@@ -2,6 +2,9 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
+# This file is loaded both on JRuby and TruffleRuby, but not CRuby.
+#-
+
 require "farce/engine/shared/rebindable"
 
 module Farce

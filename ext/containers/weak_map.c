@@ -39,6 +39,7 @@ typedef struct {
 typedef struct weak_map_waiter {
     int read_fd;
     int write_fd;
+    bool notified;
     struct weak_map_waiter *next;
 } weak_map_waiter_t;
 
@@ -94,10 +95,14 @@ weak_map_parse_timeout(VALUE timeout)
 static void
 weak_map_set_fd_flags(int fd)
 {
+#ifdef _WIN32
+    (void)fd;
+#else
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     flags = fcntl(fd, F_GETFD, 0);
     if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
+#endif
 }
 
 static void
@@ -107,6 +112,7 @@ weak_map_waiter_initialize(weak_map_waiter_t *waiter)
     if (pipe(descriptors) != 0) rb_sys_fail("pipe");
     waiter->read_fd = descriptors[0];
     waiter->write_fd = descriptors[1];
+    waiter->notified = false;
     waiter->next = NULL;
     weak_map_set_fd_flags(waiter->read_fd);
     weak_map_set_fd_flags(waiter->write_fd);
@@ -118,10 +124,14 @@ weak_map_notify_waiters_locked(weak_map_t *map)
     unsigned char byte = 1;
     map->generation++;
     for (weak_map_waiter_t *waiter = map->waiters; waiter; waiter = waiter->next) {
+        if (waiter->notified) continue;
         ssize_t result;
         do {
             result = write(waiter->write_fd, &byte, 1);
         } while (result < 0 && errno == EINTR);
+        if (result == 1 || (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
+            waiter->notified = true;
+        }
     }
 }
 

@@ -41,10 +41,14 @@ typedef struct {
 static void
 exchanger_set_fd_flags(int fd)
 {
+#ifdef _WIN32
+    (void)fd;
+#else
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     flags = fcntl(fd, F_GETFD, 0);
     if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
+#endif
 }
 
 static bool

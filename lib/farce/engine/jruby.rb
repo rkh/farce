@@ -10,7 +10,7 @@ require "farce/engine/shared"
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    autoload :TreeMap, "farce/engine/jruby/tree_map"
+    include Autoloads["#{__dir__}/jruby"]
 
     java_import org.jruby.RubyProc
     java_import org.jruby.runtime.Block

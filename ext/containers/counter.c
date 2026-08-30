@@ -7,21 +7,37 @@
 _Static_assert(sizeof(long long) == sizeof(int64_t), "Counter requires a 64-bit long long");
 _Static_assert(LLONG_MIN == INT64_MIN, "Counter requires a signed 64-bit long long");
 _Static_assert(LLONG_MAX == INT64_MAX, "Counter requires a signed 64-bit long long");
-_Static_assert(ATOMIC_LLONG_LOCK_FREE == 2, "Counter requires always-lock-free 64-bit atomics");
+
+#if ATOMIC_LLONG_LOCK_FREE == 2
+#define CONTAINERS_COUNTER_LOCK_FREE 1
+#else
+#define CONTAINERS_COUNTER_LOCK_FREE 0
+#endif
 
 static VALUE cCounter;
 
 typedef struct {
+#if CONTAINERS_COUNTER_LOCK_FREE
     _Atomic long long value;
+#else
+    pthread_mutex_t lock;
+    long long value;
+#endif
     bool initialized;
 } counter_t;
 
-/* Counter operations only linearize this numeric value. Relaxed ordering does
- * not publish or synchronize accesses to any other shared state. */
+/* On platforms with always-lock-free 64-bit atomics, counter operations only
+ * linearize this numeric value. Relaxed ordering does not publish or
+ * synchronize accesses to any other shared state. Platforms without that
+ * guarantee use a mutex so 32-bit cross builds do not depend on libatomic. */
 
 static void
 counter_free(void *pointer)
 {
+#if !CONTAINERS_COUNTER_LOCK_FREE
+    counter_t *counter = pointer;
+    if (counter) pthread_mutex_destroy(&counter->lock);
+#endif
     ruby_xfree(pointer);
 }
 
@@ -45,11 +61,13 @@ counter_allocate(VALUE klass)
 {
     counter_t *counter;
     VALUE object = TypedData_Make_Struct(klass, counter_t, &counter_type, counter);
+#if CONTAINERS_COUNTER_LOCK_FREE
     atomic_init(&counter->value, 0);
+#else
+    pthread_mutex_init(&counter->lock, NULL);
+    counter->value = 0;
+#endif
     counter->initialized = false;
-    if (!atomic_is_lock_free(&counter->value)) {
-        rb_raise(rb_eNotImpError, "64-bit atomic counters are not lock-free on this platform");
-    }
     return object;
 }
 
@@ -81,7 +99,11 @@ counter_initialize(int argc, VALUE *argv, VALUE self)
     rb_check_frozen(self);
 
     long long value = counter_integer(initial, "initial value");
+#if CONTAINERS_COUNTER_LOCK_FREE
     atomic_store_explicit(&counter->value, value, memory_order_relaxed);
+#else
+    counter->value = value;
+#endif
     counter->initialized = true;
     containers_finish_initialization(self);
     return self;
@@ -91,7 +113,13 @@ static VALUE
 counter_value(VALUE self)
 {
     counter_t *counter = get_counter(self);
+#if CONTAINERS_COUNTER_LOCK_FREE
     long long value = atomic_load_explicit(&counter->value, memory_order_relaxed);
+#else
+    pthread_mutex_lock(&counter->lock);
+    long long value = counter->value;
+    pthread_mutex_unlock(&counter->lock);
+#endif
     return LL2NUM(value);
 }
 
@@ -100,7 +128,13 @@ counter_store(VALUE self, VALUE input)
 {
     counter_t *counter = get_counter(self);
     long long value = counter_integer(input, "value");
+#if CONTAINERS_COUNTER_LOCK_FREE
     atomic_store_explicit(&counter->value, value, memory_order_relaxed);
+#else
+    pthread_mutex_lock(&counter->lock);
+    counter->value = value;
+    pthread_mutex_unlock(&counter->lock);
+#endif
     return input;
 }
 
@@ -109,6 +143,7 @@ counter_swap(VALUE self, VALUE input)
 {
     counter_t *counter = get_counter(self);
     long long replacement = counter_integer(input, "value");
+#if CONTAINERS_COUNTER_LOCK_FREE
     long long current = atomic_load_explicit(&counter->value, memory_order_relaxed);
 
     for (;;) {
@@ -123,6 +158,13 @@ counter_swap(VALUE self, VALUE input)
             return result;
         }
     }
+#else
+    pthread_mutex_lock(&counter->lock);
+    long long current = counter->value;
+    counter->value = replacement;
+    pthread_mutex_unlock(&counter->lock);
+    return LL2NUM(current);
+#endif
 }
 
 static bool
@@ -142,6 +184,7 @@ counter_subtract_overflows(long long current, long long delta)
 static VALUE
 counter_change(counter_t *counter, long long delta, bool subtract)
 {
+#if CONTAINERS_COUNTER_LOCK_FREE
     long long current = atomic_load_explicit(&counter->value, memory_order_relaxed);
 
     for (;;) {
@@ -162,6 +205,22 @@ counter_change(counter_t *counter, long long delta, bool subtract)
             return result;
         }
     }
+#else
+    pthread_mutex_lock(&counter->lock);
+    long long current = counter->value;
+    bool overflows = subtract
+        ? counter_subtract_overflows(current, delta)
+        : counter_add_overflows(current, delta);
+    if (overflows) {
+        pthread_mutex_unlock(&counter->lock);
+        rb_raise(rb_eRangeError, "counter value is outside the signed 64-bit range");
+    }
+
+    long long replacement = subtract ? current - delta : current + delta;
+    counter->value = replacement;
+    pthread_mutex_unlock(&counter->lock);
+    return LL2NUM(replacement);
+#endif
 }
 
 static VALUE
@@ -190,6 +249,7 @@ counter_compare_and_set(VALUE self, VALUE expected_input, VALUE replacement_inpu
     counter_t *counter = get_counter(self);
     long long expected = counter_integer(expected_input, "expected value");
     long long replacement = counter_integer(replacement_input, "replacement value");
+#if CONTAINERS_COUNTER_LOCK_FREE
     bool exchanged = atomic_compare_exchange_strong_explicit(
         &counter->value,
         &expected,
@@ -197,6 +257,12 @@ counter_compare_and_set(VALUE self, VALUE expected_input, VALUE replacement_inpu
         memory_order_relaxed,
         memory_order_relaxed
     );
+#else
+    pthread_mutex_lock(&counter->lock);
+    bool exchanged = counter->value == expected;
+    if (exchanged) counter->value = replacement;
+    pthread_mutex_unlock(&counter->lock);
+#endif
     return exchanged ? Qtrue : Qfalse;
 }
 

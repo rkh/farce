@@ -37,20 +37,13 @@ module Farce
   class Counter < Farce::Abstract::Counter
     include Shareable
 
-    # (see Farce::Abstract::Counter#initialize)
-    def initialize(value = 0)
-      @atom = Internal::Atom.new
-      super
-      @atom.value = @initial
-    end
-
     # @return [Numeric] The current value of the counter.
-    def value = @atom.value
+    def value = @counter.value
 
     # Reset the counter to its initial value.
     # @return [self] Returns self for chaining.
     def reset
-      @atom.value = @initial
+      @counter.value = @initial
       self
     end
 
@@ -58,9 +51,12 @@ module Farce
     # @param [Numeric] by The amount to increment the counter by.
     # @return [self] Returns self for chaining.
     def increment(by = 1)
-      by = number(by)
-      @atom.upsert(by) { it + by }
+      @counter.add(Integer(by))
       self
     end
+
+    private
+
+    def prepare = @counter = Internal::Counter.new
   end
 end

@@ -8,12 +8,6 @@ module Farce
     class Counter < Abstract::Counter
       include Unshareable
 
-      # (see Farce::Abstract::Counter#initialize)
-      def initialize(value = 0)
-        super
-        @value = @initial
-      end
-
       # @return [Numeric] The current value of the counter.
       attr_reader :value
 
@@ -28,7 +22,7 @@ module Farce
       # @param [Numeric] by The amount to increment the counter by.
       # @return [self] Returns self for chaining.
       def increment(by = 1)
-        @value += number(by)
+        @value += Integer(by)
         self
       end
     end

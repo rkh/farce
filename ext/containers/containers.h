@@ -7,7 +7,9 @@
 
 #include <pthread.h>
 #include <stdbool.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 
 void containers_check_shareable(VALUE value);
 bool containers_strict_bool(VALUE value, const char *name);

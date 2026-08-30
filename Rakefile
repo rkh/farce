@@ -5,13 +5,20 @@ require "rake/clean"
 
 # Platforms we ship prebuilt gems for.
 CROSS_PLATFORMS = %w[
+  aarch64-linux-gnu
+  aarch64-linux-musl
+
+  arm-linux-gnu
+  arm-linux-musl
+
+  x86_64-linux-gnu
+  x86_64-linux-musl
+
+  x86-linux-gnu
+  x86-linux-musl
+
   aarch64-mingw-ucrt
   x64-mingw-ucrt
-
-  aarch64-linux
-  arm-linux
-  x86_64-linux
-  x86-linux
 
   arm64-darwin
   x86_64-darwin

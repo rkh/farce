@@ -1,16 +1,31 @@
 # Farce: Fiber and Ractor Compatibility Enabler
 
-## Installation
+## Compatibility and Dependencies
 
-> [!NOTE]
-> You should always require `farce`, rather than any other files in `lib`. Other files are not intended as entry points.
->
-> ```ruby
-> require "farce"
-> ```
->
-> Constants (classes, modules, etc.) under the `Farce` namespace are loaded lazily (thread- and ractor-safe), so there is no
-> need to specifically load any particular file.
+Farce has no mandatory dependencies beyond Ruby itself.
+
+### Ruby
+
+Upon release of the latest version of Farce, it assumes to be compatible with:
+
+* The [latest patch release](https://www.ruby-lang.org/en/downloads/releases/) for each [CRuby](https://www.ruby-lang.org/en/) version [still receiving bug fixes](https://www.ruby-lang.org/en/downloads/branches/).
+* Ruby's [master branch](https://github.com/ruby/ruby/tree/master) at the time of release (ie the upcoming major version of CRuby).
+* The latest stable release of [JRuby](https://www.jruby.org/) and [TruffleRuby](https://truffleruby.dev/) (both in native and GraalVM modes).
+
+Moreover:
+
+* Dropping support for a CRuby version is only done in major releases.
+* If support for an older CRuby version is dropped, Farce will still backport security fixes for at least as long as that CRuby version is [still receiving security fixes](https://www.ruby-lang.org/en/downloads/branches/).
+
+### Similar Projects
+
+* [ractor-shim](https://github.com/eregon/ractor-shim/) provides similar functionality to `Farce::Ractor`. See [the comparison document](docs/gems/ractor-shim.md) for more details.
+* [concurrent-ruby](https://github.com/ruby-concurrency/concurrent-ruby) provides a more complete set of concurrency primitives than Farce, but is not compatible with Ractors.
+* [ratomic](https://mperham.github.io/ratomic/) has overlapping functionality with Farce. See [the comparison document](docs/gems/ratomic.md) for more details.
+
+All of the above projects can safely be used alongside Farce in the same application.
+
+## Installation
 
 ### Globally
 
@@ -55,3 +70,13 @@ $ git clone https://github.com/rkh/farce.git # prefix with `jj` if you're using 
 $ cd farce
 $ mise run
 ```
+
+### Loading Farce
+You should always require `farce`, rather than any other files in `lib`. Other files are not intended as entry points.
+
+```ruby
+require "farce"
+```
+
+Constants (classes, modules, etc.) under the `Farce` namespace are loaded lazily (thread- and ractor-safe), so there is no
+need to specifically load any particular file.

@@ -1,3 +1,7 @@
+<!--
+# @title Gem: ractor-shim
+-->
+
 # Farce / [ractor-shim](https://github.com/eregon/ractor-shim)
 
 > [!NOTE]

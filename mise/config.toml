@@ -1,8 +1,8 @@
 [tools]
-ruby = ["4.0", "4.1-dev", "3.4", "jruby", "jruby-dev", "truffleruby", "truffleruby-dev"]
+ruby = ["4.0", "4.1-dev", "3.4", "jruby", "jruby-dev", "truffleruby", "truffleruby-dev", "truffleruby+graalvm"]
 
 [vars]
-ruby_versions  = "4.0 3.4 4.1-dev jruby jruby-dev truffleruby truffleruby-dev"
+ruby_versions  = "4.0 3.4 4.1-dev jruby jruby-dev truffleruby truffleruby-dev truffleruby+graalvm"
 command_after  = ""
 command_before = ""
 
@@ -49,7 +49,7 @@ wait_for            = ["install"]
 [tasks.docs]
 description         = "Build documentation"
 run                 = "bundle exec yard --backtrace"
-sources             = ["lib/**/*", "*.md", ".yardopts"]
+sources             = ["lib/**/*", "*.md", "docs/**/*.md", ".yardopts"]
 outputs             = ["yardoc/**/*"]
 wait_for            = ["install"]
 

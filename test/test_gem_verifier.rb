@@ -13,22 +13,28 @@ class TestGemVerifier < Test
   NAMES = %w[rbtree rebind].freeze
 
   def test_accepts_gem_whose_binaries_all_match_the_target_platform
-    gem_file = gem_for("arm-linux", arm_binaries)
+    gem_file = gem_for("arm-linux-gnu", arm_binaries)
 
-    verify(gem_file, "arm-linux")
+    verify(gem_file, "arm-linux-gnu")
+  end
+
+  def test_accepts_musl_gem_whose_binaries_match_the_target_architecture
+    gem_file = gem_for("arm-linux-musl", arm_binaries(libc: :musl))
+
+    verify(gem_file, "arm-linux-musl")
   end
 
   # The bug this verifier exists to catch: a cross build that picked up a host binary.
   def test_rejects_gem_whose_binary_is_built_for_another_architecture
-    gem_file = gem_for("arm-linux", arm_binaries.merge(
+    gem_file = gem_for("arm-linux-gnu", arm_binaries.merge(
       "lib/farce/engine/ruby/4.0/rebind.so" => elf(bits: 64, machine: 0xb7),
     ))
 
-    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux") }
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-gnu") }
 
     assert_includes error.message, "lib/farce/engine/ruby/4.0/rebind.so"
-    assert_includes error.message, "ELF 32-bit arm"
-    assert_includes error.message, "ELF 64-bit aarch64"
+    assert_includes error.message, "ELF 32-bit arm GNU libc"
+    assert_includes error.message, "ELF 64-bit aarch64 GNU libc"
   end
 
   def test_accepts_windows_gem_carrying_pe_binaries
@@ -52,45 +58,54 @@ class TestGemVerifier < Test
   end
 
   def test_rejects_gem_missing_the_binary_for_one_extension
-    gem_file = gem_for("arm-linux", arm_binaries.except("lib/farce/engine/ruby/3.4/rbtree.so"))
+    gem_file = gem_for("arm-linux-gnu", arm_binaries.except("lib/farce/engine/ruby/3.4/rbtree.so"))
 
-    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux") }
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-gnu") }
 
     assert_includes error.message, "lib/farce/engine/ruby/3.4/rbtree.so"
     assert_includes error.message, "found nothing"
   end
 
   def test_rejects_gem_shipping_a_binary_it_was_not_supposed_to
-    gem_file = gem_for("arm-linux", arm_binaries.merge(
+    gem_file = gem_for("arm-linux-gnu", arm_binaries.merge(
       "lib/farce/engine/ruby/3.3/rbtree.so" => elf(bits: 32, machine: 0x28),
     ))
 
-    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux") }
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-gnu") }
 
     assert_includes error.message, "lib/farce/engine/ruby/3.3/rbtree.so"
   end
 
   def test_rejects_gem_whose_platform_does_not_match_the_build_target
-    gem_file = gem_for("aarch64-linux", arm_binaries)
+    gem_file = gem_for("aarch64-linux-gnu", arm_binaries)
 
-    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux") }
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-gnu") }
 
     assert_includes error.message, "platform"
-    assert_includes error.message, "aarch64-linux"
+    assert_includes error.message, "aarch64-linux-gnu"
+  end
+
+  def test_rejects_gnu_binary_packaged_for_musl
+    gem_file = gem_for("arm-linux-musl", arm_binaries)
+
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-musl") }
+
+    assert_includes error.message, "expected ELF 32-bit arm musl libc"
+    assert_includes error.message, "found ELF 32-bit arm GNU libc"
   end
 
   def test_rejects_precompiled_gem_that_would_still_compile_on_install
-    gem_file = gem_for("arm-linux", arm_binaries, extensions: ["ext/rbtree/extconf.rb"])
+    gem_file = gem_for("arm-linux-gnu", arm_binaries, extensions: ["ext/rbtree/extconf.rb"])
 
-    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux") }
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-gnu") }
 
     assert_includes error.message, "extension"
   end
 
   def test_rejects_gem_whose_required_ruby_version_excludes_a_shipped_abi
-    gem_file = gem_for("arm-linux", arm_binaries, required_ruby_version: [">= 4.0", "< 4.1.dev"])
+    gem_file = gem_for("arm-linux-gnu", arm_binaries, required_ruby_version: [">= 4.0", "< 4.1.dev"])
 
-    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux") }
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-gnu") }
 
     assert_includes error.message, "3.4"
     assert_includes error.message, ">= 4.0"
@@ -99,7 +114,8 @@ class TestGemVerifier < Test
   # JRuby ships the pure-Ruby implementation, under a platform that is not the build target's name.
   def test_maps_the_jruby_build_target_to_the_java_gem_platform
     assert_equal "java", GemVerifier.gem_platform("jruby")
-    assert_equal "arm-linux", GemVerifier.gem_platform("arm-linux")
+    assert_equal "arm-linux-gnu", GemVerifier.gem_platform("arm-linux-gnu")
+    assert_equal "arm-linux-musl", GemVerifier.gem_platform("arm-linux-musl")
   end
 
   def test_knows_how_to_verify_every_platform_including_jruby
@@ -145,7 +161,7 @@ class TestGemVerifier < Test
   end
 
   def test_rejects_java_gem_that_is_not_built_for_java
-    gem_file = gem_for("arm-linux", { "lib/farce/engine/jruby.rb" => "# ruby\n" })
+    gem_file = gem_for("arm-linux-gnu", { "lib/farce/engine/jruby.rb" => "# ruby\n" })
 
     error = assert_raises(GemVerifier::Error) { verify(gem_file, "jruby") }
 
@@ -187,8 +203,8 @@ class TestGemVerifier < Test
     NAMES.product(ABIS).map { "lib/farce/engine/ruby/#{it.last[/^\d+\.\d+/]}/#{it.first}.#{dlext}" }
   end
 
-  def arm_binaries
-    ext_paths("so").to_h { [it, elf(bits: 32, machine: 0x28)] }
+  def arm_binaries(libc: :gnu)
+    ext_paths("so").to_h { [it, elf(bits: 32, machine: 0x28, libc:)] }
   end
 
   def gem_for(platform, files, extensions: [], required_ruby_version: [">= 3.4", "< 4.1.dev"])
@@ -221,8 +237,9 @@ class TestGemVerifier < Test
   end
 
   # e_ident (16 bytes), e_type, e_machine
-  def elf(bits:, machine:)
-    "\x7fELF".b + [bits == 64 ? 2 : 1, 1, 1, 0].pack("C4") + ("\0" * 8) + [3, machine].pack("v2")
+  def elf(bits:, machine:, libc: :gnu)
+    marker = { gnu: "libc.so.6\0GLIBC_2.2.5\0", musl: "libc.so\0" }.fetch(libc)
+    "\x7fELF".b + [bits == 64 ? 2 : 1, 1, 1, 0].pack("C4") + ("\0" * 8) + [3, machine].pack("v2") + marker
   end
 
   # DOS stub with e_lfanew at 0x3c pointing at the COFF header

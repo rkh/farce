@@ -12,64 +12,100 @@ module Farce
       def initialize(capacity: 1024)
         @queue    = capacity ? Thread::SizedQueue.new(capacity) : Thread::Queue.new
         @capacity = capacity
-        @signals  = Set.new.compare_by_identity
-        @mutex    = Mutex.new
+        @signal   = Signal.new
+        freeze
       end
 
       def pop(timeout: nil)
-        result = @queue.pop(timeout:)
-        return block_given? ? yield : nil if result.nil?
-        broadcast
-        result unless NIL_VALUE.equal?(result)
+        timeout_at = timeout_at(timeout)
+
+        while true # rubocop:disable Style/InfiniteLoop
+          begin
+            result = @queue.pop(true)
+            broadcast
+            return NIL_VALUE.equal?(result) ? nil : result
+          rescue ThreadError
+            remaining = remaining_timeout(timeout_at)
+            return block_given? ? yield : nil unless wait_pop(timeout: remaining)
+          end
+        end
       end
 
-      def push(item, timeout: nil) # rubocop:disable Naming/PredicateMethod
+      def push(item, timeout: nil)
         item = NIL_VALUE if item.nil?
 
-        if capacity
-          return false unless @queue.push(item, timeout:)
-        else
+        unless capacity
           @queue.push(item)
+          broadcast
+          return true
         end
 
-        broadcast
-        true
+        timeout_at = timeout_at(timeout)
+        while true # rubocop:disable Style/InfiniteLoop
+          begin
+            @queue.push(item, true)
+            broadcast
+            return true
+          rescue ThreadError
+            return false unless wait_push(timeout: remaining_timeout(timeout_at))
+          end
+        end
       end
 
       def wait_pop(timeout: nil) = wait(timeout) { size.positive? }
 
       def wait_push(timeout: nil)
+        raise ClosedQueueError, "queue closed" if closed?
         return true unless capacity
         wait(timeout) { size < capacity }
       end
 
-      Internal.delegate(self, :@queue, :clear, :close, :size)
+      def close
+        @queue.close
+        broadcast
+        self
+      end
+
+      def clear
+        @queue.clear
+        broadcast
+        self
+      end
+
+      Internal.delegate(self, :@queue, :closed?, :size)
 
       private
 
+      def normalize_timeout(timeout)
+        return nil if timeout.nil?
+        timeout = Float(timeout)
+        raise ArgumentError, "timeout must be non-negative" if timeout.negative?
+        raise ArgumentError, "timeout must be finite" unless timeout.finite?
+        raise ArgumentError, "timeout must be a number" if timeout.nan?
+        timeout
+      end
+
       def wait(timeout)
-        timeout_at = Clock.timeout(timeout) if timeout
+        timeout_at = timeout_at(timeout)
 
-        until yield
-          return false if timeout_at && Clock.now >= timeout_at
-          signal ||= register_signal
-          mutex  ||= Mutex.new
-          mutex.synchronize { signal.wait(mutex, timeout_at ? timeout_at - Clock.now : nil) }
+        while true # rubocop:disable Style/InfiniteLoop
+          generation = @signal.generation
+          return true if yield
+          raise ClosedQueueError, "queue closed" if closed?
+          return false unless @signal.wait(generation, timeout: remaining_timeout(timeout_at))
         end
-
-        true
-      ensure
-        unregister_signal(signal) if signal
       end
 
-      def register_signal
-        signal = ConditionVariable.new
-        @mutex.synchronize { @signals.add(signal) }
-        signal
+      def timeout_at(timeout)
+        Clock.timeout(normalize_timeout(timeout)) unless timeout.nil?
       end
 
-      def broadcast = @mutex.synchronize { @signals.each(&:broadcast) }
-      def unregister_signal(signal) = @mutex.synchronize { @signals.delete(signal) }
+      def remaining_timeout(timeout_at)
+        return unless timeout_at
+        [timeout_at - Clock.now, 0].max
+      end
+
+      def broadcast = @signal.broadcast
     end
   end
 end

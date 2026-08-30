@@ -1,4 +1,5 @@
 .bundle/
+.yardoc/
 coverage/
 pkg/
 tmp/
@@ -10,3 +11,6 @@ yardoc/
 *.out
 *.so
 *.o
+
+mise.local.toml
+Gemfile.lock

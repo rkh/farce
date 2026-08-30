@@ -3,7 +3,7 @@
 require "mkmf"
 require_relative "../ext_helper"
 
-if RUBY_ENGINE == "jruby"
+if RUBY_ENGINE == "jruby" || (RUBY_ENGINE == "truffleruby" && !TruffleRuby.native?)
   File.write("Makefile", "all:\ninstall:\n")
 else
   have_func("rb_safe_level", "ruby.h")

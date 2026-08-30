@@ -11,6 +11,7 @@ group :development do
   gem "rake-compiler-dock"
   gem "ruby-lsp", platform: :mri
   gem "yard"
+  gem "yard-markdown-relative-links"
 end
 
 group :test do

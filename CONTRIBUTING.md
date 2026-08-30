@@ -1,3 +1,7 @@
+<!--
+# @title Contributing to Farce
+-->
+
 # Contributing to Farce
 
 Contributions to Farce are welcome and appreciated! 💜💜💜

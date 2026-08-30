@@ -13,14 +13,18 @@ module GemVerifier
 
   # Platform => [dlext, expected binary description]
   SIGNATURES = {
-    "aarch64-linux"      => ["so",     "ELF 64-bit aarch64"],
+    "aarch64-linux-gnu"  => ["so",     "ELF 64-bit aarch64 GNU libc"],
+    "aarch64-linux-musl" => ["so",     "ELF 64-bit aarch64 musl libc"],
     "aarch64-mingw-ucrt" => ["so",     "PE 64-bit aarch64"],
-    "arm-linux"          => ["so",     "ELF 32-bit arm"],
+    "arm-linux-gnu"      => ["so",     "ELF 32-bit arm GNU libc"],
+    "arm-linux-musl"     => ["so",     "ELF 32-bit arm musl libc"],
     "arm64-darwin"       => ["bundle", "Mach-O 64-bit arm64"],
     "x64-mingw-ucrt"     => ["so",     "PE 64-bit x86_64"],
-    "x86-linux"          => ["so",     "ELF 32-bit i386"],
+    "x86-linux-gnu"      => ["so",     "ELF 32-bit i386 GNU libc"],
+    "x86-linux-musl"     => ["so",     "ELF 32-bit i386 musl libc"],
     "x86_64-darwin"      => ["bundle", "Mach-O 64-bit x86_64"],
-    "x86_64-linux"       => ["so",     "ELF 64-bit x86_64"],
+    "x86_64-linux-gnu"   => ["so",     "ELF 64-bit x86_64 GNU libc"],
+    "x86_64-linux-musl"  => ["so",     "ELF 64-bit x86_64 musl libc"],
   }.freeze
 
   # Build targets that ship no binaries at all, mapped to the platform their gem declares.
@@ -147,7 +151,16 @@ module GemVerifier
 
   def describe_elf(content)
     bits = content.getbyte(4) == 2 ? 64 : 32
-    "ELF #{bits}-bit #{ELF_MACHINES[content[18, 2].unpack1(content.getbyte(5) == 2 ? "n" : "v")] || "unknown"}"
+    machine = ELF_MACHINES[content[18, 2].unpack1(content.getbyte(5) == 2 ? "n" : "v")] || "unknown"
+    libc =
+      if content.include?("libc.so.6\0".b) || content.include?("GLIBC_".b)
+        "GNU libc"
+      elsif content.include?("libc.so\0".b)
+        "musl libc"
+      else
+        "unknown libc"
+      end
+    "ELF #{bits}-bit #{machine} #{libc}"
   end
 
   def describe_pe(content)

@@ -15,6 +15,7 @@ typedef struct containers_signal_waiter containers_signal_waiter_t;
 struct containers_signal_waiter {
     int read_fd;
     int write_fd;
+    bool notified;
     containers_signal_waiter_t *next;
 };
 
@@ -68,10 +69,14 @@ containers_signal_parse_timeout(VALUE value)
 static void
 containers_signal_set_fd_flags(int fd)
 {
+#ifdef _WIN32
+    (void)fd;
+#else
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     flags = fcntl(fd, F_GETFD, 0);
     if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
+#endif
 }
 
 /* Called with signal->lock held. Each waiter has a separate descriptor, so a
@@ -81,10 +86,14 @@ containers_signal_notify_waiters_locked(containers_signal_t *signal)
 {
     unsigned char byte = 1;
     for (containers_signal_waiter_t *waiter = signal->waiters; waiter; waiter = waiter->next) {
+        if (waiter->notified) continue;
         ssize_t result;
         do {
             result = write(waiter->write_fd, &byte, 1);
         } while (result < 0 && errno == EINTR);
+        if (result == 1 || (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
+            waiter->notified = true;
+        }
     }
 }
 
@@ -221,6 +230,7 @@ containers_signal_wait_once(
         .waiter = {
             .read_fd = descriptors[0],
             .write_fd = descriptors[1],
+            .notified = false,
             .next = signal->waiters,
         },
         .timeout = timeout,

@@ -104,6 +104,8 @@ GEM
       unicode-emoji (~> 4.1)
     unicode-emoji (4.2.0)
     yard (0.9.45)
+    yard-markdown-relative-links (0.3.0)
+      yard (>= 0.9, < 1)
 
 PLATFORMS
   arm64-darwin-23
@@ -125,12 +127,13 @@ DEPENDENCIES
   simplecov
   simplecov-console
   yard
+  yard-markdown-relative-links
 
 CHECKSUMS
   ansi (1.6.0) sha256=ac9ea0c0ea8d32fb4e271348e609963ac78882f34b73836c2a02b3622e666658
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   builder (3.3.0) sha256=497918d2f9dca528fdca4b88d84e4ef4387256d984b8154e9d5d3fe5a9c8835f
-  bundler (4.0.18) sha256=02d9a17429de1847b4e0c9f27a9ee4b20c0a74c0a641b4e77195d6019e3618ac
+  bundler (4.0.19) sha256=b48056e4c77fb3853cc47775b5447ede44aaa4f53c32f168014ab4fe86587d47
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
   erb (6.0.7) sha256=c5ca6dc25b0ef974a44dc8f59fe847577122483b1968a38dec305c60bf91ee92
   erb (6.0.7-java) sha256=ef8339f928aa33be9205534be19e9c0daf310c4cc4eb85fd409141c094c57d61
@@ -176,6 +179,7 @@ CHECKSUMS
   unicode-display_width (3.2.0) sha256=0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42
   unicode-emoji (4.2.0) sha256=519e69150f75652e40bf736106cfbc8f0f73aa3fb6a65afe62fefa7f80b0f80f
   yard (0.9.45) sha256=52e211493f7cb8a3ebf7e104a25a1e73937a3103092545d34cb88fafebb3dc51
+  yard-markdown-relative-links (0.3.0) sha256=44abbc8dae94a9387d4f4a23aac76b553d9d1539690c9da065387c0869cf6507
 
 BUNDLED WITH
-  4.0.18
+  4.0.19

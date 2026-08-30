@@ -3,13 +3,13 @@ lib/farce/port.rb 0124754ca2f23c0f39f18c042c39a9376a31c04f
 lib/farce/clock.rb 2059ac2fd4ab9dced76970b5324febd1f07eb551
 lib/farce/ractor.rb 55c8514df081af5a8d0dcf00455a5b3b80989213
 lib/farce/unsafe.rb ef2e1f1f66db035e4ae2931ddfc383234afcccc7
-lib/farce/counter.rb d9259c48c99eea692b7892fa70d4fda7edab6554
+lib/farce/counter.rb 1b5f593b332b11ea4594107296f8c03670e2af1e
 lib/farce/version.rb a626b114602653e600a825108f2fc72d409d540f
 lib/farce/abstract.rb cd925650c05f290878111f45dfb573a910ebcf58
 lib/farce/unshared.rb a0fc817bb1877a70af110861be215347ec8b6a83
 lib/farce/shareable.rb 7530a0572ec4f6245df437c8296bf21c8da39829
 lib/farce/unshareable.rb 2ed0080012bba92e92f1d0ce7b992fab829babb7
 lib/farce/abstract/value.rb 1a3557a02a670dc6f0604ce24c230a092dc7803d
-lib/farce/unsafe/counter.rb eb2fb34ea5395ff623001a653b1e60e9334cc2ca
-lib/farce/abstract/counter.rb cde29505a36343f9284d69630145c1ad76f79e49
+lib/farce/unsafe/counter.rb b4a298135f29fb114510df62aed8c1615550f0a1
+lib/farce/abstract/counter.rb fc6b3dceb3b63f153bd4cd584a00ec45689bd159
 lib/farce.rb fe4f5af8763f46f181541968e004cc4cea1437ad

@@ -7,18 +7,20 @@ require "farce/engine/shared"
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    begin
-      require "farce/engine/truffleruby/#{RUBY_ENGINE_VERSION}/rbtree"
-      autoload :TreeMap, "farce/engine/ruby/shared/tree_map"
-    rescue LoadError => e
-      # simplecov:disable
-      warn <<~WARNING
-        Farce: Failed to load native extension for TruffleRuby #{RUBY_ENGINE_VERSION}.
-        Please run `rake compile` to build the extension.
-      WARNING
-      raise e
-      # simplecov:enable
+    if TruffleRuby.native?
+      path = "farce/engine/truffleruby/native"
+      autoload :RBTree,      "#{path}/rbtree"
+      autoload :MultiRBTree, "#{path}/rbtree"
+      autoload :TreeMap,     "farce/engine/ruby/shared/tree_map"
+    else
+      path = "farce/engine/truffleruby/graalvm"
+      autoload :TreeMap, "#{path}/tree_map"
     end
+
+    autoload :Counter, "#{path}/counter"
+    autoload :Flag,    "#{path}/flag"
+    autoload :Map,     "farce/engine/truffleruby/map"
+    autoload :Signal,  "farce/engine/truffleruby/signal"
 
     def native_ractors? = false
 

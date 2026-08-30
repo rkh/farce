@@ -17,6 +17,7 @@ typedef struct vector_waiter vector_waiter_t;
 struct vector_waiter {
     int read_fd;
     int write_fd;
+    bool notified;
     vector_waiter_t *next;
 };
 
@@ -188,10 +189,14 @@ vector_timeout_keyword(VALUE keywords)
 static void
 vector_set_fd_flags(int fd)
 {
+#ifdef _WIN32
+    (void)fd;
+#else
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     flags = fcntl(fd, F_GETFD, 0);
     if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
+#endif
 }
 
 /* Called with vector->lock held. Each waiter has an independent pipe, so a
@@ -202,10 +207,14 @@ vector_notify_waiters_locked(vector_t *vector)
     unsigned char byte = 1;
     vector->generation++;
     for (vector_waiter_t *waiter = vector->waiters; waiter; waiter = waiter->next) {
+        if (waiter->notified) continue;
         ssize_t result;
         do {
             result = write(waiter->write_fd, &byte, 1);
         } while (result < 0 && errno == EINTR);
+        if (result == 1 || (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
+            waiter->notified = true;
+        }
     }
 }
 
@@ -289,6 +298,7 @@ vector_wait_once(vector_t *vector, vector_timeout_t *timeout)
         .waiter = {
             .read_fd = descriptors[0],
             .write_fd = descriptors[1],
+            .notified = false,
             .next = vector->waiters,
         },
         .timeout = timeout,

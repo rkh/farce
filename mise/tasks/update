@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#MISE description="Update dependencies"
+
+mise install ruby@4.1-dev -f
+mise install
+
+bundle update --bundler
+bundle update --all
+
+mise run install

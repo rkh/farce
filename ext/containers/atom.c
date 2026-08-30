@@ -15,6 +15,7 @@ typedef struct atom_waiter atom_waiter_t;
 struct atom_waiter {
     int read_fd;
     int write_fd;
+    bool notified;
     atom_waiter_t *next;
 };
 
@@ -64,10 +65,14 @@ atom_parse_timeout(VALUE timeout)
 static void
 atom_set_fd_flags(int fd)
 {
+#ifdef _WIN32
+    (void)fd;
+#else
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     flags = fcntl(fd, F_GETFD, 0);
     if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
+#endif
 }
 
 /* Called with atom->lock held. Every waiter owns a separate descriptor, so a
@@ -78,10 +83,14 @@ atom_notify_waiters(atom_t *atom)
 {
     unsigned char byte = 1;
     for (atom_waiter_t *waiter = atom->waiters; waiter; waiter = waiter->next) {
+        if (waiter->notified) continue;
         ssize_t result;
         do {
             result = write(waiter->write_fd, &byte, 1);
         } while (result < 0 && errno == EINTR);
+        if (result == 1 || (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
+            waiter->notified = true;
+        }
     }
 }
 
@@ -261,6 +270,7 @@ atom_wait_once(atom_t *atom, atom_timeout_t *timeout)
         .waiter = {
             .read_fd = descriptors[0],
             .write_fd = descriptors[1],
+            .notified = false,
             .next = atom->waiters,
         },
         .timeout = timeout,
