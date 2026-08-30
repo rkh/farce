@@ -1,0 +1,12 @@
+# frozen_string_literal: true
+
+CLEAN.include(".yardoc", "*.log", "tmp")
+CLOBBER.include("lib/**/*.{bundle,dylib,so}", "coverage", "pkg", "yardoc")
+
+task :clobber do # rubocop:disable Rake/Desc
+  # delete empty directories after clobbering files
+  Dir.glob("lib/**/*").each do |dir|
+    next unless File.directory?(dir)
+    rmdir(dir) if Dir.empty?(dir)
+  end
+end

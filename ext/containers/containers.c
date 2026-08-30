@@ -1,0 +1,59 @@
+#include "containers.h"
+
+#define UPDATE_WAIT_USEC 1000
+
+static VALUE eIsolationError;
+
+RBIMPL_ATTR_NORETURN()
+static void
+raise_unshareable(VALUE value)
+{
+    rb_raise(eIsolationError, "value is not shareable: %" PRIsVALUE, rb_inspect(value));
+}
+
+void
+containers_check_shareable(VALUE value)
+{
+    if (!rb_ractor_shareable_p(value)) raise_unshareable(value);
+}
+
+bool
+containers_strict_bool(VALUE value, const char *name)
+{
+    if (value == Qtrue) return true;
+    if (value == Qfalse) return false;
+    rb_raise(rb_eArgError, "%s must be true or false", name);
+}
+
+void
+containers_finish_initialization(VALUE self)
+{
+    rb_obj_freeze(self);
+    rb_ractor_make_shareable(self);
+}
+
+void
+containers_brief_wait(void)
+{
+    struct timeval duration = {0, UPDATE_WAIT_USEC};
+    rb_thread_wait_for(duration);
+}
+
+RUBY_FUNC_EXPORTED void
+Init_containers(void)
+{
+    rb_ext_ractor_safe(true);
+    VALUE mFarce    = rb_const_get(rb_cObject, rb_intern("Farce"));
+    VALUE mInternal = rb_const_get(mFarce, rb_intern("Internal"));
+    eIsolationError = rb_const_get(rb_cRactor, rb_intern("IsolationError"));
+    containers_init_atom(mInternal);
+    containers_init_counter(mInternal);
+    containers_init_exchanger(mInternal);
+    containers_init_flag(mInternal);
+    containers_init_map(mInternal);
+    containers_init_queue(mInternal);
+    containers_init_signal(mInternal);
+    containers_init_unshareable(mInternal);
+    containers_init_vector(mInternal);
+    containers_init_weak_maps(mInternal);
+}

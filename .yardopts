@@ -1,0 +1,13 @@
+--charset utf-8
+--no-cache
+-o yardoc
+--default-return BasicObject
+--hide-void-return
+--hide-api private
+--exclude lib/farce/(engine|internal)(/.*|\.rb)
+--type-tag "yieldreceiver:Yield Receiver"
+--non-transitive-tag yieldreceiver
+--tag "ruby:Supported Ruby Versions"
+lib/farce/_yard/*.rb
+lib/*/**/*.rb
+lib/*.rb

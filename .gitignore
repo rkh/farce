@@ -1,0 +1,12 @@
+.bundle/
+coverage/
+pkg/
+tmp/
+vendor/
+yardoc/
+
+*.bundle
+*.log
+*.out
+*.so
+*.o

@@ -1,0 +1,929 @@
+#include "containers.h"
+#include "ruby/io.h"
+
+#include <errno.h>
+#include <fcntl.h>
+#include <math.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+
+#define MAP_INITIAL_CAPACITY 16
+
+static VALUE cMap;
+
+
+typedef enum { MAP_EMPTY = 0, MAP_OCCUPIED = 1, MAP_TOMBSTONE = 2 } map_slot_state_t;
+
+typedef struct {
+    VALUE key;
+    VALUE value;
+    st_index_t hash;
+    map_slot_state_t state;
+} map_slot_t;
+
+typedef struct map_waiter {
+    int read_fd;
+    int write_fd;
+    struct map_waiter *next;
+} map_waiter_t;
+
+typedef struct {
+    pthread_mutex_t lock;
+    map_slot_t *slots;
+    size_t capacity;
+    size_t size;
+    size_t tombstones;
+    uint64_t generation;
+    map_waiter_t *waiters;
+    bool compare_keys_by_identity;
+    bool compare_values_by_identity;
+    bool updating;
+    bool initialized;
+} map_t;
+
+typedef struct {
+    bool finite;
+    double deadline;
+} map_timeout_t;
+
+static double
+map_monotonic_now(void)
+{
+    struct timespec now;
+#ifdef CLOCK_MONOTONIC
+    if (clock_gettime(CLOCK_MONOTONIC, &now) == 0) {
+        return (double)now.tv_sec + (double)now.tv_nsec / 1000000000.0;
+    }
+#endif
+    struct timeval fallback;
+    gettimeofday(&fallback, NULL);
+    return (double)fallback.tv_sec + (double)fallback.tv_usec / 1000000.0;
+}
+
+static map_timeout_t
+map_parse_timeout(VALUE timeout)
+{
+    map_timeout_t parsed = {.finite = false, .deadline = 0};
+    if (NIL_P(timeout)) return parsed;
+    double seconds = NUM2DBL(timeout);
+    if (!isfinite(seconds) || seconds < 0) {
+        rb_raise(rb_eArgError, "timeout must be a finite, non-negative number or nil");
+    }
+    parsed.finite = true;
+    parsed.deadline = map_monotonic_now() + seconds;
+    return parsed;
+}
+
+static void
+map_set_fd_flags(int fd)
+{
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    flags = fcntl(fd, F_GETFD, 0);
+    if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
+}
+
+static void
+map_waiter_initialize(map_waiter_t *waiter)
+{
+    int descriptors[2];
+    if (pipe(descriptors) != 0) rb_sys_fail("pipe");
+    waiter->read_fd = descriptors[0];
+    waiter->write_fd = descriptors[1];
+    waiter->next = NULL;
+    map_set_fd_flags(waiter->read_fd);
+    map_set_fd_flags(waiter->write_fd);
+}
+
+static void
+map_notify_waiters_locked(map_t *map)
+{
+    unsigned char byte = 1;
+    map->generation++;
+    for (map_waiter_t *waiter = map->waiters; waiter; waiter = waiter->next) {
+        ssize_t result;
+        do {
+            result = write(waiter->write_fd, &byte, 1);
+        } while (result < 0 && errno == EINTR);
+    }
+}
+
+static void
+map_mark(void *pointer)
+{
+    map_t *map = pointer;
+    if (!map->slots) return;
+    for (size_t index = 0; index < map->capacity; index++) {
+        if (map->slots[index].state == MAP_OCCUPIED) {
+            rb_gc_mark_movable(map->slots[index].key);
+            rb_gc_mark_movable(map->slots[index].value);
+        }
+    }
+}
+
+static void
+map_compact(void *pointer)
+{
+    map_t *map = pointer;
+    if (!map->slots) return;
+    for (size_t index = 0; index < map->capacity; index++) {
+        if (map->slots[index].state == MAP_OCCUPIED) {
+            map->slots[index].key = rb_gc_location(map->slots[index].key);
+            map->slots[index].value = rb_gc_location(map->slots[index].value);
+        }
+    }
+}
+
+static void
+map_free(void *pointer)
+{
+    map_t *map = pointer;
+    pthread_mutex_destroy(&map->lock);
+    free(map->slots);
+    ruby_xfree(map);
+}
+
+static size_t
+map_memsize(const void *pointer)
+{
+    const map_t *map = pointer;
+    return map ? sizeof(map_t) + map->capacity * sizeof(map_slot_t) : 0;
+}
+
+static const rb_data_type_t map_type = {
+    .wrap_struct_name = "Ractor::Containers::Map",
+    .function = {
+        .dmark = map_mark,
+        .dfree = map_free,
+        .dsize = map_memsize,
+        .dcompact = map_compact,
+    },
+    .flags = RUBY_TYPED_FROZEN_SHAREABLE,
+};
+
+static map_slot_t *
+allocate_slots(size_t capacity)
+{
+    map_slot_t *slots = calloc(capacity, sizeof(map_slot_t));
+    if (!slots) rb_memerror();
+    return slots;
+}
+
+static VALUE
+map_allocate(VALUE klass)
+{
+    map_t *map;
+    VALUE object = TypedData_Make_Struct(klass, map_t, &map_type, map);
+    pthread_mutex_init(&map->lock, NULL);
+    map->slots = NULL;
+    map->capacity = 0;
+    map->size = 0;
+    map->tombstones = 0;
+    map->generation = 0;
+    map->waiters = NULL;
+    map->compare_keys_by_identity = false;
+    map->compare_values_by_identity = false;
+    map->updating = false;
+    map->initialized = false;
+    return object;
+}
+
+static map_t *
+get_map(VALUE self)
+{
+    map_t *map;
+    TypedData_Get_Struct(self, map_t, &map_type, map);
+    if (!map->initialized) rb_raise(rb_eRuntimeError, "uninitialized Map");
+    return map;
+}
+
+typedef struct {
+    map_t *map;
+    map_waiter_t *waiter;
+    map_timeout_t *timeout;
+    bool registered;
+} map_wait_context_t;
+
+static VALUE
+map_wait_body(VALUE opaque)
+{
+    map_wait_context_t *context = (map_wait_context_t *)opaque;
+    VALUE wait_timeout = Qnil;
+    if (context->timeout->finite) {
+        double remaining = context->timeout->deadline - map_monotonic_now();
+        if (remaining <= 0) return Qfalse;
+        wait_timeout = DBL2NUM(remaining);
+    }
+    VALUE io = rb_io_open_descriptor(
+        rb_cIO,
+        context->waiter->read_fd,
+        FMODE_READABLE | FMODE_EXTERNAL,
+        Qnil,
+        Qnil,
+        NULL
+    );
+    VALUE result = rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), wait_timeout);
+    RB_GC_GUARD(io);
+    return RTEST(result) ? Qtrue : Qfalse;
+}
+
+static VALUE
+map_wait_cleanup(VALUE opaque)
+{
+    map_wait_context_t *context = (map_wait_context_t *)opaque;
+    if (context->registered) {
+        pthread_mutex_lock(&context->map->lock);
+        map_waiter_t **cursor = &context->map->waiters;
+        while (*cursor && *cursor != context->waiter) cursor = &(*cursor)->next;
+        if (*cursor) *cursor = context->waiter->next;
+        pthread_mutex_unlock(&context->map->lock);
+        context->registered = false;
+    }
+    close(context->waiter->read_fd);
+    close(context->waiter->write_fd);
+    return Qnil;
+}
+
+static bool
+map_wait_once(map_t *map, uint64_t generation, map_timeout_t *timeout)
+{
+    map_waiter_t waiter;
+    map_waiter_initialize(&waiter);
+
+    pthread_mutex_lock(&map->lock);
+    if (map->generation != generation) {
+        pthread_mutex_unlock(&map->lock);
+        close(waiter.read_fd);
+        close(waiter.write_fd);
+        return true;
+    }
+    waiter.next = map->waiters;
+    map->waiters = &waiter;
+    pthread_mutex_unlock(&map->lock);
+
+    map_wait_context_t context = {
+        .map = map,
+        .waiter = &waiter,
+        .timeout = timeout,
+        .registered = true,
+    };
+    return RTEST(rb_ensure(map_wait_body, (VALUE)&context, map_wait_cleanup, (VALUE)&context));
+}
+
+static bool
+map_lock_for_update_with_timeout(map_t *map, map_timeout_t *timeout)
+{
+    for (;;) {
+        pthread_mutex_lock(&map->lock);
+        if (!map->updating) return true;
+        uint64_t generation = map->generation;
+        pthread_mutex_unlock(&map->lock);
+        if (!map_wait_once(map, generation, timeout)) return false;
+    }
+}
+
+static VALUE
+map_timeout_result(void)
+{
+    return rb_block_given_p() ? rb_yield_values(0) : Qnil;
+}
+
+static void
+map_lock_for_update(map_t *map)
+{
+    for (;;) {
+        pthread_mutex_lock(&map->lock);
+        if (!map->updating) return;
+        pthread_mutex_unlock(&map->lock);
+        containers_brief_wait();
+    }
+}
+
+static st_index_t
+map_key_hash(map_t *map, VALUE key)
+{
+    if (map->compare_keys_by_identity) {
+        return (st_index_t)NUM2ULL(rb_obj_id(key));
+    }
+    return (st_index_t)NUM2LONG(rb_hash(key));
+}
+
+typedef struct {
+    VALUE left;
+    VALUE right;
+} map_eql_arguments_t;
+
+static VALUE
+map_eql_protected(VALUE opaque)
+{
+    map_eql_arguments_t *arguments = (map_eql_arguments_t *)opaque;
+    return rb_eql(arguments->left, arguments->right) ? Qtrue : Qfalse;
+}
+
+static bool
+map_keys_equal(map_t *map, VALUE left, VALUE right)
+{
+    if (map->compare_keys_by_identity) return left == right;
+
+    map_eql_arguments_t arguments = {.left = left, .right = right};
+    int state = 0;
+    VALUE result = rb_protect(map_eql_protected, (VALUE)&arguments, &state);
+    if (state) {
+        /* Every equality lookup runs with this mutex held. Never let a Ruby
+         * exception strand it in the locked state. */
+        pthread_mutex_unlock(&map->lock);
+        rb_jump_tag(state);
+    }
+    return RTEST(result);
+}
+
+static size_t
+map_find_slot(map_t *map, VALUE key, st_index_t hash, bool *found)
+{
+    size_t mask = map->capacity - 1;
+    size_t first_tombstone = SIZE_MAX;
+    for (size_t offset = 0; offset < map->capacity; offset++) {
+        size_t index = ((size_t)hash + offset) & mask;
+        map_slot_t *slot = &map->slots[index];
+        if (slot->state == MAP_EMPTY) {
+            *found = false;
+            return first_tombstone == SIZE_MAX ? index : first_tombstone;
+        }
+        if (slot->state == MAP_TOMBSTONE) {
+            if (first_tombstone == SIZE_MAX) first_tombstone = index;
+            continue;
+        }
+        if (slot->hash == hash && map_keys_equal(map, slot->key, key)) {
+            *found = true;
+            return index;
+        }
+    }
+    *found = false;
+    return first_tombstone;
+}
+
+static void
+map_resize(map_t *map, size_t new_capacity)
+{
+    map_slot_t *old_slots = map->slots;
+    size_t old_capacity = map->capacity;
+    map_slot_t *new_slots = allocate_slots(new_capacity);
+    map->slots = new_slots;
+    map->capacity = new_capacity;
+    map->size = 0;
+    map->tombstones = 0;
+
+    for (size_t index = 0; index < old_capacity; index++) {
+        map_slot_t *old = &old_slots[index];
+        if (old->state == MAP_OCCUPIED) {
+            size_t mask = map->capacity - 1;
+            size_t target = (size_t)old->hash & mask;
+            while (map->slots[target].state == MAP_OCCUPIED) {
+                target = (target + 1) & mask;
+            }
+            map->slots[target] = *old;
+            map->size++;
+        }
+    }
+    free(old_slots);
+}
+
+static void
+map_prepare_insert(map_t *map)
+{
+    if ((map->size + map->tombstones + 1) * 10 >= map->capacity * 7) {
+        map_resize(map, map->capacity * 2);
+    }
+}
+
+static VALUE
+map_store_locked(map_t *map, VALUE key, VALUE value, st_index_t hash)
+{
+    bool found;
+    map_prepare_insert(map);
+    size_t index = map_find_slot(map, key, hash, &found);
+    map_slot_t *slot = &map->slots[index];
+    if (!found) {
+        if (slot->state == MAP_TOMBSTONE) map->tombstones--;
+        slot->key = key;
+        slot->hash = hash;
+        slot->state = MAP_OCCUPIED;
+        map->size++;
+    }
+    slot->value = value;
+    map_notify_waiters_locked(map);
+    return value;
+}
+
+typedef struct { map_t *map; } map_init_context_t;
+
+static int
+map_initialize_entry(VALUE key, VALUE value, VALUE opaque)
+{
+    map_init_context_t *context = (map_init_context_t *)opaque;
+    containers_check_shareable(key);
+    containers_check_shareable(value);
+    st_index_t hash = map_key_hash(context->map, key);
+    pthread_mutex_lock(&context->map->lock);
+    map_store_locked(context->map, key, value, hash);
+    pthread_mutex_unlock(&context->map->lock);
+    return ST_CONTINUE;
+}
+
+static VALUE
+map_initialize(int argc, VALUE *argv, VALUE self)
+{
+    VALUE mapping = Qnil;
+    VALUE keywords = Qnil;
+    ID keyword_ids[] = {
+        rb_intern("compare_by_identity"),
+        rb_intern("compare_keys_by_identity"),
+        rb_intern("compare_values_by_identity")
+    };
+    VALUE keyword_values[3] = {Qundef, Qundef, Qundef};
+    map_t *map;
+
+    rb_scan_args(argc, argv, "01:", &mapping, &keywords);
+    if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 3, keyword_values);
+    TypedData_Get_Struct(self, map_t, &map_type, map);
+    if (map->initialized) rb_raise(rb_eRuntimeError, "Map is already initialized");
+
+    bool common = keyword_values[0] == Qundef
+        ? false
+        : containers_strict_bool(keyword_values[0], "compare_by_identity");
+    map->compare_keys_by_identity = keyword_values[1] == Qundef
+        ? common
+        : containers_strict_bool(keyword_values[1], "compare_keys_by_identity");
+    map->compare_values_by_identity = keyword_values[2] == Qundef
+        ? common
+        : containers_strict_bool(keyword_values[2], "compare_values_by_identity");
+    map->capacity = MAP_INITIAL_CAPACITY;
+    map->slots = allocate_slots(map->capacity);
+
+    if (!NIL_P(mapping)) {
+        Check_Type(mapping, T_HASH);
+        map_init_context_t context = {.map = map};
+        rb_hash_foreach(mapping, map_initialize_entry, (VALUE)&context);
+    }
+    map->initialized = true;
+    containers_finish_initialization(self);
+    return self;
+}
+
+static VALUE
+map_get(VALUE self, VALUE key)
+{
+    map_t *map = get_map(self);
+    containers_check_shareable(key);
+    st_index_t hash = map_key_hash(map, key);
+    bool found;
+    VALUE result = Qnil;
+    pthread_mutex_lock(&map->lock);
+    size_t index = map_find_slot(map, key, hash, &found);
+    if (found) result = map->slots[index].value;
+    pthread_mutex_unlock(&map->lock);
+    return result;
+}
+
+static VALUE
+map_set(VALUE self, VALUE key, VALUE value)
+{
+    map_t *map = get_map(self);
+    containers_check_shareable(key);
+    containers_check_shareable(value);
+    st_index_t hash = map_key_hash(map, key);
+    map_lock_for_update(map);
+    map_store_locked(map, key, value, hash);
+    pthread_mutex_unlock(&map->lock);
+    return value;
+}
+
+static VALUE
+map_key_p(VALUE self, VALUE key)
+{
+    map_t *map = get_map(self);
+    containers_check_shareable(key);
+    st_index_t hash = map_key_hash(map, key);
+    bool found;
+    pthread_mutex_lock(&map->lock);
+    (void)map_find_slot(map, key, hash, &found);
+    pthread_mutex_unlock(&map->lock);
+    return found ? Qtrue : Qfalse;
+}
+
+static VALUE
+map_getkey(VALUE self, VALUE key)
+{
+    map_t *map = get_map(self);
+    containers_check_shareable(key);
+    st_index_t hash = map_key_hash(map, key);
+    bool found;
+    VALUE result = Qnil;
+    pthread_mutex_lock(&map->lock);
+    size_t index = map_find_slot(map, key, hash, &found);
+    if (found) result = map->compare_keys_by_identity ? key : map->slots[index].key;
+    pthread_mutex_unlock(&map->lock);
+    return result;
+}
+
+static VALUE
+map_delete(VALUE self, VALUE key)
+{
+    map_t *map = get_map(self);
+    containers_check_shareable(key);
+    st_index_t hash = map_key_hash(map, key);
+    bool found;
+    VALUE result = Qnil;
+    map_lock_for_update(map);
+    size_t index = map_find_slot(map, key, hash, &found);
+    if (found) {
+        map_slot_t *slot = &map->slots[index];
+        result = slot->value;
+        slot->key = Qnil;
+        slot->value = Qnil;
+        slot->state = MAP_TOMBSTONE;
+        map->size--;
+        map->tombstones++;
+        map_notify_waiters_locked(map);
+    }
+    pthread_mutex_unlock(&map->lock);
+    return result;
+}
+
+typedef struct {
+    map_t *map;
+    VALUE key;
+    VALUE current;
+    VALUE argument;
+    VALUE replacement;
+    st_index_t hash;
+    bool identity;
+    bool complete;
+} map_operation_t;
+
+static VALUE
+map_operation_cleanup(VALUE opaque)
+{
+    map_operation_t *operation = (map_operation_t *)opaque;
+    if (!operation->complete) {
+        pthread_mutex_lock(&operation->map->lock);
+        operation->map->updating = false;
+        map_notify_waiters_locked(operation->map);
+        pthread_mutex_unlock(&operation->map->lock);
+    }
+    return Qnil;
+}
+
+static VALUE
+map_store_body(VALUE opaque)
+{
+    map_operation_t *operation = (map_operation_t *)opaque;
+    VALUE result = rb_yield_values(0);
+    containers_check_shareable(result);
+    pthread_mutex_lock(&operation->map->lock);
+    map_store_locked(operation->map, operation->key, result, operation->hash);
+    operation->map->updating = false;
+    pthread_mutex_unlock(&operation->map->lock);
+    operation->complete = true;
+    return result;
+}
+
+static VALUE
+map_store_if_absent(int argc, VALUE *argv, VALUE self)
+{
+    VALUE key;
+    VALUE keywords = Qnil;
+    VALUE keyword_values[1] = {Qundef};
+    ID keyword_ids[] = {rb_intern("timeout")};
+    rb_scan_args(argc, argv, "1:", &key, &keywords);
+    if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
+
+    map_t *map = get_map(self);
+    map_operation_t operation = {.map = map, .key = key, .complete = false};
+    containers_check_shareable(key);
+    rb_need_block();
+    operation.hash = map_key_hash(map, key);
+    map_timeout_t timeout = map_parse_timeout(
+        keyword_values[0] == Qundef ? Qnil : keyword_values[0]
+    );
+
+    if (!map_lock_for_update_with_timeout(map, &timeout)) return Qnil;
+    bool found;
+    size_t index = map_find_slot(map, key, operation.hash, &found);
+    if (found) {
+        VALUE value = map->slots[index].value;
+        pthread_mutex_unlock(&map->lock);
+        return value;
+    }
+    map->updating = true;
+    pthread_mutex_unlock(&map->lock);
+    return rb_ensure(map_store_body, (VALUE)&operation, map_operation_cleanup, (VALUE)&operation);
+}
+
+static VALUE
+map_cas_body(VALUE opaque)
+{
+    map_operation_t *operation = (map_operation_t *)opaque;
+    bool matches = operation->identity
+        ? operation->current == operation->argument
+        : RTEST(rb_equal(operation->current, operation->argument));
+
+    pthread_mutex_lock(&operation->map->lock);
+    if (matches) map_store_locked(operation->map, operation->key, operation->replacement, operation->hash);
+    operation->map->updating = false;
+    if (!matches) map_notify_waiters_locked(operation->map);
+    pthread_mutex_unlock(&operation->map->lock);
+    operation->complete = true;
+    return matches ? Qtrue : Qfalse;
+}
+
+static VALUE
+map_compare_and_set(int argc, VALUE *argv, VALUE self)
+{
+    VALUE key;
+    VALUE expected;
+    VALUE replacement;
+    VALUE keywords = Qnil;
+    VALUE keyword_values[1] = {Qundef};
+    ID keyword_ids[] = {rb_intern("timeout")};
+    rb_scan_args(argc, argv, "3:", &key, &expected, &replacement, &keywords);
+    if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
+
+    map_t *map = get_map(self);
+    map_operation_t operation = {
+        .map = map,
+        .key = key,
+        .argument = expected,
+        .replacement = replacement,
+        .identity = map->compare_values_by_identity,
+        .complete = false,
+    };
+    containers_check_shareable(key);
+    containers_check_shareable(expected);
+    containers_check_shareable(replacement);
+    operation.hash = map_key_hash(map, key);
+    map_timeout_t timeout = map_parse_timeout(
+        keyword_values[0] == Qundef ? Qnil : keyword_values[0]
+    );
+
+    if (!map_lock_for_update_with_timeout(map, &timeout)) return Qfalse;
+    bool found;
+    size_t index = map_find_slot(map, key, operation.hash, &found);
+    if (!found) {
+        pthread_mutex_unlock(&map->lock);
+        return Qfalse;
+    }
+    operation.current = map->slots[index].value;
+    map->updating = true;
+    pthread_mutex_unlock(&map->lock);
+    return rb_ensure(map_cas_body, (VALUE)&operation, map_operation_cleanup, (VALUE)&operation);
+}
+
+static VALUE
+map_upsert_body(VALUE opaque)
+{
+    map_operation_t *operation = (map_operation_t *)opaque;
+    VALUE result = rb_yield(operation->current);
+    containers_check_shareable(result);
+    pthread_mutex_lock(&operation->map->lock);
+    map_store_locked(operation->map, operation->key, result, operation->hash);
+    operation->map->updating = false;
+    pthread_mutex_unlock(&operation->map->lock);
+    operation->complete = true;
+    return result;
+}
+
+static VALUE
+map_upsert(int argc, VALUE *argv, VALUE self)
+{
+    VALUE key;
+    VALUE initial;
+    VALUE keywords = Qnil;
+    VALUE keyword_values[1] = {Qundef};
+    ID keyword_ids[] = {rb_intern("timeout")};
+    rb_scan_args(argc, argv, "2:", &key, &initial, &keywords);
+    if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
+
+    map_t *map = get_map(self);
+    map_operation_t operation = {.map = map, .key = key, .complete = false};
+    containers_check_shareable(key);
+    containers_check_shareable(initial);
+    rb_need_block();
+    operation.hash = map_key_hash(map, key);
+    map_timeout_t timeout = map_parse_timeout(
+        keyword_values[0] == Qundef ? Qnil : keyword_values[0]
+    );
+
+    if (!map_lock_for_update_with_timeout(map, &timeout)) return Qnil;
+    bool found;
+    size_t index = map_find_slot(map, key, operation.hash, &found);
+    if (!found) {
+        map_store_locked(map, key, initial, operation.hash);
+        pthread_mutex_unlock(&map->lock);
+        return initial;
+    }
+    operation.current = map->slots[index].value;
+    map->updating = true;
+    pthread_mutex_unlock(&map->lock);
+    return rb_ensure(map_upsert_body, (VALUE)&operation, map_operation_cleanup, (VALUE)&operation);
+}
+
+static VALUE
+map_compare_keys_by_identity_p(VALUE self)
+{
+    return get_map(self)->compare_keys_by_identity ? Qtrue : Qfalse;
+}
+
+static VALUE
+map_compare_values_by_identity_p(VALUE self)
+{
+    return get_map(self)->compare_values_by_identity ? Qtrue : Qfalse;
+}
+
+static VALUE
+map_size(VALUE self)
+{
+    map_t *map = get_map(self);
+    size_t size;
+    pthread_mutex_lock(&map->lock);
+    size = map->size;
+    pthread_mutex_unlock(&map->lock);
+    return SIZET2NUM(size);
+}
+
+static VALUE
+map_get_with_timeout(int argc, VALUE *argv, VALUE self)
+{
+    VALUE key;
+    VALUE keywords = Qnil;
+    VALUE keyword_values[1] = {Qundef};
+    ID keyword_ids[] = {rb_intern("timeout")};
+    rb_scan_args(argc, argv, "1:", &key, &keywords);
+    if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
+
+    map_t *map = get_map(self);
+    containers_check_shareable(key);
+    st_index_t hash = map_key_hash(map, key);
+    map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
+    if (!map_lock_for_update_with_timeout(map, &timeout)) return map_timeout_result();
+
+    bool found;
+    size_t index = map_find_slot(map, key, hash, &found);
+    VALUE result = found ? map->slots[index].value : Qnil;
+    pthread_mutex_unlock(&map->lock);
+    return result;
+}
+
+static VALUE
+map_store_with_timeout(int argc, VALUE *argv, VALUE self)
+{
+    VALUE key;
+    VALUE value;
+    VALUE keywords = Qnil;
+    VALUE keyword_values[1] = {Qundef};
+    ID keyword_ids[] = {rb_intern("timeout")};
+    rb_scan_args(argc, argv, "2:", &key, &value, &keywords);
+    if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
+
+    map_t *map = get_map(self);
+    containers_check_shareable(key);
+    containers_check_shareable(value);
+    st_index_t hash = map_key_hash(map, key);
+    map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
+    if (!map_lock_for_update_with_timeout(map, &timeout)) return map_timeout_result();
+    map_store_locked(map, key, value, hash);
+    pthread_mutex_unlock(&map->lock);
+    return value;
+}
+
+static VALUE
+map_swap(int argc, VALUE *argv, VALUE self)
+{
+    VALUE key;
+    VALUE replacement;
+    VALUE keywords = Qnil;
+    VALUE keyword_values[1] = {Qundef};
+    ID keyword_ids[] = {rb_intern("timeout")};
+    rb_scan_args(argc, argv, "2:", &key, &replacement, &keywords);
+    if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
+
+    map_t *map = get_map(self);
+    containers_check_shareable(key);
+    containers_check_shareable(replacement);
+    st_index_t hash = map_key_hash(map, key);
+    map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
+    if (!map_lock_for_update_with_timeout(map, &timeout)) return map_timeout_result();
+
+    bool found;
+    size_t index = map_find_slot(map, key, hash, &found);
+    VALUE previous = found ? map->slots[index].value : Qnil;
+    map_store_locked(map, key, replacement, hash);
+    pthread_mutex_unlock(&map->lock);
+    return previous;
+}
+
+static bool
+map_values_equal(map_t *map, VALUE left, VALUE right)
+{
+    return map->compare_values_by_identity ? left == right : RTEST(rb_equal(left, right));
+}
+
+static VALUE
+map_wait_for_value(int argc, VALUE *argv, VALUE self, bool non_nil)
+{
+    VALUE key;
+    VALUE expected = Qnil;
+    VALUE keywords = Qnil;
+    VALUE keyword_values[1] = {Qundef};
+    ID keyword_ids[] = {rb_intern("timeout")};
+    if (non_nil) rb_scan_args(argc, argv, "1:", &key, &keywords);
+    else rb_scan_args(argc, argv, "2:", &key, &expected, &keywords);
+    if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
+
+    map_t *map = get_map(self);
+    containers_check_shareable(key);
+    if (!non_nil) containers_check_shareable(expected);
+    st_index_t hash = map_key_hash(map, key);
+    map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
+
+    for (;;) {
+        bool found;
+        VALUE current = Qnil;
+        uint64_t generation;
+        pthread_mutex_lock(&map->lock);
+        size_t index = map_find_slot(map, key, hash, &found);
+        if (found) current = map->slots[index].value;
+        generation = map->generation;
+        pthread_mutex_unlock(&map->lock);
+
+        bool ready = non_nil ? !NIL_P(current) : !map_values_equal(map, current, expected);
+        if (ready) return current;
+        if (!map_wait_once(map, generation, &timeout)) return map_timeout_result();
+    }
+}
+
+static VALUE
+map_wait_until_changed(int argc, VALUE *argv, VALUE self)
+{
+    return map_wait_for_value(argc, argv, self, false);
+}
+
+static VALUE
+map_wait_until_non_nil(int argc, VALUE *argv, VALUE self)
+{
+    return map_wait_for_value(argc, argv, self, true);
+}
+
+static VALUE
+map_update(int argc, VALUE *argv, VALUE self)
+{
+    VALUE key;
+    VALUE keywords = Qnil;
+    VALUE keyword_values[1] = {Qundef};
+    ID keyword_ids[] = {rb_intern("timeout")};
+    rb_scan_args(argc, argv, "1:", &key, &keywords);
+    if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
+
+    map_t *map = get_map(self);
+    map_operation_t operation = {.map = map, .key = key, .complete = false};
+    containers_check_shareable(key);
+    rb_need_block();
+    operation.hash = map_key_hash(map, key);
+    map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
+
+    if (!map_lock_for_update_with_timeout(map, &timeout)) return Qnil;
+    bool found;
+    size_t index = map_find_slot(map, key, operation.hash, &found);
+    operation.current = found ? map->slots[index].value : Qnil;
+    map->updating = true;
+    pthread_mutex_unlock(&map->lock);
+    return rb_ensure(map_upsert_body, (VALUE)&operation, map_operation_cleanup, (VALUE)&operation);
+}
+
+
+void
+containers_init_map(VALUE namespace)
+{
+    cMap = rb_define_class_under(namespace, "Map", rb_cObject);
+    rb_define_alloc_func(cMap, map_allocate);
+    rb_define_method(cMap, "initialize", map_initialize, -1);
+    rb_define_method(cMap, "[]", map_get, 1);
+    rb_define_method(cMap, "[]=", map_set, 2);
+    rb_define_method(cMap, "get", map_get_with_timeout, -1);
+    rb_define_method(cMap, "store", map_store_with_timeout, -1);
+    rb_define_method(cMap, "swap", map_swap, -1);
+    rb_define_method(cMap, "update", map_update, -1);
+    rb_define_method(cMap, "wait_until_changed", map_wait_until_changed, -1);
+    rb_define_method(cMap, "wait_until_non_nil", map_wait_until_non_nil, -1);
+    rb_define_method(cMap, "store_if_absent", map_store_if_absent, -1);
+    rb_define_method(cMap, "key?", map_key_p, 1);
+    rb_define_method(cMap, "delete", map_delete, 1);
+    rb_define_method(cMap, "compare_and_set", map_compare_and_set, -1);
+    rb_define_method(cMap, "upsert", map_upsert, -1);
+    rb_define_method(cMap, "compare_keys_by_identity?", map_compare_keys_by_identity_p, 0);
+    rb_define_method(cMap, "compare_values_by_identity?", map_compare_values_by_identity_p, 0);
+    rb_define_method(cMap, "getkey", map_getkey, 1);
+    rb_define_method(cMap, "size", map_size, 0);
+}

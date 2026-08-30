@@ -1,0 +1,122 @@
+plugins:
+- rubocop-minitest
+- rubocop-rake
+
+AllCops:
+  TargetRubyVersion: 3.4
+  NewCops: enable
+  Exclude:
+  - "lib/farce/_yard/*.rb"
+  - "{tmp,pkg}/**/*.rb"
+  - "test/setup.rb"
+  - "test/farce/internal/test_rbtree.rb"
+  - "test/farce/internal/test_multi_rbtree.rb"
+  - "farce-java.gemspec"
+
+Metrics:
+  Enabled: false
+
+Layout/ArgumentAlignment:
+  EnforcedStyle: with_fixed_indentation
+  IndentationWidth: 2
+
+Layout/ClassStructure:
+  Enabled: true
+
+Layout/EmptyLineAfterGuardClause:
+  Enabled: false
+
+# TODO: remove once we're past Rubocop 1.90.0
+Layout/EmptyLineAfterMagicComment:
+  Enabled: false
+
+Layout/HashAlignment:
+  EnforcedHashRocketStyle: table
+  EnforcedColonStyle: table
+
+Layout/HeredocArgumentClosingParenthesis:
+  Enabled: true
+
+Layout/LeadingCommentSpace:
+  AllowYARDCommentBlockSeparator: true
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Layout/MultilineOperationIndentation:
+  EnforcedStyle: indented
+
+Lint/AssignmentInCondition:
+  Enabled: false
+
+Lint/EmptyClass:
+  Enabled: false
+
+Lint/SuppressedException:
+  Enabled: false
+
+Naming/FileName:
+  Enabled: false
+
+Naming/InclusiveLanguage:
+  Enabled: true
+
+Style/AccessModifierDeclarations:
+  Enabled: false
+
+Style/CaseEquality:
+  AllowOnConstant: true
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Style/ClassMethodsDefinitions:
+  Enabled: true
+
+Style/ClassVars:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/DocumentDynamicEvalDefinition:
+  Enabled: false
+
+Style/FetchEnvVar:
+  Enabled: false
+
+Style/FormatString:
+  Enabled: false
+
+Style/ModuleFunction:
+  Enabled: false
+
+Style/MultilineTernaryOperator:
+  Enabled: false
+
+Style/MultipleComparison:
+  ComparisonsThreshold: 3
+
+Style/NestedTernaryOperator:
+  Enabled: false
+
+Style/NumberedParametersLimit:
+  Max: 2
+
+Style/NumericLiterals:
+  Enabled: false
+
+Style/ParallelAssignment:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: diff_comma
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: diff_comma

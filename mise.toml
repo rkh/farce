@@ -1,0 +1,58 @@
+[tools]
+ruby = ["4.0", "4.1-dev", "3.4", "jruby", "jruby-dev", "truffleruby", "truffleruby-dev"]
+
+[vars]
+ruby_versions  = "4.0 3.4 4.1-dev jruby jruby-dev truffleruby truffleruby-dev"
+command_after  = ""
+command_before = ""
+
+[task_templates."ruby:all"]
+description = "Run `{{vars.command}}` for all Ruby versions"
+run = """
+  {{vars.command_before}}
+  for ruby_version in {{ vars.ruby_versions }}; do
+    echo "Running \\033[1m{{vars.command}}\\033[0m for Ruby version: \\033[1m$ruby_version\\033[0m" 
+    mise exec ruby@$ruby_version -- ruby -v || exit 1
+    mise exec ruby@$ruby_version -- {{vars.command}} || exit 1
+    echo
+  done
+  {{vars.command_after}}
+"""
+
+[tasks.install]
+extends             = "ruby:all"
+vars.command        = "bundle install"
+sources             = ["Gemfile", "farce.gemspec"]
+
+[tasks.compile]
+extends             = "ruby:all"
+sources             = ["ext/**/*"]
+outputs             = ["lib/**/*.{so,bundle,dylib,dll}"]
+vars.command        = "bundle exec rake clean compile"
+wait_for            = ["install"]
+
+[tasks.test]
+env.COVERAGE        = "true"
+env.JRUBY_OPTS      = "--debug"
+extends             = "ruby:all"
+vars.command        = "bundle exec rake test"
+vars.command_before = "rm -rf coverage"
+vars.command_after  = "bundle exec rake rubocop coverage:report"
+depends             = ["compile"]
+wait_for            = ["install", "compile"]
+
+[tasks.build]
+description         = "Build all gems in parallel"
+run                 = "bundle exec rake gem:all"
+wait_for            = ["install"]
+
+[tasks.docs]
+description         = "Build documentation"
+run                 = "bundle exec yard --backtrace"
+sources             = ["lib/**/*", "*.md", ".yardopts"]
+outputs             = ["yardoc/**/*"]
+wait_for            = ["install"]
+
+[tasks.default]
+description         = "The default task (install, compile, test, docs)"
+depends             = ["install", "compile", "test", "docs"]
