@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "ruby/fiber/scheduler.h"
 #include "ruby/io.h"
 
 #include <errno.h>
@@ -19,6 +20,7 @@ struct containers_lock_waiter {
 typedef struct {
     pthread_mutex_t guard;
     VALUE owner;
+    pthread_t owner_thread;
     containers_lock_waiter_t *waiters;
     containers_lock_waiter_t *last_waiter;
     bool initialized;
@@ -247,8 +249,17 @@ containers_lock_acquire(VALUE self)
         }
         if (NIL_P(lock->owner)) {
             lock->owner = current;
+            lock->owner_thread = pthread_self();
             pthread_mutex_unlock(&lock->guard);
             return;
+        }
+        if (pthread_equal(lock->owner_thread, pthread_self()) &&
+            NIL_P(rb_fiber_scheduler_current())) {
+            pthread_mutex_unlock(&lock->guard);
+            rb_raise(
+                rb_eThreadError,
+                "deadlock; lock already owned by another fiber belonging to the same thread"
+            );
         }
         containers_lock_wait_once(lock);
     }
@@ -291,6 +302,7 @@ containers_lock_try_lock(VALUE self)
     pthread_mutex_lock(&lock->guard);
     if (NIL_P(lock->owner)) {
         lock->owner = current;
+        lock->owner_thread = pthread_self();
         acquired = true;
     }
     pthread_mutex_unlock(&lock->guard);

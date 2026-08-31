@@ -19,6 +19,8 @@ module Farce
         @mutex               = Mutex.new
         @signal              = ConditionVariable.new
         @updating            = false
+        @updating_fiber      = nil
+        @updating_thread     = nil
         @version             = 0
       end
 
@@ -108,6 +110,7 @@ module Farce
 
           result = @mutex.synchronize do
             next unless @version == version
+            reject_update_wait! if @updating
             TIMED_OUT unless wait_for_signal(deadline)
           end
           return timed_out(result, fallback) if TIMED_OUT.equal?(result)
@@ -126,6 +129,7 @@ module Farce
 
         @mutex.synchronize do
           while @updating
+            reject_update_wait!
             return TIMED_OUT unless wait_for_signal(deadline)
           end
           yield
@@ -135,10 +139,13 @@ module Farce
       def reserve(deadline)
         @mutex.synchronize do
           while @updating
+            reject_update_wait!
             return TIMED_OUT unless wait_for_signal(deadline)
           end
           yield if block_given?
-          @updating = true
+          @updating        = true
+          @updating_fiber  = Fiber.current
+          @updating_thread = Thread.current
           @value
         end
       end
@@ -158,7 +165,9 @@ module Farce
         @mutex.synchronize do
           @value = value if changed
           @version += 1 if changed
-          @updating = false
+          @updating        = false
+          @updating_fiber  = nil
+          @updating_thread = nil
           @signal.broadcast
         end
       end
@@ -187,6 +196,15 @@ module Farce
 
         @signal.wait(@mutex, remaining)
         true
+      end
+
+      def reject_update_wait!
+        raise ThreadError, "deadlock; recursive atom access during an update" if @updating_fiber.equal?(Fiber.current)
+
+        scheduler = Fiber.scheduler if Fiber.respond_to?(:scheduler)
+        return unless @updating_thread.equal?(Thread.current) && !scheduler
+
+        raise ThreadError, "deadlock; atom update is owned by another unscheduled fiber"
       end
 
       def timed_out(result, fallback)

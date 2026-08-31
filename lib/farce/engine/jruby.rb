@@ -6,11 +6,14 @@ require "jruby"
 require "java"
 
 require "farce/engine/shared"
+require "farce/engine/jvm"
 
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
     include Autoloads["#{__dir__}/jruby"]
+
+    Lock = Mutex
 
     java_import org.jruby.RubyProc
     java_import org.jruby.runtime.Block

@@ -20,6 +20,7 @@
 
 /*
  * Modified for Ruby/RBTree.
+ * Vendored unchanged by Farce for its priority queue implementation.
  */
 
 #ifndef DICT_H

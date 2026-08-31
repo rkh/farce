@@ -1,0 +1,3 @@
+dict.o: dict.c dict.h
+priority_queue.o: priority_queue.c containers.h dict.h
+tree_map.o: tree_map.c containers.h

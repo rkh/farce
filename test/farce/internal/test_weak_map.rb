@@ -6,6 +6,25 @@ module Farce
   class TestWeakMap < Test
     include Helpers::InternalTestHelpers
 
+    class YieldingWeakEqualityKey
+      attr_reader :rank
+
+      def initialize(rank, yield_fiber: false, yield_thread: false)
+        @rank = rank
+        @yield_fiber = yield_fiber
+        @yield_thread = yield_thread
+        freeze
+      end
+
+      def hash = 0
+
+      def eql?(other)
+        Fiber.scheduler&.kernel_sleep(0.01) if @yield_fiber
+        Thread.pass if @yield_thread
+        other.is_a?(YieldingWeakEqualityKey) && rank == other.rank
+      end
+    end
+
     if Internal.const_defined?(:NATIVE_WEAK_MAPS, false)
       WeakKeyMap = Internal::WeakKeyMap
       WeakValueMap = Internal::WeakValueMap
@@ -87,6 +106,111 @@ module Farce
         assert_same map, map.clear
         assert_equal 3, map[:three] = 3
         assert_equal({ three: 3 }, map.each.to_h)
+      end
+    end
+
+    def test_key_equality_does_not_hold_native_mutex_across_fiber_yield
+      scheduler = Helpers::QueueTestScheduler.new
+      Fiber.set_scheduler(scheduler)
+      map = WeakValueMap.new
+      map[YieldingWeakEqualityKey.new(1, yield_fiber: true)] = :one
+      events = []
+
+      Fiber.schedule do
+        events << :lookup
+        events << map[YieldingWeakEqualityKey.new(2)]
+      end
+      Fiber.schedule do
+        events << :size
+        events << map.size
+      end
+      Fiber.set_scheduler(nil)
+
+      assert_equal [:lookup, :size, nil, 1], events
+      assert_operator scheduler.io_wait_calls, :>=, 1
+      assert_equal :one, map[YieldingWeakEqualityKey.new(1)]
+    end
+
+    def test_key_equality_thread_pass_contention_stress
+      map = WeakValueMap.new
+      map[YieldingWeakEqualityKey.new(-1, yield_thread: true)] = -1
+      threads = 4.times.map do |worker|
+        Thread.new do
+          30.times do |index|
+            rank = (worker * 100) + index
+            map[YieldingWeakEqualityKey.new(rank, yield_thread: true)] = rank
+          end
+        end
+      end
+
+      threads.each do |thread|
+        assert thread.join(10), "weak-map comparator worker deadlocked"
+        thread.value
+      end
+
+      assert_equal 121, map.size
+    ensure
+      threads&.each { |thread| thread.kill if thread.alive? }
+    end
+
+    def test_simple_store_contention_does_not_block_a_fiber_scheduler
+      scheduler = Helpers::QueueTestScheduler.new
+      Fiber.set_scheduler(scheduler)
+      map = WeakValueMap.new({ key: 1 })
+      events = []
+
+      Fiber.schedule do
+        events << :updating
+        map.update(:key) do |old|
+          Fiber.scheduler.kernel_sleep(0.01)
+          events << :update_finished
+          old + 1
+        end
+      end
+      Fiber.schedule do
+        events << :store_waiting
+        map[:key] = 3
+        events << :stored
+      end
+      Fiber.set_scheduler(nil)
+
+      assert_equal %i[updating store_waiting update_finished stored], events
+      assert_equal 3, map[:key]
+      assert_operator scheduler.io_wait_calls, :>=, 1
+    end
+
+    def test_recursive_update_mutation_raises_and_releases_the_reservation
+      MAP_CLASSES.each do |klass|
+        map = klass.new({ key: 1 })
+        error = assert_raises(ThreadError) do
+          map.update(:key) { map[:other] = 9 }
+        end
+
+        assert_match(/recursive weak-map access during an update/, error.message)
+        assert_equal 1, map[:key]
+        refute map.key?(:other)
+        assert_equal 2, map.update(:key) { |old| old + 1 }
+      end
+    end
+
+    def test_unscheduled_sibling_fiber_cannot_wait_for_the_owners_update
+      MAP_CLASSES.each do |klass|
+        map = klass.new({ key: 1 })
+        contender = Fiber.new do
+          map[:other] = 9
+        rescue ThreadError => e
+          e
+        end
+        error = nil
+
+        assert_equal(2, map.update(:key) do |old|
+          error = contender.resume
+          old + 1
+        end)
+        assert_kind_of ThreadError, error
+        assert_match(/another unscheduled fiber/, error.message)
+        refute map.key?(:other)
+        assert_equal 3, map[:other] = 3
       end
     end
 
@@ -526,11 +650,16 @@ module Farce
     private
 
     def build_entry(klass, retain:)
-      map = klass.new
-      key = Ractor.make_shareable(Object.new)
-      value = Ractor.make_shareable(Object.new)
-      map[key] = value
-      [map, retain == :key ? key : value]
+      # Build the entry on a disposable native stack. CRuby conservatively
+      # scans C stack slots, so a stale VALUE from #[]= can otherwise keep the
+      # nominally weak side alive after this Ruby method has returned.
+      Thread.new do
+        map = klass.new
+        key = Ractor.make_shareable(Object.new)
+        value = Ractor.make_shareable(Object.new)
+        map[key] = value
+        [map, retain == :key ? key : value]
+      end.value
     end
 
     def assert_collects(map)

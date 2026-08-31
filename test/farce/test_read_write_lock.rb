@@ -304,10 +304,9 @@ module Farce
       second.report_on_exception = false
       2.times { ready.pop }
       start_first << true
-      wait_until_blocked(first)
+      wait_until_upgrader_registered(lock)
       start_second << true
       first_writing.pop
-      wait_until_blocked(second)
 
       second.raise "cancel second upgrader"
       release_first << true
@@ -380,6 +379,15 @@ module Farce
     end
 
     def ractor_value(ractor) = ractor.respond_to?(:value) ? ractor.value : ractor.take
+
+    def wait_until_upgrader_registered(lock)
+      state = lock.instance_variable_get(:@state)
+      upgrader_bit = ReadWriteLock.const_get(:UPGRADER_BIT, false)
+      deadline = Clock.timeout(1)
+      Thread.pass until state[0].anybits?(upgrader_bit) || Clock.now >= deadline
+
+      assert state[0].anybits?(upgrader_bit), "upgrader did not register while waiting for the lock"
+    end
 
     def wait_until_blocked(thread)
       deadline = Clock.timeout(1)

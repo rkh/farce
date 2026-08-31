@@ -10,6 +10,7 @@ module Farce
 
     begin
       require "#{path}/rebind"
+      require "farce/engine/ruby/containers"
     rescue LoadError => e
       # simplecov:disable
       warn <<~WARNING
@@ -20,25 +21,9 @@ module Farce
       # simplecov:enable
     end
 
-    autoload :Atom,          "farce/engine/ruby/containers"
-    autoload :Counter,       "farce/engine/ruby/containers"
-    autoload :Exchanger,     "farce/engine/ruby/containers"
-    autoload :Flag,          "farce/engine/ruby/containers"
-    autoload :Lock,          "farce/engine/ruby/containers"
-    autoload :Map,           "farce/engine/ruby/containers"
-    autoload :Queue,         "farce/engine/ruby/containers"
-    autoload :Signal,        "farce/engine/ruby/containers"
-    autoload :Unshareable,   "farce/engine/ruby/containers"
-    autoload :Vector,        "farce/engine/ruby/containers"
-    autoload :WeakMap,       "farce/engine/ruby/containers"
-    autoload :WeakKeyMap,    "farce/engine/ruby/containers"
-    autoload :WeakValueMap,  "farce/engine/ruby/containers"
     autoload :BasePort,      "#{path}/port"
     autoload :Port,          "#{path}/port"
     autoload :RactorMethods, "#{path}/ractor_methods"
-    autoload :MultiRBTree,   "#{path}/rbtree"
-    autoload :RBTree,        "#{path}/rbtree"
-    autoload :TreeMap,       "farce/engine/ruby/shared/tree_map"
 
     def native_ractors? = true
 

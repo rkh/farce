@@ -8,12 +8,8 @@ module Farce
       Fiber.set_scheduler(nil) if Fiber.respond_to?(:scheduler) && Fiber.scheduler
     end
 
-    def test_implementation_and_interface
-      if Internal.native_ractors?
-        assert_empty Mutex.public_instance_methods(false) - Lock.public_instance_methods
-      else
-        assert_same Mutex, Lock
-      end
+    def test_interface
+      assert_empty Mutex.public_instance_methods(false) - Lock.public_instance_methods
     end
 
     def test_is_shareable_on_cruby
@@ -115,6 +111,39 @@ module Farce
       lock.unlock
     end
 
+    def test_unscheduled_fiber_on_the_owner_thread_raises_instead_of_deadlocking
+      lock = Lock.new
+
+      error = assert_raises(ThreadError) do
+        lock.synchronize do
+          Fiber.new { lock.lock }.resume
+        end
+      end
+
+      assert_match(/another fiber.*same thread/, error.message)
+      assert_equal(:available, lock.synchronize { :available })
+    end
+
+    def test_truffle_deadlock_check_bypasses_an_overridden_thread_equal
+      return unless RUBY_ENGINE == "truffleruby" && TruffleRuby.native?
+
+      lock = Lock.new
+      thread = Thread.current
+      singleton = thread.singleton_class
+      thread.define_singleton_method(:equal?) { |_other| false }
+
+      error = Timeout.timeout(2) do
+        assert_raises(ThreadError) do
+          lock.synchronize { Fiber.new { lock.lock }.resume }
+        end
+      end
+
+      assert_match(/another fiber.*same thread/, error.message)
+      assert_equal(:available, lock.synchronize { :available })
+    ensure
+      singleton&.send(:remove_method, :equal?)
+    end
+
     def test_sleep_releases_and_reacquires_the_lock
       lock = Lock.new
       acquired = Queue.new
@@ -200,6 +229,80 @@ module Farce
     ensure
       lock&.unlock if lock&.owned?
       waiter&.kill&.join
+    end
+
+    def test_truffle_direct_lock_wait_can_be_interrupted_while_owner_holds
+      return unless RUBY_ENGINE == "truffleruby"
+
+      lock = Lock.new
+      ready = Queue.new
+      lock.lock
+      waiter = Thread.new do
+        ready << true
+        lock.lock
+
+        flunk "interrupted waiter acquired the lock"
+      rescue RuntimeError => e
+        e
+      end
+      Timeout.timeout(5) { ready.pop }
+      wait_until_blocked(waiter)
+
+      waiter.raise "interrupt direct lock wait"
+
+      assert waiter.join(5), "direct lock waiter ignored Thread#raise"
+      assert_equal "interrupt direct lock wait", waiter.value.message
+      assert_predicate lock, :owned?, "the original owner must retain the lock"
+      lock.unlock
+
+      assert_equal(:available, lock.synchronize { :available })
+    ensure
+      lock&.unlock if lock&.owned?
+      waiter&.kill&.join
+    end
+
+    def test_interruption_while_recording_owner_does_not_poison_the_native_mutex
+      return unless RUBY_ENGINE == "truffleruby"
+
+      %i[lock try_lock synchronize].each do |operation|
+        lock = Lock.new
+        owner = lock.instance_variable_get(:@farce_owner_thread)
+        original_set = owner.method(:set)
+        entered = Queue.new
+        release = Queue.new
+        start = Queue.new
+        worker = nil
+        injected = false
+        owner.define_singleton_method(:set) do |value|
+          if value && Thread.current.equal?(worker) && !injected
+            injected = true
+            entered << true
+            release.pop
+            Thread.pass until Thread.pending_interrupt?
+          end
+          original_set.call(value)
+        end
+        worker = Thread.new do
+          start.pop
+          operation == :synchronize ? lock.synchronize { flunk } : lock.public_send(operation)
+        rescue RuntimeError => e
+          e
+        end
+        start << true
+        Timeout.timeout(5) { entered.pop }
+
+        worker.raise "interrupt #{operation} owner recording"
+        release << true
+
+        assert worker.join(5), "#{operation} interruption did not unwind"
+        assert_equal "interrupt #{operation} owner recording", worker.value.message
+        assert_equal(:available, lock.synchronize { :available })
+      ensure
+        start << true if start
+        release << true if release
+        worker&.kill&.join
+        lock&.unlock if lock&.owned?
+      end
     end
 
     def test_canceling_one_of_multiple_waiters_does_not_strand_the_others

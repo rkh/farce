@@ -6,7 +6,7 @@ gemspec
 
 group :compatibility do
   gem "concurrent-ruby"
-  gem "ratomic", platforms: %i[mri_34 mri_40]
+  gem "ratomic", platforms: %i[mri_34 mri_40] # rubocop:disable Naming/VariableNumber
   platform :mri do
     gem "async", "~> 2.45"
     gem "concurrent-ruby-ext"
@@ -21,8 +21,14 @@ group :development do
   gem "rake-compiler"
   gem "rake-compiler-dock"
   gem "ruby-lsp", platform: :mri
-  gem "yard"
-  gem "yard-markdown-relative-links"
+end
+
+platform :mri_40 do # rubocop:disable Naming/VariableNumber
+  group :docs do
+    gem "commonmarker"
+    gem "yard"
+    gem "yard-markdown-relative-links"
+  end
 end
 
 group :test do

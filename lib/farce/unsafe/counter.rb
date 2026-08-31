@@ -4,9 +4,15 @@
 
 module Farce
   module Unsafe
+    # @!macro unsafe
+    #
     # A {Abstract::Counter counter} that is not thread-safe and cannot be shared between Ractors.
+    # @!method initialize(value = 0)
+    #   (see Abstract::Counter#initialize)
+    #   @return [Counter] new instance of {Counter}.
     class Counter < Abstract::Counter
-      include Unshareable
+      include Unshareable::Movable
+      include Unshareable::Copyable
 
       # @return [Numeric] The current value of the counter.
       attr_reader :value

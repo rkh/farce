@@ -6,9 +6,9 @@ module Farce
   module Abstract
     # @note
     #  The supported methods are generally compatible with their Hash counterparts,
-    #  with the notable exception of {#update}.
+    #  with the notable exception of {ConcurrentMap#update}.
     #
-    # A Hash-like collection suited for concurrent access and modification.
+    # A Hash-like collection with slightly reduced functionality to allow for better concurrency models.
     #
     # Iteration order is implementation-dependent. In particular, insertion order is not guaranteed.
     #
@@ -32,16 +32,6 @@ module Farce
     # @!method clear
     #   Remove all entries from the map.
     #   @return [self]
-    #   @abstract
-    #
-    # @!method compare_and_set(key, expected, replacement, timeout: nil)
-    #   Atomically replace a value if the key is present and its current value matches `expected`.
-    #   The configured value-comparison mode determines whether matching uses equality or identity.
-    #   @param key [BasicObject] The key to update.
-    #   @param expected [BasicObject] The value expected to be currently associated with the key.
-    #   @param replacement [BasicObject] The value to store when the current value matches.
-    #   @param timeout [Numeric, nil] The maximum number of seconds to wait for access.
-    #   @return [Boolean] Whether the value was replaced. Returns false on timeout.
     #   @abstract
     #
     # @!method compare_keys_by_identity?
@@ -116,16 +106,6 @@ module Farce
     #     @return [BasicObject] The associated value or the block result.
     #   @abstract
     #
-    # @!method get(key, timeout: nil)
-    #   Read the value associated with a key, waiting for atomic-update access if necessary.
-    #   @param key [BasicObject] The key to look up.
-    #   @param timeout [Numeric, nil] The maximum number of seconds to wait for access.
-    #   @yield Called if access cannot be acquired before the timeout.
-    #   @yieldreturn [BasicObject] The fallback value to return.
-    #   @return [BasicObject, nil]
-    #     The associated value, nil if the key is absent, or the fallback result if the operation times out.
-    #   @abstract
-    #
     # @!method getkey(key)
     #   Return the stored key that matches a lookup key.
     #   @param key [BasicObject] The key to match.
@@ -147,82 +127,6 @@ module Farce
     # @!method size
     #   Return the number of entries currently in the map.
     #   @return [Integer] The number of entries.
-    #   @abstract
-    #
-    # @!method store(key, value, timeout: nil)
-    #   Associate a value with a key, waiting for atomic-update access if necessary.
-    #   @param key [BasicObject] The key to store.
-    #   @param value [BasicObject] The value to store.
-    #   @param timeout [Numeric, nil] The maximum number of seconds to wait for access.
-    #   @yield Called if access cannot be acquired before the timeout.
-    #   @yieldreturn [BasicObject] The fallback value to return.
-    #   @return [BasicObject, nil] `value` on success, or the fallback result or nil on timeout.
-    #   @abstract
-    #
-    # @!method store_if_absent(key, timeout: nil)
-    #   Atomically fetch an existing value or compute and store a value for an absent key.
-    #   @param key [BasicObject] The key to look up or store.
-    #   @param timeout [Numeric, nil] The maximum number of seconds to wait for access.
-    #   @yield Called without arguments when the key is absent.
-    #   @yieldreturn [BasicObject] The value to store and return.
-    #   @return [BasicObject, nil] The existing or newly stored value, or nil on timeout.
-    #   @raise [LocalJumpError] If no block is given.
-    #   @abstract
-    #
-    # @!method swap(key, replacement, timeout: nil)
-    #   Replace the value associated with a key and return its previous value.
-    #   @param key [BasicObject] The key to update.
-    #   @param replacement [BasicObject] The value to store.
-    #   @param timeout [Numeric, nil] The maximum number of seconds to wait for access.
-    #   @yield Called if access cannot be acquired before the timeout.
-    #   @yieldreturn [BasicObject] The fallback value to return.
-    #   @return [BasicObject, nil]
-    #     The previous value, nil if the key was absent, or the fallback result if the operation times out.
-    #   @abstract
-    #
-    # @!method update(key, timeout: nil)
-    #   Atomically replace the value associated with a key with the block result.
-    #   The block receives nil when the key is absent or its current value is nil.
-    #   @param key [BasicObject] The key to update.
-    #   @param timeout [Numeric, nil] The maximum number of seconds to wait for access.
-    #   @yield [value] Called after access is acquired.
-    #   @yieldparam value [BasicObject, nil] The current value, or nil if the key is absent.
-    #   @yieldreturn [BasicObject] The value to store and return.
-    #   @return [BasicObject, nil] The newly stored value, or nil on timeout.
-    #   @raise [LocalJumpError] If no block is given.
-    #   @abstract
-    #
-    # @!method upsert(key, initial, timeout: nil)
-    #   Atomically insert `initial` for an absent key or replace an existing value with the block result.
-    #   The block is not called when the key is absent.
-    #   @param key [BasicObject] The key to insert or update.
-    #   @param initial [BasicObject] The value to store when the key is absent.
-    #   @param timeout [Numeric, nil] The maximum number of seconds to wait for access.
-    #   @yield [value] Called when the key is present.
-    #   @yieldparam value [BasicObject] The current value.
-    #   @yieldreturn [BasicObject] The replacement value to store and return.
-    #   @return [BasicObject, nil] The initial or replacement value, or nil on timeout.
-    #   @raise [LocalJumpError] If no block is given.
-    #   @abstract
-    #
-    # @!method wait_until_changed(key, expected, timeout: nil)
-    #   Wait until the value associated with a key no longer matches `expected`.
-    #   An absent key is observed as nil. The configured value-comparison mode determines how values are matched.
-    #   @param key [BasicObject] The key to observe.
-    #   @param expected [BasicObject] The value to wait to change from.
-    #   @param timeout [Numeric, nil] The maximum number of seconds to wait.
-    #   @yield Called if the value has not changed before the timeout.
-    #   @yieldreturn [BasicObject] The fallback value to return.
-    #   @return [BasicObject, nil] The changed value, or the fallback result or nil on timeout.
-    #   @abstract
-    #
-    # @!method wait_until_non_nil(key, timeout: nil)
-    #   Wait until a key is associated with a non-nil value.
-    #   @param key [BasicObject] The key to observe.
-    #   @param timeout [Numeric, nil] The maximum number of seconds to wait.
-    #   @yield Called if the value is still nil when the timeout elapses.
-    #   @yieldreturn [BasicObject] The fallback value to return.
-    #   @return [BasicObject, nil] The non-nil value, or the fallback result or nil on timeout.
     #   @abstract
     #
     # @abstract
@@ -256,7 +160,7 @@ module Farce
       def empty? = size.zero?
 
       # Alias for {#key?}
-      def has_key?(...) = key?(...)
+      def has_key?(...) = key?(...) # rubocop:disable Naming/PredicatePrefix
       alias member?  has_key?
       alias include? has_key?
 
@@ -267,6 +171,16 @@ module Farce
       # @param keys [Array<BasicObject>] The keys to look up.
       # @return [Array<BasicObject>] An array of the associated values.
       def fetch_values(*keys, &) = keys.map { fetch(it, &) }
+
+      # @note
+      #   Some maps may still accept non-shareable keys or values, but convert them into shareable representations.
+      #   This method will still return `true` for such maps.
+      #
+      # @return [Boolean] Whether the map requires keys to be Ractor-shareable
+      def shareable_keys? = false
+
+      # @return [Boolean] Whether the map requires values to be Ractor-shareable
+      def shareable_values? = false
 
       # Creates a new Array containing the map's key-value pairs as two-element arrays.
       # @return [Array<Array(BasicObject, BasicObject)>>] A new Array of `[key, value]` arrays.
@@ -288,6 +202,41 @@ module Farce
       # Some maps reference their values weakly, automatically dropping entries when a value gets garbage-collected.
       # @return [Boolean] Whether the map uses weak references for values.
       def weak_values? = false
+
+      # @return [String] String representation of the map, suitable for debugging.
+      def inspect
+        out   = "#<#{self.class.name} {"
+        comma = false
+        each_for_inspect do |key, value|
+          out << ", " if comma
+          comma = true
+          if Symbol === key
+            key = key.to_s.inspect if key.inspect.match?(%r{\A:["$@!]|[%&*+\-/<=>@\]^`|~]\z})
+            out << "#{key}:"
+          else
+            out << "#{key.inspect} =>"
+          end
+          out << " #{value.inspect}"
+        end
+        out << "}>"
+      end
+
+      # @api private
+      # @return [void]
+      def pretty_print(pp)
+        pp.group(1, "#<#{self.class.name} ", ">") do
+          pp.group(1, "{", "}") do
+            pp.breakable ""
+            pp.seplist(self, nil, :each_for_inspect) do |key, value|
+              pp.group { pp.pp_hash_pair(key, value) }
+            end
+          end
+        end
+      end
+
+      private
+
+      def each_for_inspect(&) = each(&)
     end
   end
 end

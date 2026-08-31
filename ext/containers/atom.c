@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "ruby/fiber/scheduler.h"
 #include "ruby/io.h"
 
 #include <errno.h>
@@ -26,6 +27,8 @@ typedef struct {
     uint64_t version;
     bool compare_by_identity;
     bool updating;
+    VALUE updating_fiber;
+    VALUE updating_thread;
     bool initialized;
 } atom_t;
 
@@ -33,6 +36,8 @@ typedef struct {
     bool finite;
     double deadline;
 } atom_timeout_t;
+
+static bool atom_wait_once(atom_t *atom, atom_timeout_t *timeout);
 
 static double
 atom_monotonic_now(void)
@@ -106,6 +111,8 @@ atom_finished_update(atom_t *atom, bool changed)
 {
     if (changed) atom->version++;
     atom->updating = false;
+    atom->updating_fiber = Qnil;
+    atom->updating_thread = Qnil;
     atom_notify_waiters(atom);
 }
 
@@ -114,12 +121,16 @@ atom_mark(void *pointer)
 {
     atom_t *atom = pointer;
     rb_gc_mark_movable(atom->value);
+    rb_gc_mark_movable(atom->updating_fiber);
+    rb_gc_mark_movable(atom->updating_thread);
 }
 static void
 atom_compact(void *pointer)
 {
     atom_t *atom = pointer;
     atom->value = rb_gc_location(atom->value);
+    atom->updating_fiber = rb_gc_location(atom->updating_fiber);
+    atom->updating_thread = rb_gc_location(atom->updating_thread);
 }
 
 static void
@@ -158,6 +169,8 @@ atom_allocate(VALUE klass)
     atom->version = 0;
     atom->compare_by_identity = false;
     atom->updating = false;
+    atom->updating_fiber = Qnil;
+    atom->updating_thread = Qnil;
     atom->initialized = false;
     return object;
 }
@@ -171,14 +184,45 @@ get_atom(VALUE self)
     return atom;
 }
 
+/* Called with atom->lock held. Raising releases the short native mutex so the
+ * reservation owner's ensure handler can clear it normally. */
+static void
+atom_check_update_wait_locked(atom_t *atom)
+{
+    VALUE current_fiber = rb_fiber_current();
+
+    if (atom->updating_fiber == current_fiber) {
+        pthread_mutex_unlock(&atom->lock);
+        rb_raise(rb_eThreadError, "deadlock; recursive atom access during an update");
+    }
+    if (atom->updating_thread == rb_thread_current() &&
+        NIL_P(rb_fiber_scheduler_current())) {
+        pthread_mutex_unlock(&atom->lock);
+        rb_raise(
+            rb_eThreadError,
+            "deadlock; atom update is owned by another unscheduled fiber"
+        );
+    }
+}
+
+static void
+atom_begin_update_locked(atom_t *atom)
+{
+    atom->updating = true;
+    atom->updating_fiber = rb_fiber_current();
+    atom->updating_thread = rb_thread_current();
+}
+
 static void
 atom_lock_for_update(atom_t *atom)
 {
+    atom_timeout_t timeout = {.finite = false, .deadline = 0};
+
     for (;;) {
         pthread_mutex_lock(&atom->lock);
         if (!atom->updating) return;
-        pthread_mutex_unlock(&atom->lock);
-        containers_brief_wait();
+        atom_check_update_wait_locked(atom);
+        (void)atom_wait_once(atom, &timeout);
     }
 }
 
@@ -287,6 +331,7 @@ atom_lock_for_update_with_timeout(atom_t *atom, atom_timeout_t *timeout)
     for (;;) {
         pthread_mutex_lock(&atom->lock);
         if (!atom->updating) return true;
+        atom_check_update_wait_locked(atom);
         if (!atom_wait_once(atom, timeout)) return false;
     }
 }
@@ -359,6 +404,7 @@ atom_get(int argc, VALUE *argv, VALUE self)
             pthread_mutex_unlock(&atom->lock);
             return value;
         }
+        atom_check_update_wait_locked(atom);
         if (!atom_wait_once(atom, &timeout)) return atom_timeout_result();
     }
 }
@@ -380,6 +426,7 @@ atom_store(int argc, VALUE *argv, VALUE self)
             pthread_mutex_unlock(&atom->lock);
             return value;
         }
+        atom_check_update_wait_locked(atom);
         if (!atom_wait_once(atom, &timeout)) return atom_timeout_result();
     }
 }
@@ -402,6 +449,7 @@ atom_swap(int argc, VALUE *argv, VALUE self)
             pthread_mutex_unlock(&atom->lock);
             return previous;
         }
+        atom_check_update_wait_locked(atom);
         if (!atom_wait_once(atom, &timeout)) return atom_timeout_result();
     }
 }
@@ -454,7 +502,7 @@ atom_store_if_absent(int argc, VALUE *argv, VALUE self)
         pthread_mutex_unlock(&atom->lock);
         return value;
     }
-    atom->updating = true;
+    atom_begin_update_locked(atom);
     pthread_mutex_unlock(&atom->lock);
     return rb_ensure(atom_store_body, (VALUE)&operation, atom_operation_cleanup, (VALUE)&operation);
 }
@@ -522,7 +570,7 @@ atom_compare_and_set(int argc, VALUE *argv, VALUE self)
     operation.replacement = replacement;
     operation.identity = atom->compare_by_identity;
     operation.complete = false;
-    atom->updating = true;
+    atom_begin_update_locked(atom);
     pthread_mutex_unlock(&atom->lock);
 
     return rb_ensure(atom_cas_body, (VALUE)&operation, atom_cas_cleanup, (VALUE)&operation);
@@ -552,7 +600,7 @@ atom_update(int argc, VALUE *argv, VALUE self)
 
     if (!atom_lock_for_update_with_timeout(atom, &timeout)) return Qnil;
     operation.current = atom->value;
-    atom->updating = true;
+    atom_begin_update_locked(atom);
     pthread_mutex_unlock(&atom->lock);
 
     return rb_ensure(atom_update_body, (VALUE)&operation, atom_operation_cleanup, (VALUE)&operation);
@@ -576,7 +624,7 @@ atom_upsert(int argc, VALUE *argv, VALUE self)
         return initial;
     }
     operation.current = atom->value;
-    atom->updating = true;
+    atom_begin_update_locked(atom);
     pthread_mutex_unlock(&atom->lock);
 
     return rb_ensure(atom_update_body, (VALUE)&operation, atom_operation_cleanup, (VALUE)&operation);
@@ -612,6 +660,7 @@ atom_wait_until_changed(int argc, VALUE *argv, VALUE self)
             pthread_mutex_unlock(&atom->lock);
             continue;
         }
+        if (atom->updating) atom_check_update_wait_locked(atom);
         if (!atom_wait_once(atom, &timeout)) return atom_timeout_result();
     }
 }
@@ -629,6 +678,7 @@ atom_wait_until_non_nil(int argc, VALUE *argv, VALUE self)
             pthread_mutex_unlock(&atom->lock);
             return current;
         }
+        if (atom->updating) atom_check_update_wait_locked(atom);
         if (!atom_wait_once(atom, &timeout)) return atom_timeout_result();
     }
 }

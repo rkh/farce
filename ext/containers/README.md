@@ -1,15 +1,22 @@
-# Ractor-safe containers
+# Native containers
 
-Farce-internal extension adding the following classes:
+Farce's single CRuby extension defines its internal coordinated containers,
+including `Atom`, `Counter`, `Exchanger`, `Flag`, `Lock`, `Map`, `Queue`,
+`Signal`, `Vector`, `LocalTreeMap`, `TreeMap`, `ShareableTreeMap`, and
+`PriorityQueue`. CRuby 4.1+ also gets native `WeakMap`, `WeakKeyMap`, and
+`WeakValueMap` implementations.
 
-On CRuby 3.4+:
-* `Farce::Internal::Atom`
-* `Farce::Internal::Map`
-* `Farce::Internal::Queue`
+The tree maps use Farce's MIT-licensed clean-room red-black tree. String keys
+are normalized like `-key`, producing frozen, globally deduplicated keys that
+can be recovered with `getkey`. Other keys must already be Ractor-shareable.
+`LocalTreeMap` is unsynchronized, while `TreeMap` is synchronized; both accept
+arbitrary values and follow ordinary Ruby freeze semantics. `ShareableTreeMap`
+is synchronized, requires shareable values, and is itself frozen and
+Ractor-shareable.
 
-On CRuby 4.1+:
-* `Farce::Internal::WeakMap`
-* `Farce::Internal::WeakKeyMap`
-* `Farce::Internal::WeakValueMap`
+`PriorityQueue` uses the vendored Kazlib dictionary implementation with one
+FIFO bucket per priority. Exact deletion visits only the requested priority's
+bucket. Kazlib's copyright and license remain in `dict.c` and `dict.h`.
 
-Generates a no-op Makefile on alternative Ruby implementations.
+The extension is built and loaded only on CRuby. Other engines use their Ruby
+or JVM implementations and never compile this directory.

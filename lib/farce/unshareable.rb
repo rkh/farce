@@ -47,7 +47,7 @@ module Farce
     def initialize(...)
       if Internal.native_ractors?
         case self
-        when Moveable then Internal::Unshareable.prevent_copyable(self) unless is_a?(Copyable)
+        when Movable  then Internal::Unshareable.prevent_copyable(self) unless is_a?(Copyable)
         when Copyable then Internal::Unshareable.prevent_movable(self)
         else Internal::Unshareable.pin_to_current_ractor(self)
         end

@@ -9,8 +9,33 @@ require "rubygems/package"
 require "tmpdir"
 
 class TestGemVerifier < Test
-  ABIS  = ["4.0.2", "3.4.9"].freeze
-  NAMES = %w[rbtree rebind].freeze
+  ABIS       = ["4.0.2", "3.4.9"].freeze
+  NAMES      = %w[containers rebind].freeze
+  EXTENSIONS = NAMES.map { "ext/#{it}/extconf.rb" }.freeze
+
+  def test_verifies_every_extension_in_the_source_gem
+    spec = Gem::Specification.load(File.expand_path("../farce.gemspec", __dir__))
+    unexpected_sources = spec.files.grep(%r{\Aext/}).reject do |path|
+      path == "ext/ext_helper.rb" || NAMES.include?(path.split("/")[1])
+    end
+
+    assert_equal EXTENSIONS, spec.extensions
+    assert_equal ["MIT", "LicenseRef-Kazlib-1.20"], spec.licenses
+    assert_includes spec.files, "ext/containers/dict.c"
+    assert_includes spec.files, "ext/containers/dict.h"
+    assert_includes spec.files, "ext/containers/RBTREE-LICENSE"
+    assert_includes spec.files, "ext/containers/priority_queue.c"
+    assert_includes spec.files, "ext/containers/tree_map.c"
+    assert_empty unexpected_sources
+  end
+
+  def test_java_gem_declares_only_the_license_for_the_code_it_ships
+    root = File.expand_path("..", __dir__)
+    spec = Dir.chdir(root) { Gem::Specification.load("farce-java.gemspec") }
+
+    assert_equal ["MIT"], spec.licenses
+    assert_empty spec.files.grep(%r{\Aext/})
+  end
 
   def test_accepts_gem_whose_binaries_all_match_the_target_platform
     gem_file = gem_for("arm-linux-gnu", arm_binaries)
@@ -58,22 +83,23 @@ class TestGemVerifier < Test
   end
 
   def test_rejects_gem_missing_the_binary_for_one_extension
-    gem_file = gem_for("arm-linux-gnu", arm_binaries.except("lib/farce/engine/ruby/3.4/rbtree.so"))
+    path = "lib/farce/engine/ruby/3.4/containers.so"
+    gem_file = gem_for("arm-linux-gnu", arm_binaries.except(path))
 
     error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-gnu") }
 
-    assert_includes error.message, "lib/farce/engine/ruby/3.4/rbtree.so"
+    assert_includes error.message, path
     assert_includes error.message, "found nothing"
   end
 
   def test_rejects_gem_shipping_a_binary_it_was_not_supposed_to
     gem_file = gem_for("arm-linux-gnu", arm_binaries.merge(
-      "lib/farce/engine/ruby/3.3/rbtree.so" => elf(bits: 32, machine: 0x28),
+      "lib/farce/engine/ruby/3.3/containers.so" => elf(bits: 32, machine: 0x28),
     ))
 
     error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-gnu") }
 
-    assert_includes error.message, "lib/farce/engine/ruby/3.3/rbtree.so"
+    assert_includes error.message, "lib/farce/engine/ruby/3.3/containers.so"
   end
 
   def test_rejects_gem_whose_platform_does_not_match_the_build_target
@@ -95,7 +121,7 @@ class TestGemVerifier < Test
   end
 
   def test_rejects_precompiled_gem_that_would_still_compile_on_install
-    gem_file = gem_for("arm-linux-gnu", arm_binaries, extensions: ["ext/rbtree/extconf.rb"])
+    gem_file = gem_for("arm-linux-gnu", arm_binaries, extensions: [EXTENSIONS.first])
 
     error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-gnu") }
 
@@ -131,18 +157,18 @@ class TestGemVerifier < Test
 
   def test_rejects_java_gem_shipping_a_compiled_binary
     gem_file = gem_for("java", {
-      "lib/farce/engine/jruby.rb"           => "# ruby\n",
-      "lib/farce/engine/ruby/4.0/rbtree.so" => elf(bits: 64, machine: 0xb7),
+      "lib/farce/engine/jruby.rb"               => "# ruby\n",
+      "lib/farce/engine/ruby/4.0/containers.so" => elf(bits: 64, machine: 0xb7),
     })
 
     error = assert_raises(GemVerifier::Error) { verify(gem_file, "jruby") }
 
-    assert_includes error.message, "lib/farce/engine/ruby/4.0/rbtree.so"
+    assert_includes error.message, "lib/farce/engine/ruby/4.0/containers.so"
   end
 
   def test_rejects_java_gem_that_would_compile_on_install
     gem_file = gem_for("java", { "lib/farce/engine/jruby.rb" => "# ruby\n" },
-      extensions: ["ext/rbtree/extconf.rb"])
+      extensions: [EXTENSIONS.first])
 
     error = assert_raises(GemVerifier::Error) { verify(gem_file, "jruby") }
 
@@ -151,13 +177,13 @@ class TestGemVerifier < Test
 
   def test_rejects_java_gem_shipping_extension_sources
     gem_file = gem_for("java", {
-      "lib/farce/engine/jruby.rb" => "# ruby\n",
-      "ext/rbtree/rbtree.c"       => "int rbtree;\n",
+      "lib/farce/engine/jruby.rb"       => "# ruby\n",
+      "ext/containers/priority_queue.c" => "int priority_queue;\n",
     })
 
     error = assert_raises(GemVerifier::Error) { verify(gem_file, "jruby") }
 
-    assert_includes error.message, "ext/rbtree/rbtree.c"
+    assert_includes error.message, "ext/containers/priority_queue.c"
   end
 
   def test_rejects_java_gem_that_is_not_built_for_java
@@ -170,19 +196,20 @@ class TestGemVerifier < Test
   end
 
   def test_accepts_source_gem_that_compiles_on_install
-    gem_file = gem_for(nil, {}, extensions: ["ext/rbtree/extconf.rb", "ext/rebind/extconf.rb"],
+    gem_file = gem_for(nil, {}, extensions: EXTENSIONS,
       required_ruby_version: [">= 3.4", "< 4.2"])
 
     verify(gem_file, nil)
   end
 
   def test_rejects_source_gem_shipping_a_prebuilt_binary
-    gem_file = gem_for(nil, { "lib/farce/engine/ruby/4.0/rbtree.so" => elf(bits: 32, machine: 0x28) },
-      extensions: ["ext/rbtree/extconf.rb"], required_ruby_version: [">= 3.4", "< 4.2"])
+    path = "lib/farce/engine/ruby/4.0/containers.so"
+    gem_file = gem_for(nil, { path => elf(bits: 32, machine: 0x28) },
+      extensions: EXTENSIONS, required_ruby_version: [">= 3.4", "< 4.2"])
 
     error = assert_raises(GemVerifier::Error) { verify(gem_file, nil) }
 
-    assert_includes error.message, "lib/farce/engine/ruby/4.0/rbtree.so"
+    assert_includes error.message, path
   end
 
   def test_rejects_source_gem_that_would_not_compile_on_install

@@ -13,6 +13,68 @@ module Farce
       def eql?(_other) = raise("eql? failed")
     end
 
+    class YieldingEqualityKey
+      attr_reader :rank
+
+      def initialize(rank, yield_fiber: false, yield_thread: false)
+        @rank = rank
+        @yield_fiber = yield_fiber
+        @yield_thread = yield_thread
+        freeze
+      end
+
+      def hash = 0
+
+      def eql?(other)
+        Fiber.scheduler&.kernel_sleep(0.01) if @yield_fiber
+        Thread.pass if @yield_thread
+        other.is_a?(YieldingEqualityKey) && rank == other.rank
+      end
+    end
+
+    class ReenteringEqualityKey
+      attr_reader :rank
+
+      def initialize(rank, map)
+        @rank = rank
+        @map = map
+        freeze
+      end
+
+      def hash = 0
+
+      def eql?(other)
+        @map.size
+        other.is_a?(ReenteringEqualityKey) && rank == other.rank
+      end
+    end
+
+    class MutatingEqualityKey
+      attr_reader :rank
+
+      def initialize(rank, map)
+        @rank = rank
+        @map = map
+        freeze
+      end
+
+      def hash = 0
+
+      def eql?(other)
+        @map.update(:callback) { 1 }
+        other.is_a?(MutatingEqualityKey) && rank == other.rank
+      end
+    end
+
+    class HostileIdentityValue
+      def initialize(identity_answer)
+        @identity_answer = identity_answer
+        freeze
+      end
+
+      def equal?(_other) = @identity_answer
+    end
+
     def teardown
       Fiber.set_scheduler(nil) if Fiber.respond_to?(:scheduler) && Fiber.scheduler
     end
@@ -42,6 +104,9 @@ module Farce
       assert_raises(ArgumentError) { Map.new(compare_by_identity: nil) }
       assert_raises(ArgumentError) { Map.new(compare_keys_by_identity: 1) }
       assert_raises(ArgumentError) { Map.new(compare_values_by_identity: :yes) }
+      assert_raises(ArgumentError) do
+        Map.new(compare_by_identity: HostileIdentityValue.new(true))
+      end
     end
 
     def test_get_set_key_and_delete
@@ -193,6 +258,188 @@ module Farce
       assert_operator scheduler.io_wait_calls, :>=, 1
     end
 
+    def test_simple_store_contention_does_not_block_a_fiber_scheduler
+      return unless RUBY_ENGINE == "ruby"
+
+      scheduler = Helpers::QueueTestScheduler.new
+      Fiber.set_scheduler(scheduler)
+      map = Map.new({ key: 1 })
+      events = []
+
+      Fiber.schedule do
+        events << :updating
+        map.update(:key) do |old|
+          Fiber.scheduler.kernel_sleep(0.01)
+          events << :update_finished
+          old + 1
+        end
+      end
+      Fiber.schedule do
+        events << :store_waiting
+        map[:key] = 3
+        events << :stored
+      end
+      Fiber.set_scheduler(nil)
+
+      assert_equal %i[updating store_waiting update_finished stored], events
+      assert_equal 3, map[:key]
+      assert_operator scheduler.io_wait_calls, :>=, 1
+    end
+
+    def test_key_equality_does_not_hold_native_mutex_across_fiber_yield
+      return unless RUBY_ENGINE == "ruby"
+      skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
+
+      scheduler = Helpers::QueueTestScheduler.new
+      Fiber.set_scheduler(scheduler)
+      map = Map.new
+      map[YieldingEqualityKey.new(1, yield_fiber: true)] = :one
+      events = []
+
+      Fiber.schedule do
+        events << :lookup
+        events << map[YieldingEqualityKey.new(2)]
+      end
+      Fiber.schedule do
+        events << :size
+        events << map.size
+      end
+      Fiber.set_scheduler(nil)
+
+      assert_equal [:lookup, :size, nil, 1], events
+      assert_operator scheduler.io_wait_calls, :>=, 1
+      assert_equal :one, map[YieldingEqualityKey.new(1)]
+    end
+
+    def test_key_equality_thread_pass_contention_stress
+      return unless RUBY_ENGINE == "ruby"
+
+      map = Map.new
+      map[YieldingEqualityKey.new(-1, yield_thread: true)] = -1
+      threads = 4.times.map do |worker|
+        Thread.new do
+          30.times do |index|
+            rank = (worker * 100) + index
+            map[YieldingEqualityKey.new(rank, yield_thread: true)] = rank
+          end
+        end
+      end
+
+      threads.each do |thread|
+        assert thread.join(10), "map comparator worker deadlocked"
+        thread.value
+      end
+
+      assert_equal 121, map.size
+    ensure
+      threads&.each { |thread| thread.kill if thread.alive? }
+    end
+
+    def test_recursive_key_equality_access_raises_without_poisoning_the_map
+      return unless RUBY_ENGINE == "ruby"
+
+      map = Map.new
+      map[ReenteringEqualityKey.new(1, map)] = :one
+
+      error = assert_raises(ThreadError) { map[ReenteringEqualityKey.new(1, map)] }
+      assert_match(/recursive map access/, error.message)
+      assert_equal 1, map.size
+      assert_equal :plain, map[:plain] = :plain
+    end
+
+    def test_key_equality_cannot_deadlock_by_starting_an_exclusive_update
+      map = Map.new
+      map[MutatingEqualityKey.new(1, map)] = :one
+      operation = Thread.new do
+        map[MutatingEqualityKey.new(2, map)] = :two
+      rescue ThreadError => e
+        e
+      end
+
+      assert operation.join(5), "recursive equality update deadlocked"
+      error = operation.value
+
+      assert_kind_of ThreadError, error
+      assert_match(/recursive map access/, error.message)
+      assert_equal 1, map.size
+      assert_equal :plain, map[:plain] = :plain
+    ensure
+      operation&.kill
+      operation&.join
+    end
+
+    def test_recursive_update_mutation_raises_and_releases_the_reservation
+      map = Map.new({ key: 1 })
+      error = assert_raises(ThreadError) do
+        map.update(:key) { map[:other] = 9 }
+      end
+
+      assert_match(/recursive map access during an update/, error.message)
+      assert_equal({ key: 1 }, map.each.to_h)
+      assert_equal 2, map.update(:key) { |old| old + 1 }
+    end
+
+    def test_unscheduled_sibling_fiber_cannot_wait_for_the_owners_update
+      map = Map.new({ key: 1 })
+      owner_thread = Thread.current
+      contender = Fiber.new do
+        next :different_thread unless Thread.current.equal?(owner_thread)
+
+        map[:other] = 9
+      rescue ThreadError => e
+        e
+      end
+      error = nil
+
+      assert_equal(2, map.update(:key) do |old|
+        error = contender.resume
+        old + 1
+      end)
+      if error == :different_thread
+        assert_equal({ key: 2 }, map.each.to_h)
+        assert_equal 3, map[:other] = 3
+        return
+      end
+
+      assert_kind_of ThreadError, error
+      assert_match(/another unscheduled fiber/, error.message)
+      assert_equal({ key: 2 }, map.each.to_h)
+      assert_equal 3, map[:other] = 3
+    end
+
+    def test_unscheduled_owner_check_bypasses_an_overridden_thread_equal
+      return if RUBY_ENGINE == "ruby"
+
+      map = Map.new({ key: 1 })
+      thread = Thread.current
+      singleton = thread.singleton_class
+      thread.define_singleton_method(:equal?) { |_other| false }
+      primitive_equal = BasicObject.instance_method(:equal?)
+      contender = Fiber.new do
+        next :different_thread unless primitive_equal.bind_call(Thread.current, thread)
+
+        map[:other] = 9
+      rescue ThreadError => e
+        e
+      end
+      error = nil
+
+      Timeout.timeout(2) do
+        map.update(:key) do |old|
+          error = contender.resume
+          old + 1
+        end
+      end
+
+      return assert_equal({ key: 2 }, map.each.to_h) if error == :different_thread
+
+      assert_kind_of ThreadError, error
+      assert_match(/another unscheduled fiber/, error.message)
+      assert_equal({ key: 2 }, map.each.to_h)
+    ensure
+      singleton&.send(:remove_method, :equal?)
+    end
+
     def test_wait_timeouts_and_deletion_to_nil
       map = Map.new({ key: 1 })
 
@@ -288,6 +535,20 @@ module Farce
       refute map.compare_and_set(:item, equal, :nope)
       assert map.compare_and_set(:item, original, :replacement)
       assert_predicate map, :compare_values_by_identity?
+    end
+
+    def test_identity_value_comparison_bypasses_an_overridden_equal
+      impostor = HostileIdentityValue.new(true)
+      probe = Object.new.freeze
+      map = Map.new({ item: impostor }, compare_values_by_identity: true)
+
+      refute map.compare_and_set(:item, probe, :replacement)
+      assert map.compare_and_set(:item, impostor, :replacement)
+
+      self_denial = HostileIdentityValue.new(false)
+      map = Map.new({ item: self_denial }, compare_values_by_identity: true)
+
+      assert map.compare_and_set(:item, self_denial, :replacement)
     end
 
     def test_identity_keys

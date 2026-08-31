@@ -20,6 +20,8 @@ end
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
+    EMPTY_ARRAY = [].freeze
+
     include Autoloads
     extend self
 

@@ -47,6 +47,7 @@ run                 = "bundle exec rake gem:all && bundle exec rake clean"
 wait_for            = ["install"]
 
 [tasks.docs]
+tools.ruby          = "4.0"
 description         = "Build documentation"
 run                 = "bundle exec yard --backtrace"
 sources             = ["lib/**/*", "*.md", "docs/**/*.md", ".yardopts"]

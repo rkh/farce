@@ -1,0 +1,39 @@
+# frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
+
+require "farce/engine/truffleruby/native/local_tree_map"
+
+module Farce
+  # @!visibility private
+  module Internal # :nodoc: all
+    # Synchronized native-TruffleRuby map. Storage and ordered operations come
+    # from LocalTreeMap; this subclass adds coordination and guarded mutability.
+    class TreeMap < LocalTreeMap
+      private
+
+      def synchronized? = true
+      def operation_lock = Lock.new
+      def ensure_mutation_still_allowed! = nil
+
+      def with_map_operation(state, mutation:)
+        _mutation = mutation
+        current = Fiber.current
+        raise ThreadError, "deadlock; recursive tree map access" if
+          primitive_identical?(state.operation_owner, current)
+
+        state.lock.synchronize do
+          without_async_interrupts { state.operation_owner = current }
+          yield
+        ensure
+          without_async_interrupts do
+            state.operation_owner = nil if primitive_identical?(state.operation_owner, current)
+          end
+        end
+      end
+    end
+
+    # Native TruffleRuby has no Ractor-sharing distinction.
+    ShareableTreeMap = TreeMap
+  end
+end

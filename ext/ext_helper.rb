@@ -4,7 +4,11 @@ module ExtHelper
   extend self
 
   def ext_path(ext_name = nil, engine: RUBY_ENGINE, version: RUBY_ENGINE_VERSION, lib: false)
-    dir = "#{"lib/" if lib}farce/engine/#{engine}"
+    # Build explicitly because Ruby 4 freezes interpolated literals under
+    # `frozen_string_literal`, while this path is assembled incrementally.
+    dir = String.new
+    dir << "lib/" if lib
+    dir << "farce/engine/" << engine
 
     case RUBY_ENGINE
     when "ruby"        then dir << "/#{version[/^\d+\.\d+/]}"

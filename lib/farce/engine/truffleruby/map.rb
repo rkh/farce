@@ -6,6 +6,10 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     class Map < TruffleRuby::ConcurrentMap
+      BASIC_OBJECT_EQUAL_METHOD = BasicObject.instance_method(:equal?)
+      INTERRUPT_MASK = { Exception => :never }.freeze
+      private_constant :BASIC_OBJECT_EQUAL_METHOD, :INTERRUPT_MASK
+
       alias concurrent_get []
       alias concurrent_store []=
       alias concurrent_clear clear
@@ -41,8 +45,12 @@ module Farce
         @state_mutex   = Mutex.new
         @state_signal  = Signal.new
         @change_signal = Signal.new
-        @active        = 0
+        @active_owner_fiber  = nil
+        @active_owner_thread = nil
+        @active_owners = nil
         @exclusive     = false
+        @exclusive_fiber  = nil
+        @exclusive_thread = nil
         initial_mapping&.each { |key, value| concurrent_store(wrap_key(key), value) }
       end
 
@@ -316,7 +324,7 @@ module Farce
       def delete_pair_by_identity(key, expected)
         _, result = with_exclusive_update(nil) do
           wrapped = wrap_key(key)
-          next false unless concurrent_key?(wrapped) && concurrent_get(wrapped).equal?(expected)
+          next false unless concurrent_key?(wrapped) && identical?(concurrent_get(wrapped), expected)
 
           concurrent_delete(wrapped)
           changed!
@@ -328,7 +336,7 @@ module Farce
       def replace_pair_by_identity(key, expected, replacement)
         _, result = with_exclusive_update(nil) do
           wrapped = wrap_key(key)
-          next false unless concurrent_key?(wrapped) && concurrent_get(wrapped).equal?(expected)
+          next false unless concurrent_key?(wrapped) && identical?(concurrent_get(wrapped), expected)
 
           concurrent_store(wrapped, replacement)
           changed!
@@ -338,24 +346,30 @@ module Farce
       end
 
       def validate_boolean(value, name)
-        return if value.equal?(true) || value.equal?(false)
+        return if identical?(value, true) || identical?(value, false)
         raise ArgumentError, "#{name} must be true or false"
       end
 
       def with_operation(deadline)
-        entered = enter_operation(deadline)
-        return [false, nil] unless entered
+        entered = false
+        available = enter_operation(deadline) { entered = true }
+        return [false, nil] unless available
         [true, yield]
       ensure
-        leave_operation if entered
+        Thread.handle_interrupt(INTERRUPT_MASK) { leave_operation } if entered
       end
 
       def enter_operation(deadline)
         while true # rubocop:disable Style/InfiniteLoop
           generation = @state_signal.generation
           entered = @state_mutex.synchronize do
-            next false if @exclusive
-            @active += 1
+            if @exclusive
+              reject_exclusive_wait!
+              next false
+            end
+            reject_active_operation_reentry!
+            yield
+            register_active_operation
             true
           end
           return true if entered
@@ -365,26 +379,38 @@ module Farce
 
       def leave_operation
         notify = @state_mutex.synchronize do
-          @active -= 1
-          @active.zero?
+          removed = unregister_active_operation
+          removed && !active_operation?
         end
         @state_signal.broadcast if notify
       end
 
       def with_exclusive_update(deadline)
-        entered = enter_exclusive_update(deadline)
-        return [false, nil] unless entered
+        entered = false
+        available = enter_exclusive_update(deadline) { entered = true }
+        return [false, nil] unless available
         [true, yield]
       ensure
-        leave_exclusive_update if entered
+        Thread.handle_interrupt(INTERRUPT_MASK) { leave_exclusive_update } if entered
       end
 
       def enter_exclusive_update(deadline)
         while true # rubocop:disable Style/InfiniteLoop
           generation = @state_signal.generation
           entered = @state_mutex.synchronize do
-            next false if @exclusive || !@active.zero?
-            @exclusive = true
+            if @exclusive
+              reject_exclusive_wait!
+              next false
+            end
+            if active_operation?
+              reject_active_wait!
+              next false
+            end
+            yield
+            @exclusive_fiber  = Fiber.current
+            @exclusive_thread = Thread.current
+            @exclusive        = true
+            true
           end
           return true if entered
           return false unless wait_for_signal(@state_signal, generation, deadline)
@@ -392,8 +418,15 @@ module Farce
       end
 
       def leave_exclusive_update
-        @state_mutex.synchronize { @exclusive = false }
-        @state_signal.broadcast
+        released = @state_mutex.synchronize do
+          next false unless identical?(@exclusive_fiber, Fiber.current)
+
+          was_exclusive = @exclusive
+          @exclusive = false
+          @exclusive_fiber = @exclusive_thread = nil
+          was_exclusive
+        end
+        @state_signal.broadcast if released
       end
 
       def changed! = @change_signal.broadcast
@@ -404,6 +437,7 @@ module Farce
           current = self[key]
           ready = non_nil ? !current.nil? : !values_equal?(current, expected)
           return current if ready
+          @state_mutex.synchronize { reject_exclusive_wait! if @exclusive }
           return fallback&.call unless wait_for_signal(@change_signal, generation, deadline)
         end
       end
@@ -426,9 +460,81 @@ module Farce
         Clock.now + timeout
       end
 
-      def values_equal?(left, right)
-        compare_values_by_identity? ? left.equal?(right) : left == right
+      def reject_exclusive_wait!
+        raise ThreadError, "deadlock; recursive map access during an update" if
+          identical?(@exclusive_fiber, Fiber.current)
+
+        scheduler = Fiber.scheduler if Fiber.respond_to?(:scheduler)
+        return unless identical?(@exclusive_thread, Thread.current) && !scheduler
+
+        raise ThreadError, "deadlock; map update is owned by another unscheduled fiber"
       end
+
+      def reject_active_operation_reentry!
+        return unless active_operation_owned_by?(Fiber.current)
+
+        raise ThreadError, "deadlock; recursive map access during an operation"
+      end
+
+      def reject_active_wait!
+        reject_active_operation_reentry!
+
+        scheduler = Fiber.scheduler if Fiber.respond_to?(:scheduler)
+        return if scheduler
+        return unless active_operation_on_thread?(Thread.current)
+
+        raise ThreadError, "deadlock; map operation is owned by another unscheduled fiber"
+      end
+
+      def register_active_operation
+        fiber = Fiber.current
+        thread = Thread.current
+        if @active_owners
+          @active_owners[fiber] = thread
+        elsif @active_owner_fiber
+          owners = {}.compare_by_identity
+          owners[@active_owner_fiber] = @active_owner_thread
+          owners[fiber] = thread
+          @active_owners = owners
+          @active_owner_fiber = @active_owner_thread = nil
+        else
+          @active_owner_thread = thread
+          @active_owner_fiber = fiber
+        end
+      end
+
+      def unregister_active_operation
+        if @active_owners
+          removed = @active_owners.delete(Fiber.current)
+          if @active_owners.one?
+            @active_owner_fiber, @active_owner_thread = @active_owners.first
+            @active_owners = nil
+          end
+          removed
+        elsif identical?(@active_owner_fiber, Fiber.current)
+          removed = @active_owner_thread
+          @active_owner_fiber = @active_owner_thread = nil
+          removed
+        end
+      end
+
+      def active_operation? = !@active_owner_fiber.nil? || !@active_owners.nil?
+
+      def active_operation_owned_by?(fiber)
+        @active_owners ? @active_owners.key?(fiber) : identical?(@active_owner_fiber, fiber)
+      end
+
+      def active_operation_on_thread?(thread)
+        return identical?(@active_owner_thread, thread) unless @active_owners
+
+        @active_owners.each_value.any? { |owner| identical?(owner, thread) }
+      end
+
+      def values_equal?(left, right)
+        compare_values_by_identity? ? identical?(left, right) : left == right
+      end
+
+      def identical?(left, right) = BASIC_OBJECT_EQUAL_METHOD.bind_call(left, right)
 
       private :concurrent_get, :concurrent_store, :concurrent_clear, :concurrent_compute,
         :concurrent_compute_if_absent, :concurrent_compute_if_present, :concurrent_delete,

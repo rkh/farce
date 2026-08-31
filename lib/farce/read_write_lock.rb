@@ -242,9 +242,10 @@ module Farce
       !writer_locked?(current) && waiting_writers(current).zero?
     end
 
-    def reader_count(current) = current & READER_MASK
-    def waiting_writers(current) = current / WAITER_UNIT
-    def writer_locked?(current) = current.anybits?(WRITER_BIT)
-    def upgrader?(current) = current.anybits?(UPGRADER_BIT)
+    def reader_count(current)         = current & READER_MASK
+    def waiting_writers(current)      = current / WAITER_UNIT
+    def writer_locked?(current)       = current.anybits?(WRITER_BIT)
+    def upgrader?(current)            = current.anybits?(UPGRADER_BIT)
+    def instance_variables_to_inspect = Internal::EMPTY_ARRAY
   end
 end

@@ -38,9 +38,6 @@ module Farce
         super()
       end
 
-      # @return [String] Returns a string representation of the counter.
-      def inspect = "#<#{self.class.name} #{value.inspect}>"
-
       # @overload add(by = 1)
       #   (see #increment)
       def add(...) = increment(...)
@@ -56,6 +53,13 @@ module Farce
       methods += %i[+ - / * ** <=> coerce rationalize to_i to_int to_f to_c to_r to_s]
       methods.uniq!
       Internal.delegate(self, :value, *methods)
+
+      # @return [String] Returns a string representation of the counter.
+      def inspect = "#<#{self.class.name} #{value.inspect}>"
+
+      # @api private
+      # @return [void]
+      def pretty_print(pp) = pp.group(1, "#<#{self.class.name} ", ">") { pp.pp(value) }
 
       private
 

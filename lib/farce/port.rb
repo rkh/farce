@@ -9,6 +9,8 @@ module Farce
   #
   # `Ractor::Port` subclass with additional features.
   class Port < Internal::Port
+    include Shareable
+
     # {Farce::Ractor::Port#send Sends} a message over the port.
     #
     # @overload send(message)

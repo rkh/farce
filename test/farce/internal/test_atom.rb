@@ -240,6 +240,46 @@ module Farce
       assert_equal :value, atom.wait_until_non_nil(timeout: 0)
     end
 
+    def test_recursive_update_access_raises_and_releases_the_reservation
+      atom = Atom.new(1)
+
+      error = assert_raises(ThreadError) do
+        atom.update { atom.store(9) }
+      end
+
+      assert_match(/recursive atom access during an update/, error.message)
+      assert_equal 1, atom.value
+      assert_equal(2, atom.update { |old| old + 1 })
+    end
+
+    def test_unscheduled_sibling_fiber_cannot_wait_for_the_owners_update
+      atom = Atom.new(1)
+      owner_thread = Thread.current
+      contender = Fiber.new do
+        next :different_thread unless Thread.current.equal?(owner_thread)
+
+        atom.store(9)
+      rescue ThreadError => e
+        e
+      end
+      error = nil
+
+      assert_equal(2, atom.update do |old|
+        error = contender.resume
+        old + 1
+      end)
+      if error == :different_thread
+        assert_equal 2, atom.value
+        assert_equal 3, atom.store(3)
+        return
+      end
+
+      assert_kind_of ThreadError, error
+      assert_match(/another unscheduled fiber/, error.message)
+      assert_equal 2, atom.value
+      assert_equal 3, atom.store(3)
+    end
+
     def test_upsert_rejects_an_unshareable_block_result_and_recovers
       atom = Atom.new(1)
 
@@ -335,6 +375,36 @@ module Farce
       Fiber.set_scheduler(nil)
 
       assert_equal %i[wait_started store_started value], events
+      assert_operator scheduler.io_wait_calls, :>=, 1
+    ensure
+      Fiber.set_scheduler(nil) if scheduler && Fiber.scheduler
+    end
+
+    def test_value_setter_contention_does_not_block_a_fiber_scheduler
+      return unless RUBY_ENGINE == "ruby"
+
+      scheduler = Helpers::QueueTestScheduler.new
+      Fiber.set_scheduler(scheduler)
+      atom = Atom.new(1)
+      events = []
+
+      Fiber.schedule do
+        events << :updating
+        atom.update do |old|
+          Fiber.scheduler.kernel_sleep(0.01)
+          events << :update_finished
+          old + 1
+        end
+      end
+      Fiber.schedule do
+        events << :store_waiting
+        atom.value = 3
+        events << :stored
+      end
+      Fiber.set_scheduler(nil)
+
+      assert_equal %i[updating store_waiting update_finished stored], events
+      assert_equal 3, atom.value
       assert_operator scheduler.io_wait_calls, :>=, 1
     ensure
       Fiber.set_scheduler(nil) if scheduler && Fiber.scheduler

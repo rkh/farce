@@ -20,3 +20,5 @@ module Farce
     require_relative "shared/weak_map" unless const_defined?(:NATIVE_WEAK_MAPS, false) && NATIVE_WEAK_MAPS
   end
 end
+
+require "farce/engine/shared/priority_queue"

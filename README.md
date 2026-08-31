@@ -86,6 +86,13 @@ Both the Ruby core library, and other libraries, like the very popular [concurre
       <td>❌ <b>not supported</b></td>
     </tr>
     <tr>
+      <td><a href="https://github.com/socketry/async">async</a></td>
+      <td>Promise, Condition, Queue, …</td>
+      <td>✅ supported</td>
+      <td>✅ supported</td>
+      <td>❌ <b>not supported</b></td>
+    </tr>
+    <tr>
       <td rowspan="3"><a href="https://github.com/mperham/ratomic">ratomic</a></td>
       <td>Pool</td>
       <td>⚠️ CRuby only</td>
@@ -112,10 +119,13 @@ Both the Ruby core library, and other libraries, like the very popular [concurre
       <td>💣 <b>breaks isolation</b></td>
     </tr>
     <tr>
-      <td><a href="https://github.com/socketry/async">async</a></td>
-      <td>Promise, Condition, Queue, …</td>
-      <td>✅ supported</td>
-      <td>✅ supported</td>
+      <td>
+        <a href="https://github.com/hamstergem/hamster">hamster</a> /
+        <a href="https://github.com/immutable-ruby/immutable-ruby">immutable</a>
+      </td>
+      <td>Hash, Vector, Set, List, …</td>
+      <td>⚠️ Main Ractor only</td>
+      <td>⚠️ Main Ractor only</td>
       <td>❌ <b>not supported</b></td>
     </tr>
   </tbody>
@@ -272,6 +282,6 @@ need to specifically load any particular file.
 
 ## Housekeeping
 
-Farce follows [Semantic Versioning](https://semver.org/) and [the RubyGems versioning policy](https://guides.rubygems.org/patterns/#versioning). It is released under the [MIT License](MIT-LICENSE).
+Farce follows [Semantic Versioning](https://semver.org/) and [the RubyGems versioning policy](https://guides.rubygems.org/patterns/#versioning). Farce's original code is released under the [MIT License](MIT-LICENSE). Native builds also contain Kazlib 1.20-derived `dict.c` and `dict.h`; their original permissive license and copyright notice are retained in those files. The native gem therefore declares `MIT` and `LicenseRef-Kazlib-1.20`, while the pure-Java gem declares only `MIT` because it does not ship Kazlib.
 
 Built with love in Berlin, by Konstantin Haase.

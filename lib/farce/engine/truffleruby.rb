@@ -3,22 +3,23 @@
 # warn_indent: true
 
 require "farce/engine/shared"
+require "farce/engine/jvm" unless TruffleRuby.native?
 
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
+    autoload :Lock, "farce/engine/truffleruby/lock"
+
     if TruffleRuby.native?
       path = "farce/engine/truffleruby/native"
-      autoload :RBTree,      "#{path}/rbtree"
-      autoload :MultiRBTree, "#{path}/rbtree"
-      autoload :TreeMap,     "farce/engine/ruby/shared/tree_map"
-    else
-      path = "farce/engine/truffleruby/graalvm"
+      autoload :LocalTreeMap, "#{path}/local_tree_map"
+      autoload :PriorityQueue, "#{path}/priority_queue"
+      autoload :ShareableTreeMap, "#{path}/tree_map"
       autoload :TreeMap, "#{path}/tree_map"
+      autoload :Counter, "#{path}/counter"
+      autoload :Flag, "#{path}/flag"
     end
 
-    autoload :Counter, "#{path}/counter"
-    autoload :Flag,    "#{path}/flag"
     autoload :Map,     "farce/engine/truffleruby/map"
     autoload :Signal,  "farce/engine/truffleruby/signal"
 

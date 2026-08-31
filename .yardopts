@@ -1,6 +1,9 @@
 --charset utf-8
+-e ./misc/yard-patch.rb
 --no-cache
 -o yardoc
+-m markdown
+-M commonmarker
 --default-return BasicObject
 --hide-void-return
 --hide-api private

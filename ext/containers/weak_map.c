@@ -2,6 +2,7 @@
 
 #ifdef RC_HAVE_NATIVE_WEAK_MAPS
 
+#include "ruby/fiber/scheduler.h"
 #include "ruby/io.h"
 
 #include <errno.h>
@@ -55,7 +56,12 @@ typedef struct {
     bool compare_values_by_identity;
     bool weak_keys;
     bool weak_values;
+    bool comparing;
+    VALUE comparing_owner;
+    pthread_t comparing_thread;
     bool updating;
+    VALUE updating_fiber;
+    VALUE updating_thread;
     bool initialized;
 } weak_map_t;
 
@@ -139,6 +145,9 @@ static void
 weak_map_mark(void *pointer)
 {
     weak_map_t *map = pointer;
+    rb_gc_mark_movable(map->comparing_owner);
+    rb_gc_mark_movable(map->updating_fiber);
+    rb_gc_mark_movable(map->updating_thread);
     if (!map->slots) return;
 
     for (size_t index = 0; index < map->capacity; index++) {
@@ -153,6 +162,9 @@ static void
 weak_map_compact(void *pointer)
 {
     weak_map_t *map = pointer;
+    map->comparing_owner = rb_gc_location(map->comparing_owner);
+    map->updating_fiber = rb_gc_location(map->updating_fiber);
+    map->updating_thread = rb_gc_location(map->updating_thread);
     if (!map->slots) return;
 
     for (size_t index = 0; index < map->capacity; index++) {
@@ -243,7 +255,11 @@ weak_map_allocate(VALUE klass)
     map->compare_values_by_identity = false;
     map->weak_keys = klass == cWeakKeyMap || klass == cWeakMap;
     map->weak_values = klass == cWeakValueMap || klass == cWeakMap;
+    map->comparing = false;
+    map->comparing_owner = Qnil;
     map->updating = false;
+    map->updating_fiber = Qnil;
+    map->updating_thread = Qnil;
     map->initialized = false;
     return object;
 }
@@ -335,12 +351,77 @@ weak_map_wait_once(weak_map_t *map, uint64_t generation, weak_map_timeout_t *tim
     ));
 }
 
+static void
+weak_map_lock_state(weak_map_t *map)
+{
+    weak_map_timeout_t timeout = {.finite = false, .deadline = 0};
+
+    for (;;) {
+        pthread_mutex_lock(&map->lock);
+        if (!map->comparing) return;
+
+        VALUE current = rb_fiber_current();
+        if (map->comparing_owner == current) {
+            pthread_mutex_unlock(&map->lock);
+            rb_raise(rb_eThreadError, "recursive weak-map access from key equality");
+        }
+        if (pthread_equal(map->comparing_thread, pthread_self()) &&
+            NIL_P(rb_fiber_scheduler_current())) {
+            pthread_mutex_unlock(&map->lock);
+            rb_raise(
+                rb_eThreadError,
+                "deadlock; weak-map key equality is owned by another unscheduled fiber"
+            );
+        }
+
+        uint64_t generation = map->generation;
+        pthread_mutex_unlock(&map->lock);
+        (void)weak_map_wait_once(map, generation, &timeout);
+    }
+}
+
+static void
+weak_map_check_update_wait_locked(weak_map_t *map)
+{
+    VALUE current_fiber = rb_fiber_current();
+
+    if (map->updating_fiber == current_fiber) {
+        pthread_mutex_unlock(&map->lock);
+        rb_raise(rb_eThreadError, "deadlock; recursive weak-map access during an update");
+    }
+    if (map->updating_thread == rb_thread_current() &&
+        NIL_P(rb_fiber_scheduler_current())) {
+        pthread_mutex_unlock(&map->lock);
+        rb_raise(
+            rb_eThreadError,
+            "deadlock; weak-map update is owned by another unscheduled fiber"
+        );
+    }
+}
+
+static void
+weak_map_begin_update_locked(weak_map_t *map)
+{
+    map->updating = true;
+    map->updating_fiber = rb_fiber_current();
+    map->updating_thread = rb_thread_current();
+}
+
+static void
+weak_map_finish_update_locked(weak_map_t *map)
+{
+    map->updating = false;
+    map->updating_fiber = Qnil;
+    map->updating_thread = Qnil;
+}
+
 static bool
 weak_map_lock_for_update_with_timeout(weak_map_t *map, weak_map_timeout_t *timeout)
 {
     for (;;) {
-        pthread_mutex_lock(&map->lock);
+        weak_map_lock_state(map);
         if (!map->updating) return true;
+        weak_map_check_update_wait_locked(map);
         uint64_t generation = map->generation;
         pthread_mutex_unlock(&map->lock);
         if (!weak_map_wait_once(map, generation, timeout)) return false;
@@ -356,11 +437,15 @@ weak_map_timeout_result(void)
 static void
 weak_map_lock_for_update(weak_map_t *map)
 {
+    weak_map_timeout_t timeout = {.finite = false, .deadline = 0};
+
     for (;;) {
-        pthread_mutex_lock(&map->lock);
+        weak_map_lock_state(map);
         if (!map->updating) return;
+        weak_map_check_update_wait_locked(map);
+        uint64_t generation = map->generation;
         pthread_mutex_unlock(&map->lock);
-        containers_brief_wait();
+        (void)weak_map_wait_once(map, generation, &timeout);
     }
 }
 
@@ -386,13 +471,27 @@ weak_map_eql_protected(VALUE opaque)
 }
 
 static bool
-weak_map_keys_equal(weak_map_t *map, VALUE left, VALUE right)
+weak_map_keys_equal(weak_map_t *map, VALUE left, VALUE right, bool *stale)
 {
+    *stale = false;
     if (map->compare_keys_by_identity) return left == right;
 
     weak_map_eql_arguments_t arguments = {.left = left, .right = right};
+    uint64_t generation = map->generation;
     int state = 0;
+
+    map->comparing = true;
+    map->comparing_owner = rb_fiber_current();
+    map->comparing_thread = pthread_self();
+    pthread_mutex_unlock(&map->lock);
+
     VALUE result = rb_protect(weak_map_eql_protected, (VALUE)&arguments, &state);
+
+    pthread_mutex_lock(&map->lock);
+    *stale = map->generation != generation;
+    map->comparing = false;
+    map->comparing_owner = Qnil;
+    weak_map_notify_waiters_locked(map);
     if (state) {
         pthread_mutex_unlock(&map->lock);
         rb_jump_tag(state);
@@ -403,26 +502,42 @@ weak_map_keys_equal(weak_map_t *map, VALUE left, VALUE right)
 static size_t
 weak_map_find_slot(weak_map_t *map, VALUE key, st_index_t hash, bool *found)
 {
-    size_t mask = map->capacity - 1;
-    size_t first_tombstone = SIZE_MAX;
-    for (size_t offset = 0; offset < map->capacity; offset++) {
-        size_t index = ((size_t)hash + offset) & mask;
-        weak_map_slot_t *slot = &map->slots[index];
-        if (slot->state == WEAK_MAP_EMPTY) {
-            *found = false;
-            return first_tombstone == SIZE_MAX ? index : first_tombstone;
+    for (;;) {
+        size_t mask = map->capacity - 1;
+        size_t first_tombstone = SIZE_MAX;
+        bool restart = false;
+
+        for (size_t offset = 0; offset < map->capacity; offset++) {
+            size_t index = ((size_t)hash + offset) & mask;
+            weak_map_slot_t *slot = &map->slots[index];
+
+            if (slot->state == WEAK_MAP_EMPTY) {
+                *found = false;
+                return first_tombstone == SIZE_MAX ? index : first_tombstone;
+            }
+            if (slot->state == WEAK_MAP_TOMBSTONE) {
+                if (first_tombstone == SIZE_MAX) first_tombstone = index;
+                continue;
+            }
+            if (slot->hash == hash) {
+                bool stale;
+                bool equal = weak_map_keys_equal(map, slot->key, key, &stale);
+
+                if (stale) {
+                    restart = true;
+                    break;
+                }
+                if (equal) {
+                    *found = true;
+                    return index;
+                }
+            }
         }
-        if (slot->state == WEAK_MAP_TOMBSTONE) {
-            if (first_tombstone == SIZE_MAX) first_tombstone = index;
-            continue;
-        }
-        if (slot->hash == hash && weak_map_keys_equal(map, slot->key, key)) {
-            *found = true;
-            return index;
-        }
+
+        if (restart) continue;
+        *found = false;
+        return first_tombstone;
     }
-    *found = false;
-    return first_tombstone;
 }
 
 static void
@@ -491,7 +606,7 @@ weak_map_initialize_entry(VALUE key, VALUE value, VALUE opaque)
     containers_check_shareable(key);
     containers_check_shareable(value);
     st_index_t hash = weak_map_key_hash(context->map, key);
-    pthread_mutex_lock(&context->map->lock);
+    weak_map_lock_state(context->map);
     weak_map_store_locked(context->self, context->map, key, value, hash);
     pthread_mutex_unlock(&context->map->lock);
     return ST_CONTINUE;
@@ -546,7 +661,7 @@ weak_map_get(VALUE self, VALUE key)
     st_index_t hash = weak_map_key_hash(map, key);
     bool found;
     VALUE result = Qnil;
-    pthread_mutex_lock(&map->lock);
+    weak_map_lock_state(map);
     size_t index = weak_map_find_slot(map, key, hash, &found);
     if (found) result = map->slots[index].value;
     pthread_mutex_unlock(&map->lock);
@@ -571,7 +686,7 @@ weak_map_fetch(int argc, VALUE *argv, VALUE self)
     st_index_t hash = weak_map_key_hash(map, key);
     bool found;
     VALUE result = Qnil;
-    pthread_mutex_lock(&map->lock);
+    weak_map_lock_state(map);
     size_t index = weak_map_find_slot(map, key, hash, &found);
     if (found) result = map->slots[index].value;
     pthread_mutex_unlock(&map->lock);
@@ -603,7 +718,7 @@ weak_map_key_p(VALUE self, VALUE key)
     containers_check_shareable(key);
     st_index_t hash = weak_map_key_hash(map, key);
     bool found;
-    pthread_mutex_lock(&map->lock);
+    weak_map_lock_state(map);
     (void)weak_map_find_slot(map, key, hash, &found);
     pthread_mutex_unlock(&map->lock);
     return found ? Qtrue : Qfalse;
@@ -617,7 +732,7 @@ weak_map_getkey(VALUE self, VALUE key)
     st_index_t hash = weak_map_key_hash(map, key);
     bool found;
     VALUE result = Qnil;
-    pthread_mutex_lock(&map->lock);
+    weak_map_lock_state(map);
     size_t index = weak_map_find_slot(map, key, hash, &found);
     if (found) result = map->compare_keys_by_identity ? key : map->slots[index].key;
     pthread_mutex_unlock(&map->lock);
@@ -684,8 +799,8 @@ weak_map_operation_cleanup(VALUE opaque)
 {
     weak_map_operation_t *operation = (weak_map_operation_t *)opaque;
     if (!operation->complete) {
-        pthread_mutex_lock(&operation->map->lock);
-        operation->map->updating = false;
+        weak_map_lock_state(operation->map);
+        weak_map_finish_update_locked(operation->map);
         weak_map_notify_waiters_locked(operation->map);
         pthread_mutex_unlock(&operation->map->lock);
     }
@@ -698,9 +813,9 @@ weak_map_store_body(VALUE opaque)
     weak_map_operation_t *operation = (weak_map_operation_t *)opaque;
     VALUE result = rb_yield_values(0);
     containers_check_shareable(result);
-    pthread_mutex_lock(&operation->map->lock);
+    weak_map_lock_state(operation->map);
     weak_map_store_locked(operation->self, operation->map, operation->key, result, operation->hash);
-    operation->map->updating = false;
+    weak_map_finish_update_locked(operation->map);
     pthread_mutex_unlock(&operation->map->lock);
     operation->complete = true;
     return result;
@@ -738,7 +853,7 @@ weak_map_store_if_absent(int argc, VALUE *argv, VALUE self)
         pthread_mutex_unlock(&map->lock);
         return value;
     }
-    map->updating = true;
+    weak_map_begin_update_locked(map);
     pthread_mutex_unlock(&map->lock);
     return rb_ensure(weak_map_store_body, (VALUE)&operation, weak_map_operation_cleanup, (VALUE)&operation);
 }
@@ -751,7 +866,7 @@ weak_map_cas_body(VALUE opaque)
         ? operation->current == operation->argument
         : RTEST(rb_equal(operation->current, operation->argument));
 
-    pthread_mutex_lock(&operation->map->lock);
+    weak_map_lock_state(operation->map);
     if (matches) {
         weak_map_store_locked(
             operation->self,
@@ -761,7 +876,7 @@ weak_map_cas_body(VALUE opaque)
             operation->hash
         );
     }
-    operation->map->updating = false;
+    weak_map_finish_update_locked(operation->map);
     if (!matches) weak_map_notify_waiters_locked(operation->map);
     pthread_mutex_unlock(&operation->map->lock);
     operation->complete = true;
@@ -806,7 +921,7 @@ weak_map_compare_and_set(int argc, VALUE *argv, VALUE self)
         return Qfalse;
     }
     operation.current = map->slots[index].value;
-    map->updating = true;
+    weak_map_begin_update_locked(map);
     pthread_mutex_unlock(&map->lock);
     return rb_ensure(weak_map_cas_body, (VALUE)&operation, weak_map_operation_cleanup, (VALUE)&operation);
 }
@@ -817,9 +932,9 @@ weak_map_upsert_body(VALUE opaque)
     weak_map_operation_t *operation = (weak_map_operation_t *)opaque;
     VALUE result = rb_yield(operation->current);
     containers_check_shareable(result);
-    pthread_mutex_lock(&operation->map->lock);
+    weak_map_lock_state(operation->map);
     weak_map_store_locked(operation->self, operation->map, operation->key, result, operation->hash);
-    operation->map->updating = false;
+    weak_map_finish_update_locked(operation->map);
     pthread_mutex_unlock(&operation->map->lock);
     operation->complete = true;
     return result;
@@ -860,7 +975,7 @@ weak_map_upsert(int argc, VALUE *argv, VALUE self)
         return initial;
     }
     operation.current = map->slots[index].value;
-    map->updating = true;
+    weak_map_begin_update_locked(map);
     pthread_mutex_unlock(&map->lock);
     return rb_ensure(weak_map_upsert_body, (VALUE)&operation, weak_map_operation_cleanup, (VALUE)&operation);
 }
@@ -894,7 +1009,7 @@ weak_map_size(VALUE self)
 {
     weak_map_t *map = get_weak_map(self);
     size_t size;
-    pthread_mutex_lock(&map->lock);
+    weak_map_lock_state(map);
     size = map->size;
     pthread_mutex_unlock(&map->lock);
     return SIZET2NUM(size);
@@ -913,12 +1028,12 @@ weak_map_entries_snapshot(weak_map_t *map)
 {
     for (;;) {
         size_t capacity;
-        pthread_mutex_lock(&map->lock);
+        weak_map_lock_state(map);
         capacity = map->size;
         pthread_mutex_unlock(&map->lock);
 
         VALUE entries = rb_ary_new_capa((long)(capacity * 2));
-        pthread_mutex_lock(&map->lock);
+        weak_map_lock_state(map);
         if (map->size > capacity) {
             pthread_mutex_unlock(&map->lock);
             continue;
@@ -1093,7 +1208,7 @@ weak_map_wait_for_value(int argc, VALUE *argv, VALUE self, bool non_nil)
         bool found;
         VALUE current = Qnil;
         uint64_t generation;
-        pthread_mutex_lock(&map->lock);
+        weak_map_lock_state(map);
         size_t index = weak_map_find_slot(map, key, hash, &found);
         if (found) current = map->slots[index].value;
         generation = map->generation;
@@ -1101,6 +1216,14 @@ weak_map_wait_for_value(int argc, VALUE *argv, VALUE self, bool non_nil)
 
         bool ready = non_nil ? !NIL_P(current) : !weak_map_values_equal(map, current, expected);
         if (ready) return current;
+
+        weak_map_lock_state(map);
+        if (map->generation != generation) {
+            pthread_mutex_unlock(&map->lock);
+            continue;
+        }
+        if (map->updating) weak_map_check_update_wait_locked(map);
+        pthread_mutex_unlock(&map->lock);
         if (!weak_map_wait_once(map, generation, &timeout)) return weak_map_timeout_result();
     }
 }
@@ -1145,7 +1268,7 @@ weak_map_update(int argc, VALUE *argv, VALUE self)
     bool found;
     size_t index = weak_map_find_slot(map, key, operation.hash, &found);
     operation.current = found ? map->slots[index].value : Qnil;
-    map->updating = true;
+    weak_map_begin_update_locked(map);
     pthread_mutex_unlock(&map->lock);
     return rb_ensure(
         weak_map_upsert_body,

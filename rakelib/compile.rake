@@ -9,9 +9,8 @@ RakeCompilerDock.set_ruby_cc_version(gemspec.required_ruby_version)
 desc "Compile all extensions"
 task :compile # dummy task for JRUBY
 
-if RUBY_ENGINE != "jruby" && (RUBY_ENGINE != "truffleruby" || TruffleRuby.native?)
-  extensions = RUBY_ENGINE == "ruby" ? "*" : "rbtree"
-  Dir.glob("ext/#{extensions}/extconf.rb").each do |extconf|
+if RUBY_ENGINE == "ruby"
+  gemspec.extensions.each do |extconf|
     ext_dir  = File.dirname(extconf)
     ext_name = File.basename(ext_dir)
 

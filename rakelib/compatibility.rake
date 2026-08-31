@@ -11,32 +11,30 @@ task :compatibility do
   names = { Thread => "Thread.join" }
 
   classes = [
-    [Thread, -> { it.wakeup }, -> { it.value }, -> { Thread.new { Thread.pass } }],
-    [Thread::Queue, -> { it.push(:item) }, -> { it.pop }],
-    [Thread::SizedQueue, -> { it.push(:item) }, -> { it.pop }, -> { Thread::SizedQueue.new(1) }],
-    [ConditionVariable, -> { it.signal }, -> c { m = Mutex.new and m.synchronize { c.wait(m) } }]
+    [Thread, lambda(&:wakeup), lambda(&:value), -> { Thread.new { Thread.pass } }],
+    [Thread::Queue, -> { it.push(:item) }, lambda(&:pop)],
+    [Thread::SizedQueue, -> { it.push(:item) }, lambda(&:pop), -> { Thread::SizedQueue.new(1) }],
+    [ConditionVariable, lambda(&:signal), ->(c) { m = Mutex.new and m.synchronize { c.wait(m) } }]
   ]
 
   if defined?(Ractor)
     names[Ractor] = "Ractor.join / Ractor.take"
     if Ractor.method_defined?(:join)
-      classes << [Ractor, -> { it.send(:item) }, -> { it.join }, -> { Ractor.new { receive } }]
+      classes << [Ractor, -> { it.send(:item) }, lambda(&:join), -> { Ractor.new { receive } }]
     elsif Ractor.method_defined?(:take)
-      classes << [Ractor, -> { it.send(:item) }, -> { it.take }, -> { Ractor.new { receive } }]
+      classes << [Ractor, -> { it.send(:item) }, lambda(&:take), -> { Ractor.new { receive } }]
     end
   end
 
-  if defined?(Ractor::Port)
-    classes << [Ractor::Port, -> { it.send(:item) }, -> { it.receive }]
-  end
+  classes << [Ractor::Port, -> { it.send(:item) }, lambda(&:receive)] if defined?(Ractor::Port)
 
   begin
     require "concurrent"
-    classes << [Concurrent::IVar, -> { it.set(:item) }, -> { it.value }]
+    classes << [Concurrent::IVar, -> { it.set(:item) }, lambda(&:value)]
     classes << [Concurrent::Exchanger, -> { it.exchange(:item) }, -> { it.exchange(:item) }]
     classes << [
       Concurrent::Promises::ResolvableFuture,
-      -> { it.fulfill(:item) }, -> { it.value },
+      -> { it.fulfill(:item) }, lambda(&:value),
       -> { Concurrent::Promises.resolvable_future }
     ]
   rescue LoadError
@@ -45,26 +43,33 @@ task :compatibility do
   begin
     require "async"
     require "async/priority_queue"
-    classes << [Async::Promise, -> { it.fulfill { :item } }, -> { it.wait }]
-    classes << [Async::Condition, -> { it.signal }, -> { it.wait }]
-    classes << [Async::PriorityQueue, -> { it.push(:item) }, -> { it.pop }]
+    classes << [Async::Promise, -> { it.fulfill { :item } }, lambda(&:wait)]
+    classes << [Async::Condition, lambda(&:signal), lambda(&:wait)]
+    classes << [Async::PriorityQueue, -> { it.push(:item) }, lambda(&:pop)]
   rescue LoadError
   end
 
   begin
     require "ratomic"
-    classes << [Ratomic::Queue, -> { it.push(:item) }, -> { it.pop }, -> { Ratomic::Queue.new(2) }, -> { it.close }]
+    classes << [Ratomic::Queue, -> { it.push(:item) }, lambda(&:pop), -> { Ratomic::Queue.new(2) }, lambda(&:close)]
   rescue LoadError
   end
 
   begin
     require "ractor_queue"
-    classes << [RactorQueue, -> { it.push(:item) }, -> { it.pop }, -> { RactorQueue.new(capacity: 2) }]
+    classes << [RactorQueue, -> { it.push(:item) }, lambda(&:pop), -> { RactorQueue.new(capacity: 2) }]
   rescue LoadError => e
   end
 
-  Internal = Farce.const_get(:Internal)
-  classes << [Internal::Queue, -> { it.push(:item) }, -> { it.pop }, -> { Internal::Queue.new(capacity: 2) }]
+  Internal = Farce.const_get(:Internal) # rubocop:disable Lint/ConstantDefinitionInBlock
+  classes << [Internal::Queue, -> { it.push(:item) }, lambda(&:pop), -> { Internal::Queue.new(capacity: 2) }]
+  classes << [
+    Internal::PriorityQueue,
+    -> { it.push(0, :item) },
+    lambda(&:pop),
+    -> { Internal::PriorityQueue.new(capacity: 2) },
+    lambda(&:close)
+  ]
 
   results = []
   width = 0
@@ -101,8 +106,16 @@ task :compatibility do
       done = true
       set.call(instance) unless thread_compatible
     ensure
-      setter.kill rescue nil
-      getter.kill rescue nil
+      begin
+        setter.kill
+      rescue StandardError
+        nil
+      end
+      begin
+        getter.kill
+      rescue StandardError
+        nil
+      end
     end
 
     unless defined?(Ratomic::Queue) && klass == Ratomic::Queue # stalls the entire process
@@ -137,9 +150,9 @@ task :compatibility do
       get = Farce::Ractor.shareable_proc(&get)
       attempt.call do
         instance = Ractor.make_shareable(init.call)
-        Ractor.new(instance, set) do
+        Ractor.new(instance, set) do |instance, set|
           sleep 0.1
-          _2.call(_1)
+          set.call(instance)
         end
         get.call(instance)
         ractor_compatible = true
@@ -157,7 +170,7 @@ task :compatibility do
   puts
 
   puts "| #{"Class".ljust(width)} | Thread | Fiber  | Ractor |"
-  puts "|-#{'-' * width}-|--------|--------|--------|"
+  puts "|-#{"-" * width}-|--------|--------|--------|"
 
   icons = { true => "✅", false => "❌", nil => "❓" }
 

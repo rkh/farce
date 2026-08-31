@@ -1,7 +1,5 @@
 #include "containers.h"
 
-#define UPDATE_WAIT_USEC 1000
-
 static VALUE eIsolationError;
 
 RBIMPL_ATTR_NORETURN()
@@ -33,13 +31,6 @@ containers_finish_initialization(VALUE self)
 }
 
 void
-containers_brief_wait(void)
-{
-    struct timeval duration = {0, UPDATE_WAIT_USEC};
-    rb_thread_wait_for(duration);
-}
-
-void
 containers_raise_key_error(VALUE receiver, VALUE key)
 {
     VALUE message = rb_sprintf("key not found: %" PRIsVALUE, rb_inspect(key));
@@ -64,9 +55,11 @@ Init_containers(void)
     containers_init_flag(mInternal);
     containers_init_lock(mInternal);
     containers_init_map(mInternal);
+    containers_init_priority_queue(mInternal);
     containers_init_queue(mInternal);
     containers_init_signal(mInternal);
     containers_init_unshareable(mInternal);
     containers_init_vector(mInternal);
     containers_init_weak_maps(mInternal);
+    containers_init_tree_maps(mInternal);
 }
