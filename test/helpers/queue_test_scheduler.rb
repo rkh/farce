@@ -11,7 +11,8 @@ module Helpers
       @readable = {}
       @waiting = {}
       @blocking = {}
-      @ready = []
+      @ready = Thread::Queue.new
+      @wakeup_reader, @wakeup_writer = IO.pipe
       @io_wait_calls = 0
     end
 
@@ -50,6 +51,8 @@ module Helpers
 
     def unblock(_blocker, fiber)
       @ready << fiber
+      @wakeup_writer.write_nonblock(".")
+    rescue IO::WaitWritable, Errno::EPIPE, IOError
     end
 
     def fiber_interrupt(fiber, exception)
@@ -58,6 +61,9 @@ module Helpers
 
     def close
       run while pending?
+    ensure
+      @wakeup_reader.close unless @wakeup_reader.closed?
+      @wakeup_writer.close unless @wakeup_writer.closed?
     end
 
     alias scheduler_close close
@@ -65,16 +71,19 @@ module Helpers
     private
 
     def pending?
-      @readable.any? || @waiting.any? || @blocking.any? || @ready.any?
+      @readable.any? || @waiting.any? || @blocking.any? || !@ready.empty?
     end
 
     def next_timeout
+      return 0 unless @ready.empty?
+
       deadline = @waiting.values.min
       deadline && [deadline - Farce::Clock.now, 0].max
     end
 
     def run
-      readable, = IO.select(@readable.keys, nil, nil, next_timeout)
+      readable, = IO.select([*@readable.keys, @wakeup_reader], nil, nil, next_timeout)
+      drain_wakeup if readable&.delete(@wakeup_reader)
       selected = readable&.filter_map { |io| @readable.delete(io) } || []
 
       current = Farce::Clock.now
@@ -83,13 +92,24 @@ module Helpers
       end
       expired.each { |fiber| @waiting.delete(fiber) }
 
-      ready, @ready = @ready, []
       selected.uniq.each do |fiber|
         fiber.transfer(IO::READABLE) if fiber.alive?
       end
-      (expired + ready).uniq.each do |fiber|
+      (expired + drain_ready).uniq.each do |fiber|
         fiber.transfer if fiber.alive?
       end
+    end
+
+    def drain_wakeup
+      loop { @wakeup_reader.read_nonblock(4096) }
+    rescue IO::WaitReadable, EOFError
+    end
+
+    def drain_ready
+      fibers = []
+      loop { fibers << @ready.pop(true) }
+    rescue ThreadError
+      fibers
     end
   end
 end

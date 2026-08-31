@@ -75,6 +75,47 @@ module Farce
       end
     end
 
+    def test_clear
+      MAP_CLASSES.each do |klass|
+        map = klass.new({ one: 1, two: nil })
+
+        assert_same map, map.clear
+        assert_equal 0, map.size
+        assert_empty map.keys
+        refute map.key?(:one)
+        refute map.key?(:two)
+        assert_same map, map.clear
+        assert_equal 3, map[:three] = 3
+        assert_equal({ three: 3 }, map.each.to_h)
+      end
+    end
+
+    def test_fetch
+      MAP_CLASSES.each do |klass|
+        map = klass.new({ present: nil })
+        called = false
+
+        assert_nil map.fetch(:present) { called = true }
+        refute called
+        assert_equal :default, map.fetch(:missing, :default)
+        assert_nil map.fetch(:missing, nil)
+        assert_equal :block, map.fetch(:missing) { |key| key == :missing ? :block : flunk }
+
+        result = nil
+        assert_output(nil, /block supersedes default value argument/) do
+          result = map.fetch(:missing, :default) { :block } # rubocop:disable Lint/UselessDefaultValueArgument
+        end
+        assert_equal :block, result
+
+        error = assert_raises(KeyError) { map.fetch(:missing) }
+        assert_equal "key not found: :missing", error.message
+        assert_equal :missing, error.key
+        assert_same map, error.receiver
+        assert_raises(ArgumentError) { map.fetch }
+        assert_raises(ArgumentError) { map.fetch(:key, :one, :two) }
+      end
+    end
+
     def test_get_store_and_swap
       MAP_CLASSES.each do |klass|
         map = klass.new({ key: 1 })
@@ -320,6 +361,65 @@ module Farce
         assert map.compare_and_set(stored_key, stored_value, :replacement)
         assert_predicate map, :compare_keys_by_identity?
         assert_predicate map, :compare_values_by_identity?
+      end
+    end
+
+    def test_iteration
+      MAP_CLASSES.each do |klass|
+        first = shared_string("first")
+        second = shared_string("second")
+        expected = { first => 1, second => nil }
+        map = klass.new(expected)
+
+        assert_equal expected.keys.sort, map.keys.sort
+        stored_first = map.keys.find { |key| key == first }
+
+        assert_same first, stored_first
+
+        each = map.each
+        each_pair = map.each_pair
+        each_key = map.each_key
+        each_value = map.each_value
+
+        assert_kind_of Enumerator, each
+        assert_kind_of Enumerator, each_pair
+        assert_kind_of Enumerator, each_key
+        assert_kind_of Enumerator, each_value
+        assert_equal 2, each.size
+        assert_equal 2, each_pair.size
+        assert_equal 2, each_key.size
+        assert_equal 2, each_value.size
+        assert_equal expected, each.to_h
+        assert_equal expected, each_pair.to_h
+        assert_equal expected.values.tally, each_value.to_a.tally
+
+        pairs = []
+        result = map.each { |pair| pairs << pair }
+
+        assert_same map, result
+        assert_equal expected, pairs.to_h
+
+        pairs = []
+        result = map.each_pair { |key, value| pairs << [key, value] }
+
+        assert_same map, result
+        assert_equal expected, pairs.to_h
+
+        keys = []
+        result = map.each_key { |key| keys << key }
+
+        assert_same map, result
+        assert_equal expected.keys.sort, keys.sort
+
+        values = []
+        result = map.each_value { |value| values << value }
+
+        assert_same map, result
+        assert_equal expected.values.tally, values.tally
+
+        map.each { |pair| map.delete(pair.first) }
+
+        assert_equal 0, map.size
       end
     end
 

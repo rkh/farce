@@ -4,6 +4,16 @@ source "https://gem.coop"
 
 gemspec
 
+group :compatibility do
+  gem "concurrent-ruby"
+  gem "ratomic", platforms: %i[mri_34 mri_40]
+  platform :mri do
+    gem "async", "~> 2.45"
+    gem "concurrent-ruby-ext"
+    gem "ractor_queue"
+  end
+end
+
 group :development do
   gem "irb"
   gem "rake"

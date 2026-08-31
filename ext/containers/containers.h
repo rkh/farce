@@ -15,6 +15,8 @@ void containers_check_shareable(VALUE value);
 bool containers_strict_bool(VALUE value, const char *name);
 void containers_finish_initialization(VALUE self);
 void containers_brief_wait(void);
+RBIMPL_ATTR_NORETURN()
+void containers_raise_key_error(VALUE receiver, VALUE key);
 
 void containers_init_atom(VALUE namespace);
 void containers_init_counter(VALUE namespace);

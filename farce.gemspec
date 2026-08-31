@@ -9,7 +9,7 @@ Gem::Specification.new("farce", Farce::VERSION) do |spec|
   spec.authors       = ["Konstantin Haase"]
   spec.email         = ["konstantin.mailinglists@googlemail.com"]
   spec.extensions    = Dir["ext/*/extconf.rb"]
-  spec.files         = Dir["MIT-LICENSE", "*.md", "lib/**/*.rb", "ext/**/{*.{c,h,rb},depend,LICENSE}"]
+  spec.files         = Dir["MIT-LICENSE", "*.md", "docs/**/*.md", "lib/**/*.rb", "ext/**/{*.{c,h,rb},depend,LICENSE}"]
   spec.homepage      = github
   spec.license       = "MIT"
   spec.require_paths = ["lib"]

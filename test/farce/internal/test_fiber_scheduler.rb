@@ -126,5 +126,77 @@ module Farce
       assert_equal %i[other_fiber fallback], events
       assert_operator scheduler.io_wait_calls, :>=, 1
     end
+
+    def test_exchange_uses_thread_scheduler_when_current_scheduler_is_unavailable
+      return unless RUBY_ENGINE == "jruby"
+
+      scheduler = Helpers::QueueTestScheduler.new
+      Fiber.set_scheduler(scheduler)
+      exchanger = Exchanger.new
+      events = []
+      current_scheduler = Fiber.method(:current_scheduler)
+      Fiber.define_singleton_method(:current_scheduler) { nil }
+
+      begin
+        Fiber.schedule { events << exchanger.exchange(:value, timeout: 0.01) { :fallback } }
+        Fiber.schedule { events << :other_fiber }
+        Fiber.set_scheduler(nil)
+      ensure
+        Fiber.define_singleton_method(:current_scheduler, current_scheduler)
+      end
+
+      assert_equal %i[other_fiber fallback], events
+      assert_operator scheduler.io_wait_calls, :>=, 1
+    end
+
+    def test_condition_variable_wait_does_not_block_another_fiber
+      return unless RUBY_ENGINE == "ruby"
+
+      scheduler = Helpers::QueueTestScheduler.new
+      Fiber.set_scheduler(scheduler)
+      mutex = Mutex.new
+      condition = ConditionVariable.new
+      events = []
+
+      Fiber.schedule do
+        mutex.synchronize do
+          events << :waiting
+          condition.wait(mutex)
+          events << :resumed
+        end
+      end
+      Fiber.schedule do
+        events << :signaling
+        mutex.synchronize { condition.signal }
+      end
+      Fiber.set_scheduler(nil)
+
+      assert_equal %i[waiting signaling resumed], events
+    end
+
+    def test_thread_completion_wakes_scheduler_from_another_thread
+      return unless RUBY_ENGINE == "ruby"
+
+      scheduler = Helpers::QueueTestScheduler.new
+      Fiber.set_scheduler(scheduler)
+      scheduler_thread = Thread.current
+      worker = Thread.new do
+        Thread.pass until scheduler_thread.status == "sleep"
+        :value
+      end
+      events = []
+
+      Fiber.schedule do
+        events << :waiting
+        events << worker.value
+      end
+      Fiber.schedule { events << :other_fiber }
+      Fiber.set_scheduler(nil)
+
+      assert_equal %i[waiting other_fiber value], events
+    ensure
+      worker&.kill
+      worker&.join
+    end
   end
 end

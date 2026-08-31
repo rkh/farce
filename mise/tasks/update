@@ -2,6 +2,8 @@
 #MISE description="Update dependencies"
 
 mise install ruby@4.1-dev -f
+mise install ruby@jruby-dev -f
+mise install ruby@truffleruby-dev -f
 mise install
 
 bundle update --bundler

@@ -554,6 +554,36 @@ weak_map_get(VALUE self, VALUE key)
 }
 
 static VALUE
+weak_map_fetch(int argc, VALUE *argv, VALUE self)
+{
+    VALUE key;
+    VALUE default_value;
+    rb_scan_args(argc, argv, "11", &key, &default_value);
+
+    bool default_given = argc == 2;
+    bool block_given = rb_block_given_p();
+    if (block_given && default_given) {
+        rb_warn("block supersedes default value argument");
+    }
+
+    weak_map_t *map = get_weak_map(self);
+    containers_check_shareable(key);
+    st_index_t hash = weak_map_key_hash(map, key);
+    bool found;
+    VALUE result = Qnil;
+    pthread_mutex_lock(&map->lock);
+    size_t index = weak_map_find_slot(map, key, hash, &found);
+    if (found) result = map->slots[index].value;
+    pthread_mutex_unlock(&map->lock);
+
+    if (found) return result;
+    if (block_given) return rb_yield(key);
+    if (default_given) return default_value;
+    containers_raise_key_error(self, key);
+    return Qnil;
+}
+
+static VALUE
 weak_map_set(VALUE self, VALUE key, VALUE value)
 {
     weak_map_t *map = get_weak_map(self);
@@ -616,6 +646,25 @@ weak_map_delete(VALUE self, VALUE key)
     }
     pthread_mutex_unlock(&map->lock);
     return result;
+}
+
+static VALUE
+weak_map_clear(VALUE self)
+{
+    weak_map_t *map = get_weak_map(self);
+    weak_map_lock_for_update(map);
+    for (size_t index = 0; index < map->capacity; index++) {
+        weak_map_slot_t *slot = &map->slots[index];
+        slot->key = Qnil;
+        slot->value = Qnil;
+        slot->hash = 0;
+        slot->state = WEAK_MAP_EMPTY;
+    }
+    map->size = 0;
+    map->tombstones = 0;
+    weak_map_notify_waiters_locked(map);
+    pthread_mutex_unlock(&map->lock);
+    return self;
 }
 
 typedef struct {
@@ -852,6 +901,92 @@ weak_map_size(VALUE self)
 }
 
 static VALUE
+weak_map_enumerator_size(VALUE self, VALUE arguments, VALUE enumerator)
+{
+    (void)arguments;
+    (void)enumerator;
+    return weak_map_size(self);
+}
+
+static VALUE
+weak_map_entries_snapshot(weak_map_t *map)
+{
+    for (;;) {
+        size_t capacity;
+        pthread_mutex_lock(&map->lock);
+        capacity = map->size;
+        pthread_mutex_unlock(&map->lock);
+
+        VALUE entries = rb_ary_new_capa((long)(capacity * 2));
+        pthread_mutex_lock(&map->lock);
+        if (map->size > capacity) {
+            pthread_mutex_unlock(&map->lock);
+            continue;
+        }
+        for (size_t index = 0; index < map->capacity; index++) {
+            weak_map_slot_t *slot = &map->slots[index];
+            if (slot->state != WEAK_MAP_OCCUPIED) continue;
+            rb_ary_push(entries, slot->key);
+            rb_ary_push(entries, slot->value);
+        }
+        pthread_mutex_unlock(&map->lock);
+        return entries;
+    }
+}
+
+static VALUE
+weak_map_keys(VALUE self)
+{
+    VALUE entries = weak_map_entries_snapshot(get_weak_map(self));
+    long entry_count = RARRAY_LEN(entries);
+    VALUE keys = rb_ary_new_capa(entry_count / 2);
+    for (long index = 0; index < entry_count; index += 2) {
+        rb_ary_push(keys, RARRAY_AREF(entries, index));
+    }
+    RB_GC_GUARD(entries);
+    return keys;
+}
+
+static VALUE
+weak_map_each(VALUE self)
+{
+    RETURN_SIZED_ENUMERATOR(self, 0, NULL, weak_map_enumerator_size);
+    VALUE entries = weak_map_entries_snapshot(get_weak_map(self));
+    long entry_count = RARRAY_LEN(entries);
+    for (long index = 0; index < entry_count; index += 2) {
+        rb_yield(rb_assoc_new(RARRAY_AREF(entries, index), RARRAY_AREF(entries, index + 1)));
+    }
+    RB_GC_GUARD(entries);
+    return self;
+}
+
+static VALUE
+weak_map_each_key(VALUE self)
+{
+    RETURN_SIZED_ENUMERATOR(self, 0, NULL, weak_map_enumerator_size);
+    VALUE entries = weak_map_entries_snapshot(get_weak_map(self));
+    long entry_count = RARRAY_LEN(entries);
+    for (long index = 0; index < entry_count; index += 2) {
+        rb_yield(RARRAY_AREF(entries, index));
+    }
+    RB_GC_GUARD(entries);
+    return self;
+}
+
+static VALUE
+weak_map_each_value(VALUE self)
+{
+    RETURN_SIZED_ENUMERATOR(self, 0, NULL, weak_map_enumerator_size);
+    VALUE entries = weak_map_entries_snapshot(get_weak_map(self));
+    long entry_count = RARRAY_LEN(entries);
+    for (long index = 1; index < entry_count; index += 2) {
+        rb_yield(RARRAY_AREF(entries, index));
+    }
+    RB_GC_GUARD(entries);
+    return self;
+}
+
+static VALUE
 weak_map_get_with_timeout(int argc, VALUE *argv, VALUE self)
 {
     VALUE key;
@@ -1027,6 +1162,7 @@ define_weak_map_methods(VALUE klass)
     rb_define_method(klass, "initialize", weak_map_initialize, -1);
     rb_define_method(klass, "[]", weak_map_get, 1);
     rb_define_method(klass, "[]=", weak_map_set, 2);
+    rb_define_method(klass, "fetch", weak_map_fetch, -1);
     rb_define_method(klass, "get", weak_map_get_with_timeout, -1);
     rb_define_method(klass, "store", weak_map_store_with_timeout, -1);
     rb_define_method(klass, "swap", weak_map_swap, -1);
@@ -1036,6 +1172,7 @@ define_weak_map_methods(VALUE klass)
     rb_define_method(klass, "store_if_absent", weak_map_store_if_absent, -1);
     rb_define_method(klass, "key?", weak_map_key_p, 1);
     rb_define_method(klass, "delete", weak_map_delete, 1);
+    rb_define_method(klass, "clear", weak_map_clear, 0);
     rb_define_method(klass, "compare_and_set", weak_map_compare_and_set, -1);
     rb_define_method(klass, "upsert", weak_map_upsert, -1);
     rb_define_method(klass, "compare_keys_by_identity?", weak_map_compare_keys_by_identity_p, 0);
@@ -1044,6 +1181,11 @@ define_weak_map_methods(VALUE klass)
     rb_define_method(klass, "weak_values?", weak_map_weak_values_p, 0);
     rb_define_method(klass, "getkey", weak_map_getkey, 1);
     rb_define_method(klass, "size", weak_map_size, 0);
+    rb_define_method(klass, "keys", weak_map_keys, 0);
+    rb_define_method(klass, "each", weak_map_each, 0);
+    rb_define_method(klass, "each_pair", weak_map_each, 0);
+    rb_define_method(klass, "each_key", weak_map_each_key, 0);
+    rb_define_method(klass, "each_value", weak_map_each_value, 0);
 }
 
 void

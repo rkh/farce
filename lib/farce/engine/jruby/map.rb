@@ -50,6 +50,22 @@ module Farce
 
       def [](key) = concurrent_get(wrap_key(key))
 
+      def fetch(*arguments)
+        unless arguments.length.between?(1, 2)
+          raise ArgumentError, "wrong number of arguments (given #{arguments.length}, expected 1..2)"
+        end
+
+        key, default = arguments
+        default_given = arguments.length == 2
+        warn "block supersedes default value argument", uplevel: 1 if block_given? && default_given
+        stored = @map.get(wrap_key(key))
+        return stored.value if stored
+        return yield(key) if block_given?
+        return default if default_given
+
+        raise KeyError.new("key not found: #{key.inspect}", receiver: self, key: key)
+      end
+
       def []=(key, value)
         _, result = with_operation(nil) do
           concurrent_store(wrap_key(key), value)
@@ -153,6 +169,39 @@ module Farce
       def compare_keys_by_identity? = @compare_keys_by_identity
       def compare_values_by_identity? = @compare_values_by_identity
 
+      def keys = entries_snapshot.map(&:first)
+
+      def each(&block)
+        return enum_for(__callee__) { size } unless block
+
+        entries_snapshot.each { |pair| block.call(pair) }
+        self
+      end
+      alias each_pair each
+
+      def each_key(&block)
+        return enum_for(__callee__) { size } unless block
+
+        entries_snapshot.each { |pair| block.call(pair.first) }
+        self
+      end
+
+      def each_value(&block)
+        return enum_for(__callee__) { size } unless block
+
+        entries_snapshot.each { |pair| block.call(pair.last) }
+        self
+      end
+
+      def clear
+        _, result = with_operation(nil) do
+          @map.clear
+          changed!
+          self
+        end
+        result
+      end
+
       def delete(key)
         _, result = with_operation(nil) do
           value = concurrent_delete(wrap_key(key))
@@ -175,6 +224,12 @@ module Farce
       private
 
       def wrap_key(key) = compare_keys_by_identity? ? IdentityKey.new(key) : Key.new(key)
+
+      def entries_snapshot
+        entries = []
+        @map.each_pair { |key, value| entries << [key.value, value.value] }
+        entries
+      end
 
       def concurrent_get(key)
         stored = @map.get(key)

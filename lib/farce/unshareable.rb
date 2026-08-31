@@ -26,7 +26,9 @@ module Farce
       include Unshareable
     end
 
-    module UndefFreeze
+    # @api private
+    module UndefFreeze # :nodoc: all
+      # @api private
       def append_features(mod)
         if mod.is_a?(Class)
           mod.class_eval { undef freeze if method_defined?(:freeze) }
@@ -40,6 +42,8 @@ module Farce
     private_constant :UndefFreeze
     extend UndefFreeze
 
+    # Make sure to call `super` if you include this module.
+    # Accepts any arguments and passes them on to the superclass initializer.
     def initialize(...)
       if Internal.native_ractors?
         case self

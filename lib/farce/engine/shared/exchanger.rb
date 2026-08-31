@@ -51,6 +51,8 @@ module Farce
 
       def build_waiter(offered)
         scheduler = Fiber.current_scheduler if Fiber.respond_to?(:current_scheduler)
+        # JRuby may run a later scheduled fiber on a backing thread where this is nil.
+        scheduler ||= Fiber.scheduler if Fiber.respond_to?(:scheduler) && !Fiber.current.blocking?
         reader, writer = IO.pipe if scheduler
         Waiter.new(
           condition: ConditionVariable.new,

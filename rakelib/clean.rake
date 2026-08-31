@@ -3,6 +3,10 @@
 CLEAN.include(".yardoc", "*.log", "tmp")
 CLOBBER.include("lib/**/*.{bundle,dylib,so}", "coverage", "pkg", "yardoc")
 
+task :clean do # rubocop:disable Rake/Desc
+  Dir["pkg/*/README.md"].each { rm_rf File.dirname(it) }
+end
+
 task :clobber do # rubocop:disable Rake/Desc
   # delete empty directories after clobbering files
   Dir.glob("lib/**/*").each do |dir|

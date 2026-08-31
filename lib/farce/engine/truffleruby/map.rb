@@ -48,6 +48,23 @@ module Farce
 
       def [](key) = concurrent_get(wrap_key(key))
 
+      def fetch(*arguments)
+        unless arguments.length.between?(1, 2)
+          raise ArgumentError, "wrong number of arguments (given #{arguments.length}, expected 1..2)"
+        end
+
+        key, default = arguments
+        default_given = arguments.length == 2
+        warn "block supersedes default value argument", uplevel: 1 if block_given? && default_given
+        missing = Object.new
+        value = concurrent_get_or_default(wrap_key(key), missing)
+        return value unless missing.equal?(value)
+        return yield(key) if block_given?
+        return default if default_given
+
+        raise KeyError.new("key not found: #{key.inspect}", receiver: self, key: key)
+      end
+
       def []=(key, value)
         _, result = with_operation(nil) do
           concurrent_store(wrap_key(key), value)
@@ -151,6 +168,30 @@ module Farce
       def compare_keys_by_identity? = @compare_keys_by_identity
       def compare_values_by_identity? = @compare_values_by_identity
 
+      def keys = entries_snapshot.map(&:first)
+
+      def each(&block)
+        return enum_for(__callee__) { size } unless block
+
+        entries_snapshot.each { |pair| block.call(pair) }
+        self
+      end
+      alias each_pair each
+
+      def each_key(&block)
+        return enum_for(__callee__) { size } unless block
+
+        entries_snapshot.each { |pair| block.call(pair.first) }
+        self
+      end
+
+      def each_value(&block)
+        return enum_for(__callee__) { size } unless block
+
+        entries_snapshot.each { |pair| block.call(pair.last) }
+        self
+      end
+
       def delete(key)
         _, result = with_operation(nil) do
           value = concurrent_delete(wrap_key(key))
@@ -172,9 +213,9 @@ module Farce
 
       def clear
         _, result = with_operation(nil) do
-          value = concurrent_clear
+          concurrent_clear
           changed!
-          value
+          self
         end
         result
       end
@@ -215,12 +256,6 @@ module Farce
           deleted
         end
         result
-      end
-
-      def each_pair(&block)
-        return concurrent_each_pair unless block
-
-        concurrent_each_pair { |key, value| block.call(unwrap_key(key), value) }
       end
 
       def get_and_set(key, value)
@@ -267,6 +302,12 @@ module Farce
 
       def wrap_key(key) = compare_keys_by_identity? ? IdentityKey.new(key) : key
       def unwrap_key(key) = key.is_a?(IdentityKey) ? key.value : key
+
+      def entries_snapshot
+        entries = []
+        concurrent_each_pair { |key, value| entries << [unwrap_key(key), value] }
+        entries
+      end
 
       def keys_equal?(left, right)
         compare_keys_by_identity? ? left.eql?(right) : left.hash == right.hash && left.eql?(right)

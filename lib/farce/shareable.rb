@@ -13,7 +13,8 @@ module Farce
   #   object = MyClass.new
   #   Ractor.shareable?(object) # => true
   module Shareable
-    # @!visibility private
+    # Make sure to call `super` if you include this module.
+    # Accepts any arguments and passes them on to the superclass initializer.
     def initialize(...)
       super
       ::Ractor.make_shareable(self) if Internal.native_ractors?

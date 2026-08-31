@@ -498,6 +498,36 @@ map_get(VALUE self, VALUE key)
 }
 
 static VALUE
+map_fetch(int argc, VALUE *argv, VALUE self)
+{
+    VALUE key;
+    VALUE default_value;
+    rb_scan_args(argc, argv, "11", &key, &default_value);
+
+    bool default_given = argc == 2;
+    bool block_given = rb_block_given_p();
+    if (block_given && default_given) {
+        rb_warn("block supersedes default value argument");
+    }
+
+    map_t *map = get_map(self);
+    containers_check_shareable(key);
+    st_index_t hash = map_key_hash(map, key);
+    bool found;
+    VALUE result = Qnil;
+    pthread_mutex_lock(&map->lock);
+    size_t index = map_find_slot(map, key, hash, &found);
+    if (found) result = map->slots[index].value;
+    pthread_mutex_unlock(&map->lock);
+
+    if (found) return result;
+    if (block_given) return rb_yield(key);
+    if (default_given) return default_value;
+    containers_raise_key_error(self, key);
+    return Qnil;
+}
+
+static VALUE
 map_set(VALUE self, VALUE key, VALUE value)
 {
     map_t *map = get_map(self);
@@ -560,6 +590,25 @@ map_delete(VALUE self, VALUE key)
     }
     pthread_mutex_unlock(&map->lock);
     return result;
+}
+
+static VALUE
+map_clear(VALUE self)
+{
+    map_t *map = get_map(self);
+    map_lock_for_update(map);
+    for (size_t index = 0; index < map->capacity; index++) {
+        map_slot_t *slot = &map->slots[index];
+        slot->key = Qnil;
+        slot->value = Qnil;
+        slot->hash = 0;
+        slot->state = MAP_EMPTY;
+    }
+    map->size = 0;
+    map->tombstones = 0;
+    map_notify_waiters_locked(map);
+    pthread_mutex_unlock(&map->lock);
+    return self;
 }
 
 typedef struct {
@@ -764,6 +813,92 @@ map_size(VALUE self)
 }
 
 static VALUE
+map_enumerator_size(VALUE self, VALUE arguments, VALUE enumerator)
+{
+    (void)arguments;
+    (void)enumerator;
+    return map_size(self);
+}
+
+static VALUE
+map_entries_snapshot(map_t *map)
+{
+    for (;;) {
+        size_t capacity;
+        pthread_mutex_lock(&map->lock);
+        capacity = map->size;
+        pthread_mutex_unlock(&map->lock);
+
+        VALUE entries = rb_ary_new_capa((long)(capacity * 2));
+        pthread_mutex_lock(&map->lock);
+        if (map->size > capacity) {
+            pthread_mutex_unlock(&map->lock);
+            continue;
+        }
+        for (size_t index = 0; index < map->capacity; index++) {
+            map_slot_t *slot = &map->slots[index];
+            if (slot->state != MAP_OCCUPIED) continue;
+            rb_ary_push(entries, slot->key);
+            rb_ary_push(entries, slot->value);
+        }
+        pthread_mutex_unlock(&map->lock);
+        return entries;
+    }
+}
+
+static VALUE
+map_keys(VALUE self)
+{
+    VALUE entries = map_entries_snapshot(get_map(self));
+    long entry_count = RARRAY_LEN(entries);
+    VALUE keys = rb_ary_new_capa(entry_count / 2);
+    for (long index = 0; index < entry_count; index += 2) {
+        rb_ary_push(keys, RARRAY_AREF(entries, index));
+    }
+    RB_GC_GUARD(entries);
+    return keys;
+}
+
+static VALUE
+map_each(VALUE self)
+{
+    RETURN_SIZED_ENUMERATOR(self, 0, NULL, map_enumerator_size);
+    VALUE entries = map_entries_snapshot(get_map(self));
+    long entry_count = RARRAY_LEN(entries);
+    for (long index = 0; index < entry_count; index += 2) {
+        rb_yield(rb_assoc_new(RARRAY_AREF(entries, index), RARRAY_AREF(entries, index + 1)));
+    }
+    RB_GC_GUARD(entries);
+    return self;
+}
+
+static VALUE
+map_each_key(VALUE self)
+{
+    RETURN_SIZED_ENUMERATOR(self, 0, NULL, map_enumerator_size);
+    VALUE entries = map_entries_snapshot(get_map(self));
+    long entry_count = RARRAY_LEN(entries);
+    for (long index = 0; index < entry_count; index += 2) {
+        rb_yield(RARRAY_AREF(entries, index));
+    }
+    RB_GC_GUARD(entries);
+    return self;
+}
+
+static VALUE
+map_each_value(VALUE self)
+{
+    RETURN_SIZED_ENUMERATOR(self, 0, NULL, map_enumerator_size);
+    VALUE entries = map_entries_snapshot(get_map(self));
+    long entry_count = RARRAY_LEN(entries);
+    for (long index = 1; index < entry_count; index += 2) {
+        rb_yield(RARRAY_AREF(entries, index));
+    }
+    RB_GC_GUARD(entries);
+    return self;
+}
+
+static VALUE
 map_get_with_timeout(int argc, VALUE *argv, VALUE self)
 {
     VALUE key;
@@ -921,6 +1056,7 @@ containers_init_map(VALUE namespace)
     rb_define_method(cMap, "initialize", map_initialize, -1);
     rb_define_method(cMap, "[]", map_get, 1);
     rb_define_method(cMap, "[]=", map_set, 2);
+    rb_define_method(cMap, "fetch", map_fetch, -1);
     rb_define_method(cMap, "get", map_get_with_timeout, -1);
     rb_define_method(cMap, "store", map_store_with_timeout, -1);
     rb_define_method(cMap, "swap", map_swap, -1);
@@ -930,10 +1066,16 @@ containers_init_map(VALUE namespace)
     rb_define_method(cMap, "store_if_absent", map_store_if_absent, -1);
     rb_define_method(cMap, "key?", map_key_p, 1);
     rb_define_method(cMap, "delete", map_delete, 1);
+    rb_define_method(cMap, "clear", map_clear, 0);
     rb_define_method(cMap, "compare_and_set", map_compare_and_set, -1);
     rb_define_method(cMap, "upsert", map_upsert, -1);
     rb_define_method(cMap, "compare_keys_by_identity?", map_compare_keys_by_identity_p, 0);
     rb_define_method(cMap, "compare_values_by_identity?", map_compare_values_by_identity_p, 0);
     rb_define_method(cMap, "getkey", map_getkey, 1);
     rb_define_method(cMap, "size", map_size, 0);
+    rb_define_method(cMap, "keys", map_keys, 0);
+    rb_define_method(cMap, "each", map_each, 0);
+    rb_define_method(cMap, "each_pair", map_each, 0);
+    rb_define_method(cMap, "each_key", map_each_key, 0);
+    rb_define_method(cMap, "each_value", map_each_value, 0);
 }

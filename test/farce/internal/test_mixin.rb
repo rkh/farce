@@ -10,6 +10,7 @@ module Farce
       assert_equal Clock,  namespace.const_get(:Clock)
       assert_equal Port,   namespace.const_get(:Port)
       assert_equal Ractor, namespace.const_get(:Ractor)
+      assert_equal ReadWriteLock, namespace.const_get(:ReadWriteLock)
     end
 
     def test_include_farce_does_not_define_constants_on_receiver

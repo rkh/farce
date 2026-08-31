@@ -73,5 +73,6 @@ namespace :gem do
   task verify: [*CROSS_PLATFORMS.map { "verify:#{it}" }, "verify:source"]
 
   desc "Build all gems"
-  task all: [*CROSS_PLATFORMS, :source]
+  task all: %i[source cross_platforms]
+  multitask cross_platforms: CROSS_PLATFORMS
 end

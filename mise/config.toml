@@ -43,7 +43,7 @@ wait_for            = ["install", "compile"]
 
 [tasks.build]
 description         = "Build all gems in parallel"
-run                 = "bundle exec rake gem:all"
+run                 = "bundle exec rake gem:all && bundle exec rake clean"
 wait_for            = ["install"]
 
 [tasks.docs]

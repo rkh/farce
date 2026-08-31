@@ -39,6 +39,18 @@ containers_brief_wait(void)
     rb_thread_wait_for(duration);
 }
 
+void
+containers_raise_key_error(VALUE receiver, VALUE key)
+{
+    VALUE message = rb_sprintf("key not found: %" PRIsVALUE, rb_inspect(key));
+    VALUE keywords = rb_hash_new();
+    rb_hash_aset(keywords, ID2SYM(rb_intern("receiver")), receiver);
+    rb_hash_aset(keywords, ID2SYM(rb_intern("key")), key);
+    VALUE arguments[] = {message, keywords};
+    VALUE exception = rb_class_new_instance_kw(2, arguments, rb_eKeyError, RB_PASS_KEYWORDS);
+    rb_exc_raise(exception);
+}
+
 RUBY_FUNC_EXPORTED void
 Init_containers(void)
 {

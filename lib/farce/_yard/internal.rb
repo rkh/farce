@@ -7,5 +7,7 @@ module Farce
     module Autoloads end
     # @!visibility private
     module RactorMethods end
+    # @!visibility private
+    class Atom end
   end
 end

@@ -21,8 +21,14 @@ module Farce
     end
 
     autoload :Atom,          "farce/engine/ruby/containers"
+    autoload :Counter,       "farce/engine/ruby/containers"
+    autoload :Exchanger,     "farce/engine/ruby/containers"
+    autoload :Flag,          "farce/engine/ruby/containers"
     autoload :Map,           "farce/engine/ruby/containers"
     autoload :Queue,         "farce/engine/ruby/containers"
+    autoload :Signal,        "farce/engine/ruby/containers"
+    autoload :Unshareable,   "farce/engine/ruby/containers"
+    autoload :Vector,        "farce/engine/ruby/containers"
     autoload :WeakMap,       "farce/engine/ruby/containers"
     autoload :WeakKeyMap,    "farce/engine/ruby/containers"
     autoload :WeakValueMap,  "farce/engine/ruby/containers"

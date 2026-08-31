@@ -27,7 +27,7 @@ module Farce
       KNOWN_NUMERIC_CLASSES = Set[Integer, Float, Complex, Rational].compare_by_identity.freeze
       private_constant :KNOWN_NUMERIC_CLASSES
 
-      # @param [Integer] value The initial value of the counter.
+      # @return [Integer] initial The initial value of the counter.
       attr_reader :initial
 
       # @param [Numeric, String, #to_int] value The initial value of the counter. Will be converted to an Integer.
@@ -41,7 +41,8 @@ module Farce
       # @return [String] Returns a string representation of the counter.
       def inspect = "#<#{self.class.name} #{value.inspect}>"
 
-      # (see #increment)
+      # @overload add(by = 1)
+      #   (see #increment)
       def add(...) = increment(...)
 
       # Decrement the counter by the given amount (default is 1).

@@ -7,9 +7,9 @@ module Farce
   #   class Port < Farce::Ractor::Port
   #   end
   #
-  # {Ractor::Port} subclass with additional features.
+  # `Ractor::Port` subclass with additional features.
   class Port < Internal::Port
-    # {Ractor::Port#send Sends} a message over the port.
+    # {Farce::Ractor::Port#send Sends} a message over the port.
     #
     # @overload send(message)
     #   @param message [BasicObject] The message to send.
@@ -31,7 +31,7 @@ module Farce
       end
     end
 
-    # {Ractor::Port#receive Receives} a value from the port, with an optional timeout.
+    # {Farce::Ractor::Port#receive Receives} a value from the port, with an optional timeout.
     #
     # Always supports the `timeout:` keyword argument, even on Ruby implementations that don't support it.
     #
