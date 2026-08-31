@@ -2,7 +2,10 @@
 
 if RUBY_ENGINE == "ruby"
   internal = Farce.const_get(:Internal, false)
-  %i[Atom Counter Exchanger Flag Map Queue Signal Unshareable Vector WeakMap WeakKeyMap WeakValueMap].each do |name|
+  container_classes = %i[
+    Atom Counter Exchanger Flag Lock Map Queue Signal Unshareable Vector WeakMap WeakKeyMap WeakValueMap
+  ]
+  container_classes.each do |name|
     internal.__send__(:remove_const, name) if internal.autoload?(name)
   end
   version = RUBY_VERSION[/^\d+\.\d+/]

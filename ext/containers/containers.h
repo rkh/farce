@@ -22,6 +22,7 @@ void containers_init_atom(VALUE namespace);
 void containers_init_counter(VALUE namespace);
 void containers_init_exchanger(VALUE namespace);
 void containers_init_flag(VALUE namespace);
+void containers_init_lock(VALUE namespace);
 void containers_init_map(VALUE namespace);
 void containers_init_queue(VALUE namespace);
 void containers_init_signal(VALUE namespace);

@@ -13,6 +13,7 @@ GEM
       console (~> 1.29)
       fiber-annotation
       io-event (~> 1.21)
+    benchmark-ips (2.15.1)
     builder (3.3.0)
     concurrent-ruby (1.3.8)
     concurrent-ruby-ext (1.3.8)
@@ -134,6 +135,7 @@ PLATFORMS
 
 DEPENDENCIES
   async (~> 2.45)
+  benchmark-ips
   concurrent-ruby
   concurrent-ruby-ext
   farce!
@@ -158,6 +160,7 @@ CHECKSUMS
   ansi (1.6.0) sha256=ac9ea0c0ea8d32fb4e271348e609963ac78882f34b73836c2a02b3622e666658
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   async (2.45.1) sha256=95849f7432eca535146c69f3078dab3c7228d0075ed71f48733f3e585dd7c267
+  benchmark-ips (2.15.1) sha256=07a1a9f3c6105ecaf68c174fc3fbcddd71a0e9ada6236ae03093a0dcfd812d59
   builder (3.3.0) sha256=497918d2f9dca528fdca4b88d84e4ef4387256d984b8154e9d5d3fe5a9c8835f
   bundler (4.0.19) sha256=b48056e4c77fb3853cc47775b5447ede44aaa4f53c32f168014ab4fe86587d47
   concurrent-ruby (1.3.8) sha256=b2f1be836e968ccc78ccfce277ea79c72a88633f22306782c16ff23fb415d1e1

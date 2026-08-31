@@ -62,6 +62,7 @@ Init_containers(void)
     containers_init_counter(mInternal);
     containers_init_exchanger(mInternal);
     containers_init_flag(mInternal);
+    containers_init_lock(mInternal);
     containers_init_map(mInternal);
     containers_init_queue(mInternal);
     containers_init_signal(mInternal);

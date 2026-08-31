@@ -22,8 +22,11 @@ module Farce
     READ_DEPTH    = 0
     WRITE_DEPTH   = 1
     LOCAL_STATES  = :__farce_read_write_lock_states__
+    INTERRUPTS_IMMEDIATE = { Exception => :immediate }.freeze
+    INTERRUPTS_NEVER     = { Exception => :never }.freeze
     private_constant :READER_BITS, :READER_MASK, :WRITER_BIT, :UPGRADER_BIT,
-      :WAITER_UNIT, :MAX_WAITERS, :READ_DEPTH, :WRITE_DEPTH, :LOCAL_STATES
+      :WAITER_UNIT, :MAX_WAITERS, :READ_DEPTH, :WRITE_DEPTH, :LOCAL_STATES,
+      :INTERRUPTS_IMMEDIATE, :INTERRUPTS_NEVER
 
     def initialize
       @state  = Internal::Vector.new([0])
@@ -35,17 +38,19 @@ module Farce
     #
     # @yield the block to run while holding the read lock
     # @return [Object] the block result
-    def with_read_lock(&)
+    def with_read_lock
       raise LocalJumpError, "no block given" unless block_given?
 
       local = local_state
-      Thread.handle_interrupt(Exception => :never) do
+      Thread.handle_interrupt(INTERRUPTS_NEVER) do
         global = local[READ_DEPTH].zero? && local[WRITE_DEPTH].zero?
         acquire_read_lock if global
         local[READ_DEPTH] += 1
 
         begin
-          Thread.handle_interrupt(Exception => :immediate, &)
+          # Block capture allocates on every lock operation.
+          # rubocop:disable-next Style/ExplicitBlockArgument
+          Thread.handle_interrupt(INTERRUPTS_IMMEDIATE) { yield }
         ensure
           local[READ_DEPTH] -= 1
           release_read_lock if global
@@ -60,18 +65,20 @@ module Farce
     #
     # @yield the block to run while holding the write lock
     # @return [Object] the block result
-    def with_write_lock(&)
+    def with_write_lock
       raise LocalJumpError, "no block given" unless block_given?
 
       local = local_state
-      Thread.handle_interrupt(Exception => :never) do
+      Thread.handle_interrupt(INTERRUPTS_NEVER) do
         reentrant = local[WRITE_DEPTH].positive?
         upgraded  = !reentrant && local[READ_DEPTH].positive?
-        acquire_write_lock(upgrade: upgraded) unless reentrant
+        acquire_write_lock(upgraded) unless reentrant
         local[WRITE_DEPTH] += 1
 
         begin
-          Thread.handle_interrupt(Exception => :immediate, &)
+          # Block capture allocates on every lock operation.
+          # rubocop:disable-next Style/ExplicitBlockArgument
+          Thread.handle_interrupt(INTERRUPTS_IMMEDIATE) { yield }
         ensure
           local[WRITE_DEPTH] -= 1
           unless reentrant
@@ -98,19 +105,26 @@ module Farce
     end
 
     def acquire_read_lock
-      loop do
+      return if try_acquire_read_lock
+
+      # Kernel.loop allocates on every acquisition.
+      # rubocop:disable-next Style/InfiniteLoop
+      while true
         generation = @signal.generation
-        acquired = change_state do |current|
-          if readers_allowed?(current)
-            raise ThreadError, "maximum reader count exceeded" if reader_count(current) == READER_MASK
-            [current + 1, true]
-          else
-            [current, false]
-          end
-        end
-        return if acquired
+        return if try_acquire_read_lock
 
         wait_for_change(generation)
+      end
+    end
+
+    def try_acquire_read_lock
+      change_state do |current|
+        if readers_allowed?(current)
+          raise ThreadError, "maximum reader count exceeded" if reader_count(current) == READER_MASK
+          [current + 1, true]
+        else
+          [current, false]
+        end
       end
     end
 
@@ -122,33 +136,42 @@ module Farce
       @signal.broadcast
     end
 
-    def acquire_write_lock(upgrade:)
+    def acquire_write_lock(upgrade)
       mode = upgrade ? register_upgrade : register_writer
       acquired = false
 
       begin
-        loop do
-          generation = @signal.generation
-          acquired = change_state do |current|
-            retained = mode == :retained
-            target_readers = retained ? 1 : 0
-            available = !writer_locked?(current) && reader_count(current) == target_readers
-            available &&= upgrader?(current) if retained
+        acquired = try_acquire_write_lock(mode)
+        return if acquired
 
-            if available
-              replacement = current - WAITER_UNIT + WRITER_BIT
-              replacement -= UPGRADER_BIT + 1 if retained
-              [replacement, true]
-            else
-              [current, false]
-            end
-          end
+        # Kernel.loop allocates on every acquisition.
+        # rubocop:disable-next Style/InfiniteLoop
+        while true
+          generation = @signal.generation
+          acquired = try_acquire_write_lock(mode)
           return if acquired
 
           wait_for_change(generation)
         end
       ensure
         cancel_write_request(mode) unless acquired
+      end
+    end
+
+    def try_acquire_write_lock(mode)
+      change_state do |current|
+        retained = mode == :retained
+        target_readers = retained ? 1 : 0
+        available = !writer_locked?(current) && reader_count(current) == target_readers
+        available &&= upgrader?(current) if retained
+
+        if available
+          replacement = current - WAITER_UNIT + WRITER_BIT
+          replacement -= UPGRADER_BIT + 1 if retained
+          [replacement, true]
+        else
+          [current, false]
+        end
       end
     end
 
@@ -207,7 +230,7 @@ module Farce
     end
 
     def wait_for_change(generation)
-      Thread.handle_interrupt(Exception => :immediate) { @signal.wait(generation) }
+      Thread.handle_interrupt(INTERRUPTS_IMMEDIATE) { @signal.wait(generation) }
     end
 
     def add_waiter(current)

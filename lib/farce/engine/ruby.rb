@@ -24,6 +24,7 @@ module Farce
     autoload :Counter,       "farce/engine/ruby/containers"
     autoload :Exchanger,     "farce/engine/ruby/containers"
     autoload :Flag,          "farce/engine/ruby/containers"
+    autoload :Lock,          "farce/engine/ruby/containers"
     autoload :Map,           "farce/engine/ruby/containers"
     autoload :Queue,         "farce/engine/ruby/containers"
     autoload :Signal,        "farce/engine/ruby/containers"

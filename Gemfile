@@ -15,6 +15,7 @@ group :compatibility do
 end
 
 group :development do
+  gem "benchmark-ips"
   gem "irb"
   gem "rake"
   gem "rake-compiler"
