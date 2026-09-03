@@ -8,3 +8,15 @@
 #     might be useful for hot path optimizations.
 #
 #     Concurrent access, especially modifications, may corrupt the internal state of the object.
+
+# @!macro modes
+#   Valid modes are:
+#   * `:copy` - The value will be copied between Ractors. This is the default mode.
+#   * `:make_shareable` - The value will be made Ractor-shareable using {Ractor.make_shareable}.
+#   * `:move` - The value will be moved between Ractors. This saves memory compared to copying, and supports values
+#     that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
+#     that pushed it.
+#   * `:local` - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
+#     get an error. Useful for usage contained within a single Ractor.
+#   * `:raise` - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.
+#   * `:shareable_copy` - The value will be copied and the copy will be made Ractor-shareable.

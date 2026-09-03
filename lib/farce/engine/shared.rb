@@ -13,5 +13,6 @@ module Farce
     include Autoloads["#{__dir__}/shared"]
 
     autoload :BasePort, "farce/engine/shared/port"
+    autoload :Vault,    "farce/engine/shared/vault"
   end
 end

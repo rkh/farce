@@ -591,6 +591,61 @@ vector_operation_cleanup(VALUE opaque)
 }
 
 static VALUE
+vector_store_if_absent_body(VALUE opaque)
+{
+    vector_operation_t *operation = (vector_operation_t *)opaque;
+    VALUE result = rb_yield_values(0);
+    containers_check_shareable(result);
+    pthread_mutex_lock(&operation->vector->lock);
+    if (operation->index >= operation->vector->size) {
+        operation->vector->size = operation->index + 1;
+    }
+    operation->vector->values[operation->index] = result;
+    vector_finish_update_locked(operation->vector);
+    pthread_mutex_unlock(&operation->vector->lock);
+    operation->complete = true;
+    return result;
+}
+
+static VALUE
+vector_store_if_absent(int argc, VALUE *argv, VALUE self)
+{
+    VALUE index_value;
+    VALUE keywords = Qnil;
+    rb_scan_args(argc, argv, "1:", &index_value, &keywords);
+    long long raw = vector_convert_index(index_value);
+    vector_timeout_t timeout = vector_parse_timeout(vector_timeout_keyword(keywords));
+    vector_t *vector = get_vector(self);
+    rb_need_block();
+
+    if (!vector_lock_for_update(vector, &timeout)) return Qnil;
+    size_t index = vector_assignment_index(vector, raw);
+    if (!vector_ensure_capacity(vector, index + 1)) {
+        pthread_mutex_unlock(&vector->lock);
+        rb_memerror();
+    }
+    if (index < vector->size && !NIL_P(vector->values[index])) {
+        VALUE value = vector->values[index];
+        pthread_mutex_unlock(&vector->lock);
+        return value;
+    }
+
+    vector_operation_t operation = {
+        .vector = vector,
+        .index = index,
+        .complete = false,
+    };
+    vector->updating = true;
+    pthread_mutex_unlock(&vector->lock);
+    return rb_ensure(
+        vector_store_if_absent_body,
+        (VALUE)&operation,
+        vector_operation_cleanup,
+        (VALUE)&operation
+    );
+}
+
+static VALUE
 vector_cas_body(VALUE opaque)
 {
     vector_operation_t *operation = (vector_operation_t *)opaque;
@@ -812,6 +867,7 @@ containers_init_vector(VALUE namespace)
     rb_define_method(cVector, "push", vector_push, -1);
     rb_define_method(cVector, "pop", vector_pop, -1);
     rb_define_method(cVector, "swap", vector_swap, -1);
+    rb_define_method(cVector, "store_if_absent", vector_store_if_absent, -1);
     rb_define_method(cVector, "compare_and_set", vector_compare_and_set, -1);
     rb_define_method(cVector, "upsert", vector_upsert, -1);
     rb_define_method(cVector, "update", vector_update, -1);

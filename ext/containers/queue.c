@@ -406,6 +406,17 @@ queue_size(VALUE self)
 }
 
 static VALUE
+queue_num_waiting(VALUE self)
+{
+    queue_t *queue = get_queue(self);
+    size_t num_waiting;
+    pthread_mutex_lock(&queue->lock);
+    num_waiting = queue->pop_waiters + queue->push_waiters;
+    pthread_mutex_unlock(&queue->lock);
+    return SIZET2NUM(num_waiting);
+}
+
+static VALUE
 queue_clear(VALUE self)
 {
     queue_t *queue = get_queue(self);
@@ -581,6 +592,7 @@ containers_init_queue(VALUE namespace)
     rb_define_method(cQueue, "initialize", queue_initialize, -1);
     rb_define_method(cQueue, "capacity", queue_capacity, 0);
     rb_define_method(cQueue, "size", queue_size, 0);
+    rb_define_method(cQueue, "num_waiting", queue_num_waiting, 0);
     rb_define_method(cQueue, "clear", queue_clear, 0);
     rb_define_method(cQueue, "pop", queue_pop, -1);
     rb_define_method(cQueue, "push", queue_push, -1);

@@ -102,7 +102,8 @@ module YardPatch
     def html_markup_markdown(text)
       Commonmarker.to_html(text, plugins: { syntax_highlighter: nil }, options: {
         render:    {
-          unsafe: true,
+          unsafe:     true,
+          hardbreaks: false,
         },
         extension: {
           tagfilter: false,

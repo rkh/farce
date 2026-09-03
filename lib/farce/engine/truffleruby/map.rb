@@ -360,7 +360,7 @@ module Farce
       end
 
       def enter_operation(deadline)
-        while true # rubocop:disable Style/InfiniteLoop
+        while true
           generation = @state_signal.generation
           entered = @state_mutex.synchronize do
             if @exclusive
@@ -395,7 +395,7 @@ module Farce
       end
 
       def enter_exclusive_update(deadline)
-        while true # rubocop:disable Style/InfiniteLoop
+        while true
           generation = @state_signal.generation
           entered = @state_mutex.synchronize do
             if @exclusive
@@ -432,7 +432,7 @@ module Farce
       def changed! = @change_signal.broadcast
 
       def wait_for_value(key, expected, deadline, fallback, non_nil:)
-        while true # rubocop:disable Style/InfiniteLoop
+        while true
           generation = @change_signal.generation
           current = self[key]
           ready = non_nil ? !current.nil? : !values_equal?(current, expected)

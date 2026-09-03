@@ -18,10 +18,12 @@ module Farce
         super(1)
         @broadcast_lock = Mutex.new
         @fiber_waiters  = java.util.concurrent.ConcurrentHashMap.new
+        @thread_waiters = java.util.concurrent.atomic.AtomicInteger.new
         freeze
       end
 
       def generation = phase
+      def num_waiting = @thread_waiters.get + @fiber_waiters.size
 
       def broadcast
         generation = @broadcast_lock.synchronize do
@@ -66,20 +68,31 @@ module Farce
       end
 
       def wait_with_phaser(observed, timeout)
-        return await_advance(observed) unless timeout
+        current = generation
+        return current unless current == observed
 
-        nanoseconds =
-          if timeout >= MAXIMUM_TIMEOUT.fdiv(1_000_000_000)
-            MAXIMUM_TIMEOUT
-          else
-            (timeout * 1_000_000_000).ceil
-          end
-        await_advance_interruptibly(observed, nanoseconds, NANOSECONDS)
-      rescue Java::JavaUtilConcurrent::TimeoutException
-        yield if block_given?
+        @thread_waiters.increment_and_get
+        begin
+          return await_advance(observed) unless timeout
+
+          nanoseconds =
+            if timeout >= MAXIMUM_TIMEOUT.fdiv(1_000_000_000)
+              MAXIMUM_TIMEOUT
+            else
+              (timeout * 1_000_000_000).ceil
+            end
+          await_advance_interruptibly(observed, nanoseconds, NANOSECONDS)
+        rescue Java::JavaUtilConcurrent::TimeoutException
+          yield if block_given?
+        ensure
+          @thread_waiters.decrement_and_get
+        end
       end
 
       def wait_with_scheduler(scheduler, observed, timeout)
+        current = generation
+        return current unless current == observed
+
         deadline = Clock.now + timeout if timeout
         reader, writer = IO.pipe
         @fiber_waiters[writer] = true

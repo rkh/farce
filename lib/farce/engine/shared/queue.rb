@@ -19,7 +19,7 @@ module Farce
       def pop(timeout: nil)
         timeout_at = timeout_at(timeout)
 
-        while true # rubocop:disable Style/InfiniteLoop
+        while true
           begin
             result = @queue.pop(true)
             broadcast
@@ -41,7 +41,7 @@ module Farce
         end
 
         timeout_at = timeout_at(timeout)
-        while true # rubocop:disable Style/InfiniteLoop
+        while true
           begin
             @queue.push(item, true)
             broadcast
@@ -72,6 +72,8 @@ module Farce
         self
       end
 
+      def num_waiting = @queue.num_waiting + @signal.num_waiting
+
       Internal.delegate(self, :@queue, :closed?, :size)
 
       private
@@ -88,7 +90,7 @@ module Farce
       def wait(timeout)
         timeout_at = timeout_at(timeout)
 
-        while true # rubocop:disable Style/InfiniteLoop
+        while true
           generation = @signal.generation
           return true if yield
           raise ClosedQueueError, "queue closed" if closed?
@@ -102,7 +104,8 @@ module Farce
 
       def remaining_timeout(timeout_at)
         return unless timeout_at
-        [timeout_at - Clock.now, 0].max
+        timeout = timeout_at - Clock.now
+        timeout.positive? ? timeout : 0
       end
 
       def broadcast = @signal.broadcast

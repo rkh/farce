@@ -24,6 +24,7 @@ module Farce
     autoload :BasePort,      "#{path}/port"
     autoload :Port,          "#{path}/port"
     autoload :RactorMethods, "#{path}/ractor_methods"
+    autoload :Vault,         "#{path}/vault"
 
     def native_ractors? = true
 

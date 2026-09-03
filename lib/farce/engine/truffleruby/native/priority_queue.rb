@@ -12,7 +12,7 @@ module Farce
     class PriorityQueue
       include TruffleOrderedArraySupport
 
-      DEFAULT_CAPACITY = 1024
+      DEFAULT_CAPACITY = nil
       EMPTY = Object.new.freeze
       INITIALIZATION_LOCK = Mutex.new
       private_constant :DEFAULT_CAPACITY, :EMPTY, :INITIALIZATION_LOCK
@@ -36,11 +36,20 @@ module Farce
       end
       private_constant :State
 
+      def initialize(capacity: DEFAULT_CAPACITY, signal: nil)
+        ensure_initializable!
+        capacity = normalize_capacity(capacity)
+        signal = normalize_signal(signal)
+        prepared = State.new(capacity:, signal:, lock: Lock.new)
+        commit_initialization(prepared)
+      end
+      private :initialize
+
       def initialize_copy(_other)
         raise TypeError, "priority queues cannot be copied"
       end
 
-      def try_push(priority, value)
+      def push(priority, value)
         state = initialized_state
         with_queue_operation(state) do
           raise_closed if state.closed
@@ -69,35 +78,28 @@ module Farce
         end
       end
 
-      def try_pop
-        state = initialized_state
-        result = with_queue_operation(state) do
-          raise_closed if state.closed
-          bucket = state.buckets.first
-          next EMPTY unless bucket
-
-          value = bucket.items.first
-          prepared_items = bucket.items.drop(1)
-          notify_and_commit(state) do
-            if prepared_items.empty?
-              state.buckets.shift
-            else
-              bucket.items = prepared_items
-            end
-            state.size -= 1
-          end
-          value
-        end
-        return result unless EMPTY.equal?(result)
-        block_given? ? yield : nil
+      def pop(&fallback)
+        pop_endpoint(last: false, fallback:)
       end
 
-      def peek
-        read_minimum(:value) { block_given? ? yield : nil }
+      def pop_last(&fallback)
+        pop_endpoint(last: true, fallback:)
       end
 
-      def peek_priority
-        read_minimum(:priority) { block_given? ? yield : nil }
+      def peek(&fallback)
+        read_endpoint(:value, last: false, fallback:)
+      end
+
+      def peek_last(&fallback)
+        read_endpoint(:value, last: true, fallback:)
+      end
+
+      def peek_priority(&fallback)
+        read_endpoint(:priority, last: false, fallback:)
+      end
+
+      def peek_last_priority(&fallback)
+        read_endpoint(:priority, last: true, fallback:)
       end
 
       def delete(priority, value)
@@ -146,12 +148,27 @@ module Farce
 
       private
 
-      def initialize_storage(capacity: DEFAULT_CAPACITY, signal: nil)
-        ensure_initializable!
-        capacity = normalize_capacity(capacity)
-        signal = normalize_signal(signal)
-        prepared = State.new(capacity:, signal:, lock: Lock.new)
-        commit_initialization(prepared)
+      def pop_endpoint(last:, fallback:)
+        state = initialized_state
+        result = with_queue_operation(state) do
+          raise_closed if state.closed
+          bucket = last ? state.buckets.last : state.buckets.first
+          next EMPTY unless bucket
+
+          value = bucket.items.first
+          prepared_items = bucket.items.drop(1)
+          notify_and_commit(state) do
+            if prepared_items.empty?
+              last ? state.buckets.pop : state.buckets.shift
+            else
+              bucket.items = prepared_items
+            end
+            state.size -= 1
+          end
+          value
+        end
+        return result unless EMPTY.equal?(result)
+        fallback&.call
       end
 
       def ensure_initializable!
@@ -165,7 +182,6 @@ module Farce
           raise FrozenError, "can't modify frozen priority queue" if primitive_frozen?(self)
 
           without_async_interrupts do
-            @signal = prepared.signal
             @state = prepared
             primitive_freeze(self)
           end
@@ -206,15 +222,15 @@ module Farce
         end
       end
 
-      def read_minimum(kind)
+      def read_endpoint(kind, last:, fallback:)
         state = initialized_state
         result = with_queue_operation(state) do
           raise_closed if state.closed
-          bucket = state.buckets.first
+          bucket = last ? state.buckets.last : state.buckets.first
           next EMPTY unless bucket
           kind == :priority ? bucket.priority : bucket.items.first
         end
-        EMPTY.equal?(result) ? yield : result
+        EMPTY.equal?(result) ? fallback&.call : result
       end
 
       def delete_value(priority, value, identity:)
@@ -280,5 +296,3 @@ module Farce
     end
   end
 end
-
-require "farce/engine/shared/priority_queue"

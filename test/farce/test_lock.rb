@@ -146,7 +146,7 @@ module Farce
 
     def test_sleep_releases_and_reacquires_the_lock
       lock = Lock.new
-      acquired = Queue.new
+      acquired = ::Queue.new
       lock.lock
       worker = Thread.new { lock.synchronize { acquired << true } }
       native = Mutex.new
@@ -168,10 +168,10 @@ module Farce
       return unless Internal.native_ractors?
 
       lock = Lock.new
-      sleeping = Queue.new
-      holding = Queue.new
-      release_holder = Queue.new
-      errors = Queue.new
+      sleeping = ::Queue.new
+      holding = ::Queue.new
+      release_holder = ::Queue.new
+      errors = ::Queue.new
       sleeper = Thread.new do
         lock.synchronize do
           sleeping << true
@@ -209,7 +209,7 @@ module Farce
       return unless Internal.native_ractors?
 
       lock = Lock.new
-      errors = Queue.new
+      errors = ::Queue.new
       lock.lock
       waiter = Thread.new do
         lock.synchronize { flunk "interrupted waiter acquired the lock" }
@@ -235,7 +235,7 @@ module Farce
       return unless RUBY_ENGINE == "truffleruby"
 
       lock = Lock.new
-      ready = Queue.new
+      ready = ::Queue.new
       lock.lock
       waiter = Thread.new do
         ready << true
@@ -268,9 +268,9 @@ module Farce
         lock = Lock.new
         owner = lock.instance_variable_get(:@farce_owner_thread)
         original_set = owner.method(:set)
-        entered = Queue.new
-        release = Queue.new
-        start = Queue.new
+        entered = ::Queue.new
+        release = ::Queue.new
+        start = ::Queue.new
         worker = nil
         injected = false
         owner.define_singleton_method(:set) do |value|
@@ -309,9 +309,9 @@ module Farce
       return unless Internal.native_ractors?
 
       lock = Lock.new
-      ready = Queue.new
-      acquired = Queue.new
-      errors = Queue.new
+      ready = ::Queue.new
+      acquired = ::Queue.new
+      errors = ::Queue.new
       lock.lock
       waiters = 3.times.map do |index|
         Thread.new do
@@ -352,7 +352,7 @@ module Farce
       end
 
       assert_equal :waiting, events.receive
-      result = Queue.new
+      result = ::Queue.new
       receiver = Thread.new { result << events.receive }
 
       sleep 0.01

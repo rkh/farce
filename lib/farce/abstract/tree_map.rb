@@ -4,15 +4,13 @@
 
 module Farce
   module Abstract
-    # Abstract super class for all tree map implementations.
+    # @abstract Superclass for all tree map implementations.
     #
     # You can think of a tree map as a sorted hash (sorted by key).
     # Under the hood, tree maps are implemented as a balanced binary search tree.
     #
     # This means lookups, insertions, and deletions are O(log n) operations (vs O(1) for a hash map).
     # This is much slower than a hash map, but much faster than ad hoc sorting of the map.
-    #
-    # @abstract
     class TreeMap < Map
       # @!method first_key
       #   @return [BasicObject] The first key in the map (the smallest key according to the map's ordering).

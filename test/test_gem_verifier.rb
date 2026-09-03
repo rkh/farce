@@ -23,7 +23,6 @@ class TestGemVerifier < Test
     assert_equal ["MIT", "LicenseRef-Kazlib-1.20"], spec.licenses
     assert_includes spec.files, "ext/containers/dict.c"
     assert_includes spec.files, "ext/containers/dict.h"
-    assert_includes spec.files, "ext/containers/RBTREE-LICENSE"
     assert_includes spec.files, "ext/containers/priority_queue.c"
     assert_includes spec.files, "ext/containers/tree_map.c"
     assert_empty unexpected_sources

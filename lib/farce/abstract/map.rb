@@ -4,6 +4,7 @@
 
 module Farce
   module Abstract
+    # @abstract Superclass for all maps defined by Farce.
     # @note
     #  The supported methods are generally compatible with their Hash counterparts,
     #  with the notable exception of {ConcurrentMap#update}.
@@ -128,8 +129,6 @@ module Farce
     #   Return the number of entries currently in the map.
     #   @return [Integer] The number of entries.
     #   @abstract
-    #
-    # @abstract
     class Map
       include Enumerable
 

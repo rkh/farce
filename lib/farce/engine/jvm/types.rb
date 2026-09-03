@@ -21,7 +21,6 @@ module Farce
       OBJECT_INSTANCE_VARIABLE_SET_METHOD = Object.instance_method(:instance_variable_set)
       OBJECT_IS_A_METHOD                  = Object.instance_method(:is_a?)
       STRING_INITIALIZE_COPY_METHOD       = String.instance_method(:initialize_copy)
-      STRING_UMINUS_METHOD                = String.instance_method(:-@)
 
       if RUBY_ENGINE == "jruby"
         TreeMap       = Java::JavaUtil::TreeMap
@@ -88,7 +87,7 @@ module Farce
       # JRuby and TruffleRuby differ from CRuby around subclass #freeze hooks.
       def canonical_string(value)
         klass = OBJECT_CLASS_METHOD.bind_call(value)
-        return STRING_UMINUS_METHOD.bind_call(value) if identical?(klass, String)
+        return -value if identical?(klass, String)
 
         copy_frozen_string(value)
       end

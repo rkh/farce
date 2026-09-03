@@ -17,7 +17,6 @@
 
 #include "dict.h"
 
-#define PRIORITY_QUEUE_DEFAULT_CAPACITY 1024
 #define PRIORITY_QUEUE_IDENTITY_INDEX_THRESHOLD 32
 
 enum {
@@ -370,7 +369,6 @@ static VALUE eClosedQueueError;
 static VALUE eIsolationError;
 static ID id_compare;
 static ID id_broadcast;
-static ID id_signal_ivar;
 
 static void priority_queue_wait_for_publication(priority_queue_t *queue);
 
@@ -1013,8 +1011,8 @@ priority_queue_finish_publication(VALUE opaque)
         (priority_queue_initialize_t *)opaque;
 
     /* An async exception can arrive after rb_ractor_make_shareable has set the
-     * shareable flag. In that case the native fields and Ruby ivars already
-     * form a coherent queue, so publish initialized before propagating it. */
+     * shareable flag. In that case the native fields already form a coherent
+     * queue, so publish initialized before propagating it. */
     pthread_mutex_lock(&initialization->queue->lock);
     if (rb_ractor_shareable_p(initialization->self)) {
         RUBY_ATOMIC_SET(
@@ -1070,10 +1068,6 @@ priority_queue_initialize_commit(VALUE opaque)
     queue->bounded = initialization->bounded;
     queue->capacity = initialization->capacity;
     queue->signal = initialization->signal;
-    /* The Ruby blocking layer reads @signal directly. Assign it as part of
-     * the authoritative native commit so two callers racing initialize cannot
-     * leave the Ruby wait path observing a losing initializer's Signal. */
-    rb_ivar_set(initialization->self, id_signal_ivar, queue->signal);
     /* Publication installs its logical gate before primitive freezing and
      * keeps that whole transition under nested ensure cleanup. */
     return priority_queue_publish_shareable(initialization);
@@ -1099,14 +1093,12 @@ priority_queue_initialize(int argc, VALUE *argv, VALUE self)
     }
     priority_queue_check_initializable(self, queue);
 
-    if (keyword_values[0] == Qnil) {
+    if (keyword_values[0] == Qundef || keyword_values[0] == Qnil) {
         initialization.bounded = false;
         initialization.capacity = 0;
     }
     else {
-        VALUE capacity_value = keyword_values[0] == Qundef
-            ? INT2FIX(PRIORITY_QUEUE_DEFAULT_CAPACITY)
-            : rb_to_int(keyword_values[0]);
+        VALUE capacity_value = rb_to_int(keyword_values[0]);
         long long capacity = NUM2LL(capacity_value);
         if (capacity <= 0) rb_raise(rb_eArgError, "capacity must be positive or nil");
         if ((unsigned long long)capacity > (unsigned long long)SIZE_MAX) {
@@ -1295,6 +1287,7 @@ typedef struct {
     priority_queue_read_kind_t kind;
     VALUE result;
     bool empty;
+    bool last;
 } priority_queue_read_t;
 
 static VALUE
@@ -1307,7 +1300,7 @@ priority_queue_read_body(VALUE opaque)
     priority_queue_value_t *entry;
 
     if (queue->closed) priority_queue_raise_closed();
-    node = dict_first(&queue->tree);
+    node = read->last ? dict_last(&queue->tree) : dict_first(&queue->tree);
     if (!node) {
         read->empty = true;
         return Qnil;
@@ -1333,7 +1326,7 @@ priority_queue_read_body(VALUE opaque)
 }
 
 static VALUE
-priority_queue_read(VALUE self, priority_queue_read_kind_t kind)
+priority_queue_read(VALUE self, priority_queue_read_kind_t kind, bool last)
 {
     priority_queue_t *queue = priority_queue_get(self);
     priority_queue_read_t read = {
@@ -1341,6 +1334,7 @@ priority_queue_read(VALUE self, priority_queue_read_kind_t kind)
         .kind = kind,
         .result = Qnil,
         .empty = false,
+        .last = last,
     };
     priority_queue_call(
         queue,
@@ -1354,19 +1348,37 @@ priority_queue_read(VALUE self, priority_queue_read_kind_t kind)
 static VALUE
 priority_queue_pop(VALUE self)
 {
-    return priority_queue_read(self, PRIORITY_QUEUE_POP);
+    return priority_queue_read(self, PRIORITY_QUEUE_POP, false);
+}
+
+static VALUE
+priority_queue_pop_last(VALUE self)
+{
+    return priority_queue_read(self, PRIORITY_QUEUE_POP, true);
 }
 
 static VALUE
 priority_queue_peek(VALUE self)
 {
-    return priority_queue_read(self, PRIORITY_QUEUE_PEEK);
+    return priority_queue_read(self, PRIORITY_QUEUE_PEEK, false);
+}
+
+static VALUE
+priority_queue_peek_last(VALUE self)
+{
+    return priority_queue_read(self, PRIORITY_QUEUE_PEEK, true);
 }
 
 static VALUE
 priority_queue_peek_priority(VALUE self)
 {
-    return priority_queue_read(self, PRIORITY_QUEUE_PEEK_PRIORITY);
+    return priority_queue_read(self, PRIORITY_QUEUE_PEEK_PRIORITY, false);
+}
+
+static VALUE
+priority_queue_peek_last_priority(VALUE self)
+{
+    return priority_queue_read(self, PRIORITY_QUEUE_PEEK_PRIORITY, true);
 }
 
 typedef struct {
@@ -1602,12 +1614,15 @@ priority_queue_capacity(VALUE self)
 static void
 priority_queue_define_methods(VALUE klass)
 {
-    rb_define_private_method(klass, "initialize_storage", priority_queue_initialize, -1);
+    rb_define_private_method(klass, "initialize", priority_queue_initialize, -1);
     rb_define_private_method(klass, "initialize_copy", priority_queue_initialize_copy, 1);
-    rb_define_private_method(klass, "try_push", priority_queue_push, 2);
-    rb_define_private_method(klass, "try_pop", priority_queue_pop, 0);
+    rb_define_method(klass, "push", priority_queue_push, 2);
+    rb_define_method(klass, "pop", priority_queue_pop, 0);
+    rb_define_method(klass, "pop_last", priority_queue_pop_last, 0);
     rb_define_method(klass, "peek", priority_queue_peek, 0);
+    rb_define_method(klass, "peek_last", priority_queue_peek_last, 0);
     rb_define_method(klass, "peek_priority", priority_queue_peek_priority, 0);
+    rb_define_method(klass, "peek_last_priority", priority_queue_peek_last_priority, 0);
     rb_define_method(klass, "delete", priority_queue_delete, 2);
     rb_define_method(klass, "delete_identity", priority_queue_delete_identity, 2);
     rb_define_method(klass, "size", priority_queue_size, 0);
@@ -1626,7 +1641,6 @@ containers_init_priority_queue(VALUE namespace)
 
     id_compare = rb_intern("<=>");
     id_broadcast = rb_intern("broadcast");
-    id_signal_ivar = rb_intern("@signal");
     eClosedQueueError = rb_const_get(rb_cObject, rb_intern("ClosedQueueError"));
     ractor = rb_const_get(rb_cObject, id_ractor);
     eIsolationError = rb_const_get(ractor, rb_intern("IsolationError"));

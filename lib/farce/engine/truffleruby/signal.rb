@@ -11,12 +11,14 @@ module Farce
 
       def initialize
         @generation     = Counter.new
+        @num_waiting    = Counter.new
         @condition      = ConditionVariable.new
         @broadcast_lock = Mutex.new
         freeze
       end
 
       def generation = @generation.value
+      def num_waiting = @num_waiting.value
 
       def broadcast
         @broadcast_lock.synchronize do
@@ -32,13 +34,20 @@ module Farce
 
         result = @broadcast_lock.synchronize do
           observed ||= generation
-          loop do
-            current = generation
-            break current unless current == observed
+          waiting = false
+          begin
+            loop do
+              current = generation
+              break current unless current == observed
 
-            remaining = deadline - Clock.now if deadline
-            break TIMED_OUT if remaining && !remaining.positive?
-            @condition.wait(@broadcast_lock, remaining)
+              remaining = deadline - Clock.now if deadline
+              break TIMED_OUT if remaining && !remaining.positive?
+              @num_waiting.increment unless waiting
+              waiting = true
+              @condition.wait(@broadcast_lock, remaining)
+            end
+          ensure
+            @num_waiting.decrement if waiting
           end
         end
 

@@ -23,8 +23,8 @@ module Farce
 
     def test_multiple_readers_can_enter_together
       lock = ReadWriteLock.new
-      entered = Queue.new
-      release = Queue.new
+      entered = ::Queue.new
+      release = ::Queue.new
       readers = 2.times.map do
         Thread.new do
           lock.with_read_lock do
@@ -44,9 +44,9 @@ module Farce
 
     def test_writer_waits_for_readers
       lock = ReadWriteLock.new
-      reader_entered = Queue.new
-      release_reader = Queue.new
-      writer_entered = Queue.new
+      reader_entered = ::Queue.new
+      release_reader = ::Queue.new
+      writer_entered = ::Queue.new
       reader = Thread.new do
         lock.with_read_lock do
           reader_entered << true
@@ -72,9 +72,9 @@ module Farce
 
     def test_readers_wait_for_a_writer
       lock = ReadWriteLock.new
-      writer_entered = Queue.new
-      release_writer = Queue.new
-      reader_entered = Queue.new
+      writer_entered = ::Queue.new
+      release_writer = ::Queue.new
+      reader_entered = ::Queue.new
       writer = Thread.new do
         lock.with_write_lock do
           writer_entered << true
@@ -118,9 +118,9 @@ module Farce
 
     def test_competing_upgrades_do_not_deadlock
       lock = ReadWriteLock.new
-      ready = Queue.new
-      start = Queue.new
-      writes = Queue.new
+      ready = ::Queue.new
+      start = ::Queue.new
+      writes = ::Queue.new
       workers = 2.times.map do |index|
         Thread.new do
           lock.with_read_lock do
@@ -164,9 +164,9 @@ module Farce
 
     def test_upgrade_downgrades_to_the_outer_read_lock
       lock = ReadWriteLock.new
-      downgraded = Queue.new
-      release_reader = Queue.new
-      writer_entered = Queue.new
+      downgraded = ::Queue.new
+      release_reader = ::Queue.new
+      writer_entered = ::Queue.new
       reader = Thread.new do
         lock.with_read_lock do
           lock.with_write_lock { nil }
@@ -208,8 +208,8 @@ module Farce
       return if RUBY_ENGINE == "jruby"
 
       lock = ReadWriteLock.new
-      reader_entered = Queue.new
-      release_reader = Queue.new
+      reader_entered = ::Queue.new
+      release_reader = ::Queue.new
       reader = Thread.new do
         lock.with_read_lock do
           reader_entered << true
@@ -238,8 +238,8 @@ module Farce
       return if RUBY_ENGINE == "jruby"
 
       lock = ReadWriteLock.new
-      blocker_entered = Queue.new
-      release_blocker = Queue.new
+      blocker_entered = ::Queue.new
+      release_blocker = ::Queue.new
       blocker = Thread.new do
         lock.with_read_lock do
           blocker_entered << true
@@ -270,14 +270,14 @@ module Farce
       return if RUBY_ENGINE == "jruby"
 
       lock = ReadWriteLock.new
-      ready = Queue.new
-      start_first = Queue.new
-      start_second = Queue.new
-      first_writing = Queue.new
-      release_first = Queue.new
-      second_restored = Queue.new
-      release_second = Queue.new
-      writer_entered = Queue.new
+      ready = ::Queue.new
+      start_first = ::Queue.new
+      start_second = ::Queue.new
+      first_writing = ::Queue.new
+      release_first = ::Queue.new
+      second_restored = ::Queue.new
+      release_second = ::Queue.new
+      writer_entered = ::Queue.new
       first = Thread.new do
         lock.with_read_lock do
           ready << true
@@ -353,7 +353,7 @@ module Farce
       end
 
       assert_equal :attempting, events.receive
-      results = Queue.new
+      results = ::Queue.new
       collector = Thread.new { results << events.receive }
 
       sleep 0.01

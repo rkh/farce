@@ -263,6 +263,21 @@ containers_signal_generation(VALUE self)
 }
 
 static VALUE
+containers_signal_num_waiting(VALUE self)
+{
+    containers_signal_t *signal = containers_signal_get(self);
+    size_t count = 0;
+
+    /* Count on demand so wait and broadcast have no additional bookkeeping. */
+    pthread_mutex_lock(&signal->lock);
+    for (containers_signal_waiter_t *waiter = signal->waiters; waiter; waiter = waiter->next) {
+        count++;
+    }
+    pthread_mutex_unlock(&signal->lock);
+    return SIZET2NUM(count);
+}
+
+static VALUE
 containers_signal_broadcast(VALUE self)
 {
     containers_signal_t *signal = containers_signal_get(self);
@@ -316,6 +331,7 @@ containers_init_signal(VALUE namespace)
     rb_define_alloc_func(cSignal, containers_signal_allocate);
     rb_define_method(cSignal, "initialize", containers_signal_initialize, 0);
     rb_define_method(cSignal, "generation", containers_signal_generation, 0);
+    rb_define_method(cSignal, "num_waiting", containers_signal_num_waiting, 0);
     rb_define_method(cSignal, "broadcast", containers_signal_broadcast, 0);
     rb_define_method(cSignal, "wait", containers_signal_wait, -1);
 }

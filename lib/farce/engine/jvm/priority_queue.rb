@@ -9,12 +9,12 @@ module Farce
   module Internal # :nodoc: all
     module JVMBasePriorityQueueBackend
       EMPTY = Object.new.freeze
-      DEFAULT_CAPACITY = 1024
+      DEFAULT_CAPACITY = nil
       INITIALIZATION_LOCK = Mutex.new
       INITIALIZE_INTERRUPT_MASK = { Exception => :never }.freeze
       private_constant :EMPTY, :DEFAULT_CAPACITY, :INITIALIZATION_LOCK, :INITIALIZE_INTERRUPT_MASK
 
-      def try_push(priority, value)
+      def push(priority, value)
         check_local_frozen
         access do
           check_open
@@ -31,14 +31,23 @@ module Farce
         @capacity
       end
 
-      def try_pop(&fallback)
+      def pop(&fallback)
         check_local_frozen
-        read(:pop, fallback)
+        read(:pop, fallback, last: false)
       end
 
-      def peek(&fallback) = read(:peek, fallback)
+      def pop_last(&fallback)
+        check_local_frozen
+        read(:pop, fallback, last: true)
+      end
 
-      def peek_priority(&fallback) = read(:priority, fallback)
+      def peek(&fallback) = read(:peek, fallback, last: false)
+
+      def peek_last(&fallback) = read(:peek, fallback, last: true)
+
+      def peek_priority(&fallback) = read(:priority, fallback, last: false)
+
+      def peek_last_priority(&fallback) = read(:priority, fallback, last: true)
 
       def delete(priority, value)
         check_local_frozen
@@ -80,7 +89,7 @@ module Farce
 
       private
 
-      def initialize_storage(capacity: DEFAULT_CAPACITY, signal: nil)
+      def initialize(capacity: DEFAULT_CAPACITY, signal: nil)
         raise "priority queue is already initialized" if defined?(@state)
         raise FrozenError, "can't modify frozen #{self.class}" if JVMContainers.frozen_object?(self)
 
@@ -110,7 +119,6 @@ module Farce
               JVMContainers.frozen_object?(self)
 
             @capacity = parsed_capacity
-            @signal = signal
             @change_signal = signal
             @guard = guard
             @state = state
@@ -119,10 +127,10 @@ module Farce
         end
       end
 
-      def read(kind, fallback)
+      def read(kind, fallback, last:)
         result = access do
           check_open
-          storage_read(kind)
+          storage_read(kind, last:)
         end
         return result unless EMPTY.equal?(result)
 
@@ -267,8 +275,8 @@ module Farce
         end
       end
 
-      def storage_read(kind)
-        map_entry = first_live_map_entry
+      def storage_read(kind, last:)
+        map_entry = live_map_entry(last:)
         return empty_result if map_entry.nil?
         return map_entry.getKey.priority if kind == :priority
 
@@ -280,7 +288,7 @@ module Farce
 
         next_bucket_size = bucket.live_size - 1
         next_size = @state.item_count - 1
-        removal_iterator = first_map_removal_iterator(bucket) if next_bucket_size.zero?
+        removal_iterator = endpoint_map_removal_iterator(bucket, last:) if next_bucket_size.zero?
         commit_change do
           removed = bucket.deque.pollFirst
           raise "priority bucket changed while locked" unless removed.equal?(entry)
@@ -469,13 +477,13 @@ module Farce
         end
       end
 
-      def first_live_map_entry
+      def live_map_entry(last:)
         loop do
-          entry = JVMContainers.nullable(@state.tree.firstEntry)
+          entry = JVMContainers.nullable(last ? @state.tree.lastEntry : @state.tree.firstEntry)
           return if entry.nil?
           return entry if entry.getValue.live_size.positive?
 
-          @state.tree.pollFirstEntry
+          last ? @state.tree.pollLastEntry : @state.tree.pollFirstEntry
         end
       end
 
@@ -492,12 +500,13 @@ module Farce
         iterator
       end
 
-      def first_map_removal_iterator(bucket)
-        iterator = @state.tree.entrySet.iterator
-        raise "priority map lost its first bucket" unless iterator.hasNext
+      def endpoint_map_removal_iterator(bucket, last:)
+        entries = last ? @state.tree.descendingMap.entrySet : @state.tree.entrySet
+        iterator = entries.iterator
+        raise "priority map lost its endpoint bucket" unless iterator.hasNext
 
         entry = iterator.next
-        raise "priority map selected the wrong first bucket" unless entry.getValue.equal?(bucket)
+        raise "priority map selected the wrong endpoint bucket" unless entry.getValue.equal?(bucket)
 
         iterator
       end
@@ -556,8 +565,7 @@ module Farce
       end
     end
 
-    # Coarse-lock ordered storage used directly by the blocking methods which
-    # are added below from the engine-neutral implementation.
+    # Coarse-lock ordered storage used by the public queue wrappers.
     class PriorityQueue
       include JVMPriorityQueueBackend
 
@@ -569,5 +577,3 @@ module Farce
     private_constant :JVMBasePriorityQueueBackend, :JVMPriorityQueueBackend
   end
 end
-
-require "farce/engine/shared/priority_queue"

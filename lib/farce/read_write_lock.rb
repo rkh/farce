@@ -108,7 +108,6 @@ module Farce
       return if try_acquire_read_lock
 
       # Kernel.loop allocates on every acquisition.
-      # rubocop:disable-next Style/InfiniteLoop
       while true
         generation = @signal.generation
         return if try_acquire_read_lock
@@ -145,7 +144,6 @@ module Farce
         return if acquired
 
         # Kernel.loop allocates on every acquisition.
-        # rubocop:disable-next Style/InfiniteLoop
         while true
           generation = @signal.generation
           acquired = try_acquire_write_lock(mode)

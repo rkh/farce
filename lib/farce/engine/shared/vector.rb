@@ -81,6 +81,31 @@ module Farce
         result if completed
       end
 
+      def store_if_absent(index, timeout: nil)
+        raise LocalJumpError, "no block given" unless block_given?
+
+        index = convert_index(index)
+        completed, reservation = reserve(timeout_deadline(timeout)) do
+          normalized = assignment_index(index)
+          current = @values[normalized]
+          if current.nil?
+            @updating = true
+            [:store, normalized]
+          else
+            [:existing, current]
+          end
+        end
+        return unless completed
+        return reservation.last if reservation.first == :existing
+
+        _, normalized = reservation
+        result = yield
+        @mutex.synchronize { @values[normalized] = result }
+        result
+      ensure
+        finish_update if reservation&.first == :store
+      end
+
       def compare_and_set(index, expected, replacement, timeout: nil)
         index = convert_index(index)
         completed, reservation = reserve(timeout_deadline(timeout)) do
@@ -165,7 +190,7 @@ module Farce
       end
 
       def with_available(deadline)
-        while true # rubocop:disable Style/InfiniteLoop
+        while true
           generation = @signal.generation
           completed, result = @mutex.synchronize do
             @updating ? [false, nil] : [true, yield]
@@ -176,7 +201,7 @@ module Farce
       end
 
       def reserve(deadline)
-        while true # rubocop:disable Style/InfiniteLoop
+        while true
           generation = @signal.generation
           completed, result = @mutex.synchronize do
             @updating ? [false, nil] : [true, yield]
@@ -194,7 +219,7 @@ module Farce
       def changed! = @signal.broadcast
 
       def wait_for_value(index, expected, deadline, non_nil:)
-        while true # rubocop:disable Style/InfiniteLoop
+        while true
           generation = @signal.generation
           current = @mutex.synchronize { @values[index] }
           ready = non_nil ? !current.nil? : !values_equal?(current, expected)

@@ -29,11 +29,11 @@ require "farce/version"
 # defined?(VERSION) # => false
 # ```
 module Farce
+  include Internal::Autoloads
+
   MAYBE     = Internal::ConstMissing.new(Object, ignore: %i[NativeException RubyLex])
   UNDEFINED = Internal::Undefined.new("UNDEFINED")
   private_constant :Internal, :MAYBE, :UNDEFINED
-
-  include Internal::Autoloads
 
   # @overload clock
   #   The current clock time

@@ -4,7 +4,7 @@
 
 module Farce
   module Abstract
-    # Abstract super class for maps with added concurrency features.
+    # @abstract Super class for {Map maps} with added concurrency features.
     #
     # @!method compare_and_set(key, expected, replacement, timeout: nil)
     #   Atomically replace a value if the key is present and its current value matches `expected`.
@@ -101,8 +101,6 @@ module Farce
     #   @yieldreturn [BasicObject] The fallback value to return.
     #   @return [BasicObject, nil] The non-nil value, or the fallback result or nil on timeout.
     #   @abstract
-    #
-    # @abstract
     class ConcurrentMap < Map
     end
   end
