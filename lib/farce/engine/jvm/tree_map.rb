@@ -8,8 +8,8 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     module JVMTreeMapBackend
-      Key = Struct.new(:key, :mutation_owner)
-      Value = Struct.new(:value)
+      Key            = Struct.new(:key, :mutation_owner)
+      Value          = Data.define(:value)
       KEY_COMPARATOR = JVMContainers.comparator do |left, right|
         next 0 if left.equal?(right)
 
@@ -22,7 +22,7 @@ module Farce
 
       INITIALIZATION_LOCK = Mutex.new
       INITIALIZE_INTERRUPT_MASK = { Exception => :never }.freeze
-      State = Struct.new(:tree)
+      State = Data.define(:tree)
       private_constant :Key, :Value, :KEY_COMPARATOR, :INITIALIZATION_LOCK,
         :INITIALIZE_INTERRUPT_MASK, :State
 

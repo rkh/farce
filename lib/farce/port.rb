@@ -30,6 +30,7 @@ module Farce
 
     private_constant :MANAGER, :SUBCLASSES
 
+    # @api private
     def self.[](mode, auto_local: false)
       if self == Port
         return SUBCLASSES.dig(mode, auto_local ? 1 : 0) || raise(ArgumentError, "invalid mode: #{mode.inspect}")

@@ -8,6 +8,7 @@ module Farce
       def test_include_farce_exposes_public_camel_case_constants
         namespace = Module.new { include Farce }
 
+        assert_equal Farce::Atom, namespace.const_get(:Atom)
         assert_equal Farce::Clock, namespace.const_get(:Clock)
         assert_equal Farce::Port, namespace.const_get(:Port)
         assert_equal Farce::Ractor, namespace.const_get(:Ractor)
