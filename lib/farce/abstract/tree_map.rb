@@ -25,7 +25,7 @@ module Farce
       # @!method shift
       #   Remove and return the first key-value pair in the map (the smallest key according to the map's ordering).
       #   @return [Array(BasicObject, BasicObject)] The first key-value pair in the map.
-      Internal.delegate(self, :@map, :[], :[]=, :clear, :delete, :empty?, :fetch, :first_key, :getkey, :key?,
+      Internal.delegate(self, :@map, :[], :[]=, :delete, :empty?, :fetch, :first_key, :getkey, :key?,
         :last_key, :length, :pop, :shift, :size)
 
       # @note Subclasses may accept additional, optional arguments (usually keyword arguments) to configure the map.
@@ -40,6 +40,13 @@ module Farce
           entries&.each { @map[_1] = _2 }
         end
         super()
+      end
+
+      # Remove all entries from the map.
+      # @return [self]
+      def clear
+        @map.clear
+        self
       end
 
       # Iterate over the map's key-value pairs.
@@ -104,6 +111,14 @@ module Farce
       # Mutable strings are accepted however and will be converted to an immutable string.
       # @return [true]
       def shareable_keys? = true
+
+      # TreeMap keys are compared by their ordering, never by identity.
+      # @return [false]
+      def compare_keys_by_identity? = false
+
+      # TreeMap values are compared by equality, never by identity.
+      # @return [false]
+      def compare_values_by_identity? = false
 
       private
 

@@ -16,6 +16,22 @@ module Farce
   #
   #   Ractor.shareable?(object) # => false
   module Unshareable
+    # @api private
+    module UndefFreeze # :nodoc: all
+      # @api private
+      def append_features(mod)
+        super
+        if mod.is_a?(Class)
+          mod.class_eval { undef freeze if method_defined?(:freeze) }
+        else
+          mod.extend(UndefFreeze)
+        end
+      end
+    end
+
+    private_constant :UndefFreeze
+    extend UndefFreeze
+
     # Mixin for classes that cannot be shared across Ractors, but may be moved between them.
     module Movable
       include Unshareable
@@ -25,22 +41,6 @@ module Farce
     module Copyable
       include Unshareable
     end
-
-    # @api private
-    module UndefFreeze # :nodoc: all
-      # @api private
-      def append_features(mod)
-        if mod.is_a?(Class)
-          mod.class_eval { undef freeze if method_defined?(:freeze) }
-        else
-          mod.extend(UndefFreeze)
-        end
-        super
-      end
-    end
-
-    private_constant :UndefFreeze
-    extend UndefFreeze
 
     # Make sure to call `super` if you include this module.
     # Accepts any arguments and passes them on to the superclass initializer.
