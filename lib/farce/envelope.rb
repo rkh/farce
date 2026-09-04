@@ -210,6 +210,28 @@ module Farce
     # @raise [AlreadyClaimed] If the envelope has already been claimed by another Ractor.
     def value = Internal::Storage.store_if_absent(self) { claim! && retrieve }
 
+    # Compares wrapped values. Compatible envelopes can be compared without
+    # claiming or opening either envelope.
+    # @param other [BasicObject, Envelope] The value or envelope to compare.
+    # @param identity [Boolean] Whether to compare the values by identity instead of equality.
+    # @return [Boolean] Whether the wrapped values match.
+    def same_value?(other, identity: false)
+      if comparison_vault
+        other_vault = other.comparison_vault if Envelope === other
+        if comparison_vault.equal?(other_vault)
+          return comparison_vault.same_value?(self, other, identity:)
+        elsif !(Envelope === other) && Ractor.shareable?(other)
+          return comparison_vault.same_value?(self, other, identity:, right_stored: false)
+        end
+      end
+
+      left  = value
+      right = other.value if Envelope === other
+      return BasicObject.instance_method(:equal?).bind_call(left, right) if identity
+
+      left == right
+    end
+
     # @return [String] String representation of the map, suitable for debugging.
     def inspect
       return "#<#{self.class.name} value=#{value.inspect}>" if owned?
@@ -228,5 +250,9 @@ module Farce
         end
       end
     end
+
+    protected
+
+    def comparison_vault = defined?(@vault) && @vault
   end
 end

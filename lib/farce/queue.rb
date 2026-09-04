@@ -6,14 +6,18 @@ module Farce
   # A thread-safe, ractor-shareable, first-in-first-out queue.
   #
   # The queue is bounded by default. Producers wait when the queue reaches its
-  # capacity, while consumers wait when it is empty.
+  # capacity, while consumers wait when it is empty. Values are wrapped according
+  # to the configured mode when pushed and automatically unwrapped when popped.
   class Queue < Abstract::Queue
     include Shareable
 
     # Create a queue.
+    # @!macro modes
     # @param capacity [Integer, nil] the maximum number of values, or nil for an unbounded queue
-    def initialize(capacity: 1024)
-      @queue = Internal::Queue.new(capacity:)
+    # @param mode [Symbol] the default mode used to transfer values between Ractors
+    def initialize(capacity: 1024, mode: :copy)
+      @manager = ModeManager.new(mode:)
+      @queue   = Internal::Queue.new(capacity:)
       super()
     end
 
@@ -53,19 +57,26 @@ module Farce
     # @yield called when the timeout expires
     # @raise [ThreadError] when the queue is empty and non_block is true
     # @return [BasicObject, nil] the value or the fallback result
-    def pop(non_block = false, timeout: nil, &fallback) # rubocop:disable Style/OptionalBooleanParameter
+    def pop(non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
       return try_pop { raise ThreadError, "queue empty" } if non_block
 
-      @queue.pop(timeout:, &fallback)
+      empty  = false
+      result = @queue.pop(timeout:) { empty = true }
+      return @manager.unwrap(result) unless empty
+      yield if block_given?
     end
 
     # Add a value, waiting while a bounded queue is full.
+    # @!macro modes
     # @param value [BasicObject] the value to add
     # @param non_block [Boolean] whether to raise instead of waiting when full
     # @param timeout [Numeric, nil] maximum number of seconds to wait
+    # @param mode [Symbol, nil] the transfer mode, or nil to use the queue's default mode
     # @raise [ThreadError] when the queue is full and non_block is true
     # @return [Boolean] whether the value was added
-    def push(value, non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
+    def push(value, non_block = false, timeout: nil, mode: nil) # rubocop:disable Style/OptionalBooleanParameter
+      value = @manager.wrap(value, mode:)
+
       if non_block
         return true if @queue.push(value, timeout: 0)
 
@@ -79,20 +90,20 @@ module Farce
     # @yield called when the queue is empty
     # @return [BasicObject, nil] the value or the fallback result
     def try_pop
-      empty = false
+      empty  = false
       result = @queue.pop(timeout: 0) { empty = true }
-      return result unless empty
-
-      block_given? ? yield : nil
+      return @manager.unwrap(result) unless empty
+      yield if block_given?
     end
 
     # Try to add a value without waiting.
+    # @!macro modes
     # @param value [BasicObject] the value to add
+    # @param mode [Symbol, nil] the transfer mode, or nil to use the queue's default mode
     # @yield called when the queue is full
     # @return [Boolean, BasicObject] true, or the fallback result when full
-    def try_push(value)
-      return true if @queue.push(value, timeout: 0)
-
+    def try_push(value, mode: nil)
+      return true if @queue.push(@manager.wrap(value, mode:), timeout: 0)
       block_given? ? yield : false
     end
 

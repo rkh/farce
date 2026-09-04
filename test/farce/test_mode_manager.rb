@@ -55,6 +55,12 @@ module Farce
       assert_same value, manager.unwrap(value)
     end
 
+    def test_returns_basic_objects_unchanged
+      manager = ModeManager.new
+
+      assert_same UNDEFINED, manager.unwrap(UNDEFINED)
+    end
+
     def test_copy_mode_wraps_a_snapshot_and_automatically_unwraps_it
       manager = ModeManager.new
       source = Payload.new(:original)

@@ -12,6 +12,14 @@ module Farce
       def move_out(key)       = @data.delete(key)
       def copy_out(key)       = @data[key].dup
 
+      def same_value?(left, right, identity: false, right_stored: true)
+        left  = @data[left]
+        right = @data[right] if right_stored
+        return BasicObject.instance_method(:equal?).bind_call(left, right) if identity
+
+        !!(left == right)
+      end
+
       def delete(key)
         @data.delete(key)
         nil

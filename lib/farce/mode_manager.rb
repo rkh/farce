@@ -92,8 +92,37 @@ module Farce
     # @return [BasicObject]
     #   The value inside the envelope if it was created by this mode manager, or the value itself if it was not.
     def unwrap(value)
-      return value unless value.is_a?(Envelope) && value.auto_unwrap.equal?(self)
+      return value unless Envelope === value && value.auto_unwrap.equal?(self)
       value.value
     end
+
+    # Compares two values managed by this instance. Compatible envelopes can be
+    # compared without claiming or opening them.
+    # @param left [BasicObject, Envelope] The stored value.
+    # @param right [BasicObject, Envelope] The comparison value.
+    # @param identity [Boolean] Whether to compare by identity instead of equality.
+    # @return [Boolean] Whether the values match.
+    def same_value?(left, right, identity: false)
+      left_managed  = managed_envelope?(left)
+      right_managed = managed_envelope?(right)
+
+      if left_managed && right_managed
+        return false if identity && Envelope::Move === left && Envelope::Local === right && !left.owned?
+        return left.same_value?(right, identity:)
+      end
+
+      return false if identity && left_managed
+      return left.same_value?(right) if left_managed
+
+      left  = unwrap(left)
+      right = unwrap(right)
+      return BasicObject.instance_method(:equal?).bind_call(left, right) if identity
+
+      left == right
+    end
+
+    private
+
+    def managed_envelope?(value) = Envelope === value && value.auto_unwrap.equal?(self)
   end
 end

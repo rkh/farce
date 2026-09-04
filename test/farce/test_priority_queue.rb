@@ -23,6 +23,7 @@ module Farce
       assert_equal Float::INFINITY, queue.max
       assert_equal 0, queue.default_priority
       assert_equal :ascending, queue.order
+      assert_equal :copy, queue.mode
       assert_equal 0, queue.size
       assert_predicate queue, :empty?
       refute_predicate queue, :closed?
@@ -33,7 +34,32 @@ module Farce
       error = assert_raises(ArgumentError) { PriorityQueue.new(order: :sideways) }
       assert_equal "order must be :ascending or :descending", error.message
       assert_raises(TypeError) { queue.dup }
+      assert_raises(ArgumentError) { PriorityQueue.new(mode: :invalid) }
       refute_respond_to queue, :delete_identity
+    end
+
+    def test_modes_wrap_only_values_and_reads_automatically_unwrap_them
+      queue = PriorityQueue.new(mode: :local)
+      local = ModePayload.new(:local)
+
+      assert queue.push(local, priority: 2)
+      assert_same local, queue.peek
+      assert_same local, queue.pop
+
+      source = ModePayload.new(:original)
+
+      assert queue.try_push(source, priority: 1, mode: :copy)
+      source.value = :changed
+
+      copy = queue.try_pop
+
+      refute_same source, copy
+      assert_equal :original, copy.value
+
+      assert_raises(Ractor::IsolationError) do
+        queue.try_push(ModePayload.new(:rejected), priority: 1, mode: :raise)
+      end
+      assert_equal :local, queue.mode
     end
 
     def test_nonblocking_interface_and_fallbacks
@@ -164,6 +190,37 @@ module Farce
       assert_same third, queue.pop
       assert_same first, queue.pop
       refute queue.delete(second, priority: 1)
+    end
+
+    def test_delete_compares_copied_values_without_exposing_envelopes
+      queue = PriorityQueue.new
+      source = ModePayload.new(:same)
+
+      queue.push(source, priority: 1)
+
+      assert queue.delete(ModePayload.new(:same), priority: 1)
+      assert_predicate queue, :empty?
+    end
+
+    def test_delete_compares_moved_values_without_claiming_nonmatches
+      queue = PriorityQueue.new(mode: :move)
+      queue.push(ModePayload.new(:stored), priority: 1)
+      entry = queue.instance_variable_get(:@queue).peek
+      envelope = entry.value
+
+      refute queue.delete(ModePayload.new(:other), priority: 1)
+      refute_predicate envelope, :claimed?
+      assert queue.delete(ModePayload.new(:stored), priority: 1)
+      refute_predicate envelope, :claimed?
+    end
+
+    def test_identity_delete_can_match_the_value_returned_by_peek
+      queue = PriorityQueue.new
+      queue.push(ModePayload.new(:stored), priority: 1)
+      value = queue.peek
+
+      assert queue.delete(value, priority: 1, compare_by_identity: true)
+      assert_predicate queue, :empty?
     end
 
     def test_identity_deletion_does_not_remove_an_equal_distinct_value
@@ -351,12 +408,11 @@ module Farce
       consumer&.kill if consumer&.alive?
     end
 
-    def test_rejects_unshareable_inputs_on_cruby
+    def test_rejects_unshareable_priorities_on_cruby
       return unless RUBY_ENGINE == "ruby"
       queue = PriorityQueue.new
 
       assert_raises(Ractor::IsolationError) { queue.push(:value, priority: Object.new) }
-      assert_raises(Ractor::IsolationError) { queue.push(Object.new, priority: 1) }
     end
 
     def test_cross_ractor_producers_and_consumer
@@ -374,6 +430,16 @@ module Farce
       expected = 4.times.flat_map { |worker| 250.times.map { |index| (worker * 1_000) + index } }
 
       assert_equal expected.sort, actual.sort
+    end
+
+    def test_copies_unshareable_values_across_cruby_ractors
+      return unless RUBY_ENGINE == "ruby"
+      queue = PriorityQueue.new
+      queue.push(ModePayload.new(:value), priority: 1)
+
+      result = Ractor.new(queue) { |shared| shared.pop.value }
+
+      assert_equal :value, ractor_value(result)
     end
   end
 end

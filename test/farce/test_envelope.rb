@@ -17,6 +17,8 @@ module Farce
         @value = value
       end
 
+      def ==(other) = other.is_a?(self.class) && value == other.value
+
       def inspect = "#<Payload #{@value.inspect}>"
     end
 
@@ -134,6 +136,23 @@ module Farce
 
       assert_equal "envelope has already been claimed by another Ractor", error.message
       assert_raises(Envelope::AlreadyClaimed) { envelope.value }
+    end
+
+    def test_vault_backed_envelopes_compare_values_without_claiming_them
+      moved = Envelope::Move.new(Payload.new(:same))
+      equal = Envelope::Copy.new(Payload.new(:same))
+      other = Envelope::Copy.new(Payload.new(:other))
+
+      assert moved.same_value?(equal)
+      refute moved.same_value?(other)
+      refute moved.same_value?(equal, identity: true)
+      assert moved.same_value?(moved, identity: true)
+      refute_predicate moved, :claimed?
+
+      moved_string = Envelope::Move.new(+"same")
+
+      assert moved_string.same_value?("same")
+      refute_predicate moved_string, :claimed?
     end
 
     def test_concurrent_move_claims_have_one_winner

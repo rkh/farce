@@ -18,6 +18,7 @@ module Farce
       assert_instance_of Internal::PriorityQueue, queue.instance_variable_get(:@queue)
       assert_nil queue.capacity
       assert_equal Float::INFINITY, queue.max
+      assert_equal :copy, queue.mode
 
       assert_predicate queue, :empty?
       assert_predicate queue, :frozen?
@@ -25,6 +26,31 @@ module Farce
 
       refute_respond_to queue, :delete_identity
       refute_respond_to queue, :peek_priority
+      assert_raises(ArgumentError) { TimerQueue.new(mode: :invalid) }
+    end
+
+    def test_modes_wrap_values_and_reads_automatically_unwrap_them
+      queue = TimerQueue.new(mode: :local)
+      local = ModePayload.new(:local)
+
+      assert queue.push(local, at: Clock.now)
+      assert_same local, queue.peek
+      assert_same local, queue.pop
+
+      source = ModePayload.new(:original)
+
+      assert queue.try_push(source, at: Clock.now, mode: :copy)
+      source.value = :changed
+
+      copy = queue.try_pop
+
+      refute_same source, copy
+      assert_equal :original, copy.value
+
+      assert_raises(Ractor::IsolationError) do
+        queue.push(ModePayload.new(:rejected), at: Clock.now, mode: :raise)
+      end
+      assert_equal :local, queue.mode
     end
 
     def test_nonblocking_interface_observes_timestamp_and_capacity
@@ -248,6 +274,26 @@ module Farce
       assert_same second, queue.pop
     end
 
+    def test_delete_compares_copied_values_without_exposing_envelopes
+      queue = TimerQueue.new
+      timestamp = Time.now
+
+      queue.push(ModePayload.new(:same), at: timestamp)
+
+      assert queue.delete(ModePayload.new(:same), at: timestamp)
+      assert_predicate queue, :empty?
+    end
+
+    def test_identity_delete_can_match_the_value_returned_by_peek
+      queue = TimerQueue.new
+      timestamp = Time.now
+      queue.push(ModePayload.new(:stored), at: timestamp)
+      value = queue.peek
+
+      assert queue.delete(value, at: timestamp, compare_by_identity: true)
+      assert_predicate queue, :empty?
+    end
+
     def test_clear_and_close_wake_blocked_pop
       queue = TimerQueue.new
       queue.push(:discarded, at: Clock.now + 1)
@@ -285,6 +331,16 @@ module Farce
         shared.push(:value, at: Farce::Clock.now)
         shared.pop
       end
+
+      assert_equal :value, ractor_value(result)
+    end
+
+    def test_copies_unshareable_values_across_cruby_ractors
+      return unless RUBY_ENGINE == "ruby"
+      queue = TimerQueue.new
+      queue.push(ModePayload.new(:value), at: Clock.now)
+
+      result = Ractor.new(queue) { |shared| shared.pop.value }
 
       assert_equal :value, ractor_value(result)
     end

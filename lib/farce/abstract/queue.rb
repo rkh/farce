@@ -22,18 +22,23 @@ module Farce
     #   without modifying the queue.
     #   @return [Integer] Number of threads/fibers waiting on the queue.
     #
+    # @!attribute [r] mode
+    #   @return [Symbol] The default mode used to transfer values between Ractors.
+    #
     # @!attribute [r] size
     #   @abstract
     #   @return [Integer] The current number of items in the queue.
     #
-    # @!method initialize(capacity: 1024)
+    # @!method initialize(capacity: 1024, mode: :copy)
     #   @abstract Subclasses may add additional parameters to this method.
+    #   @!macro modes
     #   @param capacity [Integer, nil]
     #     The maximum number of items the queue can hold.
     #     If `nil`, the queue is unbounded.
     #
     #     The default may vary for subclasses.
     #     Most notably, priority and timer queues default to `nil`.
+    #   @param mode [Symbol] The default mode used to transfer values between Ractors.
     #
     # @!method clear
     #   @abstract
@@ -69,7 +74,7 @@ module Farce
     #   @return [BasicObject, nil]
     #     The item taken from the queue, or the return value of the block or `nil` if the timeout expired.
     #
-    # @!method push(value, non_block = false, timeout: nil)
+    # @!method push(value, non_block = false, timeout: nil, mode: nil)
     #   @abstract
     #     Subclasses may add additional parameters to this method.
     #     They may also restrict what types of values can be pushed onto the queue.
@@ -83,6 +88,8 @@ module Farce
     #     The maximum time to wait for the item to be added.
     #     If `nil`, the method will wait indefinitely.
     #     If `0`, the method will not wait at all.
+    #   @param mode [Symbol, nil]
+    #     The mode used to transfer the value between Ractors, or `nil` to use the queue's default mode.
     #   @raise [ThreadError] when the queue is full and non_block is true
     #   @return [Boolean] `true` if the item was added to the queue
     #
@@ -94,11 +101,13 @@ module Farce
     #   @return [BasicObject, nil]
     #     The item taken from the queue, or the return value of the block or `nil` if no item was available.
     #
-    # @!method try_push(value)
+    # @!method try_push(value, mode: nil)
     #   @abstract Subclasses may add additional parameters to this method.
     #   Tries to push an item onto the queue without blocking.
     #   If the queue is at capacity, the method will call the block if given, or return `false` if no block is given.
     #   @param value [BasicObject] The item to add to the queue.
+    #   @param mode [Symbol, nil]
+    #     The mode used to transfer the value between Ractors, or `nil` to use the queue's default mode.
     #   @yield Block called if the queue is at capacity.
     #   @return [Boolean]
     #     `true` if the item was added to the queue, `false` if the queue was at capacity and no block was given.
@@ -126,6 +135,10 @@ module Farce
     #     If `0`, the method will not wait at all.
     #   @return [Boolean] `true` if space is available, `false` if the timeout expired.
     class Queue
+      # The default mode used to transfer values between Ractors.
+      # @return [Symbol]
+      def mode = @manager.mode
+
       # Alias for {#pop} to match the interface of Ruby's Queue class.
       # @return (see #pop)
       def deq(...) = pop(...)

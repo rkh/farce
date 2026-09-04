@@ -39,7 +39,20 @@ module Farce
       def main_thread                = FakeRactor.main_thread
       def make_shareable(object, **) = object
       def receive(...)               = Ractor.current.receive(...)
-      def shareable?(object)         = object.respond_to?(:ractor_shareable?) ? object.ractor_shareable? : true
+
+      def shareable?(object)
+        unless Kernel === object
+          begin
+            return object.__send__(:ractor_shareable?)
+          rescue NoMethodError => e
+            raise unless e.name == :ractor_shareable?
+            return true
+          end
+        end
+
+        object.respond_to?(:ractor_shareable?) ? object.ractor_shareable? : true
+      end
+
       def shareable_lambda(**, &)    = Farce.rebind(lambda: true, **, &)
       def shareable_proc(**, &)      = Farce.rebind(**, &)
       def shim?                      = true

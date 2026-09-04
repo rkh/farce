@@ -47,6 +47,13 @@ module Farce
       assert_equal !native_ractors?, Ractor.shareable?(object)
     end
 
+    def test_shim_shareable_predicate_accepts_basic_objects
+      return unless Ractor.shim?
+
+      assert Ractor.shareable?(Class.new(BasicObject).new)
+      refute Ractor.shareable?(Class.new(BasicObject) { include Unshareable }.new)
+    end
+
     def test_shareable_proc_binds_self
       receiver = Ractor.make_shareable({ answer: 42 }, copy: true)
       rebound = Ractor.shareable_proc(self: receiver) { self[:answer] }

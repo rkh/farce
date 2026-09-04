@@ -16,6 +16,7 @@ module Farce
       assert_equal 0, queue.size
       assert_equal 0, queue.length
       assert_equal 0, queue.num_waiting
+      assert_equal :copy, queue.mode
       assert_predicate queue, :empty?
       refute_predicate queue, :full?
       refute_predicate queue, :closed?
@@ -24,6 +25,31 @@ module Farce
       assert_raises(ArgumentError) { Queue.new(capacity: 0) }
       assert_raises(ArgumentError) { Queue.new(capacity: -1) }
       assert_raises(TypeError) { queue.dup }
+      assert_raises(ArgumentError) { Queue.new(mode: :invalid) }
+    end
+
+    def test_modes_wrap_values_and_pop_operations_automatically_unwrap_them
+      queue = Queue.new(mode: :local)
+      local = ModePayload.new(:local)
+
+      assert queue.push(local)
+      assert_same local, queue.pop
+
+      source = ModePayload.new(:original)
+
+      assert queue.try_push(source, mode: :copy)
+      source.value = :changed
+
+      copy = queue.try_pop
+
+      refute_same source, copy
+      assert_equal :original, copy.value
+
+      error = assert_raises(Ractor::IsolationError) do
+        queue.push(ModePayload.new(:rejected), mode: :raise)
+      end
+      assert_match(/value is not Ractor-shareable/, error.message)
+      assert_equal :local, queue.mode
     end
 
     def test_fifo_nil_and_aliases
@@ -165,6 +191,16 @@ module Farce
         shared.push(:value)
         shared.pop
       end
+
+      assert_equal :value, ractor_value(result)
+    end
+
+    def test_copies_unshareable_values_across_cruby_ractors
+      return unless RUBY_ENGINE == "ruby"
+      queue = Queue.new
+      queue.push(ModePayload.new(:value))
+
+      result = Ractor.new(queue) { |shared| shared.pop.value }
 
       assert_equal :value, ractor_value(result)
     end
