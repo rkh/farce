@@ -52,11 +52,12 @@ module Farce
         value = value()
         return value unless value.is_a?(Value)
 
-        seen = Set[self]
+        seen = Set.new.compare_by_identity
+        seen << self
 
         while value.is_a?(Value)
-          seen << value
           return block_given? ? yield(value) : default if seen.include?(value)
+          seen << value
           value = value.value
         end
 

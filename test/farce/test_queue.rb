@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "../setup"
+require "pp"
 
 module Farce
   class TestQueue < Test
@@ -181,6 +182,28 @@ module Farce
       assert_raises(ClosedQueueError) { queue.wait_pop }
     ensure
       producer&.kill if producer&.alive?
+    end
+
+    def test_inspect_and_pretty_inspect
+      queue = Queue.new(capacity: 2)
+
+      assert_equal "#<Farce::Queue size=0 capacity=2>", queue.inspect
+      assert_equal "#<Farce::Queue size=0 capacity=2>\n", queue.pretty_inspect
+
+      queue.push(Object.new)
+
+      assert_equal "#<Farce::Queue size=1 capacity=2>", queue.inspect
+      assert_equal "#<Farce::Queue size=1 capacity=2>\n", queue.pretty_inspect
+
+      unbounded = Queue.new(capacity: nil)
+
+      assert_equal "#<Farce::Queue size=0>", unbounded.inspect
+      assert_equal "#<Farce::Queue size=0>\n", unbounded.pretty_inspect
+
+      queue.close
+
+      assert_equal "#<Farce::Queue closed>", queue.inspect
+      assert_equal "#<Farce::Queue closed>\n", queue.pretty_inspect
     end
 
     def test_works_across_cruby_ractors

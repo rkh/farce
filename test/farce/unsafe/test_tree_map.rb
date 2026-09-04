@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "../../setup"
+require "pp"
 
 module Farce
   module Unsafe
@@ -128,6 +129,27 @@ module Farce
         value << :changed
 
         assert_equal [:changed], map[1]
+      end
+
+      def test_inspect_and_pretty_inspect
+        empty = TreeMap.new
+
+        assert_equal "#<Farce::Unsafe::TreeMap {}>", empty.inspect
+        assert_equal "#<Farce::Unsafe::TreeMap {}>\n", empty.pretty_inspect
+
+        map = TreeMap.new(2 => [2, 3], 1 => "one")
+
+        expected = '#<Farce::Unsafe::TreeMap {1 => "one", 2 => [2, 3]}>'
+
+        assert_equal expected, map.inspect
+        assert_equal "#{expected}\n", map.pretty_inspect
+
+        symbol_map = TreeMap.new("with space": :value)
+
+        expected = '#<Farce::Unsafe::TreeMap {"with space": :value}>'
+
+        assert_equal expected, symbol_map.inspect
+        assert_equal "#{expected}\n", symbol_map.pretty_inspect
       end
 
       def test_cannot_be_shared_or_transferred_between_ractors
