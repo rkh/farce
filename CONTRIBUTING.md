@@ -29,6 +29,7 @@ You can use [mise](https://mise.jdx.dev) to run tasks against all supported Ruby
  | compile extensions   | `mise compile`  | `bundle exec rake compile` |
  | run tests            | `mise run test` | `bundle exec rake test`    |
  | builds gems          | `mise build`    | `bundle exec rake gem:all` |
+ | update dependencies  | `mise update`   | see mise/tasks/update      |
 
  To install dependencies, compile extensions, run the tests and build the gems, you can run `mise run` (without any arguments) and to do so on file changes, you can use `mise watch`.
 
