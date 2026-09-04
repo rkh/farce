@@ -684,6 +684,18 @@ typedef struct {
     priority_queue_lock_waiter_t waiter;
 } priority_queue_lock_wait_context_t;
 
+static VALUE
+priority_queue_lock_wait_io(VALUE io)
+{
+    return rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), Qnil);
+}
+
+static VALUE
+priority_queue_lock_close_wait_io(VALUE io)
+{
+    return rb_io_close(io);
+}
+
 static bool
 priority_queue_lock_wait_for_descriptor(int fd)
 {
@@ -695,7 +707,12 @@ priority_queue_lock_wait_for_descriptor(int fd)
         Qnil,
         NULL
     );
-    VALUE result = rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), Qnil);
+    VALUE result = rb_ensure(
+        priority_queue_lock_wait_io,
+        io,
+        priority_queue_lock_close_wait_io,
+        io
+    );
     RB_GC_GUARD(io);
     return RTEST(result);
 }
@@ -1009,12 +1026,13 @@ priority_queue_finish_publication(VALUE opaque)
 {
     priority_queue_initialize_t *initialization =
         (priority_queue_initialize_t *)opaque;
+    bool shareable = rb_ractor_shareable_p(initialization->self);
 
     /* An async exception can arrive after rb_ractor_make_shareable has set the
      * shareable flag. In that case the native fields already form a coherent
      * queue, so publish initialized before propagating it. */
     pthread_mutex_lock(&initialization->queue->lock);
-    if (rb_ractor_shareable_p(initialization->self)) {
+    if (shareable) {
         RUBY_ATOMIC_SET(
             initialization->queue->publication_state,
             PRIORITY_QUEUE_PUBLISHED

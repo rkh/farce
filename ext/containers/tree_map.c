@@ -804,6 +804,18 @@ tc_core_map_notify_one_locked(tc_core_map *core)
 }
 
 static VALUE
+tc_core_map_wait_io(VALUE io)
+{
+    return rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), Qnil);
+}
+
+static VALUE
+tc_core_map_close_wait_io(VALUE io)
+{
+    return rb_io_close(io);
+}
+
+static VALUE
 tc_core_map_fiber_wait_body(VALUE opaque)
 {
     tc_core_map_fiber_wait *wait = (tc_core_map_fiber_wait *)opaque;
@@ -815,7 +827,12 @@ tc_core_map_fiber_wait_body(VALUE opaque)
         Qnil,
         NULL
     );
-    VALUE result = rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), Qnil);
+    VALUE result = rb_ensure(
+        tc_core_map_wait_io,
+        io,
+        tc_core_map_close_wait_io,
+        io
+    );
 
     RB_GC_GUARD(io);
     return result;
@@ -900,6 +917,8 @@ static void
 tc_core_map_lock(VALUE self, tc_core_map *core)
 {
     VALUE current = rb_fiber_current();
+    VALUE current_thread = rb_thread_current();
+    VALUE scheduler = rb_fiber_scheduler_current();
 
     (void)self;
     for (;;) {
@@ -916,14 +935,14 @@ tc_core_map_lock(VALUE self, tc_core_map *core)
         }
         if (NIL_P(core->owner_fiber) && !publication_busy) {
             core->owner_fiber = current;
-            core->owner_ruby_thread = rb_thread_current();
+            core->owner_ruby_thread = current_thread;
             pthread_mutex_unlock(&core->lock);
             return;
         }
-        if ((core->owner_ruby_thread == rb_thread_current() ||
+        if ((core->owner_ruby_thread == current_thread ||
              (publication_busy &&
-              core->publication_owner_ruby_thread == rb_thread_current())) &&
-            NIL_P(rb_fiber_scheduler_current())) {
+              core->publication_owner_ruby_thread == current_thread)) &&
+            NIL_P(scheduler)) {
             pthread_mutex_unlock(&core->lock);
             rb_raise(
                 rb_eThreadError,
@@ -1121,6 +1140,7 @@ tc_core_map_finish_publication(VALUE opaque)
 {
     tc_core_map_publication *publication =
         (tc_core_map_publication *)opaque;
+    bool shareable = rb_ractor_shareable_p(publication->self);
 
     /* rb_ractor_make_shareable can be interrupted after setting the object's
      * shareable flag. Publish the initialized bit whenever the object reached
@@ -1128,7 +1148,7 @@ tc_core_map_finish_publication(VALUE opaque)
      * exception. The outer operation ensure retains the publishing state until
      * it clears the logical lock and wakes a waiter. */
     pthread_mutex_lock(&publication->core->lock);
-    if (rb_ractor_shareable_p(publication->self)) {
+    if (shareable) {
         RUBY_ATOMIC_SET(publication->core->publication_state, TC_MAP_PUBLISHED);
     }
     pthread_mutex_unlock(&publication->core->lock);

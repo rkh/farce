@@ -37,6 +37,23 @@ typedef struct {
     double deadline;
 } atom_timeout_t;
 
+typedef struct {
+    VALUE fiber;
+    VALUE thread;
+    VALUE scheduler;
+} atom_execution_context_t;
+
+static atom_execution_context_t
+atom_current_execution_context(void)
+{
+    atom_execution_context_t context = {
+        .fiber = rb_fiber_current(),
+        .thread = rb_thread_current(),
+        .scheduler = rb_fiber_scheduler_current(),
+    };
+    return context;
+}
+
 static bool atom_wait_once(atom_t *atom, atom_timeout_t *timeout);
 
 static double
@@ -187,16 +204,13 @@ get_atom(VALUE self)
 /* Called with atom->lock held. Raising releases the short native mutex so the
  * reservation owner's ensure handler can clear it normally. */
 static void
-atom_check_update_wait_locked(atom_t *atom)
+atom_check_update_wait_locked(atom_t *atom, const atom_execution_context_t *context)
 {
-    VALUE current_fiber = rb_fiber_current();
-
-    if (atom->updating_fiber == current_fiber) {
+    if (atom->updating_fiber == context->fiber) {
         pthread_mutex_unlock(&atom->lock);
         rb_raise(rb_eThreadError, "deadlock; recursive atom access during an update");
     }
-    if (atom->updating_thread == rb_thread_current() &&
-        NIL_P(rb_fiber_scheduler_current())) {
+    if (atom->updating_thread == context->thread && NIL_P(context->scheduler)) {
         pthread_mutex_unlock(&atom->lock);
         rb_raise(
             rb_eThreadError,
@@ -206,22 +220,22 @@ atom_check_update_wait_locked(atom_t *atom)
 }
 
 static void
-atom_begin_update_locked(atom_t *atom)
+atom_begin_update_locked(atom_t *atom, const atom_execution_context_t *context)
 {
     atom->updating = true;
-    atom->updating_fiber = rb_fiber_current();
-    atom->updating_thread = rb_thread_current();
+    atom->updating_fiber = context->fiber;
+    atom->updating_thread = context->thread;
 }
 
 static void
-atom_lock_for_update(atom_t *atom)
+atom_lock_for_update(atom_t *atom, const atom_execution_context_t *context)
 {
     atom_timeout_t timeout = {.finite = false, .deadline = 0};
 
     for (;;) {
         pthread_mutex_lock(&atom->lock);
         if (!atom->updating) return;
-        atom_check_update_wait_locked(atom);
+        atom_check_update_wait_locked(atom, context);
         (void)atom_wait_once(atom, &timeout);
     }
 }
@@ -249,6 +263,29 @@ typedef struct {
     atom_timeout_t *timeout;
 } atom_wait_context_t;
 
+typedef struct {
+    VALUE io;
+    VALUE timeout;
+} atom_io_wait_context_t;
+
+static VALUE
+atom_io_wait_body(VALUE opaque)
+{
+    atom_io_wait_context_t *context = (atom_io_wait_context_t *)opaque;
+    return rb_io_wait(
+        context->io,
+        INT2NUM(RUBY_IO_READABLE),
+        context->timeout
+    );
+}
+
+static VALUE
+atom_io_wait_cleanup(VALUE opaque)
+{
+    atom_io_wait_context_t *context = (atom_io_wait_context_t *)opaque;
+    return rb_io_close(context->io);
+}
+
 static bool
 atom_wait_for_descriptor(int fd, atom_timeout_t *timeout)
 {
@@ -258,16 +295,24 @@ atom_wait_for_descriptor(int fd, atom_timeout_t *timeout)
         if (remaining <= 0) return false;
         wait_timeout = DBL2NUM(remaining);
     }
-    VALUE io = rb_io_open_descriptor(
-        rb_cIO,
-        fd,
-        FMODE_READABLE | FMODE_EXTERNAL,
-        Qnil,
-        Qnil,
-        NULL
+    atom_io_wait_context_t context = {
+        .io = rb_io_open_descriptor(
+            rb_cIO,
+            fd,
+            FMODE_READABLE | FMODE_EXTERNAL,
+            Qnil,
+            Qnil,
+            NULL
+        ),
+        .timeout = wait_timeout,
+    };
+    VALUE result = rb_ensure(
+        atom_io_wait_body,
+        (VALUE)&context,
+        atom_io_wait_cleanup,
+        (VALUE)&context
     );
-    VALUE result = rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), wait_timeout);
-    RB_GC_GUARD(io);
+    RB_GC_GUARD(context.io);
     return RTEST(result);
 }
 
@@ -326,12 +371,16 @@ atom_wait_once(atom_t *atom, atom_timeout_t *timeout)
 
 /* Returns with atom->lock held on success and released on timeout. */
 static bool
-atom_lock_for_update_with_timeout(atom_t *atom, atom_timeout_t *timeout)
+atom_lock_for_update_with_timeout(
+    atom_t *atom,
+    atom_timeout_t *timeout,
+    const atom_execution_context_t *context
+)
 {
     for (;;) {
         pthread_mutex_lock(&atom->lock);
         if (!atom->updating) return true;
-        atom_check_update_wait_locked(atom);
+        atom_check_update_wait_locked(atom, context);
         if (!atom_wait_once(atom, timeout)) return false;
     }
 }
@@ -384,7 +433,8 @@ atom_set_value(VALUE self, VALUE value)
 {
     atom_t *atom = get_atom(self);
     containers_check_shareable(value);
-    atom_lock_for_update(atom);
+    atom_execution_context_t execution = atom_current_execution_context();
+    atom_lock_for_update(atom, &execution);
     atom->value = value;
     atom_changed(atom);
     pthread_mutex_unlock(&atom->lock);
@@ -396,6 +446,7 @@ atom_get(int argc, VALUE *argv, VALUE self)
 {
     atom_t *atom = get_atom(self);
     atom_timeout_t timeout = atom_parse_timeout(atom_extract_timeout(argc, argv, "0:", NULL));
+    atom_execution_context_t execution = atom_current_execution_context();
 
     for (;;) {
         pthread_mutex_lock(&atom->lock);
@@ -404,7 +455,7 @@ atom_get(int argc, VALUE *argv, VALUE self)
             pthread_mutex_unlock(&atom->lock);
             return value;
         }
-        atom_check_update_wait_locked(atom);
+        atom_check_update_wait_locked(atom, &execution);
         if (!atom_wait_once(atom, &timeout)) return atom_timeout_result();
     }
 }
@@ -417,6 +468,7 @@ atom_store(int argc, VALUE *argv, VALUE self)
     VALUE timeout_value = atom_extract_timeout(argc, argv, "1:", &value);
     containers_check_shareable(value);
     atom_timeout_t timeout = atom_parse_timeout(timeout_value);
+    atom_execution_context_t execution = atom_current_execution_context();
 
     for (;;) {
         pthread_mutex_lock(&atom->lock);
@@ -426,7 +478,7 @@ atom_store(int argc, VALUE *argv, VALUE self)
             pthread_mutex_unlock(&atom->lock);
             return value;
         }
-        atom_check_update_wait_locked(atom);
+        atom_check_update_wait_locked(atom, &execution);
         if (!atom_wait_once(atom, &timeout)) return atom_timeout_result();
     }
 }
@@ -439,6 +491,7 @@ atom_swap(int argc, VALUE *argv, VALUE self)
     VALUE timeout_value = atom_extract_timeout(argc, argv, "1:", &value);
     containers_check_shareable(value);
     atom_timeout_t timeout = atom_parse_timeout(timeout_value);
+    atom_execution_context_t execution = atom_current_execution_context();
 
     for (;;) {
         pthread_mutex_lock(&atom->lock);
@@ -449,13 +502,14 @@ atom_swap(int argc, VALUE *argv, VALUE self)
             pthread_mutex_unlock(&atom->lock);
             return previous;
         }
-        atom_check_update_wait_locked(atom);
+        atom_check_update_wait_locked(atom, &execution);
         if (!atom_wait_once(atom, &timeout)) return atom_timeout_result();
     }
 }
 
 typedef struct {
     atom_t *atom;
+    atom_execution_context_t execution;
     VALUE current;
     VALUE argument;
     bool identity;
@@ -492,23 +546,28 @@ static VALUE
 atom_store_if_absent(int argc, VALUE *argv, VALUE self)
 {
     atom_t *atom = get_atom(self);
-    atom_operation_t operation = {.atom = atom, .complete = false};
+    atom_operation_t operation = {
+        .atom = atom,
+        .execution = atom_current_execution_context(),
+        .complete = false,
+    };
     atom_timeout_t timeout = atom_parse_timeout(atom_extract_timeout(argc, argv, "0:", NULL));
 
     rb_need_block();
-    if (!atom_lock_for_update_with_timeout(atom, &timeout)) return Qnil;
+    if (!atom_lock_for_update_with_timeout(atom, &timeout, &operation.execution)) return Qnil;
     if (!NIL_P(atom->value)) {
         VALUE value = atom->value;
         pthread_mutex_unlock(&atom->lock);
         return value;
     }
-    atom_begin_update_locked(atom);
+    atom_begin_update_locked(atom, &operation.execution);
     pthread_mutex_unlock(&atom->lock);
     return rb_ensure(atom_store_body, (VALUE)&operation, atom_operation_cleanup, (VALUE)&operation);
 }
 
 typedef struct {
     atom_t *atom;
+    atom_execution_context_t execution;
     VALUE current;
     VALUE expected;
     VALUE replacement;
@@ -562,15 +621,17 @@ atom_compare_and_set(int argc, VALUE *argv, VALUE self)
     atom_timeout_t timeout = atom_parse_timeout(
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
+    atom_execution_context_t execution = atom_current_execution_context();
 
-    if (!atom_lock_for_update_with_timeout(atom, &timeout)) return Qfalse;
+    if (!atom_lock_for_update_with_timeout(atom, &timeout, &execution)) return Qfalse;
     operation.atom = atom;
+    operation.execution = execution;
     operation.current = atom->value;
     operation.expected = expected;
     operation.replacement = replacement;
     operation.identity = atom->compare_by_identity;
     operation.complete = false;
-    atom_begin_update_locked(atom);
+    atom_begin_update_locked(atom, &operation.execution);
     pthread_mutex_unlock(&atom->lock);
 
     return rb_ensure(atom_cas_body, (VALUE)&operation, atom_cas_cleanup, (VALUE)&operation);
@@ -594,13 +655,17 @@ static VALUE
 atom_update(int argc, VALUE *argv, VALUE self)
 {
     atom_t *atom = get_atom(self);
-    atom_operation_t operation = {.atom = atom, .complete = false};
+    atom_operation_t operation = {
+        .atom = atom,
+        .execution = atom_current_execution_context(),
+        .complete = false,
+    };
     atom_timeout_t timeout = atom_parse_timeout(atom_extract_timeout(argc, argv, "0:", NULL));
     rb_need_block();
 
-    if (!atom_lock_for_update_with_timeout(atom, &timeout)) return Qnil;
+    if (!atom_lock_for_update_with_timeout(atom, &timeout, &operation.execution)) return Qnil;
     operation.current = atom->value;
-    atom_begin_update_locked(atom);
+    atom_begin_update_locked(atom, &operation.execution);
     pthread_mutex_unlock(&atom->lock);
 
     return rb_ensure(atom_update_body, (VALUE)&operation, atom_operation_cleanup, (VALUE)&operation);
@@ -611,12 +676,16 @@ atom_upsert(int argc, VALUE *argv, VALUE self)
 {
     VALUE initial;
     atom_t *atom = get_atom(self);
-    atom_operation_t operation = {.atom = atom, .complete = false};
+    atom_operation_t operation = {
+        .atom = atom,
+        .execution = atom_current_execution_context(),
+        .complete = false,
+    };
     atom_timeout_t timeout = atom_parse_timeout(atom_extract_timeout(argc, argv, "1:", &initial));
     containers_check_shareable(initial);
     rb_need_block();
 
-    if (!atom_lock_for_update_with_timeout(atom, &timeout)) return Qnil;
+    if (!atom_lock_for_update_with_timeout(atom, &timeout, &operation.execution)) return Qnil;
     if (NIL_P(atom->value)) {
         atom->value = initial;
         atom_changed(atom);
@@ -624,7 +693,7 @@ atom_upsert(int argc, VALUE *argv, VALUE self)
         return initial;
     }
     operation.current = atom->value;
-    atom_begin_update_locked(atom);
+    atom_begin_update_locked(atom, &operation.execution);
     pthread_mutex_unlock(&atom->lock);
 
     return rb_ensure(atom_update_body, (VALUE)&operation, atom_operation_cleanup, (VALUE)&operation);
@@ -644,6 +713,7 @@ atom_wait_until_changed(int argc, VALUE *argv, VALUE self)
     VALUE timeout_value = atom_extract_timeout(argc, argv, "1:", &expected);
     containers_check_shareable(expected);
     atom_timeout_t timeout = atom_parse_timeout(timeout_value);
+    atom_execution_context_t execution = atom_current_execution_context();
 
     for (;;) {
         VALUE current;
@@ -660,7 +730,7 @@ atom_wait_until_changed(int argc, VALUE *argv, VALUE self)
             pthread_mutex_unlock(&atom->lock);
             continue;
         }
-        if (atom->updating) atom_check_update_wait_locked(atom);
+        if (atom->updating) atom_check_update_wait_locked(atom, &execution);
         if (!atom_wait_once(atom, &timeout)) return atom_timeout_result();
     }
 }
@@ -670,6 +740,7 @@ atom_wait_until_non_nil(int argc, VALUE *argv, VALUE self)
 {
     atom_t *atom = get_atom(self);
     atom_timeout_t timeout = atom_parse_timeout(atom_extract_timeout(argc, argv, "0:", NULL));
+    atom_execution_context_t execution = atom_current_execution_context();
 
     for (;;) {
         pthread_mutex_lock(&atom->lock);
@@ -678,7 +749,7 @@ atom_wait_until_non_nil(int argc, VALUE *argv, VALUE self)
             pthread_mutex_unlock(&atom->lock);
             return current;
         }
-        if (atom->updating) atom_check_update_wait_locked(atom);
+        if (atom->updating) atom_check_update_wait_locked(atom, &execution);
         if (!atom_wait_once(atom, &timeout)) return atom_timeout_result();
     }
 }

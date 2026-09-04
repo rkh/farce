@@ -149,6 +149,18 @@ containers_lock_initialize(VALUE self)
     return self;
 }
 
+static VALUE
+containers_lock_wait_io(VALUE io)
+{
+    return rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), Qnil);
+}
+
+static VALUE
+containers_lock_close_wait_io(VALUE io)
+{
+    return rb_io_close(io);
+}
+
 static bool
 containers_lock_wait_for_descriptor(int fd)
 {
@@ -160,7 +172,12 @@ containers_lock_wait_for_descriptor(int fd)
         Qnil,
         NULL
     );
-    VALUE result = rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), Qnil);
+    VALUE result = rb_ensure(
+        containers_lock_wait_io,
+        io,
+        containers_lock_close_wait_io,
+        io
+    );
     RB_GC_GUARD(io);
     return RTEST(result);
 }
@@ -240,6 +257,8 @@ containers_lock_acquire(VALUE self)
 {
     containers_lock_t *lock = containers_lock_get(self);
     VALUE current = rb_fiber_current();
+    VALUE scheduler = rb_fiber_scheduler_current();
+    pthread_t current_thread = pthread_self();
 
     for (;;) {
         pthread_mutex_lock(&lock->guard);
@@ -249,12 +268,11 @@ containers_lock_acquire(VALUE self)
         }
         if (NIL_P(lock->owner)) {
             lock->owner = current;
-            lock->owner_thread = pthread_self();
+            lock->owner_thread = current_thread;
             pthread_mutex_unlock(&lock->guard);
             return;
         }
-        if (pthread_equal(lock->owner_thread, pthread_self()) &&
-            NIL_P(rb_fiber_scheduler_current())) {
+        if (pthread_equal(lock->owner_thread, current_thread) && NIL_P(scheduler)) {
             pthread_mutex_unlock(&lock->guard);
             rb_raise(
                 rb_eThreadError,

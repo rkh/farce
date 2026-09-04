@@ -21,6 +21,18 @@ module Farce
         assert_equal 2, atom.value
       end
 
+      def test_atom_is_mutable_from_multiple_ractors
+        atom = Internal::Atom.new(0)
+        workers = 4.times.map do
+          Ractor.new(atom) do |shared|
+            250.times { shared.update { |old| old + 1 } }
+          end
+        end
+        workers.each { |worker| ractor_value(worker) }
+
+        assert_equal 1_000, atom.value
+      end
+
       def test_map_is_mutable_from_multiple_ractors
         map = Internal::Map.new({ counter: 0 })
         workers = 4.times.map do

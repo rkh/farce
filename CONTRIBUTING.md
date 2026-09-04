@@ -32,6 +32,8 @@ You can use [mise](https://mise.jdx.dev) to run tasks against all supported Ruby
 
  To install dependencies, compile extensions, run the tests and build the gems, you can run `mise run` (without any arguments) and to do so on file changes, you can use `mise watch`.
 
+ Test runs have an external 120-second watchdog so a deadlocked Ruby VM cannot leave local development or CI stuck indefinitely. Set `TEST_TIMEOUT` to change the deadline. A timed-out run reports its Minitest seed and, on macOS, attempts to write a native stack sample to `tmp/test-watchdog`. The unsupervised `bundle exec rake test:run` task is available for debugging.
+
  ### Test coverage reports
 
  If you use mise, this will be handled automatically.

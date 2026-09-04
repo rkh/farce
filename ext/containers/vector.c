@@ -231,6 +231,20 @@ typedef struct {
     vector_timeout_t *timeout;
 } vector_wait_context_t;
 
+static VALUE
+vector_wait_descriptor_body(VALUE opaque)
+{
+    VALUE *arguments = (VALUE *)opaque;
+    return rb_io_wait(arguments[0], INT2NUM(RUBY_IO_READABLE), arguments[1]);
+}
+
+static VALUE
+vector_wait_descriptor_cleanup(VALUE opaque)
+{
+    VALUE *arguments = (VALUE *)opaque;
+    return rb_io_close(arguments[0]);
+}
+
 static bool
 vector_wait_for_descriptor(int fd, vector_timeout_t *timeout)
 {
@@ -240,16 +254,24 @@ vector_wait_for_descriptor(int fd, vector_timeout_t *timeout)
         if (remaining <= 0) return false;
         wait_timeout = DBL2NUM(remaining);
     }
-    VALUE io = rb_io_open_descriptor(
-        rb_cIO,
-        fd,
-        FMODE_READABLE | FMODE_EXTERNAL,
-        Qnil,
-        Qnil,
-        NULL
+    VALUE arguments[] = {
+        rb_io_open_descriptor(
+            rb_cIO,
+            fd,
+            FMODE_READABLE | FMODE_EXTERNAL,
+            Qnil,
+            Qnil,
+            NULL
+        ),
+        wait_timeout,
+    };
+    VALUE result = rb_ensure(
+        vector_wait_descriptor_body,
+        (VALUE)arguments,
+        vector_wait_descriptor_cleanup,
+        (VALUE)arguments
     );
-    VALUE result = rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), wait_timeout);
-    RB_GC_GUARD(io);
+    RB_GC_GUARD(arguments[0]);
     return RTEST(result);
 }
 

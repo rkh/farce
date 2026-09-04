@@ -281,6 +281,20 @@ extract_timeout(int argc, VALUE *argv)
     return timeout;
 }
 
+static VALUE
+queue_wait_descriptor_body(VALUE opaque)
+{
+    VALUE *arguments = (VALUE *)opaque;
+    return rb_io_wait(arguments[0], INT2NUM(RUBY_IO_READABLE), arguments[1]);
+}
+
+static VALUE
+queue_wait_descriptor_cleanup(VALUE opaque)
+{
+    VALUE *arguments = (VALUE *)opaque;
+    return rb_io_close(arguments[0]);
+}
+
 static bool
 queue_wait_for_descriptor(int fd, queue_timeout_t *timeout)
 {
@@ -290,16 +304,24 @@ queue_wait_for_descriptor(int fd, queue_timeout_t *timeout)
         if (remaining <= 0) return false;
         wait_timeout = DBL2NUM(remaining);
     }
-    VALUE io = rb_io_open_descriptor(
-        rb_cIO,
-        fd,
-        FMODE_READABLE | FMODE_EXTERNAL,
-        Qnil,
-        Qnil,
-        NULL
+    VALUE arguments[] = {
+        rb_io_open_descriptor(
+            rb_cIO,
+            fd,
+            FMODE_READABLE | FMODE_EXTERNAL,
+            Qnil,
+            Qnil,
+            NULL
+        ),
+        wait_timeout,
+    };
+    VALUE result = rb_ensure(
+        queue_wait_descriptor_body,
+        (VALUE)arguments,
+        queue_wait_descriptor_cleanup,
+        (VALUE)arguments
     );
-    VALUE result = rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), wait_timeout);
-    RB_GC_GUARD(io);
+    RB_GC_GUARD(arguments[0]);
     return RTEST(result);
 }
 
@@ -308,19 +330,21 @@ typedef struct {
     readiness_signal_t *signal;
     size_t *waiter_count;
     queue_timeout_t *timeout;
+    int wait_fd;
 } queue_wait_context_t;
 
 static VALUE
 queue_wait_body(VALUE opaque)
 {
     queue_wait_context_t *context = (queue_wait_context_t *)opaque;
-    return queue_wait_for_descriptor(context->signal->read_fd, context->timeout) ? Qtrue : Qfalse;
+    return queue_wait_for_descriptor(context->wait_fd, context->timeout) ? Qtrue : Qfalse;
 }
 
 static VALUE
 queue_wait_cleanup(VALUE opaque)
 {
     queue_wait_context_t *context = (queue_wait_context_t *)opaque;
+    close(context->wait_fd);
     pthread_mutex_lock(&context->queue->lock);
     (*context->waiter_count)--;
     queue_update_readiness(context->queue);
@@ -346,11 +370,23 @@ queue_wait(queue_t *queue, readiness_signal_t *signal, size_t *waiter_count, que
         errno = error;
         rb_sys_fail("pipe");
     }
+    /* Ruby 3.4 reports rb_io_close for an external wrapper to every waiter on
+     * the same descriptor number. A duplicate observes the same readiness pipe
+     * without letting one waiter's wrapper cleanup cancel its siblings. */
+    int wait_fd = dup(signal->read_fd);
+    if (wait_fd < 0) {
+        int error = errno;
+        pthread_mutex_unlock(&queue->lock);
+        errno = error;
+        rb_sys_fail("dup");
+    }
+    set_fd_flags(wait_fd);
     queue_wait_context_t context = {
         .queue = queue,
         .signal = signal,
         .waiter_count = waiter_count,
         .timeout = timeout,
+        .wait_fd = wait_fd,
     };
     (*waiter_count)++;
     queue_update_readiness(queue);
