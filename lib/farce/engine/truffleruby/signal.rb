@@ -22,7 +22,7 @@ module Farce
 
       def broadcast
         @broadcast_lock.synchronize do
-          generation = @generation.increment
+          generation = @generation.add
           @condition.broadcast
           generation
         end

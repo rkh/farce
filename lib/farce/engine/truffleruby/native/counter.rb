@@ -5,10 +5,11 @@
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    class Counter
+    class Counter < Numeric
       def initialize(value = 0)
         raise TypeError, "initial value must be an Integer" unless value.is_a?(Integer)
         @reference = TruffleRuby::AtomicReference.new(value)
+        super()
         freeze
       end
 
@@ -31,26 +32,38 @@ module Farce
         @reference.compare_and_set(expected_value, new_value)
       end
 
-      def increment(delta = 1)
+      def add(delta = 1)
         raise TypeError, "delta must be an Integer" unless delta.is_a?(Integer)
+        change(delta)
+      end
 
-        new_value = nil
+      def subtract(delta = 1)
+        raise TypeError, "delta must be an Integer" unless delta.is_a?(Integer)
+        change(-delta)
+      end
 
+      def increment(delta = 1)
+        change(Integer(delta))
+        self
+      end
+
+      def decrement(delta = 1)
+        change(-Integer(delta))
+        self
+      end
+
+      alias value get
+      alias value= store
+
+      private
+
+      def change(delta)
         loop do
           old_value = @reference.get
           new_value = old_value + delta
-          break if @reference.compare_and_set(old_value, new_value)
+          return new_value if @reference.compare_and_set(old_value, new_value)
         end
-
-        new_value
       end
-
-      def decrement(delta = 1) = increment(-delta)
-
-      alias add increment
-      alias subtract decrement
-      alias value get
-      alias value= store
     end
   end
 end

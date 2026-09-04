@@ -266,10 +266,32 @@ counter_compare_and_set(VALUE self, VALUE expected_input, VALUE replacement_inpu
     return exchanged ? Qtrue : Qfalse;
 }
 
+/* The chainable operations are inherited directly by Farce::Counter. Keep
+ * add/subtract as strict, value-returning primitives for internal callers. */
+static VALUE
+counter_increment(int argc, VALUE *argv, VALUE self)
+{
+    rb_check_arity(argc, 0, 1);
+    VALUE input = argc == 0 ? INT2FIX(1) : argv[0];
+    long long delta = NUM2LL(RB_INTEGER_TYPE_P(input) ? input : rb_Integer(input));
+    (void)counter_change(get_counter(self), delta, false);
+    return self;
+}
+
+static VALUE
+counter_decrement(int argc, VALUE *argv, VALUE self)
+{
+    rb_check_arity(argc, 0, 1);
+    VALUE input = argc == 0 ? INT2FIX(1) : argv[0];
+    long long delta = NUM2LL(RB_INTEGER_TYPE_P(input) ? input : rb_Integer(input));
+    (void)counter_change(get_counter(self), delta, true);
+    return self;
+}
+
 void
 containers_init_counter(VALUE namespace)
 {
-    cCounter = rb_define_class_under(namespace, "Counter", rb_cObject);
+    cCounter = rb_define_class_under(namespace, "Counter", rb_cNumeric);
     rb_define_alloc_func(cCounter, counter_allocate);
     rb_define_method(cCounter, "initialize", counter_initialize, -1);
     rb_define_method(cCounter, "value", counter_value, 0);
@@ -278,8 +300,8 @@ containers_init_counter(VALUE namespace)
     rb_define_alias(cCounter, "value=", "store");
     rb_define_method(cCounter, "swap", counter_swap, 1);
     rb_define_method(cCounter, "add", counter_add, -1);
-    rb_define_alias(cCounter, "increment", "add");
+    rb_define_method(cCounter, "increment", counter_increment, -1);
     rb_define_method(cCounter, "subtract", counter_subtract, -1);
-    rb_define_alias(cCounter, "decrement", "subtract");
+    rb_define_method(cCounter, "decrement", counter_decrement, -1);
     rb_define_method(cCounter, "compare_and_set", counter_compare_and_set, 2);
 }

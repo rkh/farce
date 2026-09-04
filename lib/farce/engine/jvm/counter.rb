@@ -7,11 +7,12 @@ require "farce/engine/jvm/types"
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    class Counter
+    class Counter < Numeric
       def initialize(value = 0)
         raise TypeError, "initial value must be an Integer" unless value.is_a?(Integer)
 
         @counter = JVMContainers::AtomicLong.new(value)
+        super()
         freeze
       end
 
@@ -30,7 +31,7 @@ module Farce
         @counter.getAndSet(value)
       end
 
-      def increment(delta = 1)
+      def add(delta = 1)
         raise TypeError, "delta must be an Integer" unless delta.is_a?(Integer)
 
         @counter.addAndGet(delta)
@@ -43,10 +44,22 @@ module Farce
         @counter.compareAndSet(expected_value, new_value)
       end
 
-      def decrement(delta = 1) = increment(-delta)
+      def subtract(delta = 1)
+        raise TypeError, "delta must be an Integer" unless delta.is_a?(Integer)
 
-      alias add increment
-      alias subtract decrement
+        @counter.addAndGet(-delta)
+      end
+
+      def increment(delta = 1)
+        @counter.addAndGet(Integer(delta))
+        self
+      end
+
+      def decrement(delta = 1)
+        @counter.addAndGet(-Integer(delta))
+        self
+      end
+
       alias value get
       alias value= store
     end

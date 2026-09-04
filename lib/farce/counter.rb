@@ -6,9 +6,22 @@ module Farce
   # Ractor-shareable, atomic counter.
   # This is a stateful, numeric object.
   #
-  # The encapsulated value can be any numeric type, as long as it is either Ractor-shareable or can be coerced into a
-  # Ractor-shareable type. This includes all of the built-in numeric types, as well as the likes of BigDecimal and
-  # ActiveSupport::Duration.
+  # Values are converted to Integers. On CRuby, the stored value and arithmetic
+  # deltas must fit in a signed 64-bit integer; overflow raises RangeError without
+  # changing the stored value.
+  #
+  # @!method value
+  #   @return [Integer] The current value of the counter.
+  #
+  # @!method increment(by = 1)
+  #   Increment the counter by the given amount (default is 1).
+  #   @param [Numeric, String, #to_int] by The amount, converted to an Integer.
+  #   @return [self] Returns self for chaining.
+  #
+  # @!method decrement(by = 1)
+  #   Decrement the counter by the given amount (default is 1).
+  #   @param [Numeric, String, #to_int] by The amount, converted to an Integer.
+  #   @return [self] Returns self for chaining.
   #
   # @example Cross-Ractor counting
   #   counter = Farce::Counter.new
@@ -21,7 +34,7 @@ module Farce
   #   # Increase the counter by 5 on another Ractor
   #   Ractor.new(counter) { it.add(5) }
   #
-  #   # Give the other rector time to run
+  #   # Give the other ractor time to run
   #   sleep 0.1
   #
   #   counter.value # => 6
@@ -29,34 +42,54 @@ module Farce
   # @example Counter as a numeric value
   #   counter = Farce::Counter.new(10.0)
   #   counter.to_i  # => 10
-  #   counter + 5   # => 15.0
+  #   counter + 5   # => 15
   #   2.5 * counter # => 25.0
   #
   #   require "active_support/all"
   #   counter.minutes.to_i # => 600
-  class Counter < Farce::Abstract::Counter
+  class Counter < Internal::Counter
+    include Abstract::Value
     include Shareable
 
-    # @return [Numeric] The current value of the counter.
-    def value = @counter.value
+    # @return [Integer] The initial value of the counter.
+    attr_reader :initial
+
+    # @param [Numeric, String, #to_int] value The initial value, converted to an Integer.
+    def initialize(value = 0)
+      raise FrozenError.new("can't initialize a frozen counter", receiver: self) if frozen?
+      @initial = Integer(value)
+      super(@initial)
+    end
 
     # Reset the counter to its initial value.
     # @return [self] Returns self for chaining.
     def reset
-      @counter.value = @initial
+      self.value = @initial
       self
     end
 
-    # Increment the counter by the given amount (default is 1).
-    # @param [Numeric] by The amount to increment the counter by.
-    # @return [self] Returns self for chaining.
-    def increment(by = 1)
-      @counter.add(Integer(by))
-      self
-    end
+    # @overload add(by = 1)
+    #   (see #increment)
+    def add(...) = increment(...)
+
+    alias subtract decrement
+    alias remove   decrement
+
+    methods  = Integer.public_instance_methods - Object.public_instance_methods - [:singleton_method_added]
+    methods += %i[+ - / * ** <=> coerce rationalize to_i to_int to_f to_c to_r to_s]
+    methods.uniq!
+    Internal.delegate(self, :value, *methods)
+
+    # @return [String] Returns a string representation of the counter.
+    def inspect = "#<#{self.class.name} #{value.inspect}>"
+
+    # @api private
+    # @return [void]
+    def pretty_print(pp) = pp.group(1, "#<#{self.class.name} ", ">") { pp.pp(value) }
 
     private
 
-    def prepare = @counter = Internal::Counter.new
+    def method_missing(...) = value.public_send(...)
+    def respond_to_missing?(method, ...) = value.respond_to?(method)
   end
 end

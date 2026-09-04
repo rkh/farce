@@ -84,11 +84,29 @@ module Farce
       def test_increment_and_decrement_accept_optional_deltas
         counter = Counter.new
 
-        assert_equal 1, counter.increment
-        assert_equal 4, counter.increment(3)
-        assert_equal 3, counter.decrement
-        assert_equal(-1, counter.decrement(4))
+        assert_kind_of Numeric, counter
+        assert_same counter, counter.increment
+        assert_equal 1, counter.value
+        assert_same counter, counter.increment(3)
+        assert_equal 4, counter.value
+        assert_same counter, counter.decrement
+        assert_equal 3, counter.value
+        assert_same counter, counter.decrement(4)
         assert_equal(-1, counter.value)
+      end
+
+      def test_chainable_updates_coerce_deltas_without_changing_primitive_returns
+        counter = Counter.new(10)
+
+        assert_same counter, counter.increment("3")
+        assert_equal 13, counter.value
+        assert_same counter, counter.decrement(2.9)
+        assert_equal 11, counter.value
+        assert_equal 12, counter.add
+        assert_equal 11, counter.subtract
+        assert_raises(TypeError) { counter.add("1") }
+        assert_raises(TypeError) { counter.subtract(1.0) }
+        assert_equal 11, counter.value
       end
 
       def test_arithmetic_requires_an_integer_delta
@@ -165,7 +183,7 @@ module Farce
         increments_per_thread = 1_000
         threads = thread_count.times.map do
           Thread.new do
-            increments_per_thread.times.map { counter.increment }
+            increments_per_thread.times.map { counter.add }
           end
         end
         returned_values = threads.flat_map(&:value)
