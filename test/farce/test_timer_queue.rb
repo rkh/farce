@@ -94,14 +94,44 @@ module Farce
       assert_equal 1, queue.size
     end
 
-    def test_push_converts_timestamps_with_clock_at
+    def test_push_parses_fixed_time_options_with_clock
       queue = TimerQueue.new
       timestamp = Time.now + 1
 
-      assert queue.push(:value, at: timestamp)
-      assert_in_delta Clock.at(timestamp), queue.first_timestamp, 0.000_001
-      assert_in_delta Clock.at(timestamp), queue.last_timestamp, 0.000_001
+      assert queue.push(:value, time: timestamp)
+      assert_in_delta Clock.parse(time: timestamp), queue.first_timestamp, 0.000_001
+      assert_in_delta Clock.parse(time: timestamp), queue.last_timestamp, 0.000_001
       assert_equal :value, queue.peek
+    end
+
+    def test_push_and_try_push_parse_relative_time_options_with_clock
+      queue = TimerQueue.new(capacity: 1)
+      before = Clock.now + 60
+
+      assert queue.push(:delayed, delay: 60)
+
+      after = Clock.now + 60
+
+      assert_operator queue.first_timestamp, :>=, before
+      assert_operator queue.first_timestamp, :<=, after
+      refute queue.push(:blocked, timeout: 0, wait: 30)
+
+      queue.clear
+      before = Clock.now + 45
+
+      assert queue.try_push(:timed, timeout: 45)
+
+      after = Clock.now + 45
+
+      assert_operator queue.first_timestamp, :>=, before
+      assert_operator queue.first_timestamp, :<=, after
+    end
+
+    def test_push_rejects_multiple_or_unknown_time_options
+      queue = TimerQueue.new
+
+      assert_raises(TypeError) { queue.push(:value, at: Clock.now, delay: 1) }
+      assert_raises(NoMethodError) { queue.try_push(:value, eventually: 1) }
     end
 
     def test_push_and_try_push_default_to_now

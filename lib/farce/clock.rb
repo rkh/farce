@@ -23,8 +23,9 @@ module Farce
     # Same as calling {#parse parse(clock: value)}
     #
     # @param value [nil, #to_f] the value to convert to clock time
+    # @raise [ArgumentError] if the resulting clock time is NaN
     # @return [Float] the clock time in seconds
-    def clock(value) = value ? value.to_f : current
+    def clock(value) = validate_timestamp(value ? value.to_f : current)
 
     # Returns the current monotonic clock time in seconds.
     # @return [Float] the clock time in seconds
@@ -47,18 +48,19 @@ module Farce
     #   * `:delay`, `:in`, `:offset`, `:timeout`, or `:wait` for {#offset relative offsets}
     #   * `:clock` for {#clock clock times}
     #
+    # @raise [ArgumentError] if the resulting clock time is NaN
     # @return [Float] the clock time in seconds
     def parse(value)
       case value
-      when nil, UNDEFINED                 then return current
-      when Float, Integer                 then return value > CUTOFF_CLOCK ? time(value) : offset(value)
-      when Time                           then return time(value)
-      when MAYBE::ActiveSupport::Duration then return offset(value)
+      when nil, UNDEFINED then return current
+      when Float, Integer then return value > CUTOFF_CLOCK ? time(value) : offset(value)
+      when Time           then return time(value)
       when Hash
         case value.size
         when 0 then return current
         when 1 then return public_send(*value.first)
         end
+      when MAYBE::ActiveSupport::Duration then return offset(value)
       else
         return at(value.to_time) if value.respond_to?(:to_time)
         return parse(value.to_f) if value.is_a?(Numeric)
@@ -73,23 +75,26 @@ module Farce
     # Meaning that you can't pass a clock time greater than 31 years, or a timestamp before September 9, 2001.
     #
     # @param value [Numeric, Time] the value to convert to clock time
+    # @raise [ArgumentError] if the resulting clock time is NaN
     # @return [Float] the clock time in seconds
     def time(value)
       case value
-      when Float, Integer then value > CUTOFF_TIME ? value - REAL_TIME : Float(value)
-      when Time           then value.to_f - REAL_TIME
-      when Numeric        then time(value.to_f)
+      when Float, Integer then timestamp = value > CUTOFF_TIME ? value - REAL_TIME : Float(value)
+      when Time           then timestamp = value.to_f - REAL_TIME
+      when Numeric        then return time(value.to_f)
       else raise TypeError, "Cannot convert #{value.class} to clock time"
       end
+      validate_timestamp(timestamp)
     end
 
     # Converts the given value to a monotonic clock time in seconds.
     # The value is assumed to be a relative offset from the current time.
     #
     # @param value [Numeric] the value to convert to clock time
+    # @raise [ArgumentError] if the resulting clock time is NaN
     # @return [Float] the clock time in seconds
     def offset(value)
-      return current + value.to_f if value.is_a?(Numeric)
+      return validate_timestamp(current + value.to_f) if value.is_a?(Numeric)
       raise TypeError, "Cannot convert #{value.class} to clock time"
     end
 
@@ -100,5 +105,12 @@ module Farce
     alias in         offset
     alias timeout    offset
     alias wait       offset
+
+    private
+
+    def validate_timestamp(timestamp)
+      raise ArgumentError, "timestamp must not be NaN" if timestamp.nan?
+      timestamp
+    end
   end
 end

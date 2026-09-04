@@ -7,7 +7,7 @@ module Farce
   # Popping waits until the earliest entry is due. Changes wake waiters so a
   # newly inserted earlier entry immediately replaces their previous deadline.
   # Transfer modes apply only to values, which are automatically unwrapped by {#pop}, {#try_pop}, and {#peek}.
-  # Timestamps are always normalized by {Clock.at}.
+  # Scheduling options are parsed by {Clock.parse} and stored as monotonic timestamps.
   class TimerQueue < Abstract::Queue
     include Internal::BlockingPriorityQueue
     include Shareable
@@ -35,13 +35,16 @@ module Farce
     # @!macro modes
     # @param value [BasicObject] the value to add
     # @param non_block [Boolean] whether to raise an exception when the queue is at capacity
-    # @param at [Numeric, Time] an absolute time accepted by Clock.at
-    # @param timeout [Numeric, nil] maximum number of seconds to wait for capacity
     # @param mode [Symbol, nil] the transfer mode, or nil to use the queue's default mode
+    # @param timeout [Numeric, nil] maximum number of seconds to wait for capacity
+    # @param time_options [Hash{Symbol => Object}] a scheduling option accepted by {Clock.parse}:
+    #   `at:`, `time:`, `timeout_at:`, `delay:`, `in:`, `offset:`, `wait:`, or `clock:`.
+    #   With no scheduling option, the value is available immediately. Since `timeout:` controls the capacity wait,
+    #   use `delay:` or `wait:` to schedule a relative offset.
     # @raise [ThreadError] when the queue is at capacity and non_block is true
     # @return [Boolean] whether the value was added
-    def push(value, non_block = false, at: Clock.now, timeout: nil, mode: nil) # rubocop:disable Style/OptionalBooleanParameter
-      at    = normalize_at(at)
+    def push(value, non_block = false, mode: nil, timeout: nil, **time_options) # rubocop:disable Style/OptionalBooleanParameter
+      at    = Clock.parse(time_options)
       entry = Entry.new(at, @manager.wrap(value, mode:))
       push_to_storage(at, non_block, entry, timeout:)
     end
@@ -64,12 +67,14 @@ module Farce
     # Try to add a value without waiting for capacity.
     # @!macro modes
     # @param value [BasicObject] the value to add
-    # @param at [Numeric, Time] an absolute time accepted by Clock.at
     # @param mode [Symbol, nil] the transfer mode, or nil to use the queue's default mode
+    # @param time_options [Hash{Symbol => Object}] a scheduling option accepted by {Clock.parse}:
+    #   `at:`, `time:`, `timeout_at:`, `delay:`, `in:`, `offset:`, `timeout:`, `wait:`, or `clock:`.
+    #   With no scheduling option, the value is available immediately.
     # @yield called when the queue is at capacity
     # @return [Boolean, BasicObject] true, or the fallback result when full
-    def try_push(value, at: Clock.now, mode: nil)
-      at    = normalize_at(at)
+    def try_push(value, mode: nil, **time_options)
+      at    = Clock.parse(time_options)
       entry = Entry.new(at, @manager.wrap(value, mode:))
       return true if @queue.push(at, entry)
       block_given? ? yield : false
@@ -139,17 +144,10 @@ module Farce
       comparison_mode = compare_by_identity ? :local : :copy
       value = @manager.wrap(value, mode: comparison_mode)
       probe = DeleteProbe.new(value, compare_by_identity, @manager)
-      @queue.delete(normalize_at(at), probe)
+      @queue.delete(Clock.at(at), probe)
     end
 
     private
-
-    def normalize_at(at)
-      at = Clock.at(at)
-      raise ArgumentError, "timestamp must not be NaN" if at.nan?
-
-      at
-    end
 
     def wait_for_entry(deadline)
       while true

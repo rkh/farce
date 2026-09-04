@@ -44,6 +44,12 @@ module Farce
       assert_in_delta 2.0, Clock.clock(2)
     end
 
+    def test_clock_rejects_nan
+      error = assert_raises(ArgumentError) { Clock.clock(Float::NAN) }
+
+      assert_equal "timestamp must not be NaN", error.message
+    end
+
     def test_parse_treats_nil_as_current_time
       assert_current_offset(0) { Clock.parse(nil) }
     end
@@ -112,6 +118,12 @@ module Farce
       assert_includes error.message, "Cannot convert"
     end
 
+    def test_parse_rejects_nan
+      error = assert_raises(ArgumentError) { Clock.parse(delay: Float::NAN) }
+
+      assert_equal "timestamp must not be NaN", error.message
+    end
+
     def test_time_accepts_clock_times
       assert_in_delta 601.0, Clock.time(601)
       assert_in_delta 601.5, Clock.time(601.5)
@@ -132,6 +144,12 @@ module Farce
       assert_equal "Cannot convert String to clock time", error.message
     end
 
+    def test_time_rejects_nan
+      error = assert_raises(ArgumentError) { Clock.time(Float::NAN) }
+
+      assert_equal "timestamp must not be NaN", error.message
+    end
+
     def test_offset_accepts_numeric_values
       assert_current_offset(0.1) { Clock.offset(0.1) }
       assert_current_offset(1) { Clock.offset(1) }
@@ -141,6 +159,12 @@ module Farce
       error = assert_raises(TypeError) { Clock.offset("1") }
 
       assert_equal "Cannot convert String to clock time", error.message
+    end
+
+    def test_offset_rejects_nan
+      error = assert_raises(ArgumentError) { Clock.offset(Float::NAN) }
+
+      assert_equal "timestamp must not be NaN", error.message
     end
 
     def test_farce_clock_delegates_to_clock_parse
