@@ -42,11 +42,6 @@ module Farce
         end
       end
 
-      def initialize
-        @ractor = ::Ractor.new { Manager.new.run }
-        ::Ractor.make_shareable(self)
-      end
-
       def move_in(key, value) = execute(:set, key, value, move: true)
       def copy_in(key, value) = execute(:set, key, value, move: false)
       def move_out(key)       = execute(:move, key)

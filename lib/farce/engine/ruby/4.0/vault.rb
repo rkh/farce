@@ -12,6 +12,11 @@ module Farce
         private def respond(port, ...) = port.send(...)
       end
 
+      def initialize
+        @ractor = ::Ractor.new { Manager.new.run }
+        ::Ractor.make_shareable(self)
+      end
+
       private
 
       def execute(action, key, value = nil, move: false)
