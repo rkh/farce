@@ -4,6 +4,7 @@ require "bundler/setup"
 require "benchmark"
 require "benchmark/ips"
 require "farce"
+require "fileutils"
 
 counter_classes  = [Farce::Counter]
 thread_classes   = [Farce::Counter]
@@ -14,6 +15,10 @@ begin
   if defined?(Concurrent::CAtomicFixnum)
     counter_classes << Concurrent::CAtomicFixnum
     thread_classes  << Concurrent::CAtomicFixnum
+  end
+  if defined?(Concurrent::JavaAtomicFixnum)
+    counter_classes << Concurrent::JavaAtomicFixnum
+    thread_classes  << Concurrent::JavaAtomicFixnum
   end
   counter_classes << Concurrent::MutexAtomicFixnum
   thread_classes  << Concurrent::MutexAtomicFixnum
@@ -71,6 +76,8 @@ workloads.each do |operation, workload|
     x.compare!
   end
 end
+
+return unless ENV["BENCHMARK_MULTITHREADED"]
 
 worker_count = 4
 increments   = Integer(ENV.fetch("BENCHMARK_INCREMENTS", 500_000))

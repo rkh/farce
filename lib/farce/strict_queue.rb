@@ -3,21 +3,29 @@
 # warn_indent: true
 
 module Farce
-  # A thread-safe, ractor-shareable, first-in-first-out queue.
+  # A thread-safe, ractor-shareable, first-in-first-out queue for shareable values.
   #
-  # The queue is bounded by default. Producers wait when the queue reaches its
-  # capacity, while consumers wait when it is empty. Values are wrapped according
-  # to the configured mode when pushed and automatically unwrapped when popped.
-  class Queue < Farce::Abstract::Queue
+  # Values are stored and returned directly, preserving their identity. Unshareable
+  # values raise {Ractor::IsolationError}. They are never copied, moved, frozen, or
+  # automatically wrapped or unwrapped. Use {Queue} to transfer unshareable values.
+  #
+  # The queue is bounded by default. Producers wait when it is full, and consumers
+  # wait when it is empty. Shareability is enforced using the current Ruby
+  # implementation's rules, including Farce's shim on JRuby and TruffleRuby.
+  #
+  # @example
+  #   queue = Farce::StrictQueue.new(capacity: 2)
+  #   value = Farce::Ractor.make_shareable([:ready])
+  #   queue.push(value)              # => true
+  #   queue.pop.equal?(value)       # => true
+  #   queue.try_pop { :empty }      # => :empty
+  class StrictQueue < Abstract::Queue
     include Shareable
 
-    # Create a queue.
-    # @!macro modes
+    # Create a queue that accepts only shareable values.
     # @param capacity [Integer, nil] the maximum number of values, or nil for an unbounded queue
-    # @param mode [Symbol] the default mode used to transfer values between Ractors
-    def initialize(capacity: 1024, mode: :copy)
-      @manager = ModeManager.new(mode:)
-      @queue   = Internal::Queue.new(capacity:)
+    def initialize(capacity: 1024)
+      @queue = Internal::Queue.new(capacity:)
       super()
     end
 
@@ -32,7 +40,7 @@ module Farce
       self
     end
 
-    # Close the queue and wake all waiters.
+    # Close the queue and wake all waiters. Further data operations raise ClosedQueueError.
     # @return [self]
     def close
       @queue.close
@@ -47,6 +55,10 @@ module Farce
     # @return [Boolean]
     def empty? = size.zero?
 
+    # The fixed transfer mode. This queue does not accept mode overrides.
+    # @return [Symbol] :raise
+    def mode = :raise
+
     # The approximate number of execution contexts waiting to push or pop.
     # @return [Integer]
     def num_waiting = @queue.num_waiting
@@ -57,53 +69,35 @@ module Farce
     # @yield called when the timeout expires
     # @raise [ThreadError] when the queue is empty and non_block is true
     # @return [BasicObject, nil] the value or the fallback result
-    def pop(non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
+    def pop(non_block = false, timeout: nil, &) # rubocop:disable Style/OptionalBooleanParameter
       return try_pop { raise ThreadError, "queue empty" } if non_block
-
-      empty  = false
-      result = @queue.pop(timeout:) { empty = true }
-      return @manager.unwrap(result) unless empty
-      yield if block_given?
+      @queue.pop(timeout:, &)
     end
 
-    # Add a value, waiting while a bounded queue is full.
-    # @!macro modes
-    # @param value [BasicObject] the value to add
+    # Add a shareable value, waiting while a bounded queue is full.
+    # @param value [BasicObject] the shareable value to add
     # @param non_block [Boolean] whether to raise instead of waiting when full
     # @param timeout [Numeric, nil] maximum number of seconds to wait
-    # @param mode [Symbol, nil] the transfer mode, or nil to use the queue's default mode
+    # @raise [Ractor::IsolationError] when the value is not shareable
     # @raise [ThreadError] when the queue is full and non_block is true
     # @return [Boolean] whether the value was added
-    def push(value, non_block = false, timeout: nil, mode: nil) # rubocop:disable Style/OptionalBooleanParameter
-      value = @manager.wrap(value, mode:)
-
-      if non_block
-        return true if @queue.push(value, timeout: 0)
-
-        raise ThreadError, "queue full"
-      end
-
+    def push(value, non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
+      return try_push(value) { raise ThreadError, "queue full" } if non_block
       @queue.push(value, timeout:)
     end
 
     # Try to remove the oldest value without waiting.
     # @yield called when the queue is empty
     # @return [BasicObject, nil] the value or the fallback result
-    def try_pop
-      empty  = false
-      result = @queue.pop(timeout: 0) { empty = true }
-      return @manager.unwrap(result) unless empty
-      yield if block_given?
-    end
+    def try_pop(&) = @queue.pop(timeout: 0, &)
 
-    # Try to add a value without waiting.
-    # @!macro modes
-    # @param value [BasicObject] the value to add
-    # @param mode [Symbol, nil] the transfer mode, or nil to use the queue's default mode
+    # Try to add a shareable value without waiting.
+    # @param value [BasicObject] the shareable value to add
     # @yield called when the queue is full
+    # @raise [Ractor::IsolationError] when the value is not shareable
     # @return [Boolean, BasicObject] true, or the fallback result when full
-    def try_push(value, mode: nil)
-      return true if @queue.push(@manager.wrap(value, mode:), timeout: 0)
+    def try_push(value)
+      return true if @queue.push(value, timeout: 0)
       block_given? ? yield : false
     end
 

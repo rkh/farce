@@ -32,6 +32,7 @@ module Farce
       end
 
       def push(item, timeout: nil)
+        raise Ractor::IsolationError, "value is not Ractor-shareable" unless Ractor.shareable?(item)
         item = NIL_VALUE if item.nil?
 
         unless capacity

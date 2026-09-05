@@ -124,6 +124,13 @@ module Farce
         assert_raises(Ractor::IsolationError) { queue.push(Object.new) }
       end
 
+      def test_rejects_explicitly_unshareable_values
+        queue = Queue.new
+
+        assert_raises(Ractor::IsolationError) { queue.push(ModePayload.new(:rejected)) }
+        assert_equal 0, queue.size
+      end
+
       def test_zero_timeout
         queue = Queue.new(capacity: 1)
 

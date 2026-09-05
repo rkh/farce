@@ -5,6 +5,7 @@ pkg/
 tmp/
 vendor/
 yardoc/
+benchmark/results/
 
 *.bundle
 *.dSYM/

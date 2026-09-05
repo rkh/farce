@@ -17,7 +17,7 @@ module Farce
     def test_blocked_pop_parks_only_the_current_fiber
       scheduler = Helpers::QueueTestScheduler.new
       Fiber.set_scheduler(scheduler)
-      queue = Queue.new
+      queue = queue_class.new
       events = []
 
       Fiber.schedule do
@@ -37,7 +37,7 @@ module Farce
     def test_blocked_push_parks_only_the_current_fiber
       scheduler = Helpers::QueueTestScheduler.new
       Fiber.set_scheduler(scheduler)
-      queue = Queue.new(capacity: 1)
+      queue = queue_class.new(capacity: 1)
       queue.push(:first)
       events = []
 
@@ -52,5 +52,11 @@ module Farce
       assert_equal :second, queue.pop
       assert_operator scheduler.io_wait_calls, :>=, 1
     end
+
+    private def queue_class = Queue
+  end
+
+  class TestStrictQueueFiberScheduler < TestQueueFiberScheduler
+    private def queue_class = StrictQueue
   end
 end
