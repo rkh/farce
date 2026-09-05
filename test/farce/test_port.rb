@@ -77,6 +77,7 @@ module Farce
     end
 
     def test_copy_mode_sends_a_snapshot_and_receive_automatically_unwraps_it
+      return unless Internal.native_ractors?
       port = Port.new
       source = ModePayload.new(:original)
 
@@ -146,6 +147,7 @@ module Farce
     end
 
     def test_move_flag_selects_move_or_copy_mode
+      return unless Internal.native_ractors?
       port = Port.new(mode: :move)
       copied = ModePayload.new(:copied)
 
@@ -162,7 +164,7 @@ module Farce
       assert_same port, port.send(moved, move: true)
       assert_equal :moved, port.receive.value
 
-      error = assert_raises(ArgumentError) { port.send(:value, move: :invalid) }
+      error = assert_raises(ArgumentError) { port.send(Object.new, move: :invalid) }
       assert_equal "invalid move: :invalid", error.message
     end
 

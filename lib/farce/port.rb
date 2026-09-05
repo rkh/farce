@@ -107,6 +107,7 @@ module Farce
     # @raise [Farce::Ractor::ClosedError] if the port is closed.
     # @return [self]
     def send(message, move: nil, mode: nil, auto_local: nil)
+      return super(message) if Ractor.shareable?(message)
       raise Ractor::ClosedError, "port is closed" if closed?
       auto_local = auto_local? if auto_local.nil?
 
@@ -122,7 +123,11 @@ module Farce
         end
       end
 
-      super(MANAGER.wrap(message, mode:))
+      case mode
+      when :copy then super(message)
+      when :move then super(message, move: true)
+      else super(MANAGER.wrap(message, mode:))
+      end
     end
 
     alias << send

@@ -4,7 +4,6 @@ require "bundler/setup"
 require "benchmark"
 require "benchmark/ips"
 require "farce"
-require "fileutils"
 
 counter_classes  = [Farce::Counter]
 thread_classes   = [Farce::Counter]
