@@ -16,7 +16,7 @@ class TestGemVerifier < Test
   def test_verifies_every_extension_in_the_source_gem
     spec = Gem::Specification.load(File.expand_path("../farce.gemspec", __dir__))
     unexpected_sources = spec.files.grep(%r{\Aext/}).reject do |path|
-      path == "ext/ext_helper.rb" || NAMES.include?(path.split("/")[1])
+      path == "ext/ext_helper.rb" || (NAMES + ["java"]).include?(path.split("/")[1])
     end
 
     assert_equal EXTENSIONS, spec.extensions
@@ -25,6 +25,10 @@ class TestGemVerifier < Test
     assert_includes spec.files, "ext/containers/dict.h"
     assert_includes spec.files, "ext/containers/priority_queue.c"
     assert_includes spec.files, "ext/containers/tree_map.c"
+    assert_includes spec.files, "ext/java/org/farce/PriorityKey.java"
+    assert_includes spec.files, "ext/java/org/farce/PriorityQueue.java"
+    assert_includes spec.files, "ext/java/org/farce/QueueSignal.java"
+    assert_includes spec.files, JavaExtension::JAR
     assert_empty unexpected_sources
   end
 
@@ -33,6 +37,7 @@ class TestGemVerifier < Test
     spec = Dir.chdir(root) { Gem::Specification.load("farce-java.gemspec") }
 
     assert_equal ["MIT"], spec.licenses
+    assert_includes spec.files, JavaExtension::JAR
     assert_empty spec.files.grep(%r{\Aext/})
   end
 
@@ -136,7 +141,7 @@ class TestGemVerifier < Test
     assert_includes error.message, ">= 4.0"
   end
 
-  # JRuby ships the pure-Ruby implementation, under a platform that is not the build target's name.
+  # JRuby's declared gem platform differs from its build target name.
   def test_maps_the_jruby_build_target_to_the_java_gem_platform
     assert_equal "java", GemVerifier.gem_platform("jruby")
     assert_equal "arm-linux-gnu", GemVerifier.gem_platform("arm-linux-gnu")
@@ -148,13 +153,13 @@ class TestGemVerifier < Test
     assert_empty GemVerifier::SIGNATURES.keys - GemVerifier.targets
   end
 
-  def test_accepts_java_gem_that_ships_only_ruby
+  def test_accepts_java_gem_with_portable_bytecode
     gem_file = gem_for("java", { "lib/farce/engine/jruby.rb" => "# ruby\n" })
 
     verify(gem_file, "jruby")
   end
 
-  def test_rejects_java_gem_shipping_a_compiled_binary
+  def test_rejects_java_gem_shipping_a_native_binary
     gem_file = gem_for("java", {
       "lib/farce/engine/jruby.rb"               => "# ruby\n",
       "lib/farce/engine/ruby/4.0/containers.so" => elf(bits: 64, machine: 0xb7),
@@ -219,7 +224,62 @@ class TestGemVerifier < Test
     assert_includes error.message, "extension"
   end
 
+  def test_rejects_missing_java_extension_in_source_and_java_gems
+    [nil, "java"].each do |platform|
+      gem_file = gem_for(platform, { JavaExtension::JAR => nil }, extensions: platform ? [] : EXTENSIONS)
+      error = assert_raises(GemVerifier::Error) { verify(gem_file, platform && "jruby") }
+
+      assert_includes error.message, "missing Java extension"
+    end
+  end
+
+  def test_rejects_corrupt_java_archive
+    gem_file = gem_for("java", { JavaExtension::JAR => "not a jar" })
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, "jruby") }
+
+    assert_includes error.message, JavaExtension::JAR
+  end
+
+  def test_rejects_truncated_java_archive_headers
+    gem_file = gem_for("java", { JavaExtension::JAR => "PK\x03\x04\x00" })
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, "jruby") }
+
+    assert_includes error.message, "truncated Java archive"
+  end
+
+  def test_rejects_java_archives_outside_the_expected_extension
+    gem_file = gem_for(nil, { "lib/unexpected.jar" => "PK\x03\x04" }, extensions: EXTENSIONS)
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, nil) }
+
+    assert_includes error.message, "lib/unexpected.jar"
+  end
+
+  def test_rejects_java_bytecode_requiring_a_newer_vm_or_preview_features
+    [[62, 0], [61, 65535]].each do |version, minor|
+      gem_file = gem_for("java", { JavaExtension::JAR => java_archive(version:, minor:) })
+      error = assert_raises(GemVerifier::Error) { verify(gem_file, "jruby") }
+
+      assert_includes error.message, "Java 17 bytecode without preview features"
+    end
+  end
+
+  def test_rejects_corrupt_java_class_contents
+    archive = java_archive(version: 61)
+    archive.setbyte(archive.index("\xCA\xFE\xBA\xBE".b), 0)
+    gem_file = gem_for("java", { JavaExtension::JAR => archive })
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, "jruby") }
+
+    assert_includes error.message, "corrupt Java archive entry"
+  end
+
   private
+
+  def java_archive(version:, minor: 0)
+    name = JavaExtension::CLASSES.first
+    content = "\xCA\xFE\xBA\xBE".b + [minor, version].pack("n2")
+    header = [20, 0, 0, 0, 0, Zlib.crc32(content), content.size, content.size, name.size, 0].pack("v5V3v2")
+    ["PK\x03\x04", header, name, content, "PK\x01\x02"].join.b
+  end
 
   def verify(gem_file, platform)
     GemVerifier.verify(gem_file, platform:, abis: ABIS, names: NAMES)
@@ -234,6 +294,8 @@ class TestGemVerifier < Test
   end
 
   def gem_for(platform, files, extensions: [], required_ruby_version: [">= 3.4", "< 4.1.dev"])
+    jar = File.expand_path("../#{JavaExtension::JAR}", __dir__)
+    files = { JavaExtension::JAR => File.binread(jar) }.merge(files).compact
     dir = Dir.mktmpdir("test_gem_verifier")
     (@tmpdirs ||= []) << dir
 

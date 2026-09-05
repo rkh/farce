@@ -20,7 +20,7 @@
 
 /*
  * Modified for Ruby/RBTree.
- * Vendored unchanged by Farce for its priority queue implementation.
+ * Modified by Farce to support reusing a unique-key insertion search.
  */
 
 #include <stdlib.h>
@@ -537,10 +537,25 @@ dnode_t *dict_upper_bound(dict_t *dict, const void *key)
  * function returns true).
  */
 
+dnode_t *dict_lookup_position(dict_t *dict, const void *key, dnode_t **parent, int *result)
+{
+    dnode_t *where = dict_root(dict), *nil = dict_nil(dict);
+    assert (!dict->dupes);
+    *parent = nil;
+    *result = -1;
+    while (where != nil) {
+        *parent = where;
+        *result = dict->compare(key, where->key, dict->context);
+        if (*result == 0) return where;
+        where = *result < 0 ? where->left : where->right;
+    }
+    return NULL;
+}
+
 int dict_insert(dict_t *dict, dnode_t *node, const void *key)
 {
     dnode_t *where = dict_root(dict), *nil = dict_nil(dict);
-    dnode_t *parent = nil, *uncle, *grandpa;
+    dnode_t *parent = nil;
     int result = -1;
 
     node->key = key;
@@ -565,6 +580,16 @@ int dict_insert(dict_t *dict, dnode_t *node, const void *key)
     }
 
     assert (where == nil);
+
+    return dict_insert_at(dict, node, key, parent, result);
+}
+
+int dict_insert_at(dict_t *dict, dnode_t *node, const void *key, dnode_t *parent, int result)
+{
+    dnode_t *nil = dict_nil(dict), *uncle, *grandpa;
+    node->key = key;
+    assert (!dict_isfull(dict));
+    assert ((result < 0 ? parent->left : parent->right) == nil);
 
     if (result < 0)
 	parent->left = node;

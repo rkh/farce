@@ -15,13 +15,24 @@ group :compatibility do
 end
 
 group :development do
-  gem "benchmark"
-  gem "benchmark-ips"
   gem "irb"
   gem "rake"
   gem "rake-compiler"
   gem "rake-compiler-dock"
   gem "ruby-lsp", platform: :mri
+end
+
+group :benchmark do
+  gem "benchmark"
+  gem "benchmark-ips"
+  gem "io-event"
+  gem "lazy_priority_queue"
+  gem "philiprehberger-priority_queue"
+  gem "pqueue"
+  platform :mri do
+    gem "priority_queue_cxx", require: "fc"
+    gem "rbtree"
+  end
 end
 
 platform :mri_40 do # rubocop:disable Naming/VariableNumber

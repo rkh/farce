@@ -20,7 +20,7 @@
 
 /*
  * Modified for Ruby/RBTree.
- * Vendored unchanged by Farce for its priority queue implementation.
+ * Modified by Farce to expose reusable unique-key insertion positions.
  */
 
 #ifndef DICT_H
@@ -103,6 +103,10 @@ extern dnode_t *dict_lookup(dict_t *, const void *);
 extern dnode_t *dict_lower_bound(dict_t *, const void *);
 extern dnode_t *dict_upper_bound(dict_t *, const void *);
 extern int dict_insert(dict_t *, dnode_t *, const void *);
+/* Farce extension: find a unique key or retain its insertion position. The
+ * caller must keep the tree and key ordering unchanged until insert_at. */
+extern dnode_t *dict_lookup_position(dict_t *, const void *, dnode_t **, int *);
+extern int dict_insert_at(dict_t *, dnode_t *, const void *, dnode_t *, int);
 extern dnode_t *dict_delete(dict_t *, dnode_t *);
 extern int dict_alloc_insert(dict_t *, const void *, void *);
 extern void dict_delete_free(dict_t *, dnode_t *);

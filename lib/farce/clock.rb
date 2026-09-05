@@ -58,7 +58,11 @@ module Farce
       when Hash
         case value.size
         when 0 then return current
-        when 1 then return public_send(*value.first)
+        when 1
+          return time(value[:at]) if value.key?(:at)
+          method = argument = nil
+          value.each_pair { |key, option| method, argument = key, option }
+          return public_send(method, argument)
         end
       when MAYBE::ActiveSupport::Duration then return offset(value)
       else

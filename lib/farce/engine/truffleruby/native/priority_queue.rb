@@ -86,6 +86,10 @@ module Farce
         pop_endpoint(last: true, fallback:)
       end
 
+      def pop_before(latest_priority, &fallback)
+        pop_endpoint(last: false, fallback:, latest_priority:)
+      end
+
       def peek(&fallback)
         read_endpoint(:value, last: false, fallback:)
       end
@@ -108,6 +112,10 @@ module Farce
 
       def delete_identity(priority, value)
         delete_value(priority, value, identity: true)
+      end
+
+      def delete_match(priority, pattern)
+        delete_value(priority, pattern, identity: false, match: true)
       end
 
       def size
@@ -148,12 +156,15 @@ module Farce
 
       private
 
-      def pop_endpoint(last:, fallback:)
+      def pop_endpoint(last:, fallback:, latest_priority: UNDEFINED)
         state = initialized_state
         result = with_queue_operation(state) do
           raise_closed if state.closed
           bucket = last ? state.buckets.last : state.buckets.first
           next EMPTY unless bucket
+          if !UNDEFINED.equal?(latest_priority) && compare_priorities(bucket.priority, latest_priority).positive?
+            next EMPTY
+          end
 
           value = bucket.items.first
           prepared_items = bucket.items.drop(1)
@@ -233,7 +244,7 @@ module Farce
         EMPTY.equal?(result) ? fallback&.call : result
       end
 
-      def delete_value(priority, value, identity:)
+      def delete_value(priority, value, identity:, match: false)
         state = initialized_state
         with_queue_operation(state) do
           raise_closed if state.closed
@@ -243,6 +254,8 @@ module Farce
           bucket = state.buckets[bucket_index]
           item_index = if identity
                          bucket.items.index { primitive_identical?(it, value) }
+                       elsif match
+                         bucket.items.index { value === it } # rubocop:disable Style/CaseEquality
                        else
                          bucket.items.index { it == value }
                        end

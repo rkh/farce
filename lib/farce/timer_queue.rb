@@ -12,17 +12,6 @@ module Farce
     include Internal::BlockingPriorityQueue
     include Shareable
 
-    DeleteProbe = Data.define(:value, :compare_by_identity, :manager)
-    Entry       = Data.define(:at, :value) do
-      # @api private
-      def ==(other)
-        return super unless DeleteProbe === other
-        other.manager.same_value?(value, other.value, identity: other.compare_by_identity)
-      end
-    end
-
-    private_constant :DeleteProbe, :Entry
-
     # @!macro modes
     # @param capacity [Integer, nil] the maximum number of values, or nil for an unbounded queue
     # @param mode [Symbol] the default mode used to transfer values between Ractors
@@ -44,9 +33,8 @@ module Farce
     # @raise [ThreadError] when the queue is at capacity and non_block is true
     # @return [Boolean] whether the value was added
     def push(value, non_block = false, mode: nil, timeout: nil, **time_options) # rubocop:disable Style/OptionalBooleanParameter
-      at    = Clock.parse(time_options)
-      entry = Entry.new(at, @manager.wrap(value, mode:))
-      push_to_storage(at, non_block, entry, timeout:)
+      at = Clock.parse(time_options)
+      push_to_storage(at, non_block, @manager.wrap(value, mode:), timeout:)
     end
 
     # Remove the earliest value, waiting until its timestamp is reached.
@@ -55,12 +43,13 @@ module Farce
     # @return [BasicObject, nil] the value or the fallback result
     def pop(non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
       return try_pop { raise ThreadError, "queue empty" } if non_block
-      deadline = timeout_at(timeout)
+      deadline = timeout_at(timeout) unless timeout.nil?
 
       while true
-        entry = wait_for_entry(deadline)
-        return block_given? ? yield : nil if UNDEFINED.equal?(entry)
-        return @manager.unwrap(entry.value) if @queue.delete_identity(entry.at, entry)
+        empty = false
+        value = @queue.pop_before(Clock.now) { empty = true }
+        return @manager.unwrap(value) unless empty
+        return block_given? ? yield : nil if UNDEFINED.equal?(wait_for_timestamp(deadline))
       end
     end
 
@@ -74,9 +63,8 @@ module Farce
     # @yield called when the queue is at capacity
     # @return [Boolean, BasicObject] true, or the fallback result when full
     def try_push(value, mode: nil, **time_options)
-      at    = Clock.parse(time_options)
-      entry = Entry.new(at, @manager.wrap(value, mode:))
-      return true if @queue.push(at, entry)
+      at = Clock.parse(time_options)
+      return true if @queue.push(at, @manager.wrap(value, mode:))
       block_given? ? yield : false
     end
 
@@ -84,10 +72,9 @@ module Farce
     # @yield called when no value is ready
     # @return [BasicObject, nil] the value or the fallback result
     def try_pop
-      until UNDEFINED.equal?(entry = @queue.peek { UNDEFINED })
-        break if entry.at > Clock.now
-        return @manager.unwrap(entry.value) if @queue.delete_identity(entry.at, entry)
-      end
+      empty = false
+      value = @queue.pop_before(Clock.now) { empty = true }
+      return @manager.unwrap(value) unless empty
       yield if block_given?
     end
 
@@ -96,8 +83,9 @@ module Farce
     # @yield called when the queue is empty
     # @return [BasicObject, nil] the value or the fallback result
     def peek
-      entry = @queue.peek { UNDEFINED }
-      return @manager.unwrap(entry.value) unless UNDEFINED.equal?(entry)
+      empty = false
+      value = @queue.peek { empty = true }
+      return @manager.unwrap(value) unless empty
       yield if block_given?
     end
 
@@ -131,7 +119,7 @@ module Farce
     # @param timeout [Numeric, nil] maximum number of seconds to wait
     # @return [Boolean] whether a value is ready
     def wait_pop(timeout: nil) # rubocop:disable Naming/PredicateMethod
-      !UNDEFINED.equal?(wait_for_entry(timeout_at(timeout)))
+      !UNDEFINED.equal?(wait_for_timestamp(timeout_at(timeout)))
     end
 
     # Delete the oldest matching value at the exact time.
@@ -144,20 +132,19 @@ module Farce
       comparison_mode = compare_by_identity ? :local : :copy
       value = @manager.wrap(value, mode: comparison_mode)
       probe = DeleteProbe.new(value, compare_by_identity, @manager)
-      @queue.delete(Clock.at(at), probe)
+      @queue.delete_match(Clock.at(at), probe)
     end
 
     private
 
-    def wait_for_entry(deadline)
+    def wait_for_timestamp(deadline)
       while true
         generation = @signal.generation
-        raise ClosedQueueError, "queue closed" if closed?
-
-        entry = @queue.peek { UNDEFINED }
-        unless UNDEFINED.equal?(entry)
-          delay = entry.at - Clock.now
-          return entry unless delay.positive?
+        timestamp = @queue.peek_priority
+        wake_after = nil
+        if timestamp
+          delay = timestamp - Clock.now
+          return timestamp unless delay.positive?
           wake_after = delay if delay.finite?
         end
 

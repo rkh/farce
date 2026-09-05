@@ -12,17 +12,6 @@ module Farce
     include Internal::BlockingPriorityQueue
     include Shareable
 
-    DeleteProbe = Data.define(:value, :compare_by_identity, :manager)
-    Entry       = Data.define(:value) do
-      # @api private
-      def ==(other)
-        return super unless DeleteProbe === other
-        other.manager.same_value?(value, other.value, identity: other.compare_by_identity)
-      end
-    end
-
-    private_constant :DeleteProbe, :Entry
-
     # @return [BasicObject] the priority used when none is passed to push
     attr_reader :default_priority
 
@@ -54,22 +43,19 @@ module Farce
                else
                  @queue.peek { empty = true }
                end
-      empty ? (block_given? ? yield : nil) : @manager.unwrap(result.value)
+      empty ? (block_given? ? yield : nil) : @manager.unwrap(result)
     end
 
     # Remove the oldest value at the lowest or highest priority, depending on {#order}, waiting when empty.
     def pop(non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
       return try_pop { raise ThreadError, "queue empty" } if non_block
-      deadline = timeout_at(timeout)
+      deadline = timeout_at(timeout) unless timeout.nil?
 
       while true
-        empty   = false
-        result  = pop_once do
-          empty = true
-          UNDEFINED
-        end
+        empty  = false
+        result = @reverse_order ? @queue.pop_last { empty = true } : @queue.pop { empty = true }
 
-        return @manager.unwrap(result.value) unless empty
+        return @manager.unwrap(result) unless empty
         remaining = remaining_timeout(deadline)
         return block_given? ? yield : nil unless wait_pop(timeout: remaining)
       end
@@ -85,8 +71,7 @@ module Farce
     # @raise [ThreadError] when the queue is at capacity and non_block is true
     # @return [Boolean] whether the value was added
     def push(value, non_block = false, priority: default_priority, timeout: nil, mode: nil) # rubocop:disable Style/OptionalBooleanParameter
-      entry = Entry.new(@manager.wrap(value, mode:))
-      push_to_storage(priority, non_block, entry, timeout:)
+      push_to_storage(priority, non_block, @manager.wrap(value, mode:), timeout:)
     end
 
     # Try to remove the oldest value at the lowest priority without waiting.
@@ -95,7 +80,7 @@ module Farce
     def try_pop
       empty  = false
       result = @reverse_order ? @queue.pop_last { empty = true } : @queue.pop { empty = true }
-      return @manager.unwrap(result.value) unless empty
+      return @manager.unwrap(result) unless empty
       yield if block_given?
     end
 
@@ -107,8 +92,7 @@ module Farce
     # @yield called when the queue is at capacity
     # @return [Boolean, BasicObject] true, or the fallback result when full
     def try_push(value, priority: default_priority, mode: nil)
-      entry = Entry.new(@manager.wrap(value, mode:))
-      return true if @queue.push(priority, entry)
+      return true if @queue.push(priority, @manager.wrap(value, mode:))
 
       block_given? ? yield : false
     end
@@ -132,7 +116,7 @@ module Farce
     def delete(value, priority:, compare_by_identity: false)
       comparison_mode = compare_by_identity ? :local : :copy
       value = @manager.wrap(value, mode: comparison_mode)
-      @queue.delete(priority, DeleteProbe.new(value, compare_by_identity, @manager))
+      @queue.delete_match(priority, DeleteProbe.new(value, compare_by_identity, @manager))
     end
 
     # Wait until a value is available without removing it.

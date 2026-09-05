@@ -7,6 +7,11 @@ module Farce
   module Internal # :nodoc: all
     # Shared blocking wrapper behavior for the public priority-based queues.
     module BlockingPriorityQueue
+      DeleteProbe = Data.define(:value, :compare_by_identity, :manager) do
+        def ===(stored) = manager.same_value?(stored, value, identity: compare_by_identity)
+      end
+      private_constant :DeleteProbe
+
       # Remove all values and wake waiters.
       def clear
         @queue.clear
@@ -34,8 +39,6 @@ module Farce
 
       private
 
-      def pop_once(&) = @reverse_order ? @queue.pop_last(&) : @queue.pop(&)
-
       def initialize_copy(_other)
         raise TypeError, "priority queues cannot be copied"
       end
@@ -48,7 +51,7 @@ module Farce
       end
 
       def push_to_storage(priority, non_block, value, timeout:)
-        deadline = timeout_at(timeout)
+        deadline = timeout_at(timeout) unless timeout.nil?
 
         while true
           return true if @queue.push(priority, value)

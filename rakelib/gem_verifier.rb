@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "../ext/ext_helper"
+require_relative "java_extension"
 require "rubygems/package"
 require "zlib"
 
@@ -27,8 +28,8 @@ module GemVerifier
     "x86_64-linux-musl"  => ["so",     "ELF 64-bit x86_64 musl libc"],
   }.freeze
 
-  # Build targets that ship no binaries at all, mapped to the platform their gem declares.
-  PURE_RUBY = { "jruby" => "java" }.freeze
+  # JVM targets share portable bytecode, with no native binaries or install-time compiler.
+  JVM_PLATFORMS = { "jruby" => "java" }.freeze
 
   ELF_MACHINES  = { 0x03 => "i386", 0x28 => "arm", 0x3e => "x86_64", 0xb7 => "aarch64" }.freeze
   PE_MACHINES   = { 0x014c => "i386", 0x8664 => "x86_64", 0xaa64 => "aarch64" }.freeze
@@ -42,18 +43,18 @@ module GemVerifier
 
   # Every build target these checks know something about.
   def targets
-    SIGNATURES.keys + PURE_RUBY.keys
+    SIGNATURES.keys + JVM_PLATFORMS.keys
   end
 
   # The platform a target's gem declares, which is not always the target's own name.
   def gem_platform(target)
-    PURE_RUBY.fetch(target, target)
+    JVM_PLATFORMS.fetch(target, target)
   end
 
   # Each target produces a different kind of gem, so each gets a different set of checks.
   def verify(gem_file, platform:, abis:, names:)
     return verify_source(gem_file) if platform.nil?
-    return verify_pure_ruby(gem_file, platform:) if PURE_RUBY.key?(platform)
+    return verify_java(gem_file, platform:) if JVM_PLATFORMS.key?(platform)
     verify_platform(gem_file, platform:, abis:, names:)
   end
 
@@ -72,10 +73,11 @@ module GemVerifier
       ["#{ExtHelper.ext_path(name, version: abi, lib: true)}.#{dlext}", abi]
     end
 
-    extra = files.keys.grep(BINARY) - wanted.keys
+    extra = files.keys.grep(BINARY) - wanted.keys - [JavaExtension::JAR]
     raise Error, "ships #{extra.join(", ")}, which no supported Ruby would load" if extra.any?
 
     checks = { "platform" => platform, "extensions" => "none" }
+    checks[JavaExtension::JAR] = verify_java_extension(files)
 
     wanted.each do |path, abi|
       found = describe(files[path])
@@ -89,38 +91,45 @@ module GemVerifier
     checks
   end
 
-  # JRuby runs the pure-Ruby implementation, so its gem must carry nothing compiled -- and none of
-  # the C sources either, since there is nothing there it could ever build or use.
-  def verify_pure_ruby(gem_file, platform:)
-    expected = PURE_RUBY.fetch(platform)
+  # The Java gem ships Ruby and portable bytecode, without native extensions or sources.
+  def verify_java(gem_file, platform:)
+    expected = JVM_PLATFORMS.fetch(platform)
     spec     = spec(gem_file)
-    files    = files(gem_file).keys
+    files    = files(gem_file)
 
     raise Error, "declares platform #{spec.platform}, expected #{expected}" unless spec.platform.to_s == expected
     unless spec.extensions.empty?
       raise Error, "declares extension #{spec.extensions.join(", ")}, so it would compile on install"
     end
 
-    binaries = files.grep(BINARY)
-    sources  = files.grep(%r{\Aext/})
+    binaries = files.keys.grep(BINARY) - [JavaExtension::JAR]
+    sources  = files.keys.grep(%r{\Aext/})
     raise Error, "ships #{binaries.join(", ")}, which #{platform} cannot load" if binaries.any?
     raise Error, "ships #{sources.join(", ")}, which #{platform} has no use for" if sources.any?
 
-    { "platform" => expected, "extensions" => "none", "binaries" => "none" }
+    { "platform" => expected, "extensions" => "none", JavaExtension::JAR => verify_java_extension(files) }
   end
 
-  # The source gem is the mirror image: it must compile on install and ship no binaries at all.
+  # CRuby compiles the C sources on install. TruffleRuby JVM loads the bundled JAR.
   def verify_source(gem_file)
     spec     = spec(gem_file)
-    binaries = files(gem_file).keys.grep(BINARY)
+    files    = files(gem_file)
+    binaries = files.keys.grep(BINARY) - [JavaExtension::JAR]
 
     raise Error, "declares no extension, so it would install without compiling" if spec.extensions.empty?
     raise Error, "ships prebuilt #{binaries.join(", ")}, which belongs in a platform gem" if binaries.any?
 
-    { "platform" => "ruby", "extensions" => spec.extensions.join(", "), "binaries" => "none" }
+    { "platform" => "ruby", "extensions" => spec.extensions.join(", "),
+      JavaExtension::JAR => verify_java_extension(files) }
   end
 
   private
+
+  def verify_java_extension(files)
+    JavaExtension.validate(files[JavaExtension::JAR])
+  rescue RuntimeError => e
+    raise Error, "#{JavaExtension::JAR}: #{e.message}"
+  end
 
   def spec(gem_file)
     Gem::Package.new(gem_file).spec

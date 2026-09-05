@@ -164,6 +164,7 @@ module Farce
 
     class JVMBlockingQueueTestSignal
       attr_reader :entered, :release
+      attr_accessor :block_next
 
       def initialize
         @entered = Thread::Queue.new
@@ -191,6 +192,31 @@ module Farce
 
       def try_push(queue, priority, value) = queue.push(priority, value)
       def try_pop(queue, &) = queue.pop(&)
+
+      def test_float_keys_preserve_large_integer_priorities
+        queue = build_storage
+        boundary = 2**60
+        queue.push(boundary + 1, :above)
+        queue.push((boundary / 2).to_f, :float)
+        queue.push(boundary - 1, :below)
+
+        assert_equal((boundary / 2).to_f, queue.peek_priority)
+        assert_equal %i[float below above], Array.new(3) { queue.pop }
+      end
+
+      def test_indexed_bucket_unlinks_head_middle_and_tail_then_accepts_more_entries
+        queue = build_storage
+        values = Array.new(80) { Object.new.freeze }
+        values.each { queue.push(-0.0, it) }
+
+        [0, 40, 79].each { assert queue.delete_identity(0.0, values[it]) }
+        queue.push(0.0, values[40])
+        expected = values.values_at(*(1...40), *(41...79), 40)
+
+        expected.each { assert_same it, queue.pop }
+
+        assert_empty queue
+      end
 
       QUEUES.each do |queue_class|
         label = queue_class.name.split("::").last
@@ -717,6 +743,18 @@ module Farce
         assert_predicate queue, :empty?
       end
 
+      def test_signal_subclass_broadcast_is_not_bypassed_by_java_notification
+        signal_class = Class.new(Signal) do
+          def instance_of?(_klass) = true
+          def broadcast = raise "subclass broadcast exploded"
+        end
+        queue = build_storage(capacity: nil, signal: signal_class.new)
+
+        error = assert_raises(RuntimeError) { queue.push(1.0, :invisible) }
+        assert_equal "subclass broadcast exploded", error.message
+        assert_predicate queue, :empty?
+      end
+
       def test_storage_removes_a_new_priority_bucket_after_broadcast_failure
         signal = JVMQueueTestSignal.new
         signal.raise_next = true
@@ -771,6 +809,39 @@ module Farce
         assert_instance_of cancellation, worker.value
         assert_equal 1, queue.size
         assert_equal :committed, try_pop(queue)
+        assert_predicate queue, :empty?
+      ensure
+        signal&.release&.push(true)
+        worker&.kill if worker&.alive?
+      end
+
+      def test_notified_async_cancellation_preserves_the_committed_identity_index
+        signal = JVMBlockingQueueTestSignal.new
+        signal.block_next = false
+        queue = build_storage(capacity: nil, signal:)
+        values = Array.new(40) { Object.new }
+        values.each { queue.push(1.0, it) }
+
+        assert queue.delete_identity(1.0, values.shift), "prime the identity index"
+
+        signal.block_next = true
+        added = Object.new
+        cancellation = Class.new(StandardError)
+        worker = Thread.new do
+          queue.push(1.0, added)
+        rescue Exception => e # rubocop:disable Lint/RescueException
+          e
+        end
+        signal.entered.pop
+        worker.raise(cancellation, "cancel indexed notification")
+        signal.release << true
+
+        assert worker.join(2), "cancelled notification did not exit"
+        assert_instance_of cancellation, worker.value
+        assert_equal 40, queue.size
+        assert queue.delete_identity(1.0, added), "committed entry must remain indexed"
+        values.each { assert_same it, queue.pop }
+
         assert_predicate queue, :empty?
       ensure
         signal&.release&.push(true)

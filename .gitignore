@@ -6,13 +6,15 @@ tmp/
 vendor/
 yardoc/
 benchmark/results/
+spike/
 
 *.bundle
 *.dSYM/
+*.jar
 *.log
+*.o
 *.out
 *.so
-*.o
 
 ext/*/Makefile
 

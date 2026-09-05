@@ -205,8 +205,7 @@ module Farce
     def test_delete_compares_moved_values_without_claiming_nonmatches
       queue = PriorityQueue.new(mode: :move)
       queue.push(ModePayload.new(:stored), priority: 1)
-      entry = queue.instance_variable_get(:@queue).peek
-      envelope = entry.value
+      envelope = queue.instance_variable_get(:@queue).peek
 
       refute queue.delete(ModePayload.new(:other), priority: 1)
       refute_predicate envelope, :claimed?
@@ -317,6 +316,28 @@ module Farce
 
       assert queue.wait_pop(timeout: 0)
       refute queue.wait_push(timeout: 0)
+    end
+
+    def test_scheduled_producer_and_consumer_repeatedly_handoff_capacity
+      skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
+      scheduler = Helpers::QueueTestScheduler.new
+      queue = PriorityQueue.new(capacity: 1)
+      received = []
+      begin
+        Fiber.set_scheduler(scheduler)
+        Fiber.schedule { 300.times { received << queue.pop } }
+        Fiber.schedule { 300.times { queue.push(it, priority: 1.0) } }
+
+        Timeout.timeout(5) { Fiber.set_scheduler(nil) }
+
+        assert_equal (0...300).to_a, received
+        assert_equal 0, queue.num_waiting
+        assert_predicate queue, :empty?
+        assert_operator scheduler.io_wait_calls, :>=, 1
+      ensure
+        queue.close
+        Fiber.set_scheduler(nil)
+      end
     end
 
     def test_num_waiting_tracks_blocked_pop_and_push

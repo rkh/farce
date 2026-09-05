@@ -3,20 +3,20 @@
 # warn_indent: true
 
 require "java"
+require "farce/engine/jvm/extension"
 
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    class Signal < java.util.concurrent.Phaser
-      MAXIMUM_GENERATION = (2**31) - 1
+    class Signal < JVMExtension::QueueSignal
       MAXIMUM_TIMEOUT    = (2**63) - 1
       NANOSECONDS        = java.util.concurrent.TimeUnit::NANOSECONDS
       READABLE           = IO::READABLE
-      private_constant :MAXIMUM_GENERATION, :MAXIMUM_TIMEOUT, :NANOSECONDS, :READABLE
+      INTERRUPT_MASK     = { Exception => :never }.freeze
+      private_constant :MAXIMUM_TIMEOUT, :NANOSECONDS, :READABLE, :INTERRUPT_MASK
 
       def initialize
-        super(1)
-        @broadcast_lock = Mutex.new
+        super
         @fiber_waiters  = java.util.concurrent.ConcurrentHashMap.new
         @thread_waiters = java.util.concurrent.atomic.AtomicInteger.new
         freeze
@@ -26,10 +26,7 @@ module Farce
       def num_waiting = @thread_waiters.get + @fiber_waiters.size
 
       def broadcast
-        generation = @broadcast_lock.synchronize do
-          previous = arrive
-          previous == MAXIMUM_GENERATION ? 0 : previous + 1
-        end
+        generation = broadcastThreads
 
         # Publish the generation even with no waiters, so a waiter registering
         # concurrently can detect the broadcast before it parks.
@@ -98,6 +95,14 @@ module Farce
         current = generation
         return current unless current == observed
 
+        # The Java monitor closes the registration/commit race. Publish the
+        # registration flag under an interrupt mask so cancellation cannot
+        # leak a registration between the Java return and Ruby assignment.
+        registered = false
+        Thread.handle_interrupt(INTERRUPT_MASK) do
+          beginSchedulerWait
+          registered = true
+        end
         deadline = Clock.now + timeout if timeout
         reader, writer = IO.pipe
         @fiber_waiters[writer] = true
@@ -112,9 +117,13 @@ module Farce
           scheduler.io_wait(reader, READABLE, remaining)
         end
       ensure
-        @fiber_waiters.delete(writer) if writer
-        reader&.close
-        writer&.close
+        Thread.handle_interrupt(INTERRUPT_MASK) do
+          @fiber_waiters.delete(writer) if writer
+          reader&.close
+          writer&.close
+        ensure
+          endSchedulerWait if registered
+        end
       end
     end
   end

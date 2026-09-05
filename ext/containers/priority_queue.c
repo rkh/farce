@@ -83,6 +83,7 @@ struct priority_queue_identity_index {
 struct priority_queue_bucket {
     dnode_t node;
     VALUE priority;
+    double float_priority;
     priority_queue_value_t *head;
     priority_queue_value_t *tail;
     priority_queue_identity_index_t *identity_index;
@@ -360,6 +361,9 @@ typedef struct {
     size_t capacity;
     bool bounded;
     bool closed;
+    /* Only homogeneous built-in numeric keys can reuse an insertion search
+     * across notification. Mixed/custom comparisons retain the two-pass path. */
+    bool numeric_only;
     rb_atomic_t publication_state;
     bool mutex_initialized;
 } priority_queue_t;
@@ -369,6 +373,7 @@ static VALUE eClosedQueueError;
 static VALUE eIsolationError;
 static ID id_compare;
 static ID id_broadcast;
+static ID id_case_equal;
 
 static void priority_queue_wait_for_publication(priority_queue_t *queue);
 
@@ -596,6 +601,7 @@ priority_queue_allocate(VALUE klass)
     queue->publication_owner_fiber = Qnil;
     queue->publication_owner_ruby_thread = Qnil;
     queue->signal = Qnil;
+    queue->numeric_only = true;
     RUBY_ATOMIC_SET(queue->publication_state, PRIORITY_QUEUE_UNINITIALIZED);
     dict_init(&queue->tree, priority_queue_compare);
     dict_set_allocator(
@@ -964,10 +970,11 @@ priority_queue_check_shareable(VALUE value)
  * until the commit and unlock complete. Callers must finish every allocation
  * and user callback before this point, then use only no-fail C mutations.
  *
- * The new-bucket Kazlib insertion is the one conservative exception: Kazlib
+ * The generic new-bucket insertion is the one conservative exception: Kazlib
  * repeats comparisons before linking the prepared node. If one raises, the
  * pending bucket ensure cleanup leaves the queue unchanged and the notification
- * is merely spurious; Kazlib never links a node before those comparisons end. */
+ * is merely spurious; Kazlib never links a node before those comparisons end.
+ * Homogeneous numeric keys reuse their search and commit without comparisons. */
 static void
 priority_queue_notify_before_commit(priority_queue_t *queue)
 {
@@ -1189,11 +1196,38 @@ priority_queue_push_body(VALUE opaque)
     dnode_t *node;
     priority_queue_bucket_t *bucket;
     priority_queue_value_t *entry;
+    dnode_t *parent = NULL;
+    int position = -1;
+    bool numeric = FIXNUM_P(push->priority) ||
+        (CLASS_OF(push->priority) == rb_cFloat && !isnan(RFLOAT_VALUE(push->priority)));
+    bool reuse_position = queue->numeric_only && numeric &&
+        (dict_isempty(&queue->tree) ||
+         FIXNUM_P(push->priority) == FIXNUM_P((VALUE)dnode_getkey(queue->tree.dict_nilnode.dict_left)));
 
     if (queue->closed) priority_queue_raise_closed();
     if (queue->bounded && queue->size >= queue->capacity) return Qfalse;
 
-    node = dict_lookup(&queue->tree, (const void *)push->priority);
+    if (reuse_position && !FIXNUM_P(push->priority)) {
+        /* A homogeneous Float tree needs no Ruby dispatch, type tests, or
+         * unboxing of stored keys in this search. All NaNs use the slow path. */
+        double priority = RFLOAT_VALUE(push->priority);
+        dnode_t *nil = &queue->tree.dict_nilnode;
+        dnode_t *where = nil->dict_left;
+        parent = nil;
+        while (where != nil) {
+            double stored = ((priority_queue_bucket_t *)where)->float_priority;
+            parent = where;
+            position = priority < stored ? -1 : priority > stored ? 1 : 0;
+            if (!position) break;
+            where = position < 0 ? where->dict_left : where->dict_right;
+        }
+        node = where == nil ? NULL : where;
+    }
+    else {
+        node = reuse_position
+            ? dict_lookup_position(&queue->tree, (const void *)push->priority, &parent, &position)
+            : dict_lookup(&queue->tree, (const void *)push->priority);
+    }
     if (node) {
         bucket = (priority_queue_bucket_t *)node;
         priority_queue_identity_index_prepare_insert(bucket->identity_index, push->value);
@@ -1230,6 +1264,9 @@ priority_queue_push_body(VALUE opaque)
             push->stored_priority = push->priority;
         }
         bucket->priority = push->stored_priority;
+        if (CLASS_OF(push->priority) == rb_cFloat) {
+            bucket->float_priority = RFLOAT_VALUE(push->priority);
+        }
         /* The bucket embeds its dnode and is recovered by address, so Kazlib's
          * auxiliary data slot is intentionally unused. Keeping it NULL also
          * means an unstable comparator's duplicate-insert fallback cannot
@@ -1237,15 +1274,14 @@ priority_queue_push_body(VALUE opaque)
         dnode_init(&bucket->node, NULL);
         bucket->node.dict_key = (const void *)bucket->priority;
         priority_queue_notify_before_commit(queue);
-        bool inserted = dict_insert(
-            &queue->tree,
-            &bucket->node,
-            bucket->node.dict_key
-        );
+        bool inserted = reuse_position
+            ? dict_insert_at(&queue->tree, &bucket->node, bucket->node.dict_key, parent, position)
+            : dict_insert(&queue->tree, &bucket->node, bucket->node.dict_key);
         if (!inserted) {
             rb_raise(rb_eRuntimeError, "priority comparator changed during insertion");
         }
         push->pending_bucket = NULL;
+        if (!reuse_position) queue->numeric_only = false;
         queue->size++;
         return Qtrue;
     }
@@ -1304,8 +1340,10 @@ typedef struct {
     priority_queue_t *queue;
     priority_queue_read_kind_t kind;
     VALUE result;
+    VALUE latest_priority;
     bool empty;
     bool last;
+    bool limited;
 } priority_queue_read_t;
 
 static VALUE
@@ -1320,6 +1358,14 @@ priority_queue_read_body(VALUE opaque)
     if (queue->closed) priority_queue_raise_closed();
     node = read->last ? dict_last(&queue->tree) : dict_first(&queue->tree);
     if (!node) {
+        read->empty = true;
+        return Qnil;
+    }
+
+    /* Test and remove under the same logical lock: a timer consumer must not
+     * pop a future entry if another consumer took the due one after a peek. */
+    if (read->limited && priority_queue_compare(
+            dnode_getkey(node), (const void *)read->latest_priority, queue) > 0) {
         read->empty = true;
         return Qnil;
     }
@@ -1370,6 +1416,23 @@ priority_queue_pop(VALUE self)
 }
 
 static VALUE
+priority_queue_pop_before(VALUE self, VALUE latest_priority)
+{
+    priority_queue_t *queue = priority_queue_get(self);
+    priority_queue_check_shareable(latest_priority);
+    priority_queue_read_t read = {
+        .queue = queue,
+        .kind = PRIORITY_QUEUE_POP,
+        .result = Qnil,
+        .latest_priority = latest_priority,
+        .limited = true,
+    };
+    priority_queue_call(queue, priority_queue_read_body, (VALUE)&read);
+    if (read.empty) return rb_block_given_p() ? rb_yield_values(0) : Qnil;
+    return read.result;
+}
+
+static VALUE
 priority_queue_pop_last(VALUE self)
 {
     return priority_queue_read(self, PRIORITY_QUEUE_POP, true);
@@ -1404,6 +1467,7 @@ typedef struct {
     VALUE self;
     VALUE priority;
     VALUE value;
+    bool match;
 } priority_queue_delete_t;
 
 static VALUE
@@ -1421,12 +1485,15 @@ priority_queue_delete_body(VALUE opaque)
     bucket = (priority_queue_bucket_t *)node;
 
     for (entry = bucket->head; entry; entry = entry->next) {
-        if (!RTEST(priority_queue_call_ruby_callback(
+        VALUE matched = deletion->match
+            ? rb_funcall(deletion->value, id_case_equal, 1, entry->value)
+            : priority_queue_call_ruby_callback(
                 entry->value,
                 deletion->value,
                 true,
                 NULL
-            ))) continue;
+            );
+        if (!RTEST(matched)) continue;
         priority_queue_notify_before_commit(queue);
         priority_queue_identity_index_remove(bucket->identity_index, entry);
         priority_queue_bucket_unlink(bucket, entry);
@@ -1455,6 +1522,24 @@ priority_queue_delete(VALUE self, VALUE priority, VALUE value)
         priority_queue_delete_body,
         (VALUE)&deletion
     );
+}
+
+/* Match from the supplied pattern's side. Public queues can now store their
+ * managed values directly and allocate a comparison probe only on deletion. */
+static VALUE
+priority_queue_delete_match(VALUE self, VALUE priority, VALUE pattern)
+{
+    priority_queue_t *queue = priority_queue_get(self);
+    priority_queue_delete_t deletion = {
+        .queue = queue,
+        .self = self,
+        .priority = priority,
+        .value = pattern,
+        .match = true,
+    };
+    priority_queue_check_shareable(priority);
+    priority_queue_check_shareable(pattern);
+    return priority_queue_call(queue, priority_queue_delete_body, (VALUE)&deletion);
 }
 
 static VALUE
@@ -1567,6 +1652,7 @@ priority_queue_clear_body(VALUE opaque)
     priority_queue_notify_before_commit(operation->queue);
     dict_free_nodes(&operation->queue->tree);
     operation->queue->size = 0;
+    operation->queue->numeric_only = true;
     return operation->self;
 }
 
@@ -1636,12 +1722,14 @@ priority_queue_define_methods(VALUE klass)
     rb_define_private_method(klass, "initialize_copy", priority_queue_initialize_copy, 1);
     rb_define_method(klass, "push", priority_queue_push, 2);
     rb_define_method(klass, "pop", priority_queue_pop, 0);
+    rb_define_method(klass, "pop_before", priority_queue_pop_before, 1);
     rb_define_method(klass, "pop_last", priority_queue_pop_last, 0);
     rb_define_method(klass, "peek", priority_queue_peek, 0);
     rb_define_method(klass, "peek_last", priority_queue_peek_last, 0);
     rb_define_method(klass, "peek_priority", priority_queue_peek_priority, 0);
     rb_define_method(klass, "peek_last_priority", priority_queue_peek_last_priority, 0);
     rb_define_method(klass, "delete", priority_queue_delete, 2);
+    rb_define_method(klass, "delete_match", priority_queue_delete_match, 2);
     rb_define_method(klass, "delete_identity", priority_queue_delete_identity, 2);
     rb_define_method(klass, "size", priority_queue_size, 0);
     rb_define_method(klass, "empty?", priority_queue_empty, 0);
@@ -1659,6 +1747,7 @@ containers_init_priority_queue(VALUE namespace)
 
     id_compare = rb_intern("<=>");
     id_broadcast = rb_intern("broadcast");
+    id_case_equal = rb_intern("===");
     eClosedQueueError = rb_const_get(rb_cObject, rb_intern("ClosedQueueError"));
     ractor = rb_const_get(rb_cObject, id_ractor);
     eIsolationError = rb_const_get(ractor, rb_intern("IsolationError"));

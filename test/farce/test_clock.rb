@@ -39,6 +39,19 @@ module Farce
       assert_current_offset(0) { Clock.clock(nil) }
     end
 
+    def test_parse_finishes_hash_iteration_before_calling_a_converter
+      options = {}
+      value = Object.new
+      value.define_singleton_method(:to_f) do
+        options[:converted] = true
+        1.5
+      end
+      options[:clock] = value
+
+      assert_in_delta 1.5, Clock.parse(options)
+      assert options[:converted]
+    end
+
     def test_clock_converts_value_to_float
       assert_in_delta 1.25, Clock.clock(1.25)
       assert_in_delta 2.0, Clock.clock(2)

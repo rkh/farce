@@ -10,12 +10,13 @@ extension_files = extension_names.flat_map do |name|
 end
 
 extension_files << "ext/ext_helper.rb"
+extension_files.concat(Dir["ext/java/**/*.java"])
 
 Gem::Specification.new("farce", Farce::VERSION) do |spec|
   spec.authors    = ["Konstantin Haase"]
   spec.email      = ["konstantin.mailinglists@googlemail.com"]
   spec.extensions = extension_names.map { "ext/#{it}/extconf.rb" }
-  spec.files      = (Dir["MIT-LICENSE", "*.md", "docs/**/*.md", "lib/**/*.rb"] + extension_files).sort
+  spec.files      = (Dir["MIT-LICENSE", "*.md", "docs/**/*.md", "lib/**/*.{rb,jar}"] + extension_files).sort
   spec.homepage   = github
   # Farce's own code is MIT-licensed. The native priority queue also vendors
   # Kazlib 1.20's permissively licensed dict.c/dict.h; Kazlib's terms do not

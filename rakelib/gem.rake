@@ -32,14 +32,14 @@ namespace :gem do
 
   gem_command = ->(gemspec) { "gem build #{gemspec} && mkdir -p pkg && mv farce-*.gem pkg/" }
 
-  task prepare: :clobber do # rubocop:disable Rake/Desc
+  task prepare: [:clobber, "java:compile"] do
     mkdir_p("vendor/cache")
     sh "gem build farce.gemspec && mv farce-*.gem vendor/cache"
     sh "bundle cache --all-platforms"
     rm_f Dir.glob("vendor/cache/farce-*.gem")
   end
 
-  desc "Build the pure-source gem (compiles at install time on CRuby)"
+  desc "Build the source gem (C sources for CRuby, bundled bytecode for JVM engines)"
   task source: :prepare do
     sh gem_command["farce.gemspec"]
     verify[nil]
