@@ -67,6 +67,28 @@ module Farce
         end
       end
 
+      def test_gc_preserves_values_in_full_and_partially_filled_wrapped_rings
+        skip "GC compaction is unavailable" unless GC.respond_to?(:verify_compaction_references)
+
+        [31, nil].each do |capacity|
+          [10, 20].each do |added|
+            queue = Queue.new(capacity:)
+            31.times { |index| queue.push("value #{index}".freeze) }
+            20.times { queue.pop }
+            added.times { |index| queue.push("value #{index + 31}".freeze) }
+            GC.verify_compaction_references(double_heap: true, toward: :empty)
+
+            expected = (20...(31 + added)).map { |index| "value #{index}" }
+
+            assert_equal expected, Array.new(queue.size) { queue.pop }
+
+            queue.push(:after_compaction)
+
+            assert_equal :after_compaction, queue.pop
+          end
+        end
+      end
+
       def test_fifo_and_size
         queue = Queue.new(capacity: 2)
 
@@ -140,6 +162,37 @@ module Farce
         assert_equal 1, queue.pop(timeout: 0)
       end
 
+      def test_try_operations_preserve_fallbacks_values_and_errors
+        queue = Queue.new(capacity: 1)
+
+        assert_equal(:empty, queue.try_pop { :empty })
+        assert queue.try_push(nil)
+        refute queue.try_push(:full)
+        assert_nil(queue.try_pop { flunk "nil is a stored value" })
+        assert queue.try_push(false)
+        assert_instance_of FalseClass, queue.try_pop
+        assert_raises(Ractor::IsolationError) { queue.try_push(ModePayload.new(:rejected)) }
+        assert_equal 0, queue.size
+        queue.close
+
+        assert_raises(ClosedQueueError) { queue.try_pop }
+        assert_raises(ClosedQueueError) { queue.try_push(:closed) }
+      end
+
+      def test_polling_with_a_coerced_capacity
+        skip "TruffleRuby's SizedQueue does not coerce to_int-only objects" if RUBY_ENGINE == "truffleruby"
+        capacity = Object.new
+        def capacity.to_int = 1
+        queue = Queue.new(capacity:)
+
+        assert queue.push(:first, timeout: 0)
+        refute queue.push(:full, timeout: 0)
+        assert_equal :first, queue.pop(timeout: 0)
+        assert queue.try_push(:second)
+        refute queue.try_push(:full)
+        assert_equal :second, queue.try_pop
+      end
+
       def test_pop_timeout_and_fallback_block
         queue = Queue.new
         started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -155,6 +208,54 @@ module Farce
 
         assert_raises(ArgumentError) { queue.pop(timeout: -1) }
         assert_raises(ArgumentError) { queue.push(1, timeout: Float::INFINITY) }
+      end
+
+      def test_keyword_fast_paths_preserve_arguments_and_validate_timeouts
+        queue = Queue.new(capacity: 1)
+        options = { timeout: 0 }.freeze
+        value = { timeout: :payload }.freeze
+
+        assert queue.push(value, **options)
+        assert_same value, queue.pop(**options)
+        assert_equal({ timeout: 0 }, options)
+        assert queue.push(value)
+        assert_same value, queue.pop
+
+        %i[pop wait_pop wait_push].each do |method|
+          assert_raises(ArgumentError) { queue.public_send(method, unknown: 0) }
+          assert_raises(ArgumentError) { queue.public_send(method, timeout: 0, unknown: 0) }
+          assert_raises(ArgumentError) { queue.public_send(method, options) }
+          assert_raises(ArgumentError) { queue.public_send(method, timeout: Float::NAN) }
+        end
+        assert_raises(ArgumentError) { queue.push(timeout: 0) }
+        assert_raises(ArgumentError) { queue.push(:value, unknown: 0) }
+        assert_raises(ArgumentError) { queue.push(:value, timeout: 0, unknown: 0) }
+        assert_raises(ArgumentError) { queue.push(:value, options) }
+        assert_raises(ArgumentError) { queue.push(:value, :extra, timeout: 0) }
+        assert_equal 0, queue.size
+
+        queue.push(:ready)
+        assert_raises(ArgumentError) { queue.pop(timeout: -1) }
+        assert_raises(ArgumentError) { queue.wait_pop(timeout: Float::INFINITY) }
+        assert_equal :ready, queue.pop
+      end
+
+      def test_zero_timeouts_preserve_nil_false_and_fallback_values
+        queue = Queue.new(capacity: 1)
+
+        [0, 0.0, -0.0, Rational(0)].each do |timeout|
+          assert_equal :empty, queue.pop(timeout:) { :empty }
+          refute queue.wait_pop(timeout:)
+          assert queue.wait_push(timeout:)
+          [nil, false].each do |value|
+            assert queue.push(value, timeout:)
+            refute queue.push(:full, timeout:)
+            refute queue.wait_push(timeout:)
+            assert queue.wait_pop(timeout:)
+            result = queue.pop(timeout:) { flunk "stored values must not call the fallback" }
+            value.nil? ? assert_nil(result) : assert_same(value, result)
+          end
+        end
       end
 
       def test_blocking_pop
@@ -258,6 +359,60 @@ module Farce
         queue.close
 
         assert_instance_of ::ClosedQueueError, thread.value
+      end
+
+      def test_interrupted_native_waiters_leave_their_siblings_usable
+        return unless RUBY_ENGINE == "ruby"
+
+        %i[pop push].each do |operation|
+          queue = Queue.new(capacity: 1)
+          queue.push(:first) if operation == :push
+          waiters = 2.times.map do
+            Thread.new { operation == :pop ? queue.pop : queue.push(:replacement) }
+          end
+          Timeout.timeout(5) { Thread.pass until queue.num_waiting == 2 }
+          waiters.first.kill
+          Timeout.timeout(5) { waiters.first.join }
+
+          assert_equal 1, queue.num_waiting
+          operation == :pop ? queue.push(:value) : queue.pop
+          result = Timeout.timeout(5) { waiters.last.value }
+
+          assert_equal(operation == :pop ? :value : true, result)
+          assert_equal 0, queue.num_waiting
+          queue.close
+        ensure
+          queue&.close
+          waiters&.each(&:kill)
+          waiters&.each(&:join)
+        end
+      end
+
+      def test_close_wakes_all_data_and_readiness_waiters
+        %i[pop push].each do |operation|
+          queue = Queue.new(capacity: 1)
+          queue.push(:first) if operation == :push
+          waiters = 8.times.map do |index|
+            Thread.new do
+              if index.even?
+                queue.public_send(:"wait_#{operation}")
+              else
+                operation == :pop ? queue.pop : queue.push(:replacement)
+              end
+            rescue ClosedQueueError
+              :closed
+            end
+          end
+          Timeout.timeout(5) { Thread.pass until queue.num_waiting == waiters.size }
+          queue.close
+
+          assert_equal [:closed] * 8, Timeout.timeout(5) { waiters.map(&:value) }
+          assert_equal 0, queue.num_waiting
+        ensure
+          queue&.close
+          waiters&.each(&:kill)
+          waiters&.each(&:join)
+        end
       end
 
       def test_multiple_producers_and_consumers

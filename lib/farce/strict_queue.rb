@@ -71,7 +71,7 @@ module Farce
     # @return [BasicObject, nil] the value or the fallback result
     def pop(non_block = false, timeout: nil, &) # rubocop:disable Style/OptionalBooleanParameter
       return try_pop { raise ThreadError, "queue empty" } if non_block
-      @queue.pop(timeout:, &)
+      timeout.nil? ? @queue.pop(&) : @queue.pop(timeout:, &)
     end
 
     # Add a shareable value, waiting while a bounded queue is full.
@@ -83,13 +83,13 @@ module Farce
     # @return [Boolean] whether the value was added
     def push(value, non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
       return try_push(value) { raise ThreadError, "queue full" } if non_block
-      @queue.push(value, timeout:)
+      timeout.nil? ? @queue.push(value) : @queue.push(value, timeout:)
     end
 
     # Try to remove the oldest value without waiting.
     # @yield called when the queue is empty
     # @return [BasicObject, nil] the value or the fallback result
-    def try_pop(&) = @queue.pop(timeout: 0, &)
+    def try_pop(&) = @queue.try_pop(&)
 
     # Try to add a shareable value without waiting.
     # @param value [BasicObject] the shareable value to add
@@ -97,7 +97,7 @@ module Farce
     # @raise [Ractor::IsolationError] when the value is not shareable
     # @return [Boolean, BasicObject] true, or the fallback result when full
     def try_push(value)
-      return true if @queue.push(value, timeout: 0)
+      return true if @queue.try_push(value)
       block_given? ? yield : false
     end
 

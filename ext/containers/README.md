@@ -20,3 +20,8 @@ bucket. Kazlib's copyright and license remain in `dict.c` and `dict.h`.
 
 The extension is built and loaded only on CRuby. Other engines use their Ruby
 or JVM implementations and never compile this directory.
+
+`Queue` uses a bounded or growing FIFO ring. Its `try_push` and `try_pop`
+entry points share the checked operation bodies with `push` and `pop`, while
+avoiding keyword allocation and clock reads for polling. Vacated slots are
+cleared, and the GC hooks visit only the live portion of the ring.

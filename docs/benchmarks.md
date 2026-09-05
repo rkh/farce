@@ -66,13 +66,14 @@ Farce's locks have identical performance to `Mutex` (as they are a subclass of `
 
 ## Queue performance
 
-Nothing beats Ruby's built-in `Queue` and `SizedQueue` for performance, but they do not support ractors. Farce's queues are faster than other options that support ractors, and are the only option that allows sharing of non-sharable objects between ractors, other than Port-multiplexing, which is inefficient.
+In the producer/consumer workload in `benchmark/queue.rb`, Ruby's built-in `Thread::Queue` and `Thread::SizedQueue` remain the fastest, but they do not support ractors.
 
  Implementation                | Performance | Notes
 -------------------------------|-------------|-------------
- `Queue` and `SizedQueue`      | Fastest     | no ractor support
- `Farce::StrictQueue`          | 2.2x slower | only allows sharable objects
- `Farce::Queue`                | 2.7x slower |
- `Ratomic::Queue`              | 6x slower   | breaks ractor isolation
- `RactorQueue`                 | 15x slower  | breaks ractor isolation
- `Ractor::Port` (multiplexing) | 55x slower  |
+ `Thread::Queue`               | Fastest     | no ractor support
+ `Thread::SizedQueue`          | 1.4x slower | no ractor support
+ `Farce::StrictQueue`          | 1.5x slower | only allows sharable objects
+ `Farce::Queue`                | 2.1x slower |
+ `Ratomic::Queue`              | 8.7x slower | breaks ractor isolation
+ `RactorQueue`                 | 27x slower  | breaks ractor isolation
+ `Ractor::Port` (multiplexing) | 100x slower |

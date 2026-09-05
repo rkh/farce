@@ -66,7 +66,7 @@ module Farce
     #     Whether to automatically use `:local` mode when sending values from the owning ractor.
     def initialize(...)
       # Important: Cannot set instance variables on a Ractor::Port.
-      Internal::Storage[self] = true
+      Internal::Storage.ractor[self] = true
       super
     end
 
@@ -84,7 +84,7 @@ module Farce
     # Checks ractor ownership of this port. The ractor owning this port is the only one that can receive messages
     # through the port or close it.
     # @return [Boolean] `true` if the current Ractor owns this port, `false` otherwise.
-    def owned? = !!Internal::Storage[self]
+    def owned? = !!Internal::Storage.ractor[self]
 
     # Sends a message through the port.
     #
@@ -137,7 +137,11 @@ module Farce
     # @param timeout [Numeric, nil] The maximum time to wait for a message, in seconds. If `nil`, waits indefinitely.
     # @return [BasicObject, nil] The received message, or `nil` if the timeout was reached.
     # @raise [Farce::Ractor::ClosedError] if the port is closed.
-    def receive(timeout: nil) = MANAGER.unwrap(super)
+    def receive(timeout: nil)
+      # Omit the absent keyword instead of allocating arguments for super.
+      result = timeout.nil? ? super() : super
+      MANAGER.unwrap(result)
+    end
     alias pop receive
 
     # @return [String] A string representation of the port, including its class name and mode.

@@ -21,7 +21,7 @@ module Farce
 
       def execute(action, key, value = nil, move: false)
         raise Ractor::IsolationError, "key must be shareable" unless ::Ractor.shareable?(key)
-        port,    mutex   = Storage.store_if_absent(self) { [::Ractor::Port.new, Mutex.new] }
+        port,    mutex   = Storage.ractor.store_if_absent(self) { [::Ractor::Port.new, Mutex.new] }
         success, payload = mutex.synchronize do
           @ractor.send([action, key, value, port].freeze, move:)
           port.receive

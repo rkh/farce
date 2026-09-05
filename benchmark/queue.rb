@@ -1,5 +1,14 @@
 # frozen_string_literal: true
 
+if RUBY_ENGINE == "ruby"
+  case ENV["JIT"].to_s.downcase
+  when "", "yjit" then RubyVM::YJIT.enable
+  when "zjit"     then RubyVM::ZJIT.enable
+  when "false" # no-op
+  else abort "Unknown JIT: #{ENV["JIT"].inspect}"
+  end
+end
+
 require "bundler/setup"
 require "benchmark"
 require "benchmark/ips"
@@ -42,8 +51,11 @@ class PortQueue
 end
 
 queues = {
-  "Farce::Queue"       => -> { Farce::Queue.new },
-  "Farce::StrictQueue" => -> { Farce::StrictQueue.new },
+  "Thread::Queue"          => -> { Thread::Queue.new },
+  "Thread::SizedQueue"     => -> { Thread::SizedQueue.new(1024) },
+  "Farce::Internal::Queue" => -> { Farce.const_get(:Internal, false)::Queue.new },
+  "Farce::Queue"           => -> { Farce::Queue.new },
+  "Farce::StrictQueue"     => -> { Farce::StrictQueue.new },
 }
 
 if defined?(Ractor)
@@ -64,10 +76,10 @@ if defined?(Ractor)
   end
 end
 
-queues["Thread::Queue"] = -> { Thread::SizedQueue.new(1024) }
-
 Benchmark.ips do |x|
+  x.config(time: Float(ENV.fetch("TIME", "5")), warmup: Float(ENV.fetch("WARMUP", "2")))
   queues.each do |queue_name, queue_factory|
+    next if ENV["FILTER"] && !Regexp.new(ENV["FILTER"]).match?(queue_name)
     queue = queue_factory.call
     x.report(queue_name) do |times|
       reader = Thread.new { times.times { queue.pop } }

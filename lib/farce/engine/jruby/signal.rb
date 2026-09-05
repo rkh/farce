@@ -30,6 +30,11 @@ module Farce
           previous = arrive
           previous == MAXIMUM_GENERATION ? 0 : previous + 1
         end
+
+        # Publish the generation even with no waiters, so a waiter registering
+        # concurrently can detect the broadcast before it parks.
+        return generation if @fiber_waiters.empty?
+
         @fiber_waiters.key_set.each do |writer|
           writer.write_nonblock(".", exception: false)
         rescue IOError, SystemCallError

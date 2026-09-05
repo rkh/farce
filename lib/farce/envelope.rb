@@ -104,7 +104,7 @@ module Farce
       #   @param value [Object] The value to wrap in the envelope.
       def initialize(value, auto_unwrap = nil)
         @owner = Ractor.current
-        Internal::Storage[self] = value
+        Internal::Storage.ractor[self] = value
         super
       end
 
@@ -208,7 +208,7 @@ module Farce
     # May be called multiple times.
     # @return [BasicObject] The value wrapped in the envelope.
     # @raise [AlreadyClaimed] If the envelope has already been claimed by another Ractor.
-    def value = Internal::Storage.store_if_absent(self) { claim! && retrieve }
+    def value = Internal::Storage.ractor.store_if_absent(self) { claim! && retrieve }
 
     # Compares wrapped values. Compatible envelopes can be compared without
     # claiming or opening either envelope.

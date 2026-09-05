@@ -11,6 +11,7 @@
 
 static VALUE cQueue;
 static VALUE eClosedQueueError;
+static ID id_timeout;
 
 #define QUEUE_INITIAL_CAPACITY 16
 
@@ -117,8 +118,10 @@ queue_mark(void *pointer)
 {
     queue_t *queue = pointer;
     if (!queue->values) return;
-    for (size_t index = 0; index < queue->storage_capacity; index++) {
+    size_t index = queue->head;
+    for (size_t remaining = queue->size; remaining > 0; remaining--) {
         rb_gc_mark_movable(queue->values[index]);
+        if (++index == queue->storage_capacity) index = 0;
     }
 }
 
@@ -127,8 +130,10 @@ queue_compact(void *pointer)
 {
     queue_t *queue = pointer;
     if (!queue->values) return;
-    for (size_t index = 0; index < queue->storage_capacity; index++) {
+    size_t index = queue->head;
+    for (size_t remaining = queue->size; remaining > 0; remaining--) {
         queue->values[index] = rb_gc_location(queue->values[index]);
+        if (++index == queue->storage_capacity) index = 0;
     }
 }
 
@@ -262,13 +267,21 @@ parse_timeout(VALUE timeout)
         rb_raise(rb_eArgError, "timeout must be a finite, non-negative number or nil");
     }
     parsed.finite = true;
-    parsed.deadline = monotonic_now() + seconds;
+    /* A zero deadline denotes polling and never needs to read the clock. */
+    parsed.deadline = seconds == 0 ? 0 : monotonic_now() + seconds;
     return parsed;
 }
 
 static VALUE
 extract_timeout(int argc, VALUE *argv)
 {
+    if (argc == 0) return Qnil;
+    /* rb_scan_args copies keyword hashes for rb_get_kwargs to consume. The
+     * common single-keyword case can read the original hash without copying. */
+    if (argc == 1 && rb_keyword_given_p() && RHASH_SIZE(argv[0]) == 1) {
+        VALUE timeout = rb_hash_lookup2(argv[0], ID2SYM(id_timeout), Qundef);
+        if (timeout != Qundef) return timeout;
+    }
     VALUE keywords = Qnil;
     VALUE timeout = Qnil;
     ID keyword_ids[] = {rb_intern("timeout")};
@@ -360,7 +373,7 @@ queue_wait_cleanup(VALUE opaque)
 static bool
 queue_wait(queue_t *queue, readiness_signal_t *signal, size_t *waiter_count, queue_timeout_t *timeout)
 {
-    if (timeout->finite && timeout->deadline <= monotonic_now()) {
+    if (timeout->finite && (timeout->deadline == 0 || timeout->deadline <= monotonic_now())) {
         pthread_mutex_unlock(&queue->lock);
         return false;
     }
@@ -513,11 +526,8 @@ queue_release_wait_descriptors(VALUE self)
 }
 
 static VALUE
-queue_pop(int argc, VALUE *argv, VALUE self)
+queue_pop_with_timeout(queue_t *queue, queue_timeout_t timeout)
 {
-    queue_t *queue = get_queue(self);
-    queue_timeout_t timeout = parse_timeout(extract_timeout(argc, argv));
-
     for (;;) {
         pthread_mutex_lock(&queue->lock);
         if (queue->closed) {
@@ -527,7 +537,7 @@ queue_pop(int argc, VALUE *argv, VALUE self)
         if (queue->size > 0) {
             VALUE value = queue->values[queue->head];
             queue->values[queue->head] = Qnil;
-            queue->head = (queue->head + 1) % queue->storage_capacity;
+            if (++queue->head == queue->storage_capacity) queue->head = 0;
             queue->size--;
             queue_update_readiness(queue);
             pthread_mutex_unlock(&queue->lock);
@@ -540,22 +550,24 @@ queue_pop(int argc, VALUE *argv, VALUE self)
 }
 
 static VALUE
-queue_push(int argc, VALUE *argv, VALUE self)
+queue_pop(int argc, VALUE *argv, VALUE self)
 {
-    VALUE value;
-    VALUE keywords = Qnil;
-    VALUE timeout_value = Qnil;
-    ID keyword_ids[] = {rb_intern("timeout")};
-    VALUE keyword_values[1];
-    rb_scan_args(argc, argv, "1:", &value, &keywords);
-    if (!NIL_P(keywords)) {
-        rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
-        if (keyword_values[0] != Qundef) timeout_value = keyword_values[0];
-    }
-
     queue_t *queue = get_queue(self);
-    containers_check_shareable(value);
-    queue_timeout_t timeout = parse_timeout(timeout_value);
+    queue_timeout_t timeout = {.finite = false, .deadline = 0};
+    if (argc > 0) timeout = parse_timeout(extract_timeout(argc, argv));
+    return queue_pop_with_timeout(queue, timeout);
+}
+
+static VALUE
+queue_try_pop(VALUE self)
+{
+    queue_timeout_t timeout = {.finite = true, .deadline = 0};
+    return queue_pop_with_timeout(get_queue(self), timeout);
+}
+
+static VALUE
+queue_push_with_timeout(queue_t *queue, VALUE value, queue_timeout_t timeout)
+{
     for (;;) {
         pthread_mutex_lock(&queue->lock);
         if (queue->closed) {
@@ -568,7 +580,7 @@ queue_push(int argc, VALUE *argv, VALUE self)
                 rb_memerror();
             }
             queue->values[queue->tail] = value;
-            queue->tail = (queue->tail + 1) % queue->storage_capacity;
+            if (++queue->tail == queue->storage_capacity) queue->tail = 0;
             queue->size++;
             queue_update_readiness(queue);
             pthread_mutex_unlock(&queue->lock);
@@ -576,6 +588,45 @@ queue_push(int argc, VALUE *argv, VALUE self)
         }
         if (!queue_wait(queue, &queue->can_push, &queue->push_waiters, &timeout)) return Qfalse;
     }
+}
+
+static VALUE
+queue_push(int argc, VALUE *argv, VALUE self)
+{
+    VALUE value;
+    VALUE keywords = Qnil;
+    VALUE timeout_value = Qnil;
+    ID keyword_ids[] = {rb_intern("timeout")};
+    VALUE keyword_values[1];
+    if (argc == 1 && !rb_keyword_given_p()) {
+        value = argv[0];
+    }
+    else if (argc == 2 && rb_keyword_given_p()) {
+        value = argv[0];
+        timeout_value = extract_timeout(1, argv + 1);
+    }
+    else {
+        /* Preserve Ruby's positional-hash and keyword-only argument rules. */
+        rb_scan_args(argc, argv, "1:", &value, &keywords);
+        if (!NIL_P(keywords)) {
+            rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
+            if (keyword_values[0] != Qundef) timeout_value = keyword_values[0];
+        }
+    }
+
+    queue_t *queue = get_queue(self);
+    containers_check_shareable(value);
+    queue_timeout_t timeout = parse_timeout(timeout_value);
+    return queue_push_with_timeout(queue, value, timeout);
+}
+
+static VALUE
+queue_try_push(VALUE self, VALUE value)
+{
+    queue_t *queue = get_queue(self);
+    containers_check_shareable(value);
+    queue_timeout_t timeout = {.finite = true, .deadline = 0};
+    return queue_push_with_timeout(queue, value, timeout);
 }
 
 static VALUE
@@ -622,6 +673,7 @@ queue_wait_push(int argc, VALUE *argv, VALUE self)
 void
 containers_init_queue(VALUE namespace)
 {
+    id_timeout = rb_intern("timeout");
     eClosedQueueError = rb_const_get(rb_cObject, rb_intern("ClosedQueueError"));
     cQueue = rb_define_class_under(namespace, "Queue", rb_cObject);
     rb_define_alloc_func(cQueue, queue_allocate);
@@ -631,7 +683,9 @@ containers_init_queue(VALUE namespace)
     rb_define_method(cQueue, "num_waiting", queue_num_waiting, 0);
     rb_define_method(cQueue, "clear", queue_clear, 0);
     rb_define_method(cQueue, "pop", queue_pop, -1);
+    rb_define_method(cQueue, "try_pop", queue_try_pop, 0);
     rb_define_method(cQueue, "push", queue_push, -1);
+    rb_define_method(cQueue, "try_push", queue_try_push, 1);
     rb_define_method(cQueue, "wait_pop", queue_wait_pop, -1);
     rb_define_method(cQueue, "wait_push", queue_wait_push, -1);
     rb_define_method(cQueue, "close", queue_close, 0);

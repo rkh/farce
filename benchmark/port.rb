@@ -1,7 +1,17 @@
 # frozen_string_literal: true
 # warn_indent: true
 
+if RUBY_ENGINE == "ruby"
+  case ENV["JIT"].to_s.downcase
+  when "", "yjit" then RubyVM::YJIT.enable
+  when "zjit"     then RubyVM::ZJIT.enable
+  when "false" # no-op
+  else abort "Unknown JIT: #{ENV["JIT"].inspect}"
+  end
+end
+
 require "bundler/setup"
+require "benchmark"
 require "benchmark/ips"
 require "farce"
 

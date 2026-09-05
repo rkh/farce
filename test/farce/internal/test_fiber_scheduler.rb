@@ -70,6 +70,31 @@ module Farce
         assert_operator scheduler.io_wait_calls, :>=, 1
       end
 
+      def test_queue_wakes_native_and_scheduled_readiness_waiters
+        return unless RUBY_ENGINE == "ruby"
+
+        queue = Queue.new
+        worker = Thread.new { queue.wait_pop }
+        Timeout.timeout(5) { Thread.pass until queue.num_waiting == 1 }
+        scheduler = Helpers::QueueTestScheduler.new
+        Fiber.set_scheduler(scheduler)
+        events = []
+
+        Fiber.schedule { events << queue.wait_pop }
+        Fiber.schedule { queue.push(:ready) }
+        Fiber.set_scheduler(nil)
+
+        assert_equal [true], events
+        assert Timeout.timeout(5) { worker.value }
+        assert_equal :ready, queue.pop
+        assert_equal 0, queue.num_waiting
+        assert_operator scheduler.io_wait_calls, :>=, 1
+      ensure
+        queue&.close
+        worker&.kill
+        worker&.join
+      end
+
       def test_exchange_does_not_block_another_fiber
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)

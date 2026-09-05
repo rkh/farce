@@ -60,8 +60,8 @@ module Farce
     def pop(non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
       return try_pop { raise ThreadError, "queue empty" } if non_block
 
-      empty  = false
-      result = @queue.pop(timeout:) { empty = true }
+      empty = false
+      result = timeout.nil? ? @queue.pop { empty = true } : @queue.pop(timeout:) { empty = true }
       return @manager.unwrap(result) unless empty
       yield if block_given?
     end
@@ -78,20 +78,19 @@ module Farce
       value = @manager.wrap(value, mode:)
 
       if non_block
-        return true if @queue.push(value, timeout: 0)
-
+        return true if @queue.try_push(value)
         raise ThreadError, "queue full"
       end
 
-      @queue.push(value, timeout:)
+      timeout.nil? ? @queue.push(value) : @queue.push(value, timeout:)
     end
 
     # Try to remove the oldest value without waiting.
     # @yield called when the queue is empty
     # @return [BasicObject, nil] the value or the fallback result
     def try_pop
-      empty  = false
-      result = @queue.pop(timeout: 0) { empty = true }
+      empty = false
+      result = @queue.try_pop { empty = true }
       return @manager.unwrap(result) unless empty
       yield if block_given?
     end
@@ -103,7 +102,7 @@ module Farce
     # @yield called when the queue is full
     # @return [Boolean, BasicObject] true, or the fallback result when full
     def try_push(value, mode: nil)
-      return true if @queue.push(@manager.wrap(value, mode:), timeout: 0)
+      return true if @queue.try_push(@manager.wrap(value, mode:))
       block_given? ? yield : false
     end
 

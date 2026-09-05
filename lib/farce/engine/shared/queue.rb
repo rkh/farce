@@ -18,6 +18,12 @@ module Farce
 
       def pop(timeout: nil)
         timeout_at = timeout_at(timeout)
+        # Observing an empty queue is sufficient for a nonblocking miss. Avoid
+        # constructing a ThreadError (and its backtrace) just to return nil.
+        if timeout_at&.zero? && @queue.empty?
+          raise ClosedQueueError, "queue closed" if closed?
+          return block_given? ? yield : nil
+        end
 
         while true
           begin
@@ -42,6 +48,10 @@ module Farce
         end
 
         timeout_at = timeout_at(timeout)
+        if timeout_at&.zero? && @queue.size >= @queue.max
+          raise ClosedQueueError, "queue closed" if closed?
+          return false
+        end
         while true
           begin
             @queue.push(item, true)
@@ -54,6 +64,10 @@ module Farce
       end
 
       def wait_pop(timeout: nil) = wait(timeout) { size.positive? }
+
+      def try_pop(&) = pop(timeout: 0, &)
+
+      def try_push(item) = push(item, timeout: 0)
 
       def wait_push(timeout: nil)
         raise ClosedQueueError, "queue closed" if closed?
@@ -91,6 +105,12 @@ module Farce
       def wait(timeout)
         timeout_at = timeout_at(timeout)
 
+        if timeout_at&.zero?
+          return true if yield
+          raise ClosedQueueError, "queue closed" if closed?
+          return false
+        end
+
         while true
           generation = @signal.generation
           return true if yield
@@ -100,11 +120,14 @@ module Farce
       end
 
       def timeout_at(timeout)
-        Clock.timeout(normalize_timeout(timeout)) unless timeout.nil?
+        return if timeout.nil?
+        timeout = normalize_timeout(timeout)
+        timeout.zero? ? 0 : Clock.timeout(timeout)
       end
 
       def remaining_timeout(timeout_at)
         return unless timeout_at
+        return 0 if timeout_at.zero?
         timeout = timeout_at - Clock.now
         timeout.positive? ? timeout : 0
       end

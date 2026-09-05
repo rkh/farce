@@ -23,6 +23,7 @@ SimpleCov.configure do
   # somehow simplecov doesn't pick these up, so we'll skip them
   Dir.glob("lib/farce/engine/ruby/3.4/*.rb", base: __dir__) { skip it }
   skip "lib/farce/engine/ruby/containers.rb"
+  skip "lib/farce/engine/ruby/shared/vault.rb" # ?
 
   source_in_json false
 end

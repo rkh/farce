@@ -177,6 +177,31 @@ module Farce
       assert_nil port.receive
     end
 
+    def test_receive_forwards_timeouts_and_preserves_local_values
+      if RUBY_ENGINE == "ruby" && RUBY_VERSION.start_with?("4.0.")
+        skip "CRuby 4.0's timeout selector is not implemented"
+      end
+      port = Port.new(mode: :local)
+
+      assert_nil port.receive(timeout: 0)
+      value = ModePayload.new(:value)
+      port.send(value)
+
+      assert_same value, port.pop(timeout: 1)
+      port.send(nil)
+
+      assert_nil port.receive(timeout: nil)
+      assert_nil port.pop(timeout: 0.001)
+    end
+
+    def test_receive_with_an_explicit_nil_timeout
+      port = Port.new(mode: :local)
+      value = ModePayload.new(:value)
+      port.send(value)
+
+      assert_same value, port.receive(timeout: nil)
+    end
+
     def test_send_to_a_closed_port_does_not_consume_the_value
       port = Port.new(mode: :move)
       port.close
