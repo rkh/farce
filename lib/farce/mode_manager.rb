@@ -92,7 +92,7 @@ module Farce
     # @return [BasicObject]
     #   The value inside the envelope if it was created by this mode manager, or the value itself if it was not.
     def unwrap(value)
-      return value unless Envelope === value && value.auto_unwrap.equal?(self)
+      return value unless managed_envelope?(value)
       value.value
     end
 
@@ -121,8 +121,7 @@ module Farce
       left == right
     end
 
-    private
-
+    # @return [Boolean] Whether the value is an envelope managed by this mode manager.
     def managed_envelope?(value) = Envelope === value && value.auto_unwrap.equal?(self)
   end
 end

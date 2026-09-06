@@ -8,8 +8,6 @@ if RUBY_ENGINE != "ruby"
   return
 end
 
-abort "ractor-containers requires Ruby 3.4 or newer" if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("3.4")
-
 %w[pthread.h ruby/ractor.h ruby/thread.h ruby/fiber/scheduler.h].each do |header|
   have_header(header) or abort "#{header} is required"
 end

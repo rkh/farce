@@ -8,7 +8,7 @@ require "farce/engine/jvm" unless TruffleRuby.native?
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    autoload :Lock, "farce/engine/truffleruby/lock"
+    include Autoloads["#{__dir__}/truffleruby"]
 
     if TruffleRuby.native?
       path = "farce/engine/truffleruby/native"
@@ -19,9 +19,6 @@ module Farce
       autoload :Counter, "#{path}/counter"
       autoload :Flag, "#{path}/flag"
     end
-
-    autoload :Map,     "farce/engine/truffleruby/map"
-    autoload :Signal,  "farce/engine/truffleruby/signal"
 
     def native_ractors? = false
 

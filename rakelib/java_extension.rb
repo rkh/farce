@@ -16,13 +16,16 @@ module JavaExtension
     org/farce/PriorityQueue.class
     org/farce/QueueSignal.class
   ].freeze
-  CLASS_VERSION = 61 # javac --release 17; no Ruby-engine-specific Java APIs
+  SCHEDULER_JAR = "lib/farce/engine/jruby/fiber_scheduler.jar"
+  SCHEDULER_CLASSES = %w[org/farce/FiberScheduler.class].freeze
+  JARS = [JAR, SCHEDULER_JAR].freeze
+  CLASS_VERSION = 61 # Both jars target Java 17; only the scheduler jar uses JRuby APIs.
 
   module_function
 
   def build
     Dir.mktmpdir("farce-java") do |stage|
-      sources = Dir[File.join(ROOT, "ext/java/**/*.java")]
+      sources = Dir[File.join(ROOT, "ext/java/**/*.java")].reject { File.basename(it) == "FiberScheduler.java" }
       run(ENV.fetch("JAVAC", "javac"), "--release", "17", "-d", stage, *sources)
       output = File.join(stage, "farce.jar")
       # Stored entries permit dependency-free bytecode validation in GemVerifier.
@@ -35,6 +38,29 @@ module JavaExtension
     end
   end
 
+  def build_scheduler
+    require "rbconfig"
+    jar = ENV["JRUBY_JAR"]
+    if !jar && RUBY_ENGINE == "jruby"
+      require "jruby"
+      jar = File.join(JRuby.runtime.jruby_home, "lib", "jruby.jar")
+    end
+    unless jar && File.file?(jar)
+      raise "Set JRUBY_JAR to lib/jruby.jar from the JRuby runtime used to build scheduler bindings"
+    end
+    Dir.mktmpdir("farce-scheduler-java") do |stage|
+      run(ENV.fetch("JAVAC", "javac"), "--release", "17", "-proc:none", "-classpath", jar,
+        "-d", stage, File.join(ROOT, "ext/java/org/farce/FiberScheduler.java"))
+      FileUtils.touch(Dir["#{stage}/**/*"], mtime: Time.utc(2000))
+      output = File.join(stage, "scheduler.jar")
+      run(ENV.fetch("JAR", "jar"), "--create", "--file", output,
+        "--no-compress", "--no-manifest", "-C", stage, "org")
+      validate(File.binread(output), expected_classes: SCHEDULER_CLASSES)
+      FileUtils.mkdir_p(File.dirname(File.join(ROOT, SCHEDULER_JAR)))
+      FileUtils.cp(output, File.join(ROOT, SCHEDULER_JAR))
+    end
+  end
+
   def run(*command)
     return if system({ "TZ" => "UTC" }, *command)
     raise "Java extension build failed: #{command.first} (set JAVAC/JAR to your JDK tools)"
@@ -42,7 +68,7 @@ module JavaExtension
 
   # Accept the deliberately simple JAR format emitted above, check every CRC,
   # and reject missing/unexpected classes or bytecode requiring a newer JVM.
-  def validate(bytes)
+  def validate(bytes, expected_classes: CLASSES)
     raise "missing Java extension" unless bytes
 
     offset = 0
@@ -67,7 +93,7 @@ module JavaExtension
       end
       classes << name
     end
-    unless classes.sort == CLASSES && bytes.byteslice(offset, 4) == "PK\x01\x02"
+    unless classes.sort == expected_classes.sort && bytes.byteslice(offset, 4) == "PK\x01\x02"
       raise "Java archive has missing or unexpected classes"
     end
     "Java 17 bytecode (#{classes.join(", ")})"

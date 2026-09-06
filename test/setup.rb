@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 $VERBOSE = false if RUBY_ENGINE == "jruby"
-require "bundler/setup"
+require "bundler/setup" unless ENV["FARCE_STANDALONE_TESTS"] == "1"
 
 if ENV["COVERAGE"] && ENV["COVERAGE"].downcase != "false"
   raise "Farce has been loaded before coverage tracking was enabled." if defined?(Farce::Clock)

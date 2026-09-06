@@ -16,6 +16,8 @@ GEM
     benchmark (0.5.0)
     benchmark-ips (2.15.1)
     builder (3.3.0)
+    carbon_fiber (0.2.0-aarch64-linux)
+    carbon_fiber (0.2.0-arm64-darwin)
     commonmarker (2.10.0-aarch64-linux)
     commonmarker (2.10.0-arm64-darwin)
     concurrent-ruby (1.3.8)
@@ -41,8 +43,8 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     jar-dependencies (0.6.0-java)
-    json (2.21.2)
-    json (2.21.2-java)
+    json (3.0.1)
+    json (3.0.1-java)
     language_server-protocol (3.17.0.6)
     lazy_priority_queue (0.1.1)
     lint_roller (1.1.0)
@@ -55,7 +57,8 @@ GEM
       builder
       minitest (>= 5.0, < 7)
       ruby-progressbar
-    parallel (2.1.0)
+    nio4r (2.7.5)
+    parallel (2.2.0)
     parser (3.3.12.0)
       ast (~> 2.4.1)
       racc
@@ -122,7 +125,7 @@ GEM
       prism (>= 1.2, < 2.0)
       rbs (>= 3, < 5)
     ruby-progressbar (1.13.0)
-    simplecov (1.1.1)
+    simplecov (1.2.0)
     simplecov-console (0.9.5)
       ansi
       simplecov
@@ -147,6 +150,7 @@ DEPENDENCIES
   async (~> 2.45)
   benchmark
   benchmark-ips
+  carbon_fiber
   commonmarker
   concurrent-ruby
   concurrent-ruby-ext
@@ -156,6 +160,7 @@ DEPENDENCIES
   lazy_priority_queue
   minitest
   minitest-reporters
+  nio4r
   philiprehberger-priority_queue
   pqueue
   priority_queue_cxx
@@ -182,6 +187,8 @@ CHECKSUMS
   benchmark-ips (2.15.1) sha256=07a1a9f3c6105ecaf68c174fc3fbcddd71a0e9ada6236ae03093a0dcfd812d59
   builder (3.3.0) sha256=497918d2f9dca528fdca4b88d84e4ef4387256d984b8154e9d5d3fe5a9c8835f
   bundler (4.0.20) sha256=7978a8ac648767f5e635bc522445b79e80a52b907a39a36c2d8085ed6bc762ae
+  carbon_fiber (0.2.0-aarch64-linux) sha256=ea3335c7fcde7233db54d73332c40d2733adb1e39e14a07d01a388fe74296f81
+  carbon_fiber (0.2.0-arm64-darwin) sha256=5501b087fb6337445705ad7ffb160ca68c8b7f4a9b7b6bbb977a811c4df869e7
   commonmarker (2.10.0-aarch64-linux) sha256=eeb167dea203dee066eb0dd99b3fd2deb526c8b5e7297ad385f7a5d60f869478
   commonmarker (2.10.0-arm64-darwin) sha256=39ecc891d1e4308b5233cc28b40383de854a2bfbefe17d68e49174347a8aa79e
   concurrent-ruby (1.3.8) sha256=b2f1be836e968ccc78ccfce277ea79c72a88633f22306782c16ff23fb415d1e1
@@ -200,15 +207,16 @@ CHECKSUMS
   io-event (1.21.1) sha256=b3088f89ad67edf9be9fc2f48a5fae0790e92862487551eeb337b49098eb99e6
   irb (1.18.0) sha256=de9454a0703a54704b9811a5ef31a60c86949fbf4013fcf244fabc7c775248e3
   jar-dependencies (0.6.0-java) sha256=9f40c13696b7590d890c119c37860ab1ce87ecaa66f4edfa4ca06a443a30d82c
-  json (2.21.2) sha256=1f1d3b7cf2b3ba1a69beca0bb6db13d5438b80bff3cd54cdaaa620b9b07c1c6a
-  json (2.21.2-java) sha256=f01521cd90639cc26b63040fb00d2b949f18f41ecaab5c82b02fb31d0b8b736c
+  json (3.0.1) sha256=c80f74a3570c3a310cd41c526904e7ef8363abdece4432f31fe97d812bc4a39e
+  json (3.0.1-java) sha256=1c27f7763a1085b4c7d015265bc95f638a6682db29a9b3dbcea490b9988e8521
   language_server-protocol (3.17.0.6) sha256=5ef2c0c138f8267e1bc631d3328347d354f96724b0af22f2c79516120443b7f0
   lazy_priority_queue (0.1.1) sha256=e5d4ea8d037e8743afc91019fc23f5f6858372fea73e05e8244f8964f0634337
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
   minitest-reporters (1.8.0) sha256=8ce5280fb73ad3178ae525454df169b6f28c1b38b1d088ea91815d3a370ba384
-  parallel (2.1.0) sha256=b35258865c2e31134c5ecb708beaaf6772adf9d5efae28e93e99260877b09356
+  nio4r (2.7.5) sha256=6c90168e48fb5f8e768419c93abb94ba2b892a1d0602cb06eef16d8b7df1dca1
+  parallel (2.2.0) sha256=e1059c5fd7b649558a0aec38a769f06a42942bdb40503d005a59c352fe011cd8
   parser (3.3.12.0) sha256=21a6d7f755d5a24dfbdc6e6b772e4e879a52e7631a88bc5a3a134606052c9828
   philiprehberger-priority_queue (0.5.0) sha256=78d8b745a588045b9910b30183b6458821819fdfdb75978007a57439e781798b
   pp (0.6.4) sha256=dfcb0fce700c41456265922884f9fe195d7fbb0674a3578e6c0f69588e82b570
@@ -238,7 +246,7 @@ CHECKSUMS
   rubocop-rake (0.7.1) sha256=3797f2b6810c3e9df7376c26d5f44f3475eda59eb1adc38e6f62ecf027cbae4d
   ruby-lsp (0.26.11) sha256=4cc8f1587237ff8c9031680b5491df901a82559eeaa1ae96863ffe700b32583d
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
-  simplecov (1.1.1) sha256=25825ef13f0b2e74694d769817dad6ab8e90131dabdaa666e522fea105521e78
+  simplecov (1.2.0) sha256=ea6acd05eece5a41990e2a5171c57d15700d329326c7666c85ee8c6a0dd0977e
   simplecov-console (0.9.5) sha256=b1108bcfff5f210143e2b8301698c367b01586f20d25a73e95475a5df6fc6ff6
   terminal-table (4.0.0) sha256=f504793203f8251b2ea7c7068333053f0beeea26093ec9962e62ea79f94301d2
   tsort (0.2.0) sha256=9650a793f6859a43b6641671278f79cfead60ac714148aabe4e3f0060480089f

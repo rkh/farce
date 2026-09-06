@@ -7,7 +7,7 @@ AllCops:
   NewCops: enable
   Exclude:
   - "lib/farce/_yard/*.rb"
-  - "{tmp,pkg}/**/*.rb"
+  - "{tmp,pkg,benchmark}/**/*.rb"
   - "test/setup.rb"
   - "test/farce/internal/test_rbtree.rb"
   - "test/farce/internal/test_multi_rbtree.rb"
@@ -107,7 +107,7 @@ Style/NestedTernaryOperator:
   Enabled: false
 
 Style/NumberedParametersLimit:
-  Max: 2
+  Max: 3
 
 Style/NumericLiterals:
   Enabled: false

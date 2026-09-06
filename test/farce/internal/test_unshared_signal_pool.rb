@@ -224,6 +224,7 @@ class TestUnsharedSignalPool < Test
     assert_equal 0, signal.num_waiting
   ensure
     if singleton&.method_defined?(:owned_pool_original_pipe)
+      singleton.remove_method :pipe
       singleton.alias_method :pipe, :owned_pool_original_pipe
       singleton.remove_method :owned_pool_original_pipe
     end
@@ -237,6 +238,7 @@ class TestUnsharedSignalPool < Test
 
     assert_raises(Errno::EMFILE) { Fiber.schedule { signal.wait } }
     assert_equal 0, signal.num_waiting
+    singleton.remove_method :pipe
     singleton.alias_method :pipe, :owned_pool_original_pipe
     singleton.remove_method :owned_pool_original_pipe
     Fiber.schedule { signal.wait }
@@ -246,6 +248,7 @@ class TestUnsharedSignalPool < Test
     assert_equal 0, signal.num_waiting
   ensure
     if singleton&.method_defined?(:owned_pool_original_pipe)
+      singleton.remove_method :pipe
       singleton.alias_method :pipe, :owned_pool_original_pipe
       singleton.remove_method :owned_pool_original_pipe
     end

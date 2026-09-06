@@ -86,7 +86,7 @@ module Helpers
     end
 
     def run
-      readable, = IO.select([*@readable.keys, @wakeup_reader], nil, nil, next_timeout)
+      readable, = select_readable([*@readable.keys, @wakeup_reader], next_timeout)
       drain_wakeup if readable&.delete(@wakeup_reader)
       selected = readable&.filter_map { |io| @readable.delete(io) } || []
 
@@ -101,6 +101,18 @@ module Helpers
       end
       (expired + drain_ready).uniq.each do |fiber|
         fiber.transfer if fiber.alive?
+      end
+    end
+
+    def select_readable(readers, timeout)
+      if RUBY_ENGINE == "jruby"
+        # JRuby can dispatch io_select even in a blocking/root fiber. Use its
+        # primitive below scheduler dispatch without changing the installed scheduler.
+        milliseconds = timeout.nil? ? nil : java.lang.Long.valueOf((timeout * 1000).ceil)
+        groups = [readers, nil, nil].map { |group| JRuby.reference(group) }
+        Java::OrgJrubyUtilIo::SelectExecutor.new(*groups, milliseconds).go(JRuby.runtime.current_context)
+      else
+        Fiber.blocking { IO.select(readers, nil, nil, timeout) }
       end
     end
 

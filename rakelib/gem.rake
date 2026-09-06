@@ -32,7 +32,7 @@ namespace :gem do
 
   gem_command = ->(gemspec) { "gem build #{gemspec} && mkdir -p pkg && mv farce-*.gem pkg/" }
 
-  task prepare: [:clobber, "java:compile"] do
+  task prepare: [:clobber, "java:compile", "java:scheduler"] do
     mkdir_p("vendor/cache")
     sh "gem build farce.gemspec && mv farce-*.gem vendor/cache"
     sh "bundle cache --all-platforms"

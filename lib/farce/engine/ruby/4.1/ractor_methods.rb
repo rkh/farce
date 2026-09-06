@@ -8,7 +8,7 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     module RactorMethods
-      Internal.delegate(self, ::Ractor, :shareable_proc, :shareable_lambda, :select)
+      Internal.delegate(self, ::Ractor, :shareable_proc, :shareable_lambda, :select, :current, :main, :new)
     end
   end
 end

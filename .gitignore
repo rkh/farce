@@ -6,7 +6,6 @@ tmp/
 vendor/
 yardoc/
 benchmark/results/
-spike/
 
 *.bundle
 *.dSYM/

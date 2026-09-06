@@ -25,11 +25,13 @@ end
 group :benchmark do
   gem "benchmark"
   gem "benchmark-ips"
-  gem "io-event"
   gem "lazy_priority_queue"
   gem "philiprehberger-priority_queue"
   gem "pqueue"
   platforms :mri_34, :mri_40 do # rubocop:disable Naming/VariableNumber
+    gem "carbon_fiber"
+    gem "io-event"
+    gem "nio4r"
     gem "priority_queue_cxx", require: "fc"
     gem "rbtree"
   end

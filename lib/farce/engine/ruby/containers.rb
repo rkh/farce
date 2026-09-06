@@ -5,13 +5,11 @@
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    version = RUBY_VERSION[/^\d+\.\d+/]
-
     begin
-      require "farce/engine/ruby/#{version}/containers"
+      require "#{ENGINE_PATH}/containers"
     rescue LoadError => e
       warn <<~WARNING
-        Farce: Failed to load native extension for Ruby #{version}.
+        Farce: Failed to load native extension for Ruby #{RUBY_VERSION}.
         Please run `rake compile` to build the extension.
       WARNING
       raise e

@@ -8,7 +8,7 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     module RactorMethods
-      Internal.delegate(self, ::Ractor, :shareable_proc, :shareable_lambda)
+      Internal.delegate(self, ::Ractor, :shareable_proc, :shareable_lambda, :current, :main, :new)
 
       def select(*, timeout: nil)
         return ::Ractor.select(*) unless timeout

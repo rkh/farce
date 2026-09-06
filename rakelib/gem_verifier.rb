@@ -73,11 +73,11 @@ module GemVerifier
       ["#{ExtHelper.ext_path(name, version: abi, lib: true)}.#{dlext}", abi]
     end
 
-    extra = files.keys.grep(BINARY) - wanted.keys - [JavaExtension::JAR]
+    extra = files.keys.grep(BINARY) - wanted.keys - JavaExtension::JARS
     raise Error, "ships #{extra.join(", ")}, which no supported Ruby would load" if extra.any?
 
     checks = { "platform" => platform, "extensions" => "none" }
-    checks[JavaExtension::JAR] = verify_java_extension(files)
+    checks.merge!(verify_java_extensions(files))
 
     wanted.each do |path, abi|
       found = describe(files[path])
@@ -102,33 +102,38 @@ module GemVerifier
       raise Error, "declares extension #{spec.extensions.join(", ")}, so it would compile on install"
     end
 
-    binaries = files.keys.grep(BINARY) - [JavaExtension::JAR]
+    binaries = files.keys.grep(BINARY) - JavaExtension::JARS
     sources  = files.keys.grep(%r{\Aext/})
     raise Error, "ships #{binaries.join(", ")}, which #{platform} cannot load" if binaries.any?
     raise Error, "ships #{sources.join(", ")}, which #{platform} has no use for" if sources.any?
 
-    { "platform" => expected, "extensions" => "none", JavaExtension::JAR => verify_java_extension(files) }
+    { "platform" => expected, "extensions" => "none", **verify_java_extensions(files) }
   end
 
   # CRuby compiles the C sources on install. TruffleRuby JVM loads the bundled JAR.
   def verify_source(gem_file)
     spec     = spec(gem_file)
     files    = files(gem_file)
-    binaries = files.keys.grep(BINARY) - [JavaExtension::JAR]
+    binaries = files.keys.grep(BINARY) - JavaExtension::JARS
 
     raise Error, "declares no extension, so it would install without compiling" if spec.extensions.empty?
     raise Error, "ships prebuilt #{binaries.join(", ")}, which belongs in a platform gem" if binaries.any?
 
     { "platform" => "ruby", "extensions" => spec.extensions.join(", "),
-      JavaExtension::JAR => verify_java_extension(files) }
+      **verify_java_extensions(files) }
   end
 
   private
 
-  def verify_java_extension(files)
-    JavaExtension.validate(files[JavaExtension::JAR])
-  rescue RuntimeError => e
-    raise Error, "#{JavaExtension::JAR}: #{e.message}"
+  def verify_java_extensions(files)
+    JavaExtension::JARS.to_h do |path|
+      classes = path == JavaExtension::JAR ? JavaExtension::CLASSES : JavaExtension::SCHEDULER_CLASSES
+      begin
+        [path, JavaExtension.validate(files[path], expected_classes: classes)]
+      rescue RuntimeError => e
+        raise Error, "#{path}: #{e.message}"
+      end
+    end
   end
 
   def spec(gem_file)
@@ -139,10 +144,14 @@ module GemVerifier
   def files(gem_file)
     files = {}
 
-    Gem::Package::TarReader.new(File.open(gem_file, "rb")) do |gem|
-      gem.seek("data.tar.gz") do |data|
-        Zlib::GzipReader.wrap(data) do |unzipped|
-          Gem::Package::TarReader.new(unzipped) { |entry| entry.each { files[it.full_name] = it.read } }
+    File.open(gem_file, "rb") do |file|
+      Gem::Package::TarReader.new(file) do |gem|
+        gem.seek("data.tar.gz") do |data|
+          Zlib::GzipReader.wrap(data) do |unzipped|
+            Gem::Package::TarReader.new(unzipped) { |entry| entry.each { files[it.full_name] = it.read } }
+            # Tar ends before gzip; consume the padding and validate the gzip footer before closing.
+            unzipped.read(16 * 1024) until unzipped.eof?
+          end
         end
       end
     end

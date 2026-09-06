@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-CLEAN.include(".yardoc", "*.log", "tmp")
+CLEAN.include(".yardoc", "**/*.log", "ext/*/{Makefile,*.bundle,*.bundle.dSYM}", "tmp")
 CLOBBER.include("lib/**/*.{bundle,dylib,so,jar}", "coverage", "pkg", "yardoc")
 
 task :clean do # rubocop:disable Rake/Desc

@@ -2,6 +2,7 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
+require "farce/config"
 require "farce/internal"
 require "farce/engine/#{RUBY_ENGINE}"
 require "farce/version"

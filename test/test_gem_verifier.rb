@@ -10,7 +10,7 @@ require "tmpdir"
 
 class TestGemVerifier < Test
   ABIS       = ["4.0.2", "3.4.9"].freeze
-  NAMES      = %w[containers rebind].freeze
+  NAMES      = %w[containers rebind fiber_scheduler].freeze
   EXTENSIONS = NAMES.map { "ext/#{it}/extconf.rb" }.freeze
 
   def test_verifies_every_extension_in_the_source_gem
@@ -29,6 +29,7 @@ class TestGemVerifier < Test
     assert_includes spec.files, "ext/java/org/farce/PriorityQueue.java"
     assert_includes spec.files, "ext/java/org/farce/QueueSignal.java"
     assert_includes spec.files, JavaExtension::JAR
+    assert_empty spec.files.grep(/io_selector|NIOSelector|BorrowedChannel/)
     assert_empty unexpected_sources
   end
 
@@ -233,6 +234,12 @@ class TestGemVerifier < Test
     end
   end
 
+  def test_rejects_missing_scheduler_bindings
+    gem_file = gem_for("java", { JavaExtension::SCHEDULER_JAR => nil })
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, "jruby") }
+    assert_includes error.message, JavaExtension::SCHEDULER_JAR
+  end
+
   def test_rejects_corrupt_java_archive
     gem_file = gem_for("java", { JavaExtension::JAR => "not a jar" })
     error = assert_raises(GemVerifier::Error) { verify(gem_file, "jruby") }
@@ -294,8 +301,8 @@ class TestGemVerifier < Test
   end
 
   def gem_for(platform, files, extensions: [], required_ruby_version: [">= 3.4", "< 4.1.dev"])
-    jar = File.expand_path("../#{JavaExtension::JAR}", __dir__)
-    files = { JavaExtension::JAR => File.binread(jar) }.merge(files).compact
+    jars = JavaExtension::JARS.to_h { |path| [path, File.binread(File.expand_path("../#{path}", __dir__))] }
+    files = jars.merge(files).compact
     dir = Dir.mktmpdir("test_gem_verifier")
     (@tmpdirs ||= []) << dir
 

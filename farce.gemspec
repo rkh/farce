@@ -4,7 +4,7 @@ require_relative "lib/farce/version"
 require_relative "ext/ext_helper"
 
 github          = "https://github.com/rkh/farce"
-extension_names = %w[containers rebind].freeze
+extension_names = %w[containers rebind fiber_scheduler].freeze
 extension_files = extension_names.flat_map do |name|
   Dir["ext/#{name}/{*.{c,h,rb},depend,*LICENSE,README.md}"]
 end

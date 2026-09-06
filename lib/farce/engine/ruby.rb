@@ -2,29 +2,37 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
+# Load the scheduler dependency before native initialization.
+# Late Resolv loading can crash RubyGems for some reason
+require "resolv"
+
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    version = RUBY_VERSION[/^\d+\.\d+/]
-    path    = "farce/engine/ruby/#{version}"
+    # include Autoloads["#{__dir__}/ruby", skip: :containers]
+
+    # Compiled extensions and Ruby helpers share one directory for each CRuby ABI.
+    ENGINE_PATH = "farce/engine/ruby/#{RUBY_VERSION[/^\d+\.\d+/]}".freeze
+    private_constant :ENGINE_PATH
 
     begin
-      require "#{path}/rebind"
+      require "#{ENGINE_PATH}/rebind"
       require "farce/engine/ruby/containers"
     rescue LoadError => e
       # simplecov:disable
       warn <<~WARNING
-        Farce: Failed to load native extension for Ruby #{version}.
+        Farce: Failed to load native extension for Ruby #{RUBY_VERSION}.
         Please run `rake compile` to build the extension.
       WARNING
       raise e
       # simplecov:enable
     end
 
-    autoload :BasePort,      "#{path}/port"
-    autoload :Port,          "#{path}/port"
-    autoload :RactorMethods, "#{path}/ractor_methods"
-    autoload :Vault,         "#{path}/vault"
+    autoload :FiberScheduler, "farce/engine/ruby/fiber_scheduler"
+    autoload :BasePort,       "#{ENGINE_PATH}/port"
+    autoload :Port,           "#{ENGINE_PATH}/port"
+    autoload :RactorMethods,  "#{ENGINE_PATH}/ractor_methods"
+    autoload :Vault,          "#{ENGINE_PATH}/vault"
 
     def native_ractors? = true
 
@@ -52,7 +60,7 @@ module Farce
     patch[Ractor, :receive, signature: "..."]
     Ractor.alias_method :recv, :receive
 
-    # Patch Ractor::Port
+    # Patch the native Ractor::Port. A shim may define this constant on older Ruby.
     patch[Ractor::Port, :receive, signature: "...", schedule: "self"] if RUBY_VERSION >= "4"
   end
 end

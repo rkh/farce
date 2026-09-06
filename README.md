@@ -41,9 +41,9 @@ Both the Ruby core library, and other libraries, like the very popular [concurre
     <tr>
       <th>Library</th>
       <th>Example classes</th>
-      <th>Thread</th>
-      <th>Fiber Scheduler</th>
-      <th>Ractor</th>
+      <th>Multithreading</th>
+      <th>Non-blocking Fibers</th>
+      <th>Cross-Ractor Usage</th>
     </tr>
   </thead>
   <tbody>
@@ -86,10 +86,16 @@ Both the Ruby core library, and other libraries, like the very popular [concurre
       <td>❌ <b>not supported</b></td>
     </tr>
     <tr>
-      <td><a href="https://github.com/socketry/async">async</a></td>
+      <td rowspan="2"><a href="https://github.com/socketry/async">async</a></td>
       <td>Promise, Condition, Queue, …</td>
       <td>✅ supported</td>
       <td>✅ supported</td>
+      <td>❌ <b>not supported</b></td>
+    </tr>
+    <tr>
+      <td>Scheduler</td>
+      <td>⚠️ Main Ractor only</td>
+      <td>⚠️ Main Ractor only</td>
       <td>❌ <b>not supported</b></td>
     </tr>
     <tr>
