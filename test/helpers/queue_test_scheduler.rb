@@ -4,7 +4,7 @@ module Helpers
   # A deliberately small IO.select scheduler derived from Ruby's own scheduler
   # test support: https://github.com/ruby/ruby/blob/master/test/fiber/scheduler.rb
   class QueueTestScheduler
-    attr_reader :io_wait_calls
+    attr_reader :io_wait_calls, :block_calls, :unblock_calls
 
     def initialize(root = Fiber.current)
       @root = root
@@ -14,6 +14,8 @@ module Helpers
       @ready = Thread::Queue.new
       @wakeup_reader, @wakeup_writer = IO.pipe
       @io_wait_calls = 0
+      @block_calls = 0
+      @unblock_calls = 0
     end
 
     def fiber(&)
@@ -37,6 +39,7 @@ module Helpers
     end
 
     def block(_blocker, timeout = nil)
+      @block_calls += 1
       fiber = Fiber.current
       if timeout
         @waiting[fiber] = Farce::Clock.now + timeout
@@ -50,6 +53,7 @@ module Helpers
     end
 
     def unblock(_blocker, fiber)
+      @unblock_calls += 1
       @ready << fiber
       @wakeup_writer.write_nonblock(".")
     rescue IO::WaitWritable, Errno::EPIPE, IOError

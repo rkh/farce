@@ -1,3 +1,6 @@
 dict.o: dict.c dict.h
-priority_queue.o: priority_queue.c containers.h dict.h
+priority_queue.o: priority_queue.c containers.h dict.h unshared_wait.h
 tree_map.o: tree_map.c containers.h
+
+queue.o: queue.c containers.h unshared_wait.h
+unshared_signal.o: unshared_signal.c containers.h unshared_wait.h unshared_io_pool.h

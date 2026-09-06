@@ -27,18 +27,20 @@ Entry = Data.define(:priority, :id) do
 end
 
 Implementation = Data.define(:factory, :push, :pop)
-implementations = {
-  "Farce::TimerQueue (due)" => Implementation.new(
-    -> { Farce::TimerQueue.new },
-    ->(queue, entry) { queue.try_push(entry, at: entry.priority) },
-    ->(queue) { queue.try_pop },
-  ),
-  "Farce::PriorityQueue"    => Implementation.new(
-    -> { Farce::PriorityQueue.new },
-    ->(queue, entry) { queue.try_push(entry, priority: entry.priority) },
-    ->(queue) { queue.try_pop },
-  ),
-}
+implementations = {}
+[Farce, Farce::Strict, Farce::Unshared].each do |namespace|
+  %i[PriorityQueue TimerQueue].each do |shape|
+    next unless namespace.const_defined?(shape, false)
+    klass = namespace.const_get(shape)
+    timer = shape == :TimerQueue
+    implementations["#{klass.name}#{" (due)" if timer}"] = Implementation.new(
+      -> { klass.new },
+      timer ? ->(queue, entry) { queue.try_push(entry, at: entry.priority) } :
+        ->(queue, entry) { queue.try_push(entry, priority: entry.priority) },
+      ->(queue) { queue.try_pop },
+    )
+  end
+end
 
 filter = Regexp.new(ENV.fetch("FILTER", "."))
 competitors = {

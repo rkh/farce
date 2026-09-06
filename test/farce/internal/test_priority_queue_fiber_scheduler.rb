@@ -53,6 +53,19 @@ module Farce
         @cancel_next_io_wait = true
       end
 
+      def cancel_next_block!
+        @cancel_next_block = true
+      end
+
+      def block(blocker, timeout = nil)
+        result = super
+        if @cancel_next_block && blocker.is_a?(UnsharedPriorityQueue)
+          @cancel_next_block = false
+          raise PriorityQueueWaitCancellation, "cancel notified waiter"
+        end
+        result
+      end
+
       def io_wait(...)
         result = super
         if @cancel_next_io_wait
@@ -82,7 +95,7 @@ module Farce
       def test_comparator_contention_parks_only_the_waiting_fiber
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
-        queue = PriorityQueue.new
+        queue = new_queue
         queue.push(YieldingPriority.new(1), :first)
         events = []
 
@@ -98,11 +111,11 @@ module Farce
         Fiber.set_scheduler(nil)
 
         assert_equal %i[push_started peek_started pushed first], events
-        assert_operator scheduler.io_wait_calls, :>=, 1
+        assert_coordination(scheduler)
       end
 
       def test_unscheduled_fiber_reentry_raises_instead_of_blocking_the_thread
-        queue = PriorityQueue.new
+        queue = new_queue
         queue.push(TransferringPriority.new(1), :first)
         Thread.current[TransferringPriority::FIBER_KEY] = Fiber.new do
           queue.peek
@@ -125,10 +138,10 @@ module Farce
       def test_canceling_the_notified_storage_lock_waiter_wakes_the_next_fiber
         scheduler = CancellingPriorityQueueScheduler.new
         Fiber.set_scheduler(scheduler)
-        queue = PriorityQueue.new
+        queue = new_queue
         queue.push(YieldingPriority.new(1), :first)
         events = []
-        scheduler.cancel_next_io_wait!
+        cancel_next_wait(scheduler)
 
         Fiber.schedule do
           events << :owner_started
@@ -153,13 +166,59 @@ module Farce
         end
 
         assert_includes events, :canceled
-        assert_predicate scheduler, :waiting_io_ready?, "the next storage-lock waiter was stranded"
+        assert_survivor_woken(scheduler, events)
 
-        scheduler.run_once
+        scheduler.run_once unless events.last == :first
 
         assert_equal :first, events.last
         Fiber.set_scheduler(nil)
       end
+
+      private def queue_class = PriorityQueue
+      private def new_queue = queue_class.new
+
+      private def assert_coordination(scheduler)
+        assert_operator scheduler.io_wait_calls, :>=, 1
+      end
+
+      private def cancel_next_wait(scheduler) = scheduler.cancel_next_io_wait!
+
+      private def assert_survivor_woken(scheduler, _events)
+        assert_predicate scheduler, :waiting_io_ready?, "the next storage-lock waiter was stranded"
+      end
+    end
+
+    class TestUnsharedPriorityQueueStorageFiberScheduler < TestPriorityQueueStorageFiberScheduler
+      private def queue_class = UnsharedPriorityQueue
+      private def fiber_wait = :auto
+      private def new_queue = queue_class.new(signal: UnsharedSignal.for(fiber_wait))
+      private def io_path? = fiber_wait == :auto ? Internal::UNSHARED_FIBER_IO : fiber_wait == :io
+
+      private def assert_coordination(scheduler)
+        return super if io_path?
+
+        assert_equal 0, scheduler.io_wait_calls
+        assert_operator scheduler.block_calls, :>=, 1
+      end
+
+      private def cancel_next_wait(scheduler)
+        io_path? ? scheduler.cancel_next_io_wait! : scheduler.cancel_next_block!
+      end
+
+      private def assert_survivor_woken(scheduler, events)
+        # All original lock waiters are notified together. The survivor may
+        # have finished in the same scheduler iteration as cancellation.
+        assert(events.last == :first || scheduler.waiting_io_ready? || !scheduler.instance_variable_get(:@ready).empty?,
+          "the next storage-lock waiter was stranded")
+      end
+    end
+
+    class TestUnsharedPriorityQueueStorageIOWaiting < TestUnsharedPriorityQueueStorageFiberScheduler
+      private def fiber_wait = :io
+    end
+
+    class TestUnsharedPriorityQueueStorageBlockWaiting < TestUnsharedPriorityQueueStorageFiberScheduler
+      private def fiber_wait = :block
     end
   end
 end

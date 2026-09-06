@@ -72,7 +72,7 @@ In the producer/consumer workload in `benchmark/queue.rb`, Ruby's built-in `Thre
 -------------------------------|-------------|-------------
  `Thread::Queue`               | Fastest     | no ractor support
  `Thread::SizedQueue`          | 1.4x slower | no ractor support
- `Farce::StrictQueue`          | 1.5x slower | only allows sharable objects
+ `Farce::Strict::Queue`        | 1.5x slower | only allows sharable objects
  `Farce::Queue`                | 2.1x slower |
  `Ratomic::Queue`              | 8.7x slower | breaks ractor isolation
  `RactorQueue`                 | 27x slower  | breaks ractor isolation

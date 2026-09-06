@@ -12,19 +12,19 @@ module Farce
       end
 
       def test_initialization_and_generation
-        signal = Signal.new
+        signal = signal_class.new
 
         assert_equal 0, signal.generation
         assert_equal 0, signal.num_waiting
         assert_predicate signal, :frozen?
-        assert Ractor.shareable?(signal)
+        assert_equal signal_class == Signal, Ractor.shareable?(signal)
         assert_equal 1, signal.broadcast
         assert_equal 2, signal.broadcast
         assert_equal 2, signal.generation
       end
 
       def test_wait_returns_immediately_when_generation_already_changed
-        signal = Signal.new
+        signal = signal_class.new
         observed = signal.generation
         signal.broadcast
 
@@ -32,7 +32,7 @@ module Farce
       end
 
       def test_wait_without_a_generation_waits_for_the_next_broadcast
-        signal = Signal.new
+        signal = signal_class.new
         signal.broadcast
         broadcaster = Thread.new do
           sleep 0.01
@@ -44,7 +44,7 @@ module Farce
       end
 
       def test_timeout_and_fallback
-        signal = Signal.new
+        signal = signal_class.new
 
         assert_nil signal.wait(timeout: 0)
         assert_equal :fallback, signal.wait(timeout: 0.01) { :fallback }
@@ -53,7 +53,7 @@ module Farce
       end
 
       def test_broadcast_wakes_all_waiters
-        signal = Signal.new
+        signal = signal_class.new
         observed = signal.generation
         ready = Thread::Queue.new
         waiters = 8.times.map do
@@ -72,7 +72,7 @@ module Farce
       end
 
       def test_generation_token_closes_the_check_to_wait_race
-        signal = Signal.new
+        signal = signal_class.new
         observed = signal.generation
 
         signal.broadcast
@@ -82,7 +82,7 @@ module Farce
       end
 
       def test_repeated_broadcasts
-        signal = Signal.new
+        signal = signal_class.new
         observed = signal.generation
 
         100.times do |index|
@@ -94,7 +94,7 @@ module Farce
       end
 
       def test_concurrent_broadcasts_advance_generation_atomically
-        signal = Signal.new
+        signal = signal_class.new
         broadcasters = 8.times.map do
           Thread.new { 100.times { signal.broadcast } }
         end
@@ -104,7 +104,11 @@ module Farce
       end
 
       def test_wait_from_multiple_ractors
-        signal = Signal.new
+        signal = signal_class.new
+        unless Ractor.shareable?(signal)
+          assert_raises(Ractor::Error) { Ractor.make_shareable(signal) }
+          return
+        end
         observed = signal.generation
         ready = Internal::Queue.new(capacity: nil)
         waiters = 4.times.map do
@@ -125,7 +129,7 @@ module Farce
 
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
-        signal = Signal.new
+        signal = signal_class.new
         observed = signal.generation
         events = []
 
@@ -141,7 +145,7 @@ module Farce
         Fiber.set_scheduler(nil)
 
         assert_equal [:waiting, :broadcasting, 1, 1], events
-        assert_operator scheduler.io_wait_calls, :>=, 1
+        assert_wait_protocol(scheduler)
       end
 
       def test_timeout_does_not_block_a_fiber_scheduler
@@ -149,7 +153,7 @@ module Farce
 
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
-        signal = Signal.new
+        signal = signal_class.new
         events = []
 
         Fiber.schedule { events << signal.wait(timeout: 0.01) }
@@ -157,15 +161,40 @@ module Farce
         Fiber.set_scheduler(nil)
 
         assert_equal [:other_fiber, nil], events
-        assert_operator scheduler.io_wait_calls, :>=, 1
+        assert_wait_protocol(scheduler)
       end
 
       def test_invalid_arguments
-        signal = Signal.new
+        signal = signal_class.new
 
         assert_raises(TypeError) { signal.wait(:generation, timeout: 0) }
         assert_raises(ArgumentError) { signal.wait(timeout: -1) }
         assert_raises(ArgumentError) { signal.wait(timeout: Float::INFINITY) }
+      end
+
+      private def signal_class = Signal
+
+      private def assert_wait_protocol(scheduler)
+        if signal_class == Signal || signal_class.new.fiber_wait == :io
+          assert_operator scheduler.io_wait_calls, :>=, 1
+        else
+          assert_equal 0, scheduler.io_wait_calls
+          assert_operator scheduler.block_calls, :>=, 1
+        end
+      end
+    end
+
+    if Internal.native_ractors?
+      class TestUnsharedSignal < TestSignal
+        private def signal_class = UnsharedSignal
+      end
+
+      class TestUnsharedIOSignal < TestSignal
+        private def signal_class = UnsharedIOSignal
+      end
+
+      class TestUnsharedBlockSignal < TestSignal
+        private def signal_class = UnsharedBlockSignal
       end
     end
   end

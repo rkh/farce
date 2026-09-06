@@ -4,13 +4,13 @@ require_relative "../setup"
 require "pp"
 
 module Farce
-  class TestStrictQueue < Test
+  class TestStrictFIFOQueue < Test
     include Helpers::InternalTestHelpers
 
     def test_initialization_hierarchy_and_interface
-      queue = StrictQueue.new
+      queue = Strict::Queue.new
 
-      assert_equal Abstract::Queue, StrictQueue.superclass
+      assert_equal Abstract::Queue, Strict::Queue.superclass
       assert_equal 1024, queue.capacity
       assert_equal 1024, queue.max
       assert_equal 0, queue.size
@@ -22,24 +22,24 @@ module Farce
       refute_predicate queue, :closed?
       assert_predicate queue, :frozen?
       assert Ractor.shareable?(queue)
-      assert_raises(ArgumentError) { StrictQueue.new(capacity: 0) }
-      assert_raises(ArgumentError) { StrictQueue.new(capacity: -1) }
+      assert_raises(ArgumentError) { Strict::Queue.new(capacity: 0) }
+      assert_raises(ArgumentError) { Strict::Queue.new(capacity: -1) }
       assert_raises(TypeError) { queue.dup }
       assert_raises(TypeError) { queue.clone }
     end
 
     def test_transfer_mode_cannot_be_overridden
-      queue = StrictQueue.new
+      queue = Strict::Queue.new
 
-      assert_raises(ArgumentError) { StrictQueue.new(mode: :copy) }
+      assert_raises(ArgumentError) { Strict::Queue.new(mode: :copy) }
       assert_raises(ArgumentError) { queue.push(:value, mode: :copy) }
       assert_raises(ArgumentError) { queue.try_push(:value, mode: :make_shareable) }
       assert_predicate queue, :empty?
     end
 
     def test_shareable_values_preserve_identity_and_fifo_order
-      queue = StrictQueue.new
-      values = [false, true, 42, :value, "frozen", [:nested, "value"].freeze, StrictQueue.new]
+      queue = Strict::Queue.new
+      values = [false, true, 42, :value, "frozen", [:nested, "value"].freeze, Strict::Queue.new]
 
       values.each { |value| assert queue.push(value) }
 
@@ -49,7 +49,7 @@ module Farce
     end
 
     def test_envelopes_are_returned_without_unwrapping
-      queue = StrictQueue.new
+      queue = Strict::Queue.new
       envelope = Envelope.new(ModePayload.new(:value), mode: :local)
 
       assert queue.push(envelope)
@@ -59,7 +59,7 @@ module Farce
     end
 
     def test_push_methods_reject_unshareable_values_without_changing_them
-      queue = StrictQueue.new
+      queue = Strict::Queue.new
       value = ModePayload.new(:original)
 
       %i[push try_push enq <<].each do |method|
@@ -75,7 +75,7 @@ module Farce
 
     def test_rejects_mutable_and_shallow_frozen_values_on_cruby
       return unless Internal.native_ractors?
-      queue = StrictQueue.new
+      queue = Strict::Queue.new
       mutable = +"mutable"
       shallow = [mutable].freeze
 
@@ -89,7 +89,7 @@ module Farce
     end
 
     def test_full_queue_still_rejects_unshareable_values
-      queue = StrictQueue.new(capacity: 1)
+      queue = Strict::Queue.new(capacity: 1)
       queue.push(:first)
       value = ModePayload.new(:rejected)
 
@@ -103,7 +103,7 @@ module Farce
     end
 
     def test_aliases_and_non_block_argument
-      queue = StrictQueue.new(capacity: 2)
+      queue = Strict::Queue.new(capacity: 2)
 
       assert queue.enq(nil, true)
       assert queue.public_send(:<<, false)
@@ -123,7 +123,7 @@ module Farce
     end
 
     def test_try_operations_and_fallbacks
-      queue = StrictQueue.new(capacity: 1)
+      queue = Strict::Queue.new(capacity: 1)
       fallback = Object.new
 
       assert_nil queue.try_pop
@@ -138,7 +138,7 @@ module Farce
     end
 
     def test_timeouts_and_fallbacks
-      queue = StrictQueue.new(capacity: 1)
+      queue = Strict::Queue.new(capacity: 1)
       fallback = Object.new
 
       assert_nil queue.pop(timeout: 0)
@@ -151,7 +151,7 @@ module Farce
     end
 
     def test_unbounded_capacity
-      queue = StrictQueue.new(capacity: nil)
+      queue = Strict::Queue.new(capacity: nil)
       values = 2_000.times.to_a
 
       assert_nil queue.capacity
@@ -164,7 +164,7 @@ module Farce
     end
 
     def test_blocking_operations_and_wait_methods
-      queue = StrictQueue.new(capacity: 1)
+      queue = Strict::Queue.new(capacity: 1)
 
       refute queue.wait_pop(timeout: 0)
       assert queue.wait_push(timeout: 0)
@@ -194,7 +194,7 @@ module Farce
     end
 
     def test_clear_wakes_waiting_producers
-      queue = StrictQueue.new(capacity: 1)
+      queue = Strict::Queue.new(capacity: 1)
       queue.push(:discarded)
       producer = Thread.new { queue.push(:replacement) }
       Timeout.timeout(5) { Thread.pass until queue.num_waiting.positive? }
@@ -208,7 +208,7 @@ module Farce
     end
 
     def test_close_is_idempotent_and_data_operations_raise
-      queue = StrictQueue.new
+      queue = Strict::Queue.new
 
       assert_same queue, queue.close
       assert_same queue, queue.close
@@ -223,22 +223,22 @@ module Farce
     end
 
     def test_inspect_and_pretty_inspect
-      queue = StrictQueue.new(capacity: 2)
+      queue = Strict::Queue.new(capacity: 2)
       queue.push(:value)
 
-      assert_equal "#<Farce::StrictQueue size=1 capacity=2>", queue.inspect
-      assert_equal "#<Farce::StrictQueue size=1 capacity=2>\n", queue.pretty_inspect
-      assert_equal "#<Farce::StrictQueue size=0>", StrictQueue.new(capacity: nil).inspect
+      assert_equal "#<Farce::Strict::Queue size=1 capacity=2>", queue.inspect
+      assert_equal "#<Farce::Strict::Queue size=1 capacity=2>\n", queue.pretty_inspect
+      assert_equal "#<Farce::Strict::Queue size=0>", Strict::Queue.new(capacity: nil).inspect
 
       queue.close
 
-      assert_equal "#<Farce::StrictQueue closed>", queue.inspect
-      assert_equal "#<Farce::StrictQueue closed>\n", queue.pretty_inspect
+      assert_equal "#<Farce::Strict::Queue closed>", queue.inspect
+      assert_equal "#<Farce::Strict::Queue closed>\n", queue.pretty_inspect
     end
 
     def test_preserves_identity_across_cruby_ractors
       return unless Internal.native_ractors?
-      queue = StrictQueue.new
+      queue = Strict::Queue.new
       value = [:shared].freeze
       queue.push(value)
 

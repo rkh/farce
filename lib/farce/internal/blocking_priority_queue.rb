@@ -7,11 +7,6 @@ module Farce
   module Internal # :nodoc: all
     # Shared blocking wrapper behavior for the public priority-based queues.
     module BlockingPriorityQueue
-      DeleteProbe = Data.define(:value, :compare_by_identity, :manager) do
-        def ===(stored) = manager.same_value?(stored, value, identity: compare_by_identity)
-      end
-      private_constant :DeleteProbe
-
       # Remove all values and wake waiters.
       def clear
         @queue.clear
@@ -45,9 +40,20 @@ module Farce
 
       def initialize(capacity:, reverse_order: false)
         @reverse_order = reverse_order
-        @signal        = Signal.new
-        @queue         = PriorityQueue.new(capacity:, signal: @signal)
+        @signal        = queue_signal
+        @queue         = queue_storage_class.new(capacity:, signal: @signal)
         super()
+      end
+
+      def queue_storage_class = Internal::PriorityQueue
+      def queue_signal = Signal.new
+
+      def delete_from_storage(priority, value, compare_by_identity:)
+        if compare_by_identity
+          @queue.delete_identity(priority, value)
+        else
+          @queue.delete(priority, value)
+        end
       end
 
       def push_to_storage(priority, non_block, value, timeout:)

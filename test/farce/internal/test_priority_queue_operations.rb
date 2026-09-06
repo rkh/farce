@@ -19,7 +19,7 @@ module Farce
       end
 
       def test_pop_before_is_inclusive_and_preserves_nil_false_and_fifo_ties
-        queue = PriorityQueue.new
+        queue = queue_class.new
         queue.push(2, :future)
         queue.push(1, nil)
         queue.push(1, false)
@@ -36,7 +36,7 @@ module Farce
       end
 
       def test_pop_before_releases_the_lock_on_comparison_failure
-        queue = PriorityQueue.new
+        queue = queue_class.new
         queue.push(ExplodingPriority.new(1), :kept)
 
         assert_raises(RuntimeError) { queue.pop_before(ExplodingPriority.new(2)) }
@@ -45,7 +45,7 @@ module Farce
       end
 
       def test_delete_match_removes_only_the_oldest_match_at_the_exact_priority
-        queue = PriorityQueue.new
+        queue = queue_class.new
         queue.push(1, :target)
         queue.push(2, :other)
         queue.push(2, :target)
@@ -57,7 +57,7 @@ module Farce
       end
 
       def test_match_failures_and_reentrancy_leave_values_and_lock_intact
-        queue = PriorityQueue.new
+        queue = queue_class.new
         queue.push(1, :kept)
 
         assert_raises(RuntimeError) { queue.delete_match(1, ExplodingMatch.new("match failed")) }
@@ -67,7 +67,7 @@ module Farce
       end
 
       def test_new_operations_observe_close
-        queue = PriorityQueue.new
+        queue = queue_class.new
         queue.close
 
         assert_raises(ClosedQueueError) { queue.pop_before(1) }
@@ -75,7 +75,7 @@ module Farce
       end
 
       def test_float_insertions_and_due_pops_match_a_sorted_reference
-        queue = PriorityQueue.new
+        queue = queue_class.new
         random = Random.new(173)
         expected = []
 
@@ -100,18 +100,35 @@ module Farce
       end
 
       def test_float_fast_path_transitions_and_special_values
-        queue = PriorityQueue.new
+        queue = queue_class.new
         priorities = [1.5, -0.0, 0.0, -Float::INFINITY, Float::INFINITY, 2, -1.5]
         priorities.each_with_index { |priority, id| queue.push(priority, id) }
         expected = priorities.each_with_index.sort_by { |priority, id| [priority, id] }.map(&:last)
 
         assert_equal expected, Array.new(queue.size) { queue.pop_before(Float::INFINITY) }
-        queue.clear
         queue.push(2.5, :later)
         queue.push(1.5, :earlier)
 
         assert_equal :earlier, queue.pop_before(1.5)
         assert_equal :later, queue.pop_before(2.5)
+      end
+
+      private def queue_class = PriorityQueue
+    end
+
+    class TestUnsharedPriorityQueueOperations < TestPriorityQueueOperations
+      private def queue_class = UnsharedPriorityQueue
+    end
+
+    if Internal.native_ractors?
+      class TestUnsharedPriorityQueueSignalOperations < TestPriorityQueueOperations
+        private def queue_class
+          Class.new(UnsharedPriorityQueue) do
+            def initialize
+              super(signal: UnsharedSignal.new)
+            end
+          end
+        end
       end
     end
   end

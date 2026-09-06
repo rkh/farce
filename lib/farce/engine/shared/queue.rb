@@ -38,7 +38,7 @@ module Farce
       end
 
       def push(item, timeout: nil)
-        raise Ractor::IsolationError, "value is not Ractor-shareable" unless Ractor.shareable?(item)
+        check_value(item)
         item = NIL_VALUE if item.nil?
 
         unless capacity
@@ -92,6 +92,10 @@ module Farce
       Internal.delegate(self, :@queue, :closed?, :size)
 
       private
+
+      def check_value(item)
+        raise Ractor::IsolationError, "value is not Ractor-shareable" unless Ractor.shareable?(item)
+      end
 
       def normalize_timeout(timeout)
         return nil if timeout.nil?

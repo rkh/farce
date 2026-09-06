@@ -58,6 +58,7 @@ Init_containers(void)
     containers_init_priority_queue(mInternal);
     containers_init_queue(mInternal);
     containers_init_signal(mInternal);
+    containers_init_unshared_signal(mInternal);
     containers_init_unshareable(mInternal);
     containers_init_vector(mInternal);
     containers_init_weak_maps(mInternal);

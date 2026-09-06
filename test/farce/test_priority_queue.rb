@@ -17,7 +17,7 @@ module Farce
     def test_initialization_and_hierarchy
       queue = PriorityQueue.new
 
-      assert_equal Abstract::Queue, PriorityQueue.superclass
+      assert_equal Abstract::PriorityQueue, PriorityQueue.superclass
       assert_instance_of Internal::PriorityQueue, queue.instance_variable_get(:@queue)
       assert_nil queue.capacity
       assert_equal Float::INFINITY, queue.max

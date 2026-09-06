@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "unshared_wait.h"
 #include <ruby/atomic.h>
 #include <ruby/fiber/scheduler.h>
 #include <ruby/io.h>
@@ -352,11 +353,14 @@ typedef struct {
     VALUE owner_ruby_thread;
     priority_queue_lock_waiter_t *waiters;
     priority_queue_lock_waiter_t *last_waiter;
+    farce_unshared_wait_list_t unshared_lock_waiters;
+    VALUE unshared_self;
     /* Deliberately omitted from dmark: publication must remember its owner
      * without making that Fiber/Thread part of the shareable object graph. */
     VALUE publication_owner_fiber;
     VALUE publication_owner_ruby_thread;
     VALUE signal;
+    containers_unshared_signal_t *unshared_signal;
     size_t size;
     size_t capacity;
     bool bounded;
@@ -366,6 +370,8 @@ typedef struct {
     bool numeric_only;
     rb_atomic_t publication_state;
     bool mutex_initialized;
+    bool shared;
+    bool unshared_fiber_io;
 } priority_queue_t;
 
 static VALUE cPriorityQueue;
@@ -501,6 +507,8 @@ priority_queue_mark(void *pointer)
     rb_gc_mark_movable(queue->owner_fiber);
     rb_gc_mark_movable(queue->owner_ruby_thread);
     rb_gc_mark_movable(queue->signal);
+    rb_gc_mark_movable(queue->unshared_self);
+    farce_unshared_wait_mark(&queue->unshared_lock_waiters);
     for (node = dict_first(&queue->tree); node; node = dict_next(&queue->tree, node)) {
         priority_queue_bucket_t *bucket = (priority_queue_bucket_t *)node;
         priority_queue_value_t *entry;
@@ -527,6 +535,7 @@ priority_queue_compact(void *pointer)
     queue->publication_owner_ruby_thread =
         rb_gc_location(queue->publication_owner_ruby_thread);
     queue->signal = rb_gc_location(queue->signal);
+    queue->unshared_self = rb_gc_location(queue->unshared_self);
     for (node = dict_first(&queue->tree); node; node = dict_next(&queue->tree, node)) {
         priority_queue_bucket_t *bucket = (priority_queue_bucket_t *)node;
         priority_queue_value_t *entry;
@@ -583,24 +592,50 @@ static const rb_data_type_t priority_queue_type = {
     .flags = RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
+static const rb_data_type_t unshared_priority_queue_type = {
+    .wrap_struct_name = "Farce::Internal::UnsharedPriorityQueue",
+    .function = {
+        .dmark = priority_queue_mark,
+        .dfree = priority_queue_free,
+        .dsize = priority_queue_memsize,
+        .dcompact = priority_queue_compact,
+    },
+    .parent = &priority_queue_type,
+};
+
+/* The GVL protects the native fields within one Ractor. Keep the logical
+ * owner and waiter protocol because comparisons and notifications can yield. */
+static inline void priority_queue_mutex_lock(priority_queue_t *queue)
+{
+    if (queue->shared) pthread_mutex_lock(&queue->lock);
+}
+
+static inline void priority_queue_mutex_unlock(priority_queue_t *queue)
+{
+    if (queue->shared) pthread_mutex_unlock(&queue->lock);
+}
+
 static VALUE
-priority_queue_allocate(VALUE klass)
+priority_queue_allocate_type(VALUE klass, bool shared)
 {
     priority_queue_t *queue;
     VALUE object = TypedData_Make_Struct(
         klass,
         priority_queue_t,
-        &priority_queue_type,
+        shared ? &priority_queue_type : &unshared_priority_queue_type,
         queue
     );
     int error;
 
     memset(queue, 0, sizeof(*queue));
+    queue->shared = shared;
+    queue->unshared_fiber_io = FARCE_UNSHARED_FIBER_IO;
     queue->owner_fiber = Qnil;
     queue->owner_ruby_thread = Qnil;
     queue->publication_owner_fiber = Qnil;
     queue->publication_owner_ruby_thread = Qnil;
     queue->signal = Qnil;
+    queue->unshared_self = shared ? Qnil : object;
     queue->numeric_only = true;
     RUBY_ATOMIC_SET(queue->publication_state, PRIORITY_QUEUE_UNINITIALIZED);
     dict_init(&queue->tree, priority_queue_compare);
@@ -610,11 +645,16 @@ priority_queue_allocate(VALUE klass)
         priority_queue_free_tree_node,
         queue
     );
-    error = pthread_mutex_init(&queue->lock, NULL);
-    if (error) rb_syserr_fail(error, "pthread_mutex_init");
-    queue->mutex_initialized = true;
+    if (shared) {
+        error = pthread_mutex_init(&queue->lock, NULL);
+        if (error) rb_syserr_fail(error, "pthread_mutex_init");
+        queue->mutex_initialized = true;
+    }
     return object;
 }
+
+static VALUE priority_queue_allocate(VALUE klass) { return priority_queue_allocate_type(klass, true); }
+static VALUE unshared_priority_queue_allocate(VALUE klass) { return priority_queue_allocate_type(klass, false); }
 
 static priority_queue_t *
 priority_queue_get_raw(VALUE self)
@@ -668,6 +708,12 @@ priority_queue_lock_set_fd_flags(int fd)
 static void
 priority_queue_lock_notify_one_locked(priority_queue_t *queue)
 {
+    if (!queue->shared) {
+        /* Ownership has already been released. Notify the original cohort
+         * together so cancellation or synchronous unblock cannot strand the
+         * next waiter. Reentrant operations can register for a later unlock. */
+        farce_unshared_wait_notify_all(&queue->unshared_lock_waiters);
+    }
     unsigned char byte = 1;
     priority_queue_lock_waiter_t *waiter;
 
@@ -740,7 +786,7 @@ priority_queue_lock_wait_cleanup(VALUE opaque)
     priority_queue_lock_waiter_t *previous = NULL;
     priority_queue_lock_waiter_t **link;
 
-    pthread_mutex_lock(&context->queue->lock);
+    priority_queue_mutex_lock(context->queue);
     for (link = &context->queue->waiters; *link; link = &(*link)->next) {
         if (*link == &context->waiter) {
             *link = context->waiter.next;
@@ -763,7 +809,7 @@ priority_queue_lock_wait_cleanup(VALUE opaque)
         )) {
         priority_queue_lock_notify_one_locked(context->queue);
     }
-    pthread_mutex_unlock(&context->queue->lock);
+    priority_queue_mutex_unlock(context->queue);
     close(context->waiter.read_fd);
     close(context->waiter.write_fd);
     return Qnil;
@@ -773,11 +819,15 @@ priority_queue_lock_wait_cleanup(VALUE opaque)
 static void
 priority_queue_lock_wait_once(priority_queue_t *queue)
 {
+    if (!queue->shared && (!queue->unshared_fiber_io || NIL_P(rb_fiber_scheduler_current()))) {
+        (void)farce_unshared_wait(&queue->unshared_lock_waiters, queue->unshared_self, false, 0);
+        return;
+    }
     int descriptors[2];
     priority_queue_lock_wait_context_t context;
 
     if (pipe(descriptors) != 0) {
-        pthread_mutex_unlock(&queue->lock);
+        priority_queue_mutex_unlock(queue);
         rb_sys_fail("pipe");
     }
     priority_queue_lock_set_fd_flags(descriptors[0]);
@@ -795,7 +845,7 @@ priority_queue_lock_wait_once(priority_queue_t *queue)
     if (queue->last_waiter) queue->last_waiter->next = &context.waiter;
     else queue->waiters = &context.waiter;
     queue->last_waiter = &context.waiter;
-    pthread_mutex_unlock(&queue->lock);
+    priority_queue_mutex_unlock(queue);
     (void)rb_ensure(
         priority_queue_lock_wait_body,
         (VALUE)&context,
@@ -814,27 +864,27 @@ priority_queue_lock(priority_queue_t *queue, bool *acquired)
     for (;;) {
         bool publication_busy;
 
-        pthread_mutex_lock(&queue->lock);
+        priority_queue_mutex_lock(queue);
         publication_busy = priority_queue_publication_busy(
             RUBY_ATOMIC_LOAD(queue->publication_state)
         );
         if (queue->owner_fiber == current ||
             (publication_busy && queue->publication_owner_fiber == current)) {
-            pthread_mutex_unlock(&queue->lock);
+            priority_queue_mutex_unlock(queue);
             rb_raise(rb_eThreadError, "deadlock; recursive priority queue access");
         }
         if (NIL_P(queue->owner_fiber) && !publication_busy) {
             queue->owner_fiber = current;
             queue->owner_ruby_thread = current_thread;
             *acquired = true;
-            pthread_mutex_unlock(&queue->lock);
+            priority_queue_mutex_unlock(queue);
             return;
         }
         if ((queue->owner_ruby_thread == current_thread ||
              (publication_busy &&
               queue->publication_owner_ruby_thread == current_thread)) &&
             NIL_P(scheduler)) {
-            pthread_mutex_unlock(&queue->lock);
+            priority_queue_mutex_unlock(queue);
             rb_raise(
                 rb_eThreadError,
                 "deadlock; priority queue contention between unscheduled fibers"
@@ -849,7 +899,7 @@ priority_queue_unlock(priority_queue_t *queue)
 {
     rb_atomic_t state;
 
-    pthread_mutex_lock(&queue->lock);
+    priority_queue_mutex_lock(queue);
     state = RUBY_ATOMIC_LOAD(queue->publication_state);
     if (state == PRIORITY_QUEUE_PUBLISHED) {
         RUBY_ATOMIC_SET(queue->publication_state, PRIORITY_QUEUE_INITIALIZED);
@@ -862,7 +912,7 @@ priority_queue_unlock(priority_queue_t *queue)
     queue->publication_owner_fiber = Qnil;
     queue->publication_owner_ruby_thread = Qnil;
     priority_queue_lock_notify_one_locked(queue);
-    pthread_mutex_unlock(&queue->lock);
+    priority_queue_mutex_unlock(queue);
 }
 
 typedef struct {
@@ -978,7 +1028,8 @@ priority_queue_check_shareable(VALUE value)
 static void
 priority_queue_notify_before_commit(priority_queue_t *queue)
 {
-    if (!NIL_P(queue->signal)) rb_funcall(queue->signal, id_broadcast, 0);
+    if (queue->unshared_signal) containers_unshared_signal_notify(queue->unshared_signal);
+    else if (!NIL_P(queue->signal)) rb_funcall(queue->signal, id_broadcast, 0);
 }
 
 RBIMPL_ATTR_NORETURN()
@@ -1038,14 +1089,14 @@ priority_queue_finish_publication(VALUE opaque)
     /* An async exception can arrive after rb_ractor_make_shareable has set the
      * shareable flag. In that case the native fields already form a coherent
      * queue, so publish initialized before propagating it. */
-    pthread_mutex_lock(&initialization->queue->lock);
+    priority_queue_mutex_lock(initialization->queue);
     if (shareable) {
         RUBY_ATOMIC_SET(
             initialization->queue->publication_state,
             PRIORITY_QUEUE_PUBLISHED
         );
     }
-    pthread_mutex_unlock(&initialization->queue->lock);
+    priority_queue_mutex_unlock(initialization->queue);
     return Qnil;
 }
 
@@ -1057,13 +1108,13 @@ priority_queue_publish_shareable(priority_queue_initialize_t *initialization)
     /* Install the gate before primitive freeze can make this typed object
      * Ractor-visible. Move the logical owner out of dmark before recursive
      * sharing, while retaining it for callback reentry/deadlock detection. */
-    pthread_mutex_lock(&queue->lock);
+    priority_queue_mutex_lock(queue);
     RUBY_ATOMIC_SET(queue->publication_state, PRIORITY_QUEUE_PUBLISHING);
     queue->publication_owner_fiber = queue->owner_fiber;
     queue->publication_owner_ruby_thread = queue->owner_ruby_thread;
     queue->owner_fiber = Qnil;
     queue->owner_ruby_thread = Qnil;
-    pthread_mutex_unlock(&queue->lock);
+    priority_queue_mutex_unlock(queue);
     return rb_ensure(
         priority_queue_make_shareable,
         (VALUE)initialization,
@@ -1090,12 +1141,20 @@ priority_queue_initialize_commit(VALUE opaque)
     }
     rb_check_frozen(initialization->self);
 
+    containers_unshared_signal_t *unshared_signal =
+        containers_unshared_signal_get_if_exact(initialization->signal);
+    bool fiber_io = containers_unshared_signal_uses_fiber_io(initialization->signal);
+    queue->unshared_signal = unshared_signal;
+    queue->unshared_fiber_io = fiber_io;
     queue->bounded = initialization->bounded;
     queue->capacity = initialization->capacity;
     queue->signal = initialization->signal;
     /* Publication installs its logical gate before primitive freezing and
      * keeps that whole transition under nested ensure cleanup. */
-    return priority_queue_publish_shareable(initialization);
+    if (queue->shared) return priority_queue_publish_shareable(initialization);
+    rb_obj_freeze(initialization->self);
+    RUBY_ATOMIC_SET(queue->publication_state, PRIORITY_QUEUE_INITIALIZED);
+    return initialization->self;
 }
 
 static VALUE
@@ -1134,7 +1193,7 @@ priority_queue_initialize(int argc, VALUE *argv, VALUE self)
     }
 
     if (keyword_values[1] != Qundef && !NIL_P(keyword_values[1])) {
-        priority_queue_check_shareable(keyword_values[1]);
+        if (queue->shared) priority_queue_check_shareable(keyword_values[1]);
         if (!rb_respond_to(keyword_values[1], id_broadcast)) {
             rb_raise(rb_eTypeError, "signal must respond to #broadcast");
         }
@@ -1308,6 +1367,17 @@ priority_queue_push_locked(VALUE opaque)
     );
 }
 
+/* A Ractor-confined operation may run under the GVL alone when it cannot call
+ * Ruby. Never bypass a suspended callback's logical owner. The caller must
+ * prove comparison/notification callbacks are impossible on this path. */
+static inline bool
+priority_queue_can_run_direct(priority_queue_t *queue)
+{
+    return !queue->shared && NIL_P(queue->owner_fiber) &&
+        (NIL_P(queue->signal) ||
+         (queue->unshared_signal && !containers_unshared_signal_has_waiters(queue->unshared_signal)));
+}
+
 static VALUE
 priority_queue_push(VALUE self, VALUE priority, VALUE value)
 {
@@ -1321,8 +1391,16 @@ priority_queue_push(VALUE self, VALUE priority, VALUE value)
         .pending_bucket = NULL,
         .pending_entry = NULL,
     };
-    priority_queue_check_shareable(priority);
-    priority_queue_check_shareable(value);
+    if (queue->shared) priority_queue_check_shareable(priority);
+    if (queue->shared) priority_queue_check_shareable(value);
+    if (priority_queue_can_run_direct(queue) && queue->numeric_only &&
+        (FIXNUM_P(priority) || (CLASS_OF(priority) == rb_cFloat && !isnan(RFLOAT_VALUE(priority)))) &&
+        (dict_isempty(&queue->tree) ||
+         FIXNUM_P(priority) == FIXNUM_P((VALUE)dnode_getkey(queue->tree.dict_nilnode.dict_left)))) {
+        /* Retain allocation cleanup, but there is no callback lock to release.
+         * The homogeneous numeric path uses dict_insert_at without dispatch. */
+        return priority_queue_push_locked((VALUE)&push);
+    }
     return priority_queue_call(
         queue,
         priority_queue_push_locked,
@@ -1384,7 +1462,7 @@ priority_queue_read_body(VALUE opaque)
     priority_queue_identity_index_remove(bucket->identity_index, entry);
     priority_queue_bucket_unlink(bucket, entry);
     free(entry);
-    queue->size--;
+    if (--queue->size == 0) queue->numeric_only = true;
     if (bucket->size == 0) dict_delete_free(&queue->tree, node);
     return read->result;
 }
@@ -1400,11 +1478,12 @@ priority_queue_read(VALUE self, priority_queue_read_kind_t kind, bool last)
         .empty = false,
         .last = last,
     };
-    priority_queue_call(
-        queue,
-        priority_queue_read_body,
-        (VALUE)&read
-    );
+    if (priority_queue_can_run_direct(queue)) {
+        priority_queue_read_body((VALUE)&read);
+    }
+    else {
+        priority_queue_call(queue, priority_queue_read_body, (VALUE)&read);
+    }
     if (read.empty) return rb_block_given_p() ? rb_yield_values(0) : Qnil;
     return read.result;
 }
@@ -1419,7 +1498,7 @@ static VALUE
 priority_queue_pop_before(VALUE self, VALUE latest_priority)
 {
     priority_queue_t *queue = priority_queue_get(self);
-    priority_queue_check_shareable(latest_priority);
+    if (queue->shared) priority_queue_check_shareable(latest_priority);
     priority_queue_read_t read = {
         .queue = queue,
         .kind = PRIORITY_QUEUE_POP,
@@ -1427,7 +1506,21 @@ priority_queue_pop_before(VALUE self, VALUE latest_priority)
         .latest_priority = latest_priority,
         .limited = true,
     };
-    priority_queue_call(queue, priority_queue_read_body, (VALUE)&read);
+    bool direct = priority_queue_can_run_direct(queue);
+    if (direct) {
+        dnode_t *first = dict_first(&queue->tree);
+        VALUE first_priority = first ? (VALUE)dnode_getkey(first) : Qnil;
+        direct = !first ||
+            (FIXNUM_P(latest_priority) && FIXNUM_P(first_priority)) ||
+            (CLASS_OF(latest_priority) == rb_cFloat && !isnan(RFLOAT_VALUE(latest_priority)) &&
+             CLASS_OF(first_priority) == rb_cFloat && !isnan(RFLOAT_VALUE(first_priority)));
+    }
+    if (direct) {
+        priority_queue_read_body((VALUE)&read);
+    }
+    else {
+        priority_queue_call(queue, priority_queue_read_body, (VALUE)&read);
+    }
     if (read.empty) return rb_block_given_p() ? rb_yield_values(0) : Qnil;
     return read.result;
 }
@@ -1498,7 +1591,7 @@ priority_queue_delete_body(VALUE opaque)
         priority_queue_identity_index_remove(bucket->identity_index, entry);
         priority_queue_bucket_unlink(bucket, entry);
         free(entry);
-        queue->size--;
+        if (--queue->size == 0) queue->numeric_only = true;
         if (bucket->size == 0) dict_delete_free(&queue->tree, node);
         return Qtrue;
     }
@@ -1515,8 +1608,8 @@ priority_queue_delete(VALUE self, VALUE priority, VALUE value)
         .priority = priority,
         .value = value,
     };
-    priority_queue_check_shareable(priority);
-    priority_queue_check_shareable(value);
+    if (queue->shared) priority_queue_check_shareable(priority);
+    if (queue->shared) priority_queue_check_shareable(value);
     return priority_queue_call(
         queue,
         priority_queue_delete_body,
@@ -1537,8 +1630,8 @@ priority_queue_delete_match(VALUE self, VALUE priority, VALUE pattern)
         .value = pattern,
         .match = true,
     };
-    priority_queue_check_shareable(priority);
-    priority_queue_check_shareable(pattern);
+    if (queue->shared) priority_queue_check_shareable(priority);
+    if (queue->shared) priority_queue_check_shareable(pattern);
     return priority_queue_call(queue, priority_queue_delete_body, (VALUE)&deletion);
 }
 
@@ -1578,7 +1671,7 @@ priority_queue_delete_identity_body(VALUE opaque)
     priority_queue_identity_index_remove(bucket->identity_index, entry);
     priority_queue_bucket_unlink(bucket, entry);
     free(entry);
-    queue->size--;
+    if (--queue->size == 0) queue->numeric_only = true;
     if (bucket->size == 0) dict_delete_free(&queue->tree, node);
     return Qtrue;
 }
@@ -1593,8 +1686,8 @@ priority_queue_delete_identity(VALUE self, VALUE priority, VALUE value)
         .priority = priority,
         .value = value,
     };
-    priority_queue_check_shareable(priority);
-    priority_queue_check_shareable(value);
+    if (queue->shared) priority_queue_check_shareable(priority);
+    if (queue->shared) priority_queue_check_shareable(value);
     return priority_queue_call(
         queue,
         priority_queue_delete_identity_body,
@@ -1619,6 +1712,7 @@ priority_queue_size(VALUE self)
 {
     priority_queue_t *queue = priority_queue_get(self);
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
+    if (priority_queue_can_run_direct(queue)) return priority_queue_size_body((VALUE)&operation);
     return priority_queue_call(
         queue,
         priority_queue_size_body,
@@ -1638,6 +1732,7 @@ priority_queue_empty(VALUE self)
 {
     priority_queue_t *queue = priority_queue_get(self);
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
+    if (priority_queue_can_run_direct(queue)) return priority_queue_empty_body((VALUE)&operation);
     return priority_queue_call(
         queue,
         priority_queue_empty_body,
@@ -1661,6 +1756,7 @@ priority_queue_clear(VALUE self)
 {
     priority_queue_t *queue = priority_queue_get(self);
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
+    if (priority_queue_can_run_direct(queue)) return priority_queue_clear_body((VALUE)&operation);
     return priority_queue_call(
         queue,
         priority_queue_clear_body,
@@ -1682,6 +1778,7 @@ priority_queue_close(VALUE self)
 {
     priority_queue_t *queue = priority_queue_get(self);
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
+    if (priority_queue_can_run_direct(queue)) return priority_queue_close_body((VALUE)&operation);
     return priority_queue_call(
         queue,
         priority_queue_close_body,
@@ -1701,6 +1798,7 @@ priority_queue_closed(VALUE self)
 {
     priority_queue_t *queue = priority_queue_get(self);
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
+    if (priority_queue_can_run_direct(queue)) return priority_queue_closed_body((VALUE)&operation);
     return priority_queue_call(
         queue,
         priority_queue_closed_body,
@@ -1755,4 +1853,6 @@ containers_init_priority_queue(VALUE namespace)
     cPriorityQueue = rb_define_class_under(namespace, "PriorityQueue", rb_cObject);
     rb_define_alloc_func(cPriorityQueue, priority_queue_allocate);
     priority_queue_define_methods(cPriorityQueue);
+    VALUE unshared = rb_define_class_under(namespace, "UnsharedPriorityQueue", cPriorityQueue);
+    rb_define_alloc_func(unshared, unshared_priority_queue_allocate);
 }

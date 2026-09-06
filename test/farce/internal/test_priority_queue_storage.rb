@@ -508,7 +508,7 @@ module Farce
       QueueClass = Internal::PriorityQueue
 
       def test_queue_is_frozen_and_ractor_shareable_on_cruby
-        queue = QueueClass.new
+        queue = queue_class.new
 
         assert_predicate queue, :frozen?
         assert Ractor.shareable?(queue) if RUBY_ENGINE == "ruby"
@@ -517,7 +517,7 @@ module Farce
       def test_unshareable_inputs_are_rejected_on_cruby
         return unless RUBY_ENGINE == "ruby"
 
-        queue = QueueClass.new
+        queue = queue_class.new
         assert_raises(Ractor::IsolationError) { native_push(queue, Object.new, :value) }
         assert_raises(Ractor::IsolationError) { native_push(queue, 1, Object.new) }
         assert_raises(Ractor::IsolationError) { queue.delete(1, Object.new) }
@@ -528,7 +528,7 @@ module Farce
       end
 
       def test_signal_protocol_callback_cannot_overwrite_a_recursive_initialization
-        queue = QueueClass.allocate
+        queue = queue_class.allocate
         broadcasts = Internal::Counter.new
         signal = ReentrantRespondToSignal.new(broadcasts)
         Thread.current[ReentrantRespondToSignal::CALLBACK_KEY] = proc do
@@ -549,7 +549,7 @@ module Farce
       end
 
       def test_concurrent_initializers_have_one_atomic_winner
-        queue = QueueClass.allocate
+        queue = queue_class.allocate
         entered = Thread::Queue.new
         release = Thread::Queue.new
         counters = 2.times.map { Internal::Counter.new }
@@ -647,7 +647,7 @@ module Farce
       end
 
       def test_recursive_comparison_access_raises_instead_of_deadlocking
-        queue = QueueClass.new
+        queue = queue_class.new
         native_push(queue, ComparablePriority.new(1), :first)
         recursive = ComparablePriority.new(2, reenter: queue)
 
@@ -658,7 +658,7 @@ module Farce
       end
 
       def test_thread_contention_during_ruby_comparisons
-        queue = QueueClass.new(capacity: nil)
+        queue = queue_class.new(capacity: nil)
         threads = 6.times.map do |worker|
           Thread.new do
             250.times do |index|
@@ -682,7 +682,7 @@ module Farce
       def test_concurrent_ractor_producers
         return unless RUBY_ENGINE == "ruby"
 
-        queue = QueueClass.new(capacity: nil)
+        queue = queue_class.new(capacity: nil)
         workers = 4.times.map do |worker|
           Ractor.new(queue, worker) do |shared, prefix|
             250.times { |index| shared.push(index % 8, (prefix * 1_000) + index) }
@@ -701,6 +701,23 @@ module Farce
 
       def new_queue_with_ephemeral_signal(calls)
         new_queue_with_signal(signal: CountingBroadcast.new(calls))
+      end
+    end
+
+    class TestUnsharedPriorityQueueStorage < TestNativePriorityQueueStorage
+      QueueClass = Internal::UnsharedPriorityQueue
+
+      def share(value) = value
+
+      undef_method :test_queue_is_frozen_and_ractor_shareable_on_cruby
+      undef_method :test_unshareable_inputs_are_rejected_on_cruby
+      undef_method :test_concurrent_ractor_producers
+
+      def test_queue_remains_unshareable_even_when_frozen
+        queue = new_queue
+
+        assert_predicate queue, :frozen?
+        refute Ractor.shareable?(queue) if Internal.native_ractors?
       end
     end
   end

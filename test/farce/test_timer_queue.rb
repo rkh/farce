@@ -13,7 +13,7 @@ module Farce
     def test_is_an_unbounded_abstract_queue_by_default
       queue = TimerQueue.new
 
-      assert_equal Abstract::Queue, TimerQueue.superclass
+      assert_equal Abstract::TimerQueue, TimerQueue.superclass
       refute_operator TimerQueue, :<, PriorityQueue
       assert_instance_of Internal::PriorityQueue, queue.instance_variable_get(:@queue)
       assert_nil queue.capacity

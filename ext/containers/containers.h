@@ -7,6 +7,7 @@
 
 #include <pthread.h>
 #include <stdbool.h>
+#include <stdint.h>
 #ifndef _WIN32
 #include <sys/time.h>
 #endif
@@ -26,6 +27,14 @@ void containers_init_map(VALUE namespace);
 void containers_init_priority_queue(VALUE namespace);
 void containers_init_queue(VALUE namespace);
 void containers_init_signal(VALUE namespace);
+
+typedef struct containers_unshared_signal containers_unshared_signal_t;
+containers_unshared_signal_t *containers_unshared_signal_get_if_exact(VALUE signal);
+bool containers_unshared_fiber_io(VALUE mode);
+bool containers_unshared_signal_uses_fiber_io(VALUE signal);
+bool containers_unshared_signal_has_waiters(containers_unshared_signal_t *signal);
+void containers_unshared_signal_notify(containers_unshared_signal_t *signal);
+void containers_init_unshared_signal(VALUE namespace);
 void containers_init_unshareable(VALUE namespace);
 void containers_init_vector(VALUE namespace);
 void containers_init_weak_maps(VALUE namespace);

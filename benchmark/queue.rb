@@ -53,9 +53,9 @@ end
 queues = {
   "Thread::Queue"          => -> { Thread::Queue.new },
   "Thread::SizedQueue"     => -> { Thread::SizedQueue.new(1024) },
-  "Farce::Internal::Queue" => -> { Farce.const_get(:Internal, false)::Queue.new },
   "Farce::Queue"           => -> { Farce::Queue.new },
-  "Farce::StrictQueue"     => -> { Farce::StrictQueue.new },
+  "Farce::Strict::Queue"   => -> { Farce::Strict::Queue.new },
+  "Farce::Unshared::Queue" => -> { Farce::Unshared::Queue.new },
 }
 
 if defined?(Ractor)

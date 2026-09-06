@@ -7,6 +7,7 @@ module Farce
   #
   # Subclasses of these can be found under the following namespaces:
   # * {Farce} - for Ractor-shareable implementations
+  # * {Farce::Strict} - for Ractor-shareable implementations accepting only shareable values
   # * {Farce::Unshared} - for Ractor-unshareable implementations
   # * {Farce::Unsafe} – for implementations that are not thread-safe
   module Abstract

@@ -3,8 +3,8 @@
 # warn_indent: true
 
 module Farce
-  # Thread-safe containers for values used within one Ractor.
-  module Unshared
+  # Shareable queues that store shareable values directly.
+  module Strict
     include Internal::Autoloads
   end
 end

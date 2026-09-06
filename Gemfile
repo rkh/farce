@@ -29,7 +29,7 @@ group :benchmark do
   gem "lazy_priority_queue"
   gem "philiprehberger-priority_queue"
   gem "pqueue"
-  platform :mri do
+  platforms :mri_34, :mri_40 do # rubocop:disable Naming/VariableNumber
     gem "priority_queue_cxx", require: "fc"
     gem "rbtree"
   end

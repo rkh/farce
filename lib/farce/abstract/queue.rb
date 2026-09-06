@@ -137,7 +137,7 @@ module Farce
     class Queue
       # The default mode used to transfer values between Ractors.
       # @return [Symbol]
-      def mode = @manager.mode
+      def mode = :raise
 
       # Alias for {#pop} to match the interface of Ruby's Queue class.
       # @return (see #pop)
@@ -179,6 +179,56 @@ module Farce
           end
         end
       end
+
+      def capacity = @queue.capacity
+
+      def clear
+        @queue.clear
+        self
+      end
+
+      def close
+        @queue.close
+        self
+      end
+
+      def closed? = @queue.closed?
+
+      def empty? = size.zero?
+
+      def num_waiting = @queue.num_waiting
+
+      def pop(non_block = false, timeout: nil, &) # rubocop:disable Style/OptionalBooleanParameter
+        return @queue.try_pop { raise ThreadError, "queue empty" } if non_block
+        timeout.nil? ? @queue.pop(&) : @queue.pop(timeout:, &)
+      end
+
+      def push(value, non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
+        if non_block
+          return true if @queue.try_push(value)
+          raise ThreadError, "queue full"
+        end
+        timeout.nil? ? @queue.push(value) : @queue.push(value, timeout:)
+      end
+
+      def try_pop(&) = @queue.try_pop(&)
+
+      def try_push(value)
+        return true if @queue.try_push(value)
+        block_given? ? yield : false
+      end
+
+      def size = @queue.size
+
+      def wait_pop(timeout: nil) = @queue.wait_pop(timeout:)
+
+      def wait_push(timeout: nil) = @queue.wait_push(timeout:)
+
+      def initialize_copy(_other)
+        raise TypeError, "queues cannot be copied"
+      end
+
+      private :initialize_copy
 
       private
 

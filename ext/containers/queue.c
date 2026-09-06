@@ -1,5 +1,6 @@
 #include "containers.h"
 #include "ruby/io.h"
+#include "unshared_wait.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -34,9 +35,14 @@ typedef struct {
     size_t push_waiters;
     readiness_signal_t can_pop;
     readiness_signal_t can_push;
+    farce_unshared_wait_list_t unshared_pop_waiters;
+    farce_unshared_wait_list_t unshared_push_waiters;
     bool bounded;
     bool closed;
     bool initialized;
+    bool shared;
+    bool unshared_fiber_io;
+    bool unshared_notifications_needed;
 } queue_t;
 
 static void
@@ -102,6 +108,15 @@ readiness_set(readiness_signal_t *signal, bool desired)
 static void
 queue_update_readiness(queue_t *queue)
 {
+    if (!queue->shared) {
+        if (!queue->unshared_notifications_needed) return;
+        if (queue->closed || queue->size > 0) {
+            farce_unshared_wait_notify_all(&queue->unshared_pop_waiters);
+        }
+        if (queue->closed || !queue->bounded || queue->size < queue->limit) {
+            farce_unshared_wait_notify_all(&queue->unshared_push_waiters);
+        }
+    }
     readiness_set(
         &queue->can_pop,
         queue->pop_waiters > 0 && (queue->closed || queue->size > 0)
@@ -111,12 +126,22 @@ queue_update_readiness(queue_t *queue)
         queue->push_waiters > 0 &&
             (queue->closed || !queue->bounded || queue->size < queue->limit)
     );
+    if (!queue->shared) {
+        /* Keep the slow path until both waiter mechanisms and every pending
+         * readiness byte have drained. Interrupted direct waits may leave the
+         * flag set, which is harmless and corrected by the next mutation. */
+        queue->unshared_notifications_needed = queue->pop_waiters || queue->push_waiters ||
+            queue->unshared_pop_waiters.count || queue->unshared_push_waiters.count ||
+            queue->can_pop.set || queue->can_push.set;
+    }
 }
 
 static void
 queue_mark(void *pointer)
 {
     queue_t *queue = pointer;
+    farce_unshared_wait_mark(&queue->unshared_pop_waiters);
+    farce_unshared_wait_mark(&queue->unshared_push_waiters);
     if (!queue->values) return;
     size_t index = queue->head;
     for (size_t remaining = queue->size; remaining > 0; remaining--) {
@@ -141,7 +166,7 @@ static void
 queue_free(void *pointer)
 {
     queue_t *queue = pointer;
-    pthread_mutex_destroy(&queue->lock);
+    if (queue->shared) pthread_mutex_destroy(&queue->lock);
     free(queue->values);
     if (queue->can_pop.read_fd >= 0) close(queue->can_pop.read_fd);
     if (queue->can_pop.write_fd >= 0) close(queue->can_pop.write_fd);
@@ -168,12 +193,35 @@ static const rb_data_type_t queue_type = {
     .flags = RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
+static const rb_data_type_t unshared_queue_type = {
+    .wrap_struct_name = "Farce::Internal::UnsharedQueue",
+    .function = {
+        .dmark = queue_mark,
+        .dfree = queue_free,
+        .dsize = queue_memsize,
+        .dcompact = queue_compact,
+    },
+    .parent = &queue_type,
+};
+
+/* Unshared queues are confined to one Ractor. These critical sections call no
+ * Ruby code and retain the GVL. Waiting releases it only after leaving them. */
+static inline void queue_lock(queue_t *queue)
+{
+    if (queue->shared) pthread_mutex_lock(&queue->lock);
+}
+
+static inline void queue_unlock(queue_t *queue)
+{
+    if (queue->shared) pthread_mutex_unlock(&queue->lock);
+}
+
 static VALUE
-queue_allocate(VALUE klass)
+queue_allocate_type(VALUE klass, bool shared)
 {
     queue_t *queue;
-    VALUE object = TypedData_Make_Struct(klass, queue_t, &queue_type, queue);
-    pthread_mutex_init(&queue->lock, NULL);
+    VALUE object = TypedData_Make_Struct(klass, queue_t, shared ? &queue_type : &unshared_queue_type, queue);
+    if (shared) pthread_mutex_init(&queue->lock, NULL);
     queue->values = NULL;
     queue->storage_capacity = 0;
     queue->limit = 0;
@@ -184,11 +232,18 @@ queue_allocate(VALUE klass)
     queue->push_waiters = 0;
     queue->can_pop = (readiness_signal_t){.read_fd = -1, .write_fd = -1, .set = false};
     queue->can_push = (readiness_signal_t){.read_fd = -1, .write_fd = -1, .set = false};
+    queue->unshared_pop_waiters = (farce_unshared_wait_list_t){0};
+    queue->unshared_push_waiters = (farce_unshared_wait_list_t){0};
     queue->bounded = true;
     queue->closed = false;
     queue->initialized = false;
+    queue->shared = shared;
+    queue->unshared_notifications_needed = false;
     return object;
 }
+
+static VALUE queue_allocate(VALUE klass) { return queue_allocate_type(klass, true); }
+static VALUE unshared_queue_allocate(VALUE klass) { return queue_allocate_type(klass, false); }
 
 static queue_t *
 get_queue(VALUE self)
@@ -204,16 +259,17 @@ queue_initialize(int argc, VALUE *argv, VALUE self)
 {
     VALUE keywords = Qnil;
     VALUE capacity_value = Qundef;
-    ID keyword_ids[] = {rb_intern("capacity")};
-    VALUE keyword_values[1];
+    ID keyword_ids[] = {rb_intern("capacity"), rb_intern("fiber_wait")};
+    VALUE keyword_values[2] = {Qundef, Qundef};
     queue_t *queue;
+    TypedData_Get_Struct(self, queue_t, &queue_type, queue);
     rb_scan_args(argc, argv, "0:", &keywords);
     if (!NIL_P(keywords)) {
-        rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
+        rb_get_kwargs(keywords, keyword_ids, 0, queue->shared ? 1 : 2, keyword_values);
         capacity_value = keyword_values[0];
     }
-    TypedData_Get_Struct(self, queue_t, &queue_type, queue);
     if (queue->initialized) rb_raise(rb_eRuntimeError, "Queue is already initialized");
+    bool fiber_io = containers_unshared_fiber_io(keyword_values[1]);
 
     if (NIL_P(capacity_value)) {
         queue->bounded = false;
@@ -233,8 +289,10 @@ queue_initialize(int argc, VALUE *argv, VALUE self)
 
     queue->values = calloc(queue->storage_capacity, sizeof(VALUE));
     if (!queue->values) rb_memerror();
+    queue->unshared_fiber_io = fiber_io;
     queue->initialized = true;
-    containers_finish_initialization(self);
+    if (queue->shared) containers_finish_initialization(self);
+    else rb_obj_freeze(self);
     return self;
 }
 
@@ -358,28 +416,34 @@ queue_wait_cleanup(VALUE opaque)
 {
     queue_wait_context_t *context = (queue_wait_context_t *)opaque;
     close(context->wait_fd);
-    pthread_mutex_lock(&context->queue->lock);
+    queue_lock(context->queue);
     (*context->waiter_count)--;
     queue_update_readiness(context->queue);
     if (context->queue->closed && *context->waiter_count == 0) {
         readiness_close(context->signal);
     }
-    pthread_mutex_unlock(&context->queue->lock);
+    queue_unlock(context->queue);
     return Qnil;
 }
 
 /* Called with queue->lock held and always returns with it released. Registering
  * before the unlock closes the check-to-wait race with a producer or consumer. */
 static bool
-queue_wait(queue_t *queue, readiness_signal_t *signal, size_t *waiter_count, queue_timeout_t *timeout)
+queue_wait(VALUE self, queue_t *queue, readiness_signal_t *signal, size_t *waiter_count, queue_timeout_t *timeout)
 {
     if (timeout->finite && (timeout->deadline == 0 || timeout->deadline <= monotonic_now())) {
-        pthread_mutex_unlock(&queue->lock);
+        queue_unlock(queue);
         return false;
+    }
+    if (!queue->shared) queue->unshared_notifications_needed = true;
+    if (!queue->shared && (!queue->unshared_fiber_io || NIL_P(rb_fiber_scheduler_current()))) {
+        farce_unshared_wait_list_t *list = signal == &queue->can_pop ?
+            &queue->unshared_pop_waiters : &queue->unshared_push_waiters;
+        return farce_unshared_wait(list, self, timeout->finite, timeout->deadline);
     }
     if (signal->read_fd < 0 && !readiness_initialize(signal)) {
         int error = errno;
-        pthread_mutex_unlock(&queue->lock);
+        queue_unlock(queue);
         errno = error;
         rb_sys_fail("pipe");
     }
@@ -389,7 +453,7 @@ queue_wait(queue_t *queue, readiness_signal_t *signal, size_t *waiter_count, que
     int wait_fd = dup(signal->read_fd);
     if (wait_fd < 0) {
         int error = errno;
-        pthread_mutex_unlock(&queue->lock);
+        queue_unlock(queue);
         errno = error;
         rb_sys_fail("dup");
     }
@@ -403,7 +467,7 @@ queue_wait(queue_t *queue, readiness_signal_t *signal, size_t *waiter_count, que
     };
     (*waiter_count)++;
     queue_update_readiness(queue);
-    pthread_mutex_unlock(&queue->lock);
+    queue_unlock(queue);
     return RTEST(rb_ensure(queue_wait_body, (VALUE)&context, queue_wait_cleanup, (VALUE)&context));
 }
 
@@ -412,6 +476,12 @@ static void
 raise_queue_closed(void)
 {
     rb_raise(eClosedQueueError, "queue is closed");
+}
+
+static VALUE
+unshared_queue_fiber_wait(VALUE self)
+{
+    return ID2SYM(rb_intern(get_queue(self)->unshared_fiber_io ? "io" : "block"));
 }
 
 static VALUE
@@ -448,9 +518,9 @@ queue_size(VALUE self)
 {
     queue_t *queue = get_queue(self);
     size_t size;
-    pthread_mutex_lock(&queue->lock);
+    queue_lock(queue);
     size = queue->size;
-    pthread_mutex_unlock(&queue->lock);
+    queue_unlock(queue);
     return SIZET2NUM(size);
 }
 
@@ -459,9 +529,10 @@ queue_num_waiting(VALUE self)
 {
     queue_t *queue = get_queue(self);
     size_t num_waiting;
-    pthread_mutex_lock(&queue->lock);
-    num_waiting = queue->pop_waiters + queue->push_waiters;
-    pthread_mutex_unlock(&queue->lock);
+    queue_lock(queue);
+    num_waiting = queue->pop_waiters + queue->push_waiters +
+        queue->unshared_pop_waiters.count + queue->unshared_push_waiters.count;
+    queue_unlock(queue);
     return SIZET2NUM(num_waiting);
 }
 
@@ -469,7 +540,7 @@ static VALUE
 queue_clear(VALUE self)
 {
     queue_t *queue = get_queue(self);
-    pthread_mutex_lock(&queue->lock);
+    queue_lock(queue);
 
     size_t index = queue->head;
     for (size_t remaining = queue->size; remaining > 0; remaining--) {
@@ -482,7 +553,7 @@ queue_clear(VALUE self)
     queue->tail = 0;
     queue_update_readiness(queue);
 
-    pthread_mutex_unlock(&queue->lock);
+    queue_unlock(queue);
     return self;
 }
 
@@ -491,9 +562,9 @@ queue_closed_p(VALUE self)
 {
     queue_t *queue = get_queue(self);
     bool closed;
-    pthread_mutex_lock(&queue->lock);
+    queue_lock(queue);
     closed = queue->closed;
-    pthread_mutex_unlock(&queue->lock);
+    queue_unlock(queue);
     return closed ? Qtrue : Qfalse;
 }
 
@@ -501,14 +572,14 @@ static VALUE
 queue_close(VALUE self)
 {
     queue_t *queue = get_queue(self);
-    pthread_mutex_lock(&queue->lock);
+    queue_lock(queue);
     if (!queue->closed) {
         queue->closed = true;
         queue_update_readiness(queue);
         if (queue->pop_waiters == 0) readiness_close(&queue->can_pop);
         if (queue->push_waiters == 0) readiness_close(&queue->can_push);
     }
-    pthread_mutex_unlock(&queue->lock);
+    queue_unlock(queue);
     return self;
 }
 
@@ -518,20 +589,20 @@ static VALUE
 queue_release_wait_descriptors(VALUE self)
 {
     queue_t *queue = get_queue(self);
-    pthread_mutex_lock(&queue->lock);
+    queue_lock(queue);
     if (queue->pop_waiters == 0) readiness_close(&queue->can_pop);
     if (queue->push_waiters == 0) readiness_close(&queue->can_push);
-    pthread_mutex_unlock(&queue->lock);
+    queue_unlock(queue);
     return self;
 }
 
 static VALUE
-queue_pop_with_timeout(queue_t *queue, queue_timeout_t timeout)
+queue_pop_with_timeout(VALUE self, queue_t *queue, queue_timeout_t timeout)
 {
     for (;;) {
-        pthread_mutex_lock(&queue->lock);
+        queue_lock(queue);
         if (queue->closed) {
-            pthread_mutex_unlock(&queue->lock);
+            queue_unlock(queue);
             raise_queue_closed();
         }
         if (queue->size > 0) {
@@ -540,10 +611,10 @@ queue_pop_with_timeout(queue_t *queue, queue_timeout_t timeout)
             if (++queue->head == queue->storage_capacity) queue->head = 0;
             queue->size--;
             queue_update_readiness(queue);
-            pthread_mutex_unlock(&queue->lock);
+            queue_unlock(queue);
             return value;
         }
-        if (!queue_wait(queue, &queue->can_pop, &queue->pop_waiters, &timeout)) {
+        if (!queue_wait(self, queue, &queue->can_pop, &queue->pop_waiters, &timeout)) {
             return rb_block_given_p() ? rb_yield_values(0) : Qnil;
         }
     }
@@ -555,38 +626,38 @@ queue_pop(int argc, VALUE *argv, VALUE self)
     queue_t *queue = get_queue(self);
     queue_timeout_t timeout = {.finite = false, .deadline = 0};
     if (argc > 0) timeout = parse_timeout(extract_timeout(argc, argv));
-    return queue_pop_with_timeout(queue, timeout);
+    return queue_pop_with_timeout(self, queue, timeout);
 }
 
 static VALUE
 queue_try_pop(VALUE self)
 {
     queue_timeout_t timeout = {.finite = true, .deadline = 0};
-    return queue_pop_with_timeout(get_queue(self), timeout);
+    return queue_pop_with_timeout(self, get_queue(self), timeout);
 }
 
 static VALUE
-queue_push_with_timeout(queue_t *queue, VALUE value, queue_timeout_t timeout)
+queue_push_with_timeout(VALUE self, queue_t *queue, VALUE value, queue_timeout_t timeout)
 {
     for (;;) {
-        pthread_mutex_lock(&queue->lock);
+        queue_lock(queue);
         if (queue->closed) {
-            pthread_mutex_unlock(&queue->lock);
+            queue_unlock(queue);
             raise_queue_closed();
         }
         if (!queue->bounded || queue->size < queue->limit) {
             if (queue->size == queue->storage_capacity && !queue_grow(queue)) {
-                pthread_mutex_unlock(&queue->lock);
+                queue_unlock(queue);
                 rb_memerror();
             }
             queue->values[queue->tail] = value;
             if (++queue->tail == queue->storage_capacity) queue->tail = 0;
             queue->size++;
             queue_update_readiness(queue);
-            pthread_mutex_unlock(&queue->lock);
+            queue_unlock(queue);
             return Qtrue;
         }
-        if (!queue_wait(queue, &queue->can_push, &queue->push_waiters, &timeout)) return Qfalse;
+        if (!queue_wait(self, queue, &queue->can_push, &queue->push_waiters, &timeout)) return Qfalse;
     }
 }
 
@@ -615,18 +686,18 @@ queue_push(int argc, VALUE *argv, VALUE self)
     }
 
     queue_t *queue = get_queue(self);
-    containers_check_shareable(value);
+    if (queue->shared) containers_check_shareable(value);
     queue_timeout_t timeout = parse_timeout(timeout_value);
-    return queue_push_with_timeout(queue, value, timeout);
+    return queue_push_with_timeout(self, queue, value, timeout);
 }
 
 static VALUE
 queue_try_push(VALUE self, VALUE value)
 {
     queue_t *queue = get_queue(self);
-    containers_check_shareable(value);
+    if (queue->shared) containers_check_shareable(value);
     queue_timeout_t timeout = {.finite = true, .deadline = 0};
-    return queue_push_with_timeout(queue, value, timeout);
+    return queue_push_with_timeout(self, queue, value, timeout);
 }
 
 static VALUE
@@ -635,17 +706,17 @@ queue_wait_pop(int argc, VALUE *argv, VALUE self)
     queue_t *queue = get_queue(self);
     queue_timeout_t timeout = parse_timeout(extract_timeout(argc, argv));
     for (;;) {
-        pthread_mutex_lock(&queue->lock);
+        queue_lock(queue);
         if (queue->closed) {
-            pthread_mutex_unlock(&queue->lock);
+            queue_unlock(queue);
             raise_queue_closed();
         }
         bool ready = queue->size > 0;
         if (ready) {
-            pthread_mutex_unlock(&queue->lock);
+            queue_unlock(queue);
             return Qtrue;
         }
-        if (!queue_wait(queue, &queue->can_pop, &queue->pop_waiters, &timeout)) return Qfalse;
+        if (!queue_wait(self, queue, &queue->can_pop, &queue->pop_waiters, &timeout)) return Qfalse;
     }
 }
 
@@ -655,17 +726,17 @@ queue_wait_push(int argc, VALUE *argv, VALUE self)
     queue_t *queue = get_queue(self);
     queue_timeout_t timeout = parse_timeout(extract_timeout(argc, argv));
     for (;;) {
-        pthread_mutex_lock(&queue->lock);
+        queue_lock(queue);
         if (queue->closed) {
-            pthread_mutex_unlock(&queue->lock);
+            queue_unlock(queue);
             raise_queue_closed();
         }
         bool ready = !queue->bounded || queue->size < queue->limit;
         if (ready) {
-            pthread_mutex_unlock(&queue->lock);
+            queue_unlock(queue);
             return Qtrue;
         }
-        if (!queue_wait(queue, &queue->can_push, &queue->push_waiters, &timeout)) return Qfalse;
+        if (!queue_wait(self, queue, &queue->can_push, &queue->push_waiters, &timeout)) return Qfalse;
     }
 }
 
@@ -677,6 +748,9 @@ containers_init_queue(VALUE namespace)
     eClosedQueueError = rb_const_get(rb_cObject, rb_intern("ClosedQueueError"));
     cQueue = rb_define_class_under(namespace, "Queue", rb_cObject);
     rb_define_alloc_func(cQueue, queue_allocate);
+    VALUE unshared = rb_define_class_under(namespace, "UnsharedQueue", cQueue);
+    rb_define_alloc_func(unshared, unshared_queue_allocate);
+    rb_define_method(unshared, "fiber_wait", unshared_queue_fiber_wait, 0);
     rb_define_method(cQueue, "initialize", queue_initialize, -1);
     rb_define_method(cQueue, "capacity", queue_capacity, 0);
     rb_define_method(cQueue, "size", queue_size, 0);

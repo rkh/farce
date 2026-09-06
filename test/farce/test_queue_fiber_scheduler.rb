@@ -31,7 +31,7 @@ module Farce
       Fiber.set_scheduler(nil)
 
       assert_equal %i[pop_started producer_ran value], events
-      assert_operator scheduler.io_wait_calls, :>=, 1
+      assert_coordination(scheduler)
     end
 
     def test_blocked_push_parks_only_the_current_fiber
@@ -50,13 +50,32 @@ module Farce
 
       assert_equal [:push_started, :first, true], events
       assert_equal :second, queue.pop
-      assert_operator scheduler.io_wait_calls, :>=, 1
+      assert_coordination(scheduler)
     end
 
     private def queue_class = Queue
+
+    private def assert_coordination(scheduler)
+      assert_operator scheduler.io_wait_calls, :>=, 1
+    end
   end
 
-  class TestStrictQueueFiberScheduler < TestQueueFiberScheduler
-    private def queue_class = StrictQueue
+  class TestStrictFIFOQueueFiberScheduler < TestQueueFiberScheduler
+    private def queue_class = Strict::Queue
+  end
+
+  class TestUnsharedQueueFiberScheduler < TestQueueFiberScheduler
+    private def queue_class = Unshared::Queue
+
+    private def assert_coordination(scheduler)
+      if Internal::UNSHARED_FIBER_IO
+        assert_operator scheduler.io_wait_calls, :>=, 1
+        return
+      end
+
+      assert_equal 0, scheduler.io_wait_calls
+      assert_operator scheduler.block_calls, :>=, 1
+      assert_operator scheduler.unblock_calls, :>=, 1
+    end
   end
 end
