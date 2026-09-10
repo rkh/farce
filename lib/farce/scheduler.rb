@@ -407,15 +407,14 @@ module Farce
 
     private
 
-    def setup(expected_state = :initialized, external_scheduler = nil)
+    def set_scheduler!(expected_state = :initialized, scheduler = nil)
       setup_owner(expected_state)
-      scheduler               = external_scheduler || @constructor&.call ||
-        Internal::FiberScheduler.new(backend: @backend)
+      scheduler             ||= @constructor&.call || Internal::FiberScheduler.new(backend: @backend)
       register                = Internal::Storage.store_if_absent(self.class) { Internal::Storage.new }
       register[scheduler]     = self
       Internal::Storage[self] = scheduler
       Fiber.set_scheduler(scheduler) unless Fiber.scheduler.equal?(scheduler)
-      scheduler
+      scheduler.fiber { dispatch { scheduler.fiber(&it) } }
     end
 
     def launch!(name, priority)
@@ -423,8 +422,7 @@ module Farce
       Thread.current.priority = priority if priority
 
       if Fiber.respond_to?(:set_scheduler)
-        setup(:launching)
-        dispatch { Fiber.schedule(&it) }
+        set_scheduler!(:launching)
       else
         setup_owner(:launching)
         group = ThreadGroup.new
@@ -433,11 +431,6 @@ module Farce
         dispatch { group.add(Thread.new(&it)) }
         group.list.each { it.join unless it.equal?(Thread.current) }
       end
-    end
-
-    def set_scheduler!(external_scheduler = nil)
-      scheduler = setup(:initialized, external_scheduler)
-      scheduler.fiber { dispatch { scheduler.fiber(&it) } }
     end
 
     def setup_owner(expected_state)

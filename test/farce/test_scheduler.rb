@@ -250,6 +250,22 @@ module Farce
       worker&.kill&.join
     end
 
+    def test_launch_thread_resumes_tasks_while_waiting_for_submissions
+      scheduler = Scheduler.new
+      result = Thread::Queue.new
+      worker = scheduler.launch_thread
+
+      scheduler.schedule(result) do |queue|
+        sleep 0.01
+        queue << :done
+      end
+
+      assert_equal :done, result.pop(timeout: 2)
+    ensure
+      scheduler&.close
+      worker&.kill&.join
+    end
+
     def test_launch_records_and_reraises_setup_failure
       return unless Fiber.respond_to?(:set_scheduler)
       scheduler = Scheduler.new { raise ArgumentError, "setup failed" }
