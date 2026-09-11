@@ -32,6 +32,7 @@ jobs:
             version: truffleruby-head
           - name: truffleruby+graalvm
             version: truffleruby+graalvm
+            test_timeout: 300
 
     steps:
       - uses: actions/checkout@v6
@@ -44,6 +45,7 @@ jobs:
       - run: bundle exec rake ci
         env:
           FARCE_VERIFY_GEMS: ${{ matrix.ruby.verify_gems || false }}
+          TEST_TIMEOUT: ${{ matrix.ruby.test_timeout || 120 }}
 
   windows:
     name: Windows / Ruby ${{ matrix.ruby }}
@@ -67,3 +69,5 @@ jobs:
           bundle install
 
       - run: bundle exec rake ci
+        env:
+          TEST_TIMEOUT: 300

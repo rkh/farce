@@ -214,6 +214,11 @@ module Farce
     end
 
     class TestUnsharedPriorityQueueStorageIOWaiting < TestUnsharedPriorityQueueStorageFiberScheduler
+      def setup
+        super
+        skip "IO-based fiber waiting is unavailable on Windows" if Gem.win_platform?
+      end
+
       private def fiber_wait = :io
     end
 

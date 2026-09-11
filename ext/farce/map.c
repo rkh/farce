@@ -43,7 +43,7 @@ typedef struct {
     bool compare_values_by_identity;
     bool comparing;
     VALUE comparing_owner;
-    pthread_t comparing_thread;
+    VALUE comparing_thread;
     bool updating;
     VALUE updating_fiber;
     VALUE updating_thread;
@@ -59,7 +59,6 @@ typedef struct {
     VALUE fiber;
     VALUE thread;
     VALUE scheduler;
-    pthread_t native_thread;
 } map_execution_context_t;
 
 /* Ruby's current Fiber/Thread accessors may allocate. Capture their values
@@ -72,7 +71,6 @@ map_current_execution_context(void)
         .fiber = rb_fiber_current(),
         .thread = rb_thread_current(),
         .scheduler = rb_fiber_scheduler_current(),
-        .native_thread = pthread_self(),
     };
     return context;
 }
@@ -153,6 +151,7 @@ map_mark(void *pointer)
 {
     map_t *map = pointer;
     rb_gc_mark_movable(map->comparing_owner);
+    rb_gc_mark_movable(map->comparing_thread);
     rb_gc_mark_movable(map->updating_fiber);
     rb_gc_mark_movable(map->updating_thread);
     if (!map->slots) return;
@@ -169,6 +168,7 @@ map_compact(void *pointer)
 {
     map_t *map = pointer;
     map->comparing_owner = rb_gc_location(map->comparing_owner);
+    map->comparing_thread = rb_gc_location(map->comparing_thread);
     map->updating_fiber = rb_gc_location(map->updating_fiber);
     map->updating_thread = rb_gc_location(map->updating_thread);
     if (!map->slots) return;
@@ -231,6 +231,7 @@ map_allocate(VALUE klass)
     map->compare_values_by_identity = false;
     map->comparing = false;
     map->comparing_owner = Qnil;
+    map->comparing_thread = Qnil;
     map->updating = false;
     map->updating_fiber = Qnil;
     map->updating_thread = Qnil;
@@ -367,8 +368,7 @@ map_lock_state(map_t *map, const map_execution_context_t *context)
             pthread_mutex_unlock(&map->lock);
             rb_raise(rb_eThreadError, "recursive map access from key equality");
         }
-        if (pthread_equal(map->comparing_thread, context->native_thread) &&
-            NIL_P(context->scheduler)) {
+        if (map->comparing_thread == context->thread && NIL_P(context->scheduler)) {
             pthread_mutex_unlock(&map->lock);
             rb_raise(
                 rb_eThreadError,
@@ -495,7 +495,7 @@ map_keys_equal(
 
     map->comparing = true;
     map->comparing_owner = context->fiber;
-    map->comparing_thread = context->native_thread;
+    map->comparing_thread = context->thread;
     pthread_mutex_unlock(&map->lock);
 
     VALUE result = rb_protect(map_eql_protected, (VALUE)&arguments, &state);
@@ -503,6 +503,7 @@ map_keys_equal(
     pthread_mutex_lock(&map->lock);
     map->comparing = false;
     map->comparing_owner = Qnil;
+    map->comparing_thread = Qnil;
     map_notify_waiters_locked(map);
     if (state) {
         pthread_mutex_unlock(&map->lock);

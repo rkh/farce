@@ -292,6 +292,10 @@ module Farce
   end
 
   class TestUnsharedQueueIOWaiting < TestUnsharedQueueWaiting
+    def setup
+      skip "IO-based fiber waiting is unavailable on Windows" if Gem.win_platform?
+    end
+
     private def fiber_wait = :io
   end
 

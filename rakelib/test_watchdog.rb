@@ -186,7 +186,7 @@ class TestWatchdog
 
   def force_terminate_tree
     if windows?
-      system("taskkill", "/PID", @pid.to_s, "/T", "/F", out: File::NULL, err: @output)
+      system("taskkill", "/PID", @pid.to_s, "/T", "/F", out: File::NULL, err: File::NULL)
     else
       Process.kill("KILL", -@pid)
     end
