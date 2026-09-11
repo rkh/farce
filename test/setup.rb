@@ -16,7 +16,7 @@ $LOAD_PATH.unshift(__dir__)
 require "minitest/autorun"
 require "minitest/reporters"
 
-Minitest::Reporters.use!
+Minitest::Reporters.use! unless Gem.win_platform?
 
 module Helpers
   Internal = Farce.const_get(:Internal, false)
