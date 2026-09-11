@@ -29,7 +29,7 @@ module Farce
     #   @abstract
     #   @return [Integer] The current number of items in the queue.
     #
-    # @!method initialize(capacity: 1024, mode: :copy)
+    # @!method initialize(capacity: 1024, mode: :copy, track_age: false)
     #   @abstract Subclasses may add additional parameters to this method.
     #   @!macro modes
     #   @param capacity [Integer, nil]
@@ -39,6 +39,7 @@ module Farce
     #     The default may vary for subclasses.
     #     Most notably, priority and timer queues default to `nil`.
     #   @param mode [Symbol] The default mode used to transfer values between Ractors.
+    #   @param track_age [Boolean] Whether to track enqueue age and queue generations.
     #
     # @!method clear
     #   @abstract
@@ -55,6 +56,14 @@ module Farce
     #   Checks whether the queue is closed.
     #   @return [Boolean] `true` if the queue is closed, `false` otherwise.
     #
+    # @!method seal
+    #   Stops new pushes while allowing queued items to be removed.
+    #   The queue closes automatically when it becomes empty.
+    #   @return [self]
+    #
+    # @!method sealed?
+    #   @return [Boolean] Whether the queue rejects new pushes.
+    #
     # @!method empty?
     #   @abstract
     #   Checks whether the queue is empty.
@@ -70,6 +79,7 @@ module Farce
     #     The maximum time to wait for an item to be available.
     #     If `nil`, the method will wait indefinitely.
     #     If `0`, the method will not wait at all.
+    #   @raise [Farce::Queue::ClosedError] when the queue is closed
     #   @raise [ThreadError] when the queue is empty and non_block is true
     #   @return [BasicObject, nil]
     #     The item taken from the queue, or the return value of the block or `nil` if the timeout expired.
@@ -90,6 +100,8 @@ module Farce
     #     If `0`, the method will not wait at all.
     #   @param mode [Symbol, nil]
     #     The mode used to transfer the value between Ractors, or `nil` to use the queue's default mode.
+    #   @raise [Farce::Queue::ClosedError] when the queue is closed
+    #   @raise [Farce::Queue::SealedError] when the queue is sealed but not yet closed
     #   @raise [ThreadError] when the queue is full and non_block is true
     #   @return [Boolean] `true` if the item was added to the queue
     #
@@ -109,6 +121,8 @@ module Farce
     #   @param mode [Symbol, nil]
     #     The mode used to transfer the value between Ractors, or `nil` to use the queue's default mode.
     #   @yield Block called if the queue is at capacity.
+    #   @raise [Farce::Queue::ClosedError] when the queue is closed
+    #   @raise [Farce::Queue::SealedError] when the queue is sealed but not yet closed
     #   @return [Boolean]
     #     `true` if the item was added to the queue, `false` if the queue was at capacity and no block was given.
     #
@@ -122,6 +136,7 @@ module Farce
     #     The maximum time to wait for an item to be available.
     #     If `nil`, the method will wait indefinitely.
     #     If `0`, the method will not wait at all.
+    #   @raise [Farce::Queue::ClosedError] when the queue is closed
     #   @return [Boolean] `true` if an item is available, `false` if the timeout expired.
     #
     # @!method wait_push(timeout: nil)
@@ -133,6 +148,8 @@ module Farce
     #     The maximum time to wait for space to be available.
     #     If `nil`, the method will wait indefinitely.
     #     If `0`, the method will not wait at all.
+    #   @raise [Farce::Queue::ClosedError] when the queue is closed
+    #   @raise [Farce::Queue::SealedError] when the queue is sealed but not yet closed
     #   @return [Boolean] `true` if space is available, `false` if the timeout expired.
     class Queue
       # The default mode used to transfer values between Ractors.
@@ -192,7 +209,28 @@ module Farce
         self
       end
 
+      # Stop new pushes and close after the final queued item is removed.
+      # @return [self]
+      def seal
+        @queue.seal
+        self
+      end
+
       def closed? = @queue.closed?
+      def sealed? = @queue.sealed?
+
+      # @return [Boolean] Whether enqueue-age tracking is enabled.
+      def age_tracking? = @queue.age_tracking?
+
+      # @return [Integer, nil] The mutation generation, or `nil` when tracking is disabled.
+      def generation = @queue.generation
+
+      # The timestamp is monotonic. Its origin is runtime-specific.
+      # @return [Float, nil] The monotonic enqueue time of the oldest item.
+      def oldest_enqueued_at = @queue.oldest_enqueued_at
+
+      # @return [Float, nil] Seconds since the oldest item was enqueued.
+      def oldest_age = @queue.oldest_age
 
       def empty? = size.zero?
 

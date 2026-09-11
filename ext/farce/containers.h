@@ -25,6 +25,7 @@ void containers_init_flag(VALUE namespace);
 void containers_init_lock(VALUE namespace);
 void containers_init_map(VALUE namespace);
 void containers_init_priority_queue(VALUE namespace);
+void containers_init_darwin(VALUE namespace);
 void containers_init_queue(VALUE namespace);
 void containers_init_signal(VALUE namespace);
 

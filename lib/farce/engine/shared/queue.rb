@@ -9,10 +9,12 @@ module Farce
       NIL_VALUE = Object.new.freeze
       attr_reader :capacity
 
-      def initialize(capacity: 1024)
+      def initialize(capacity: 1024, track_age: false)
         @queue    = capacity ? Thread::SizedQueue.new(capacity) : Thread::Queue.new
         @capacity = capacity
         @signal   = Signal.new
+        @tracking = track_age ? { lock: Mutex.new, timestamps: [], generation: 0 } : nil
+        @lifecycle = { lock: Mutex.new, hard_closed: false }
         freeze
       end
 
@@ -21,13 +23,14 @@ module Farce
         # Observing an empty queue is sufficient for a nonblocking miss. Avoid
         # constructing a ThreadError (and its backtrace) just to return nil.
         if timeout_at&.zero? && @queue.empty?
-          raise ClosedQueueError, "queue closed" if closed?
+          raise_closed if closed?
           return block_given? ? yield : nil
         end
 
         while true
           begin
-            result = @queue.pop(true)
+            result = tracked_pop
+            raise ThreadError if result.nil? && @queue.closed?
             broadcast
             return NIL_VALUE.equal?(result) ? nil : result
           rescue ThreadError
@@ -42,19 +45,19 @@ module Farce
         item = NIL_VALUE if item.nil?
 
         unless capacity
-          @queue.push(item)
+          tracked_push(item)
           broadcast
           return true
         end
 
         timeout_at = timeout_at(timeout)
         if timeout_at&.zero? && @queue.size >= @queue.max
-          raise ClosedQueueError, "queue closed" if closed?
+          raise_unwritable if sealed?
           return false
         end
         while true
           begin
-            @queue.push(item, true)
+            tracked_push(item, non_block: true)
             broadcast
             return true
           rescue ThreadError
@@ -70,31 +73,107 @@ module Farce
       def try_push(item) = push(item, timeout: 0)
 
       def wait_push(timeout: nil)
-        raise ClosedQueueError, "queue closed" if closed?
+        raise_unwritable if sealed?
         return true unless capacity
-        wait(timeout) { size < capacity }
+        wait(timeout) do
+          raise_unwritable if sealed?
+          size < capacity
+        end
       end
 
       def close
-        @queue.close
+        @lifecycle[:lock].synchronize do
+          changed = !@lifecycle[:hard_closed]
+          @lifecycle[:hard_closed] = true
+          @queue.close
+          bump_generation if changed
+        end
+        broadcast
+        self
+      end
+
+      def seal
+        @lifecycle[:lock].synchronize do
+          changed = !@queue.closed?
+          @queue.close
+          bump_generation if changed
+        end
         broadcast
         self
       end
 
       def clear
-        @queue.clear
+        if @tracking
+          @tracking[:lock].synchronize do
+            changed = @queue.size.positive?
+            @queue.clear
+            @tracking[:timestamps].clear
+            @tracking[:generation] += 1 if changed
+          end
+        else
+          @queue.clear
+        end
         broadcast
         self
       end
 
       def num_waiting = @queue.num_waiting + @signal.num_waiting
 
-      Internal.delegate(self, :@queue, :closed?, :size)
+      Internal.delegate(self, :@queue, :size)
+
+      def sealed? = @queue.closed?
+
+      def closed?
+        @lifecycle[:hard_closed] || (@queue.closed? && @queue.empty?)
+      end
+
+      def age_tracking? = !@tracking.nil?
+      def generation = @tracking && @tracking[:lock].synchronize { @tracking[:generation] }
+
+      def oldest_enqueued_at
+        @tracking && @tracking[:lock].synchronize { @tracking[:timestamps].first }
+      end
+
+      def oldest_age
+        timestamp = oldest_enqueued_at
+        Process.clock_gettime(Process::CLOCK_MONOTONIC) - timestamp if timestamp
+      end
 
       private
 
       def check_value(item)
         raise Ractor::IsolationError, "value is not Ractor-shareable" unless Ractor.shareable?(item)
+      end
+
+      def tracked_push(item, non_block: false)
+        if @tracking
+          @tracking[:lock].synchronize do
+            result = @queue.push(item, non_block)
+            @tracking[:timestamps] << Process.clock_gettime(Process::CLOCK_MONOTONIC)
+            @tracking[:generation] += 1
+            result
+          end
+        else
+          @queue.push(item, non_block)
+        end
+      rescue ::ClosedQueueError
+        raise_unwritable
+      end
+
+      def tracked_pop
+        return @queue.pop(true) unless @tracking
+        @tracking[:lock].synchronize do
+          result = @queue.pop(true)
+          unless result.nil? && @queue.closed?
+            @tracking[:timestamps].shift
+            @tracking[:generation] += 1
+          end
+          result
+        end
+      end
+
+      def bump_generation
+        @tracking[:lock].synchronize { @tracking[:generation] += 1 } if @tracking
       end
 
       def normalize_timeout(timeout)
@@ -111,16 +190,26 @@ module Farce
 
         if timeout_at&.zero?
           return true if yield
-          raise ClosedQueueError, "queue closed" if closed?
+          raise_closed if closed?
           return false
         end
 
         while true
           generation = @signal.generation
           return true if yield
-          raise ClosedQueueError, "queue closed" if closed?
+          raise_closed if closed?
           return false unless @signal.wait(generation, timeout: remaining_timeout(timeout_at))
         end
+      end
+
+      def raise_closed
+        raise ::Farce::Queue::ClosedError, "queue is closed"
+      end
+
+      def raise_unwritable
+        closed = closed?
+        error = closed ? ::Farce::Queue::ClosedError : ::Farce::Queue::SealedError
+        raise error, closed ? "queue is closed" : "queue is sealed"
       end
 
       def timeout_at(timeout)

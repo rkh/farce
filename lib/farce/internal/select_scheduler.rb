@@ -116,6 +116,7 @@ module Farce
       end
 
       def ready? = !@ready.empty?
+      def scheduler_ready_count = @ready.size
       def pending? = !@waits.empty?
       def pending_count = @wait_mutex.synchronize { @waits.size }
 

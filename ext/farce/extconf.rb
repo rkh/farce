@@ -15,10 +15,18 @@ end
 
 have_func("clock_gettime", "time.h")
 
+if have_header("pthread/qos.h")
+  have_func("pthread_set_qos_class_self_np", "pthread/qos.h")
+  have_func("pthread_get_qos_class_np", "pthread/qos.h")
+  have_func("qos_class_main", "pthread/qos.h")
+end
+
+have_func("sysctlbyname", "sys/sysctl.h") if have_header("sys/sysctl.h")
+
 epoll = have_header("sys/epoll.h")
 kqueue = have_header("sys/event.h")
 $srcs = %w[
-  atom.c counter.c dict.c exchanger.c farce.c flag.c lock.c map.c priority_queue.c
+  atom.c counter.c darwin.c dict.c exchanger.c farce.c flag.c lock.c map.c priority_queue.c
   queue.c signal.c tree_map.c unshareable.c unshared_signal.c vector.c weak_map.c
 ]
 $srcs.concat(epoll || kqueue ? %w[drivers.c io.c reactor.c] : ["unsupported.c"])

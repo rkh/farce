@@ -54,7 +54,9 @@ queues = {
   "Thread::Queue"          => -> { Thread::Queue.new },
   "Thread::SizedQueue"     => -> { Thread::SizedQueue.new(1024) },
   "Farce::Queue"           => -> { Farce::Queue.new },
+  "Farce::Queue tracked"   => -> { Farce::Queue.new(track_age: true) },
   "Farce::Strict::Queue"   => -> { Farce::Strict::Queue.new },
+  "Farce::Strict tracked"  => -> { Farce::Strict::Queue.new(track_age: true) },
   "Farce::Unshared::Queue" => -> { Farce::Unshared::Queue.new },
 }
 

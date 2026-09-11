@@ -8,8 +8,8 @@ module Farce
     class Queue < Abstract::Queue
       include Shareable
 
-      def initialize(capacity: 1024)
-        @queue = Internal::Queue.new(capacity:)
+      def initialize(capacity: 1024, track_age: false)
+        @queue = Internal::Queue.new(capacity:, track_age:)
         super()
       end
     end

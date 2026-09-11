@@ -19,18 +19,30 @@ module Farce
         self
       end
 
+      # Stop new pushes and close after the final value is removed.
+      def seal
+        @queue.seal
+        self
+      end
+
       # Wait until capacity is available without adding a value.
       def wait_push(timeout: nil)
-        raise ClosedQueueError, "queue closed" if closed?
+        raise_unwritable if sealed?
         return true unless capacity
 
-        wait(timeout) { size < capacity }
+        wait(timeout) do
+          raise_unwritable if sealed?
+          size < capacity
+        end
       end
 
       # The approximate number of waiting execution contexts.
       def num_waiting = @signal.num_waiting
 
-      Internal.delegate(self, :@queue, :capacity, :closed?, :empty?, :size)
+      Internal.delegate(
+        self, :@queue, :age_tracking?, :capacity, :closed?, :empty?, :generation,
+        :oldest_age, :oldest_enqueued_at, :sealed?, :size,
+      )
 
       private
 
@@ -38,10 +50,10 @@ module Farce
         raise TypeError, "priority queues cannot be copied"
       end
 
-      def initialize(capacity:, reverse_order: false)
+      def initialize(capacity:, reverse_order: false, track_age: false)
         @reverse_order = reverse_order
         @signal        = queue_signal
-        @queue         = queue_storage_class.new(capacity:, signal: @signal)
+        @queue         = queue_storage_class.new(capacity:, signal: @signal, track_age:)
         super()
       end
 
@@ -82,10 +94,16 @@ module Farce
 
         while true
           generation = @signal.generation
-          raise ClosedQueueError, "queue closed" if closed?
+          raise ::Farce::Queue::ClosedError, "queue is closed" if closed?
           return true if yield
           return false unless @signal.wait(generation, timeout: remaining_timeout(deadline))
         end
+      end
+
+      def raise_unwritable
+        closed = closed?
+        error = closed ? ::Farce::Queue::ClosedError : ::Farce::Queue::SealedError
+        raise error, closed ? "queue is closed" : "queue is sealed"
       end
 
       def timeout_at(timeout)

@@ -157,6 +157,9 @@ module Farce
       def idle? = @fibers.empty? && !pending? && @timers.empty? && @mailbox.empty?
       def closed? = @closed
 
+      # Return a lower bound for fibers that can resume immediately.
+      def farce_runnable_count = scheduler_ready_count + @mailbox.size
+
       # Stop admission immediately. An active driver owns the drain and releases
       # resources after returning from dispatch. Destroying them here would leave
       # its native stack referring to freed state.

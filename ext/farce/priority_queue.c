@@ -14,6 +14,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "dict.h"
@@ -65,6 +67,13 @@ struct priority_queue_value {
     priority_queue_value_t *next;
     priority_queue_value_t *identity_next;
 };
+
+typedef struct priority_queue_tracked_value {
+    priority_queue_value_t value;
+    double enqueued_at;
+    struct priority_queue_tracked_value *age_previous;
+    struct priority_queue_tracked_value *age_next;
+} priority_queue_tracked_value_t;
 
 typedef struct {
     VALUE identity;
@@ -363,8 +372,13 @@ typedef struct {
     containers_unshared_signal_t *unshared_signal;
     size_t size;
     size_t capacity;
+    priority_queue_tracked_value_t *age_head;
+    priority_queue_tracked_value_t *age_tail;
+    uint64_t generation;
     bool bounded;
+    bool sealed;
     bool closed;
+    bool track_age;
     /* Only homogeneous built-in numeric keys can reuse an insertion search
      * across notification. Mixed/custom comparisons retain the two-pass path. */
     bool numeric_only;
@@ -375,11 +389,54 @@ typedef struct {
 } priority_queue_t;
 
 static VALUE cPriorityQueue;
-static VALUE eClosedQueueError;
 static VALUE eIsolationError;
+static ID id_farce;
+static ID id_public_queue;
+static ID id_closed_error;
+static ID id_sealed_error;
 static ID id_compare;
 static ID id_broadcast;
 static ID id_case_equal;
+
+static double
+priority_queue_monotonic_now(void)
+{
+    struct timespec now;
+#ifdef CLOCK_MONOTONIC
+    if (clock_gettime(CLOCK_MONOTONIC, &now) == 0) {
+        return (double)now.tv_sec + (double)now.tv_nsec / 1000000000.0;
+    }
+#endif
+    struct timeval fallback;
+    gettimeofday(&fallback, NULL);
+    return (double)fallback.tv_sec + (double)fallback.tv_usec / 1000000.0;
+}
+
+static void
+priority_queue_track_push(priority_queue_t *queue, priority_queue_value_t *value)
+{
+    if (!queue->track_age) return;
+    priority_queue_tracked_value_t *tracked = (priority_queue_tracked_value_t *)value;
+    tracked->enqueued_at = priority_queue_monotonic_now();
+    tracked->age_previous = queue->age_tail;
+    tracked->age_next = NULL;
+    if (queue->age_tail) queue->age_tail->age_next = tracked;
+    else queue->age_head = tracked;
+    queue->age_tail = tracked;
+    queue->generation++;
+}
+
+static void
+priority_queue_track_remove(priority_queue_t *queue, priority_queue_value_t *value)
+{
+    if (!queue->track_age) return;
+    priority_queue_tracked_value_t *tracked = (priority_queue_tracked_value_t *)value;
+    if (tracked->age_previous) tracked->age_previous->age_next = tracked->age_next;
+    else queue->age_head = tracked->age_next;
+    if (tracked->age_next) tracked->age_next->age_previous = tracked->age_previous;
+    else queue->age_tail = tracked->age_previous;
+    queue->generation++;
+}
 
 static void priority_queue_wait_for_publication(priority_queue_t *queue);
 
@@ -568,7 +625,8 @@ priority_queue_memsize(const void *pointer)
     if (!queue) return 0;
     size = sizeof(priority_queue_t)
         + (size_t)dict_count((dict_t *)&queue->tree) * sizeof(priority_queue_bucket_t)
-        + queue->size * sizeof(priority_queue_value_t);
+        + queue->size * (queue->track_age ?
+            sizeof(priority_queue_tracked_value_t) : sizeof(priority_queue_value_t));
     for (node = dict_first((dict_t *)&queue->tree);
          node;
          node = dict_next((dict_t *)&queue->tree, node)) {
@@ -1036,7 +1094,18 @@ RBIMPL_ATTR_NORETURN()
 static void
 priority_queue_raise_closed(void)
 {
-    rb_raise(eClosedQueueError, "queue is closed");
+    VALUE farce = rb_const_get(rb_cObject, id_farce);
+    VALUE queue = rb_const_get(farce, id_public_queue);
+    rb_raise(rb_const_get(queue, id_closed_error), "queue is closed");
+}
+
+RBIMPL_ATTR_NORETURN()
+static void
+priority_queue_raise_sealed(void)
+{
+    VALUE farce = rb_const_get(rb_cObject, id_farce);
+    VALUE queue = rb_const_get(farce, id_public_queue);
+    rb_raise(rb_const_get(queue, id_sealed_error), "queue is sealed");
 }
 
 typedef struct {
@@ -1045,6 +1114,7 @@ typedef struct {
     VALUE signal;
     size_t capacity;
     bool bounded;
+    bool track_age;
 } priority_queue_initialize_t;
 
 static void
@@ -1148,6 +1218,7 @@ priority_queue_initialize_commit(VALUE opaque)
     queue->unshared_fiber_io = fiber_io;
     queue->bounded = initialization->bounded;
     queue->capacity = initialization->capacity;
+    queue->track_age = initialization->track_age;
     queue->signal = initialization->signal;
     /* Publication installs its logical gate before primitive freezing and
      * keeps that whole transition under nested ensure cleanup. */
@@ -1161,8 +1232,8 @@ static VALUE
 priority_queue_initialize(int argc, VALUE *argv, VALUE self)
 {
     VALUE keywords = Qnil;
-    VALUE keyword_values[2] = {Qundef, Qundef};
-    ID keyword_ids[] = {rb_intern("capacity"), rb_intern("signal")};
+    VALUE keyword_values[3] = {Qundef, Qundef, Qundef};
+    ID keyword_ids[] = {rb_intern("capacity"), rb_intern("signal"), rb_intern("track_age")};
     priority_queue_t *queue = priority_queue_get_raw(self);
     priority_queue_initialize_t initialization = {
         .queue = queue,
@@ -1173,7 +1244,7 @@ priority_queue_initialize(int argc, VALUE *argv, VALUE self)
     };
     rb_scan_args(argc, argv, "0:", &keywords);
     if (!NIL_P(keywords)) {
-        rb_get_kwargs(keywords, keyword_ids, 0, 2, keyword_values);
+        rb_get_kwargs(keywords, keyword_ids, 0, 3, keyword_values);
     }
     priority_queue_check_initializable(self, queue);
 
@@ -1199,6 +1270,7 @@ priority_queue_initialize(int argc, VALUE *argv, VALUE self)
         }
         initialization.signal = keyword_values[1];
     }
+    initialization.track_age = keyword_values[2] != Qundef && RTEST(keyword_values[2]);
 
     /* Capacity coercion and signal inspection can invoke arbitrary Ruby. A
      * sibling Fiber may pause there, then be resumed while another initializer
@@ -1264,6 +1336,7 @@ priority_queue_push_body(VALUE opaque)
          FIXNUM_P(push->priority) == FIXNUM_P((VALUE)dnode_getkey(queue->tree.dict_nilnode.dict_left)));
 
     if (queue->closed) priority_queue_raise_closed();
+    if (queue->sealed) priority_queue_raise_sealed();
     if (queue->bounded && queue->size >= queue->capacity) return Qfalse;
 
     if (reuse_position && !FIXNUM_P(push->priority)) {
@@ -1290,7 +1363,7 @@ priority_queue_push_body(VALUE opaque)
     if (node) {
         bucket = (priority_queue_bucket_t *)node;
         priority_queue_identity_index_prepare_insert(bucket->identity_index, push->value);
-        entry = malloc(sizeof(priority_queue_value_t));
+        entry = calloc(1, queue->track_age ? sizeof(priority_queue_tracked_value_t) : sizeof(priority_queue_value_t));
         if (!entry) rb_memerror();
         entry->value = push->value;
         entry->previous = bucket->tail;
@@ -1300,7 +1373,7 @@ priority_queue_push_body(VALUE opaque)
     }
     else {
         bucket = calloc(1, sizeof(priority_queue_bucket_t));
-        entry = malloc(sizeof(priority_queue_value_t));
+        entry = calloc(1, queue->track_age ? sizeof(priority_queue_tracked_value_t) : sizeof(priority_queue_value_t));
         if (!bucket || !entry) {
             free(bucket);
             free(entry);
@@ -1342,6 +1415,7 @@ priority_queue_push_body(VALUE opaque)
         push->pending_bucket = NULL;
         if (!reuse_position) queue->numeric_only = false;
         queue->size++;
+        priority_queue_track_push(queue, entry);
         return Qtrue;
     }
 
@@ -1352,6 +1426,7 @@ priority_queue_push_body(VALUE opaque)
     bucket->size++;
     priority_queue_identity_index_add(bucket->identity_index, entry);
     queue->size++;
+    priority_queue_track_push(queue, entry);
     push->pending_entry = NULL;
     return Qtrue;
 }
@@ -1461,8 +1536,12 @@ priority_queue_read_body(VALUE opaque)
     priority_queue_notify_before_commit(queue);
     priority_queue_identity_index_remove(bucket->identity_index, entry);
     priority_queue_bucket_unlink(bucket, entry);
+    priority_queue_track_remove(queue, entry);
     free(entry);
-    if (--queue->size == 0) queue->numeric_only = true;
+    if (--queue->size == 0) {
+        queue->numeric_only = true;
+        if (queue->sealed) queue->closed = true;
+    }
     if (bucket->size == 0) dict_delete_free(&queue->tree, node);
     return read->result;
 }
@@ -1590,8 +1669,12 @@ priority_queue_delete_body(VALUE opaque)
         priority_queue_notify_before_commit(queue);
         priority_queue_identity_index_remove(bucket->identity_index, entry);
         priority_queue_bucket_unlink(bucket, entry);
+        priority_queue_track_remove(queue, entry);
         free(entry);
-        if (--queue->size == 0) queue->numeric_only = true;
+        if (--queue->size == 0) {
+            queue->numeric_only = true;
+            if (queue->sealed) queue->closed = true;
+        }
         if (bucket->size == 0) dict_delete_free(&queue->tree, node);
         return Qtrue;
     }
@@ -1670,8 +1753,12 @@ priority_queue_delete_identity_body(VALUE opaque)
     priority_queue_notify_before_commit(queue);
     priority_queue_identity_index_remove(bucket->identity_index, entry);
     priority_queue_bucket_unlink(bucket, entry);
+    priority_queue_track_remove(queue, entry);
     free(entry);
-    if (--queue->size == 0) queue->numeric_only = true;
+    if (--queue->size == 0) {
+        queue->numeric_only = true;
+        if (queue->sealed) queue->closed = true;
+    }
     if (bucket->size == 0) dict_delete_free(&queue->tree, node);
     return Qtrue;
 }
@@ -1746,9 +1833,35 @@ priority_queue_clear_body(VALUE opaque)
     priority_queue_self_operation_t *operation = (priority_queue_self_operation_t *)opaque;
     priority_queue_notify_before_commit(operation->queue);
     dict_free_nodes(&operation->queue->tree);
+    if (operation->queue->size > 0 && operation->queue->track_age) operation->queue->generation++;
     operation->queue->size = 0;
+    operation->queue->age_head = NULL;
+    operation->queue->age_tail = NULL;
     operation->queue->numeric_only = true;
+    if (operation->queue->sealed) operation->queue->closed = true;
     return operation->self;
+}
+
+static VALUE
+priority_queue_seal_body(VALUE opaque)
+{
+    priority_queue_self_operation_t *operation = (priority_queue_self_operation_t *)opaque;
+    if (!operation->queue->sealed) {
+        priority_queue_notify_before_commit(operation->queue);
+        operation->queue->sealed = true;
+        if (operation->queue->track_age) operation->queue->generation++;
+        if (operation->queue->size == 0) operation->queue->closed = true;
+    }
+    return operation->self;
+}
+
+static VALUE
+priority_queue_seal(VALUE self)
+{
+    priority_queue_t *queue = priority_queue_get(self);
+    priority_queue_self_operation_t operation = {.queue = queue, .self = self};
+    if (priority_queue_can_run_direct(queue)) return priority_queue_seal_body((VALUE)&operation);
+    return priority_queue_call(queue, priority_queue_seal_body, (VALUE)&operation);
 }
 
 static VALUE
@@ -1769,6 +1882,8 @@ priority_queue_close_body(VALUE opaque)
 {
     priority_queue_self_operation_t *operation = (priority_queue_self_operation_t *)opaque;
     priority_queue_notify_before_commit(operation->queue);
+    if (!operation->queue->closed && operation->queue->track_age) operation->queue->generation++;
+    operation->queue->sealed = true;
     operation->queue->closed = true;
     return operation->self;
 }
@@ -1807,6 +1922,81 @@ priority_queue_closed(VALUE self)
 }
 
 static VALUE
+priority_queue_sealed_body(VALUE opaque)
+{
+    priority_queue_self_operation_t *operation = (priority_queue_self_operation_t *)opaque;
+    return operation->queue->sealed ? Qtrue : Qfalse;
+}
+
+static VALUE
+priority_queue_sealed(VALUE self)
+{
+    priority_queue_t *queue = priority_queue_get(self);
+    priority_queue_self_operation_t operation = {.queue = queue, .self = self};
+    if (priority_queue_can_run_direct(queue)) return priority_queue_sealed_body((VALUE)&operation);
+    return priority_queue_call(queue, priority_queue_sealed_body, (VALUE)&operation);
+}
+
+static VALUE
+priority_queue_age_tracking(VALUE self)
+{
+    return priority_queue_get(self)->track_age ? Qtrue : Qfalse;
+}
+
+static VALUE
+priority_queue_generation_body(VALUE opaque)
+{
+    priority_queue_self_operation_t *operation = (priority_queue_self_operation_t *)opaque;
+    return ULL2NUM(operation->queue->generation);
+}
+
+static VALUE
+priority_queue_generation(VALUE self)
+{
+    priority_queue_t *queue = priority_queue_get(self);
+    if (!queue->track_age) return Qnil;
+    priority_queue_self_operation_t operation = {.queue = queue, .self = self};
+    if (priority_queue_can_run_direct(queue)) return priority_queue_generation_body((VALUE)&operation);
+    return priority_queue_call(queue, priority_queue_generation_body, (VALUE)&operation);
+}
+
+static VALUE
+priority_queue_oldest_body(VALUE opaque)
+{
+    priority_queue_self_operation_t *operation = (priority_queue_self_operation_t *)opaque;
+    priority_queue_tracked_value_t *head = operation->queue->age_head;
+    return head ? DBL2NUM(head->enqueued_at) : Qnil;
+}
+
+static VALUE
+priority_queue_oldest_enqueued_at(VALUE self)
+{
+    priority_queue_t *queue = priority_queue_get(self);
+    if (!queue->track_age) return Qnil;
+    priority_queue_self_operation_t operation = {.queue = queue, .self = self};
+    if (priority_queue_can_run_direct(queue)) return priority_queue_oldest_body((VALUE)&operation);
+    return priority_queue_call(queue, priority_queue_oldest_body, (VALUE)&operation);
+}
+
+static VALUE
+priority_queue_oldest_age_body(VALUE opaque)
+{
+    priority_queue_self_operation_t *operation = (priority_queue_self_operation_t *)opaque;
+    priority_queue_tracked_value_t *head = operation->queue->age_head;
+    return head ? DBL2NUM(priority_queue_monotonic_now() - head->enqueued_at) : Qnil;
+}
+
+static VALUE
+priority_queue_oldest_age(VALUE self)
+{
+    priority_queue_t *queue = priority_queue_get(self);
+    if (!queue->track_age) return Qnil;
+    priority_queue_self_operation_t operation = {.queue = queue, .self = self};
+    if (priority_queue_can_run_direct(queue)) return priority_queue_oldest_age_body((VALUE)&operation);
+    return priority_queue_call(queue, priority_queue_oldest_age_body, (VALUE)&operation);
+}
+
+static VALUE
 priority_queue_capacity(VALUE self)
 {
     priority_queue_t *queue = priority_queue_get(self);
@@ -1833,7 +2023,13 @@ priority_queue_define_methods(VALUE klass)
     rb_define_method(klass, "empty?", priority_queue_empty, 0);
     rb_define_method(klass, "clear", priority_queue_clear, 0);
     rb_define_method(klass, "close", priority_queue_close, 0);
+    rb_define_method(klass, "seal", priority_queue_seal, 0);
     rb_define_method(klass, "closed?", priority_queue_closed, 0);
+    rb_define_method(klass, "sealed?", priority_queue_sealed, 0);
+    rb_define_method(klass, "age_tracking?", priority_queue_age_tracking, 0);
+    rb_define_method(klass, "generation", priority_queue_generation, 0);
+    rb_define_method(klass, "oldest_enqueued_at", priority_queue_oldest_enqueued_at, 0);
+    rb_define_method(klass, "oldest_age", priority_queue_oldest_age, 0);
     rb_define_method(klass, "capacity", priority_queue_capacity, 0);
 }
 
@@ -1846,7 +2042,10 @@ containers_init_priority_queue(VALUE namespace)
     id_compare = rb_intern("<=>");
     id_broadcast = rb_intern("broadcast");
     id_case_equal = rb_intern("===");
-    eClosedQueueError = rb_const_get(rb_cObject, rb_intern("ClosedQueueError"));
+    id_farce = rb_intern("Farce");
+    id_public_queue = rb_intern("Queue");
+    id_closed_error = rb_intern("ClosedError");
+    id_sealed_error = rb_intern("SealedError");
     ractor = rb_const_get(rb_cObject, id_ractor);
     eIsolationError = rb_const_get(ractor, rb_intern("IsolationError"));
 

@@ -19,10 +19,10 @@ module Farce
       # @param default_priority [BasicObject] the priority used when push or
       #   try_push is called without an explicit priority
       # @param order [:ascending, :descending] the priority order
-      def initialize(capacity: nil, default_priority: 0, order: :ascending)
+      def initialize(capacity: nil, default_priority: 0, order: :ascending, track_age: false)
         @order            = normalize_order(order)
         @default_priority = default_priority
-        super(capacity:, reverse_order: @order == :descending)
+        super(capacity:, reverse_order: @order == :descending, track_age:)
       end
 
       # Return the next value without removing it.

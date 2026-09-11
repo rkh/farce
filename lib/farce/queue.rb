@@ -5,13 +5,21 @@
 module Farce
   # A shareable FIFO queue with transfer modes for unshareable values.
   class Queue < Abstract::Queue
+    # Raised when an operation cannot proceed because the queue is closed.
+    class ClosedError < ::ClosedQueueError
+    end
+
+    # Raised when a push cannot proceed because the queue is sealed.
+    class SealedError < ClosedError
+    end
+
     include Internal::ManagedQueue
     include Shareable
 
     # @!macro modes
-    def initialize(capacity: 1024, mode: :copy)
+    def initialize(capacity: 1024, mode: :copy, track_age: false)
       @manager = ModeManager.new(mode:)
-      @queue = Internal::Queue.new(capacity:)
+      @queue = Internal::Queue.new(capacity:, track_age:)
       super()
     end
 

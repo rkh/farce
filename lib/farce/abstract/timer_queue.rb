@@ -9,7 +9,7 @@ module Farce
       include Internal::BlockingPriorityQueue
 
       # @param capacity [Integer, nil] the maximum number of values, or nil for an unbounded queue
-      def initialize(capacity: nil)
+      def initialize(capacity: nil, track_age: false)
         super
       end
 

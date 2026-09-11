@@ -13,6 +13,7 @@ module JavaExtension
     org/farce/PriorityQueue$Bucket.class
     org/farce/PriorityQueue$Entry.class
     org/farce/PriorityQueue$Failure.class
+    org/farce/PriorityQueue$TrackedEntry.class
     org/farce/PriorityQueue.class
     org/farce/QueueSignal.class
   ].freeze

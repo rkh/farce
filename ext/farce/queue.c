@@ -11,7 +11,10 @@
 #include <unistd.h>
 
 static VALUE cQueue;
-static VALUE eClosedQueueError;
+static ID id_farce;
+static ID id_public_queue;
+static ID id_closed_error;
+static ID id_sealed_error;
 static ID id_timeout;
 
 #define QUEUE_INITIAL_CAPACITY 16
@@ -26,6 +29,7 @@ typedef struct {
 typedef struct {
     pthread_mutex_t lock;
     VALUE *values;
+    double *enqueued_at;
     size_t storage_capacity;
     size_t limit;
     size_t size;
@@ -38,7 +42,10 @@ typedef struct {
     farce_unshared_wait_list_t unshared_pop_waiters;
     farce_unshared_wait_list_t unshared_push_waiters;
     bool bounded;
+    bool sealed;
     bool closed;
+    bool track_age;
+    uint64_t generation;
     bool initialized;
     bool shared;
     bool unshared_fiber_io;
@@ -113,7 +120,7 @@ queue_update_readiness(queue_t *queue)
         if (queue->closed || queue->size > 0) {
             farce_unshared_wait_notify_all(&queue->unshared_pop_waiters);
         }
-        if (queue->closed || !queue->bounded || queue->size < queue->limit) {
+        if (queue->sealed || !queue->bounded || queue->size < queue->limit) {
             farce_unshared_wait_notify_all(&queue->unshared_push_waiters);
         }
     }
@@ -124,7 +131,7 @@ queue_update_readiness(queue_t *queue)
     readiness_set(
         &queue->can_push,
         queue->push_waiters > 0 &&
-            (queue->closed || !queue->bounded || queue->size < queue->limit)
+            (queue->sealed || !queue->bounded || queue->size < queue->limit)
     );
     if (!queue->shared) {
         /* Keep the slow path until both waiter mechanisms and every pending
@@ -168,6 +175,7 @@ queue_free(void *pointer)
     queue_t *queue = pointer;
     if (queue->shared) pthread_mutex_destroy(&queue->lock);
     free(queue->values);
+    free(queue->enqueued_at);
     if (queue->can_pop.read_fd >= 0) close(queue->can_pop.read_fd);
     if (queue->can_pop.write_fd >= 0) close(queue->can_pop.write_fd);
     if (queue->can_push.read_fd >= 0) close(queue->can_push.read_fd);
@@ -179,7 +187,8 @@ static size_t
 queue_memsize(const void *pointer)
 {
     const queue_t *queue = pointer;
-    return queue ? sizeof(queue_t) + queue->storage_capacity * sizeof(VALUE) : 0;
+    return queue ? sizeof(queue_t) + queue->storage_capacity *
+        (sizeof(VALUE) + (queue->track_age ? sizeof(double) : 0)) : 0;
 }
 
 static const rb_data_type_t queue_type = {
@@ -223,6 +232,7 @@ queue_allocate_type(VALUE klass, bool shared)
     VALUE object = TypedData_Make_Struct(klass, queue_t, shared ? &queue_type : &unshared_queue_type, queue);
     if (shared) pthread_mutex_init(&queue->lock, NULL);
     queue->values = NULL;
+    queue->enqueued_at = NULL;
     queue->storage_capacity = 0;
     queue->limit = 0;
     queue->size = 0;
@@ -235,7 +245,10 @@ queue_allocate_type(VALUE klass, bool shared)
     queue->unshared_pop_waiters = (farce_unshared_wait_list_t){0};
     queue->unshared_push_waiters = (farce_unshared_wait_list_t){0};
     queue->bounded = true;
+    queue->sealed = false;
     queue->closed = false;
+    queue->track_age = false;
+    queue->generation = 0;
     queue->initialized = false;
     queue->shared = shared;
     queue->unshared_notifications_needed = false;
@@ -259,17 +272,17 @@ queue_initialize(int argc, VALUE *argv, VALUE self)
 {
     VALUE keywords = Qnil;
     VALUE capacity_value = Qundef;
-    ID keyword_ids[] = {rb_intern("capacity"), rb_intern("fiber_wait")};
-    VALUE keyword_values[2] = {Qundef, Qundef};
+    ID keyword_ids[] = {rb_intern("capacity"), rb_intern("track_age"), rb_intern("fiber_wait")};
+    VALUE keyword_values[3] = {Qundef, Qundef, Qundef};
     queue_t *queue;
     TypedData_Get_Struct(self, queue_t, &queue_type, queue);
     rb_scan_args(argc, argv, "0:", &keywords);
     if (!NIL_P(keywords)) {
-        rb_get_kwargs(keywords, keyword_ids, 0, queue->shared ? 1 : 2, keyword_values);
+        rb_get_kwargs(keywords, keyword_ids, 0, queue->shared ? 2 : 3, keyword_values);
         capacity_value = keyword_values[0];
     }
     if (queue->initialized) rb_raise(rb_eRuntimeError, "Queue is already initialized");
-    bool fiber_io = containers_unshared_fiber_io(keyword_values[1]);
+    bool fiber_io = containers_unshared_fiber_io(keyword_values[2]);
 
     if (NIL_P(capacity_value)) {
         queue->bounded = false;
@@ -289,6 +302,12 @@ queue_initialize(int argc, VALUE *argv, VALUE self)
 
     queue->values = calloc(queue->storage_capacity, sizeof(VALUE));
     if (!queue->values) rb_memerror();
+    VALUE track_age = keyword_values[1];
+    queue->track_age = track_age != Qundef && RTEST(track_age);
+    if (queue->track_age) {
+        queue->enqueued_at = calloc(queue->storage_capacity, sizeof(double));
+        if (!queue->enqueued_at) rb_memerror();
+    }
     queue->unshared_fiber_io = fiber_io;
     queue->initialized = true;
     if (queue->shared) containers_finish_initialization(self);
@@ -475,7 +494,18 @@ RBIMPL_ATTR_NORETURN()
 static void
 raise_queue_closed(void)
 {
-    rb_raise(eClosedQueueError, "queue is closed");
+    VALUE farce = rb_const_get(rb_cObject, id_farce);
+    VALUE queue = rb_const_get(farce, id_public_queue);
+    rb_raise(rb_const_get(queue, id_closed_error), "queue is closed");
+}
+
+RBIMPL_ATTR_NORETURN()
+static void
+raise_queue_sealed(void)
+{
+    VALUE farce = rb_const_get(rb_cObject, id_farce);
+    VALUE queue = rb_const_get(farce, id_public_queue);
+    rb_raise(rb_const_get(queue, id_sealed_error), "queue is sealed");
 }
 
 static VALUE
@@ -501,12 +531,24 @@ queue_grow(queue_t *queue)
     size_t grown = current * 2;
     VALUE *values = calloc(grown, sizeof(VALUE));
     if (!values) return false;
+    double *enqueued_at = NULL;
+    if (queue->track_age) {
+        enqueued_at = calloc(grown, sizeof(double));
+        if (!enqueued_at) {
+            free(values);
+            return false;
+        }
+    }
 
     for (size_t index = 0; index < queue->size; index++) {
-        values[index] = queue->values[(queue->head + index) % current];
+        size_t source = (queue->head + index) % current;
+        values[index] = queue->values[source];
+        if (queue->track_age) enqueued_at[index] = queue->enqueued_at[source];
     }
     free(queue->values);
+    free(queue->enqueued_at);
     queue->values = values;
+    queue->enqueued_at = enqueued_at;
     queue->storage_capacity = grown;
     queue->head = 0;
     queue->tail = queue->size;
@@ -545,12 +587,15 @@ queue_clear(VALUE self)
     size_t index = queue->head;
     for (size_t remaining = queue->size; remaining > 0; remaining--) {
         queue->values[index] = Qnil;
+        if (queue->track_age) queue->enqueued_at[index] = 0;
         index++;
         if (index == queue->storage_capacity) index = 0;
     }
+    if (queue->size > 0 && queue->track_age) queue->generation++;
     queue->size = 0;
     queue->head = 0;
     queue->tail = 0;
+    if (queue->sealed) queue->closed = true;
     queue_update_readiness(queue);
 
     queue_unlock(queue);
@@ -569,12 +614,90 @@ queue_closed_p(VALUE self)
 }
 
 static VALUE
+queue_sealed_p(VALUE self)
+{
+    queue_t *queue = get_queue(self);
+    bool sealed;
+    queue_lock(queue);
+    sealed = queue->sealed;
+    queue_unlock(queue);
+    return sealed ? Qtrue : Qfalse;
+}
+
+static VALUE
+queue_age_tracking_p(VALUE self)
+{
+    return get_queue(self)->track_age ? Qtrue : Qfalse;
+}
+
+static VALUE
+queue_generation(VALUE self)
+{
+    queue_t *queue = get_queue(self);
+    uint64_t generation;
+    if (!queue->track_age) return Qnil;
+    queue_lock(queue);
+    generation = queue->generation;
+    queue_unlock(queue);
+    return ULL2NUM(generation);
+}
+
+static VALUE
+queue_oldest_enqueued_at(VALUE self)
+{
+    queue_t *queue = get_queue(self);
+    double timestamp;
+    if (!queue->track_age) return Qnil;
+    queue_lock(queue);
+    if (queue->size == 0) {
+        queue_unlock(queue);
+        return Qnil;
+    }
+    timestamp = queue->enqueued_at[queue->head];
+    queue_unlock(queue);
+    return DBL2NUM(timestamp);
+}
+
+static VALUE
+queue_oldest_age(VALUE self)
+{
+    queue_t *queue = get_queue(self);
+    double age;
+    if (!queue->track_age) return Qnil;
+    queue_lock(queue);
+    if (queue->size == 0) {
+        queue_unlock(queue);
+        return Qnil;
+    }
+    age = monotonic_now() - queue->enqueued_at[queue->head];
+    queue_unlock(queue);
+    return DBL2NUM(age);
+}
+
+static VALUE
+queue_seal(VALUE self)
+{
+    queue_t *queue = get_queue(self);
+    queue_lock(queue);
+    if (!queue->sealed) {
+        queue->sealed = true;
+        if (queue->size == 0) queue->closed = true;
+        if (queue->track_age) queue->generation++;
+        queue_update_readiness(queue);
+    }
+    queue_unlock(queue);
+    return self;
+}
+
+static VALUE
 queue_close(VALUE self)
 {
     queue_t *queue = get_queue(self);
     queue_lock(queue);
     if (!queue->closed) {
+        queue->sealed = true;
         queue->closed = true;
+        if (queue->track_age) queue->generation++;
         queue_update_readiness(queue);
         if (queue->pop_waiters == 0) readiness_close(&queue->can_pop);
         if (queue->push_waiters == 0) readiness_close(&queue->can_push);
@@ -608,8 +731,11 @@ queue_pop_with_timeout(VALUE self, queue_t *queue, queue_timeout_t timeout)
         if (queue->size > 0) {
             VALUE value = queue->values[queue->head];
             queue->values[queue->head] = Qnil;
+            if (queue->track_age) queue->enqueued_at[queue->head] = 0;
             if (++queue->head == queue->storage_capacity) queue->head = 0;
             queue->size--;
+            if (queue->track_age) queue->generation++;
+            if (queue->sealed && queue->size == 0) queue->closed = true;
             queue_update_readiness(queue);
             queue_unlock(queue);
             return value;
@@ -645,14 +771,20 @@ queue_push_with_timeout(VALUE self, queue_t *queue, VALUE value, queue_timeout_t
             queue_unlock(queue);
             raise_queue_closed();
         }
+        if (queue->sealed) {
+            queue_unlock(queue);
+            raise_queue_sealed();
+        }
         if (!queue->bounded || queue->size < queue->limit) {
             if (queue->size == queue->storage_capacity && !queue_grow(queue)) {
                 queue_unlock(queue);
                 rb_memerror();
             }
             queue->values[queue->tail] = value;
+            if (queue->track_age) queue->enqueued_at[queue->tail] = monotonic_now();
             if (++queue->tail == queue->storage_capacity) queue->tail = 0;
             queue->size++;
+            if (queue->track_age) queue->generation++;
             queue_update_readiness(queue);
             queue_unlock(queue);
             return Qtrue;
@@ -731,6 +863,10 @@ queue_wait_push(int argc, VALUE *argv, VALUE self)
             queue_unlock(queue);
             raise_queue_closed();
         }
+        if (queue->sealed) {
+            queue_unlock(queue);
+            raise_queue_sealed();
+        }
         bool ready = !queue->bounded || queue->size < queue->limit;
         if (ready) {
             queue_unlock(queue);
@@ -744,8 +880,11 @@ queue_wait_push(int argc, VALUE *argv, VALUE self)
 void
 containers_init_queue(VALUE namespace)
 {
+    id_farce = rb_intern("Farce");
+    id_public_queue = rb_intern("Queue");
+    id_closed_error = rb_intern("ClosedError");
+    id_sealed_error = rb_intern("SealedError");
     id_timeout = rb_intern("timeout");
-    eClosedQueueError = rb_const_get(rb_cObject, rb_intern("ClosedQueueError"));
     cQueue = rb_define_class_under(namespace, "Queue", rb_cObject);
     rb_define_alloc_func(cQueue, queue_allocate);
     VALUE unshared = rb_define_class_under(namespace, "UnsharedQueue", cQueue);
@@ -763,6 +902,12 @@ containers_init_queue(VALUE namespace)
     rb_define_method(cQueue, "wait_pop", queue_wait_pop, -1);
     rb_define_method(cQueue, "wait_push", queue_wait_push, -1);
     rb_define_method(cQueue, "close", queue_close, 0);
+    rb_define_method(cQueue, "seal", queue_seal, 0);
     rb_define_method(cQueue, "closed?", queue_closed_p, 0);
+    rb_define_method(cQueue, "sealed?", queue_sealed_p, 0);
+    rb_define_method(cQueue, "age_tracking?", queue_age_tracking_p, 0);
+    rb_define_method(cQueue, "generation", queue_generation, 0);
+    rb_define_method(cQueue, "oldest_enqueued_at", queue_oldest_enqueued_at, 0);
+    rb_define_method(cQueue, "oldest_age", queue_oldest_age, 0);
     rb_define_private_method(cQueue, "__release_wait_descriptors__", queue_release_wait_descriptors, 0);
 }

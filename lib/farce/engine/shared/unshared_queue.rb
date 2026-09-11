@@ -5,9 +5,9 @@
 module Farce
   module Internal # :nodoc: all
     class UnsharedQueue < Queue
-      def initialize(capacity: 1024, fiber_wait: :auto)
+      def initialize(capacity: 1024, fiber_wait: :auto, track_age: false)
         raise ArgumentError, "fiber_wait must be :auto, :io, or :block" unless %i[auto io block].include?(fiber_wait)
-        super(capacity:)
+        super(capacity:, track_age:)
       end
 
       def fiber_wait = :auto

@@ -37,7 +37,7 @@ module Farce
       private_constant :Box, :INITIALIZATION_LOCK, :INTERRUPT_MASK, :JAVA_CAPACITY_MAX,
         :COMPARATOR, :SNAPSHOT, :IDENTITY, :EQUAL, :IDENTICAL, :MATCH, :SCHEDULED
 
-      def initialize(capacity: nil, signal: nil)
+      def initialize(capacity: nil, signal: nil, track_age: false)
         check_initialization
         parsed_capacity = normalize_capacity(capacity)
         raise TypeError, "signal must respond to #broadcast" unless signal.nil? || signal.respond_to?(:broadcast)
@@ -56,7 +56,7 @@ module Farce
         native_signal = signal if RUBY_ENGINE == "jruby" &&
           JVMContainers.identical?(JVMContainers::OBJECT_CLASS_METHOD.bind_call(signal), Signal)
         core = JVMExtension::PriorityQueue.new(COMPARATOR, SNAPSHOT, IDENTITY, EQUAL,
-          IDENTICAL, MATCH, committer, SCHEDULED, java_capacity, native_signal)
+          IDENTICAL, MATCH, committer, SCHEDULED, java_capacity, native_signal, track_age ? true : false)
         INITIALIZATION_LOCK.synchronize do
           Thread.handle_interrupt(INTERRUPT_MASK) do
             check_initialization
@@ -118,6 +118,18 @@ module Farce
         raise_failure(e)
       end
 
+      def sealed?
+        storage.isSealed
+      rescue JVMExtension::QueueFailure => e
+        raise_failure(e)
+      end
+
+      def age_tracking? = storage.isAgeTracking
+
+      def generation = JVMContainers.nullable(storage.generation)
+      def oldest_enqueued_at = JVMContainers.nullable(storage.oldestEnqueuedAt)
+      def oldest_age = JVMContainers.nullable(storage.oldestAge)
+
       def clear
         storage.clear
         self
@@ -127,6 +139,13 @@ module Farce
 
       def close
         storage.close
+        self
+      rescue JVMExtension::QueueFailure => e
+        raise_failure(e)
+      end
+
+      def seal
+        storage.seal
         self
       rescue JVMExtension::QueueFailure => e
         raise_failure(e)
@@ -169,7 +188,11 @@ module Farce
       end
 
       def raise_failure(error)
-        klass = error.getCode == 2 ? ClosedQueueError : ThreadError
+        klass = case error.getCode
+                when 2 then ::Farce::Queue::ClosedError
+                when 4 then ::Farce::Queue::SealedError
+                else ThreadError
+                end
         raise klass, error.getMessage
       end
 

@@ -25,6 +25,113 @@ module Farce
       assert_equal Abstract::Queue, Abstract::TimerQueue.superclass
     end
 
+    def test_all_queues_can_be_sealed_and_drained
+      assert_operator Queue::ClosedError, :<, ClosedQueueError
+      assert_operator Queue::SealedError, :<, Queue::ClosedError
+
+      [Farce, *NAMESPACES].each do |namespace|
+        SHAPES.each do |shape|
+          queue = namespace.const_get(shape).new
+          options = queue_options(shape)
+          queue.push(:first, **options)
+          queue.push(:second, **options)
+
+          assert_same queue, queue.seal
+          assert_predicate queue, :sealed?
+          refute_predicate queue, :closed?
+          assert_raises(Queue::SealedError) { queue.push(:rejected, **options) }
+          assert_raises(Queue::SealedError) { queue.try_push(:rejected, **options) }
+          assert_raises(Queue::SealedError) { queue.wait_push(timeout: 0) }
+          assert_equal :first, queue.pop
+          refute_predicate queue, :closed?
+          assert_equal :second, queue.pop
+          assert_predicate queue, :closed?
+          assert_raises(Queue::ClosedError) { queue.pop }
+          assert_raises(Queue::ClosedError) { queue.push(:rejected, **options) }
+          assert_raises(Queue::ClosedError) { queue.try_push(:rejected, **options) }
+          assert_raises(Queue::ClosedError) { queue.wait_push(timeout: 0) }
+        end
+      end
+    end
+
+    def test_seal_wakes_waiters_and_clear_finishes_draining
+      [Farce, *NAMESPACES].each do |namespace|
+        SHAPES.each do |shape|
+          options = queue_options(shape)
+          queue = namespace.const_get(shape).new(capacity: 1)
+          queue.push(:first, **options)
+          producer = Thread.new do
+            queue.push(:blocked, **options)
+          rescue ClosedQueueError => e
+            e
+          end
+          Timeout.timeout(5) { sleep 0.001 until queue.num_waiting.positive? }
+
+          queue.seal
+
+          assert_instance_of Queue::SealedError, producer.value
+          assert_same queue, queue.clear
+          assert_predicate queue, :closed?
+
+          empty = namespace.const_get(shape).new
+          consumer = Thread.new do
+            empty.pop
+          rescue ClosedQueueError => e
+            e
+          end
+          Timeout.timeout(5) { sleep 0.001 until empty.num_waiting.positive? }
+
+          empty.seal
+
+          assert_instance_of Queue::ClosedError, consumer.value
+          assert_predicate empty, :closed?
+        ensure
+          queue&.close
+          empty&.close
+          producer&.kill
+          consumer&.kill
+        end
+      end
+    end
+
+    def test_age_tracking_is_opt_in_for_all_queues
+      [Farce, *NAMESPACES].each do |namespace|
+        SHAPES.each do |shape|
+          plain = namespace.const_get(shape).new
+          tracked = namespace.const_get(shape).new(track_age: true)
+          options = queue_options(shape)
+
+          refute_predicate plain, :age_tracking?
+          assert_nil plain.generation
+          assert_nil plain.oldest_enqueued_at
+          assert_nil plain.oldest_age
+
+          assert_predicate tracked, :age_tracking?
+          assert_equal 0, tracked.generation
+          tracked.push(:value, **options)
+
+          assert_equal 1, tracked.generation
+          assert_kind_of Float, tracked.oldest_enqueued_at
+          assert_operator tracked.oldest_age, :>=, 0
+          assert_equal :value, tracked.pop
+          assert_equal 2, tracked.generation
+          assert_nil tracked.oldest_enqueued_at
+        end
+      end
+    end
+
+    def test_priority_age_tracks_the_oldest_enqueued_item_not_the_next_priority
+      queue = PriorityQueue.new(track_age: true)
+      queue.push(:oldest, priority: 2)
+      oldest = queue.oldest_enqueued_at
+      queue.push(:newer, priority: 1)
+
+      assert_equal :newer, queue.pop
+      assert_equal oldest, queue.oldest_enqueued_at
+      assert_equal :oldest, queue.pop
+      assert_nil queue.oldest_enqueued_at
+    end
+
     def test_unshared_fiber_wait_configuration
       SHAPES.each do |shape|
         klass = Unshared.const_get(shape)
@@ -268,6 +375,16 @@ module Farce
         end
 
         assert_predicate queue, :empty?
+      end
+    end
+
+    private
+
+    def queue_options(shape)
+      case shape
+      when :PriorityQueue then { priority: 0 }
+      when :TimerQueue then { at: Clock.now }
+      else {}
       end
     end
   end

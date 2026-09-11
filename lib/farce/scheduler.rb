@@ -36,31 +36,8 @@ module Farce
     class ClosedError < StandardError
     end
 
-    # A wrapper around a proc that carries arguments with it, possibly wrapping the arguments in an Envelope.
-    class Task
-      include Shareable
-
-      MANAGER = ModeManager.new
-
-      def initialize(args, block, mode)
-        @block    = Ractor.shareable_proc(&block)
-        @unwrap   = false
-        @args     = args.map! do |arg|
-          wrapped = MANAGER.wrap(arg, mode:)
-          @unwrap = true if MANAGER.managed_envelope?(wrapped)
-          wrapped
-        end.freeze
-        super()
-      end
-
-      def to_proc
-        return -> { @block.call(*@args) } unless @unwrap
-        -> { @block.call(*@args.map { |arg| MANAGER.unwrap(arg) }) }
-      end
-    end
-
     CLOSED_STATES = Set[:closed, :closing, :error].freeze
-    private_constant :Task, :CLOSED_STATES
+    private_constant :CLOSED_STATES
 
     # Returns a Farce scheduler for the current thread's installed fiber scheduler.
     # Returns `nil` when no fiber scheduler is installed.
@@ -196,15 +173,18 @@ module Farce
     #
     #   @param capacity [Integer, nil] Pending-task capacity; nil creates an unbounded queue.
     #   @yieldreturn [Object] The fiber scheduler to install when launched or installed.
-    def initialize(capacity: 1024, backend: CONFIG.freeze.io_backend, queue: nil, external: false, &)
+    def initialize(capacity: 1024, backend: CONFIG.freeze.io_backend, queue: nil, external: false,
+                   pool_worker: nil, queue_owner: true, &constructor)
       @capacity    = capacity ? Integer(capacity) : nil
       @backend     = backend
-      @constructor = block_given? ? Ractor.shareable_proc(&) : nil
+      @constructor = Ractor.shareable?(constructor) ? constructor : Ractor.shareable_proc(&constructor) if constructor
       @external    = external || block_given?
       @owner       = Internal::Atom.new(nil)
       @state       = Internal::Atom.new(:initialized)
       @error       = Internal::Atom.new
       @queue       = queue || Internal::Queue.new(capacity: @capacity)
+      @pool_worker = pool_worker
+      @queue_owner = queue_owner
       super()
     end
 
@@ -356,7 +336,7 @@ module Farce
 
       task = mode == :local ?
         Envelope::Local.new(args.any? ? -> { block.call(*args) } : block) :
-        Task.new(args, block, mode)
+        Internal::ScheduledTask.new(args, block, mode)
 
       @queue.push(task)
       self
@@ -414,7 +394,16 @@ module Farce
       register[scheduler]     = self
       Internal::Storage[self] = scheduler
       Fiber.set_scheduler(scheduler) unless Fiber.scheduler.equal?(scheduler)
-      scheduler.fiber { dispatch { scheduler.fiber(&it) } }
+      runnable_count = :farce_runnable_count if @pool_worker && scheduler.respond_to?(:farce_runnable_count)
+      scheduler.fiber do
+        dispatch(scheduler, runnable_count) do |task|
+          if @pool_worker
+            scheduler.fiber(&task.to_proc(@pool_worker))
+          else
+            scheduler.fiber(&task)
+          end
+        end
+      end
     end
 
     def launch!(name, priority)
@@ -428,7 +417,9 @@ module Farce
         group = ThreadGroup.new
         group.add(Thread.current)
 
-        dispatch { group.add(Thread.new(&it)) }
+        dispatch do |task|
+          group.add(Thread.new(&task.to_proc(@pool_worker)))
+        end
         group.list.each { it.join unless it.equal?(Thread.current) }
       end
     end
@@ -445,19 +436,35 @@ module Farce
       nil
     end
 
-    def dispatch
+    def dispatch(scheduler = nil, runnable_count = nil)
+      failure = nil
       @state.compare_and_set(:setup, :running)
       while keep_processing?
-        task = @queue.pop
+        break if @pool_worker && !@pool_worker.wait_for_admission(scheduler, runnable_count)
+        timed_out = false
+        timeout = @pool_worker&.idle_timeout
+        task = @queue.pop(timeout:) { timed_out = true }
+        if timed_out
+          break if @pool_worker&.retire?
+          next
+        end
+        next unless task
         task = task.value if task.is_a?(Envelope)
-        yield task if task
+        if task
+          @pool_worker&.task_started
+          yield task
+        end
       end
-      @queue.close
+      @queue.close if @queue_owner
+    rescue ClosedQueueError
+      raise unless @pool_worker
     rescue Exception => e # rubocop:disable Lint/RescueException
+      failure = e
       @state.value = :error
       @error.value = Envelope.new(e)
       raise
     ensure
+      @pool_worker&.stopped(failure)
       # make sure we're in a closed state
       unless @state.compare_and_set(:closing, :closed)
         state = @state.value

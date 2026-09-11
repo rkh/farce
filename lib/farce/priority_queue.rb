@@ -9,9 +9,9 @@ module Farce
     include Shareable
 
     # @!macro modes
-    def initialize(capacity: nil, default_priority: 0, order: :ascending, mode: :copy)
+    def initialize(capacity: nil, default_priority: 0, order: :ascending, mode: :copy, track_age: false)
       @manager = ModeManager.new(mode:)
-      super(capacity:, default_priority:, order:)
+      super(capacity:, default_priority:, order:, track_age:)
     end
 
     # @!macro modes

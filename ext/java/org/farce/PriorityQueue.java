@@ -26,7 +26,7 @@ public final class PriorityQueue {
         HashMap<Object, Entry> identities;
     }
 
-    private static final class Entry {
+    private static class Entry {
         final Object value;
         Entry previous;
         Entry next;
@@ -35,6 +35,13 @@ public final class PriorityQueue {
         Entry identityNext;
         boolean committed;
         Entry(Object value) { this.value = value; }
+    }
+
+    private static final class TrackedEntry extends Entry {
+        final long enqueuedAt;
+        TrackedEntry agePrevious;
+        TrackedEntry ageNext;
+        TrackedEntry(Object value) { super(value); enqueuedAt = System.nanoTime(); }
     }
 
     private final ReentrantLock lock = new ReentrantLock();
@@ -48,7 +55,12 @@ public final class PriorityQueue {
     private final QueueSignal signal;
     private final BooleanSupplier scheduled;
     private final long capacity;
+    private final boolean trackAge;
     private long size;
+    private long generation;
+    private TrackedEntry ageHead;
+    private TrackedEntry ageTail;
+    private boolean sealed;
     private boolean closed;
 
     public PriorityQueue(Comparator<PriorityKey> comparator,
@@ -58,7 +70,8 @@ public final class PriorityQueue {
                          BiPredicate<Object, Object> identical,
                          BiPredicate<Object, Object> match,
                          Consumer<Runnable> committer,
-                         BooleanSupplier scheduled, long capacity, QueueSignal signal) {
+                         BooleanSupplier scheduled, long capacity, QueueSignal signal,
+                         boolean trackAge) {
         this.tree = new TreeMap<>(comparator);
         this.snapshot = snapshot;
         this.identity = identity;
@@ -69,6 +82,7 @@ public final class PriorityQueue {
         this.signal = signal;
         this.scheduled = scheduled;
         this.capacity = capacity;
+        this.trackAge = trackAge;
     }
 
     private void enter() {
@@ -81,7 +95,12 @@ public final class PriorityQueue {
         }
     }
 
-    private void checkOpen() {
+    private void checkPushOpen() {
+        if (closed) throw new Failure(2, "queue is closed");
+        if (sealed) throw new Failure(4, "queue is sealed");
+    }
+
+    private void checkReadOpen() {
         if (closed) throw new Failure(2, "queue is closed");
     }
 
@@ -106,7 +125,7 @@ public final class PriorityQueue {
         Bucket bucket = null;
         Entry entry = null;
         try {
-            checkOpen();
+            checkPushOpen();
             if (capacity > 0 && size >= capacity) return false;
             bucket = tree.get(query);
             if (bucket == null) {
@@ -115,7 +134,7 @@ public final class PriorityQueue {
                 Bucket existing = tree.putIfAbsent(key, candidate);
                 bucket = existing == null ? candidate : existing;
             }
-            entry = new Entry(value);
+            entry = trackAge ? new TrackedEntry(value) : new Entry(value);
             if (bucket.identities != null) addIdentity(bucket.identities, entry);
             Bucket target = bucket;
             Entry added = entry;
@@ -126,6 +145,7 @@ public final class PriorityQueue {
                 target.tail = added;
                 target.size++;
                 size++;
+                trackPush(added);
                 added.committed = true;
             });
             return true;
@@ -153,7 +173,7 @@ public final class PriorityQueue {
     public Object read(int kind, boolean last, PriorityKey cutoff) {
         enter();
         try {
-            checkOpen();
+            checkReadOpen();
             Iterator<Map.Entry<PriorityKey, Bucket>> iterator = iterator(last);
             if (!iterator.hasNext()) return null;
             Map.Entry<PriorityKey, Bucket> item = iterator.next();
@@ -174,7 +194,7 @@ public final class PriorityQueue {
     public boolean removeValue(PriorityKey key, Object value, int kind) {
         enter();
         try {
-            checkOpen();
+            checkReadOpen();
             Bucket bucket = tree.get(key);
             if (bucket == null) return false;
             Entry found = null;
@@ -214,6 +234,28 @@ public final class PriorityQueue {
         if (bucket.identities != null) discardIdentity(bucket.identities, entry);
         bucket.size--;
         size--;
+        trackRemove(entry);
+        if (sealed && size == 0) closed = true;
+    }
+
+    private void trackPush(Entry entry) {
+        if (!trackAge) return;
+        TrackedEntry tracked = (TrackedEntry)entry;
+        tracked.agePrevious = ageTail;
+        if (ageTail == null) ageHead = tracked;
+        else ageTail.ageNext = tracked;
+        ageTail = tracked;
+        generation++;
+    }
+
+    private void trackRemove(Entry entry) {
+        if (!trackAge) return;
+        TrackedEntry tracked = (TrackedEntry)entry;
+        if (tracked.agePrevious == null) ageHead = tracked.ageNext;
+        else tracked.agePrevious.ageNext = tracked.ageNext;
+        if (tracked.ageNext == null) ageTail = tracked.agePrevious;
+        else tracked.ageNext.agePrevious = tracked.agePrevious;
+        generation++;
     }
 
     // Circular identity FIFOs need no separate slot allocation and retain no dead entries.
@@ -270,15 +312,62 @@ public final class PriorityQueue {
         try { return closed; } finally { lock.unlock(); }
     }
 
+    public boolean isSealed() {
+        enter();
+        try { return sealed; } finally { lock.unlock(); }
+    }
+
+    public boolean isAgeTracking() { return trackAge; }
+
+    public Long generation() {
+        if (!trackAge) return null;
+        enter();
+        try { return generation; } finally { lock.unlock(); }
+    }
+
+    public Double oldestEnqueuedAt() {
+        if (!trackAge) return null;
+        enter();
+        try { return ageHead == null ? null : ageHead.enqueuedAt / 1_000_000_000.0; }
+        finally { lock.unlock(); }
+    }
+
+    public Double oldestAge() {
+        if (!trackAge) return null;
+        enter();
+        try { return ageHead == null ? null : (System.nanoTime() - ageHead.enqueuedAt) / 1_000_000_000.0; }
+        finally { lock.unlock(); }
+    }
+
     public void clear() {
         enter();
-        try { commit(() -> { tree.clear(); size = 0; }); }
+        try { commit(() -> {
+            tree.clear();
+            if (trackAge && size > 0) generation++;
+            size = 0;
+            ageHead = ageTail = null;
+            if (sealed) closed = true;
+        }); }
+        finally { lock.unlock(); }
+    }
+
+    public void seal() {
+        enter();
+        try { commit(() -> {
+            if (!sealed && trackAge) generation++;
+            sealed = true;
+            if (size == 0) closed = true;
+        }); }
         finally { lock.unlock(); }
     }
 
     public void close() {
         enter();
-        try { commit(() -> closed = true); }
+        try { commit(() -> {
+            if (!closed && trackAge) generation++;
+            sealed = true;
+            closed = true;
+        }); }
         finally { lock.unlock(); }
     }
 }

@@ -9,7 +9,7 @@ module Farce
       include Internal::StrictQueueValues unless Internal.native_ractors?
       include Shareable
 
-      def initialize(capacity: nil, default_priority: 0, order: :ascending)
+      def initialize(capacity: nil, default_priority: 0, order: :ascending, track_age: false)
         unless Ractor.shareable?(default_priority)
           raise Ractor::IsolationError, "default priority is not Ractor-shareable"
         end

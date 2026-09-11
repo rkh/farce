@@ -18,29 +18,34 @@ module Farce
       private_constant :DEFAULT_CAPACITY, :EMPTY, :INITIALIZATION_LOCK
 
       Bucket = Struct.new(:priority, :items)
-      private_constant :Bucket
+      TrackedItem = Struct.new(:value, :enqueued_at)
+      private_constant :Bucket, :TrackedItem
 
       class State
-        attr_accessor :size, :closed, :operation_owner
-        attr_reader :buckets, :capacity, :signal, :lock
+        attr_accessor :size, :sealed, :closed, :generation, :operation_owner
+        attr_reader :buckets, :capacity, :signal, :lock, :tracked_items, :track_age
 
-        def initialize(capacity:, signal:, lock:)
+        def initialize(capacity:, signal:, lock:, track_age:)
           @buckets = []
           @capacity = capacity
           @signal = signal
           @lock = lock
           @size = 0
+          @sealed = false
           @closed = false
+          @track_age = track_age
+          @tracked_items = [] if track_age
+          @generation = 0
           @operation_owner = nil
         end
       end
       private_constant :State
 
-      def initialize(capacity: DEFAULT_CAPACITY, signal: nil)
+      def initialize(capacity: DEFAULT_CAPACITY, signal: nil, track_age: false)
         ensure_initializable!
         capacity = normalize_capacity(capacity)
         signal = normalize_signal(signal)
-        prepared = State.new(capacity:, signal:, lock: Lock.new)
+        prepared = State.new(capacity:, signal:, lock: Lock.new, track_age: track_age ? true : false)
         commit_initialization(prepared)
       end
       private :initialize
@@ -53,18 +58,22 @@ module Farce
         state = initialized_state
         with_queue_operation(state) do
           raise_closed if state.closed
+          raise_sealed if state.sealed
           next false if state.capacity && state.size >= state.capacity
+
+          stored = state.track_age ? TrackedItem.new(value, Clock.now) : value
 
           index, found = locate_priority(state.buckets, priority)
           if found
             bucket = state.buckets[index]
-            prepared_items = bucket.items.dup << value
+            prepared_items = bucket.items.dup << stored
             notify_and_commit(state) do
               bucket.items = prepared_items
               state.size += 1
+              track_push(state, stored)
             end
           else
-            pending = Bucket.new(snapshot_ordered_key(priority), [value])
+            pending = Bucket.new(snapshot_ordered_key(priority), [stored])
             notify_and_commit(state) do
               index, duplicate = with_interruptible_callbacks do
                 locate_priority(state.buckets, priority)
@@ -72,6 +81,7 @@ module Farce
               raise "priority comparator changed during insertion" if duplicate
               state.buckets.insert(index, pending)
               state.size += 1
+              track_push(state, stored)
             end
           end
           true
@@ -135,7 +145,10 @@ module Farce
         with_queue_operation(state) do
           notify_and_commit(state) do
             state.buckets.clear
+            state.generation += 1 if state.track_age && state.size.positive?
             state.size = 0
+            state.tracked_items&.clear
+            state.closed = true if state.sealed
           end
           self
         end
@@ -144,7 +157,11 @@ module Farce
       def close
         state = initialized_state
         with_queue_operation(state) do
-          notify_and_commit(state) { state.closed = true }
+          notify_and_commit(state) do
+            state.generation += 1 if state.track_age && !state.closed
+            state.sealed = true
+            state.closed = true
+          end
           self
         end
       end
@@ -152,6 +169,42 @@ module Farce
       def closed?
         state = initialized_state
         with_queue_operation(state) { state.closed }
+      end
+
+      def sealed?
+        state = initialized_state
+        with_queue_operation(state) { state.sealed }
+      end
+
+      def age_tracking? = initialized_state.track_age
+
+      def generation
+        state = initialized_state
+        with_queue_operation(state) { state.track_age ? state.generation : nil }
+      end
+
+      def oldest_enqueued_at
+        state = initialized_state
+        with_queue_operation(state) { state.tracked_items&.first&.enqueued_at }
+      end
+
+      def oldest_age
+        timestamp = oldest_enqueued_at
+        Clock.now - timestamp if timestamp
+      end
+
+      def seal
+        state = initialized_state
+        with_queue_operation(state) do
+          notify_and_commit(state) do
+            unless state.sealed
+              state.sealed = true
+              state.generation += 1 if state.track_age
+            end
+            state.closed = true if state.size.zero? # rubocop:disable Style/ZeroLengthPredicate
+          end
+          self
+        end
       end
 
       private
@@ -166,7 +219,7 @@ module Farce
             next EMPTY
           end
 
-          value = bucket.items.first
+          stored = bucket.items.first
           prepared_items = bucket.items.drop(1)
           notify_and_commit(state) do
             if prepared_items.empty?
@@ -175,8 +228,10 @@ module Farce
               bucket.items = prepared_items
             end
             state.size -= 1
+            track_remove(state, stored)
+            state.closed = true if state.sealed && state.size.zero? # rubocop:disable Style/ZeroLengthPredicate
           end
-          value
+          tracked_value(state, stored)
         end
         return result unless EMPTY.equal?(result)
         fallback&.call
@@ -239,7 +294,7 @@ module Farce
           raise_closed if state.closed
           bucket = last ? state.buckets.last : state.buckets.first
           next EMPTY unless bucket
-          kind == :priority ? bucket.priority : bucket.items.first
+          kind == :priority ? bucket.priority : tracked_value(state, bucket.items.first)
         end
         EMPTY.equal?(result) ? fallback&.call : result
       end
@@ -253,14 +308,15 @@ module Farce
 
           bucket = state.buckets[bucket_index]
           item_index = if identity
-                         bucket.items.index { primitive_identical?(it, value) }
+                         bucket.items.index { primitive_identical?(tracked_value(state, it), value) }
                        elsif match
-                         bucket.items.index { value === it } # rubocop:disable Style/CaseEquality
+                         bucket.items.index { value === tracked_value(state, it) } # rubocop:disable Style/CaseEquality
                        else
-                         bucket.items.index { it == value }
+                         bucket.items.index { tracked_value(state, it) == value }
                        end
           next false unless item_index
 
+          removed = bucket.items[item_index]
           prepared_items = bucket.items.dup
           prepared_items.delete_at(item_index)
           notify_and_commit(state) do
@@ -270,6 +326,8 @@ module Farce
               bucket.items = prepared_items
             end
             state.size -= 1
+            track_remove(state, removed)
+            state.closed = true if state.sealed && state.size.zero? # rubocop:disable Style/ZeroLengthPredicate
           end
           true
         end
@@ -303,8 +361,26 @@ module Farce
         end
       end
 
+      def tracked_value(state, item) = state.track_age ? item.value : item
+
+      def track_push(state, item)
+        return unless state.track_age
+        state.tracked_items << item
+        state.generation += 1
+      end
+
+      def track_remove(state, item)
+        return unless state.track_age
+        state.tracked_items.delete(item)
+        state.generation += 1
+      end
+
       def raise_closed
-        raise ClosedQueueError, "queue is closed"
+        raise ::Farce::Queue::ClosedError, "queue is closed"
+      end
+
+      def raise_sealed
+        raise ::Farce::Queue::SealedError, "queue is sealed"
       end
     end
   end

@@ -72,6 +72,7 @@ Init_farce(void)
     containers_init_lock(mInternal);
     containers_init_map(mInternal);
     containers_init_priority_queue(mInternal);
+    containers_init_darwin(mInternal);
     containers_init_queue(mInternal);
     containers_init_signal(mInternal);
     containers_init_unshared_signal(mInternal);

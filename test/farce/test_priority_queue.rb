@@ -384,7 +384,7 @@ module Farce
       sleep 0.01
 
       assert_same queue, queue.close
-      assert_instance_of ClosedQueueError, consumer.value
+      assert_instance_of Queue::ClosedError, consumer.value
       assert_same queue, queue.close
       assert_predicate queue, :closed?
       assert_raises(ClosedQueueError) { queue.push(:value, priority: 1) }

@@ -13,6 +13,12 @@ module Farce
       raise LoadError, "the JVM fiber scheduler requires JRuby"
     end
 
+    unless FiberScheduler.private_method_defined?(:scheduler_ready_count)
+      class FiberScheduler
+        private def scheduler_ready_count = ready? ? 1 : 0
+      end
+    end
+
     FiberScheduler.prepend(SchedulerLifecycle)
   end
 end
