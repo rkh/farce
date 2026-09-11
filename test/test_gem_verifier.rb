@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-return if RUBY_ENGINE != "ruby"
+return if RUBY_ENGINE == "truffleruby" || ENV["FARCE_SKIP_GEM_VERIFIER"] == "true"
 
 require_relative "setup"
 require_relative "../rakelib/gem_verifier"

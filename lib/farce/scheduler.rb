@@ -418,7 +418,8 @@ module Farce
         group.add(Thread.current)
 
         dispatch do |task|
-          group.add(Thread.new(&task.to_proc(@pool_worker)))
+          callback = @pool_worker ? task.to_proc(@pool_worker) : task.to_proc
+          group.add(Thread.new(&callback))
         end
         group.list.each { it.join unless it.equal?(Thread.current) }
       end

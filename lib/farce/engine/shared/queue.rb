@@ -148,13 +148,13 @@ module Farce
       def tracked_push(item, non_block: false)
         if @tracking
           @tracking[:lock].synchronize do
-            result = @queue.push(item, non_block)
+            result = non_block ? @queue.push(item, true) : @queue.push(item)
             @tracking[:timestamps] << Process.clock_gettime(Process::CLOCK_MONOTONIC)
             @tracking[:generation] += 1
             result
           end
         else
-          @queue.push(item, non_block)
+          non_block ? @queue.push(item, true) : @queue.push(item)
         end
       rescue ::ClosedQueueError
         raise_unwritable

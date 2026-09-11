@@ -104,7 +104,7 @@ farce_unshared_wait_body(VALUE opaque)
         if (remaining > 86400) remaining = 86400;
         struct timeval interval = {
             .tv_sec = (time_t)remaining,
-            .tv_usec = (suseconds_t)ceil((remaining - floor(remaining)) * 1000000),
+            .tv_usec = (int)ceil((remaining - floor(remaining)) * 1000000),
         };
         if (interval.tv_usec == 1000000) {
             interval.tv_sec++;

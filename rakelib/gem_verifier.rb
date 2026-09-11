@@ -70,7 +70,7 @@ module GemVerifier
     end
 
     wanted = names.product(abis).to_h do |name, abi|
-      ["#{ExtHelper.ext_path(name, version: abi, lib: true)}.#{dlext}", abi]
+      ["#{ExtHelper.ext_path(name, engine: "ruby", version: abi, lib: true)}.#{dlext}", abi]
     end
 
     extra = files.keys.grep(BINARY) - wanted.keys - JavaExtension::JARS

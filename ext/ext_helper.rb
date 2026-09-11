@@ -10,7 +10,7 @@ module ExtHelper
     dir << "lib/" if lib
     dir << "farce/engine/" << engine
 
-    case RUBY_ENGINE
+    case engine
     when "ruby"        then dir << "/#{version[/^\d+\.\d+/]}"
     when "truffleruby" then dir << "/#{TruffleRuby.native? ? "native" : "graalvm"}/#{version}"
     end
