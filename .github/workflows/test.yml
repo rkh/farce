@@ -1,0 +1,66 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux / ${{ matrix.ruby.name }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - name: "3.4"
+            version: "3.4"
+          - name: "4.0"
+            version: "4.0"
+          - name: 4.1-dev
+            version: head
+          - name: jruby
+            version: jruby
+          - name: jruby-dev
+            version: jruby-head
+          - name: truffleruby
+            version: truffleruby
+          - name: truffleruby-dev
+            version: truffleruby-head
+          - name: truffleruby+graalvm
+            version: truffleruby+graalvm
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby.version }}
+
+      - run: bundle install
+      - run: bundle exec rake clean compile test
+
+  windows:
+    name: Windows / Ruby ${{ matrix.ruby }}
+    runs-on: windows-2025
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["3.4", "4.0"]
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          Remove-Item Gemfile.lock
+          bundle install
+
+      - run: bundle exec rake clean compile test
