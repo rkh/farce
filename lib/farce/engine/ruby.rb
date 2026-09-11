@@ -9,15 +9,13 @@ require "resolv"
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    # include Autoloads["#{__dir__}/ruby", skip: :containers]
-
     # Compiled extensions and Ruby helpers share one directory for each CRuby ABI.
     ENGINE_PATH = "farce/engine/ruby/#{RUBY_VERSION[/^\d+\.\d+/]}".freeze
     private_constant :ENGINE_PATH
 
     begin
       require "#{ENGINE_PATH}/rebind"
-      require "farce/engine/ruby/containers"
+      require "#{ENGINE_PATH}/farce"
     rescue LoadError => e
       # simplecov:disable
       warn <<~WARNING
@@ -26,6 +24,12 @@ module Farce
       WARNING
       raise e
       # simplecov:enable
+    end
+
+    unless const_defined?(:NATIVE_WEAK_MAPS, false) && NATIVE_WEAK_MAPS
+      autoload :WeakMap,      "farce/engine/ruby/shared/weak_map"
+      autoload :WeakKeyMap,   "farce/engine/ruby/shared/weak_map"
+      autoload :WeakValueMap, "farce/engine/ruby/shared/weak_map"
     end
 
     autoload :FiberScheduler, "farce/engine/ruby/fiber_scheduler"

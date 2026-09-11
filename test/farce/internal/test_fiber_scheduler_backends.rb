@@ -15,6 +15,12 @@ module Farce
               require "farce"
               module Farce
                 module Internal
+                  native_features = $LOADED_FEATURES.select do |feature|
+                    feature.match?(%r{/engine/ruby/[0-9]+[.][0-9]+/(?:farce|containers|fiber_scheduler)[.](?:bundle|so)$})
+                  end
+                  if RUBY_ENGINE == "ruby" && native_features.map { File.basename(it, ".*") } != ["farce"]
+                    abort "wrong native extensions loaded: \#{native_features.inspect}"
+                  end
                   path = Internal.autoload?(:FiberScheduler)
                   unless path&.delete_suffix(".rb")&.end_with?("/engine/#{RUBY_ENGINE}/fiber_scheduler")
                     abort "wrong engine loader: \#{path.inspect}"

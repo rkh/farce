@@ -4,7 +4,7 @@ module Farce
   module Internal
     case CONFIG.freeze.fiber_scheduler_implementation
     when :native
-      require "#{ENGINE_PATH}/fiber_scheduler"
+      load_native_fiber_scheduler
     when :select
       class FiberScheduler
         include SelectScheduler

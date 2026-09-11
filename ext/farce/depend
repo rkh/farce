@@ -1,5 +1,9 @@
 dict.o: dict.c dict.h
+farce.o: farce.c containers.h
 priority_queue.o: priority_queue.c containers.h dict.h unshared_wait.h
+reactor.o: reactor.c reactor.h
+drivers.o: drivers.c reactor.h
+io.o: io.c reactor.h
 tree_map.o: tree_map.c containers.h
 
 queue.o: queue.c containers.h unshared_wait.h

@@ -2,6 +2,8 @@
 
 static VALUE eIsolationError;
 
+void farce_init_fiber_scheduler(VALUE namespace);
+
 RBIMPL_ATTR_NORETURN()
 static void
 raise_unshareable(VALUE value)
@@ -42,13 +44,27 @@ containers_raise_key_error(VALUE receiver, VALUE key)
     rb_exc_raise(exception);
 }
 
+static VALUE
+farce_load_native_fiber_scheduler(VALUE namespace)
+{
+    farce_init_fiber_scheduler(namespace);
+    return Qnil;
+}
+
 RUBY_FUNC_EXPORTED void
-Init_containers(void)
+Init_farce(void)
 {
     rb_ext_ractor_safe(true);
     VALUE mFarce    = rb_const_get(rb_cObject, rb_intern("Farce"));
     VALUE mInternal = rb_const_get(mFarce, rb_intern("Internal"));
+    VALUE singleton = rb_singleton_class(mInternal);
     eIsolationError = rb_const_get(rb_cRactor, rb_intern("IsolationError"));
+    rb_define_private_method(
+        singleton,
+        "load_native_fiber_scheduler",
+        farce_load_native_fiber_scheduler,
+        0
+    );
     containers_init_atom(mInternal);
     containers_init_counter(mInternal);
     containers_init_exchanger(mInternal);

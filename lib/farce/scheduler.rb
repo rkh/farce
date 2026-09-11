@@ -102,7 +102,7 @@ module Farce
       register = Internal::Storage.store_if_absent(self) { Internal::Storage.new }
       register.store_if_absent(scheduler) do
         wrapper = new(**, external: true)
-        wrapper.__send__(:set_scheduler!, scheduler)
+        wrapper.__send__(:set_scheduler!, scheduler:)
         wrapper
       end
     end
@@ -407,7 +407,7 @@ module Farce
 
     private
 
-    def set_scheduler!(expected_state = :initialized, scheduler = nil)
+    def set_scheduler!(expected_state = :initialized, scheduler: nil)
       setup_owner(expected_state)
       scheduler             ||= @constructor&.call || Internal::FiberScheduler.new(backend: @backend)
       register                = Internal::Storage.store_if_absent(self.class) { Internal::Storage.new }

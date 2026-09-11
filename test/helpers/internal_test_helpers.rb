@@ -9,7 +9,7 @@ if RUBY_ENGINE == "ruby"
     internal.__send__(:remove_const, name) if internal.autoload?(name)
   end
   version = RUBY_VERSION[/^\d+\.\d+/]
-  require "farce/engine/ruby/#{version}/containers"
+  require "farce/engine/ruby/#{version}/farce"
 end
 
 module Helpers

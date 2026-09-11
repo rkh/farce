@@ -788,10 +788,8 @@ static VALUE no_copy(int argc, VALUE *argv, VALUE self) { rb_raise(rb_eTypeError
 
 // Define the native scheduler class and connect its Ruby methods to these C functions.
 // Include the shared Ruby IO helpers and install the native IO hooks.
-RUBY_FUNC_EXPORTED void Init_fiber_scheduler(void) {
+void farce_init_fiber_scheduler(VALUE internal) {
     // Each scheduler owns its mutable driver and wait state.
-    rb_ext_ractor_safe(true);
-    VALUE farce = rb_define_module("Farce"), internal = rb_define_module_under(farce, "Internal");
     VALUE klass = rb_define_class_under(internal, "FiberScheduler", rb_cObject);
     rb_include_module(klass, rb_const_get(internal, rb_intern("SchedulerIO")));
     rb_define_alloc_func(klass, allocate);

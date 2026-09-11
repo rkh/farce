@@ -10,7 +10,7 @@ require "tmpdir"
 
 class TestGemVerifier < Test
   ABIS       = ["4.0.2", "3.4.9"].freeze
-  NAMES      = %w[containers rebind fiber_scheduler].freeze
+  NAMES      = %w[farce rebind].freeze
   EXTENSIONS = NAMES.map { "ext/#{it}/extconf.rb" }.freeze
 
   def test_verifies_every_extension_in_the_source_gem
@@ -21,10 +21,11 @@ class TestGemVerifier < Test
 
     assert_equal EXTENSIONS, spec.extensions
     assert_equal ["MIT", "LicenseRef-Kazlib-1.20"], spec.licenses
-    assert_includes spec.files, "ext/containers/dict.c"
-    assert_includes spec.files, "ext/containers/dict.h"
-    assert_includes spec.files, "ext/containers/priority_queue.c"
-    assert_includes spec.files, "ext/containers/tree_map.c"
+    assert_includes spec.files, "ext/farce/dict.c"
+    assert_includes spec.files, "ext/farce/dict.h"
+    assert_includes spec.files, "ext/farce/priority_queue.c"
+    assert_includes spec.files, "ext/farce/reactor.c"
+    assert_includes spec.files, "ext/farce/tree_map.c"
     assert_includes spec.files, "ext/java/org/farce/PriorityKey.java"
     assert_includes spec.files, "ext/java/org/farce/PriorityQueue.java"
     assert_includes spec.files, "ext/java/org/farce/QueueSignal.java"
@@ -88,7 +89,7 @@ class TestGemVerifier < Test
   end
 
   def test_rejects_gem_missing_the_binary_for_one_extension
-    path = "lib/farce/engine/ruby/3.4/containers.so"
+    path = "lib/farce/engine/ruby/3.4/farce.so"
     gem_file = gem_for("arm-linux-gnu", arm_binaries.except(path))
 
     error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-gnu") }
@@ -99,12 +100,12 @@ class TestGemVerifier < Test
 
   def test_rejects_gem_shipping_a_binary_it_was_not_supposed_to
     gem_file = gem_for("arm-linux-gnu", arm_binaries.merge(
-      "lib/farce/engine/ruby/3.3/containers.so" => elf(bits: 32, machine: 0x28),
+      "lib/farce/engine/ruby/3.3/farce.so" => elf(bits: 32, machine: 0x28),
     ))
 
     error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-gnu") }
 
-    assert_includes error.message, "lib/farce/engine/ruby/3.3/containers.so"
+    assert_includes error.message, "lib/farce/engine/ruby/3.3/farce.so"
   end
 
   def test_rejects_gem_whose_platform_does_not_match_the_build_target
@@ -162,13 +163,13 @@ class TestGemVerifier < Test
 
   def test_rejects_java_gem_shipping_a_native_binary
     gem_file = gem_for("java", {
-      "lib/farce/engine/jruby.rb"               => "# ruby\n",
-      "lib/farce/engine/ruby/4.0/containers.so" => elf(bits: 64, machine: 0xb7),
+      "lib/farce/engine/jruby.rb"          => "# ruby\n",
+      "lib/farce/engine/ruby/4.0/farce.so" => elf(bits: 64, machine: 0xb7),
     })
 
     error = assert_raises(GemVerifier::Error) { verify(gem_file, "jruby") }
 
-    assert_includes error.message, "lib/farce/engine/ruby/4.0/containers.so"
+    assert_includes error.message, "lib/farce/engine/ruby/4.0/farce.so"
   end
 
   def test_rejects_java_gem_that_would_compile_on_install
@@ -182,13 +183,13 @@ class TestGemVerifier < Test
 
   def test_rejects_java_gem_shipping_extension_sources
     gem_file = gem_for("java", {
-      "lib/farce/engine/jruby.rb"       => "# ruby\n",
-      "ext/containers/priority_queue.c" => "int priority_queue;\n",
+      "lib/farce/engine/jruby.rb"  => "# ruby\n",
+      "ext/farce/priority_queue.c" => "int priority_queue;\n",
     })
 
     error = assert_raises(GemVerifier::Error) { verify(gem_file, "jruby") }
 
-    assert_includes error.message, "ext/containers/priority_queue.c"
+    assert_includes error.message, "ext/farce/priority_queue.c"
   end
 
   def test_rejects_java_gem_that_is_not_built_for_java
@@ -208,7 +209,7 @@ class TestGemVerifier < Test
   end
 
   def test_rejects_source_gem_shipping_a_prebuilt_binary
-    path = "lib/farce/engine/ruby/4.0/containers.so"
+    path = "lib/farce/engine/ruby/4.0/farce.so"
     gem_file = gem_for(nil, { path => elf(bits: 32, machine: 0x28) },
       extensions: EXTENSIONS, required_ruby_version: [">= 3.4", "< 4.2"])
 
