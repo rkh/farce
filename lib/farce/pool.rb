@@ -34,7 +34,7 @@ module Farce
   #
   #   # Schedule some work
   #   pool.schedule { MyClass.do_something }
-  class Pool
+  class Pool < Farce::Abstract::Scheduler
     include Shareable
 
     # Raised when attempting to schedule a task on a closed pool.

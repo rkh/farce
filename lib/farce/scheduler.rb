@@ -29,7 +29,7 @@ module Farce
   #   scheduler = Farce::Scheduler.new
   #   Fiber.set_scheduler(scheduler)
   #   Fiber.schedule { puts "Hello from the scheduler!" }
-  class Scheduler
+  class Scheduler < Farce::Abstract::Scheduler
     include Shareable
 
     # Raised when attempting to schedule a task on a closed scheduler.
