@@ -80,6 +80,8 @@ module Farce
       end
 
       def test_ractors_exchange_values
+        skip "Native pipe waits across Ractors are unavailable on Windows" if Gem.win_platform?
+
         exchanger = Exchanger.new
         first = Ractor.new(exchanger) { |shared| shared.exchange(:first) }
         second = Ractor.new(exchanger) { |shared| shared.exchange(:second) }

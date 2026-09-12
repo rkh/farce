@@ -341,6 +341,7 @@ module Farce
 
     def test_coordinates_native_ractors
       return unless Internal.native_ractors?
+      return if Gem.win_platform?
 
       lock = Lock.new
       events = Port.new

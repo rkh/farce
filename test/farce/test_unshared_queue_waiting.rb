@@ -223,11 +223,11 @@ module Farce
       Fiber.set_scheduler(scheduler)
       queue = new_queue
       producer = Thread.new do
-        Thread.pass until queue.num_waiting == 1
+        Timeout.timeout(2) { Thread.pass until queue.num_waiting == 1 }
         queue.push(:ready)
       end
       result = Fiber.new(blocking: true) { queue.pop(timeout: 2) }.resume
-      producer.join
+      producer.value
 
       assert_equal :ready, result
       assert_empty scheduler.blockers
