@@ -344,7 +344,7 @@ vector_lock_for_update(vector_t *vector, vector_timeout_t *timeout)
 static long long
 vector_convert_index(VALUE value)
 {
-    return NUM2LL(rb_to_int(value));
+    return NUM2LL(value);
 }
 
 static bool

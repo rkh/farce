@@ -70,4 +70,5 @@ jobs:
 
       - run: bundle exec rake ci
         env:
+          TESTOPTS: --verbose
           TEST_TIMEOUT: 300

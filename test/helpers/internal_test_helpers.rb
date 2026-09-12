@@ -45,7 +45,7 @@ module Helpers
             end
             report.call(observation)
             break
-          rescue Ractor::IsolationError
+          rescue Ractor::IsolationError, NameError
             unless reported_isolation
               report.call(:isolated)
               reported_isolation = true
