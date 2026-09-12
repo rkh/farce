@@ -75,7 +75,7 @@ module Farce
       refute_predicate scheduler, :alive?
       assert_same Ractor.current, scheduler.owner
 
-      error = assert_raises(Scheduler::ClosedError) { scheduler.schedule { nil } }
+      error = assert_raises(SchedulerClosedError) { scheduler.schedule { nil } }
       assert_equal "cannot schedule task on a closed scheduler", error.message
     end
 
@@ -93,7 +93,7 @@ module Farce
       scheduler.close
 
       assert submitter.join(2), "submission remained blocked after close"
-      assert_instance_of Scheduler::ClosedError, result.pop
+      assert_instance_of SchedulerClosedError, result.pop
     ensure
       submitter&.kill&.join
     end
@@ -309,7 +309,7 @@ module Farce
       return unless Fiber.respond_to?(:scheduler) && Fiber.scheduler
       scheduler.schedule(scheduler, &:close) if scheduler && !scheduler.closed?
       Fiber.set_scheduler(nil)
-    rescue Scheduler::ClosedError
+    rescue SchedulerClosedError
       Fiber.set_scheduler(nil) if Fiber.scheduler
     end
   end

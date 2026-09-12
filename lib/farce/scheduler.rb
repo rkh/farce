@@ -32,10 +32,6 @@ module Farce
   class Scheduler < Farce::Abstract::Scheduler
     include Shareable
 
-    # Raised when attempting to schedule a task on a closed scheduler.
-    class ClosedError < StandardError
-    end
-
     CLOSED_STATES = Set[:closed, :closing, :error].freeze
     private_constant :CLOSED_STATES
 
@@ -247,6 +243,11 @@ module Farce
       callback   = Ractor.shareable_proc(self: self) { _1.__send__(:launch!, _3, _2) }
 
       return executor.new(self, priority, name, &callback) unless executor <= Ractor
+      # Requiring an autoloaded implementation from a new Ractor can deadlock
+      # while its launcher waits for setup to finish.
+      Internal.const_get(:FiberScheduler, false)
+      Internal.const_get(:Storage, false)
+      Internal.const_get(:ThreadPool, false)
       executor.new(self, priority, name, name:, &callback)
     rescue Exception => e # rubocop:disable Lint/RescueException
       @state.value = :error
@@ -254,8 +255,13 @@ module Farce
       raise
     ensure
       # if we return the thread too early, someone could kill it while another threads blocks on a schedule call
-      @state.wait_until_changed(:launching)
-      @state.wait_until_changed(:setup)
+      if Gem.win_platform? && executor <= Ractor
+        sleep 0.001 while @state.value == :launching
+        sleep 0.001 while @state.value == :setup
+      else
+        @state.wait_until_changed(:launching)
+        @state.wait_until_changed(:setup)
+      end
     end
 
     # @return [Ractor, nil] The owning Ractor, or nil before ownership is assigned.
@@ -323,14 +329,14 @@ module Farce
     # @param auto_local [Boolean] Whether to override mode with `:local` in the owning Ractor.
     # @yield [*args] The task to execute.
     # @return [Scheduler] self.
-    # @raise [ClosedError] If the handle is closing, closed, or in an error state.
+    # @raise [SchedulerClosedError] If the handle is closing, closed, or in an error state.
     # @see Ractor.shareable_proc
     def schedule(*args, mode: :copy, auto_local: true, &block)
-      raise ClosedError, "cannot schedule task on a closed scheduler" if closed?
+      raise SchedulerClosedError, "cannot schedule task on a closed scheduler" if closed?
 
       if auto_local
         owner = @owner.wait_until_non_nil
-        raise ClosedError, "cannot schedule task on a closed scheduler" if closed?
+        raise SchedulerClosedError, "cannot schedule task on a closed scheduler" if closed?
         mode  = :local if owner == Ractor.current
       end
 
@@ -342,7 +348,7 @@ module Farce
       self
     rescue ClosedQueueError
       raise unless closed?
-      raise ClosedError, "cannot schedule task on a closed scheduler"
+      raise SchedulerClosedError, "cannot schedule task on a closed scheduler"
     end
 
     # Requests shutdown and rejects further submissions. Repeated calls are harmless.

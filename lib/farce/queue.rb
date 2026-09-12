@@ -5,14 +5,6 @@
 module Farce
   # A shareable FIFO queue with transfer modes for unshareable values.
   class Queue < Farce::Abstract::Queue
-    # Raised when an operation cannot proceed because the queue is closed.
-    class ClosedError < ::ClosedQueueError
-    end
-
-    # Raised when a push cannot proceed because the queue is sealed.
-    class SealedError < ClosedError
-    end
-
     include Internal::ManagedQueue
     include Shareable
 

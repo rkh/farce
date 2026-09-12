@@ -189,8 +189,8 @@ module Farce
 
       def raise_failure(error)
         klass = case error.getCode
-                when 2 then ::Farce::Queue::ClosedError
-                when 4 then ::Farce::Queue::SealedError
+                when 2 then ::Farce::ClosedQueueError
+                when 4 then ::Farce::SealedQueueError
                 else ThreadError
                 end
         raise klass, error.getMessage

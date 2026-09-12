@@ -95,11 +95,11 @@ module Farce
         !SINGLE_TRANSFER && buffer.locked? ? work.call : buffer.locked(&work)
       end
 
-      def duplicate_io(io)
+      def duplicate_io(io, writing)
         # IO#dup flushes Ruby's buffers. During an io_write hook that would flush
         # the same payload twice. Duplicate the descriptor below Ruby buffering.
         Fiber.blocking do
-          copy = IO.for_fd(io.fcntl(Fcntl::F_DUPFD, 0))
+          copy = IO.for_fd(io.fcntl(Fcntl::F_DUPFD, 0), writing ? "w" : "r")
           copy.close_on_exec = true
           copy
         end
@@ -110,7 +110,7 @@ module Farce
         file_offset = Integer(file_offset)
         check_fiber
         locked_buffer(buffer) do
-          copy = duplicate_io(io)
+          copy = duplicate_io(io, writing)
           capacity = single_transfer ? minimum : buffer.size - offset
           minimum = capacity.zero? ? 0 : 1 if single_transfer
           data = buffer.get_string(offset, capacity) if writing
@@ -131,7 +131,7 @@ module Farce
       # File workers own copies. A cancelled caller waits for acknowledgement
       # before its ensure closes the duplicated IO or releases any borrowed state.
       def file_transfer(writing, io, buffer, minimum, offset, capacity = buffer.size - offset)
-        copy = duplicate_io(io)
+        copy = duplicate_io(io, writing)
         data = buffer.get_string(offset, capacity) if writing
         value = background do
           worker_transfer(copy, writing, data, capacity, minimum)

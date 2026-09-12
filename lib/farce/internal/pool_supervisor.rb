@@ -24,7 +24,7 @@ module Farce
       end
 
       def schedule(pool, token, delay)
-        raise ::Farce::Queue::ClosedError, "pool supervisor is closed" if @closed.value
+        raise ::Farce::ClosedQueueError, "pool supervisor is closed" if @closed.value
         @queue.push([pool, token].freeze, delay:)
       end
 

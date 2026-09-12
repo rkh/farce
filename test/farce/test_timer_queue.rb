@@ -341,7 +341,7 @@ module Farce
       queue.close
 
       assert consumer.join(1), "close did not wake the consumer"
-      assert_instance_of Queue::ClosedError, consumer.value
+      assert_instance_of ClosedQueueError, consumer.value
     ensure
       consumer&.kill if consumer&.alive?
     end

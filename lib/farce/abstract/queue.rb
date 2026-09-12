@@ -79,7 +79,7 @@ module Farce
     #     The maximum time to wait for an item to be available.
     #     If `nil`, the method will wait indefinitely.
     #     If `0`, the method will not wait at all.
-    #   @raise [Farce::Queue::ClosedError] when the queue is closed
+    #   @raise [Farce::ClosedQueueError] when the queue is closed
     #   @raise [ThreadError] when the queue is empty and non_block is true
     #   @return [BasicObject, nil]
     #     The item taken from the queue, or the return value of the block or `nil` if the timeout expired.
@@ -100,8 +100,8 @@ module Farce
     #     If `0`, the method will not wait at all.
     #   @param mode [Symbol, nil]
     #     The mode used to transfer the value between Ractors, or `nil` to use the queue's default mode.
-    #   @raise [Farce::Queue::ClosedError] when the queue is closed
-    #   @raise [Farce::Queue::SealedError] when the queue is sealed but not yet closed
+    #   @raise [Farce::ClosedQueueError] when the queue is closed
+    #   @raise [Farce::SealedQueueError] when the queue is sealed but not yet closed
     #   @raise [ThreadError] when the queue is full and non_block is true
     #   @return [Boolean] `true` if the item was added to the queue
     #
@@ -121,8 +121,8 @@ module Farce
     #   @param mode [Symbol, nil]
     #     The mode used to transfer the value between Ractors, or `nil` to use the queue's default mode.
     #   @yield Block called if the queue is at capacity.
-    #   @raise [Farce::Queue::ClosedError] when the queue is closed
-    #   @raise [Farce::Queue::SealedError] when the queue is sealed but not yet closed
+    #   @raise [Farce::ClosedQueueError] when the queue is closed
+    #   @raise [Farce::SealedQueueError] when the queue is sealed but not yet closed
     #   @return [Boolean]
     #     `true` if the item was added to the queue, `false` if the queue was at capacity and no block was given.
     #
@@ -136,7 +136,7 @@ module Farce
     #     The maximum time to wait for an item to be available.
     #     If `nil`, the method will wait indefinitely.
     #     If `0`, the method will not wait at all.
-    #   @raise [Farce::Queue::ClosedError] when the queue is closed
+    #   @raise [Farce::ClosedQueueError] when the queue is closed
     #   @return [Boolean] `true` if an item is available, `false` if the timeout expired.
     #
     # @!method wait_push(timeout: nil)
@@ -148,8 +148,8 @@ module Farce
     #     The maximum time to wait for space to be available.
     #     If `nil`, the method will wait indefinitely.
     #     If `0`, the method will not wait at all.
-    #   @raise [Farce::Queue::ClosedError] when the queue is closed
-    #   @raise [Farce::Queue::SealedError] when the queue is sealed but not yet closed
+    #   @raise [Farce::ClosedQueueError] when the queue is closed
+    #   @raise [Farce::SealedQueueError] when the queue is sealed but not yet closed
     #   @return [Boolean] `true` if space is available, `false` if the timeout expired.
     class Queue
       # The default mode used to transfer values between Ractors.

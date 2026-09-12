@@ -804,38 +804,10 @@ tc_core_map_notify_one_locked(tc_core_map *core)
 }
 
 static VALUE
-tc_core_map_wait_io(VALUE io)
-{
-    return rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), Qnil);
-}
-
-static VALUE
-tc_core_map_close_wait_io(VALUE io)
-{
-    return rb_io_close(io);
-}
-
-static VALUE
 tc_core_map_fiber_wait_body(VALUE opaque)
 {
     tc_core_map_fiber_wait *wait = (tc_core_map_fiber_wait *)opaque;
-    VALUE io = rb_io_open_descriptor(
-        rb_cIO,
-        wait->waiter.read_fd,
-        FMODE_READABLE | FMODE_EXTERNAL,
-        Qnil,
-        Qnil,
-        NULL
-    );
-    VALUE result = rb_ensure(
-        tc_core_map_wait_io,
-        io,
-        tc_core_map_close_wait_io,
-        io
-    );
-
-    RB_GC_GUARD(io);
-    return result;
+    return containers_wait_for_readable(wait->waiter.read_fd, Qnil) ? Qtrue : Qfalse;
 }
 
 static VALUE

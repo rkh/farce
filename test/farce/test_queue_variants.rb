@@ -26,8 +26,8 @@ module Farce
     end
 
     def test_all_queues_can_be_sealed_and_drained
-      assert_operator Queue::ClosedError, :<, ClosedQueueError
-      assert_operator Queue::SealedError, :<, Queue::ClosedError
+      assert_operator ClosedQueueError, :<, ::ClosedQueueError
+      assert_operator SealedQueueError, :<, ClosedQueueError
 
       [Farce, *NAMESPACES].each do |namespace|
         SHAPES.each do |shape|
@@ -39,17 +39,17 @@ module Farce
           assert_same queue, queue.seal
           assert_predicate queue, :sealed?
           refute_predicate queue, :closed?
-          assert_raises(Queue::SealedError) { queue.push(:rejected, **options) }
-          assert_raises(Queue::SealedError) { queue.try_push(:rejected, **options) }
-          assert_raises(Queue::SealedError) { queue.wait_push(timeout: 0) }
+          assert_raises(SealedQueueError) { queue.push(:rejected, **options) }
+          assert_raises(SealedQueueError) { queue.try_push(:rejected, **options) }
+          assert_raises(SealedQueueError) { queue.wait_push(timeout: 0) }
           assert_equal :first, queue.pop
           refute_predicate queue, :closed?
           assert_equal :second, queue.pop
           assert_predicate queue, :closed?
-          assert_raises(Queue::ClosedError) { queue.pop }
-          assert_raises(Queue::ClosedError) { queue.push(:rejected, **options) }
-          assert_raises(Queue::ClosedError) { queue.try_push(:rejected, **options) }
-          assert_raises(Queue::ClosedError) { queue.wait_push(timeout: 0) }
+          assert_raises(ClosedQueueError) { queue.pop }
+          assert_raises(ClosedQueueError) { queue.push(:rejected, **options) }
+          assert_raises(ClosedQueueError) { queue.try_push(:rejected, **options) }
+          assert_raises(ClosedQueueError) { queue.wait_push(timeout: 0) }
         end
       end
     end
@@ -69,7 +69,7 @@ module Farce
 
           queue.seal
 
-          assert_instance_of Queue::SealedError, producer.value
+          assert_instance_of SealedQueueError, producer.value
           assert_same queue, queue.clear
           assert_predicate queue, :closed?
 
@@ -83,7 +83,7 @@ module Farce
 
           empty.seal
 
-          assert_instance_of Queue::ClosedError, consumer.value
+          assert_instance_of ClosedQueueError, consumer.value
           assert_predicate empty, :closed?
         ensure
           queue&.close

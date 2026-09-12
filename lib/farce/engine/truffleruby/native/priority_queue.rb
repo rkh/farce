@@ -376,11 +376,11 @@ module Farce
       end
 
       def raise_closed
-        raise ::Farce::Queue::ClosedError, "queue is closed"
+        raise ::Farce::ClosedQueueError, "queue is closed"
       end
 
       def raise_sealed
-        raise ::Farce::Queue::SealedError, "queue is sealed"
+        raise ::Farce::SealedQueueError, "queue is sealed"
       end
     end
   end

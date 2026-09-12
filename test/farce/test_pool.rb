@@ -102,7 +102,7 @@ module Farce
       pool.schedule(result, mode: :raise) { |queue| queue << :done }
 
       assert_same pool, pool.close
-      assert_raises(Pool::ClosedError) { pool.schedule { nil } }
+      assert_raises(PoolClosedError) { pool.schedule { nil } }
       assert_equal :done, result.pop(timeout: 2)
       Timeout.timeout(2) { sleep 0.001 until pool.state == :closed }
 

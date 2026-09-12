@@ -255,29 +255,6 @@ typedef struct {
     bool registered;
 } map_wait_context_t;
 
-typedef struct {
-    VALUE io;
-    VALUE timeout;
-} map_io_wait_context_t;
-
-static VALUE
-map_io_wait_body(VALUE opaque)
-{
-    map_io_wait_context_t *context = (map_io_wait_context_t *)opaque;
-    return rb_io_wait(
-        context->io,
-        INT2NUM(RUBY_IO_READABLE),
-        context->timeout
-    );
-}
-
-static VALUE
-map_io_wait_cleanup(VALUE opaque)
-{
-    map_io_wait_context_t *context = (map_io_wait_context_t *)opaque;
-    return rb_io_close(context->io);
-}
-
 static VALUE
 map_wait_body(VALUE opaque)
 {
@@ -288,25 +265,7 @@ map_wait_body(VALUE opaque)
         if (remaining <= 0) return Qfalse;
         wait_timeout = DBL2NUM(remaining);
     }
-    map_io_wait_context_t wait = {
-        .io = rb_io_open_descriptor(
-            rb_cIO,
-            context->waiter->read_fd,
-            FMODE_READABLE | FMODE_EXTERNAL,
-            Qnil,
-            Qnil,
-            NULL
-        ),
-        .timeout = wait_timeout,
-    };
-    VALUE result = rb_ensure(
-        map_io_wait_body,
-        (VALUE)&wait,
-        map_io_wait_cleanup,
-        (VALUE)&wait
-    );
-    RB_GC_GUARD(wait.io);
-    return RTEST(result) ? Qtrue : Qfalse;
+    return containers_wait_for_readable(context->waiter->read_fd, wait_timeout) ? Qtrue : Qfalse;
 }
 
 static VALUE

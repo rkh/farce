@@ -295,30 +295,8 @@ typedef struct {
     weak_map_t *map;
     weak_map_waiter_t *waiter;
     weak_map_timeout_t *timeout;
-    VALUE io;
-    VALUE wait_timeout;
     bool registered;
 } weak_map_wait_context_t;
-
-static VALUE
-weak_map_wait_io_body(VALUE opaque)
-{
-    weak_map_wait_context_t *context = (weak_map_wait_context_t *)opaque;
-    return rb_io_wait(
-        context->io,
-        INT2NUM(RUBY_IO_READABLE),
-        context->wait_timeout
-    );
-}
-
-static VALUE
-weak_map_wait_io_cleanup(VALUE opaque)
-{
-    weak_map_wait_context_t *context = (weak_map_wait_context_t *)opaque;
-    VALUE io = context->io;
-    context->io = Qnil;
-    return rb_io_close(io);
-}
 
 static VALUE
 weak_map_wait_body(VALUE opaque)
@@ -330,25 +308,7 @@ weak_map_wait_body(VALUE opaque)
         if (remaining <= 0) return Qfalse;
         wait_timeout = DBL2NUM(remaining);
     }
-    VALUE io = rb_io_open_descriptor(
-        rb_cIO,
-        context->waiter->read_fd,
-        FMODE_READABLE | FMODE_EXTERNAL,
-        Qnil,
-        Qnil,
-        NULL
-    );
-    context->io = io;
-    context->wait_timeout = wait_timeout;
-    VALUE result = rb_ensure(
-        weak_map_wait_io_body,
-        opaque,
-        weak_map_wait_io_cleanup,
-        opaque
-    );
-    RB_GC_GUARD(io);
-    RB_GC_GUARD(wait_timeout);
-    return RTEST(result) ? Qtrue : Qfalse;
+    return containers_wait_for_readable(context->waiter->read_fd, wait_timeout) ? Qtrue : Qfalse;
 }
 
 static VALUE
@@ -389,8 +349,6 @@ weak_map_wait_once(weak_map_t *map, uint64_t generation, weak_map_timeout_t *tim
         .map = map,
         .waiter = &waiter,
         .timeout = timeout,
-        .io = Qnil,
-        .wait_timeout = Qnil,
         .registered = true,
     };
     return RTEST(rb_ensure(

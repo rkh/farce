@@ -9,21 +9,28 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 static VALUE cQueue;
 static ID id_farce;
-static ID id_public_queue;
 static ID id_closed_error;
 static ID id_sealed_error;
 static ID id_timeout;
+#ifdef _WIN32
+static rb_ractor_local_key_t queue_main_ractor_key;
+#endif
 
 #define QUEUE_INITIAL_CAPACITY 16
-
 
 typedef struct {
     int read_fd;
     int write_fd;
     bool set;
+#ifdef _WIN32
+    HANDLE event;
+#endif
 } readiness_signal_t;
 
 typedef struct {
@@ -70,6 +77,15 @@ readiness_initialize(readiness_signal_t *signal)
 {
     int descriptors[2];
     if (pipe(descriptors) != 0) return false;
+#ifdef _WIN32
+    signal->event = CreateEventW(NULL, TRUE, FALSE, NULL);
+    if (!signal->event) {
+        close(descriptors[0]);
+        close(descriptors[1]);
+        errno = EIO;
+        return false;
+    }
+#endif
     signal->read_fd = descriptors[0];
     signal->write_fd = descriptors[1];
     signal->set = false;
@@ -86,6 +102,10 @@ readiness_close(readiness_signal_t *signal)
     signal->read_fd = -1;
     signal->write_fd = -1;
     signal->set = false;
+#ifdef _WIN32
+    if (signal->event) CloseHandle(signal->event);
+    signal->event = NULL;
+#endif
 }
 
 static void
@@ -93,6 +113,7 @@ readiness_set(readiness_signal_t *signal, bool desired)
 {
     unsigned char byte = 1;
     ssize_t result;
+    if (signal->read_fd < 0) return;
     if (desired == signal->set) return;
     if (desired) {
         do {
@@ -100,6 +121,9 @@ readiness_set(readiness_signal_t *signal, bool desired)
         } while (result < 0 && errno == EINTR);
         if (result == 1 || (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
             signal->set = true;
+#ifdef _WIN32
+            SetEvent(signal->event);
+#endif
         }
     }
     else {
@@ -108,6 +132,9 @@ readiness_set(readiness_signal_t *signal, bool desired)
         } while (result < 0 && errno == EINTR);
         if (result == 1 || (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
             signal->set = false;
+#ifdef _WIN32
+            ResetEvent(signal->event);
+#endif
         }
     }
 }
@@ -176,10 +203,8 @@ queue_free(void *pointer)
     if (queue->shared) pthread_mutex_destroy(&queue->lock);
     free(queue->values);
     free(queue->enqueued_at);
-    if (queue->can_pop.read_fd >= 0) close(queue->can_pop.read_fd);
-    if (queue->can_pop.write_fd >= 0) close(queue->can_pop.write_fd);
-    if (queue->can_push.read_fd >= 0) close(queue->can_push.read_fd);
-    if (queue->can_push.write_fd >= 0) close(queue->can_push.write_fd);
+    readiness_close(&queue->can_pop);
+    readiness_close(&queue->can_push);
     ruby_xfree(queue);
 }
 
@@ -371,20 +396,6 @@ extract_timeout(int argc, VALUE *argv)
     return timeout;
 }
 
-static VALUE
-queue_wait_descriptor_body(VALUE opaque)
-{
-    VALUE *arguments = (VALUE *)opaque;
-    return rb_io_wait(arguments[0], INT2NUM(RUBY_IO_READABLE), arguments[1]);
-}
-
-static VALUE
-queue_wait_descriptor_cleanup(VALUE opaque)
-{
-    VALUE *arguments = (VALUE *)opaque;
-    return rb_io_close(arguments[0]);
-}
-
 static bool
 queue_wait_for_descriptor(int fd, queue_timeout_t *timeout)
 {
@@ -394,25 +405,7 @@ queue_wait_for_descriptor(int fd, queue_timeout_t *timeout)
         if (remaining <= 0) return false;
         wait_timeout = DBL2NUM(remaining);
     }
-    VALUE arguments[] = {
-        rb_io_open_descriptor(
-            rb_cIO,
-            fd,
-            FMODE_READABLE | FMODE_EXTERNAL,
-            Qnil,
-            Qnil,
-            NULL
-        ),
-        wait_timeout,
-    };
-    VALUE result = rb_ensure(
-        queue_wait_descriptor_body,
-        (VALUE)arguments,
-        queue_wait_descriptor_cleanup,
-        (VALUE)arguments
-    );
-    RB_GC_GUARD(arguments[0]);
-    return RTEST(result);
+    return containers_wait_for_readable_level(fd, wait_timeout);
 }
 
 typedef struct {
@@ -430,11 +423,61 @@ queue_wait_body(VALUE opaque)
     return queue_wait_for_descriptor(context->wait_fd, context->timeout) ? Qtrue : Qfalse;
 }
 
+#ifdef _WIN32
+typedef struct {
+    HANDLE event;
+    DWORD timeout;
+    DWORD result;
+} queue_event_wait_t;
+
+static void *
+queue_event_wait_without_gvl(void *opaque)
+{
+    queue_event_wait_t *wait = (queue_event_wait_t *)opaque;
+    wait->result = WaitForSingleObject(wait->event, wait->timeout);
+    return NULL;
+}
+
+static void
+queue_event_wait_interrupt(void *opaque)
+{
+    queue_event_wait_t *wait = (queue_event_wait_t *)opaque;
+    SetEvent(wait->event);
+}
+
+static VALUE
+queue_event_wait_body(VALUE opaque)
+{
+    queue_wait_context_t *context = (queue_wait_context_t *)opaque;
+    DWORD timeout = INFINITE;
+    if (context->timeout->finite) {
+        double remaining = context->timeout->deadline - monotonic_now();
+        if (remaining <= 0) return Qfalse;
+        timeout = (DWORD)ceil(remaining * 1000);
+    }
+    queue_event_wait_t wait = {
+        .event = context->signal->event,
+        .timeout = timeout,
+        .result = WAIT_FAILED,
+    };
+    rb_thread_call_without_gvl(
+        queue_event_wait_without_gvl,
+        &wait,
+        queue_event_wait_interrupt,
+        &wait
+    );
+    if (wait.result == WAIT_TIMEOUT) return Qfalse;
+    if (wait.result == WAIT_OBJECT_0) return Qtrue;
+    errno = EIO;
+    rb_sys_fail("WaitForSingleObject");
+}
+#endif
+
 static VALUE
 queue_wait_cleanup(VALUE opaque)
 {
     queue_wait_context_t *context = (queue_wait_context_t *)opaque;
-    close(context->wait_fd);
+    if (context->wait_fd >= 0) close(context->wait_fd);
     queue_lock(context->queue);
     (*context->waiter_count)--;
     queue_update_readiness(context->queue);
@@ -466,6 +509,26 @@ queue_wait(VALUE self, queue_t *queue, readiness_signal_t *signal, size_t *waite
         errno = error;
         rb_sys_fail("pipe");
     }
+#ifdef _WIN32
+    VALUE main_ractor_marker;
+    bool in_main_ractor = rb_ractor_local_storage_value_lookup(
+        queue_main_ractor_key,
+        &main_ractor_marker
+    );
+    if (in_main_ractor && NIL_P(rb_fiber_scheduler_current())) {
+        queue_wait_context_t context = {
+            .queue = queue,
+            .signal = signal,
+            .waiter_count = waiter_count,
+            .timeout = timeout,
+            .wait_fd = -1,
+        };
+        (*waiter_count)++;
+        queue_update_readiness(queue);
+        queue_unlock(queue);
+        return RTEST(rb_ensure(queue_event_wait_body, (VALUE)&context, queue_wait_cleanup, (VALUE)&context));
+    }
+#endif
     /* Ruby 3.4 reports rb_io_close for an external wrapper to every waiter on
      * the same descriptor number. A duplicate observes the same readiness pipe
      * without letting one waiter's wrapper cleanup cancel its siblings. */
@@ -495,8 +558,7 @@ static void
 raise_queue_closed(void)
 {
     VALUE farce = rb_const_get(rb_cObject, id_farce);
-    VALUE queue = rb_const_get(farce, id_public_queue);
-    rb_raise(rb_const_get(queue, id_closed_error), "queue is closed");
+    rb_raise(rb_const_get(farce, id_closed_error), "queue is closed");
 }
 
 RBIMPL_ATTR_NORETURN()
@@ -504,8 +566,7 @@ static void
 raise_queue_sealed(void)
 {
     VALUE farce = rb_const_get(rb_cObject, id_farce);
-    VALUE queue = rb_const_get(farce, id_public_queue);
-    rb_raise(rb_const_get(queue, id_sealed_error), "queue is sealed");
+    rb_raise(rb_const_get(farce, id_sealed_error), "queue is sealed");
 }
 
 static VALUE
@@ -880,10 +941,13 @@ queue_wait_push(int argc, VALUE *argv, VALUE self)
 void
 containers_init_queue(VALUE namespace)
 {
+#ifdef _WIN32
+    queue_main_ractor_key = rb_ractor_local_storage_value_newkey();
+    rb_ractor_local_storage_value_set(queue_main_ractor_key, Qtrue);
+#endif
     id_farce = rb_intern("Farce");
-    id_public_queue = rb_intern("Queue");
-    id_closed_error = rb_intern("ClosedError");
-    id_sealed_error = rb_intern("SealedError");
+    id_closed_error = rb_intern("ClosedQueueError");
+    id_sealed_error = rb_intern("SealedQueueError");
     id_timeout = rb_intern("timeout");
     cQueue = rb_define_class_under(namespace, "Queue", rb_cObject);
     rb_define_alloc_func(cQueue, queue_allocate);

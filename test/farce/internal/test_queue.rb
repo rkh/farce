@@ -343,7 +343,7 @@ module Farce
 
         queue.close
 
-        assert_instance_of Farce::Queue::ClosedError, thread.value
+        assert_instance_of Farce::ClosedQueueError, thread.value
       end
 
       def test_close_wakes_blocked_push
@@ -358,7 +358,7 @@ module Farce
 
         queue.close
 
-        assert_instance_of Farce::Queue::ClosedError, thread.value
+        assert_instance_of Farce::ClosedQueueError, thread.value
       end
 
       def test_interrupted_native_waiters_leave_their_siblings_usable

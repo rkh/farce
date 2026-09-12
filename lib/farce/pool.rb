@@ -37,10 +37,6 @@ module Farce
   class Pool < Farce::Abstract::Scheduler
     include Shareable
 
-    # Raised when attempting to schedule a task on a closed pool.
-    class ClosedError < Scheduler::ClosedError
-    end
-
     # @return [Float] Maximum queue wait before adding a worker.
     attr_reader :grow_after
 
@@ -108,9 +104,9 @@ module Farce
     # @param auto_local [Boolean] Accepted for compatibility with {Scheduler#schedule}.
     # @yield [*args] Task to execute.
     # @return [Pool] self.
-    # @raise [ClosedError] If the pool is closing or closed.
+    # @raise [PoolClosedError] If the pool is closing or closed.
     def schedule(*args, mode: :copy, auto_local: true, &block) # rubocop:disable Lint/UnusedMethodArgument
-      raise ClosedError, "cannot schedule task on a closed pool" if closed?
+      raise PoolClosedError, "cannot schedule task on a closed pool" if closed?
       raise ArgumentError, "local transfer is not supported by a pool" if mode == :local
 
       task = Internal::ScheduledTask.new(args, block, mode)
@@ -119,7 +115,7 @@ module Farce
       self
     rescue ClosedQueueError
       raise unless closed?
-      raise ClosedError, "cannot schedule task on a closed pool"
+      raise PoolClosedError, "cannot schedule task on a closed pool"
     end
 
     # Stop accepting tasks and drain queued work.

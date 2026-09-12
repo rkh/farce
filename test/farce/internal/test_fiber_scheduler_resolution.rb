@@ -13,6 +13,7 @@ module Farce
       end
 
       def test_native_resolves_in_non_main_ractors
+        skip "the native epoll/kqueue scheduler is unavailable on Windows" if Gem.win_platform?
         check_non_main_ractors("native")
       end
 

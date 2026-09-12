@@ -7,7 +7,11 @@ module Farce
   module Internal
     class TestFiberSchedulerBackends < Test
       def test_implementation_loads_the_single_internal_scheduler
-        implementations = RUBY_ENGINE == "ruby" ? %w[native select] : ["jvm"]
+        implementations = if RUBY_ENGINE == "ruby"
+                            Gem.win_platform? ? ["select"] : %w[native select]
+                          else
+                            ["jvm"]
+                          end
         implementations.each do |implementation|
           env = { "FARCE_FIBER_SCHEDULER_IMPLEMENTATION" => implementation, "FARCE_IO_BACKEND" => nil }
           output, error, status = Open3.capture3(env,
@@ -96,6 +100,7 @@ module Farce
 
       def test_incompatible_implementation_is_a_load_error
         implementations = RUBY_ENGINE == "ruby" ? ["jvm"] : %w[native select]
+        implementations << "native" if RUBY_ENGINE == "ruby" && Gem.win_platform?
         implementations.each do |implementation|
           env = { "FARCE_FIBER_SCHEDULER_IMPLEMENTATION" => implementation, "FARCE_IO_BACKEND" => nil }
           output, error, status = Open3.capture3(env,

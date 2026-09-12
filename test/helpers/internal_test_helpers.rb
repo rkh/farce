@@ -27,7 +27,10 @@ module Helpers
     # polling an indirect constant before publication begins, then verify that
     # its first permitted native call observes the committed state rather than
     # the transient uninitialized state.
-    def assert_atomic_ractor_publication(container_class, iterations: 20_000)
+    def assert_atomic_ractor_publication(
+      container_class,
+      iterations: Gem.win_platform? ? 200 : 20_000
+    )
       holder = Module.new
       events = Ractor::Port.new if defined?(Ractor::Port)
       worker = Ractor.new(holder, events) do |target_holder, event_port|

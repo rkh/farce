@@ -21,6 +21,22 @@ Minitest::Reporters.use! unless Gem.win_platform?
 module Helpers
   Internal = Farce.const_get(:Internal, false)
   include Internal::Autoloads["#{__dir__}/helpers"]
+
+  # CRuby on Windows can leave a newly-created Ractor unscheduled when another
+  # Ractor was recently created or terminated. A collection immediately before
+  # spawning is enough to make the scheduler progress, while keeping the
+  # workaround out of ordinary thread-only tests.
+  module WindowsRactorStartBarrier
+    def new(...)
+      main = Ractor.current == Ractor.main
+      GC.start if main
+      super
+    end
+  end
+end
+
+if RUBY_ENGINE == "ruby" && Gem.win_platform?
+  Ractor.singleton_class.prepend(Helpers::WindowsRactorStartBarrier)
 end
 
 class Test < Minitest::Test

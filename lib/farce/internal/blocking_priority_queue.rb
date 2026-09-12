@@ -94,7 +94,7 @@ module Farce
 
         while true
           generation = @signal.generation
-          raise ::Farce::Queue::ClosedError, "queue is closed" if closed?
+          raise ::Farce::ClosedQueueError, "queue is closed" if closed?
           return true if yield
           return false unless @signal.wait(generation, timeout: remaining_timeout(deadline))
         end
@@ -102,7 +102,7 @@ module Farce
 
       def raise_unwritable
         closed = closed?
-        error = closed ? ::Farce::Queue::ClosedError : ::Farce::Queue::SealedError
+        error = closed ? ::Farce::ClosedQueueError : ::Farce::SealedQueueError
         raise error, closed ? "queue is closed" : "queue is sealed"
       end
 

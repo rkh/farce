@@ -16,6 +16,7 @@ void containers_check_shareable(VALUE value);
 bool containers_strict_bool(VALUE value, const char *name);
 void containers_finish_initialization(VALUE self);
 bool containers_wait_for_readable(int fd, VALUE timeout);
+bool containers_wait_for_readable_level(int fd, VALUE timeout);
 RBIMPL_ATTR_NORETURN()
 void containers_raise_key_error(VALUE receiver, VALUE key);
 

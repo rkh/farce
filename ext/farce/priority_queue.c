@@ -390,7 +390,6 @@ typedef struct {
 static VALUE cPriorityQueue;
 static VALUE eIsolationError;
 static ID id_farce;
-static ID id_public_queue;
 static ID id_closed_error;
 static ID id_sealed_error;
 static ID id_compare;
@@ -1067,8 +1066,7 @@ static void
 priority_queue_raise_closed(void)
 {
     VALUE farce = rb_const_get(rb_cObject, id_farce);
-    VALUE queue = rb_const_get(farce, id_public_queue);
-    rb_raise(rb_const_get(queue, id_closed_error), "queue is closed");
+    rb_raise(rb_const_get(farce, id_closed_error), "queue is closed");
 }
 
 RBIMPL_ATTR_NORETURN()
@@ -1076,8 +1074,7 @@ static void
 priority_queue_raise_sealed(void)
 {
     VALUE farce = rb_const_get(rb_cObject, id_farce);
-    VALUE queue = rb_const_get(farce, id_public_queue);
-    rb_raise(rb_const_get(queue, id_sealed_error), "queue is sealed");
+    rb_raise(rb_const_get(farce, id_sealed_error), "queue is sealed");
 }
 
 typedef struct {
@@ -2015,9 +2012,8 @@ containers_init_priority_queue(VALUE namespace)
     id_broadcast = rb_intern("broadcast");
     id_case_equal = rb_intern("===");
     id_farce = rb_intern("Farce");
-    id_public_queue = rb_intern("Queue");
-    id_closed_error = rb_intern("ClosedError");
-    id_sealed_error = rb_intern("SealedError");
+    id_closed_error = rb_intern("ClosedQueueError");
+    id_sealed_error = rb_intern("SealedQueueError");
     ractor = rb_const_get(rb_cObject, id_ractor);
     eIsolationError = rb_const_get(ractor, rb_intern("IsolationError"));
 

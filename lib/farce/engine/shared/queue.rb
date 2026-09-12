@@ -203,12 +203,12 @@ module Farce
       end
 
       def raise_closed
-        raise ::Farce::Queue::ClosedError, "queue is closed"
+        raise ::Farce::ClosedQueueError, "queue is closed"
       end
 
       def raise_unwritable
         closed = closed?
-        error = closed ? ::Farce::Queue::ClosedError : ::Farce::Queue::SealedError
+        error = closed ? ::Farce::ClosedQueueError : ::Farce::SealedQueueError
         raise error, closed ? "queue is closed" : "queue is sealed"
       end
 

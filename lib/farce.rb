@@ -6,6 +6,7 @@ require "farce/config"
 require "farce/internal"
 require "farce/engine/#{RUBY_ENGINE}"
 require "farce/version"
+require "farce/error"
 
 # Namespace for everything provided by Farce.
 #

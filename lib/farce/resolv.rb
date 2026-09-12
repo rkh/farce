@@ -13,6 +13,7 @@ module Farce
     Hosts      = ::Resolv::Hosts
     VERSION    = ::Resolv::VERSION
     IDENTIFIER = Internal::Counter.new
+    DEFAULT_HOSTS = Ractor.make_shareable(::Resolv::Hosts::DefaultFileName, copy: true)
     DEFAULT_CONFIG =
       if RUBY_PLATFORM.match?(/mswin|mingw/)
         Ractor.make_shareable(::Resolv::DNS::Config.default_config_hash, copy: true)
@@ -31,7 +32,7 @@ module Farce
 
     ::Resolv::DNS::Message.prepend(MessageExtension)
     ::Resolv::DNS.singleton_class.prepend(RequestIDExtension)
-    private_constant :DEFAULT_CONFIG, :IDENTIFIER, :MessageExtension, :RequestIDExtension
+    private_constant :DEFAULT_CONFIG, :DEFAULT_HOSTS, :IDENTIFIER, :MessageExtension, :RequestIDExtension
 
     # @return [::Resolv] the resolver instance for the current ractor
     def self.resolver = Internal::Storage.store_if_absent(self) { new }
@@ -41,7 +42,7 @@ module Farce
       if resolvers.nil? || resolvers.is_a?(Hash)
         defaults = DEFAULT_CONFIG || DNS::Config.default_config_hash
         config = defaults.merge(resolvers || config)
-        resolvers = [Hosts.new, DNS.new(config)]
+        resolvers = [Hosts.new(DEFAULT_HOSTS), DNS.new(config)]
       end
       ::Resolv.new(resolvers)
     end

@@ -100,6 +100,7 @@ module Farce
       end
 
       def test_socket_reopen_between_reads_does_not_reuse_an_old_lease
+        skip "Ruby cannot select a reopened socket on Windows" if Gem.win_platform?
         original, old_writer = pair
         replacement, new_writer = pair
         data = []

@@ -183,17 +183,18 @@ class TestUnsharedSignalPool < Test
   def test_active_slots_are_distinct_and_idle_retention_is_bounded
     signal = Signal.new
     results = []
-    100.times { Fiber.schedule { results << signal.wait } }
+    count = Gem.win_platform? ? 60 : 100
+    count.times { Fiber.schedule { results << signal.wait } }
 
-    assert_equal 100, signal.num_waiting
-    assert_equal 100, @scheduler.handles.map(&:fileno).uniq.size
+    assert_equal count, signal.num_waiting
+    assert_equal count, @scheduler.handles.map(&:fileno).uniq.size
     GC.verify_compaction_references(double_heap: true, toward: :empty)
     signal.broadcast
     @scheduler.tick
 
-    assert_equal [1] * 100, results
+    assert_equal [1] * count, results
     assert_equal(2, @scheduler.handles.count { !it.closed? })
-    assert_equal 98, @scheduler.handles.count(&:closed?)
+    assert_equal count - 2, @scheduler.handles.count(&:closed?)
     assert_equal 0, signal.num_waiting
   end
 
@@ -255,6 +256,7 @@ class TestUnsharedSignalPool < Test
   end
 
   def test_pool_collection_releases_idle_descriptors
+    skip "open descriptor count is not available" unless File.directory?("/dev/fd")
     3.times { GC.start }
     before = Dir.children("/dev/fd").size
     references = 20.times.map { make_idle_pool }

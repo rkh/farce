@@ -14,3 +14,8 @@ can be recovered with `getkey`. Other keys must already be Ractor-shareable. `Lo
 The extension is built and loaded only on CRuby. Other engines use their Ruby or JVM implementations and never compile this directory.
 
 This extension is intentionally kept separate from the `rebind` extension, as the other extension is tightly bound to CRuby internals and may have to be adjusted for each new Ruby version.
+
+
+## AI Usage
+
+OpenAI's Astra has been used to explore and fix bugs in this extensions, primarily for implementing Windows support, as well as for performance and high contention testing. All generated code has been reviewed extensively if it ended up being used in the final implementation.
