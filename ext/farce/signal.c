@@ -159,20 +159,6 @@ containers_signal_initialize(VALUE self)
     return self;
 }
 
-static VALUE
-containers_signal_wait_descriptor_body(VALUE opaque)
-{
-    VALUE *arguments = (VALUE *)opaque;
-    return rb_io_wait(arguments[0], INT2NUM(RUBY_IO_READABLE), arguments[1]);
-}
-
-static VALUE
-containers_signal_wait_descriptor_cleanup(VALUE opaque)
-{
-    VALUE *arguments = (VALUE *)opaque;
-    return rb_io_close(arguments[0]);
-}
-
 static bool
 containers_signal_wait_for_descriptor(int fd, containers_signal_timeout_t *timeout)
 {
@@ -183,25 +169,7 @@ containers_signal_wait_for_descriptor(int fd, containers_signal_timeout_t *timeo
         wait_timeout = DBL2NUM(remaining);
     }
 
-    VALUE arguments[] = {
-        rb_io_open_descriptor(
-            rb_cIO,
-            fd,
-            FMODE_READABLE | FMODE_EXTERNAL,
-            Qnil,
-            Qnil,
-            NULL
-        ),
-        wait_timeout,
-    };
-    VALUE result = rb_ensure(
-        containers_signal_wait_descriptor_body,
-        (VALUE)arguments,
-        containers_signal_wait_descriptor_cleanup,
-        (VALUE)arguments
-    );
-    RB_GC_GUARD(arguments[0]);
-    return RTEST(result);
+    return containers_wait_for_readable(fd, wait_timeout);
 }
 
 static VALUE

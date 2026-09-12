@@ -149,37 +149,10 @@ containers_lock_initialize(VALUE self)
     return self;
 }
 
-static VALUE
-containers_lock_wait_io(VALUE io)
-{
-    return rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), Qnil);
-}
-
-static VALUE
-containers_lock_close_wait_io(VALUE io)
-{
-    return rb_io_close(io);
-}
-
 static bool
 containers_lock_wait_for_descriptor(int fd)
 {
-    VALUE io = rb_io_open_descriptor(
-        rb_cIO,
-        fd,
-        FMODE_READABLE | FMODE_EXTERNAL,
-        Qnil,
-        Qnil,
-        NULL
-    );
-    VALUE result = rb_ensure(
-        containers_lock_wait_io,
-        io,
-        containers_lock_close_wait_io,
-        io
-    );
-    RB_GC_GUARD(io);
-    return RTEST(result);
+    return containers_wait_for_readable(fd, Qnil);
 }
 
 static VALUE

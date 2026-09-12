@@ -263,29 +263,6 @@ typedef struct {
     atom_timeout_t *timeout;
 } atom_wait_context_t;
 
-typedef struct {
-    VALUE io;
-    VALUE timeout;
-} atom_io_wait_context_t;
-
-static VALUE
-atom_io_wait_body(VALUE opaque)
-{
-    atom_io_wait_context_t *context = (atom_io_wait_context_t *)opaque;
-    return rb_io_wait(
-        context->io,
-        INT2NUM(RUBY_IO_READABLE),
-        context->timeout
-    );
-}
-
-static VALUE
-atom_io_wait_cleanup(VALUE opaque)
-{
-    atom_io_wait_context_t *context = (atom_io_wait_context_t *)opaque;
-    return rb_io_close(context->io);
-}
-
 static bool
 atom_wait_for_descriptor(int fd, atom_timeout_t *timeout)
 {
@@ -295,25 +272,7 @@ atom_wait_for_descriptor(int fd, atom_timeout_t *timeout)
         if (remaining <= 0) return false;
         wait_timeout = DBL2NUM(remaining);
     }
-    atom_io_wait_context_t context = {
-        .io = rb_io_open_descriptor(
-            rb_cIO,
-            fd,
-            FMODE_READABLE | FMODE_EXTERNAL,
-            Qnil,
-            Qnil,
-            NULL
-        ),
-        .timeout = wait_timeout,
-    };
-    VALUE result = rb_ensure(
-        atom_io_wait_body,
-        (VALUE)&context,
-        atom_io_wait_cleanup,
-        (VALUE)&context
-    );
-    RB_GC_GUARD(context.io);
-    return RTEST(result);
+    return containers_wait_for_readable(fd, wait_timeout);
 }
 
 static VALUE

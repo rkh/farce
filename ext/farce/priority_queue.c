@@ -793,37 +793,10 @@ typedef struct {
     priority_queue_lock_waiter_t waiter;
 } priority_queue_lock_wait_context_t;
 
-static VALUE
-priority_queue_lock_wait_io(VALUE io)
-{
-    return rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), Qnil);
-}
-
-static VALUE
-priority_queue_lock_close_wait_io(VALUE io)
-{
-    return rb_io_close(io);
-}
-
 static bool
 priority_queue_lock_wait_for_descriptor(int fd)
 {
-    VALUE io = rb_io_open_descriptor(
-        rb_cIO,
-        fd,
-        FMODE_READABLE | FMODE_EXTERNAL,
-        Qnil,
-        Qnil,
-        NULL
-    );
-    VALUE result = rb_ensure(
-        priority_queue_lock_wait_io,
-        io,
-        priority_queue_lock_close_wait_io,
-        io
-    );
-    RB_GC_GUARD(io);
-    return RTEST(result);
+    return containers_wait_for_readable(fd, Qnil);
 }
 
 static VALUE
