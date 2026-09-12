@@ -4,7 +4,7 @@
 
 module Farce
   # A shareable FIFO queue with transfer modes for unshareable values.
-  class Queue < Abstract::Queue
+  class Queue < Farce::Abstract::Queue
     # Raised when an operation cannot proceed because the queue is closed.
     class ClosedError < ::ClosedQueueError
     end
