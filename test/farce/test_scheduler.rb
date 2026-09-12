@@ -261,9 +261,12 @@ module Farce
       end
 
       assert_equal :done, result.pop(timeout: 2)
+      scheduler.close
+
+      assert worker.join(5), "scheduler worker did not stop after close"
     ensure
       scheduler&.close
-      worker&.kill&.join
+      worker&.join(5)
     end
 
     def test_launch_records_and_reraises_setup_failure

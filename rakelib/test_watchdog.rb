@@ -86,7 +86,10 @@ class TestWatchdog
       return
     end
 
-    sample_on_macos if @diagnostics
+    if @diagnostics
+      sample_on_macos
+      dump_jruby_threads
+    end
     signal_process(@diagnostics ? "ABRT" : "TERM")
     wait_until(monotonic_time + @shutdown_grace)
     force_terminate_tree
@@ -108,6 +111,16 @@ class TestWatchdog
     wait_for_sampler(sampler)
   rescue SystemCallError => e
     report "Could not capture native stacks: #{e.message}"
+  end
+
+  def dump_jruby_threads
+    return unless RUBY_ENGINE == "jruby"
+
+    report "Requesting a JVM thread dump from JRuby pid #{@pid}"
+    signal_process("QUIT")
+    sleep 0.5
+  rescue ArgumentError, NotImplementedError, SystemCallError => e
+    report "Could not request a JVM thread dump: #{e.message}"
   end
 
   def wait_for_sampler(sampler)
