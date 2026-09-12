@@ -35,8 +35,39 @@ module Farce
     #   @yieldreceiver [BasicObject, nil]
     #     Local mode will not touch the block's binding (self stays the same), but other modes may change it to `nil`.
     #
-    #   @return [void]
+    #   @return [self]
+    #
+    # @!method close
+    #   @abstract This method must be implemented by concrete scheduler subclasses.
+    #   Closes the scheduler, releasing any resources it holds.
+    #   Once closed, the scheduler cannot be used to schedule new tasks.
+    #   Will drain any pending tasks before fully closing. If tasks are running indefinitely, it may block.
+    #   @return [self]
+    #
+    # @!method closed?
+    #   @abstract This method must be implemented by concrete scheduler subclasses.
+    #   @return [Boolean] Whether the scheduler is closed.
+    #
+    # @!method state
+    #   @abstract This method must be implemented by concrete scheduler subclasses.
+    #   @return [Symbol]
+    #     The current state of the scheduler.
+    #
+    #     Common states include:
+    #     * `:initialized`, `:launching` and `:setup` for the setup phase.
+    #     * `:running` for the execution phase.
+    #     * `:closing`, `:closed`, and `:error` for the termination phase.
+    #
+    #     Not all schedulers will implement every state.
+    #
+    # @!method ractor_safe?
+    #   @abstract Schedulers should include {Shareable} or {Unshareable}, which implement this method.
+    #   @return [Boolean] Whether the scheduler is safe to use across Ractors.
     class Scheduler
+      # An error that occurred during the scheduler's operation, if any.
+      # This is primarily for scheduling errors, not execution errors.
+      # You can check this if the {#state} is `:error`.
+      def error = nil
     end
   end
 end
