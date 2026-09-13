@@ -2,7 +2,12 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
+# Load worker dependencies before a scheduler is used from another Ractor.
+# Some concurrent autoload can lead to stalls on Windows with Ruby 3.4.
+require "farce/clock"
+require "farce/internal/thread_pool"
 require "farce/resolv"
+require "farce/resolv/dns"
 
 module Farce
   module Internal
