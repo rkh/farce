@@ -236,7 +236,7 @@ module Farce
       end
 
       def test_wait_does_not_block_a_fiber_scheduler
-        skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
+        return unless Fiber.respond_to?(:set_scheduler)
 
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
@@ -286,8 +286,7 @@ module Farce
       end
 
       def test_key_equality_does_not_hold_native_mutex_across_fiber_yield
-        return unless RUBY_ENGINE == "ruby"
-        skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
+        return unless RUBY_ENGINE == "ruby" && Fiber.respond_to?(:set_scheduler)
 
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)

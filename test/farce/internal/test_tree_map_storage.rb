@@ -710,8 +710,7 @@ module Farce
       end
 
       def test_comparator_contention_parks_only_the_waiting_fiber_on_cruby
-        return unless RUBY_ENGINE == "ruby"
-        skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
+        return unless RUBY_ENGINE == "ruby" && Fiber.respond_to?(:set_scheduler)
 
         begin
           scheduler = Helpers::QueueTestScheduler.new

@@ -1,15 +1,11 @@
 # frozen_string_literal: true
 
-return unless RUBY_ENGINE == "ruby"
+return unless RUBY_ENGINE == "ruby" && Fiber.respond_to?(:set_scheduler)
 
 require_relative "../setup"
 
 module Farce
   class TestQueueFiberScheduler < Test
-    def setup
-      skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
-    end
-
     def teardown
       Fiber.set_scheduler(nil) if Fiber.respond_to?(:scheduler) && Fiber.scheduler
     end

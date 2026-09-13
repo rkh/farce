@@ -23,7 +23,7 @@ module Farce
       end
 
       def test_uses_native_weak_hooks_when_available
-        skip "native weak hooks unavailable" unless Internal.const_defined?(:NATIVE_WEAK_MAPS, false)
+        return unless Internal.const_defined?(:NATIVE_WEAK_MAPS, false)
 
         assert_nil atom_class.instance_method(:value).source_location
         atom = atom_class.new([]).freeze
@@ -33,7 +33,7 @@ module Farce
       end
 
       def test_can_be_created_in_a_non_main_ractor
-        skip "native ractors unavailable" unless RUBY_ENGINE == "ruby"
+        return unless RUBY_ENGINE == "ruby"
         type = atom_class
         worker = Ractor.new(type) do |klass|
           local = []

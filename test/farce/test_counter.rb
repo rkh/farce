@@ -224,9 +224,7 @@ module Farce
       return unless Internal.native_ractors?
       # CRuby 3.4 on Linux can hang when joining threads inside Ractors.
       # Reproduced without Farce using only Ractors containing Thread.new calls.
-      if RUBY_ENGINE == "ruby" && RUBY_VERSION.start_with?("3.4.") && RUBY_PLATFORM.include?("linux")
-        skip "CRuby 3.4/Linux can hang with nested Ractors and threads"
-      end
+      return if RUBY_ENGINE == "ruby" && RUBY_VERSION.start_with?("3.4.") && RUBY_PLATFORM.include?("linux")
       counter = Counter.new
       workers = 4.times.map do
         Ractor.new(counter) do |shared|

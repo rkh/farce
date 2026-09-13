@@ -160,8 +160,7 @@ module Farce
       end
 
       def test_prevent_copyable_markers_close_descriptors_and_follow_owner_lifetime
-        descriptor_count = open_file_descriptor_count
-        skip "open descriptor count is not available" unless descriptor_count
+        return unless descriptor_count = open_file_descriptor_count
 
         GC.start
         count = 10_000

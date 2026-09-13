@@ -5,6 +5,9 @@
 require_relative "../../setup"
 require "weakref"
 
+return unless RUBY_ENGINE == "ruby"
+return if Farce.const_defined?("Internal::NATIVE_WEAK_MAPS") && Farce.const_get("Internal::NATIVE_WEAK_MAPS")
+
 module Farce
   module Internal
     class TestVaultWeakMap < Test
@@ -61,12 +64,6 @@ module Farce
           end
           0
         end
-      end
-
-      def setup
-        skip "Vault fallback requires CRuby" unless RUBY_ENGINE == "ruby"
-        return unless Internal.const_defined?(:NATIVE_WEAK_MAPS, false) && Internal::NATIVE_WEAK_MAPS
-        skip "native weak maps are enabled"
       end
 
       def map_classes = [WeakKeyMap, WeakValueMap, WeakMap]

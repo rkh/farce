@@ -36,7 +36,7 @@ class TestWatchdogTest < Minitest::Test
   end
 
   def test_timeout_terminates_descendant_processes
-    skip "process-group assertion is POSIX-specific" if Gem.win_platform?
+    skip if Gem.win_platform?
 
     Tempfile.create do |pid_file|
       source = 'sleep 30 & child=$!; printf "%s\n" "$child" > "$1"; wait'

@@ -146,7 +146,7 @@ module Farce
     end
 
     def test_strict_variant_runs_updates_in_the_requesting_ractor
-      skip "native ractors unavailable" unless Internal.native_ractors?
+      return unless Internal.native_ractors?
 
       atom = Strict::WeakAtom.new(0)
       worker = Ractor.new(atom) do |shared|

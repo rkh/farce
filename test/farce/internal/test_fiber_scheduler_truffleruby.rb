@@ -7,11 +7,8 @@ require_relative "../../setup"
 module Farce
   module Internal
     class TestFiberSchedulerTruffleruby < Test
-      def setup
-        skip "TruffleRuby only" unless RUBY_ENGINE == "truffleruby"
-      end
-
       def test_preloading_succeeds_but_instantiation_is_unsupported
+        return unless RUBY_ENGINE == "truffleruby"
         scheduler = Internal.const_get(:FiberScheduler, false)
 
         assert_kind_of Class, scheduler

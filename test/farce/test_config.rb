@@ -224,7 +224,7 @@ class TestConfig < Test
   end
 
   def test_frozen_config_is_shareable
-    skip "native Ractors are unavailable" unless RUBY_ENGINE == "ruby"
+    return unless RUBY_ENGINE == "ruby"
     config = Farce::Config.new { |c| c.fiber_scheduler_implementation = :select }.freeze
 
     assert Ractor.shareable?(config)

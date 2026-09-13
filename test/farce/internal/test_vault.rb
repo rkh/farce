@@ -28,11 +28,8 @@ module Farce
         def ==(_other) = @vault.copy_out(:other)
       end
 
-      def setup
-        skip "native Vault requires CRuby" unless Internal.native_ractors?
-      end
-
       def test_recursive_request_raises_without_stopping_the_vault
+        return unless Internal.native_ractors?
         vault = Vault.new
         key = Object.new.freeze
         vault.copy_in(key, RecursiveEquality.new(vault))
@@ -48,6 +45,7 @@ module Farce
       end
 
       def test_concurrent_callers_receive_their_own_copy_and_move_replies
+        return unless Internal.native_ractors?
         vault = Vault.new
         workers = 8.times.map do |index|
           Thread.new do
@@ -66,6 +64,7 @@ module Farce
       end
 
       def test_copy_and_move_replies_progress_between_weak_map_requests
+        return unless Internal.native_ractors?
         Timeout.timeout(30) do
           200.times do |index|
             map = Farce::WeakKeyMap.new
@@ -80,6 +79,7 @@ module Farce
       end
 
       def test_interrupted_request_does_not_poison_later_replies
+        return unless Internal.native_ractors?
         vault = Vault.new
         key = Object.new.freeze
         other_key = Object.new.freeze

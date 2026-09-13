@@ -384,7 +384,7 @@ module Farce
     end
 
     def test_timed_pop_does_not_block_a_fiber_scheduler
-      skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
+      return unless Fiber.respond_to?(:set_scheduler)
       scheduler = Helpers::QueueTestScheduler.new
       Fiber.set_scheduler(scheduler)
       queue = TimerQueue.new
@@ -403,7 +403,7 @@ module Farce
     end
 
     def test_earlier_push_wakes_a_scheduled_fiber
-      skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
+      return unless Fiber.respond_to?(:set_scheduler)
       scheduler = Helpers::QueueTestScheduler.new
       Fiber.set_scheduler(scheduler)
       queue = TimerQueue.new

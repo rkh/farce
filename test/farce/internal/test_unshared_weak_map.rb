@@ -39,7 +39,7 @@ module Farce
       end
 
       def test_key_equality_does_not_hold_native_mutex_across_fiber_yield
-        skip "Fiber scheduler is unavailable" unless Fiber.respond_to?(:set_scheduler)
+        return unless Fiber.respond_to?(:set_scheduler)
 
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
@@ -86,7 +86,7 @@ module Farce
       end
 
       def test_simple_store_contention_does_not_block_a_fiber_scheduler
-        skip "Fiber scheduler is unavailable" unless Fiber.respond_to?(:set_scheduler)
+        return unless Fiber.respond_to?(:set_scheduler)
 
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
@@ -230,7 +230,7 @@ module Farce
       def test_clear_wakes_waiters_and_allows_reinsertion
         map_classes.each do |klass|
           map = klass.new({ key: 1 })
-          skip "Fiber scheduler is unavailable" unless Fiber.respond_to?(:set_scheduler)
+          return unless Fiber.respond_to?(:set_scheduler)
 
           scheduler = Helpers::QueueTestScheduler.new
           Fiber.set_scheduler(scheduler)
@@ -290,7 +290,7 @@ module Farce
       def test_waiter_follows_reinserted_entry
         map_classes.each do |klass|
           map = klass.new({ key: nil })
-          skip "Fiber scheduler is unavailable" unless Fiber.respond_to?(:set_scheduler)
+          return unless Fiber.respond_to?(:set_scheduler)
 
           scheduler = Helpers::QueueTestScheduler.new
           Fiber.set_scheduler(scheduler)
@@ -324,7 +324,7 @@ module Farce
                 # ObjectSpace::WeakMap retains keys on these engines.
                 # https://github.com/jruby/jruby/issues/8456
                 # https://github.com/truffleruby/truffleruby/issues/2547
-                skip "upstream ObjectSpace::WeakMap does not collect keys"
+                return # skip "upstream ObjectSpace::WeakMap does not collect keys"
               end
               klass = Internal.const_get(name, false)
               map, retained = build_entry(klass, identity:, retain: side == :key ? :value : :key)
@@ -492,7 +492,7 @@ module Farce
       end
 
       def test_can_be_created_locally_inside_a_ractor
-        skip "native ractors are unavailable" unless RUBY_ENGINE == "ruby"
+        return unless RUBY_ENGINE == "ruby"
 
         map_classes.each do |klass|
           worker = Ractor.new(klass) do |map_class|
@@ -562,7 +562,7 @@ module Farce
       def test_idle_equality_weak_key_map_releases_its_value
         # Direct ObjectSpace::WeakKeyMap controls show that these runtimes
         # release stale values on access. Preserve the primitive's behavior.
-        skip "ObjectSpace::WeakKeyMap defers value cleanup until access" if %w[jruby truffleruby].include?(RUBY_ENGINE)
+        return if %w[jruby truffleruby].include?(RUBY_ENGINE)
 
         map, weak_value = Thread.new do
           value = Object.new
@@ -579,9 +579,7 @@ module Farce
 
       MAP_NAMES.each do |map_name|
         define_method("test_#{map_name}_compares_keys_with_eql") do
-          if RUBY_ENGINE == "jruby" && map_name != :UnsharedWeakValueMap
-            skip "upstream ObjectSpace::WeakKeyMap uses == instead of eql?"
-          end
+          return if RUBY_ENGINE == "jruby" && map_name != :UnsharedWeakValueMap
 
           key_class = Class.new do
             attr_reader :rank

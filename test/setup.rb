@@ -46,3 +46,13 @@ class Test < Minitest::Test
   include Helpers
   include Helpers::Subprocess
 end
+
+# Including Farce loads MainScheduler through the mixin's eager autoloads.
+# Stop its dispatcher before JRuby tears down the remaining fiber threads.
+Minitest.after_run do
+  next if Farce.autoload?(:MainScheduler)
+
+  require "timeout"
+  Farce::MainScheduler.close
+  Timeout.timeout(5) { sleep 0.001 until Farce::MainScheduler.state == :closed }
+end

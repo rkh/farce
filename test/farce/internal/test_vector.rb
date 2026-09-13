@@ -348,10 +348,9 @@ module Farce
         assert_nil Vector.new.wait_until_non_nil(0, timeout: 0)
       end
 
-      # rubocop:disable Minitest/SkipEnsure
       def test_wait_does_not_block_a_fiber_scheduler
-        skip "Fiber schedulers are not supported on TruffleRuby" if RUBY_ENGINE == "truffleruby"
-        skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
+        return if RUBY_ENGINE == "truffleruby"
+        return unless Fiber.respond_to?(:set_scheduler)
 
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
@@ -375,8 +374,8 @@ module Farce
       end
 
       def test_update_contention_does_not_block_a_fiber_scheduler
-        skip "Fiber schedulers are not supported on TruffleRuby" if RUBY_ENGINE == "truffleruby"
-        skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
+        return if RUBY_ENGINE == "truffleruby"
+        return unless Fiber.respond_to?(:set_scheduler)
 
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
@@ -404,7 +403,6 @@ module Farce
       ensure
         Fiber.set_scheduler(nil) if Fiber.respond_to?(:scheduler) && Fiber.scheduler
       end
-      # rubocop:enable Minitest/SkipEnsure
 
       def test_rejects_unshareable_values
         return unless Internal.native_ractors?

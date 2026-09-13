@@ -173,7 +173,7 @@ module Farce
     end
 
     def test_scheduler_notification_failure_releases_the_callback_lock
-      skip "Direct scheduler callback path" if io_path?
+      return if io_path?
       [Unshared::PriorityQueue, Unshared::TimerQueue].each do |klass|
         scheduler = Scheduler.new
         Fiber.set_scheduler(scheduler)
@@ -195,7 +195,7 @@ module Farce
     end
 
     def test_synchronous_unblock_can_wait_for_commit_and_register_again
-      skip "Direct scheduler callback path" if io_path?
+      return if io_path?
       Fiber.set_scheduler(ImmediateScheduler.new)
       [Unshared::PriorityQueue, Unshared::TimerQueue].each do |klass|
         queue = new_queue(klass)

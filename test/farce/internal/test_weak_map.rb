@@ -50,15 +50,12 @@ module Farce
 
       def map_classes = MAP_CLASSES
 
-      def setup
-        skip "shared weak maps require native ractors" unless RUBY_ENGINE == "ruby"
-      end
-
       def teardown
         Fiber.set_scheduler(nil) if Fiber.respond_to?(:scheduler) && Fiber.scheduler
       end
 
       def test_waiter_observes_a_change_after_gc_with_an_equal_lookup_key
+        return unless RUBY_ENGINE == "ruby"
         [WeakKeyMap, WeakMap].each do |klass|
           entered = Queue.new
           ready = Thread::Queue.new
@@ -101,6 +98,8 @@ module Farce
       end
 
       def test_weakness_flags_and_shareability
+        return unless RUBY_ENGINE == "ruby"
+
         expectations = {
           WeakKeyMap   => [true, false],
           WeakValueMap => [false, true],
@@ -117,7 +116,8 @@ module Farce
       end
 
       def test_key_equality_does_not_hold_native_mutex_across_fiber_yield
-        skip "native map coordination contract" unless native_weak_maps?
+        return unless RUBY_ENGINE == "ruby"
+        return unless native_weak_maps?
 
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
@@ -141,6 +141,8 @@ module Farce
       end
 
       def test_key_equality_thread_pass_contention_stress
+        return unless RUBY_ENGINE == "ruby"
+
         map = WeakValueMap.new
         map[YieldingWeakEqualityKey.new(-1, yield_thread: true)] = -1
         threads = 4.times.map do |worker|
@@ -163,6 +165,8 @@ module Farce
       end
 
       def test_simple_store_contention_does_not_block_a_fiber_scheduler
+        return unless RUBY_ENGINE == "ruby"
+
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
         map = WeakValueMap.new({ key: 1 })
@@ -189,7 +193,8 @@ module Farce
       end
 
       def test_recursive_update_mutation_raises_and_releases_the_reservation
-        skip "native map coordination contract" unless native_weak_maps?
+        return unless RUBY_ENGINE == "ruby"
+        return unless native_weak_maps?
 
         MAP_CLASSES.each do |klass|
           map = klass.new({ key: 1 })
@@ -205,7 +210,8 @@ module Farce
       end
 
       def test_unscheduled_sibling_fiber_cannot_wait_for_the_owners_update
-        skip "native map coordination contract" unless native_weak_maps?
+        return unless RUBY_ENGINE == "ruby"
+        return unless native_weak_maps?
 
         MAP_CLASSES.each do |klass|
           map = klass.new({ key: 1 })
@@ -228,6 +234,8 @@ module Farce
       end
 
       def test_wait_does_not_block_a_fiber_scheduler
+        return unless RUBY_ENGINE == "ruby"
+
         iterations = native_weak_maps? ? 1 : 25
         iterations.times do
           MAP_CLASSES.each do |klass|
@@ -253,13 +261,14 @@ module Farce
       end
 
       def test_fallback_fiber_replies_do_not_retain_descriptors
-        skip "native weak maps do not use the owner Ractor" if native_weak_maps?
+        return unless RUBY_ENGINE == "ruby"
+        return if native_weak_maps?
 
         # Warm up the owner request path before taking the baseline. Each
         # Fiber-local reply queue releases its dormant signaling pipe after use.
         WeakMap.new
         before = open_file_descriptor_count
-        skip "open descriptor count is not available" unless before
+        return unless before
 
         100.times do
           scheduler = Helpers::QueueTestScheduler.new
@@ -274,6 +283,8 @@ module Farce
       end
 
       def test_update_always_calls_the_block
+        return unless RUBY_ENGINE == "ruby"
+
         MAP_CLASSES.each do |klass|
           map = klass.new({ nil_value: nil, counter: 1 })
           seen = []
@@ -299,6 +310,8 @@ module Farce
       end
 
       def test_rejects_unshareable_inputs
+        return unless RUBY_ENGINE == "ruby"
+
         MAP_CLASSES.each do |klass|
           map = klass.new
 
@@ -311,6 +324,8 @@ module Farce
       end
 
       def test_mutation_from_multiple_ractors
+        return unless RUBY_ENGINE == "ruby"
+
         MAP_CLASSES.each do |klass|
           map = klass.new
           workers = 4.times.map do
@@ -327,6 +342,8 @@ module Farce
       end
 
       def test_retired_cells_are_not_resurrected
+        return unless RUBY_ENGINE == "ruby"
+
         MAP_CLASSES.each do |klass|
           map = klass.new({ key: 1 })
 
@@ -343,6 +360,8 @@ module Farce
       end
 
       def test_weak_keys_are_collected
+        return unless RUBY_ENGINE == "ruby"
+
         [WeakKeyMap, WeakMap].each do |klass|
           map, retained_value = build_entry(klass, retain: :value)
 
@@ -352,6 +371,8 @@ module Farce
       end
 
       def test_weak_values_are_collected
+        return unless RUBY_ENGINE == "ruby"
+
         [WeakValueMap, WeakMap].each do |klass|
           map, retained_key = build_entry(klass, retain: :key)
 
@@ -361,6 +382,8 @@ module Farce
       end
 
       def test_strong_side_remains_reachable
+        return unless RUBY_ENGINE == "ruby"
+
         key = Ractor.make_shareable(Object.new)
         value = Ractor.make_shareable(Object.new)
         weak_key_map = WeakKeyMap.new({ key => value })

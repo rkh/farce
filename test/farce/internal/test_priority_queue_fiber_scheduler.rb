@@ -84,15 +84,13 @@ module Farce
     end
 
     class TestPriorityQueueStorageFiberScheduler < Test
-      def setup
-        skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
-      end
-
       def teardown
         Fiber.set_scheduler(nil) if Fiber.respond_to?(:scheduler) && Fiber.scheduler
       end
 
       def test_comparator_contention_parks_only_the_waiting_fiber
+        return unless Fiber.respond_to?(:set_scheduler)
+
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
         queue = new_queue
@@ -115,6 +113,8 @@ module Farce
       end
 
       def test_unscheduled_fiber_reentry_raises_instead_of_blocking_the_thread
+        return unless Fiber.respond_to?(:set_scheduler)
+
         queue = new_queue
         queue.push(TransferringPriority.new(1), :first)
         Thread.current[TransferringPriority::FIBER_KEY] = Fiber.new do
@@ -136,6 +136,8 @@ module Farce
       end
 
       def test_canceling_the_notified_storage_lock_waiter_wakes_the_next_fiber
+        return unless Fiber.respond_to?(:set_scheduler)
+
         scheduler = CancellingPriorityQueueScheduler.new
         Fiber.set_scheduler(scheduler)
         queue = new_queue

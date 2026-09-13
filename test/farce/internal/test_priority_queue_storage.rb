@@ -317,7 +317,7 @@ module Farce
       end
 
       def test_gc_compaction_updates_priorities_and_values
-        skip "GC compaction is unavailable" unless GC.respond_to?(:compact)
+        return unless GC.respond_to?(:compact)
 
         queue = new_queue(capacity: nil)
         256.times.reverse_each do |index|

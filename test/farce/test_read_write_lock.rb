@@ -404,16 +404,12 @@ module Farce
   end
 
   class TestReadWriteLockFiberScheduler < Test
-    def setup
-      skip "Fiber schedulers are not supported on TruffleRuby" if RUBY_ENGINE == "truffleruby"
-      skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
-    end
-
     def teardown
       Fiber.set_scheduler(nil) if Fiber.respond_to?(:scheduler) && Fiber.scheduler
     end
 
     def test_waiting_for_a_write_lock_does_not_block_the_scheduler
+      return unless Fiber.respond_to?(:set_scheduler)
       scheduler = Helpers::QueueTestScheduler.new
       Fiber.set_scheduler(scheduler)
       lock = ReadWriteLock.new

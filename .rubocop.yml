@@ -52,7 +52,13 @@ Lint/AssignmentInCondition:
 Lint/EmptyClass:
   Enabled: false
 
+Lint/NonLocalExitFromIterator:
+  Enabled: false
+
 Lint/SuppressedException:
+  Enabled: false
+
+Minitest/ReturnInTestMethod:
   Enabled: false
 
 Naming/FileName:

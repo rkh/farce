@@ -319,7 +319,7 @@ module Farce
     end
 
     def test_scheduled_producer_and_consumer_repeatedly_handoff_capacity
-      skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
+      return unless Fiber.respond_to?(:set_scheduler)
       scheduler = Helpers::QueueTestScheduler.new
       queue = PriorityQueue.new(capacity: 1)
       received = []

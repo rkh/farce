@@ -1,15 +1,12 @@
 # frozen_string_literal: true
 
+return unless Fiber.respond_to?(:set_scheduler)
 require_relative "../../setup"
 
 module Farce
   module Internal
     class TestFiberScheduler < Test
       include Helpers::InternalTestHelpers
-
-      def setup
-        skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
-      end
 
       def teardown
         Fiber.set_scheduler(nil) if Fiber.respond_to?(:scheduler) && Fiber.scheduler

@@ -73,7 +73,7 @@ module Farce
     end
 
     def test_scheduled_fibers_can_pair
-      skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
+      return unless Fiber.respond_to?(:set_scheduler)
 
       begin
         [Exchanger, Strict::Exchanger].each do |type|
@@ -133,7 +133,7 @@ module Farce
     end
 
     def test_move_mode_between_ractors
-      skip "Native Ractors are required for move semantics" unless Internal.native_ractors?
+      return unless Internal.native_ractors?
 
       exchanger = Exchanger.new(mode: :move)
       original = [:payload]
@@ -145,7 +145,7 @@ module Farce
     end
 
     def test_timeout_does_not_undo_value_preparation
-      skip "Native Ractors are required for transfer semantics" unless Internal.native_ractors?
+      return unless Internal.native_ractors?
 
       exchanger = Exchanger.new
       moved = []

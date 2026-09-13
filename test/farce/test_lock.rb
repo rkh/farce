@@ -370,7 +370,7 @@ module Farce
 
     def test_waiting_does_not_block_a_fiber_scheduler
       return unless Internal.native_ractors?
-      skip "Fiber schedulers are not supported" unless Fiber.respond_to?(:set_scheduler)
+      return unless Fiber.respond_to?(:set_scheduler)
 
       scheduler = Helpers::QueueTestScheduler.new
       Fiber.set_scheduler(scheduler)

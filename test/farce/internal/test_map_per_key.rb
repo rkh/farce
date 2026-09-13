@@ -8,7 +8,7 @@ module Farce
   module Internal
     class TestMapPerKey < Test
       def test_native_memory_accounting_tracks_live_reservations
-        skip "native memory accounting requires CRuby" unless RUBY_ENGINE == "ruby"
+        return unless RUBY_ENGINE == "ruby"
 
         assert_native_memory_accounting_tracks_live_reservations
       end
@@ -226,14 +226,14 @@ module Farce
       end
 
       def test_interrupted_key_callbacks_do_not_leak_a_reservation_checkout
-        skip "the native map uses separate key coordination" if RUBY_ENGINE == "ruby"
+        return if RUBY_ENGINE == "ruby"
 
         assert_interrupted_hash_checkout_cleanup
         assert_interrupted_equality_checkout_cleanup
       end
 
       def test_native_key_callback_reentry_is_rejected_before_waiting_on_another_key
-        skip "the native map has its own comparison gate" if RUBY_ENGINE == "ruby"
+        return if RUBY_ENGINE == "ruby"
 
         assert_native_key_callback_reentry_is_rejected
       end

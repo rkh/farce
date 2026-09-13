@@ -84,7 +84,7 @@ module Farce
       end
 
       def test_updates_from_multiple_ractors
-        skip "atom is unshared" unless shareable_atom?
+        return unless shareable_atom?
         atom = atom_class.new(0)
         workers = 4.times.map do
           Ractor.new(atom) do |shared|

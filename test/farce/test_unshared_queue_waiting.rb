@@ -146,7 +146,7 @@ module Farce
     end
 
     def test_unblock_failure_does_not_skip_other_waiters
-      skip "Direct scheduler callbacks are not used on this runtime" if io_path?
+      return if io_path?
       scheduler = RecordingScheduler.new
       scheduler.fail_unblock = true
       Fiber.set_scheduler(scheduler)
@@ -181,7 +181,7 @@ module Farce
     end
 
     def test_reentrant_unblock_does_not_wake_a_new_wait_registration
-      skip "Direct scheduler callbacks are not used on this runtime" if io_path?
+      return if io_path?
       Fiber.set_scheduler(ImmediateScheduler.new)
       queue = new_queue
       results = []
