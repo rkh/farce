@@ -284,23 +284,28 @@ module Farce
 
     def test_create_returns_a_running_scheduler
       result = Thread::Queue.new
-      scheduler = Timeout.timeout(2) { Scheduler.create(Thread, capacity: nil) }
+      worker = nil
+      executor = Class.new
+      # Capture the worker at launch. JRuby fibers can expose a different Thread.current.
+      executor.define_singleton_method(:new) do |*args, &block|
+        worker = Thread.new(*args, &block)
+      end
+      scheduler = Timeout.timeout(2) { Scheduler.create(executor, capacity: nil) }
 
       assert_instance_of Scheduler, scheduler
       assert_equal :running, scheduler.state
 
       scheduler.schedule(result, scheduler) do |queue, handle|
-        queue << Thread.current
+        queue << :done
         handle.close
       end
-      task_thread = result.pop
 
-      assert task_thread.join(5), "created scheduler task did not stop"
-      Timeout.timeout(5) { Thread.pass until scheduler.state == :closed }
+      assert worker.join(5), "created scheduler worker did not stop"
+      assert_equal :done, result.pop(true)
 
       assert_equal :closed, scheduler.state
     ensure
-      task_thread&.kill&.join
+      worker&.kill&.join(5)
     end
 
     private
