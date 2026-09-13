@@ -142,6 +142,15 @@ module Farce
         refute_equal main_storage.object_id, object_id
       end
 
+      def test_thread_storage_is_shared_with_nested_fibers
+        storage = Storage.thread
+        inherited = Fiber.new do
+          [Storage.thread, Storage.thread(Thread.current), Fiber.new { Storage.thread }.resume]
+        end.resume
+
+        inherited.each { assert_same storage, it }
+      end
+
       def test_invalid_mode_raises
         storage = Storage.new
         error = assert_raises(ArgumentError) { storage[:key, mode: :invalid] }

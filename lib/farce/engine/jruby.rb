@@ -24,6 +24,9 @@ module Farce
 
     def native_ractors? = false
 
+    # Fibers expose their backing thread through Thread.current.
+    def storage_thread(thread) = JRuby.reference(thread).getFiberCurrentThread
+
     def rebind(proc, new_self, lambda)
       proc     = lambda.nil? ? proc.dup : change_lambda(proc, lambda)
       block    = ref(proc).get_block

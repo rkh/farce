@@ -71,6 +71,7 @@ module Farce
       end
 
       def self.thread(thread = Thread.current)
+        thread = Internal.storage_thread(thread)
         by_thread = ractor.store_if_absent(:threads) { Storage.new }
         by_thread[thread] ||= Storage.new
       end

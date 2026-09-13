@@ -44,6 +44,8 @@ module Farce
       end
     end
 
+    def storage_thread(thread) = thread
+
     def delegate(from, to, *methods)
       methods.each do |method|
         if to.is_a?(Module)
