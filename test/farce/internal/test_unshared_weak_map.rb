@@ -262,14 +262,19 @@ module Farce
       def test_waiter_retains_the_stored_key_until_a_change
         [UnsharedWeakKeyMap, UnsharedWeakMap].each do |klass|
           entered = Thread::Queue.new
-          map = Thread.new do
+          roots = Thread.new do
             key = shared_string("key")
-            klass.new({ key => ObservedWaitValue.new(entered) })
+            value = ObservedWaitValue.new(entered)
+            [klass.new({ key => value }), key, value]
           end.value
+          map = roots.first
           key = shared_string("key")
+          collect_garbage
           waiter = Thread.new { map.wait_until_changed(key, :expected) }
           begin
             assert entered.pop(timeout: 2)
+            # Keep the entry alive until the waiter acquires its own references.
+            roots.clear
             10.times { collect_garbage }
             map[key] = :changed
 
