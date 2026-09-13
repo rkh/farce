@@ -255,7 +255,7 @@ module Farce
       raise
     ensure
       # if we return the thread too early, someone could kill it while another threads blocks on a schedule call
-      if Gem.win_platform? && executor <= Ractor
+      if System.windows? && executor <= Ractor
         sleep 0.001 while @state.value == :launching
         sleep 0.001 while @state.value == :setup
       else

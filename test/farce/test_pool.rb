@@ -52,8 +52,11 @@ module Farce
       pool.schedule(result, mode: :raise) { |queue| queue << Ractor.current }
       second = result.pop(timeout: 2)
 
+      refute_nil first
+      refute_nil second
       refute_same first, second if Helpers::Internal.native_ractors?
 
+      assert_nil pool.error
       assert_equal 2, pool.size
     ensure
       gate&.value = true
