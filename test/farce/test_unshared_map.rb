@@ -38,7 +38,7 @@ module Farce
         key = Object.new
         value = []
         map = Unshared::Map.new({ key => value })
-        [map, WeakRef.new(key), WeakRef.new(value)]
+        [map, ::WeakRef.new(key), ::WeakRef.new(value)]
       end.value
 
       3.times { collect_garbage }

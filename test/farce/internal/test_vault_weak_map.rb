@@ -302,7 +302,7 @@ module Farce
         map_reference, value_reference = Thread.new do
           value = Object.new.freeze
           map = WeakKeyMap.new({ live_key => value })
-          [WeakRef.new(map), WeakRef.new(value)]
+          [::WeakRef.new(map), ::WeakRef.new(value)]
         end.value
 
         40.times do

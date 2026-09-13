@@ -175,7 +175,7 @@ module Farce
 
         assert_predicate markers, :all?
         assert markers.all?(&:closed?)
-        weak_markers = markers.map { |marker| WeakRef.new(marker) }
+        weak_markers = markers.map { |marker| ::WeakRef.new(marker) }
 
         assert_operator open_file_descriptor_count, :<=, descriptor_count + 2
 

@@ -471,7 +471,7 @@ module Farce
             key = Object.new
             map = UnsharedWeakValueMap.new(compare_keys_by_identity: identity)
             map[key] = Object.new
-            [map, WeakRef.new(key)]
+            [map, ::WeakRef.new(key)]
           end.value
 
           assert_eventually_empty(map)
@@ -484,7 +484,7 @@ module Farce
           value = Object.new
           map = UnsharedWeakKeyMap.new
           map[Object.new] = value
-          [map, WeakRef.new(value)]
+          [map, ::WeakRef.new(value)]
         end.value
 
         assert_eventually_empty(map)
@@ -543,7 +543,7 @@ module Farce
           references = 10.times.map do
             key = Object.new
             map[key] = Object.new
-            WeakRef.new(key)
+            ::WeakRef.new(key)
           end
           [map, references]
         end.value
@@ -568,7 +568,7 @@ module Farce
           value = Object.new
           map = UnsharedWeakKeyMap.new
           map[Object.new] = value
-          [map, WeakRef.new(value)]
+          [map, ::WeakRef.new(value)]
         end.value
 
         # Do not access the map until collection is proved. Housekeeping must

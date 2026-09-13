@@ -272,6 +272,6 @@ class TestUnsharedSignalPool < Test
     Fiber.schedule { signal.wait }
     signal.broadcast
     @scheduler.tick
-    WeakRef.new(signal)
+    ::WeakRef.new(signal)
   end
 end
