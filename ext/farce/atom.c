@@ -10,6 +10,14 @@
 #include <unistd.h>
 
 static VALUE cAtom;
+#ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
+static VALUE cWeakAtom;
+
+/* These functions are exported by Rubies with the probed typed-data weak
+ * reference callback, but their declarations intentionally remain internal. */
+void rb_gc_declare_weak_references(VALUE object);
+bool rb_gc_handle_weak_references_alive_p(VALUE object);
+#endif
 
 typedef struct atom_waiter atom_waiter_t;
 
@@ -29,6 +37,7 @@ typedef struct {
     bool updating;
     VALUE updating_fiber;
     VALUE updating_thread;
+    bool weak;
     bool initialized;
 } atom_t;
 
@@ -137,7 +146,7 @@ static void
 atom_mark(void *pointer)
 {
     atom_t *atom = pointer;
-    rb_gc_mark_movable(atom->value);
+    if (!atom->weak) rb_gc_mark_movable(atom->value);
     rb_gc_mark_movable(atom->updating_fiber);
     rb_gc_mark_movable(atom->updating_thread);
 }
@@ -149,6 +158,21 @@ atom_compact(void *pointer)
     atom->updating_fiber = rb_gc_location(atom->updating_fiber);
     atom->updating_thread = rb_gc_location(atom->updating_thread);
 }
+
+#ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
+/* The VM invokes this after marking while mutators are stopped. Taking the atom
+ * mutex here could deadlock if GC stopped a mutator while it owned the mutex. */
+static void
+atom_handle_weak_references(void *pointer)
+{
+    atom_t *atom = pointer;
+    if (!atom->weak || NIL_P(atom->value)) return;
+    if (rb_gc_handle_weak_references_alive_p(atom->value)) return;
+
+    atom->value = Qnil;
+    atom_changed(atom);
+}
+#endif
 
 static void
 atom_free(void *pointer)
@@ -171,6 +195,9 @@ static const rb_data_type_t atom_type = {
         .dfree = atom_free,
         .dsize = atom_memsize,
         .dcompact = atom_compact,
+#ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
+        .handle_weak_references = atom_handle_weak_references,
+#endif
     },
     .flags = RUBY_TYPED_FROZEN_SHAREABLE,
 };
@@ -188,6 +215,11 @@ atom_allocate(VALUE klass)
     atom->updating = false;
     atom->updating_fiber = Qnil;
     atom->updating_thread = Qnil;
+#ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
+    atom->weak = klass == cWeakAtom;
+#else
+    atom->weak = false;
+#endif
     atom->initialized = false;
     return object;
 }
@@ -371,6 +403,9 @@ atom_initialize(int argc, VALUE *argv, VALUE self)
     containers_check_shareable(value);
     atom->value = value;
     atom->compare_by_identity = identity == Qundef ? false : containers_strict_bool(identity, "compare_by_identity");
+#ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
+    if (atom->weak) rb_gc_declare_weak_references(self);
+#endif
     atom->initialized = true;
     containers_finish_initialization(self);
     return self;
@@ -720,22 +755,32 @@ atom_compare_by_identity_p(VALUE self)
 }
 
 
+static void
+define_atom_methods(VALUE klass)
+{
+    rb_define_alloc_func(klass, atom_allocate);
+    rb_define_method(klass, "initialize", atom_initialize, -1);
+    rb_define_method(klass, "value", atom_value, 0);
+    rb_define_method(klass, "value=", atom_set_value, 1);
+    rb_define_method(klass, "get", atom_get, -1);
+    rb_define_method(klass, "store", atom_store, -1);
+    rb_define_method(klass, "swap", atom_swap, -1);
+    rb_define_method(klass, "store_if_absent", atom_store_if_absent, -1);
+    rb_define_method(klass, "compare_and_set", atom_compare_and_set, -1);
+    rb_define_method(klass, "update", atom_update, -1);
+    rb_define_method(klass, "upsert", atom_upsert, -1);
+    rb_define_method(klass, "wait_until_changed", atom_wait_until_changed, -1);
+    rb_define_method(klass, "wait_until_non_nil", atom_wait_until_non_nil, -1);
+    rb_define_method(klass, "compare_by_identity?", atom_compare_by_identity_p, 0);
+}
+
 void
 containers_init_atom(VALUE namespace)
 {
     cAtom = rb_define_class_under(namespace, "Atom", rb_cObject);
-    rb_define_alloc_func(cAtom, atom_allocate);
-    rb_define_method(cAtom, "initialize", atom_initialize, -1);
-    rb_define_method(cAtom, "value", atom_value, 0);
-    rb_define_method(cAtom, "value=", atom_set_value, 1);
-    rb_define_method(cAtom, "get", atom_get, -1);
-    rb_define_method(cAtom, "store", atom_store, -1);
-    rb_define_method(cAtom, "swap", atom_swap, -1);
-    rb_define_method(cAtom, "store_if_absent", atom_store_if_absent, -1);
-    rb_define_method(cAtom, "compare_and_set", atom_compare_and_set, -1);
-    rb_define_method(cAtom, "update", atom_update, -1);
-    rb_define_method(cAtom, "upsert", atom_upsert, -1);
-    rb_define_method(cAtom, "wait_until_changed", atom_wait_until_changed, -1);
-    rb_define_method(cAtom, "wait_until_non_nil", atom_wait_until_non_nil, -1);
-    rb_define_method(cAtom, "compare_by_identity?", atom_compare_by_identity_p, 0);
+    define_atom_methods(cAtom);
+#ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
+    cWeakAtom = rb_define_class_under(namespace, "WeakAtom", rb_cObject);
+    define_atom_methods(cWeakAtom);
+#endif
 }

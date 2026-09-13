@@ -59,7 +59,7 @@ weak_alive   = have_func("rb_gc_handle_weak_references_alive_p")
 # Kazlib deliberately puts full-tree integrity walks behind assert(3).
 # Enable them only while debugging the priority queue.
 $defs << "-DNDEBUG" unless ENV["FARCE_PRIORITY_QUEUE_ASSERTIONS"] == "1"
-$defs << "-DRC_HAVE_NATIVE_WEAK_MAPS=1" if weak_callback && weak_declare && weak_alive
+$defs << "-DRC_HAVE_NATIVE_WEAK_REFERENCES=1" if weak_callback && weak_declare && weak_alive
 $CFLAGS  = "#{$CFLAGS} -std=c11 -fvisibility=hidden -Wall -Wextra -Wno-unused-parameter -Wno-unused-function"
 $LDFLAGS = "#{$LDFLAGS} -pthread" unless /mswin|mingw/ =~ RUBY_PLATFORM
 

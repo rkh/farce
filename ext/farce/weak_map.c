@@ -1,6 +1,6 @@
 #include "containers.h"
 
-#ifdef RC_HAVE_NATIVE_WEAK_MAPS
+#ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
 
 #include "ruby/fiber/scheduler.h"
 #include "ruby/io.h"

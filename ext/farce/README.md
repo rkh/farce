@@ -1,6 +1,6 @@
 # Native extension
 
-Farce's CRuby extension defines its internal coordinated containers, including `Atom`, `Counter`, `Exchanger`, `Flag`, `Lock`, `Map`, `Queue`, `Signal`, `Vector`, `LocalTreeMap`, `TreeMap`, `ShareableTreeMap`, and `PriorityQueue`. CRuby 4.1+ also gets native `WeakMap`, `WeakKeyMap`, and `WeakValueMap` implementations.
+Farce's CRuby extension defines its internal coordinated containers, including `Atom`, `Counter`, `Exchanger`, `Flag`, `Lock`, `Map`, `Queue`, `Signal`, `Vector`, `LocalTreeMap`, `TreeMap`, `ShareableTreeMap`, and `PriorityQueue`. CRuby 4.1+ also gets native `WeakAtom`, `WeakMap`, `WeakKeyMap`, and `WeakValueMap` implementations.
 
 On platforms with epoll or kqueue, the same extension also provides Farce's native fiber scheduler. The scheduler class is initialized lazily so selecting the Ruby `select` implementation does not load or expose the native scheduler.
 
