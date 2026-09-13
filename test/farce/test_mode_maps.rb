@@ -441,7 +441,12 @@ module Farce
         key = Ractor.make_shareable(Object.new)
         value = ModePayload.new(:value)
         map[key] = value
-        [map, map.instance_variable_get(:@map)[key]]
+        internal = map.instance_variable_get(:@map)
+        envelope = internal[key]
+        # The Vault read reply includes the canonical key. Replace that reply
+        # with a missing-key read before GC can scan stale owner stack slots.
+        internal[:missing]
+        [map, envelope]
       end
 
       flunk "weak-key entry creation stalled:\n#{worker.backtrace&.join("\n")}" unless worker.join(5)
