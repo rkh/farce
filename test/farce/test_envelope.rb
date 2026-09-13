@@ -155,6 +155,16 @@ module Farce
       refute_predicate moved_string, :claimed?
     end
 
+    def test_local_envelope_compares_with_an_unwrapped_value
+      value = +"value"
+      envelope = Envelope::Local.new(value)
+
+      assert envelope.same_value?(+"value")
+      refute envelope.same_value?(nil)
+      assert envelope.same_value?(value, identity: true)
+      refute envelope.same_value?(+"value", identity: true)
+    end
+
     def test_concurrent_move_claims_have_one_winner
       envelope = Envelope::Move.new(Payload.new(:value))
       workers = 4.times.map do

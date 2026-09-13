@@ -271,11 +271,15 @@ module Farce
           next if status == :retired
 
           begin
+            alive, stored_key = entry.lookup_key
             state, present, current = entry.state
           ensure
             entry.release
           end
-          next if state == :retired || state == :dead
+          next if !alive || state == :retired || state == :dead
+          # Retain the canonical key across the wait, including for an equal
+          # lookup object. Otherwise GC could orphan the entry's change signal.
+          key     = stored_key
           current = nil unless present
           return current if non_nil ? !current.nil? : !values_equal?(current, expected)
           return fallback&.call unless entry.wait_for_change?(changed, deadline)

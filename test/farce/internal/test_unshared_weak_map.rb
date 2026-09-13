@@ -250,6 +250,38 @@ module Farce
         end
       end
 
+      class ObservedWaitValue
+        def initialize(entered) = @entered = entered
+
+        def ==(other)
+          @entered << true
+          other == :expected
+        end
+      end
+
+      def test_waiter_retains_the_stored_key_until_a_change
+        [UnsharedWeakKeyMap, UnsharedWeakMap].each do |klass|
+          entered = Thread::Queue.new
+          map = Thread.new do
+            key = shared_string("key")
+            klass.new({ key => ObservedWaitValue.new(entered) })
+          end.value
+          key = shared_string("key")
+          waiter = Thread.new { map.wait_until_changed(key, :expected) }
+          begin
+            assert entered.pop(timeout: 2)
+            10.times { collect_garbage }
+            map[key] = :changed
+
+            assert waiter.join(2), "waiter remained on a collected entry"
+            assert_includes [nil, :changed], waiter.value
+          ensure
+            waiter.kill if waiter.alive?
+            waiter.join
+          end
+        end
+      end
+
       def test_waiter_follows_reinserted_entry
         map_classes.each do |klass|
           map = klass.new({ key: nil })

@@ -226,7 +226,7 @@ module Farce
       end
 
       left  = value
-      right = other.value if Envelope === other
+      right = Envelope === other ? other.value : other
       return BasicObject.instance_method(:equal?).bind_call(left, right) if identity
 
       left == right

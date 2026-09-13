@@ -25,14 +25,14 @@ module Farce
   #   # Note: Farce::Counter would have better performance
   #   counter = Farce::Atom.new(0)
   #   counter.update { |count| count + 1 } # => 1
-  #   counter.compare_and_set(1, 2)       # => true
-  #   counter.value                      # => 2
+  #   counter.compare_and_set(1, 2)        # => true
+  #   counter.value                        # => 2
   #
-  # @example Keeping a mutable value local to its Ractor
-  #   items = []
-  #   atom = Farce::Atom.new(items, mode: :local)
-  #   atom.value.equal?(items) # => true
-  #   atom.update { |current| current + [:job] } # => [:job]
+  # @example Automatically making values shareable
+  #   atom = Farce::Atom.new([], mode: :make_shareable)
+  #   atom.update { |items| items + [:job] } # => [:job]
+  #   atom.value                    # => [:job]
+  #   Ractor.shareable?(atom.value) # => true
   class Atom < Farce::Abstract::Atom
     include Shareable
 
