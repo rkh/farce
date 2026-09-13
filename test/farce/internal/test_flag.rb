@@ -7,15 +7,15 @@ module Farce
       include Helpers::InternalTestHelpers
 
       def test_default_and_initial_value
-        refute Flag.new.value
-        refute Flag.new(false).value
-        assert Flag.new(true).value
+        refute flag_class.new.value
+        refute flag_class.new(false).value
+        assert flag_class.new(true).value
       end
 
       def test_flag_is_frozen_and_shareable
         return unless Internal.native_ractors?
 
-        flag = Flag.new
+        flag = flag_class.new
 
         assert_predicate flag, :frozen?
         assert Ractor.shareable?(flag)
@@ -24,7 +24,7 @@ module Farce
       def test_frozen_uninitialized_flag_cannot_be_initialized
         return unless RUBY_ENGINE == "ruby"
 
-        flag = Flag.allocate
+        flag = flag_class.allocate
         flag.freeze
 
         assert Ractor.shareable?(flag)
@@ -34,12 +34,12 @@ module Farce
 
       def test_initial_value_must_be_a_boolean
         [nil, 0, :true, "false"].each do |value| # rubocop:disable Lint/BooleanSymbol
-          assert_raises(ArgumentError) { Flag.new(value) }
+          assert_raises(ArgumentError) { flag_class.new(value) }
         end
       end
 
       def test_value_get_set_store_writer_and_swap
-        flag = Flag.new
+        flag = flag_class.new
 
         refute flag.value
         refute flag.get
@@ -56,7 +56,7 @@ module Farce
       end
 
       def test_store_and_swap_validate_before_mutating
-        flag = Flag.new(true)
+        flag = flag_class.new(true)
 
         assert_raises(ArgumentError) { flag.store(nil) }
         assert flag.value
@@ -65,7 +65,7 @@ module Farce
       end
 
       def test_compare_and_set
-        flag = Flag.new
+        flag = flag_class.new
 
         assert flag.compare_and_set(false, true)
         assert flag.value
@@ -76,7 +76,7 @@ module Farce
       end
 
       def test_compare_and_set_validates_both_arguments_before_mutating
-        flag = Flag.new(false)
+        flag = flag_class.new(false)
 
         assert_raises(ArgumentError) { flag.compare_and_set(nil, true) }
         refute flag.value
@@ -85,7 +85,7 @@ module Farce
       end
 
       def test_toggle_returns_the_new_value
-        flag = Flag.new
+        flag = flag_class.new
 
         assert flag.toggle
         refute flag.toggle
@@ -94,7 +94,7 @@ module Farce
       end
 
       def test_toggles_are_exact_across_threads
-        flag = Flag.new
+        flag = flag_class.new
         thread_count = 8
         toggles_per_thread = 1_000
         threads = thread_count.times.map do
@@ -108,7 +108,7 @@ module Farce
       end
 
       def test_toggles_are_exact_across_ractors
-        flag = Flag.new
+        flag = flag_class.new
         ractor_count = 4
         toggles_per_ractor = 1_000
         workers = ractor_count.times.map do
@@ -124,7 +124,7 @@ module Farce
       end
 
       def test_flag_sent_to_a_ractor_is_the_same_object
-        flag = Flag.new
+        flag = flag_class.new
         worker = Ractor.new do
           received = Ractor.receive
           received.set
@@ -136,6 +136,7 @@ module Farce
         assert_equal flag.object_id, ractor_value(worker)
         assert flag.value
       end
+      private def flag_class = Flag
     end
   end
 end
