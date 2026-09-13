@@ -183,10 +183,12 @@ module Farce
       def unwrap_value(value) = value
       def wrap_value(value)   = value
 
+      # simplecov:disable
       def new_tree_map(...)
         raise "subclass failed to implement #new_tree_map" unless instance_of?(TreeMap)
         raise NoMethodError, "Farce::Abstract::TreeMap should not be instantiated directly. Use a subclass instead."
       end
+      # simplecov:enable
     end
   end
 end

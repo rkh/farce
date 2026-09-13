@@ -6,6 +6,8 @@ require_relative "../rakelib/test_watchdog"
 require_relative "setup"
 
 class TestWatchdogTest < Minitest::Test
+  include Helpers::Subprocess
+
   def test_success_and_failure_statuses_are_preserved
     assert_equal 0, run_watchdog("exit 0")
     assert_equal 23, run_watchdog("exit 23")
@@ -14,7 +16,7 @@ class TestWatchdogTest < Minitest::Test
   def test_timeout_has_a_distinct_status_and_reports_the_seed
     output = StringIO.new
     watchdog = TestWatchdog.new(
-      ruby_command("sleep"), seed: 12_345, timeout: 0.05, shutdown_grace: 0,
+      ruby_command("sleep", coverage: false), seed: 12_345, timeout: 0.05, shutdown_grace: 0,
       diagnostics: false, output: output,
     )
 
@@ -53,12 +55,8 @@ class TestWatchdogTest < Minitest::Test
   private
 
   def run_watchdog(source)
-    command = Gem.win_platform? ? ruby_command(source) : ["/bin/sh", "-c", source]
+    command = Gem.win_platform? ? ruby_command(source, coverage: false) : ["/bin/sh", "-c", source]
     TestWatchdog.new(command, seed: 1, timeout: 2, diagnostics: false, output: StringIO.new).run
-  end
-
-  def ruby_command(source)
-    [RbConfig.ruby, "-e", source]
   end
 
   def process_survives?(pid)

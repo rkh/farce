@@ -124,6 +124,25 @@ module Farce
       close_pool(pool)
     end
 
+    def test_close_rejects_a_submission_blocked_by_capacity
+      pool = Pool.new(min_size: 0, max_size: 1, capacity: 1, grow_after: 60, shrink_after: nil)
+      pool.schedule { nil }
+      submitter = Thread.new do
+        pool.schedule { nil }
+      rescue PoolClosedError => e
+        e
+      end
+      queue = pool.instance_variable_get(:@queue)
+      Timeout.timeout(2) { Thread.pass until queue.num_waiting.positive? }
+      pool.close
+
+      assert submitter.join(2), "submission remained blocked after close"
+      assert_instance_of PoolClosedError, submitter.value
+    ensure
+      submitter&.kill&.join
+      close_pool(pool)
+    end
+
     def test_zero_minimum_still_drains_on_close
       pool = Pool.new(min_size: 0, max_size: 1, grow_after: 1, shrink_after: nil)
       result = Queue.new

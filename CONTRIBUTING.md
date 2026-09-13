@@ -48,6 +48,12 @@ You can use [mise](https://mise.jdx.dev) to run tasks against all supported Ruby
  bundle exec rake coverage:report
  ```
 
+### Ruby subprocess tests
+
+Use `ruby_subprocess(source, env: {}, timeout: 15)` in tests that need a fresh Ruby process. It returns stdout, stderr, and `Process::Status`, adds the repository's `lib` and `test` directories to the load path, and reports captured output if the child times out.
+
+When `COVERAGE=true`, the helper starts SimpleCov before the child script loads Farce. Each child records a separate result for the merged report without adding coverage output to stdout or stderr. Use `coverage: false` for timing-sensitive probes. Use `ruby_command(source, coverage: false)` when a test needs to manage the process itself.
+
 ## AI contribution policy
 
 If you wish to use an AI tool for assistance, please adhere to the following guidelines:

@@ -236,6 +236,13 @@ module Farce
       end
     end
 
+    def test_wait_until_changed_waits_before_timing_out
+      vector = Vector.new([:unchanged])
+
+      assert_nil vector.wait_until_changed(0, :unchanged, timeout: 0.01)
+      assert_equal :unchanged, vector[0]
+    end
+
     def test_waiters_observe_changes
       VECTOR_CLASSES.each do |klass|
         vector = klass.new

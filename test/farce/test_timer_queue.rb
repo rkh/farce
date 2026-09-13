@@ -53,6 +53,14 @@ module Farce
       assert_equal :local, queue.mode
     end
 
+    def test_empty_peek_returns_the_fallback_without_enqueuing_it
+      queue = TimerQueue.new
+
+      assert_nil queue.peek
+      assert_equal(:empty, queue.peek { :empty })
+      assert_predicate queue, :empty?
+    end
+
     def test_nonblocking_interface_observes_timestamp_and_capacity
       queue = TimerQueue.new(capacity: 1)
       future = Clock.now + 0.03

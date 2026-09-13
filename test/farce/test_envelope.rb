@@ -22,6 +22,15 @@ module Farce
       def inspect = "#<Payload #{@value.inspect}>"
     end
 
+    def test_explicit_modes_override_legacy_options
+      assert_instance_of Envelope::Move, Envelope.new(Payload.new(:move), mode: :move, local: true)
+      assert_instance_of Envelope::Copy, Envelope.new(Payload.new(:copy), mode: :copy, move: true)
+      assert_instance_of Envelope::Local, Envelope.new(Payload.new(:local), mode: :local)
+
+      error = assert_raises(ArgumentError) { Envelope.new(Payload.new(:value), mode: :invalid) }
+      assert_equal "invalid mode: :invalid", error.message
+    end
+
     def test_selects_a_subclass_from_the_value_and_options
       assert_instance_of Envelope::Copy, Envelope.new(Payload.new(:copy))
       assert_instance_of Envelope::Move, Envelope.new(Payload.new(:move), move: true)

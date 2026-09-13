@@ -2,9 +2,16 @@
 # shareable_constant_value: literal
 # warn_indent: true
 require_relative "../setup"
-require "open3"
 
 class TestConfig < Test
+  def test_global_config_returns_and_yields_the_same_instance
+    config = Farce.config
+    yielded = nil
+
+    assert_same(config, Farce.config { |value| yielded = value })
+    assert_same config, yielded
+  end
+
   def with_implementation_env(value)
     previous = ENV["FARCE_FIBER_SCHEDULER_IMPLEMENTATION"]
     ENV["FARCE_FIBER_SCHEDULER_IMPLEMENTATION"] = value
@@ -227,43 +234,41 @@ class TestConfig < Test
   end
 
   def test_config_remains_editable_after_requiring_farce
-    output, error, status = Open3.capture3(RbConfig.ruby,
-      "-I#{File.expand_path("../../lib", __dir__)}", "-e", <<~CODE)
-        require "farce"
-        config = Farce.config
-        abort "configuration frozen by require" if config.frozen?
-        Farce.config do |c|
-          c.fiber_scheduler_implementation = :select
-          c.io_backend = :select
-          c.main_thread_pool_size = 3
-          c.additional_thread_pool_size = 1
-        end
-        abort "configuration replaced" unless Farce.config.equal?(config)
-        abort "configuration frozen while configuring" if config.frozen?
-        actual = [config.fiber_scheduler_implementation, config.io_backend,
-                  config.main_thread_pool_size, config.additional_thread_pool_size]
-        abort "configuration changes lost" unless actual == [:select, :select, 3, 1]
-        puts "ok"
-      CODE
+    output, error, status = ruby_subprocess(<<~CODE)
+      require "farce"
+      config = Farce.config
+      abort "configuration frozen by require" if config.frozen?
+      Farce.config do |c|
+        c.fiber_scheduler_implementation = :select
+        c.io_backend = :select
+        c.main_thread_pool_size = 3
+        c.additional_thread_pool_size = 1
+      end
+      abort "configuration replaced" unless Farce.config.equal?(config)
+      abort "configuration frozen while configuring" if config.frozen?
+      actual = [config.fiber_scheduler_implementation, config.io_backend,
+                config.main_thread_pool_size, config.additional_thread_pool_size]
+      abort "configuration changes lost" unless actual == [:select, :select, 3, 1]
+      puts "ok"
+    CODE
 
     assert_predicate status, :success?, error
     assert_equal "ok", output.strip
   end
 
   def test_config_can_be_loaded_and_configured_before_farce
-    output, error, status = Open3.capture3({ "FARCE_FIBER_SCHEDULER_IMPLEMENTATION" => "native" },
-      RbConfig.ruby, "-I#{File.expand_path("../../lib", __dir__)}", "-e", <<~CODE)
-        require "farce/config"
-        config = Farce.config do |c|
-          c.fiber_scheduler_implementation = :select
-        end
-        abort "different config" unless Farce.config.equal?(config)
-        abort "configuration frozen too early" if config.frozen?
-        require "farce"
-        abort "configuration replaced" unless Farce.config.equal?(config)
-        abort "configuration lost" unless Farce.config.fiber_scheduler_implementation == :select
-        puts "ok"
-      CODE
+    output, error, status = ruby_subprocess(<<~CODE, env: { "FARCE_FIBER_SCHEDULER_IMPLEMENTATION" => "native" })
+      require "farce/config"
+      config = Farce.config do |c|
+        c.fiber_scheduler_implementation = :select
+      end
+      abort "different config" unless Farce.config.equal?(config)
+      abort "configuration frozen too early" if config.frozen?
+      require "farce"
+      abort "configuration replaced" unless Farce.config.equal?(config)
+      abort "configuration lost" unless Farce.config.fiber_scheduler_implementation == :select
+      puts "ok"
+    CODE
 
     assert_predicate status, :success?, error
     assert_equal "ok", output.strip

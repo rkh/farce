@@ -22,9 +22,11 @@ module Farce
       private
 
       # @abstract
+      # simplecov:disable
       def internal_atom_class
         raise NoMethodError, "Farce::Abstract::WeakAtom should not be instantiated directly. Use a subclass instead."
       end
+      # simplecov:enable
     end
   end
 end

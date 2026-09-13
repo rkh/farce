@@ -1,0 +1,51 @@
+# frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
+
+require_relative "setup"
+
+class TestSubprocess < Test
+  def test_captures_output_and_preserves_failure_status
+    output, error, status = ruby_subprocess('puts "output"; warn "error"; exit 23')
+
+    assert_equal "output\n", output
+    assert_equal "error\n", error
+    assert_equal 23, status.exitstatus
+  end
+
+  def test_passes_environment_and_load_paths_without_loading_farce
+    output, error, status = ruby_subprocess(<<~RUBY, env: { "FARCE_SUBPROCESS_TEST" => "value" })
+      abort "Farce loaded too early" if defined?(Farce::Clock)
+      require "farce/config"
+      puts ENV.fetch("FARCE_SUBPROCESS_TEST")
+    RUBY
+
+    assert_predicate status, :success?, error
+    assert_equal "value\n", output
+  end
+
+  def test_drains_both_output_streams
+    output, error, status = ruby_subprocess('$stdout.write("o" * 100_000); $stderr.write("e" * 100_000)')
+
+    assert_predicate status, :success?
+    assert_equal "o" * 100_000, output
+    assert_equal "e" * 100_000, error
+  end
+
+  def test_timeout_terminates_the_child_and_reports_output
+    error = assert_raises(Minitest::Assertion) do
+      ruby_subprocess('$stdout.sync = true; puts "started"; sleep 30', timeout: 0.05, coverage: false)
+    end
+
+    assert_includes error.message, "timed out after 0.05 seconds"
+    assert_includes error.message, "stdout:"
+    assert_includes error.message, "stderr:"
+  end
+
+  def test_coverage_can_be_disabled_for_a_child
+    output, error, status = ruby_subprocess('puts defined?(SimpleCov) || "disabled"', coverage: false)
+
+    assert_predicate status, :success?, error
+    assert_equal "disabled\n", output
+  end
+end

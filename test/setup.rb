@@ -6,7 +6,7 @@ require "bundler/setup" unless ENV["FARCE_STANDALONE_TESTS"] == "1"
 if ENV["COVERAGE"] && ENV["COVERAGE"].downcase != "false"
   raise "Farce has been loaded before coverage tracking was enabled." if defined?(Farce::Clock)
   require "simplecov"
-  SimpleCov.start
+  SimpleCov.start unless Coverage.running?
 end
 
 require "farce"
@@ -44,4 +44,5 @@ end
 
 class Test < Minitest::Test
   include Helpers
+  include Helpers::Subprocess
 end

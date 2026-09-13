@@ -5,6 +5,26 @@ require_relative "../../setup"
 module Farce
   module Internal
     class TestMixin < Test
+      def test_include_adds_port_to_a_local_ractor_namespace
+        ractor = Module.new
+        namespace = Module.new
+        namespace.const_set(:Ractor, ractor)
+        namespace.include(Farce)
+
+        assert_same Farce::Port, ractor.const_get(:Port, false)
+      end
+
+      def test_include_preserves_an_existing_local_port
+        port = Class.new
+        ractor = Module.new
+        ractor.const_set(:Port, port)
+        namespace = Module.new
+        namespace.const_set(:Ractor, ractor)
+        namespace.include(Farce)
+
+        assert_same port, ractor.const_get(:Port, false)
+      end
+
       def test_include_farce_exposes_public_camel_case_constants
         namespace = Module.new { include Farce }
 

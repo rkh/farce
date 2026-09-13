@@ -10,6 +10,15 @@ module Farce
 
     TREE_MAPS = [TreeMap, Strict::TreeMap, Unshared::TreeMap].freeze
 
+    def test_fetch_rejects_missing_and_extra_arguments
+      TREE_MAPS.each do |klass|
+        map = klass.new
+
+        assert_raises(ArgumentError) { map.fetch }
+        assert_raises(ArgumentError) { map.fetch(:key, :default, :extra) }
+      end
+    end
+
     def test_public_hierarchy_backends_and_properties
       assert_equal Abstract::TreeMap, TreeMap.superclass
       assert_equal Abstract::TreeMap, Strict::TreeMap.superclass

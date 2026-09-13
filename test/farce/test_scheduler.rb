@@ -44,6 +44,14 @@ module Farce
       assert_equal :initialized, scheduler.state
     end
 
+    def test_external_scheduler_rejects_access_from_another_ractor
+      scheduler = Scheduler.new { raise "constructor should not run" }
+      other = Ractor.new { Ractor.current }
+      scheduler.owner = ractor_value(other)
+
+      assert_raises(Ractor::IsolationError) { scheduler.external_scheduler }
+    end
+
     def test_owner_can_be_assigned_idempotently
       scheduler = Scheduler.new
 
