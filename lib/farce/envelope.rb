@@ -29,8 +29,7 @@ module Farce
     include Abstract::Value
 
     # Raised when trying to claim an envelope that has already been claimed by another Ractor.
-    class AlreadyClaimed < Ractor::IsolationError
-    end
+    AlreadyClaimed = Class.new(Ractor::IsolationError)
 
     # An envelope that copies its contents. Can be opened by multiple Ractors.
     # The value will be copied once when the envelope is created, and then once per Ractor that opens the envelope.

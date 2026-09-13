@@ -4,18 +4,14 @@
 
 module Farce
   # Raised when an operation cannot proceed because a queue is closed.
-  class ClosedQueueError < ::ClosedQueueError
-  end
+  ClosedQueueError = Class.new(::ClosedQueueError)
 
   # Raised when a push cannot proceed because a queue is sealed.
-  class SealedQueueError < ClosedQueueError
-  end
+  SealedQueueError = Class.new(ClosedQueueError)
 
   # Raised when attempting to schedule a task on a closed scheduler.
-  class SchedulerClosedError < StandardError
-  end
+  SchedulerClosedError = Class.new(StandardError)
 
   # Raised when attempting to schedule a task on a closed pool.
-  class PoolClosedError < SchedulerClosedError
-  end
+  PoolClosedError = Class.new(SchedulerClosedError)
 end

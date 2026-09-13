@@ -9,8 +9,7 @@ require "zlib"
 # Cross compilation happens out of sight in a container, so a gem that quietly ends up holding
 # the wrong architecture looks exactly like a good one until someone installs it.
 module GemVerifier
-  class Error < StandardError
-  end
+  Error = Class.new(StandardError)
 
   # Platform => [dlext, expected binary description]
   SIGNATURES = {
