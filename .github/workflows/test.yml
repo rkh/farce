@@ -32,6 +32,8 @@ jobs:
             version: jruby-head
             # Avoid virtual-thread starvation during nested fiber creation.
             jruby_opts: -Xfiber.vthread=false
+            # Match stable JRuby's allowance for the full suite and JVM startup.
+            test_timeout: 300
           - name: truffleruby
             version: truffleruby
           - name: truffleruby-dev
