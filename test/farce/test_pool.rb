@@ -49,11 +49,17 @@ module Farce
         nil until wait.value
       end
       first = started.pop(timeout: 2)
+
+      refute_nil first, "the first pool worker did not start"
+
       pool.schedule(result, mode: :raise) { |queue| queue << Ractor.current }
       second = result.pop(timeout: 2)
 
-      refute_nil first
-      refute_nil second
+      refute_nil second, lambda {
+        "the second task did not run within 2 seconds " \
+          "(pool state: #{pool.state}, workers: #{pool.size}, " \
+          "queued tasks: #{pool.instance_variable_get(:@queue).size}, error: #{pool.error.inspect})"
+      }
       refute_same first, second if Helpers::Internal.native_ractors?
 
       assert_nil pool.error
