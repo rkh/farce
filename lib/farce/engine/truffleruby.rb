@@ -10,6 +10,10 @@ module Farce
   module Internal # :nodoc: all
     include Autoloads["#{__dir__}/truffleruby"]
 
+    autoload :WeakMap,      "farce/engine/shared/unshared_weak_map"
+    autoload :WeakKeyMap,   "farce/engine/shared/unshared_weak_map"
+    autoload :WeakValueMap, "farce/engine/shared/unshared_weak_map"
+
     if TruffleRuby.native?
       path = "farce/engine/truffleruby/native"
       autoload :LocalTreeMap, "#{path}/local_tree_map"

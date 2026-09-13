@@ -15,6 +15,10 @@ module Farce
 
     Lock = Mutex
 
+    autoload :WeakMap,      "farce/engine/shared/unshared_weak_map"
+    autoload :WeakKeyMap,   "farce/engine/shared/unshared_weak_map"
+    autoload :WeakValueMap, "farce/engine/shared/unshared_weak_map"
+
     java_import org.jruby.RubyProc
     java_import org.jruby.runtime.Block
 

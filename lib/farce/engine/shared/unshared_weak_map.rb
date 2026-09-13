@@ -1,0 +1,336 @@
+# frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
+
+require "farce/engine/shared/weak_map/lock"
+require "farce/engine/shared/weak_map/cell"
+require "farce/engine/shared/weak_map/index"
+
+module Farce
+  # @!visibility private
+  module Internal # :nodoc: all
+    class UnsharedWeakMapBase < Abstract::ConcurrentMap
+      def initialize(
+        initial_mapping = nil,
+        compare_by_identity: false,
+        compare_keys_by_identity: compare_by_identity,
+        compare_values_by_identity: compare_by_identity
+      )
+        validate_boolean(compare_by_identity,        "compare_by_identity")
+        validate_boolean(compare_keys_by_identity,   "compare_keys_by_identity")
+        validate_boolean(compare_values_by_identity, "compare_values_by_identity")
+        raise TypeError, "initial mapping must be a Hash" unless initial_mapping.nil? || initial_mapping.is_a?(Hash)
+
+        super()
+
+        @compare_keys_by_identity   = compare_keys_by_identity
+        @compare_values_by_identity = compare_values_by_identity
+        @cell_class                 = weak_values? ? UnsharedWeakValueMapCell : UnsharedWeakMapCell
+
+        index_class = if weak_keys?
+                        compare_keys_by_identity? ? UnsharedWeakIdentityMapIndex : UnsharedWeakKeyMapIndex
+                      else
+                        compare_keys_by_identity? ? UnsharedStrongIdentityMapIndex : UnsharedStrongKeyMapIndex
+                      end
+        @index = index_class.new
+        initial_mapping&.each { self[it.first] = it.last }
+      end
+
+      def [](key) = read(key, nil)[1]
+
+      def []=(key, value)
+        store(key, value)
+      end
+
+      def fetch(*arguments)
+        unless arguments.length.between?(1, 2)
+          raise ArgumentError, "wrong number of arguments (given #{arguments.length}, expected 1..2)"
+        end
+
+        key, default  = arguments
+        default_given = arguments.length == 2
+        warn "block supersedes default value argument", uplevel: 1 if block_given? && default_given
+        present, value = read(key, nil)
+        return value if present
+        return yield(key) if block_given?
+        return default if default_given
+
+        raise KeyError.new("key not found: #{key.inspect}", receiver: self, key: key)
+      end
+
+      def get(key, timeout: nil, &fallback)
+        deadline                   = timeout_deadline(timeout)
+        _present, value, timed_out = read(key, deadline)
+        timed_out ? fallback&.call : value
+      end
+
+      def store(key, value, timeout: nil, &fallback)
+        deadline          = timeout_deadline(timeout)
+        completed, result = with_entry(key, deadline, create: true) do |_present, _current, entry|
+          entry.store(value)
+          value
+        end
+        completed ? result : fallback&.call
+      end
+
+      def swap(key, replacement, timeout: nil, &fallback)
+        deadline          = timeout_deadline(timeout)
+        completed, result = with_entry(key, deadline, create: true) do |present, current, entry|
+          entry.store(replacement)
+          present ? current : nil
+        end
+        completed ? result : fallback&.call
+      end
+
+      def store_if_absent(key, timeout: nil)
+        raise LocalJumpError, "no block given" unless block_given?
+
+        deadline          = timeout_deadline(timeout)
+        completed, result = with_entry(key, deadline, create: true) do |present, current, entry|
+          next current if present
+          value = yield
+          entry.store(value)
+          value
+        end
+        completed ? result : nil
+      end
+
+      def compare_and_set(key, expected, replacement, timeout: nil)
+        deadline          = timeout_deadline(timeout)
+        completed, result = with_entry(key, deadline, create: false) do |present, current, entry|
+          next false unless present && values_equal?(current, expected)
+
+          entry.store(replacement)
+          true
+        end
+        completed && result
+      end
+
+      def update(key, timeout: nil)
+        raise LocalJumpError, "no block given" unless block_given?
+
+        deadline          = timeout_deadline(timeout)
+        completed, result = with_entry(key, deadline, create: true) do |_present, current, entry|
+          value = yield(current)
+          entry.store(value)
+          value
+        end
+        completed ? result : nil
+      end
+
+      def upsert(key, initial_value, timeout: nil)
+        raise LocalJumpError, "no block given" unless block_given?
+
+        deadline          = timeout_deadline(timeout)
+        completed, result = with_entry(key, deadline, create: true) do |present, current, entry|
+          value = present ? yield(current) : initial_value
+          entry.store(value)
+          value
+        end
+        completed ? result : nil
+      end
+
+      def wait_until_changed(key, expected, timeout: nil, &fallback)
+        wait_for_value(key, expected, timeout_deadline(timeout), fallback, non_nil: false)
+      end
+
+      def wait_until_non_nil(key, timeout: nil, &fallback)
+        wait_for_value(key, nil, timeout_deadline(timeout), fallback, non_nil: true)
+      end
+
+      def key?(key)                   = read(key, nil).first
+      def compare_keys_by_identity?   = @compare_keys_by_identity
+      def compare_values_by_identity? = @compare_values_by_identity
+      def size                        = entries_snapshot.size
+      def keys                        = entries_snapshot.map(&:first)
+
+      def each(&block)
+        return enum_for(__callee__) { size } unless block
+        entries_snapshot.each { block.call(it) }
+        self
+      end
+      alias each_pair each
+
+      def each_key(&block)
+        return enum_for(__callee__) { size } unless block
+        entries_snapshot.each { block.call(it.first) }
+        self
+      end
+
+      def each_value(&block)
+        return enum_for(__callee__) { size } unless block
+        entries_snapshot.each { block.call(it.last) }
+        self
+      end
+
+      def delete(key)
+        completed, result = with_entry(key, nil, create: false) do |present, current, entry, index|
+          next nil unless present
+          index.remove(key, entry)
+          entry.retire
+          current if present
+        end
+        result if completed
+      end
+
+      def getkey(key)
+        @index.sweep_one
+        entry, created = @index.resolve(key)
+        return if !entry || created == :timed_out
+
+        alive, stored_key = entry.lookup_key
+        stored_key if alive
+      end
+
+      def clear
+        @index.clear
+        self
+      end
+
+      private
+
+      def read(key, deadline)
+        completed, result = with_entry(key, deadline, create: false) { |present, value| [present, value] }
+        completed ? [*result, false] : [false, nil, result == :timed_out]
+      end
+
+      def with_entry(key, deadline, create:)
+        @index.sweep_one
+        while true
+          entry, created = @index.resolve(key, deadline:, create:) do |key_reference|
+            cell         = @cell_class.new(key_reference)
+            cell.reserve(nil)
+            cell
+          end
+          return [false, :timed_out] if created == :timed_out
+          return [true, yield(false, nil, nil, @index)] unless entry
+
+          unless created
+            status = entry.reserve(deadline)
+            return [false, :timed_out] if status == :timed_out
+            next if status == :retired
+          end
+
+          retry_entry = false
+          begin
+            state, present, current = entry.state
+            return [true, yield(present, current, entry, @index)] if state == :ok
+            retry_entry = true
+          ensure
+            begin
+              if created && !entry.present?
+                @index.remove(key, entry)
+                entry.retire
+              end
+            ensure
+              entry.release
+            end
+          end
+          if retry_entry
+            @index.remove(key, entry)
+            entry.retire
+          end
+        end
+      end
+
+      def entries_snapshot
+        entries  = @index.snapshot
+        pairs    = entries.filter_map do |entry|
+          status = entry.reserve(nil)
+          next unless status == :acquired
+
+          begin
+            state, present, value = entry.state
+            next unless state == :ok && present
+            alive, key = entry.lookup_key
+            [key, value] if alive
+          ensure
+            entry.release
+          end
+        end
+        @index.sweep(entries)
+        pairs
+      end
+
+      def wait_for_value(key, expected, deadline, fallback, non_nil:)
+        while true
+          @index.sweep_one
+          observed         = @index.change_signal.generation
+          entry, timed_out = @index.resolve(key, deadline:)
+          return fallback&.call if timed_out == :timed_out
+
+          unless entry
+            return nil unless values_equal?(nil, expected)
+            return fallback&.call unless signal_changed?(@index.change_signal, observed, deadline)
+            next
+          end
+
+          changed = entry.change_generation
+          status  = entry.reserve(deadline)
+          return fallback&.call if status == :timed_out
+          next if status == :retired
+
+          begin
+            state, present, current = entry.state
+          ensure
+            entry.release
+          end
+          next if state == :retired || state == :dead
+          current = nil unless present
+          return current if non_nil ? !current.nil? : !values_equal?(current, expected)
+          return fallback&.call unless entry.wait_for_change?(changed, deadline)
+        end
+      end
+
+      def signal_changed?(signal, observed, deadline)
+        timeout = deadline - Clock.now if deadline
+        return false if timeout && !timeout.positive?
+
+        timed_out = Object.new
+        result    = signal.wait(observed, timeout:) { timed_out }
+        !timed_out.equal?(result)
+      end
+
+      def timeout_deadline(timeout)
+        return if timeout.nil?
+
+        timeout = Float(timeout)
+        if !timeout.finite? || timeout.negative?
+          raise ArgumentError, "timeout must be a finite, non-negative number or nil"
+        end
+        Clock.now + timeout
+      end
+
+      def values_equal?(left, right)
+        return BasicObject.instance_method(:equal?).bind_call(left, right) if compare_values_by_identity?
+        left == right
+      end
+
+      def validate_boolean(value, name)
+        equal = BasicObject.instance_method(:equal?)
+        return if equal.bind_call(value, true) || equal.bind_call(value, false)
+        raise ArgumentError, "#{name} must be true or false"
+      end
+    end
+    private_constant :UnsharedWeakMapBase
+
+    class UnsharedWeakKeyMap < UnsharedWeakMapBase
+      def weak_keys? = true
+    end
+
+    class UnsharedWeakValueMap < UnsharedWeakMapBase
+      def weak_values? = true
+    end
+
+    class UnsharedWeakMap < UnsharedWeakMapBase
+      def weak_keys? = true
+      def weak_values? = true
+    end
+
+    unless RUBY_ENGINE == "ruby"
+      WeakKeyMap   = UnsharedWeakKeyMap
+      WeakValueMap = UnsharedWeakValueMap
+      WeakMap      = UnsharedWeakMap
+    end
+  end
+end

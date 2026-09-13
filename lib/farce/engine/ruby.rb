@@ -32,6 +32,10 @@ module Farce
       autoload :WeakValueMap, "farce/engine/ruby/shared/weak_map"
     end
 
+    autoload :UnsharedWeakMap,      "farce/engine/shared/unshared_weak_map"
+    autoload :UnsharedWeakKeyMap,   "farce/engine/shared/unshared_weak_map"
+    autoload :UnsharedWeakValueMap, "farce/engine/shared/unshared_weak_map"
+
     autoload :FiberScheduler, "farce/engine/ruby/fiber_scheduler"
     autoload :BasePort,       "#{ENGINE_PATH}/port"
     autoload :Port,           "#{ENGINE_PATH}/port"

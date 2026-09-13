@@ -161,7 +161,7 @@ module Farce
       expected = wrap_comparison(expected)
       deadline = timeout_deadline(timeout)
 
-      loop do
+      while true
         current = @atom.get(timeout: remaining_timeout(deadline)) { TIMED_OUT }
         return unwrap_result(current, &) if TIMED_OUT.equal?(current)
         return unwrap_value(current) unless values_equal?(current, expected)

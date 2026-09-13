@@ -12,7 +12,10 @@ module Farce
   module Internal # :nodoc: all
     include Autoloads["#{__dir__}/shared"]
 
-    autoload :BasePort, "farce/engine/shared/port"
-    autoload :Vault,    "farce/engine/shared/vault"
+    autoload :BasePort,             "farce/engine/shared/port"
+    autoload :Vault,                "farce/engine/shared/vault"
+    autoload :UnsharedWeakMap,      "farce/engine/shared/unshared_weak_map"
+    autoload :UnsharedWeakKeyMap,   "farce/engine/shared/unshared_weak_map"
+    autoload :UnsharedWeakValueMap, "farce/engine/shared/unshared_weak_map"
   end
 end
