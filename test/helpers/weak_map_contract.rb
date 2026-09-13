@@ -228,6 +228,19 @@ module Helpers
       end
     end
 
+    def test_compare_and_set_can_store_false_and_nil
+      map_classes.each do |klass|
+        map = klass.new({ key: :original })
+
+        assert map.compare_and_set(:key, :original, false)
+        assert_same false, map[:key]
+        assert map.compare_and_set(:key, false, nil)
+        assert_nil map[:key]
+        assert map.key?(:key)
+        refute map.compare_and_set(:missing, nil, false)
+      end
+    end
+
     def test_concurrent_updates
       map_classes.each do |klass|
         map = klass.new({ counter: 0 })

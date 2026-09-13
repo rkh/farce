@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../../setup"
 
@@ -28,7 +30,7 @@ module Farce
       end
 
       MAP_CLASSES =
-        if Internal.const_defined?(:NATIVE_WEAK_MAPS, false)
+        if RUBY_ENGINE == "ruby"
           [WeakKeyMap, WeakValueMap, WeakMap].freeze
         else
           [].freeze
@@ -37,12 +39,11 @@ module Farce
       def map_classes = MAP_CLASSES
 
       def setup
-        native = Internal.const_defined?(:NATIVE_WEAK_MAPS, false) && Internal::NATIVE_WEAK_MAPS
-        skip "weak-map fallback coverage is intentionally omitted" unless native
+        skip "shared weak maps require native ractors" unless RUBY_ENGINE == "ruby"
       end
 
       def teardown
-        Fiber.set_scheduler(nil) if Fiber.scheduler
+        Fiber.set_scheduler(nil) if Fiber.respond_to?(:scheduler) && Fiber.scheduler
       end
 
       def test_weakness_flags_and_shareability
@@ -62,6 +63,8 @@ module Farce
       end
 
       def test_key_equality_does_not_hold_native_mutex_across_fiber_yield
+        skip "native map coordination contract" unless native_weak_maps?
+
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
         map = WeakValueMap.new
@@ -132,6 +135,8 @@ module Farce
       end
 
       def test_recursive_update_mutation_raises_and_releases_the_reservation
+        skip "native map coordination contract" unless native_weak_maps?
+
         MAP_CLASSES.each do |klass|
           map = klass.new({ key: 1 })
           error = assert_raises(ThreadError) do
@@ -146,6 +151,8 @@ module Farce
       end
 
       def test_unscheduled_sibling_fiber_cannot_wait_for_the_owners_update
+        skip "native map coordination contract" unless native_weak_maps?
+
         MAP_CLASSES.each do |klass|
           map = klass.new({ key: 1 })
           contender = Fiber.new do
@@ -167,7 +174,7 @@ module Farce
       end
 
       def test_wait_does_not_block_a_fiber_scheduler
-        iterations = Internal::NATIVE_WEAK_MAPS ? 1 : 25
+        iterations = native_weak_maps? ? 1 : 25
         iterations.times do
           MAP_CLASSES.each do |klass|
             scheduler = Helpers::QueueTestScheduler.new
@@ -192,7 +199,7 @@ module Farce
       end
 
       def test_fallback_fiber_replies_do_not_retain_descriptors
-        skip "native weak maps do not use the owner Ractor" if Internal::NATIVE_WEAK_MAPS
+        skip "native weak maps do not use the owner Ractor" if native_weak_maps?
 
         # Warm up the owner request path before taking the baseline. Each
         # Fiber-local reply queue releases its dormant signaling pipe after use.
@@ -251,10 +258,10 @@ module Farce
 
       def test_mutation_from_multiple_ractors
         MAP_CLASSES.each do |klass|
-          map = klass.new({ counter: 0 })
+          map = klass.new
           workers = 4.times.map do
             Ractor.new(map) do |shared|
-              50.times { shared.upsert(:counter, 0) { |old| old + 1 } }
+              50.times { shared.upsert(:counter, 1) { |old| old + 1 } }
               :done
             end
           end
@@ -312,6 +319,10 @@ module Farce
       end
 
       private
+
+      def native_weak_maps?
+        Internal.const_defined?(:NATIVE_WEAK_MAPS, false) && Internal::NATIVE_WEAK_MAPS
+      end
 
       def build_entry(klass, retain:)
         # Build the entry on a disposable native stack. CRuby conservatively

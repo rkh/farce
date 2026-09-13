@@ -6,6 +6,7 @@ if RUBY_ENGINE == "ruby"
     Atom Counter Exchanger Flag Lock Map Queue Signal Unshareable Vector WeakMap WeakKeyMap WeakValueMap
   ]
   container_classes.each do |name|
+    next if %i[WeakMap WeakKeyMap WeakValueMap].include?(name) && !internal.const_defined?(:NATIVE_WEAK_MAPS, false)
     internal.__send__(:remove_const, name) if internal.autoload?(name)
   end
   version = RUBY_VERSION[/^\d+\.\d+/]

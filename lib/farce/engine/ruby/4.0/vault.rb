@@ -9,7 +9,10 @@ module Farce
   module Internal # :nodoc: all
     class Vault
       class Manager
-        private def respond(port, ...) = port.send(...)
+        private def respond(port, message, move: false)
+          return port.store(::Ractor.make_shareable(message)) if port.is_a?(Atom)
+          port.send(message, move:)
+        end
       end
 
       def initialize

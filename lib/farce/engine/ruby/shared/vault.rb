@@ -9,6 +9,7 @@ module Farce
       class Manager
         def initialize
           @data = ObjectSpace::WeakKeyMap.new
+          @weak_maps = ObjectSpace::WeakKeyMap.new
         end
 
         def run = (run_once while true)
@@ -30,12 +31,27 @@ module Farce
             return respond(port, [true, result].freeze)
           when :delete then @data.delete(key)
           when :set    then @data[key] = value
+          when :weak_map
+            command, *arguments = value
+            if command == :create
+              options = arguments.first
+              @weak_maps[key] = VaultWeakMapState.new(**options)
+              return respond(port, [true, [:ok].freeze].freeze)
+            end
+            map = @weak_maps[key]
+            raise ArgumentError, "unknown weak map" unless map
+            return respond(port, [true, map.dispatch(command, *arguments)].freeze)
           else warn "Unknown vault action: #{action.inspect}"
           end
           respond(port, true)
         rescue StandardError => e
           begin
-            respond(port, [false, e].freeze)
+            error = if port.is_a?(Atom)
+                      [e.class, e.message.freeze, e.backtrace&.map(&:freeze)&.freeze].freeze
+                    else
+                      e
+                    end
+            respond(port, [false, error].freeze)
           rescue StandardError => e
             warn "Vault error: #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
           end
@@ -52,6 +68,26 @@ module Farce
       end
 
       def delete(key) = execute(:delete, key)
+
+      def weak_map(key, action, *arguments)
+        if ::Ractor.current.equal?(@ractor)
+          raise ThreadError, "deadlock; recursive weak-map access from the Vault Ractor"
+        end
+        raise Ractor::IsolationError, "key must be shareable" unless ::Ractor.shareable?(key)
+
+        pending = Object.new.freeze
+        reply = Atom.new(pending, compare_by_identity: true)
+        @ractor.send([:weak_map, key, [action, *arguments].freeze, reply].freeze)
+        success, payload = reply.wait_until_changed(pending)
+        return payload if success
+
+        error_class, message, backtrace = payload
+        error_class = RuntimeError unless error_class.is_a?(Class) && error_class <= StandardError
+        error = error_class.allocate
+        Exception.instance_method(:initialize).bind_call(error, message)
+        error.set_backtrace(backtrace) if backtrace
+        raise error
+      end
     end
   end
 end
