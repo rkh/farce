@@ -50,7 +50,9 @@ You can use [mise](https://mise.jdx.dev) to run tasks against all supported Ruby
 
 ### Ruby subprocess tests
 
-Use `ruby_subprocess(source, env: {}, timeout: 15)` in tests that need a fresh Ruby process. It returns stdout, stderr, and `Process::Status`, adds the repository's `lib` and `test` directories to the load path, and reports captured output if the child times out.
+Use `ruby_subprocess(source, env: {})` in tests that need a fresh Ruby process. It returns stdout, stderr, and `Process::Status`, adds the repository's `lib` and `test` directories to the load path, and reports captured output if the child times out.
+
+The subprocess timeout defaults to 15 seconds. Set `TEST_SUBPROCESS_TIMEOUT` for slower runtime startup, such as TruffleRuby on the JVM. An explicit `timeout:` argument overrides this setting. The whole-suite `TEST_TIMEOUT` watchdog remains independent.
 
 When `COVERAGE=true`, the helper starts SimpleCov before the child script loads Farce. Each child records a separate result for the merged report without adding coverage output to stdout or stderr. Use `coverage: false` for timing-sensitive probes. Use `ruby_command(source, coverage: false)` when a test needs to manage the process itself.
 

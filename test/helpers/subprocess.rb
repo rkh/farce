@@ -19,7 +19,7 @@ module Helpers
 
     # Return stdout, stderr and Process::Status. Drain both pipes while waiting
     # so a verbose child cannot deadlock. Report captured output on timeout.
-    def ruby_subprocess(source, env: {}, timeout: 15, coverage: true)
+    def ruby_subprocess(source, env: {}, timeout: Float(ENV.fetch("TEST_SUBPROCESS_TIMEOUT", 15)), coverage: true)
       Open3.popen3(env, *ruby_command(source, coverage:)) do |input, output, error, waiter|
         input.close
         output_reader = Thread.new { output.read }

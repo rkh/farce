@@ -40,7 +40,9 @@ jobs:
             version: truffleruby-head
           - name: truffleruby+graalvm
             version: truffleruby+graalvm
-            test_timeout: 300
+            # Each subprocess starts a fresh JVM, which can exceed 15 seconds on CI.
+            subprocess_timeout: 60
+            test_timeout: 600
 
     steps:
       - uses: actions/checkout@v6
@@ -55,6 +57,7 @@ jobs:
           FARCE_VERIFY_GEMS: ${{ matrix.ruby.verify_gems || false }}
           JRUBY_OPTS: ${{ matrix.ruby.jruby_opts || '' }}
           TEST_TIMEOUT: ${{ matrix.ruby.test_timeout || 120 }}
+          TEST_SUBPROCESS_TIMEOUT: ${{ matrix.ruby.subprocess_timeout || 15 }}
 
   windows:
     name: Windows / Ruby ${{ matrix.ruby }}
