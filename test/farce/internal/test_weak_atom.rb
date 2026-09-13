@@ -118,22 +118,38 @@ module Farce
 
       def test_observer_finishes_after_collection_and_a_store
         entered = Queue.new
-        atom = Thread.new { atom_class.new(ObservedWaitValue.new(entered)) }.value
-        waiter = Thread.new { atom.wait_until_changed(:expected) }
-        begin
-          assert_equal :compared, entered.pop(timeout: 2)
-          10.times do
-            collect_garbage
-            Thread.pass
-          end
-          atom.store(:changed)
-
-          assert waiter.join(2), "observer remained blocked after storing a new value"
-          assert_includes [nil, :changed], waiter.value
-        ensure
-          waiter.kill if waiter.alive?
-          waiter.join
+        ready = Thread::Queue.new
+        release = Thread::Queue.new
+        holder = Thread.new do
+          # Retain the value until the observer has compared it. Clear this
+          # disposable stack before checking whether the value is collectible.
+          values = [ObservedWaitValue.new(entered)]
+          ready.push(atom_class.new(values.first))
+          release.pop
+          values.clear
+          nil
         end
+        atom = ready.pop
+        collect_garbage
+        waiter = Thread.new { atom.wait_until_changed(:expected) }
+
+        assert_equal :compared, entered.pop(timeout: 2)
+        release.push(true)
+
+        assert holder.join(2), "value holder did not release its reference"
+        10.times do
+          collect_garbage
+          Thread.pass
+        end
+        atom.store(:changed)
+
+        assert waiter.join(2), "observer remained blocked after storing a new value"
+        assert_includes [nil, :changed], waiter.value
+      ensure
+        waiter&.kill if waiter&.alive?
+        waiter&.join
+        holder&.kill if holder&.alive?
+        holder&.join
       end
 
       private

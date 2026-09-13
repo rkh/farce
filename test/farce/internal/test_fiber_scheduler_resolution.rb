@@ -31,6 +31,8 @@ module Farce
                 batch_sizes = RUBY_VERSION.start_with?("3.4.") ? [1, 1] : [2]
                 batch_sizes.each do |batch_size|
                   tasks = batch_size.times.map do
+                    # This subprocess does not load the Windows startup barrier in test/setup.rb.
+                    GC.start if Gem.win_platform?
                     ::Ractor.new do
                       server = Helpers::DnsServer.new(pause_first: true)
                       dns = Resolv::DNS.new(server.config)
