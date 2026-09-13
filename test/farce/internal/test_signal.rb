@@ -17,7 +17,7 @@ module Farce
         assert_equal 0, signal.generation
         assert_equal 0, signal.num_waiting
         assert_predicate signal, :frozen?
-        assert_equal signal_class == Signal, Ractor.shareable?(signal)
+        assert_equal shareable_signal?, Ractor.shareable?(signal)
         assert_equal 1, signal.broadcast
         assert_equal 2, signal.broadcast
         assert_equal 2, signal.generation
@@ -173,6 +173,8 @@ module Farce
       end
 
       private def signal_class = Signal
+
+      private def shareable_signal? = signal_class == Signal
 
       private def assert_wait_protocol(scheduler)
         if signal_class == Signal || signal_class.new.fiber_wait == :io
