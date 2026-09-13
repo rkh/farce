@@ -65,6 +65,20 @@ module Farce
         workers&.each(&:join)
       end
 
+      def test_copy_and_move_replies_progress_between_weak_map_requests
+        Timeout.timeout(30) do
+          200.times do |index|
+            map = Farce::WeakKeyMap.new
+            source = [index]
+            copied = map.store(:key, source, mode: :copy)
+
+            assert_equal [index], copied
+            refute_same source, copied
+            assert_equal [index], map.store(:key, [index], mode: :move)
+          end
+        end
+      end
+
       def test_interrupted_request_does_not_poison_later_replies
         vault = Vault.new
         key = Object.new.freeze
