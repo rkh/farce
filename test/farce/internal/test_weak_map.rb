@@ -61,15 +61,26 @@ module Farce
       def test_waiter_observes_a_change_after_gc_with_an_equal_lookup_key
         [WeakKeyMap, WeakMap].each do |klass|
           entered = Queue.new
-          map = Thread.new do
-            stored_key = String.new("key").freeze
-            value = ObservedWaitValue.new(entered)
-            klass.new({ stored_key => value })
-          end.value
+          ready = Thread::Queue.new
+          release = Thread::Queue.new
+          holder = Thread.new do
+            # Retain both weak referents until the waiter has observed the entry.
+            # Then clear the references and discard the holder's native stack.
+            entries = { String.new("key").freeze => ObservedWaitValue.new(entered) }
+            ready.push(klass.new(entries))
+            release.pop
+            entries.clear
+            nil
+          end
+          map = ready.pop
+          GC.start
           lookup_key = String.new("key").freeze
           waiter = Thread.new { map.wait_until_changed(lookup_key, :expected) }
           begin
-            assert_equal :compared, entered.pop(timeout: 5)
+            assert_equal :compared, entered.pop(timeout: 5), "#{klass}: waiter did not observe the initial entry"
+            release.push(true)
+
+            assert holder.join(5), "weak entry holder did not release its references"
             10.times do
               GC.start
               Thread.pass
@@ -83,6 +94,8 @@ module Farce
           ensure
             waiter.kill if waiter.alive?
             waiter.join
+            holder.kill if holder.alive?
+            holder.join
           end
         end
       end
