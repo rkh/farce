@@ -92,7 +92,8 @@ static void *
 containers_sleep_without_gvl(void *opaque)
 {
     (void)opaque;
-    Sleep(1);
+    /* Ruby redirects Sleep to rb_w32_Sleep, which requires the GVL. */
+    SleepEx(1, FALSE);
     return NULL;
 }
 
