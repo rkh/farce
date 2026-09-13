@@ -17,7 +17,7 @@ module Farce
   #
   #   # The entry can disappear once its key is collected.
   #   owner = nil
-  class WeakKeyMap < Abstract::WeakKeyMap
+  class WeakKeyMap < Farce::Abstract::WeakKeyMap
     include Internal::MapValueModes
     include Shareable
 
