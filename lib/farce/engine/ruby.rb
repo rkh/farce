@@ -32,6 +32,8 @@ module Farce
       autoload :WeakValueMap, "farce/engine/ruby/shared/weak_map"
     end
 
+    StrictAtom = Atom
+
     autoload :WeakAtom,         "farce/engine/ruby/shared/weak_atom"     unless const_defined?(:WeakAtom, false)
     autoload :UnsharedWeakAtom, "farce/engine/shared/unshared_weak_atom" unless const_defined?(:UnsharedWeakAtom, false)
 

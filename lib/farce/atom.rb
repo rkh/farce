@@ -3,14 +3,38 @@
 # warn_indent: true
 
 module Farce
-  # A Ractor-shareable atomic reference that can hold non-shareable values.
+  # A Ractor-shareable atomic reference that strongly retains its current value and can hold non-shareable values.
   #
   # Values are transferred according to the atom's default {#mode}, or an operation-specific mode where supported.
   # Values returned by the atom are automatically unwrapped. Updates are serialized, and comparison operations compare
   # the stored values without claiming or opening their envelopes when possible.
-  class Atom
+  #
+  # @example Creating a new atom
+  #   atom = Farce::Atom.new("initial value")
+  #   atom.value # => "initial value"
+  #
+  #   # atoms are ractor-shareable
+  #   Ractor.new(atom) do |atom|
+  #     atom.update { |current| current + " updated" } # => "initial value updated"
+  #   end
+  #
+  #   # waits for the other ractor to perform its update
+  #   atom.wait_until_changed "initial value"
+  #
+  # @example Updating a counter atomically
+  #   # Note: Farce::Counter would have better performance
+  #   counter = Farce::Atom.new(0)
+  #   counter.update { |count| count + 1 } # => 1
+  #   counter.compare_and_set(1, 2)       # => true
+  #   counter.value                      # => 2
+  #
+  # @example Keeping a mutable value local to its Ractor
+  #   items = []
+  #   atom = Farce::Atom.new(items, mode: :local)
+  #   atom.value.equal?(items) # => true
+  #   atom.update { |current| current + [:job] } # => [:job]
+  class Atom < Farce::Abstract::Atom
     include Shareable
-    include Abstract::Value
 
     NIL_VALUE = Object.new.freeze
     TIMED_OUT = Object.new.freeze

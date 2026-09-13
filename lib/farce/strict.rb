@@ -3,7 +3,7 @@
 # warn_indent: true
 
 module Farce
-  # Shareable queues that store shareable values directly.
+  # Shareable containers that store shareable values directly.
   module Strict
     include Internal::Autoloads
   end
