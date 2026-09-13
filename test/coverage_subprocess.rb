@@ -5,6 +5,8 @@
 # The subprocess helper loads this before scripts can require Farce.
 return unless ENV["COVERAGE"] && ENV["COVERAGE"].downcase != "false"
 
+# Select locked gem versions before SimpleCov can activate default gems.
+require "bundler/setup"
 require "simplecov"
 SimpleCov.start do
   command_name "#{command_name} subprocess #{Process.pid}"

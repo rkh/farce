@@ -66,4 +66,18 @@ class TestSubprocess < Test
     assert_predicate status, :success?, error
     assert_equal "disabled\n", output
   end
+
+  def test_coverage_bootstrap_uses_bundled_dependencies_without_rubyopt
+    output, error, status = ruby_subprocess(<<~RUBY, env: { "COVERAGE" => "true", "RUBYOPT" => nil }, coverage: false)
+      require "coverage_subprocess"
+      abort "coverage is not running" unless Coverage.running?
+      abort "Farce loaded too early" if defined?(Farce::Clock)
+      require "json"
+      puts JSON::VERSION
+    RUBY
+
+    assert_predicate status, :success?, error
+    assert_empty error
+    assert_equal "#{Gem.loaded_specs.fetch("json").version}\n", output
+  end
 end
