@@ -158,7 +158,7 @@ module Farce
 
       def release_slot
         @slots << true
-      rescue ClosedQueueError
+      rescue ::ClosedQueueError
         # Closing the pool has already woken callers waiting for capacity.
         nil
       end

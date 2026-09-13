@@ -27,7 +27,7 @@ module Farce
         end
         @queue.push(value)
         self
-      rescue ClosedQueueError
+      rescue ::ClosedQueueError
         raise Ractor::ClosedError, "The port was already closed"
       end
 
