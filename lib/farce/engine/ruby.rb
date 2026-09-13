@@ -35,20 +35,20 @@ module Farce
     StrictAtom    = Atom
     StrictTreeMap = ShareableTreeMap
 
-    autoload :StrictMap,          "farce/engine/ruby/shared/strict_map"
-    autoload :StrictWeakKeyMap,   "farce/engine/ruby/shared/strict_map"
-    autoload :StrictWeakMap,      "farce/engine/ruby/shared/strict_map"
-    autoload :StrictWeakValueMap, "farce/engine/ruby/shared/strict_map"
-
-    autoload :WeakAtom,         "farce/engine/ruby/shared/weak_atom"     unless const_defined?(:WeakAtom, false)
-    autoload :UnsharedWeakAtom, "farce/engine/shared/unshared_weak_atom" unless const_defined?(:UnsharedWeakAtom, false)
-
+    autoload :StrictMap,            "farce/engine/ruby/shared/strict_map"
+    autoload :StrictWeakKeyMap,     "farce/engine/ruby/shared/strict_map"
+    autoload :StrictWeakMap,        "farce/engine/ruby/shared/strict_map"
+    autoload :StrictWeakValueMap,   "farce/engine/ruby/shared/strict_map"
+    autoload :WeakAtom,             "farce/engine/ruby/shared/weak_atom"     unless const_defined?(:WeakAtom, false)
+    autoload :UnsharedWeakAtom,     "farce/engine/shared/unshared_weak_atom" unless const_defined?(:UnsharedWeakAtom,
+      false)
+    autoload :UnsharedVector,       "farce/engine/shared/unshared_vector"
     autoload :UnsharedMap,          "farce/engine/shared/unshared_weak_map"
     autoload :UnsharedWeakMap,      "farce/engine/shared/unshared_weak_map"
     autoload :UnsharedWeakKeyMap,   "farce/engine/shared/unshared_weak_map"
     autoload :UnsharedWeakValueMap, "farce/engine/shared/unshared_weak_map"
+    autoload :FiberScheduler,       "farce/engine/ruby/fiber_scheduler"
 
-    autoload :FiberScheduler, "farce/engine/ruby/fiber_scheduler"
     autoload :BasePort,       "#{ENGINE_PATH}/port"
     autoload :Port,           "#{ENGINE_PATH}/port"
     autoload :RactorMethods,  "#{ENGINE_PATH}/ractor_methods"
