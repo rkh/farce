@@ -370,7 +370,7 @@ module Farce
       def test_recursive_update_mutation_raises_and_releases_the_reservation
         map = Map.new({ key: 1 })
         error = assert_raises(ThreadError) do
-          map.update(:key) { map[:other] = 9 }
+          map.update(:key) { map[:key] = 9 }
         end
 
         assert_match(/recursive map access during an update/, error.message)
@@ -384,7 +384,7 @@ module Farce
         contender = Fiber.new do
           next :different_thread unless Thread.current.equal?(owner_thread)
 
-          map[:other] = 9
+          map[:key] = 9
         rescue ThreadError => e
           e
         end
@@ -396,14 +396,14 @@ module Farce
         end)
         if error == :different_thread
           assert_equal({ key: 2 }, map.each.to_h)
-          assert_equal 3, map[:other] = 3
+          assert_equal 3, map[:key] = 3
           return
         end
 
         assert_kind_of ThreadError, error
         assert_match(/another unscheduled fiber/, error.message)
         assert_equal({ key: 2 }, map.each.to_h)
-        assert_equal 3, map[:other] = 3
+        assert_equal 3, map[:key] = 3
       end
 
       def test_unscheduled_owner_check_bypasses_an_overridden_thread_equal
@@ -417,7 +417,7 @@ module Farce
         contender = Fiber.new do
           next :different_thread unless primitive_equal.bind_call(Thread.current, thread)
 
-          map[:other] = 9
+          map[:key] = 9
         rescue ThreadError => e
           e
         end

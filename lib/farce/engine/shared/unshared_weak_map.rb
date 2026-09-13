@@ -9,7 +9,7 @@ require "farce/engine/shared/weak_map/index"
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    class UnsharedWeakMapBase < Abstract::ConcurrentMap
+    class UnsharedMapBase < Abstract::ConcurrentMap
       def initialize(
         initial_mapping = nil,
         compare_by_identity: false,
@@ -36,7 +36,7 @@ module Farce
         initial_mapping&.each { self[it.first] = it.last }
       end
 
-      def [](key) = read(key, nil)[1]
+      def [](key) = read_unreserved(key)[1]
 
       def []=(key, value)
         store(key, value)
@@ -67,8 +67,7 @@ module Farce
       def store(key, value, timeout: nil, &fallback)
         deadline          = timeout_deadline(timeout)
         completed, result = with_entry(key, deadline, create: true) do |_present, _current, entry|
-          entry.store(value)
-          value
+          value if entry.store(value)
         end
         completed ? result : fallback&.call
       end
@@ -76,8 +75,8 @@ module Farce
       def swap(key, replacement, timeout: nil, &fallback)
         deadline          = timeout_deadline(timeout)
         completed, result = with_entry(key, deadline, create: true) do |present, current, entry|
-          entry.store(replacement)
-          present ? current : nil
+          stored = entry.store(replacement)
+          current if stored && present
         end
         completed ? result : fallback&.call
       end
@@ -89,8 +88,7 @@ module Farce
         completed, result = with_entry(key, deadline, create: true) do |present, current, entry|
           next current if present
           value = yield
-          entry.store(value)
-          value
+          value if entry.store(value)
         end
         completed ? result : nil
       end
@@ -101,7 +99,6 @@ module Farce
           next false unless present && values_equal?(current, expected)
 
           entry.store(replacement)
-          true
         end
         completed && result
       end
@@ -112,8 +109,7 @@ module Farce
         deadline          = timeout_deadline(timeout)
         completed, result = with_entry(key, deadline, create: true) do |_present, current, entry|
           value = yield(current)
-          entry.store(value)
-          value
+          value if entry.store(value)
         end
         completed ? result : nil
       end
@@ -124,8 +120,7 @@ module Farce
         deadline          = timeout_deadline(timeout)
         completed, result = with_entry(key, deadline, create: true) do |present, current, entry|
           value = present ? yield(current) : initial_value
-          entry.store(value)
-          value
+          value if entry.store(value)
         end
         completed ? result : nil
       end
@@ -188,6 +183,20 @@ module Farce
       end
 
       private
+
+      def read_unreserved(key)
+        @index.sweep_one
+        loop do
+          entry, = @index.resolve(key)
+          return [false, nil] unless entry
+
+          state, present, value = entry.state
+          return [present, value] if state == :ok
+
+          @index.remove(key, entry)
+          entry.retire
+        end
+      end
 
       def read(key, deadline)
         completed, result = with_entry(key, deadline, create: false) { |present, value| [present, value] }
@@ -316,17 +325,20 @@ module Farce
         raise ArgumentError, "#{name} must be true or false"
       end
     end
-    private_constant :UnsharedWeakMapBase
+    private_constant :UnsharedMapBase
 
-    class UnsharedWeakKeyMap < UnsharedWeakMapBase
+    class UnsharedMap < UnsharedMapBase
+    end
+
+    class UnsharedWeakKeyMap < UnsharedMapBase
       def weak_keys? = true
     end
 
-    class UnsharedWeakValueMap < UnsharedWeakMapBase
+    class UnsharedWeakValueMap < UnsharedMapBase
       def weak_values? = true
     end
 
-    class UnsharedWeakMap < UnsharedWeakMapBase
+    class UnsharedWeakMap < UnsharedMapBase
       def weak_keys? = true
       def weak_values? = true
     end

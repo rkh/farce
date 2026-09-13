@@ -16,12 +16,12 @@ module Farce
 
     if TruffleRuby.native?
       path = "farce/engine/truffleruby/native"
-      autoload :LocalTreeMap, "#{path}/local_tree_map"
-      autoload :PriorityQueue, "#{path}/priority_queue"
+      autoload :UnsafeTreeMap,    "#{path}/unsafe_tree_map"
+      autoload :PriorityQueue,    "#{path}/priority_queue"
       autoload :ShareableTreeMap, "#{path}/tree_map"
-      autoload :TreeMap, "#{path}/tree_map"
-      autoload :Counter, "#{path}/counter"
-      autoload :Flag, "#{path}/flag"
+      autoload :TreeMap,          "#{path}/tree_map"
+      autoload :Counter,          "#{path}/counter"
+      autoload :Flag,             "#{path}/flag"
     end
 
     def native_ractors? = false

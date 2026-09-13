@@ -18,6 +18,7 @@ module Farce
     autoload :StrictWeakMap,        "farce/engine/shared/strict_map"
     autoload :StrictWeakValueMap,   "farce/engine/shared/strict_map"
     autoload :Vault,                "farce/engine/shared/vault"
+    autoload :UnsharedMap,          "farce/engine/shared/unshared_weak_map"
     autoload :UnsharedWeakMap,      "farce/engine/shared/unshared_weak_map"
     autoload :UnsharedWeakKeyMap,   "farce/engine/shared/unshared_weak_map"
     autoload :UnsharedWeakValueMap, "farce/engine/shared/unshared_weak_map"

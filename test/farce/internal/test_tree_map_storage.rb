@@ -66,7 +66,7 @@ module Farce
       def <=>(other)
         counts = Thread.current[:tree_map_fiber_reentry_counts] ||= Hash.new(0)
         counts[self] += 1
-        Thread.current[:local_tree_map_contender]&.resume if counts[self] == @resume_at
+        Thread.current[:unsafe_tree_map_contender]&.resume if counts[self] == @resume_at
         rank <=> other.rank
       end
     end
@@ -360,10 +360,10 @@ module Farce
       end
     end
 
-    class TestLocalTreeMapStorage < Test
+    class TestUnsafeTreeMapStorage < Test
       include TreeMapStorageBehavior
 
-      TreeMap = Internal::LocalTreeMap
+      TreeMap = Internal::UnsafeTreeMap
 
       def test_local_map_is_unshareable_and_honors_freeze
         map = TreeMap.new(1 => :one)
@@ -411,7 +411,7 @@ module Farce
       def test_comparison_cannot_reenter_from_another_fiber_on_the_same_thread
         one = TreeMapFiberReentryKey.new(1, resume_at: 99)
         map = TreeMap.new(one => :one)
-        Thread.current[:local_tree_map_contender] = Fiber.new { map.clear }
+        Thread.current[:unsafe_tree_map_contender] = Fiber.new { map.clear }
         two = TreeMapFiberReentryKey.new(2, resume_at: 1)
 
         error = assert_raises(RuntimeError) { map[two] = :two }
@@ -421,7 +421,7 @@ module Farce
         assert_equal :one, map[one]
         assert_nil map[two]
       ensure
-        Thread.current[:local_tree_map_contender] = nil
+        Thread.current[:unsafe_tree_map_contender] = nil
         Thread.current[:tree_map_fiber_reentry_counts] = nil
       end
 

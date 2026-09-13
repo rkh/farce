@@ -6,6 +6,8 @@ module Farce
   # A concurrent map with direct shareable keys and strongly retained values.
   # Transfer modes apply only to values. Keys are never copied or wrapped.
   # Values stored through this map's mode manager are automatically unwrapped.
+  # Updates on different keys can run concurrently.
+  # Clearing the map invalidates unfinished updates so they cannot restore removed entries.
   #
   # @example Atomically updating a value
   #   map = Farce::Map.new({ count: 0 })

@@ -549,7 +549,7 @@ tc_map_store_unlocked(VALUE self, tc_map *map, VALUE key, VALUE value,
     return value;
 }
 /* ------------------------------------------------------------------------- */
-/* LocalTreeMap / TreeMap / ShareableTreeMap                                 */
+/* UnsafeTreeMap / TreeMap / ShareableTreeMap                                */
 
 /* The three maps deliberately share the exact same node layout and red-black
  * tree operations. The policy bits decide whether a public operation takes
@@ -582,7 +582,7 @@ typedef struct {
     rb_atomic_t publication_state;
 } tc_core_map;
 
-static const rb_data_type_t tc_local_map_type;
+static const rb_data_type_t tc_unsafe_map_type;
 static const rb_data_type_t tc_map_type;
 static const rb_data_type_t tc_shared_map_type;
 
@@ -633,8 +633,8 @@ tc_core_map_memsize(const void *opaque)
         : sizeof(*core) + core->map.size * sizeof(tc_map_node);
 }
 
-static const rb_data_type_t tc_local_map_type = {
-    .wrap_struct_name = "Farce::Internal::LocalTreeMap",
+static const rb_data_type_t tc_unsafe_map_type = {
+    .wrap_struct_name = "Farce::Internal::UnsafeTreeMap",
     .function = {
         .dmark = tc_core_map_mark,
         .dfree = tc_core_map_free,
@@ -697,9 +697,9 @@ tc_core_map_allocate(VALUE klass, const rb_data_type_t *type,
 }
 
 static VALUE
-tc_local_map_allocate(VALUE klass)
+tc_unsafe_map_allocate(VALUE klass)
 {
-    return tc_core_map_allocate(klass, &tc_local_map_type, false, false);
+    return tc_core_map_allocate(klass, &tc_unsafe_map_type, false, false);
 }
 
 static VALUE
@@ -719,8 +719,8 @@ tc_core_map_get_raw(VALUE self)
 {
     tc_core_map *core;
 
-    if (rb_typeddata_is_kind_of(self, &tc_local_map_type)) {
-        TypedData_Get_Struct(self, tc_core_map, &tc_local_map_type, core);
+    if (rb_typeddata_is_kind_of(self, &tc_unsafe_map_type)) {
+        TypedData_Get_Struct(self, tc_core_map, &tc_unsafe_map_type, core);
         return core;
     }
     if (rb_typeddata_is_kind_of(self, &tc_map_type)) {
@@ -1692,7 +1692,7 @@ tc_core_map_define_methods(VALUE klass)
 void
 containers_init_tree_maps(VALUE internal)
 {
-    VALUE local_map_class;
+    VALUE unsafe_map_class;
     VALUE map_class;
     VALUE shareable_map_class;
     VALUE ractor;
@@ -1702,9 +1702,9 @@ containers_init_tree_maps(VALUE internal)
     ractor = rb_const_get(rb_cObject, ractor_id);
     tc_eIsolationError = rb_const_get(ractor, rb_intern("IsolationError"));
 
-    local_map_class = rb_define_class_under(internal, "LocalTreeMap", rb_cObject);
-    rb_define_alloc_func(local_map_class, tc_local_map_allocate);
-    tc_core_map_define_methods(local_map_class);
+    unsafe_map_class = rb_define_class_under(internal, "UnsafeTreeMap", rb_cObject);
+    rb_define_alloc_func(unsafe_map_class, tc_unsafe_map_allocate);
+    tc_core_map_define_methods(unsafe_map_class);
 
     map_class = rb_define_class_under(internal, "TreeMap", rb_cObject);
     rb_define_alloc_func(map_class, tc_map_allocate);

@@ -11,19 +11,21 @@ module Farce
       Strict::WeakKeyMap,
       Strict::WeakValueMap,
       Strict::WeakMap,
+      Unshared::Map,
       Unshared::WeakKeyMap,
       Unshared::WeakValueMap,
       Unshared::WeakMap
     ].freeze
 
-    STRICT_VARIANTS = DIRECT_VARIANTS.first(4).freeze
-    UNSHARED_VARIANTS = DIRECT_VARIANTS.last(3).freeze
+    STRICT_VARIANTS   = DIRECT_VARIANTS.first(4).freeze
+    UNSHARED_VARIANTS = DIRECT_VARIANTS.last(4).freeze
 
     def test_public_hierarchy_describes_retention
       assert_equal Abstract::ConcurrentMap, Strict::Map.superclass
       assert_equal Abstract::WeakKeyMap, Strict::WeakKeyMap.superclass
       assert_equal Abstract::WeakValueMap, Strict::WeakValueMap.superclass
       assert_equal Abstract::WeakMap, Strict::WeakMap.superclass
+      assert_equal Abstract::ConcurrentMap, Unshared::Map.superclass
       assert_equal Abstract::WeakKeyMap, Unshared::WeakKeyMap.superclass
       assert_equal Abstract::WeakValueMap, Unshared::WeakValueMap.superclass
       assert_equal Abstract::WeakMap, Unshared::WeakMap.superclass
@@ -37,6 +39,7 @@ module Farce
         Strict::WeakKeyMap     => [true, false],
         Strict::WeakValueMap   => [false, true],
         Strict::WeakMap        => [true, true],
+        Unshared::Map          => [false, false],
         Unshared::WeakKeyMap   => [true, false],
         Unshared::WeakValueMap => [false, true],
         Unshared::WeakMap      => [true, true],

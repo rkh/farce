@@ -125,7 +125,7 @@ module Farce
       def compare_values_by_identity? = @compare_values_by_identity
       def shareable_keys?             = true
       def shareable_values?           = true
-      def size                        = entries_snapshot.size
+      def size                        = await_response(deadline: nil) { request(:size) }[1]
       def keys                        = entries_snapshot.map(&:first)
 
       def each(&block)

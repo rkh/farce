@@ -13,7 +13,8 @@ module Farce
 
         assert_equal Abstract::TreeMap, TreeMap.superclass
         assert_instance_of TreeMap, map
-        assert_instance_of Internal::LocalTreeMap, map.instance_variable_get(:@map)
+        assert_instance_of Internal::UnsafeTreeMap, map.instance_variable_get(:@map)
+        refute Internal.const_defined?(:LocalTreeMap, false)
         assert_equal [[1, :one], [2, :two]], map.to_a
         assert_predicate map, :shareable_keys?
         refute_predicate map, :shareable_values?

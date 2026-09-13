@@ -50,7 +50,7 @@ module Farce
         assert_nil map.first_key
       end
 
-      [LocalTreeMap, TreeMap, ShareableTreeMap].uniq.each do |map_class|
+      [UnsafeTreeMap, TreeMap, ShareableTreeMap].uniq.each do |map_class|
         label = map_class.name.split("::").last
 
         define_method("test_#{label}_fetch_and_key_lookup") do
@@ -129,7 +129,7 @@ module Farce
 
       def test_tree_map_variants_have_explicit_cruby_shareability
         map = TreeMap.new
-        local = LocalTreeMap.new
+        local = UnsafeTreeMap.new
         shareable = ShareableTreeMap.new
 
         if RUBY_ENGINE == "ruby"
@@ -147,10 +147,10 @@ module Farce
       def test_cruby_defines_all_three_native_maps_directly
         return unless RUBY_ENGINE == "ruby"
 
-        assert_equal Object, LocalTreeMap.superclass
+        assert_equal Object, UnsafeTreeMap.superclass
         assert_equal Object, TreeMap.superclass
         assert_equal Object, ShareableTreeMap.superclass
-        assert_nil LocalTreeMap.instance_method(:[]=).source_location
+        assert_nil UnsafeTreeMap.instance_method(:[]=).source_location
         assert_nil TreeMap.instance_method(:[]=).source_location
         assert_nil ShareableTreeMap.instance_method(:[]=).source_location
       end
@@ -158,7 +158,7 @@ module Farce
       def test_local_map_canonicalizes_mutable_string_keys
         original = +"middle"
         canonical = -original
-        map = LocalTreeMap.new
+        map = UnsafeTreeMap.new
 
         map[original] = :middle
         stored = map.getkey(+"middle")
@@ -211,13 +211,13 @@ module Farce
 
         assert_raises(Ractor::IsolationError) { ShareableTreeMap.new[1] = value }
         assert_same value, TreeMap.new(1 => value)[1]
-        assert_same value, LocalTreeMap.new(1 => value)[1]
+        assert_same value, UnsafeTreeMap.new(1 => value)[1]
       end
 
       def test_all_cruby_tree_maps_require_shareable_keys
         return unless RUBY_ENGINE == "ruby"
 
-        [LocalTreeMap, TreeMap, ShareableTreeMap].each do |map_class|
+        [UnsafeTreeMap, TreeMap, ShareableTreeMap].each do |map_class|
           map = map_class.new
           key = Object.new
 

@@ -18,7 +18,7 @@ module Farce
         private
 
         def run_once
-          action, key, value, port = ::Ractor.receive
+          action, key, value, port = receive_request
           case action
           when :move   then return respond(port, [true, @data.delete(key)].freeze, move: true)
           when :copy   then return respond(port, [true, @data[key]].freeze, move: false)

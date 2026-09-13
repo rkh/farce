@@ -9,9 +9,14 @@ module Farce
   module Internal # :nodoc: all
     class Vault
       class Manager
+        private def receive_request = ::Ractor.receive
+
         private def respond(port, message, move: false)
           return port.store(::Ractor.make_shareable(message)) if port.is_a?(Atom)
           port.send(message, move:)
+        rescue ::Ractor::ClosedError
+          # An interrupted caller closes its private reply port.
+          raise unless port.is_a?(::Ractor::Port) && port.closed?
         end
       end
 
@@ -24,12 +29,13 @@ module Farce
 
       def execute(action, key, value = nil, move: false)
         raise Ractor::IsolationError, "key must be shareable" unless ::Ractor.shareable?(key)
-        port,    mutex   = Storage.ractor.store_if_absent(self) { [::Ractor::Port.new, Mutex.new] }
-        success, payload = mutex.synchronize do
-          @ractor.send([action, key, value, port].freeze, move:)
-          port.receive
-        end
+        raise ThreadError, "deadlock; recursive access from the Vault Ractor" if ::Ractor.current.equal?(@ractor)
+        port = ::Ractor::Port.new
+        @ractor.send([action, key, value, port].freeze, move:)
+        success, payload = port.receive
         success ? payload : raise(payload)
+      ensure
+        port&.close
       end
     end
   end

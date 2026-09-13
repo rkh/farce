@@ -12,35 +12,87 @@ module Farce
     # This means lookups, insertions, and deletions are O(log n) operations (vs O(1) for a hash map).
     # This is much slower than a hash map, but much faster than ad hoc sorting of the map.
     class TreeMap < Map
-      # @!method first_key
-      #   @return [BasicObject] The first key in the map (the smallest key according to the map's ordering).
-      #
-      # @!method last_key
-      #   @return [BasicObject] The last key in the map (the largest key according to the map's ordering).
-      #
-      # @!method pop
-      #   Remove and return the last key-value pair in the map (the largest key according to the map's ordering).
-      #   @return [Array(BasicObject, BasicObject)] The last key-value pair in the map.
-      #
-      # @!method shift
-      #   Remove and return the first key-value pair in the map (the smallest key according to the map's ordering).
-      #   @return [Array(BasicObject, BasicObject)] The first key-value pair in the map.
-      Internal.delegate(self, :@map, :[], :[]=, :delete, :empty?, :fetch, :first_key, :getkey, :key?,
-        :last_key, :length, :pop, :shift, :size)
-
       # @note Subclasses may accept additional, optional arguments (usually keyword arguments) to configure the map.
       # @param entries [Hash, Array<Array(BasicObject, BasicObject)>, Map, #each, nil]
       #   Optional initial entries for the map. Needs to implement #each and yield key-value pairs.
       #   If nil, the map will be empty.
       def initialize(entries = nil)
         if entries.respond_to?(:to_hash)
-          @map = new_tree_map(entries)
-        else
-          @map = new_tree_map
-          entries&.each { @map[_1] = _2 }
+          converted = Hash.try_convert(entries)
+          raise TypeError, "entries must be a Hash or respond to #to_hash" unless converted
+          entries = converted
         end
+        @map = new_tree_map
+        entries&.each { self[_1] = _2 }
         super()
       end
+
+      # (see Map#[])
+      def [](key) = unwrap_value(@map[prepare_key(key)])
+
+      # (see Map#[]=)
+      def []=(key, value)
+        key = prepare_key(key)
+        @map[key] = wrap_value(value)
+        value
+      end
+
+      # (see Map#delete)
+      def delete(key) = unwrap_value(@map.delete(prepare_key(key)))
+
+      # (see Map#empty?)
+      def empty? = @map.empty?
+
+      # (see Map#fetch)
+      def fetch(*arguments)
+        unless arguments.length.between?(1, 2)
+          raise ArgumentError, "wrong number of arguments (given #{arguments.length}, expected 1..2)"
+        end
+
+        key, default = arguments
+        key = prepare_key(key)
+        warn "block supersedes default value argument", uplevel: 1 if block_given? && arguments.length == 2
+        value = @map.fetch(key) do
+          return yield(key) if block_given?
+          return default if arguments.length == 2
+          raise KeyError.new("key not found: #{key.inspect}", receiver: self, key: key)
+        end
+        unwrap_value(value)
+      end
+
+      # Return the smallest key according to the map's ordering.
+      # @return [BasicObject, nil] The first key, or nil if the map is empty.
+      def first_key = @map.first_key
+
+      # (see Map#getkey)
+      def getkey(key) = @map.getkey(prepare_key(key))
+
+      # (see Map#key?)
+      def key?(key) = @map.key?(prepare_key(key))
+
+      # Return the largest key according to the map's ordering.
+      # @return [BasicObject, nil] The last key, or nil if the map is empty.
+      def last_key = @map.last_key
+
+      # (see Map#size)
+      def length = @map.length
+
+      # Remove and return the entry with the largest key according to the map's ordering.
+      # @return [Array(BasicObject, BasicObject), nil] The last key-value pair, or nil if the map is empty.
+      def pop
+        pair = @map.pop
+        [pair.first, unwrap_value(pair.last)] if pair
+      end
+
+      # Remove and return the entry with the smallest key according to the map's ordering.
+      # @return [Array(BasicObject, BasicObject), nil] The first key-value pair, or nil if the map is empty.
+      def shift
+        pair = @map.shift
+        [pair.first, unwrap_value(pair.last)] if pair
+      end
+
+      # (see Map#size)
+      def size = @map.size
 
       # Remove all entries from the map.
       # @return [self]
@@ -58,10 +110,9 @@ module Farce
       #   @return [self]
       # @overload each
       #   @return [Enumerator] An enumerator over two-element `[key, value]` pairs.
-      # @abstract
-      def each(&)
+      def each
         return enum_for(__method__) unless block_given?
-        @map.each(&)
+        @map.each { |key, value| yield [key, unwrap_value(value)] }
         self
       end
 
@@ -122,7 +173,15 @@ module Farce
 
       private
 
-      def each_for_inspect(&) = @map.each(&)
+      def each_for_inspect(&) = each(&)
+
+      def prepare_key(key)
+        return key if String === key || Ractor.shareable?(key)
+        raise Ractor::IsolationError, "key must be Ractor-shareable"
+      end
+
+      def unwrap_value(value) = value
+      def wrap_value(value)   = value
 
       def new_tree_map(...)
         raise "subclass failed to implement #new_tree_map" unless instance_of?(TreeMap)

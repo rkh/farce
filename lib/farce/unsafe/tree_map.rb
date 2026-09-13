@@ -9,7 +9,7 @@ module Farce
     class TreeMap < Abstract::TreeMap
       include Unshareable
 
-      private def new_tree_map(...) = Internal::LocalTreeMap.new(...)
+      private def new_tree_map(...) = Internal::UnsafeTreeMap.new(...)
     end
   end
 end

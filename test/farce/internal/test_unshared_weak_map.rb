@@ -522,8 +522,7 @@ module Farce
           release << true
 
           assert worker.join(5), "retired update did not finish"
-          worker.value
-
+          assert_nil worker.value
           assert_equal 1, calls
           assert_equal 9, map[:key]
           assert_equal 1, map.size

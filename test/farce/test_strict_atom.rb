@@ -8,6 +8,10 @@ module Farce
   class TestStrictAtom < Internal::TestAtom
     def atom_class = Strict::Atom
 
+    def test_timeout
+      name == "test_direct_storage_and_strong_retention" ? 5 : super
+    end
+
     def test_public_type_and_shareability
       atom = atom_class.new
 

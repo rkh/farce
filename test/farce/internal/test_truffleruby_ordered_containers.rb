@@ -9,13 +9,13 @@ module Farce
     class TestTruffleRubyOrderedContainers < Test
       def test_tree_maps_are_direct_production_classes
         map = Internal::TreeMap.new(2 => :two, 1 => :one)
-        local = Internal::LocalTreeMap.new(2 => :two, 1 => :one)
+        local = Internal::UnsafeTreeMap.new(2 => :two, 1 => :one)
 
         assert_same Internal::TreeMap, Internal::ShareableTreeMap
         assert_instance_of Internal::TreeMap, map
-        assert_instance_of Internal::LocalTreeMap, local
-        assert_equal Internal::LocalTreeMap, Internal::TreeMap.superclass
-        assert_equal Object, Internal::LocalTreeMap.superclass
+        assert_instance_of Internal::UnsafeTreeMap, local
+        assert_equal Internal::UnsafeTreeMap, Internal::TreeMap.superclass
+        assert_equal Object, Internal::UnsafeTreeMap.superclass
         assert_predicate map, :frozen?
         refute_predicate local, :frozen?
         assert_equal [1, :one], map.shift

@@ -127,7 +127,7 @@ module Farce
     end
 
     class TestJVMTreeMaps < Test
-      MAPS = [Internal::LocalTreeMap, Internal::TreeMap].freeze
+      MAPS = [Internal::UnsafeTreeMap, Internal::TreeMap].freeze
 
       MAPS.each do |map_class|
         label = map_class.name.split("::").last
@@ -263,8 +263,8 @@ module Farce
         end
       end
 
-      def test_local_tree_map_honors_freeze_and_reentrant_mutation_guard
-        map = Internal::LocalTreeMap.new(1 => :one)
+      def test_unsafe_tree_map_honors_freeze_and_reentrant_mutation_guard
+        map = Internal::UnsafeTreeMap.new(1 => :one)
         recursive = JVMTreeRank.new(2, reenter: map)
         error = assert_raises(RuntimeError) { map[recursive] = :two }
         assert_match(/cannot be modified during comparison/, error.message)
@@ -278,8 +278,8 @@ module Farce
         assert_equal :one, map[1]
       end
 
-      def test_local_tree_map_freeze_cannot_be_hidden_by_an_override
-        map_class = Class.new(Internal::LocalTreeMap) do
+      def test_unsafe_tree_map_freeze_cannot_be_hidden_by_an_override
+        map_class = Class.new(Internal::UnsafeTreeMap) do
           def frozen? = false
         end
         map = map_class.new(1 => :one)
@@ -294,8 +294,8 @@ module Farce
         assert_equal :one, map[1]
       end
 
-      def test_local_tree_map_callback_freeze_prevents_the_pending_mutation
-        map = Internal::LocalTreeMap.new
+      def test_unsafe_tree_map_callback_freeze_prevents_the_pending_mutation
+        map = Internal::UnsafeTreeMap.new
         one = JVMTreeRank.new(1)
         map[one] = :one
         freezing = JVMTreeRank.new(2, freeze_target: map)
@@ -306,8 +306,8 @@ module Farce
         assert_equal :one, map[one]
       end
 
-      def test_local_tree_map_detects_freeze_from_stored_numeric_coercion
-        map = Internal::LocalTreeMap.new
+      def test_unsafe_tree_map_detects_freeze_from_stored_numeric_coercion
+        map = Internal::UnsafeTreeMap.new
         stored = JVMCoercingTreeRank.new(2, map)
         map[stored] = :stored
 
@@ -317,8 +317,8 @@ module Farce
         assert_equal :stored, map[stored]
       end
 
-      def test_local_tree_map_uses_a_primitive_frozen_string_snapshot
-        map = Internal::LocalTreeMap.new
+      def test_unsafe_tree_map_uses_a_primitive_frozen_string_snapshot
+        map = Internal::UnsafeTreeMap.new
         original = JVMHostileTreeString.new("middle")
         map[original] = :middle
         stored = map.first_key
@@ -386,7 +386,7 @@ module Farce
         key_class = backend.const_get(:Key, false)
         key_class.prepend(JVMMutationOwnerTeardownProbe) unless
           key_class < JVMMutationOwnerTeardownProbe
-        map = Internal::LocalTreeMap.new(1 => :one)
+        map = Internal::UnsafeTreeMap.new(1 => :one)
         entered = Thread::Queue.new
         release = Thread::Queue.new
         cancellation = Class.new(StandardError)
@@ -457,13 +457,13 @@ module Farce
     class TestJVMTreeMapPublicClasses < Test
       def test_default_is_synchronized_and_local_variant_is_explicit
         map = Internal::TreeMap.new(2 => :two, 1 => :one)
-        local = Internal::LocalTreeMap.new(2 => :two, 1 => :one)
+        local = Internal::UnsafeTreeMap.new(2 => :two, 1 => :one)
 
         assert_same Internal::TreeMap, Internal::ShareableTreeMap
         assert_instance_of Internal::TreeMap, map
-        assert_instance_of Internal::LocalTreeMap, local
+        assert_instance_of Internal::UnsafeTreeMap, local
         assert_equal Object, Internal::TreeMap.superclass
-        assert_equal Object, Internal::LocalTreeMap.superclass
+        assert_equal Object, Internal::UnsafeTreeMap.superclass
         assert_predicate map, :frozen?
         refute_predicate local, :frozen?
         assert_equal [1, :one], map.shift

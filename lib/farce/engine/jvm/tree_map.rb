@@ -261,7 +261,7 @@ module Farce
     end
 
     # Explicit unsynchronized JVM implementation.
-    class LocalTreeMap
+    class UnsafeTreeMap
       include JVMTreeMapBackend
     end
 

@@ -147,6 +147,7 @@ module Farce
         when :finish   then finish(*arguments)
         when :store    then store(*arguments)
         when :delete   then delete(arguments.first)
+        when :size     then size
         when :snapshot then snapshot
         when :clear    then clear
         else raise ArgumentError, "unknown weak-map action: #{action.inspect}"
@@ -210,6 +211,19 @@ module Farce
           remove(key, entry) if result.first == :ok
           result
         end
+      end
+
+      # Count in the owner Ractor so size replies do not keep weak entries alive.
+      def size
+        entries = @index.snapshot
+        count = 0
+        entries.each do |entry|
+          state = entry.read
+          return state if state.first == :busy
+          count += 1 if state.first == :ok && state[1]
+        end
+        @index.sweep(entries)
+        [:ok, count].freeze
       end
 
       def snapshot

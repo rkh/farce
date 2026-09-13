@@ -2,14 +2,14 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
-require "farce/engine/truffleruby/native/local_tree_map"
+require "farce/engine/truffleruby/native/unsafe_tree_map"
 
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
     # Synchronized native-TruffleRuby map. Storage and ordered operations come
-    # from LocalTreeMap; this subclass adds coordination and guarded mutability.
-    class TreeMap < LocalTreeMap
+    # from UnsafeTreeMap; this subclass adds coordination and guarded mutability.
+    class TreeMap < UnsafeTreeMap
       private
 
       def synchronized? = true

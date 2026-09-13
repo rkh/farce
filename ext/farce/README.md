@@ -1,11 +1,11 @@
 # Native extension
 
-Farce's CRuby extension defines its internal coordinated containers, including `Atom`, `Counter`, `Exchanger`, `Flag`, `Lock`, `Map`, `Queue`, `Signal`, `Vector`, `LocalTreeMap`, `TreeMap`, `ShareableTreeMap`, and `PriorityQueue`. CRuby 4.1+ also gets native `WeakAtom`, `WeakMap`, `WeakKeyMap`, and `WeakValueMap` implementations.
+Farce's CRuby extension defines its internal coordinated containers, including `Atom`, `Counter`, `Exchanger`, `Flag`, `Lock`, `Map`, `Queue`, `Signal`, `Vector`, `UnsafeTreeMap`, `TreeMap`, `ShareableTreeMap`, and `PriorityQueue`. CRuby 4.1+ also gets native `WeakAtom`, `WeakMap`, `WeakKeyMap`, and `WeakValueMap` implementations.
 
 On platforms with epoll or kqueue, the same extension also provides Farce's native fiber scheduler. The scheduler class is initialized lazily so selecting the Ruby `select` implementation does not load or expose the native scheduler.
 
 The tree maps use a red-black tree. String keys are normalized like `-key`, producing frozen, globally deduplicated keys that
-can be recovered with `getkey`. Other keys must already be Ractor-shareable. `LocalTreeMap` is unsynchronized, while `TreeMap` is synchronized. Both accept arbitrary values and follow ordinary Ruby freeze semantics. `ShareableTreeMap` is synchronized, requires shareable values, and is itself frozen and Ractor-shareable.
+can be recovered with `getkey`. Other keys must already be Ractor-shareable. `UnsafeTreeMap` is unsynchronized, while `TreeMap` is synchronized. Both accept arbitrary values and follow ordinary Ruby freeze semantics. `ShareableTreeMap` is synchronized, requires shareable values, and is itself frozen and Ractor-shareable.
 
 `PriorityQueue` uses the vendored Kazlib dictionary implementation with one FIFO bucket per priority (this is the same implementation used by the rbtree gem). Exact deletion visits only the requested priority's bucket. Kazlib's copyright and license remain in `dict.c` and `dict.h`.
 

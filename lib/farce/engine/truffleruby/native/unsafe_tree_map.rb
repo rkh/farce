@@ -9,7 +9,7 @@ module Farce
   module Internal # :nodoc: all
     # Unsynchronized ordered map for callers that provide their own ownership.
     # Entries live in one sorted Array and are located by binary search.
-    class LocalTreeMap
+    class UnsafeTreeMap
       include TruffleOrderedArraySupport
 
       INITIALIZATION_LOCK = Mutex.new

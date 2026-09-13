@@ -2,10 +2,14 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
+require "farce/engine/shared/map_key_coordination"
+
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
     class Map < TruffleRuby::ConcurrentMap
+      include MapKeyCoordination
+
       BASIC_OBJECT_EQUAL_METHOD = BasicObject.instance_method(:equal?)
       INTERRUPT_MASK = { Exception => :never }.freeze
       private_constant :BASIC_OBJECT_EQUAL_METHOD, :INTERRUPT_MASK
@@ -41,16 +45,13 @@ module Farce
         super()
         @compare_keys_by_identity   = compare_keys_by_identity
         @compare_values_by_identity = compare_values_by_identity
-        # Native operations may overlap; block updates reserve exclusive access.
+        # Native operations may overlap. Block updates reserve one logical key.
         @state_mutex   = Mutex.new
-        @state_signal  = Signal.new
         @change_signal = Signal.new
         @active_owner_fiber  = nil
         @active_owner_thread = nil
         @active_owners = nil
-        @exclusive     = false
-        @exclusive_fiber  = nil
-        @exclusive_thread = nil
+        initialize_key_coordination
         initial_mapping&.each { |key, value| concurrent_store(wrap_key(key), value) }
       end
 
@@ -74,32 +75,45 @@ module Farce
       end
 
       def []=(key, value)
-        _, result = with_operation(nil) do
-          concurrent_store(wrap_key(key), value)
-          changed!
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          reservation.commit do
+            native_operation { concurrent_store(wrapped, value) }
+            changed!
+          end
           value
         end
         result
       end
 
       def get(key, timeout: nil, &fallback)
-        completed, result = with_operation(timeout_deadline(timeout)) { concurrent_get(wrap_key(key)) }
+        wrapped = wrap_key(key)
+        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do
+          native_operation { concurrent_get(wrapped) }
+        end
         completed ? result : fallback&.call
       end
 
       def store(key, value, timeout: nil, &fallback)
-        completed, result = with_operation(timeout_deadline(timeout)) do
-          concurrent_store(wrap_key(key), value)
-          changed!
+        wrapped = wrap_key(key)
+        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
+          reservation.commit do
+            native_operation { concurrent_store(wrapped, value) }
+            changed!
+          end
           value
         end
         completed ? result : fallback&.call
       end
 
       def swap(key, replacement, timeout: nil, &fallback)
-        completed, result = with_operation(timeout_deadline(timeout)) do
-          previous = concurrent_get_and_set(wrap_key(key), replacement)
-          changed!
+        wrapped = wrap_key(key)
+        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
+          previous = nil
+          reservation.commit do
+            previous = native_operation { concurrent_get_and_set(wrapped, replacement) }
+            changed!
+          end
           previous
         end
         completed ? result : fallback&.call
@@ -108,31 +122,35 @@ module Farce
       def store_if_absent(key, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
 
-        completed, result = with_exclusive_update(timeout_deadline(timeout)) do
-          wrapped = wrap_key(key)
-          if concurrent_key?(wrapped)
-            concurrent_get(wrapped)
+        wrapped = wrap_key(key)
+        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
+          if native_operation { concurrent_key?(wrapped) }
+            native_operation { concurrent_get(wrapped) }
           else
             value = yield
-            concurrent_store(wrapped, value)
-            changed!
-            value
+            stored = reservation.commit do
+              native_operation { concurrent_store(wrapped, value) }
+              changed!
+            end
+            value if stored
           end
         end
         completed ? result : nil
       end
 
       def compare_and_set(key, expected, replacement, timeout: nil)
-        completed, result = with_exclusive_update(timeout_deadline(timeout)) do
-          wrapped = wrap_key(key)
-          next false unless concurrent_key?(wrapped)
+        wrapped = wrap_key(key)
+        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
+          next false unless native_operation { concurrent_key?(wrapped) }
 
-          current = concurrent_get(wrapped)
+          current = native_operation { concurrent_get(wrapped) }
           next false unless values_equal?(current, expected)
 
-          concurrent_store(wrapped, replacement)
-          changed!
-          true
+          replaced = reservation.commit do
+            native_operation { concurrent_store(wrapped, replacement) }
+            changed!
+          end
+          replaced
         end
         completed && result
       end
@@ -140,12 +158,14 @@ module Farce
       def update(key, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
 
-        completed, result = with_exclusive_update(timeout_deadline(timeout)) do
-          wrapped = wrap_key(key)
-          value = yield(concurrent_get(wrapped))
-          concurrent_store(wrapped, value)
-          changed!
-          value
+        wrapped = wrap_key(key)
+        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
+          value = yield(native_operation { concurrent_get(wrapped) })
+          stored = reservation.commit do
+            native_operation { concurrent_store(wrapped, value) }
+            changed!
+          end
+          value if stored
         end
         completed ? result : nil
       end
@@ -153,12 +173,15 @@ module Farce
       def upsert(key, initial_value, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
 
-        completed, result = with_exclusive_update(timeout_deadline(timeout)) do
-          wrapped = wrap_key(key)
-          value = concurrent_key?(wrapped) ? yield(concurrent_get(wrapped)) : initial_value
-          concurrent_store(wrapped, value)
-          changed!
-          value
+        wrapped = wrap_key(key)
+        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
+          present = native_operation { concurrent_key?(wrapped) }
+          value = present ? yield(native_operation { concurrent_get(wrapped) }) : initial_value
+          stored = reservation.commit do
+            native_operation { concurrent_store(wrapped, value) }
+            changed!
+          end
+          value if stored
         end
         completed ? result : nil
       end
@@ -201,9 +224,13 @@ module Farce
       end
 
       def delete(key)
-        _, result = with_operation(nil) do
-          value = concurrent_delete(wrap_key(key))
-          changed!
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          value = nil
+          reservation.commit do
+            value = native_operation { concurrent_delete(wrapped) }
+            changed!
+          end
           value
         end
         result
@@ -220,37 +247,53 @@ module Farce
       end
 
       def clear
-        _, result = with_operation(nil) do
-          concurrent_clear
+        clear_key_operations do
+          native_operation { concurrent_clear }
           changed!
-          self
+        end
+        self
+      end
+
+      def compute(key)
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          value = yield(native_operation { concurrent_get(wrapped) })
+          stored = reservation.commit do
+            native_operation { concurrent_store(wrapped, value) }
+            changed!
+          end
+          value if stored
         end
         result
       end
 
-      def compute(key, &)
-        _, result = with_exclusive_update(nil) do
-          value = concurrent_compute(wrap_key(key), &)
-          changed!
-          value
+      def compute_if_absent(key)
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          next native_operation { concurrent_get(wrapped) } if
+            native_operation { concurrent_key?(wrapped) }
+
+          value = yield
+          stored = reservation.commit do
+            native_operation { concurrent_store(wrapped, value) }
+            changed!
+          end
+          value if stored
         end
         result
       end
 
-      def compute_if_absent(key, &)
-        _, result = with_exclusive_update(nil) do
-          value = concurrent_compute_if_absent(wrap_key(key), &)
-          changed!
-          value
-        end
-        result
-      end
+      def compute_if_present(key)
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          next unless native_operation { concurrent_key?(wrapped) }
 
-      def compute_if_present(key, &)
-        _, result = with_exclusive_update(nil) do
-          value = concurrent_compute_if_present(wrap_key(key), &)
-          changed!
-          value
+          value = yield(native_operation { concurrent_get(wrapped) })
+          stored = reservation.commit do
+            native_operation { concurrent_store(wrapped, value) }
+            changed!
+          end
+          value if stored
         end
         result
       end
@@ -258,18 +301,26 @@ module Farce
       def delete_pair(key, value)
         return delete_pair_by_identity(key, value) if compare_values_by_identity?
 
-        _, result = with_operation(nil) do
-          deleted = concurrent_delete_pair(wrap_key(key), value)
-          changed! if deleted
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          deleted = false
+          reservation.commit do
+            deleted = native_operation { concurrent_delete_pair(wrapped, value) }
+            changed! if deleted
+          end
           deleted
         end
         result
       end
 
       def get_and_set(key, value)
-        _, result = with_operation(nil) do
-          previous = concurrent_get_and_set(wrap_key(key), value)
-          changed!
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          previous = nil
+          reservation.commit do
+            previous = native_operation { concurrent_get_and_set(wrapped, value) }
+            changed!
+          end
           previous
         end
         result
@@ -277,19 +328,28 @@ module Farce
 
       def get_or_default(key, default) = concurrent_get_or_default(wrap_key(key), default)
 
-      def merge_pair(key, value, &)
-        _, result = with_exclusive_update(nil) do
-          merged = concurrent_merge_pair(wrap_key(key), value, &)
-          changed!
-          merged
+      def merge_pair(key, value)
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          present = native_operation { concurrent_key?(wrapped) }
+          merged = present ? yield(native_operation { concurrent_get(wrapped) }) : value
+          stored = reservation.commit do
+            native_operation { concurrent_store(wrapped, merged) }
+            changed!
+          end
+          merged if stored
         end
         result
       end
 
       def replace_if_exists(key, value)
-        _, result = with_operation(nil) do
-          previous = concurrent_replace_if_exists(wrap_key(key), value)
-          changed!
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          previous = nil
+          reservation.commit do
+            previous = native_operation { concurrent_replace_if_exists(wrapped, value) }
+            changed!
+          end
           previous
         end
         result
@@ -298,9 +358,13 @@ module Farce
       def replace_pair(key, expected, replacement)
         return replace_pair_by_identity(key, expected, replacement) if compare_values_by_identity?
 
-        _, result = with_operation(nil) do
-          replaced = concurrent_replace_pair(wrap_key(key), expected, replacement)
-          changed! if replaced
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          replaced = false
+          reservation.commit do
+            replaced = native_operation { concurrent_replace_pair(wrapped, expected, replacement) }
+            changed! if replaced
+          end
           replaced
         end
         result
@@ -322,25 +386,29 @@ module Farce
       end
 
       def delete_pair_by_identity(key, expected)
-        _, result = with_exclusive_update(nil) do
-          wrapped = wrap_key(key)
-          next false unless concurrent_key?(wrapped) && identical?(concurrent_get(wrapped), expected)
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          next false unless native_operation { concurrent_key?(wrapped) } &&
+            identical?(native_operation { concurrent_get(wrapped) }, expected)
 
-          concurrent_delete(wrapped)
-          changed!
-          true
+          reservation.commit do
+            native_operation { concurrent_delete(wrapped) }
+            changed!
+          end
         end
         result
       end
 
       def replace_pair_by_identity(key, expected, replacement)
-        _, result = with_exclusive_update(nil) do
-          wrapped = wrap_key(key)
-          next false unless concurrent_key?(wrapped) && identical?(concurrent_get(wrapped), expected)
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          next false unless native_operation { concurrent_key?(wrapped) } &&
+            identical?(native_operation { concurrent_get(wrapped) }, expected)
 
-          concurrent_store(wrapped, replacement)
-          changed!
-          true
+          reservation.commit do
+            native_operation { concurrent_store(wrapped, replacement) }
+            changed!
+          end
         end
         result
       end
@@ -350,94 +418,36 @@ module Farce
         raise ArgumentError, "#{name} must be true or false"
       end
 
-      def with_operation(deadline)
+      def native_operation(&)
         entered = false
-        available = enter_operation(deadline) { entered = true }
-        return [false, nil] unless available
-        [true, yield]
+        @state_mutex.synchronize do
+          reject_active_operation_reentry!
+          Thread.handle_interrupt(INTERRUPT_MASK) do
+            register_active_operation
+            entered = true
+          end
+        end
+        yield
       ensure
         Thread.handle_interrupt(INTERRUPT_MASK) { leave_operation } if entered
       end
 
-      def enter_operation(deadline)
-        while true
-          generation = @state_signal.generation
-          entered = @state_mutex.synchronize do
-            if @exclusive
-              reject_exclusive_wait!
-              next false
-            end
-            reject_active_operation_reentry!
-            yield
-            register_active_operation
-            true
-          end
-          return true if entered
-          return false unless wait_for_signal(@state_signal, generation, deadline)
-        end
-      end
-
       def leave_operation
-        notify = @state_mutex.synchronize do
-          removed = unregister_active_operation
-          removed && !active_operation?
-        end
-        @state_signal.broadcast if notify
-      end
-
-      def with_exclusive_update(deadline)
-        entered = false
-        available = enter_exclusive_update(deadline) { entered = true }
-        return [false, nil] unless available
-        [true, yield]
-      ensure
-        Thread.handle_interrupt(INTERRUPT_MASK) { leave_exclusive_update } if entered
-      end
-
-      def enter_exclusive_update(deadline)
-        while true
-          generation = @state_signal.generation
-          entered = @state_mutex.synchronize do
-            if @exclusive
-              reject_exclusive_wait!
-              next false
-            end
-            if active_operation?
-              reject_active_wait!
-              next false
-            end
-            yield
-            @exclusive_fiber  = Fiber.current
-            @exclusive_thread = Thread.current
-            @exclusive        = true
-            true
-          end
-          return true if entered
-          return false unless wait_for_signal(@state_signal, generation, deadline)
-        end
-      end
-
-      def leave_exclusive_update
-        released = @state_mutex.synchronize do
-          next false unless identical?(@exclusive_fiber, Fiber.current)
-
-          was_exclusive = @exclusive
-          @exclusive = false
-          @exclusive_fiber = @exclusive_thread = nil
-          was_exclusive
-        end
-        @state_signal.broadcast if released
+        @state_mutex.synchronize { unregister_active_operation }
       end
 
       def changed! = @change_signal.broadcast
 
       def wait_for_value(key, expected, deadline, fallback, non_nil:)
+        wrapped = wrap_key(key)
         while true
           generation = @change_signal.generation
-          current = self[key]
+          completed, current = with_key_operation(wrapped, deadline) do
+            native_operation { concurrent_get(wrapped) }
+          end
+          return fallback&.call unless completed
           ready = non_nil ? !current.nil? : !values_equal?(current, expected)
           return current if ready
-          @state_mutex.synchronize { reject_exclusive_wait! if @exclusive }
           return fallback&.call unless wait_for_signal(@change_signal, generation, deadline)
         end
       end
@@ -460,30 +470,10 @@ module Farce
         Clock.now + timeout
       end
 
-      def reject_exclusive_wait!
-        raise ThreadError, "deadlock; recursive map access during an update" if
-          identical?(@exclusive_fiber, Fiber.current)
-
-        scheduler = Fiber.scheduler if Fiber.respond_to?(:scheduler)
-        return unless identical?(@exclusive_thread, Thread.current) && !scheduler
-
-        raise ThreadError, "deadlock; map update is owned by another unscheduled fiber"
-      end
-
       def reject_active_operation_reentry!
         return unless active_operation_owned_by?(Fiber.current)
 
         raise ThreadError, "deadlock; recursive map access during an operation"
-      end
-
-      def reject_active_wait!
-        reject_active_operation_reentry!
-
-        scheduler = Fiber.scheduler if Fiber.respond_to?(:scheduler)
-        return if scheduler
-        return unless active_operation_on_thread?(Thread.current)
-
-        raise ThreadError, "deadlock; map operation is owned by another unscheduled fiber"
       end
 
       def register_active_operation
@@ -518,16 +508,8 @@ module Farce
         end
       end
 
-      def active_operation? = !@active_owner_fiber.nil? || !@active_owners.nil?
-
       def active_operation_owned_by?(fiber)
         @active_owners ? @active_owners.key?(fiber) : identical?(@active_owner_fiber, fiber)
-      end
-
-      def active_operation_on_thread?(thread)
-        return identical?(@active_owner_thread, thread) unless @active_owners
-
-        @active_owners.each_value.any? { |owner| identical?(owner, thread) }
       end
 
       def values_equal?(left, right)
