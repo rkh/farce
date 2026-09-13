@@ -132,7 +132,7 @@ module Farce
       assert ractor.monitor(port)
       ractor.send(:done)
 
-      assert_equal :exited, port.receive
+      assert_monitor_notification ractor, :exited, port.receive
       assert_equal :done, value(ractor)
     end
 
@@ -158,7 +158,7 @@ module Farce
       port = Port.new
 
       refute ractor.monitor(port)
-      assert_equal :exited, port.receive
+      assert_monitor_notification ractor, :exited, port.receive
     end
 
     def test_ractor_monitor_reports_error_status
@@ -174,7 +174,7 @@ module Farce
         refute ractor.monitor(port)
       end
 
-      assert_equal :aborted, port.receive
+      assert_monitor_notification ractor, :aborted, port.receive
     end
 
     def test_inspect_includes_name_location_and_status
@@ -190,6 +190,17 @@ module Farce
     end
 
     private
+
+    def assert_monitor_notification(ractor, status, notification)
+      # Newer Ruby 4.1 builds include the monitored Ractor in the notification.
+      if native_ractors? && RUBY_VERSION >= "4.1" && notification.is_a?(Array)
+        assert_equal 2, notification.size
+        assert_same ractor, notification.first
+        assert_equal status, notification.last
+      else
+        assert_equal status, notification
+      end
+    end
 
     def value(ractor) = ractor.respond_to?(:value) ? ractor.value : ractor.take
 
