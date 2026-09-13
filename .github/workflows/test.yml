@@ -24,6 +24,8 @@ jobs:
           - name: jruby
             version: jruby
             verify_gems: true
+            # Avoid virtual-thread starvation during pool growth on Java 21.
+            jruby_opts: -Xfiber.vthread=false
           - name: jruby-dev
             version: jruby-head
             # Avoid virtual-thread starvation during nested fiber creation.
