@@ -36,6 +36,8 @@ module Farce
                 raise "explicit limit ignored" unless explicit.max_threads == 5
                 explicit.close
                 tasks = 2.times.map do
+                  # This subprocess does not load test/setup's Windows Ractor-start barrier.
+                  GC.start if Farce::System.windows?
                   Ractor.new do
                     current = ThreadPool.current
                     raise "wrong secondary limit" unless current.max_threads == 1 && current.capacity == 2

@@ -81,21 +81,25 @@ module Farce
       pool = Pool.new(max_size: 2, max_inflight: 1, grow_after: 0.005, shrink_after: 0.02)
       started = Queue.new
       gate = Atom.new(false, mode: :raise)
+      extra_gate = Queue.new
 
       pool.schedule(started, gate, mode: :raise) do |queue, wait|
         queue << true
         nil until wait.value
       end
       started.pop(timeout: 2)
-      pool.schedule(mode: :raise) { nil }
+      # Keep the extra worker busy until its growth has been observed.
+      pool.schedule(extra_gate, mode: :raise, &:pop)
 
       Timeout.timeout(2) { sleep 0.001 until pool.size == 2 }
       gate.value = true
+      extra_gate << nil
       Timeout.timeout(2) { sleep 0.001 until pool.size == 1 }
 
       assert_equal 1, pool.size
     ensure
       gate&.value = true
+      extra_gate&.close
       close_pool(pool)
     end
 

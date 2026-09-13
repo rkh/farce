@@ -145,7 +145,7 @@ module Farce
         timeout = [timeout || 0.05, 0.05].min unless snapshot.empty?
         begin
           found = select_snapshot(groups.map(&:uniq), ready? ? 0 : timeout)
-        rescue IOError, Errno::EBADF
+        rescue IOError, Errno::EBADF, Errno::ENOTSOCK
           closed = snapshot.select { |_, wait| wait.ios.flatten.any?(&:closed?) }
           raise if closed.empty?
           closed.each { |token, _| interrupt_wait(token, IOError.new("stream closed while waiting")) } # rubocop:disable Style/HashEachMethods -- snapshot is an Array

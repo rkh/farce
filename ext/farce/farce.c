@@ -92,19 +92,22 @@ static void *
 containers_sleep_without_gvl(void *opaque)
 {
     (void)opaque;
+    /* SleepEx rounds short waits to the system timer tick. Keep pipe handoffs
+     * responsive without changing the process-wide timer resolution. */
+    HANDLE timer = CreateWaitableTimerExW(
+        NULL, NULL, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
+        TIMER_MODIFY_STATE | SYNCHRONIZE
+    );
+    if (timer) {
+        LARGE_INTEGER due = {.QuadPart = -10000}; /* One millisecond. */
+        bool armed = SetWaitableTimer(timer, &due, 0, NULL, NULL, FALSE);
+        DWORD result = armed ? WaitForSingleObject(timer, 10) : WAIT_FAILED;
+        /* Close before returning to Ruby, which may deliver an interrupt. */
+        CloseHandle(timer);
+        if (result != WAIT_FAILED) return NULL;
+    }
     /* Ruby redirects Sleep to rb_w32_Sleep, which requires the GVL. */
     SleepEx(1, FALSE);
-    return NULL;
-}
-
-static void *
-containers_read_without_gvl(void *opaque)
-{
-    containers_read_context_t *context = opaque;
-    do {
-        context->result = read(context->fd, &(unsigned char){0}, 1);
-    } while (context->result < 0 && errno == EINTR);
-    context->error = errno;
     return NULL;
 }
 #endif
@@ -127,30 +130,11 @@ static bool
 containers_wait_for_readable_mode(int fd, VALUE timeout, bool consume)
 {
 #ifdef _WIN32
-    /* CRuby's anonymous-pipe polling can stop making progress on Windows.
-     * Consume indefinite one-shot notifications with a blocking read; timed
-     * waits use short no-GVL probes so Ruby regains control between slices.
+    /* Blocking CRT pipe reads do not reliably unblock on Thread#kill.
+     * Use short no-GVL probes even for indefinite waits so Ruby can deliver
+     * interrupts between slices and run the caller's waiter cleanup.
      * Scheduler-backed waits retain rb_io_wait integration. */
     if (NIL_P(rb_fiber_scheduler_current())) {
-        if (NIL_P(timeout) && consume) {
-            containers_read_context_t context = {
-                .fd = fd,
-                .result = -1,
-                .error = 0,
-                .consume = true,
-            };
-            rb_thread_call_without_gvl(
-                containers_read_without_gvl,
-                &context,
-                RUBY_UBF_IO,
-                NULL
-            );
-            if (context.result < 0) {
-                errno = context.error;
-                rb_sys_fail("read");
-            }
-            return true;
-        }
         double seconds = NIL_P(timeout) ? 0 : NUM2DBL(timeout);
         bool finite = !NIL_P(timeout);
         ULONGLONG deadline = GetTickCount64() + (ULONGLONG)ceil(seconds * 1000);

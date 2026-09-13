@@ -488,11 +488,8 @@ module Farce
           calls == 1 ? a : other
         end
         result = nil
-        Fiber.schedule { result = IO.select([wrapper], nil, nil, 0.03) }
-        Fiber.schedule do
-          sleep 0.001
-          b.write("x")
-        end
+        Fiber.schedule { result = IO.select([wrapper]) }
+        Fiber.schedule { b.write("x") }
         @scheduler.run
 
         assert_equal [[wrapper], [], []], result
