@@ -436,13 +436,20 @@ module Farce
     def build_weak_key_entry
       # Build the key on a disposable native stack. CRuby conservatively scans
       # C stack slots, which can otherwise retain a stale reference to it.
-      Thread.new do
+      worker = Thread.new do
         map = WeakKeyMap.new
         key = Ractor.make_shareable(Object.new)
         value = ModePayload.new(:value)
         map[key] = value
         [map, map.instance_variable_get(:@map)[key]]
-      end.value
+      end
+
+      flunk "weak-key entry creation stalled:\n#{worker.backtrace&.join("\n")}" unless worker.join(5)
+
+      worker.value
+    ensure
+      worker&.kill if worker&.alive?
+      worker&.join
     end
 
     def collect_garbage
