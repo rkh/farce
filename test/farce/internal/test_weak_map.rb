@@ -10,6 +10,18 @@ module Farce
       include Helpers::InternalTestHelpers
       include Helpers::WeakMapContract
 
+      class ObservedWaitValue
+        def initialize(entered)
+          @entered = entered
+          freeze
+        end
+
+        def ==(other)
+          @entered.push(:compared)
+          other == :expected
+        end
+      end
+
       class YieldingWeakEqualityKey
         attr_reader :rank
 
@@ -44,6 +56,35 @@ module Farce
 
       def teardown
         Fiber.set_scheduler(nil) if Fiber.respond_to?(:scheduler) && Fiber.scheduler
+      end
+
+      def test_waiter_observes_a_change_after_gc_with_an_equal_lookup_key
+        [WeakKeyMap, WeakMap].each do |klass|
+          entered = Queue.new
+          map = Thread.new do
+            stored_key = String.new("key").freeze
+            value = ObservedWaitValue.new(entered)
+            klass.new({ stored_key => value })
+          end.value
+          lookup_key = String.new("key").freeze
+          waiter = Thread.new { map.wait_until_changed(lookup_key, :expected) }
+          begin
+            assert_equal :compared, entered.pop(timeout: 5)
+            10.times do
+              GC.start
+              Thread.pass
+            end
+
+            map[lookup_key] = :changed
+
+            assert waiter.join(5), "waiter remained on an orphaned entry"
+            # Native GC may notify the observer of removal before reinsertion.
+            assert_includes [nil, :changed], waiter.value
+          ensure
+            waiter.kill if waiter.alive?
+            waiter.join
+          end
+        end
       end
 
       def test_weakness_flags_and_shareability

@@ -251,6 +251,9 @@ module Farce
         loop do
           response = await_response(deadline:) { request(:read, key) }
           return fallback&.call if response.equal?(TIMED_OUT)
+          # Keep the canonical stored key alive, even when the lookup used a
+          # different equal key. It arrives atomically with the entry's signal.
+          key     = response[5] if response.first == :ok
           present = response.first == :ok && response[1]
           current = present ? response[2] : nil
           return current if non_nil ? !current.nil? : !values_equal?(current, expected)

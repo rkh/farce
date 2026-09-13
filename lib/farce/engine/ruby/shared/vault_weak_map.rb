@@ -25,11 +25,12 @@ module Farce
       def read
         return [:retired] if @retired
         return busy if @claim
-        return [:dead] unless @key.read.first
-        return [:ok, false, nil, @changes, @changes.value] unless @present
+        alive, key = @key.read
+        return [:dead] unless alive
+        return [:ok, false, nil, @changes, @changes.value, key] unless @present
 
         alive, value = read_value
-        alive ? [:ok, true, value, @changes, @changes.value] : [:dead]
+        alive ? [:ok, true, value, @changes, @changes.value, key] : [:dead]
       end
 
       def claim(ticket)
