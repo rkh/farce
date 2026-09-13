@@ -80,3 +80,34 @@ jobs:
       - run: bundle exec rake ci
         env:
           TEST_TIMEOUT: 300
+
+  arm:
+    name: ${{ matrix.os.name }} ARM / Ruby 4.0
+    runs-on: ${{ matrix.os.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - name: Linux
+            runner: ubuntu-24.04-arm
+          - name: Windows
+            runner: windows-11-arm
+          - name: macOS
+            runner: macos-15
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0"
+
+      - name: Remove incompatible lockfile on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Remove-Item Gemfile.lock
+
+      - run: bundle install
+      - run: bundle exec rake ci
+        env:
+          TEST_TIMEOUT: 300
