@@ -201,8 +201,8 @@ class TestUnsharedSignalPool < Test
   def test_repeated_timeouts_do_not_accumulate_slots
     signal = Signal.new
     results = []
-    Fiber.schedule { 30.times { results << signal.wait(timeout: 0.0001) } }
-    30.times { @scheduler.tick }
+    fiber = Fiber.schedule { 30.times { results << signal.wait(timeout: 0.0001) } }
+    @scheduler.tick while fiber.alive?
 
     assert_equal [nil] * 30, results
     assert_equal 1, @scheduler.handles.map(&:object_id).uniq.size
