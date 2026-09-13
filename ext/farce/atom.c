@@ -12,6 +12,7 @@
 static VALUE cAtom;
 #ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
 static VALUE cWeakAtom;
+static VALUE cUnsharedWeakAtom;
 
 /* These functions are exported by Rubies with the probed typed-data weak
  * reference callback, but their declarations intentionally remain internal. */
@@ -38,6 +39,7 @@ typedef struct {
     VALUE updating_fiber;
     VALUE updating_thread;
     bool weak;
+    bool unshared;
     bool initialized;
 } atom_t;
 
@@ -202,11 +204,34 @@ static const rb_data_type_t atom_type = {
     .flags = RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
+#ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
+/* A separate type keeps mutable referents local even if the wrapper is frozen. */
+static const rb_data_type_t unshared_weak_atom_type = {
+    .wrap_struct_name = "Farce::Internal::UnsharedWeakAtom",
+    .function = {
+        .dmark = atom_mark,
+        .dfree = atom_free,
+        .dsize = atom_memsize,
+        .dcompact = atom_compact,
+        .handle_weak_references = atom_handle_weak_references,
+    },
+    .parent = &atom_type,
+};
+#endif
+
 static VALUE
 atom_allocate(VALUE klass)
 {
     atom_t *atom;
-    VALUE object = TypedData_Make_Struct(klass, atom_t, &atom_type, atom);
+    const rb_data_type_t *type = &atom_type;
+    bool unshared = false;
+#ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
+    unshared = cUnsharedWeakAtom &&
+        (klass == cUnsharedWeakAtom || rb_class_inherited_p(klass, cUnsharedWeakAtom) == Qtrue);
+    if (unshared) type = &unshared_weak_atom_type;
+#endif
+    VALUE object = TypedData_Make_Struct(klass, atom_t, type, atom);
+    atom->unshared = unshared;
     pthread_mutex_init(&atom->lock, NULL);
     atom->value = Qnil;
     atom->waiters = NULL;
@@ -216,7 +241,8 @@ atom_allocate(VALUE klass)
     atom->updating_fiber = Qnil;
     atom->updating_thread = Qnil;
 #ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
-    atom->weak = klass == cWeakAtom;
+    atom->weak = unshared || klass == cWeakAtom ||
+        (cWeakAtom && rb_class_inherited_p(klass, cWeakAtom) == Qtrue);
 #else
     atom->weak = false;
 #endif
@@ -231,6 +257,12 @@ get_atom(VALUE self)
     TypedData_Get_Struct(self, atom_t, &atom_type, atom);
     if (!atom->initialized) rb_raise(rb_eRuntimeError, "uninitialized Atom");
     return atom;
+}
+
+static void
+atom_check_value(atom_t *atom, VALUE value)
+{
+    if (!atom->unshared) containers_check_shareable(value);
 }
 
 /* Called with atom->lock held. Raising releases the short native mutex so the
@@ -400,14 +432,15 @@ atom_initialize(int argc, VALUE *argv, VALUE self)
 
     TypedData_Get_Struct(self, atom_t, &atom_type, atom);
     if (atom->initialized) rb_raise(rb_eRuntimeError, "Atom is already initialized");
-    containers_check_shareable(value);
+    atom_check_value(atom, value);
     atom->value = value;
     atom->compare_by_identity = identity == Qundef ? false : containers_strict_bool(identity, "compare_by_identity");
 #ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
     if (atom->weak) rb_gc_declare_weak_references(self);
 #endif
     atom->initialized = true;
-    containers_finish_initialization(self);
+    if (atom->unshared) rb_obj_freeze(self);
+    else containers_finish_initialization(self);
     return self;
 }
 
@@ -426,7 +459,7 @@ static VALUE
 atom_set_value(VALUE self, VALUE value)
 {
     atom_t *atom = get_atom(self);
-    containers_check_shareable(value);
+    atom_check_value(atom, value);
     atom_execution_context_t execution = atom_current_execution_context();
     atom_lock_for_update(atom, &execution);
     atom->value = value;
@@ -460,7 +493,7 @@ atom_store(int argc, VALUE *argv, VALUE self)
     VALUE value;
     atom_t *atom = get_atom(self);
     VALUE timeout_value = atom_extract_timeout(argc, argv, "1:", &value);
-    containers_check_shareable(value);
+    atom_check_value(atom, value);
     atom_timeout_t timeout = atom_parse_timeout(timeout_value);
     atom_execution_context_t execution = atom_current_execution_context();
 
@@ -483,7 +516,7 @@ atom_swap(int argc, VALUE *argv, VALUE self)
     VALUE value;
     atom_t *atom = get_atom(self);
     VALUE timeout_value = atom_extract_timeout(argc, argv, "1:", &value);
-    containers_check_shareable(value);
+    atom_check_value(atom, value);
     atom_timeout_t timeout = atom_parse_timeout(timeout_value);
     atom_execution_context_t execution = atom_current_execution_context();
 
@@ -527,7 +560,7 @@ atom_store_body(VALUE opaque)
 {
     atom_operation_t *operation = (atom_operation_t *)opaque;
     VALUE result = rb_yield_values(0);
-    containers_check_shareable(result);
+    atom_check_value(operation->atom, result);
     pthread_mutex_lock(&operation->atom->lock);
     operation->atom->value = result;
     atom_finished_update(operation->atom, true);
@@ -610,8 +643,8 @@ atom_compare_and_set(int argc, VALUE *argv, VALUE self)
 
     atom_t *atom = get_atom(self);
     atom_cas_t operation;
-    containers_check_shareable(expected);
-    containers_check_shareable(replacement);
+    atom_check_value(atom, expected);
+    atom_check_value(atom, replacement);
     atom_timeout_t timeout = atom_parse_timeout(
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
@@ -636,7 +669,7 @@ atom_update_body(VALUE opaque)
 {
     atom_operation_t *operation = (atom_operation_t *)opaque;
     VALUE result = rb_yield(operation->current);
-    containers_check_shareable(result);
+    atom_check_value(operation->atom, result);
     pthread_mutex_lock(&operation->atom->lock);
     operation->atom->value = result;
     atom_finished_update(operation->atom, true);
@@ -676,7 +709,7 @@ atom_upsert(int argc, VALUE *argv, VALUE self)
         .complete = false,
     };
     atom_timeout_t timeout = atom_parse_timeout(atom_extract_timeout(argc, argv, "1:", &initial));
-    containers_check_shareable(initial);
+    atom_check_value(atom, initial);
     rb_need_block();
 
     if (!atom_lock_for_update_with_timeout(atom, &timeout, &operation.execution)) return Qnil;
@@ -705,7 +738,7 @@ atom_wait_until_changed(int argc, VALUE *argv, VALUE self)
     VALUE expected;
     atom_t *atom = get_atom(self);
     VALUE timeout_value = atom_extract_timeout(argc, argv, "1:", &expected);
-    containers_check_shareable(expected);
+    atom_check_value(atom, expected);
     atom_timeout_t timeout = atom_parse_timeout(timeout_value);
     atom_execution_context_t execution = atom_current_execution_context();
 
@@ -774,6 +807,14 @@ define_atom_methods(VALUE klass)
     rb_define_method(klass, "compare_by_identity?", atom_compare_by_identity_p, 0);
 }
 
+#ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
+static VALUE
+unshared_weak_atom_initialize_copy(VALUE self, VALUE other)
+{
+    rb_raise(rb_eTypeError, "cannot copy UnsharedWeakAtom");
+}
+#endif
+
 void
 containers_init_atom(VALUE namespace)
 {
@@ -782,5 +823,8 @@ containers_init_atom(VALUE namespace)
 #ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
     cWeakAtom = rb_define_class_under(namespace, "WeakAtom", rb_cObject);
     define_atom_methods(cWeakAtom);
+    cUnsharedWeakAtom = rb_define_class_under(namespace, "UnsharedWeakAtom", rb_cObject);
+    define_atom_methods(cUnsharedWeakAtom);
+    rb_define_private_method(cUnsharedWeakAtom, "initialize_copy", unshared_weak_atom_initialize_copy, 1);
 #endif
 }

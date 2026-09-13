@@ -8,8 +8,9 @@ module Farce
     class Vault
       class Manager
         def initialize
-          @data = ObjectSpace::WeakKeyMap.new
-          @weak_maps = ObjectSpace::WeakKeyMap.new
+          @data       = ObjectSpace::WeakKeyMap.new
+          @weak_maps  = ObjectSpace::WeakKeyMap.new
+          @weak_atoms = ObjectSpace::WeakKeyMap.new
         end
 
         def run = (run_once while true)
@@ -31,6 +32,20 @@ module Farce
             return respond(port, [true, result].freeze)
           when :delete then @data.delete(key)
           when :set    then @data[key] = value
+          when :weak_atom
+            command, *arguments = value
+            if command == :create
+              @weak_atoms[key] = VaultWeakAtomSlot.new(*arguments)
+              return respond(port, [true, nil].freeze)
+            end
+            slot = @weak_atoms[key]
+            raise ArgumentError, "unknown weak atom" unless slot
+            result = case command
+                     when :read then slot.value
+                     when :store then slot.store(arguments.first)
+                     else raise ArgumentError, "unknown weak-atom action: #{command.inspect}"
+                     end
+            return respond(port, [true, result].freeze)
           when :weak_map
             command, *arguments = value
             if command == :create
@@ -69,15 +84,18 @@ module Farce
 
       def delete(key) = execute(:delete, key)
 
-      def weak_map(key, action, *arguments)
-        if ::Ractor.current.equal?(@ractor)
-          raise ThreadError, "deadlock; recursive weak-map access from the Vault Ractor"
-        end
+      def weak_map(key, action, *) = shared_request(:weak_map, key, action, *)
+      def weak_atom(key, action, *) = shared_request(:weak_atom, key, action, *)
+
+      private
+
+      def shared_request(kind, key, action, *arguments)
+        raise ThreadError, "deadlock; recursive access from the Vault Ractor" if ::Ractor.current.equal?(@ractor)
         raise Ractor::IsolationError, "key must be shareable" unless ::Ractor.shareable?(key)
 
         pending = Object.new.freeze
         reply = Atom.new(pending, compare_by_identity: true)
-        @ractor.send([:weak_map, key, [action, *arguments].freeze, reply].freeze)
+        @ractor.send([kind, key, [action, *arguments].freeze, reply].freeze)
         success, payload = reply.wait_until_changed(pending)
         return payload if success
 

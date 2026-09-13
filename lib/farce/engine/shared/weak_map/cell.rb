@@ -2,34 +2,11 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
+require "farce/engine/shared/weak_map/reference"
+
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    class UnsharedWeakMapReference
-      def initialize(value) = @value = value
-      def read = [true, @value]
-    end
-    private_constant :UnsharedWeakMapReference
-
-    # A weak value slot also supplies reverse key lookup for enumeration.
-    class UnsharedWeakMapWeakReference
-      def self.for(value)
-        Internal.garbage_collectable?(value) ? new(value) : UnsharedWeakMapReference.new(value)
-      end
-
-      def initialize(value)
-        @token = Object.new
-        @data = ObjectSpace::WeakMap.new
-        @data[@token] = value
-      end
-
-      def read
-        value = @data[@token]
-        [!value.nil?, value]
-      end
-    end
-    private_constant :UnsharedWeakMapWeakReference
-
     # The common cell holds its value directly. The index supplies key ownership.
     # A WeakKeyMap index owns this cell and controls its collection lifetime.
     class UnsharedWeakMapCell < UnsharedWeakMapLock

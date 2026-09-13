@@ -7,44 +7,47 @@ module Farce
     class TestAtom < Test
       include Helpers::InternalTestHelpers
 
-      def run(...) = Timeout.timeout(0.5) { super }
+      def atom_class = Atom
+      def shareable_atom? = Internal.native_ractors?
+      def test_timeout = 0.5
+      def run(...) = Timeout.timeout(test_timeout) { super }
 
       def test_default_and_shareability
-        atom = Atom.new
+        atom = atom_class.new
 
         assert_nil atom.value
         refute_predicate atom, :compare_by_identity?
-        assert Ractor.shareable?(atom) if Internal.native_ractors?
+        assert Ractor.shareable?(atom) if shareable_atom?
       end
 
       def test_initialization_validation
-        assert_raises(Ractor::IsolationError) { Atom.new(Object.new) } if Internal.native_ractors?
-        assert_raises(ArgumentError) { Atom.new(compare_by_identity: nil) }
+        assert_raises(Ractor::IsolationError) { atom_class.new(Object.new) } if shareable_atom?
+        assert_raises(ArgumentError) { atom_class.new(compare_by_identity: nil) }
       end
 
       def test_value_writer
-        atom = Atom.new(1)
+        atom = atom_class.new(1)
 
         assert_equal 2, atom.value = 2
         assert_equal 2, atom.value
-        assert_raises(Ractor::IsolationError) { atom.value = [] } if Internal.native_ractors?
+        assert_raises(Ractor::IsolationError) { atom.value = [] } if shareable_atom?
 
         assert_equal 2, atom.value
       end
 
       def test_get_and_store
-        atom = Atom.new(1)
+        atom = atom_class.new(1)
 
         assert_equal 1, atom.get
         assert_equal 2, atom.store(2)
         assert_equal 2, atom.get(timeout: 0)
-        assert_raises(Ractor::IsolationError) { atom.store([]) } if Internal.native_ractors?
+        assert_raises(Ractor::IsolationError) { atom.store([]) } if shareable_atom?
 
         assert_equal 2, atom.value
       end
 
       def test_get_and_store_can_time_out_while_an_update_is_in_flight
-        atom = Atom.new(1)
+        atom = atom_class.new(1)
         entered = Thread::Queue.new
         release = Thread::Queue.new
         updater = Thread.new do
@@ -73,7 +76,7 @@ module Farce
       end
 
       def test_timeout_validation
-        atom = Atom.new
+        atom = atom_class.new
 
         assert_raises(ArgumentError) { atom.get(timeout: -1) }
         assert_raises(ArgumentError) { atom.store(1, timeout: Float::INFINITY) }
@@ -87,17 +90,17 @@ module Farce
       end
 
       def test_swap
-        atom = Atom.new(1)
+        atom = atom_class.new(1)
 
         assert_equal 1, atom.swap(2)
         assert_equal 2, atom.value
-        assert_raises(Ractor::IsolationError) { atom.swap([]) } if Internal.native_ractors?
+        assert_raises(Ractor::IsolationError) { atom.swap([]) } if shareable_atom?
 
         assert_equal 2, atom.value
       end
 
       def test_store_if_absent
-        atom = Atom.new
+        atom = atom_class.new
         calls = 0
 
         assert_equal 10, atom.store_if_absent(timeout: 0) {
@@ -112,7 +115,7 @@ module Farce
       end
 
       def test_store_if_absent_executes_once_under_contention
-        atom = Atom.new
+        atom = atom_class.new
         calls = 0
         calls_lock = Mutex.new
         threads = 8.times.map do
@@ -130,7 +133,7 @@ module Farce
       end
 
       def test_failed_store_does_not_poison_the_atom
-        atom = Atom.new
+        atom = atom_class.new
 
         assert_raises(RuntimeError) { atom.store_if_absent { raise "boom" } }
         assert_equal(7, atom.store_if_absent { 7 })
@@ -139,7 +142,7 @@ module Farce
       def test_compare_and_set_by_value
         original = shared_string("value")
         equal = shared_string("value")
-        atom = Atom.new(original)
+        atom = atom_class.new(original)
 
         assert atom.compare_and_set(equal, :replacement, timeout: 0)
         assert_equal :replacement, atom.value
@@ -149,7 +152,7 @@ module Farce
       def test_compare_and_set_by_identity
         original = shared_string("value")
         equal = shared_string("value")
-        atom = Atom.new(original, compare_by_identity: true)
+        atom = atom_class.new(original, compare_by_identity: true)
 
         refute atom.compare_and_set(equal, :nope)
         assert atom.compare_and_set(original, :replacement)
@@ -157,7 +160,7 @@ module Farce
       end
 
       def test_upsert
-        atom = Atom.new
+        atom = atom_class.new
         called = false
 
         assert_equal 3, atom.upsert(3, timeout: 0) { called = true }
@@ -167,7 +170,7 @@ module Farce
       end
 
       def test_update_always_calls_the_block_including_for_nil
-        atom = Atom.new
+        atom = atom_class.new
         calls = 0
 
         assert_equal(1, atom.update do |old|
@@ -183,7 +186,7 @@ module Farce
       end
 
       def test_update_is_serialized_under_contention
-        atom = Atom.new(0)
+        atom = atom_class.new(0)
         threads = 8.times.map do
           Thread.new do
             atom.update do |old|
@@ -199,7 +202,7 @@ module Farce
       end
 
       def test_update_timeout_does_not_invoke_the_block
-        atom = Atom.new(1)
+        atom = atom_class.new(1)
         entered = Thread::Queue.new
         release = Thread::Queue.new
         updater = Thread.new do
@@ -221,16 +224,16 @@ module Farce
       end
 
       def test_update_with_timeout_succeeds_when_the_reservation_is_available
-        atom = Atom.new(1)
+        atom = atom_class.new(1)
 
         assert_equal 2, atom.update(timeout: 0) { |old| old + 1 }
         assert_equal 2, atom.value
       end
 
       def test_failed_update_recovers_and_does_not_notify_a_value_change
-        atom = Atom.new
+        atom = atom_class.new
 
-        assert_raises(Ractor::IsolationError) { atom.update { [] } } if Internal.native_ractors?
+        assert_raises(Ractor::IsolationError) { atom.update { [] } } if shareable_atom?
 
         assert_nil atom.value
         assert_equal :timeout,
@@ -240,7 +243,7 @@ module Farce
       end
 
       def test_recursive_update_access_raises_and_releases_the_reservation
-        atom = Atom.new(1)
+        atom = atom_class.new(1)
 
         error = assert_raises(ThreadError) do
           atom.update { atom.store(9) }
@@ -252,7 +255,7 @@ module Farce
       end
 
       def test_unscheduled_sibling_fiber_cannot_wait_for_the_owners_update
-        atom = Atom.new(1)
+        atom = atom_class.new(1)
         owner_thread = Thread.current
         contender = Fiber.new do
           next :different_thread unless Thread.current.equal?(owner_thread)
@@ -280,21 +283,21 @@ module Farce
       end
 
       def test_upsert_rejects_an_unshareable_block_result_and_recovers
-        atom = Atom.new(1)
+        atom = atom_class.new(1)
 
-        assert_raises(Ractor::IsolationError) { atom.upsert(0) { [] } } if Internal.native_ractors?
+        assert_raises(Ractor::IsolationError) { atom.upsert(0) { [] } } if shareable_atom?
 
         assert_equal 2, atom.upsert(0) { |old| old + 1 }
       end
 
       def test_wait_until_changed_returns_immediately_when_already_changed
-        atom = Atom.new(:current)
+        atom = atom_class.new(:current)
 
         assert_equal :current, atom.wait_until_changed(:expected, timeout: 0)
       end
 
       def test_wait_until_changed_waits_for_a_new_value
-        atom = Atom.new(:old)
+        atom = atom_class.new(:old)
         waiter = Thread.new { atom.wait_until_changed(:old, timeout: 1) }
 
         atom.value = :new
@@ -305,7 +308,7 @@ module Farce
       def test_wait_until_changed_uses_value_equality_by_default
         original = shared_string("value")
         equal = shared_string("value")
-        atom = Atom.new(original)
+        atom = atom_class.new(original)
 
         assert_equal :timeout, atom.wait_until_changed(equal, timeout: 0) { :timeout }
       end
@@ -313,14 +316,14 @@ module Farce
       def test_wait_until_changed_can_compare_by_identity
         original = shared_string("value")
         equal = shared_string("value")
-        atom = Atom.new(original, compare_by_identity: true)
+        atom = atom_class.new(original, compare_by_identity: true)
 
         assert_same original, atom.wait_until_changed(equal, timeout: 0)
         assert_nil atom.wait_until_changed(original, timeout: 0)
       end
 
       def test_wait_until_changed_wakes_all_waiters
-        atom = Atom.new(:old)
+        atom = atom_class.new(:old)
         ready = Thread::Queue.new
         waiters = 4.times.map do
           Thread.new do
@@ -336,7 +339,7 @@ module Farce
       end
 
       def test_wait_until_non_nil
-        atom = Atom.new
+        atom = atom_class.new
         waiter = Thread.new { atom.wait_until_non_nil(timeout: 1) }
 
         atom.store(false)
@@ -346,7 +349,7 @@ module Farce
       end
 
       def test_wait_timeouts_return_nil_or_call_a_fallback_block
-        atom = Atom.new
+        atom = atom_class.new
 
         assert_nil atom.wait_until_changed(nil, timeout: 0)
         assert_equal :changed_timeout,
@@ -360,7 +363,7 @@ module Farce
         return unless RUBY_ENGINE == "ruby"
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
-        atom = Atom.new
+        atom = atom_class.new
         events = []
 
         Fiber.schedule do
@@ -384,7 +387,7 @@ module Farce
 
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
-        atom = Atom.new(1)
+        atom = atom_class.new(1)
         events = []
 
         Fiber.schedule do
