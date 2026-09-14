@@ -8,5 +8,6 @@ mise install
 
 bundle update --bundler
 bundle update --all
+bundle exec rake clobber
 
 mise run install
