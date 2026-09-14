@@ -1,0 +1,153 @@
+# frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
+
+module Farce
+  # A delegating reference to a Farce::Abstract::Value object.
+  #
+  # @example
+  #   atom = Farce::Atom.new(:example)
+  #   ref  = Farce::Reference.new(atom)
+  #   ref == :example # => true
+  #
+  #   atom.value = 42
+  #
+  #   ref == :example # => false
+  #   ref == 42       # => true
+  class Reference < BasicObject
+    class Deep < Reference
+      protected def method_missing(...) = @value.unwrap.__send__(...) # rubocop:disable Style/MissingRespondToMissing
+    end
+
+    module Inherited
+      define_method(:freeze,  ::Kernel.instance_method(:freeze))
+      define_method(:frozen?, ::Kernel.instance_method(:frozen?))
+    end
+
+    private_constant :Deep, :Inherited
+    include Inherited
+
+    # Creates a subclass of {Farce::Reference} that uses the given factory to create new values to reference
+    # automatically.
+    #
+    # @example Creating a class for a specific value type
+    #   # Example class that turns its value into an uppercase string
+    #   class UpcaseValue
+    #     include Farce::Abstract::Value
+    #     attr_reader :value
+    #     def initialize(value) = @value = -(value.to_s.upcase)
+    #   end
+    #
+    #   # Create a reference class for UpcaseValue
+    #   UpcaseRef = Farce::Reference[UpcaseValue]
+    #
+    #   UpcaseRef.new("hello") == "HELLO" # => true
+    #
+    # @example Subclassing a generated reference class
+    #   # This is useful if you want to add custom methods
+    #   class UpcaseRef < Farce::Reference[UpcaseValue]
+    #     def wordle_compatible? = size == 5
+    #   end
+    def self.[](factory, deep: false)
+      raise ::ArgumentError, "factory must be a class" unless factory.is_a?(::Class)
+      raise ::ArgumentError, "factory must include Farce::Abstract::Value" unless factory < ::Farce::Abstract::Value
+
+      klass = ::Class.new(deep ? Deep : Reference)
+      klass.set_temporary_name("#{superclass.name}[#{factory.name}, deep: #{deep.inspect}]")
+      klass.instance_variable_set(:@value_factory, factory)
+
+      klass.class_eval <<~RUBY, __FILE__, __LINE__ + 1
+        def self.new(...) = super(value_factory.new(...))
+        def self.value_factory
+          return @value_factory if defined?(@value_factory) && @value_factory
+          superclass.value_factory
+        end
+      RUBY
+
+      klass.singleton_class.class_eval "undef []", __FILE__, __LINE__
+      klass
+    end
+
+    # Creates a new reference to the given value.
+    # @param value [Farce::Abstract::Value] the value to be referenced
+    # @param deep [Boolean] whether to resolve nested values (like an {Envelope} inside of an {Atom})
+    # @return [Farce::Reference] a new reference to the given value
+    # @see #initialize
+    def self.new(value, deep: false)
+      value = deref(value)
+      raise ::ArgumentError, "value must be a Farce::Abstract::Value" unless ::Farce::Abstract::Value === value
+      return super(value) unless self == Reference && deep
+      Deep.new(value)
+    end
+
+    # If reference is a {Farce::Reference}, dereference it to get the underlying {Farce::Abstract::Value value object}.
+    #
+    # @example
+    #   ref = Farce::Reference.new(Farce::Atom.new(:example))
+    #   ref == :example # => true
+    #
+    #   atom = Farce::Reference.deref(ref)
+    #   atom.value = 42
+    #
+    #   ref == :example # => false
+    #   ref == 42       # => true
+    #
+    # @return [Farce::Abstract::Value, BasicObject]
+    #   the underlying value object, or the given reference if the argument is not a {Farce::Reference}
+    def self.deref(reference)
+      return reference unless Reference === reference
+      ::Kernel.instance_method(:instance_variable_get).bind_call(reference, :@value)
+    end
+
+    # @overload initialize(value, deep: false)
+    #   @param value [Farce::Abstract::Value] the value to be referenced
+    #   @param deep [Boolean] whether to resolve nested values (like an {Envelope} inside of an {Atom})
+    def initialize(value) = @value = value
+
+    # @return [Boolean] whether this object and the referenced value is frozen
+    def frozen? = super && method_missing(:frozen?)
+
+    # Freezes this object and the referenced value
+    # @return [self] this object
+    def freeze
+      method_missing(:freeze)
+      super
+    end
+
+    # Delegates equality check to the referenced value
+    # @param other [Object] the object to compare with the referenced value
+    # @return [Boolean] whether the referenced value is equal to the other object
+    def ==(other) = method_missing(:==, other)
+
+    # Delegates inequality check to the referenced value
+    # @param other [Object] the object to compare with the referenced value
+    # @return [Boolean] whether the referenced value is not equal to the other object
+    def !=(other)
+      method_missing(:!=, other)
+    end
+
+    # Delegates logical negation to the referenced value
+    # @return [Boolean] the negated value of the referenced value
+    def ! = method_missing(:!)
+
+    # Delegates instance_eval to the referenced value
+    # @yield the block to be evaluated in the context of the referenced value
+    # @yieldreceiver [BasicObject] the referenced value
+    # @yieldreturn [BasicObject] the result of the block evaluation
+    # @return [BasicObject] the result of evaluating the block in the context of the referenced value
+    def instance_eval(...) = method_missing(:instance_eval, ...)
+
+    # @overload instance_exec(*args)
+    #   Delegates instance_exec to the referenced value
+    #   @param args [Array] the arguments to be passed to the block
+    #   @yield [*args] the block to be evaluated in the context of the referenced value
+    #   @yieldreceiver [BasicObject] the referenced value
+    #   @yieldparam args [Array] the arguments passed to the block
+    #   @yieldreturn [BasicObject] the result of the block evaluation
+    #   @return [BasicObject] the result of evaluating the block in the context of the referenced value
+    def instance_exec(...) = method_missing(:instance_exec, ...)
+
+    # Delegates all methods to the referenced value
+    private def method_missing(...) = @value.value.__send__(...) # rubocop:disable Style/MissingRespondToMissing
+  end
+end
