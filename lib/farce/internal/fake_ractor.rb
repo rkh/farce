@@ -51,7 +51,7 @@ module Farce
             monitors:        Set.new,
             mutex:           Mutex.new,
             name:            name,
-            source_location: -block.source_location.join(":"),
+            source_location: -(block.source_location&.join(":") || "(unknown)"),
             status:          :running,
           )
 
