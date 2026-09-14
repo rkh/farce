@@ -25,13 +25,13 @@ jobs:
             version: jruby
             verify_gems: true
             # Avoid virtual-thread starvation during pool growth on Java 21.
-            jruby_opts: -Xfiber.vthread=false
+            jruby_opts: --debug -Xfiber.vthread=false
             # Leave headroom for the full suite and JVM subprocess startup on CI.
             test_timeout: 300
           - name: jruby-dev
             version: jruby-head
             # Avoid virtual-thread starvation during nested fiber creation.
-            jruby_opts: -Xfiber.vthread=false
+            jruby_opts: --debug -Xfiber.vthread=false
             # Match stable JRuby's allowance for the full suite and JVM startup.
             test_timeout: 300
           - name: truffleruby
