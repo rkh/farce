@@ -20,3 +20,13 @@
 #     get an error. Useful for usage contained within a single Ractor.
 #   * `:raise` - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.
 #   * `:shareable_copy` - The value will be copied and the copy will be made Ractor-shareable.
+
+# @!macro scopes
+#   Valid scopes are:
+#   * `:ractor` - The value is shared by all threads within the same Ractor.
+#   * `:thread_group` - The value is shared by all threads within the same thread group.
+#   * `:thread` - The value is shared by all fibers within the same thread.
+#   * `:fiber_storage` - The value is shared by all fibers using the same storage.
+#     Unless explicitly specified, storage is inherited from the parent fiber for blocking fibers,
+#     but not for non-blocking fibers (such as those created by {Scheduler#schedule}).
+#   * `:fiber` - Each fiber has its own independent value.

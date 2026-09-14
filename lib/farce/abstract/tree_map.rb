@@ -28,20 +28,20 @@ module Farce
       end
 
       # (see Map#[])
-      def [](key) = unwrap_value(@map[prepare_key(key)])
+      def [](key) = unwrap_value(internal_map[prepare_key(key)])
 
       # (see Map#[]=)
       def []=(key, value)
         key = prepare_key(key)
-        @map[key] = wrap_value(value)
+        internal_map[key] = wrap_value(value)
         value
       end
 
       # (see Map#delete)
-      def delete(key) = unwrap_value(@map.delete(prepare_key(key)))
+      def delete(key) = unwrap_value(internal_map.delete(prepare_key(key)))
 
       # (see Map#empty?)
-      def empty? = @map.empty?
+      def empty? = internal_map.empty?
 
       # (see Map#fetch)
       def fetch(*arguments)
@@ -52,7 +52,7 @@ module Farce
         key, default = arguments
         key = prepare_key(key)
         warn "block supersedes default value argument", uplevel: 1 if block_given? && arguments.length == 2
-        value = @map.fetch(key) do
+        value = internal_map.fetch(key) do
           return yield(key) if block_given?
           return default if arguments.length == 2
           raise KeyError.new("key not found: #{key.inspect}", receiver: self, key: key)
@@ -62,42 +62,42 @@ module Farce
 
       # Return the smallest key according to the map's ordering.
       # @return [BasicObject, nil] The first key, or nil if the map is empty.
-      def first_key = @map.first_key
+      def first_key = internal_map.first_key
 
       # (see Map#getkey)
-      def getkey(key) = @map.getkey(prepare_key(key))
+      def getkey(key) = internal_map.getkey(prepare_key(key))
 
       # (see Map#key?)
-      def key?(key) = @map.key?(prepare_key(key))
+      def key?(key) = internal_map.key?(prepare_key(key))
 
       # Return the largest key according to the map's ordering.
       # @return [BasicObject, nil] The last key, or nil if the map is empty.
-      def last_key = @map.last_key
+      def last_key = internal_map.last_key
 
       # (see Map#size)
-      def length = @map.length
+      def length = internal_map.length
 
       # Remove and return the entry with the largest key according to the map's ordering.
       # @return [Array(BasicObject, BasicObject), nil] The last key-value pair, or nil if the map is empty.
       def pop
-        pair = @map.pop
+        pair = internal_map.pop
         [pair.first, unwrap_value(pair.last)] if pair
       end
 
       # Remove and return the entry with the smallest key according to the map's ordering.
       # @return [Array(BasicObject, BasicObject), nil] The first key-value pair, or nil if the map is empty.
       def shift
-        pair = @map.shift
+        pair = internal_map.shift
         [pair.first, unwrap_value(pair.last)] if pair
       end
 
       # (see Map#size)
-      def size = @map.size
+      def size = internal_map.size
 
       # Remove all entries from the map.
       # @return [self]
       def clear
-        @map.clear
+        internal_map.clear
         self
       end
 
@@ -112,7 +112,7 @@ module Farce
       #   @return [Enumerator] An enumerator over two-element `[key, value]` pairs.
       def each
         return enum_for(__method__) unless block_given?
-        @map.each { |key, value| yield [key, unwrap_value(value)] }
+        internal_map.each { |key, value| yield [key, unwrap_value(value)] }
         self
       end
 
@@ -189,6 +189,8 @@ module Farce
         raise NoMethodError, "Farce::Abstract::TreeMap should not be instantiated directly. Use a subclass instead."
       end
       # simplecov:enable
+
+      private def internal_map = @map
     end
   end
 end

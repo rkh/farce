@@ -28,7 +28,7 @@ module Farce
       # Return the next value without removing it.
       # @yield called when the queue is empty
       # @return [BasicObject, nil] the next value or the fallback result
-      def peek(&) = @reverse_order ? @queue.peek_last(&) : @queue.peek(&)
+      def peek(&) = internal_reverse_order? ? internal_queue.peek_last(&) : internal_queue.peek(&)
 
       # Remove the oldest value at the lowest or highest priority, depending on {#order}, waiting when empty.
       def pop(non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
@@ -37,7 +37,11 @@ module Farce
 
         while true
           empty  = false
-          result = @reverse_order ? @queue.pop_last { empty = true } : @queue.pop { empty = true }
+          result = if internal_reverse_order?
+                     internal_queue.pop_last { empty = true }
+                   else
+                     internal_queue.pop { empty = true }
+                   end
 
           return result unless empty
           remaining = remaining_timeout(deadline)
@@ -59,7 +63,7 @@ module Farce
       # Try to remove the oldest value at the lowest priority without waiting.
       # @yield called when the queue is empty
       # @return [BasicObject, nil] the next value or the fallback result
-      def try_pop(&) = @reverse_order ? @queue.pop_last(&) : @queue.pop(&)
+      def try_pop(&) = internal_reverse_order? ? internal_queue.pop_last(&) : internal_queue.pop(&)
 
       # Try to add a value without waiting.
       # @param value [BasicObject] the value to add
@@ -67,7 +71,7 @@ module Farce
       # @yield called when the queue is at capacity
       # @return [Boolean, BasicObject] true, or the fallback result when full
       def try_push(value, priority: default_priority)
-        return true if @queue.push(priority, value)
+        return true if internal_queue.push(priority, value)
 
         block_given? ? yield : false
       end
@@ -75,12 +79,16 @@ module Farce
       # Return the next priority without removing it.
       # @yield called when the queue is empty
       # @return [BasicObject, nil] the priority or the fallback result
-      def first_priority(&) = @reverse_order ? @queue.peek_last_priority(&) : @queue.peek_priority(&)
+      def first_priority(&)
+        internal_reverse_order? ? internal_queue.peek_last_priority(&) : internal_queue.peek_priority(&)
+      end
 
       # Return the last priority without removing it.
       # @yield called when the queue is empty
       # @return [BasicObject, nil] the priority or the fallback result
-      def last_priority(&) = @reverse_order ? @queue.peek_priority(&) : @queue.peek_last_priority(&)
+      def last_priority(&)
+        internal_reverse_order? ? internal_queue.peek_priority(&) : internal_queue.peek_last_priority(&)
+      end
 
       # Delete the oldest matching value at the exact priority.
       # @param value [BasicObject] the value to delete
@@ -95,6 +103,8 @@ module Farce
       def wait_pop(timeout: nil) = wait(timeout) { size.positive? }
 
       private
+
+      def internal_reverse_order? = @reverse_order
 
       def normalize_order(order)
         return :ascending if :ascending.equal?(order)

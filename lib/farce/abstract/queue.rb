@@ -197,70 +197,70 @@ module Farce
         end
       end
 
-      def capacity = @queue.capacity
+      def capacity = internal_queue.capacity
 
       def clear
-        @queue.clear
+        internal_queue.clear
         self
       end
 
       def close
-        @queue.close
+        internal_queue.close
         self
       end
 
       # Stop new pushes and close after the final queued item is removed.
       # @return [self]
       def seal
-        @queue.seal
+        internal_queue.seal
         self
       end
 
-      def closed? = @queue.closed?
-      def sealed? = @queue.sealed?
+      def closed? = internal_queue.closed?
+      def sealed? = internal_queue.sealed?
 
       # @return [Boolean] Whether enqueue-age tracking is enabled.
-      def age_tracking? = @queue.age_tracking?
+      def age_tracking? = internal_queue.age_tracking?
 
       # @return [Integer, nil] The mutation generation, or `nil` when tracking is disabled.
-      def generation = @queue.generation
+      def generation = internal_queue.generation
 
       # The timestamp is monotonic. Its origin is runtime-specific.
       # @return [Float, nil] The monotonic enqueue time of the oldest item.
-      def oldest_enqueued_at = @queue.oldest_enqueued_at
+      def oldest_enqueued_at = internal_queue.oldest_enqueued_at
 
       # @return [Float, nil] Seconds since the oldest item was enqueued.
-      def oldest_age = @queue.oldest_age
+      def oldest_age = internal_queue.oldest_age
 
       def empty? = size.zero?
 
-      def num_waiting = @queue.num_waiting
+      def num_waiting = internal_queue.num_waiting
 
       def pop(non_block = false, timeout: nil, &) # rubocop:disable Style/OptionalBooleanParameter
-        return @queue.try_pop { raise ThreadError, "queue empty" } if non_block
-        timeout.nil? ? @queue.pop(&) : @queue.pop(timeout:, &)
+        return internal_queue.try_pop { raise ThreadError, "queue empty" } if non_block
+        timeout.nil? ? internal_queue.pop(&) : internal_queue.pop(timeout:, &)
       end
 
       def push(value, non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
         if non_block
-          return true if @queue.try_push(value)
+          return true if internal_queue.try_push(value)
           raise ThreadError, "queue full"
         end
-        timeout.nil? ? @queue.push(value) : @queue.push(value, timeout:)
+        timeout.nil? ? internal_queue.push(value) : internal_queue.push(value, timeout:)
       end
 
-      def try_pop(&) = @queue.try_pop(&)
+      def try_pop(&) = internal_queue.try_pop(&)
 
       def try_push(value)
-        return true if @queue.try_push(value)
+        return true if internal_queue.try_push(value)
         block_given? ? yield : false
       end
 
-      def size = @queue.size
+      def size = internal_queue.size
 
-      def wait_pop(timeout: nil) = @queue.wait_pop(timeout:)
+      def wait_pop(timeout: nil) = internal_queue.wait_pop(timeout:)
 
-      def wait_push(timeout: nil) = @queue.wait_push(timeout:)
+      def wait_push(timeout: nil) = internal_queue.wait_push(timeout:)
 
       def initialize_copy(_other)
         raise TypeError, "queues cannot be copied"
@@ -275,6 +275,8 @@ module Farce
         info[:num_waiting] = num_waiting if num_waiting.positive?
         info
       end
+
+      private def internal_queue = @queue
     end
   end
 end

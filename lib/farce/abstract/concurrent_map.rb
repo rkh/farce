@@ -7,11 +7,11 @@ module Farce
     # @abstract Super class for {Map maps} with added concurrency features.
     class ConcurrentMap < Map
       # (see Map#[])
-      def [](key) = @map[key]
+      def [](key) = internal_map[key]
 
       # (see Map#[]=)
       def []=(key, value)
-        @map[key] = value
+        internal_map[key] = value
       end
 
       # (see Map#fetch)
@@ -22,7 +22,7 @@ module Farce
 
         key, default = arguments
         warn "block supersedes default value argument", uplevel: 1 if block_given? && arguments.length == 2
-        @map.fetch(key) do
+        internal_map.fetch(key) do
           return yield(key) if block_given?
           return default if arguments.length == 2
           raise KeyError.new("key not found: #{key.inspect}", receiver: self, key: key)
@@ -36,7 +36,7 @@ module Farce
       # @yieldreturn [BasicObject] The fallback value to return.
       # @return [BasicObject, nil]
       #   The associated value, nil if the key is absent, or the fallback result if the operation times out.
-      def get(key, timeout: nil, &) = @map.get(key, timeout:, &)
+      def get(key, timeout: nil, &) = internal_map.get(key, timeout:, &)
 
       # Associate a value with a key, waiting for atomic-update access if necessary.
       # @param key [BasicObject] The key to store.
@@ -45,7 +45,7 @@ module Farce
       # @yield Called if access cannot be acquired before the timeout.
       # @yieldreturn [BasicObject] The fallback value to return.
       # @return [BasicObject, nil] `value` on success, or the fallback result or nil on timeout.
-      def store(key, value, timeout: nil, &) = @map.store(key, value, timeout:, &)
+      def store(key, value, timeout: nil, &) = internal_map.store(key, value, timeout:, &)
 
       # Replace the value associated with a key and return its previous value.
       # @param key [BasicObject] The key to update.
@@ -55,7 +55,7 @@ module Farce
       # @yieldreturn [BasicObject] The fallback value to return.
       # @return [BasicObject, nil]
       #   The previous value, nil if the key was absent, or the fallback result if the operation times out.
-      def swap(key, replacement, timeout: nil, &) = @map.swap(key, replacement, timeout:, &)
+      def swap(key, replacement, timeout: nil, &) = internal_map.swap(key, replacement, timeout:, &)
 
       # Atomically fetch an existing value or compute and store a value for an absent key.
       # @param key [BasicObject] The key to look up or store.
@@ -64,7 +64,7 @@ module Farce
       # @yieldreturn [BasicObject] The value to store and return.
       # @return [BasicObject, nil] The existing or newly stored value, or nil on timeout.
       # @raise [LocalJumpError] If no block is given.
-      def store_if_absent(key, timeout: nil, &) = @map.store_if_absent(key, timeout:, &)
+      def store_if_absent(key, timeout: nil, &) = internal_map.store_if_absent(key, timeout:, &)
 
       # Atomically replace a value if the key is present and its current value matches `expected`.
       # The configured value-comparison mode determines whether matching uses equality or identity.
@@ -74,7 +74,7 @@ module Farce
       # @param timeout [Numeric, nil] The maximum number of seconds to wait for access.
       # @return [Boolean] Whether the value was replaced. Returns false on timeout.
       def compare_and_set(key, expected, replacement, timeout: nil)
-        @map.compare_and_set(key, expected, replacement, timeout:)
+        internal_map.compare_and_set(key, expected, replacement, timeout:)
       end
 
       # Atomically replace the value associated with a key with the block result.
@@ -86,7 +86,7 @@ module Farce
       # @yieldreturn [BasicObject] The value to store and return.
       # @return [BasicObject, nil] The newly stored value, or nil on timeout.
       # @raise [LocalJumpError] If no block is given.
-      def update(key, timeout: nil, &) = @map.update(key, timeout:, &)
+      def update(key, timeout: nil, &) = internal_map.update(key, timeout:, &)
 
       # Atomically insert `initial` for an absent key or replace an existing value with the block result.
       # The block is not called when the key is absent.
@@ -98,7 +98,7 @@ module Farce
       # @yieldreturn [BasicObject] The replacement value to store and return.
       # @return [BasicObject, nil] The initial or replacement value, or nil on timeout.
       # @raise [LocalJumpError] If no block is given.
-      def upsert(key, initial, timeout: nil, &) = @map.upsert(key, initial, timeout:, &)
+      def upsert(key, initial, timeout: nil, &) = internal_map.upsert(key, initial, timeout:, &)
 
       # Wait until the value associated with a key no longer matches `expected`.
       # An absent key is observed as nil. The configured value-comparison mode determines how values are matched.
@@ -109,7 +109,7 @@ module Farce
       # @yieldreturn [BasicObject] The fallback value to return.
       # @return [BasicObject, nil] The changed value, or the fallback result or nil on timeout.
       def wait_until_changed(key, expected, timeout: nil, &)
-        @map.wait_until_changed(key, expected, timeout:, &)
+        internal_map.wait_until_changed(key, expected, timeout:, &)
       end
 
       # Wait until a key is associated with a non-nil value.
@@ -118,25 +118,25 @@ module Farce
       # @yield Called if the value is still nil when the timeout elapses.
       # @yieldreturn [BasicObject] The fallback value to return.
       # @return [BasicObject, nil] The non-nil value, or the fallback result or nil on timeout.
-      def wait_until_non_nil(key, timeout: nil, &) = @map.wait_until_non_nil(key, timeout:, &)
+      def wait_until_non_nil(key, timeout: nil, &) = internal_map.wait_until_non_nil(key, timeout:, &)
 
       # (see Map#key?)
-      def key?(key) = @map.key?(key)
+      def key?(key) = internal_map.key?(key)
 
       # (see Map#getkey)
-      def getkey(key) = @map.getkey(key)
+      def getkey(key) = internal_map.getkey(key)
 
       # (see Map#size)
-      def size = @map.size
+      def size = internal_map.size
 
       # (see Map#compare_keys_by_identity?)
-      def compare_keys_by_identity? = @map.compare_keys_by_identity?
+      def compare_keys_by_identity? = internal_map.compare_keys_by_identity?
 
       # (see Map#compare_values_by_identity?)
-      def compare_values_by_identity? = @map.compare_values_by_identity?
+      def compare_values_by_identity? = internal_map.compare_values_by_identity?
 
       # (see Map#keys)
-      def keys = @map.keys
+      def keys = internal_map.keys
 
       # Return the values currently stored in the map.
       # @return [Array<BasicObject>] A new array of values in iteration order.
@@ -146,7 +146,7 @@ module Farce
       def each(&block)
         return enum_for(__callee__) { size } unless block
 
-        @map.each(&block)
+        internal_map.each(&block)
         self
       end
 
@@ -157,7 +157,7 @@ module Farce
       def each_key(&block)
         return enum_for(__callee__) { size } unless block
 
-        @map.each_key(&block)
+        internal_map.each_key(&block)
         self
       end
 
@@ -165,18 +165,20 @@ module Farce
       def each_value(&block)
         return enum_for(__callee__) { size } unless block
 
-        @map.each_value(&block)
+        internal_map.each_value(&block)
         self
       end
 
       # (see Map#delete)
-      def delete(key) = @map.delete(key)
+      def delete(key) = internal_map.delete(key)
 
       # (see Map#clear)
       def clear
-        @map.clear
+        internal_map.clear
         self
       end
+
+      private def internal_map = @map
     end
   end
 end

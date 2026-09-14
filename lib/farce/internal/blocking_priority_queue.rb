@@ -9,19 +9,19 @@ module Farce
     module BlockingPriorityQueue
       # Remove all values and wake waiters.
       def clear
-        @queue.clear
+        internal_queue.clear
         self
       end
 
       # Close the queue and wake waiters.
       def close
-        @queue.close
+        internal_queue.close
         self
       end
 
       # Stop new pushes and close after the final value is removed.
       def seal
-        @queue.seal
+        internal_queue.seal
         self
       end
 
@@ -37,10 +37,10 @@ module Farce
       end
 
       # The approximate number of waiting execution contexts.
-      def num_waiting = @signal.num_waiting
+      def num_waiting = internal_signal.num_waiting
 
       Internal.delegate(
-        self, :@queue, :age_tracking?, :capacity, :closed?, :empty?, :generation,
+        self, :internal_queue, :age_tracking?, :capacity, :closed?, :empty?, :generation,
         :oldest_age, :oldest_enqueued_at, :sealed?, :size,
       )
 
@@ -53,18 +53,20 @@ module Farce
       def initialize(capacity:, reverse_order: false, track_age: false)
         @reverse_order = reverse_order
         @signal        = queue_signal
-        @queue         = queue_storage_class.new(capacity:, signal: @signal, track_age:)
+        @queue         = queue_storage_class.new(capacity:, signal: internal_signal, track_age:)
         super()
       end
+
+      def internal_signal = @signal
 
       def queue_storage_class = Internal::PriorityQueue
       def queue_signal = Signal.new
 
       def delete_from_storage(priority, value, compare_by_identity:)
         if compare_by_identity
-          @queue.delete_identity(priority, value)
+          internal_queue.delete_identity(priority, value)
         else
-          @queue.delete(priority, value)
+          internal_queue.delete(priority, value)
         end
       end
 
@@ -72,7 +74,7 @@ module Farce
         deadline = timeout_at(timeout) unless timeout.nil?
 
         while true
-          return true if @queue.push(priority, value)
+          return true if internal_queue.push(priority, value)
           raise ThreadError, "queue full" if non_block
           return false unless wait_push(timeout: remaining_timeout(deadline))
         end
@@ -93,10 +95,10 @@ module Farce
         deadline = timeout_at(timeout)
 
         while true
-          generation = @signal.generation
+          generation = internal_signal.generation
           raise ::Farce::ClosedQueueError, "queue is closed" if closed?
           return true if yield
-          return false unless @signal.wait(generation, timeout: remaining_timeout(deadline))
+          return false unless internal_signal.wait(generation, timeout: remaining_timeout(deadline))
         end
       end
 

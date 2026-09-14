@@ -11,6 +11,7 @@ module Farce
       end
 
       # Alternative engines keep their existing scheduler coordination.
+      # @api private
       def fiber_wait = :auto
     end
 

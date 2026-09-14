@@ -38,7 +38,7 @@ module Farce
 
         while true
           empty = false
-          value = @queue.pop_before(Clock.now) { empty = true }
+          value = internal_queue.pop_before(Clock.now) { empty = true }
           return value unless empty
           return block_given? ? yield : nil if UNDEFINED.equal?(wait_for_timestamp(deadline))
         end
@@ -53,29 +53,29 @@ module Farce
       # @return [Boolean, BasicObject] true, or the fallback result when full
       def try_push(value, **time_options)
         at = Clock.parse(time_options)
-        return true if @queue.push(at, value)
+        return true if internal_queue.push(at, value)
         block_given? ? yield : false
       end
 
       # Try to remove the earliest value only if its timestamp has been reached.
       # @yield called when no value is ready
       # @return [BasicObject, nil] the value or the fallback result
-      def try_pop(&) = @queue.pop_before(Clock.now, &)
+      def try_pop(&) = internal_queue.pop_before(Clock.now, &)
 
       # Return the earliest value without removing it, whether or not it is due.
       # @yield called when the queue is empty
       # @return [BasicObject, nil] the value or the fallback result
-      def peek(&) = @queue.peek(&)
+      def peek(&) = internal_queue.peek(&)
 
       # Return the earliest timestamp without removing it.
       # @yield called when the queue is empty
       # @return [Float, nil] the timestamp or the fallback result
-      def first_timestamp(&) = @queue.peek_priority(&)
+      def first_timestamp(&) = internal_queue.peek_priority(&)
 
       # Return the latest timestamp without removing it.
       # @yield called when the queue is empty
       # @return [Float, nil] the timestamp or the fallback result
-      def last_timestamp(&) = @queue.peek_last_priority(&)
+      def last_timestamp(&) = internal_queue.peek_last_priority(&)
 
       # Checks whether the earliest timestamp has been reached.
       # @param leeway [Numeric] how much leeway to allow for clock drift and scheduling delays
@@ -113,8 +113,8 @@ module Farce
 
       def wait_for_timestamp(deadline)
         while true
-          generation = @signal.generation
-          timestamp = @queue.peek_priority
+          generation = internal_signal.generation
+          timestamp = internal_queue.peek_priority
           wake_after = nil
           if timestamp
             delay = timestamp - Clock.now
@@ -127,7 +127,7 @@ module Farce
           wait_for = wake_after && remaining ?
             (wake_after < remaining ? wake_after : remaining) :
             wake_after || remaining
-          changed = @signal.wait(generation, timeout: wait_for)
+          changed = internal_signal.wait(generation, timeout: wait_for)
           return UNDEFINED if !changed && deadline && remaining_timeout(deadline).zero?
         end
       end
