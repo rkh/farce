@@ -21,6 +21,15 @@ module Farce
   # Raised when attempting to schedule a task on a closed pool.
   PoolClosedError = Class.new(SchedulerClosedError)
 
+  # Raised when a timed operation does not complete before its timeout.
+  TimeoutError = Class.new(StandardError)
+
+  # Raised when an operation requires ownership by the current Fiber.
+  OwnershipError = Class.new(StandardError)
+
+  # Raised when attempting to use a permanently retired lease.
+  RetiredLeaseError = Class.new(StandardError)
+
   # Raised when a weak reference is no longer valid because the referenced object has been garbage collected.
   WeakRefError = Class.new(defined?(::WeakRef::RefError) ? ::WeakRef::RefError : StandardError)
 end
