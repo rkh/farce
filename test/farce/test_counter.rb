@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../setup"
 
@@ -11,6 +13,7 @@ module Farce
 
       assert_equal Internal::Counter, Counter.superclass
       assert_equal Numeric, Internal::Counter.superclass
+      assert_kind_of Abstract::Counter, counter
       assert_kind_of Numeric, counter
       assert_kind_of Abstract::Value, counter
       assert_equal 12, counter.initial

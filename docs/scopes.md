@@ -20,6 +20,7 @@ Farce's local containers let you share one object while keeping separate content
     - [`:fiber_storage`: let child fibers share a context](#fiber_storage-let-child-fibers-share-a-context)
       - [Non-blocking fibers and schedulers](#non-blocking-fibers-and-schedulers)
   - [Classes that support scopes](#classes-that-support-scopes)
+    - [Count within each scope](#count-within-each-scope)
     - [Keep a cache in each Ractor](#keep-a-cache-in-each-ractor)
     - [Create mutable values with a factory](#create-mutable-values-with-a-factory)
     - [Delegate through a lazy reference](#delegate-through-a-lazy-reference)
@@ -239,6 +240,7 @@ These classes accept the same five scopes. The scope determines which backing co
 
 | Class | What each scope gets |
 | --- | --- |
+| `Farce::Local::Counter` | An atomic integer counter with its own current value. |
 | `Farce::Local::Atom` | An atomic reference with its own current value. |
 | `Farce::Local::WeakAtom` | A reference that does not keep its value alive. |
 | `Farce::Local::Map` | A mutable map. |
@@ -255,6 +257,28 @@ These classes accept the same five scopes. The scope determines which backing co
 | `Farce::Local::Lease` | An independently initialized resource to borrow. |
 | `Farce::Local::LeaseMap` | An independently initialized set of named resources. |
 | `Farce::Local::LeasePool` | A pool with its own resources and capacity. |
+
+### Count within each scope
+
+`Local::Counter` provides the numeric interface and atomic operations of `Farce::Counter`. Each scope starts at the configured initial integer. Reads and `reset` affect only the current scope. Values are not summed across scopes.
+
+```ruby
+completed = Farce::Local::Counter.new(10, scope: :thread)
+completed.increment(3)
+
+child = Thread.new do
+  before = completed.value
+  completed.increment
+  completed.reset
+  [before, completed.value]
+end.value
+
+child           # => [10, 10]
+completed.value # => 13
+completed + 2   # => 15
+```
+
+Updates remain atomic when multiple threads share a Ractor or thread-group scope. Conditional operations such as `increment_if_below` apply their bounds to that scope's counter.
 
 ### Keep a cache in each Ractor
 
