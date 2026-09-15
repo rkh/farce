@@ -51,7 +51,7 @@ module Farce
         raise ArgumentError, "no block given" unless work
         admitting = true
         failure = nil
-        task = Fiber.new(blocking: false) do
+        task = Fiber.new(blocking: false, storage: nil) do
           work.call(*, **)
         rescue Exception => e # rubocop:disable Lint/RescueException
           raise unless admitting
