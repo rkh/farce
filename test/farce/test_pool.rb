@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../setup"
 
@@ -24,6 +26,47 @@ module Farce
       refute_predicate pool, :closed?
       assert_predicate pool, :frozen?
       assert Ractor.shareable?(pool)
+    ensure
+      close_pool(pool)
+    end
+
+    def test_default_minimum_is_zero
+      pool = Pool.new
+
+      assert_equal 0, pool.min_size
+      assert_equal 0, pool.size
+      pool.close
+
+      assert_equal :closed, pool.state
+    ensure
+      close_pool(pool)
+    end
+
+    def test_first_worker_starts_without_waiting_for_growth
+      pool = Pool.new(grow_after: 60, shrink_after: nil)
+      result = Queue.new
+
+      pool.schedule(result, mode: :raise) { |queue| queue << :done }
+
+      assert_equal :done, result.pop(timeout: 2)
+      assert_equal 1, pool.size
+    ensure
+      close_pool(pool)
+    end
+
+    def test_idle_pool_retires_to_zero_and_restarts_immediately
+      pool = Pool.new(grow_after: 60, shrink_after: 0.02)
+      result = Queue.new
+
+      pool.schedule(result, mode: :raise) { |queue| queue << :first }
+
+      assert_equal :first, result.pop(timeout: 2)
+      Timeout.timeout(2) { sleep 0.001 until pool.size.zero? } # rubocop:disable Style/ZeroLengthPredicate
+
+      pool.schedule(result, mode: :raise) { |queue| queue << :second }
+
+      assert_equal :second, result.pop(timeout: 2)
+      assert_nil pool.error
     ensure
       close_pool(pool)
     end
@@ -84,7 +127,7 @@ module Farce
     end
 
     def test_idle_extra_worker_retires
-      pool = Pool.new(max_size: 2, max_inflight: 1, grow_after: 0.005, shrink_after: 0.02)
+      pool = Pool.new(min_size: 1, max_size: 2, max_inflight: 1, grow_after: 0.005, shrink_after: 0.02)
       started = Queue.new
       gate = Atom.new(false, mode: :raise)
       extra_gate = Queue.new
@@ -125,7 +168,15 @@ module Farce
     end
 
     def test_close_rejects_a_submission_blocked_by_capacity
-      pool = Pool.new(min_size: 0, max_size: 1, capacity: 1, grow_after: 60, shrink_after: nil)
+      pool = Pool.new(max_size: 1, capacity: 1, shrink_after: nil)
+      started = Queue.new
+      gate = Atom.new(false, mode: :raise)
+      pool.schedule(started, gate, mode: :raise) do |queue, wait|
+        queue << true
+        nil until wait.value
+      end
+
+      assert started.pop(timeout: 2)
       pool.schedule { nil }
       submitter = Thread.new do
         pool.schedule { nil }
@@ -139,6 +190,7 @@ module Farce
       assert submitter.join(2), "submission remained blocked after close"
       assert_instance_of PoolClosedError, submitter.value
     ensure
+      gate&.value = true
       submitter&.kill&.join
       close_pool(pool)
     end

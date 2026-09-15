@@ -5,9 +5,11 @@
 module Farce
   # A dynamically sized pool of Ractor schedulers.
   #
-  # Tasks wait in one shared queue. A task that remains queued for `grow_after`
-  # causes the pool to add a worker until `max_size` is reached. Extra workers
-  # retire after `shrink_after` without queued or running work.
+  # Tasks wait in one shared queue. An empty pool starts its first worker immediately
+  # when work arrives. A task that remains queued for `grow_after`
+  # causes the pool to add a worker until `max_size` is reached. Workers above
+  # `min_size` retire after `shrink_after` without queued or running work.
+  # By default, the pool starts with no workers and can shrink back to zero.
   #
   # Most importantly, it exposes a {#schedule} method compatible with {Scheduler#schedule}.
   #
@@ -65,7 +67,7 @@ module Farce
     # @param capacity [Integer, nil] Pending-task capacity.
     # @param backend [Symbol] IO backend for the built-in scheduler.
     # @yieldreturn [Object] Fiber scheduler constructed in each worker.
-    def initialize(min_size: 1, max_size: 4, max_inflight: 64,
+    def initialize(min_size: 0, max_size: 4, max_inflight: 64,
                    grow_after: 0.005, shrink_after: 30, capacity: 1024,
                    backend: CONFIG.freeze.io_backend, &constructor)
       @min_size     = Integer(min_size)
@@ -246,11 +248,11 @@ module Farce
       value
     end
 
-    def start_worker(drain: false)
+    def start_worker(drain: false, only_if_empty: false)
       reserved = false
       @worker_count.update do |count|
         can_start = state == :running || (drain && closing? && !queue_empty?)
-        if can_start && count < @max_size
+        if can_start && count < @max_size && (!only_if_empty || count.zero?)
           reserved = true
           count + 1
         else
@@ -277,6 +279,8 @@ module Farce
 
     def arm_scaler
       return if at_max_size? || queue_empty? || state != :running
+      start_worker(only_if_empty: true) if size.zero?
+      return if at_max_size?
       started = @queue.generation
       age = @queue.oldest_age
       return unless age
