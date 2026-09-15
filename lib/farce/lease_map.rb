@@ -12,11 +12,13 @@ module Farce
   #
   # @example Automatically checking out resources as they are accessed
   #   leases = Farce::LeaseMap.new { { primary: [], replica: [] } }
+  #
   #   leases.auto_lease do
   #     leases[:primary] << :updated
   #     leases[:replica] << :replicated
   #     leases[:primary] << :verified # Reuses the same checkout
   #   end
+  #
   #   # Both resources are checked back in when the block exits, even on an exception.
   #   leases.available?(:primary) # => true
   #   leases.checkout(:primary, &:dup) # => [:updated, :verified]
