@@ -8,14 +8,15 @@ module Farce
     class PriorityQueue < Abstract::PriorityQueue
       include Scoped
 
-      # @!macro scopes
-      # @param capacity [Integer, nil] the maximum number of values, or nil for an unbounded queue
-      # @param default_priority [BasicObject] the shareable priority used when none is passed to push or try_push
-      # @param order [:ascending, :descending] the priority order
-      # @param scope [Symbol] the scope of the priority queue
-      # @param track_age [Boolean] whether to track enqueue age and queue generations
-      # @param fiber_wait [:auto, :io, :block] how scheduled fibers wait on CRuby
-      # @return [PriorityQueue]
+      # @overload initialize(capacity: nil, default_priority: 0, order: :ascending, scope: :ractor, track_age: false)
+      #   @!macro scopes
+      #   @param capacity [Integer, nil] the maximum number of values, or nil for an unbounded queue
+      #   @param default_priority [BasicObject] the shareable priority used when none is passed to push or try_push
+      #   @param order [:ascending, :descending] the priority order
+      #   @param scope [Symbol] the scope of the priority queue
+      #   @param track_age [Boolean] whether to track enqueue age and queue generations
+      #   @param fiber_wait [:auto, :io, :block] how scheduled fibers wait on CRuby
+      #   @return [PriorityQueue]
       def initialize(
         capacity: nil, default_priority: 0, order: :ascending, scope: :ractor,
         track_age: false, fiber_wait: :auto

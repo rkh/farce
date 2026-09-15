@@ -8,12 +8,13 @@ module Farce
     class TimerQueue < Abstract::TimerQueue
       include Scoped
 
-      # @!macro scopes
-      # @param capacity [Integer, nil] the maximum number of values, or nil for an unbounded queue
-      # @param track_age [Boolean] whether to track enqueue age and queue generations
-      # @param scope [Symbol] the scope of the queue
-      # @param fiber_wait [:auto, :io, :block] how scheduled fibers wait on CRuby
-      # @return [TimerQueue]
+      # @overload initialize(capacity: nil, track_age: false, scope: :ractor)
+      #   @!macro scopes
+      #   @param capacity [Integer, nil] the maximum number of values, or nil for an unbounded queue
+      #   @param track_age [Boolean] whether to track enqueue age and queue generations
+      #   @param scope [Symbol] the scope of the queue
+      #   @param fiber_wait [:auto, :io, :block] how scheduled fibers wait on CRuby
+      #   @return [TimerQueue]
       def initialize(capacity: nil, track_age: false, scope: :ractor, fiber_wait: :auto)
         super
       end

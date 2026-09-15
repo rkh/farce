@@ -30,52 +30,64 @@ module Farce
 
     # @return [Symbol] The default transfer mode.
     def mode = @manager.mode
+
+    # (see Farce::Abstract::Vector#compare_by_identity?)
     def compare_by_identity? = @compare_by_identity
+
+    # (see Farce::Abstract::Vector#shareable_values?)
     def shareable_values? = true
+
+    # (see Farce::Abstract::Vector#[])
     def [](index) = @manager.unwrap(@vector[index])
 
+    # (see Farce::Abstract::Vector#[]=)
     def []=(index, value)
       @vector[index] = @manager.wrap(value)
       value
     end
 
+    # (see Farce::Abstract::Vector#get)
     def get(index, timeout: nil) = @manager.unwrap(@vector.get(index, timeout:))
 
-    # (see Abstract::Vector#store)
+    # (see Farce::Abstract::Vector#store)
     # @param mode [Symbol, nil] The transfer mode, or nil to use the default.
     def store(index, value, mode: nil, timeout: nil)
       @manager.unwrap(@vector.store(index, @manager.wrap(value, mode:), timeout:))
     end
 
-    # (see Abstract::Vector#push)
+    # (see Farce::Abstract::Vector#push)
     # @param mode [Symbol, nil] The transfer mode, or nil to use the default.
     def push(value, mode: nil, timeout: nil)
       @vector.push(@manager.wrap(value, mode:), timeout:) ? self : false
     end
 
+    # (see Farce::Abstract::Vector#pop)
     def pop(timeout: nil) = @manager.unwrap(@vector.pop(timeout:))
 
-    # (see Abstract::Vector#swap)
+    # (see Farce::Abstract::Vector#swap)
+    # @!macro modes
     # @param mode [Symbol, nil] The replacement's transfer mode, or nil to use the default.
     def swap(index, replacement, mode: nil, timeout: nil)
       @manager.unwrap(@vector.swap(index, @manager.wrap(replacement, mode:), timeout:))
     end
 
-    # (see Abstract::Vector#store_if_absent)
+    # (see Farce::Abstract::Vector#store_if_absent)
     # @param mode [Symbol, nil] The result's transfer mode, or nil to use the default.
     def store_if_absent(index, mode: nil, timeout: nil)
       raise LocalJumpError, "no block given" unless block_given?
       @manager.unwrap(@vector.store_if_absent(index, timeout:) { @manager.wrap(yield, mode:) })
     end
 
-    # (see Abstract::Vector#update)
+    # (see Farce::Abstract::Vector#update)
+    # @!macro modes
     # @param mode [Symbol, nil] The result's transfer mode, or nil to use the default.
     def update(index, mode: nil, timeout: nil)
       raise LocalJumpError, "no block given" unless block_given?
       @manager.unwrap(@vector.update(index, timeout:) { @manager.wrap(yield(@manager.unwrap(it)), mode:) })
     end
 
-    # (see Abstract::Vector#upsert)
+    # (see Farce::Abstract::Vector#upsert)
+    # @!macro modes
     # @param mode [Symbol, nil] The value transfer mode, or nil to use the default.
     def upsert(index, initial, mode: nil, timeout: nil)
       raise LocalJumpError, "no block given" unless block_given?
@@ -84,7 +96,8 @@ module Farce
       end)
     end
 
-    # (see Abstract::Vector#compare_and_set)
+    # (see Farce::Abstract::Vector#compare_and_set)
+    # @!macro modes
     # @param mode [Symbol, nil] The replacement's transfer mode, or nil to use the default.
     def compare_and_set(index, expected, replacement, mode: nil, timeout: nil)
       deadline = timeout_deadline(timeout)
@@ -102,6 +115,7 @@ module Farce
       end
     end
 
+    # (see Farce::Abstract::Vector#wait_until_changed)
     def wait_until_changed(index, expected, timeout: nil)
       deadline = timeout_deadline(timeout)
       expected = wrap_comparison(expected)
@@ -113,6 +127,7 @@ module Farce
       end
     end
 
+    # (see Farce::Abstract::Vector#wait_until_non_nil)
     def wait_until_non_nil(index, timeout: nil) = @manager.unwrap(@vector.wait_until_non_nil(index, timeout:))
 
     private

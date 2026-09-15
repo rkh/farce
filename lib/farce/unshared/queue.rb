@@ -8,11 +8,15 @@ module Farce
     class Queue < Abstract::Queue
       include Unshareable
 
+      # @overload initialize(capacity: 1024, track_age: false)
+      #   (see Farce::Abstract::Queue#initialize)
       def initialize(capacity: 1024, fiber_wait: :auto, track_age: false)
         @queue = Internal::UnsharedQueue.new(capacity:, fiber_wait:, track_age:)
         super()
       end
 
+      # (see Farce::Abstract::Queue#mode)
+      # @return [Symbol] always returns :local
       def mode = :local
 
       # The resolved fiber waiting strategy. Other Ruby engines may return :auto.

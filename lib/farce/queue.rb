@@ -8,14 +8,18 @@ module Farce
     include Internal::ManagedQueue
     include Shareable
 
+    # (see Farce::Abstract::Queue#initialize)
     # @!macro modes
+    # @param mode [Symbol] the default mode for sending unshareable values
     def initialize(capacity: 1024, mode: :copy, track_age: false)
       @manager = ModeManager.new(mode:)
       @queue = Internal::Queue.new(capacity:, track_age:)
       super()
     end
 
+    # (see Farce::Abstract::Queue#push)
     # @!macro modes
+    # @param mode [Symbol] the default mode for sending unshareable values
     def push(value, non_block = false, timeout: nil, mode: nil) # rubocop:disable Style/OptionalBooleanParameter
       value = @manager.wrap(value, mode:)
 
@@ -27,12 +31,15 @@ module Farce
       timeout.nil? ? @queue.push(value) : @queue.push(value, timeout:)
     end
 
+    # (see Farce::Abstract::Queue#try_push)
     # @!macro modes
+    # @param mode [Symbol] the default mode for sending unshareable values
     def try_push(value, mode: nil)
       return true if @queue.try_push(@manager.wrap(value, mode:))
       block_given? ? yield : false
     end
 
+    # (see Farce::Abstract::Queue#pop)
     def pop(non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
       return try_pop { raise ThreadError, "queue empty" } if non_block
 
@@ -42,6 +49,7 @@ module Farce
       yield if block_given?
     end
 
+    # (see Farce::Abstract::Queue#try_pop)
     def try_pop
       empty = false
       result = @queue.try_pop { empty = true }

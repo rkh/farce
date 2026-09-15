@@ -9,6 +9,7 @@ module Farce
       include Unshareable
       include Internal::UnsharedQueueWaiting
 
+      # @return [Symbol] always returns :local
       def mode = :local
     end
   end

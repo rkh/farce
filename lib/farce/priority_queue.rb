@@ -8,24 +8,31 @@ module Farce
     include Internal::ManagedQueue
     include Shareable
 
+    # (see Farce::Abstract::PriorityQueue#initialize)
     # @!macro modes
+    # @param mode [Symbol] the default mode for sending unshareable values
     def initialize(capacity: nil, default_priority: 0, order: :ascending, mode: :copy, track_age: false)
       @manager = ModeManager.new(mode:)
       super(capacity:, default_priority:, order:, track_age:)
     end
 
+    # (see Farce::Abstract::PriorityQueue#push)
     # @!macro modes
+    # @param mode [Symbol] the default mode for sending unshareable values
     def push(value, non_block = false, priority: default_priority, timeout: nil, mode: nil) # rubocop:disable Style/OptionalBooleanParameter
       push_to_storage(priority, non_block, @manager.wrap(value, mode:), timeout:)
     end
 
+    # (see Farce::Abstract::PriorityQueue#try_push)
     # @!macro modes
+    # @param mode [Symbol] the default mode for sending unshareable values
     def try_push(value, priority: default_priority, mode: nil)
       return true if @queue.push(priority, @manager.wrap(value, mode:))
 
       block_given? ? yield : false
     end
 
+    # (see Farce::Abstract::PriorityQueue#pop)
     def pop(non_block = false, timeout: nil) # rubocop:disable Style/OptionalBooleanParameter
       return try_pop { raise ThreadError, "queue empty" } if non_block
       deadline = timeout_at(timeout) unless timeout.nil?
@@ -40,6 +47,7 @@ module Farce
       end
     end
 
+    # (see Farce::Abstract::PriorityQueue#try_pop)
     def try_pop
       empty  = false
       result = @reverse_order ? @queue.pop_last { empty = true } : @queue.pop { empty = true }
@@ -47,7 +55,8 @@ module Farce
       yield if block_given?
     end
 
-    # Peeking at a moved value claims it for this Ractor while leaving it queued.
+    # (see Farce::Abstract::PriorityQueue#peek)
+    # @note Peeking at a moved value claims it for this Ractor while leaving it queued.
     def peek
       empty  = false
       result = if @reverse_order

@@ -22,9 +22,6 @@ module Farce
   # @!method value
   #   @return [Boolean] the current value
   #
-  # @!method get
-  #   (see #value)
-  #
   # @!method set
   #   Set the flag to true.
   #   @return [true]
@@ -36,7 +33,7 @@ module Farce
   #   @raise [ArgumentError] if the value is not true or false
   #
   # @!method value=(value)
-  #   (see #store)
+  #   Alias for {#store}
   #
   # @!method swap(value)
   #   Replace the value and return its previous state.

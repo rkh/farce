@@ -16,6 +16,7 @@ module Farce
     class Queue < Abstract::Queue
       include Scoped
 
+      # @return [Symbol] always returns `:local`
       def mode = :local
 
       # @api private

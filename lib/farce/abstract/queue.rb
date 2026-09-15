@@ -29,16 +29,14 @@ module Farce
     #   @abstract
     #   @return [Integer] The current number of items in the queue.
     #
-    # @!method initialize(capacity: 1024, mode: :copy, track_age: false)
+    # @!method initialize(capacity: 1024, track_age: false)
     #   @abstract Subclasses may add additional parameters to this method.
-    #   @!macro modes
     #   @param capacity [Integer, nil]
     #     The maximum number of items the queue can hold.
     #     If `nil`, the queue is unbounded.
     #
     #     The default may vary for subclasses.
     #     Most notably, priority and timer queues default to `nil`.
-    #   @param mode [Symbol] The default mode used to transfer values between Ractors.
     #   @param track_age [Boolean] Whether to track enqueue age and queue generations.
     #
     # @!method clear
@@ -69,7 +67,6 @@ module Farce
     #   Checks whether the queue is empty.
     #   @return [Boolean] `true` if the queue is empty, `false` otherwise.
     #
-    #
     # @!method pop(non_block = false, timeout: nil)
     #   @abstract Subclasses may add additional parameters to this method.
     #   Takes an item from the queue, blocking until one is available or the timeout expires.
@@ -84,7 +81,7 @@ module Farce
     #   @return [BasicObject, nil]
     #     The item taken from the queue, or the return value of the block or `nil` if the timeout expired.
     #
-    # @!method push(value, non_block = false, timeout: nil, mode: nil)
+    # @!method push(value, non_block = false, timeout: nil)
     #   @abstract
     #     Subclasses may add additional parameters to this method.
     #     They may also restrict what types of values can be pushed onto the queue.
@@ -98,8 +95,6 @@ module Farce
     #     The maximum time to wait for the item to be added.
     #     If `nil`, the method will wait indefinitely.
     #     If `0`, the method will not wait at all.
-    #   @param mode [Symbol, nil]
-    #     The mode used to transfer the value between Ractors, or `nil` to use the queue's default mode.
     #   @raise [Farce::ClosedQueueError] when the queue is closed
     #   @raise [Farce::SealedQueueError] when the queue is sealed but not yet closed
     #   @raise [ThreadError] when the queue is full and non_block is true
@@ -113,13 +108,11 @@ module Farce
     #   @return [BasicObject, nil]
     #     The item taken from the queue, or the return value of the block or `nil` if no item was available.
     #
-    # @!method try_push(value, mode: nil)
+    # @!method try_push(value)
     #   @abstract Subclasses may add additional parameters to this method.
     #   Tries to push an item onto the queue without blocking.
     #   If the queue is at capacity, the method will call the block if given, or return `false` if no block is given.
     #   @param value [BasicObject] The item to add to the queue.
-    #   @param mode [Symbol, nil]
-    #     The mode used to transfer the value between Ractors, or `nil` to use the queue's default mode.
     #   @yield Block called if the queue is at capacity.
     #   @raise [Farce::ClosedQueueError] when the queue is closed
     #   @raise [Farce::SealedQueueError] when the queue is sealed but not yet closed
