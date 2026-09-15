@@ -10,4 +10,4 @@ bundle update --bundler
 bundle update --all
 bundle exec rake clobber
 
-mise run install
+mise run -f install
