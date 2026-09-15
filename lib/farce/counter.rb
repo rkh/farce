@@ -8,7 +8,8 @@ module Farce
   #
   # Values are converted to Integers. On CRuby, the stored value and arithmetic
   # deltas must fit in a signed 64-bit integer; overflow raises RangeError without
-  # changing the stored value.
+  # changing the stored value. Conditional-operation bounds may be wider, but a
+  # resulting stored value must still fit.
   #
   # @!method value
   #   @return [Integer] The current value of the counter.
@@ -66,6 +67,38 @@ module Farce
     def reset
       self.value = @initial
       self
+    end
+
+    # Increment the counter by one if its current value is below the limit.
+    # The check and increment happen atomically.
+    # @param [Numeric, String, #to_int] limit The upper bound, converted to an Integer.
+    # @return [Boolean] true if the counter changed, otherwise false.
+    def increment_if_below(limit) # rubocop:disable Naming/PredicateMethod
+      limit = Integer(limit)
+      current = value
+
+      while current < limit
+        return true if compare_and_set(current, current + 1)
+        current = value
+      end
+
+      false
+    end
+
+    # Decrement the counter by one if its current value is above the floor.
+    # The check and decrement happen atomically.
+    # @param [Numeric, String, #to_int] floor The lower bound, converted to an Integer.
+    # @return [Boolean] true if the counter changed, otherwise false.
+    def decrement_if_above(floor) # rubocop:disable Naming/PredicateMethod
+      floor = Integer(floor)
+      current = value
+
+      while current > floor
+        return true if compare_and_set(current, current - 1)
+        current = value
+      end
+
+      false
     end
 
     # @overload add(by = 1)

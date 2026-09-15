@@ -210,6 +210,121 @@ module Farce
       assert_equal 10, counter.value
     end
 
+    def test_conditional_updates_change_by_one_until_reaching_the_bound
+      counter = Counter.new(2)
+
+      assert counter.increment_if_below("3")
+      assert_equal 3, counter.value
+      refute counter.increment_if_below(3.9)
+      assert_equal 3, counter.value
+
+      assert counter.decrement_if_above("2")
+      assert_equal 2, counter.value
+      refute counter.decrement_if_above(2.9)
+      assert_equal 2, counter.value
+    end
+
+    def test_conditional_update_bounds_are_converted_once
+      increment_conversions = 0
+      increment_limit = Object.new
+      increment_limit.define_singleton_method(:to_int) do
+        increment_conversions += 1
+        1
+      end
+      decrement_conversions = 0
+      decrement_floor = Object.new
+      decrement_floor.define_singleton_method(:to_int) do
+        decrement_conversions += 1
+        0
+      end
+      counter = Counter.new
+
+      assert counter.increment_if_below(increment_limit)
+      assert_equal 1, increment_conversions
+      assert counter.decrement_if_above(decrement_floor)
+      assert_equal 1, decrement_conversions
+    end
+
+    def test_invalid_conditional_update_bounds_do_not_change_the_value
+      counter = Counter.new(7)
+
+      assert_raises(TypeError) { counter.increment_if_below(Object.new) }
+      assert_raises(TypeError) { counter.increment_if_below(nil) }
+      assert_raises(ArgumentError) { counter.increment_if_below("invalid") }
+      assert_raises(TypeError) { counter.decrement_if_above(Object.new) }
+      assert_raises(TypeError) { counter.decrement_if_above(nil) }
+      assert_raises(ArgumentError) { counter.decrement_if_above("invalid") }
+      assert_equal 7, counter.value
+    end
+
+    def test_native_conditional_update_result_range_checks_do_not_change_the_value
+      return unless RUBY_ENGINE == "ruby"
+      maximum = (2**63) - 1
+      minimum = -(2**63)
+      counter = Counter.new(maximum)
+
+      assert_raises(RangeError) { counter.increment_if_below(maximum + 1) }
+      assert_equal maximum, counter.value
+
+      counter = Counter.new(minimum)
+
+      assert_raises(RangeError) { counter.decrement_if_above(minimum - 1) }
+      assert_equal minimum, counter.value
+    end
+
+    def test_conditional_updates_reread_and_recheck_after_a_failed_compare_and_set
+      increment_attempts = 0
+      incrementing_class = Class.new(Counter) do
+        define_method(:compare_and_set) do |expected, replacement|
+          if expected != replacement && increment_attempts.zero?
+            increment_attempts += 1
+            increment
+            false
+          else
+            super(expected, replacement)
+          end
+        end
+      end
+      decrement_attempts = 0
+      decrementing_class = Class.new(Counter) do
+        define_method(:compare_and_set) do |expected, replacement|
+          if expected != replacement && decrement_attempts.zero?
+            decrement_attempts += 1
+            decrement
+            false
+          else
+            super(expected, replacement)
+          end
+        end
+      end
+      incrementing_counter = incrementing_class.new
+      decrementing_counter = decrementing_class.new(1)
+
+      refute incrementing_counter.increment_if_below(1)
+      assert_equal 1, increment_attempts
+      assert_equal 1, incrementing_counter.value
+      refute decrementing_counter.decrement_if_above(0)
+      assert_equal 1, decrement_attempts
+      assert_equal 0, decrementing_counter.value
+    end
+
+    def test_conditional_updates_respect_bounds_under_thread_contention
+      counter = Counter.new
+      increment_results = 8.times.map do
+        Thread.new { 500.times.count { counter.increment_if_below(1_000) } }
+      end
+
+      assert_equal 1_000, increment_results.sum(&:value)
+      assert_equal 1_000, counter.value
+
+      decrement_results = 8.times.map do
+        Thread.new { 500.times.count { counter.decrement_if_above(0) } }
+      end
+
+      assert_equal 1_000, decrement_results.sum(&:value)
+      assert_equal 0, counter.value
+    end
+
     def test_updates_are_exact_across_threads
       counter = Counter.new
       workers = 8.times.map do
