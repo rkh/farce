@@ -68,6 +68,42 @@ module Farce
       # This is primarily for scheduling errors, not execution errors.
       # You can check this if the {#state} is `:error`.
       def error = nil
+
+      # @param wait [Boolean] Whether to wait for the owner to be non-nil before checking if the scheduler is local.
+      # @return [Boolean] Whether the scheduler is local for the current Ractor.
+      def local?(wait: true) = false # rubocop:disable Lint/UnusedMethodArgument
+
+      # Like {#schedule}, with two differences:
+      # 1. If {#local?} returns true, and it would run in local mode (either due to `auto_local` or explicitly set
+      #    `mode: :local`), it executes the block directly without enqueuing it.
+      # 2. It blocks until the block has been executed, either immediately in local mode or after being scheduled.
+      #
+      # @param (see #schedule)
+      # @return [self]
+      def execute(*, mode: :copy, auto_local: true, &callback)
+        raise LocalJumpError, "Cannot yield without a block" unless block_given?
+        raise SchedulerClosedError, "cannot execute task on a closed scheduler" if closed?
+
+        if (auto_local || mode == :local) && local?
+          raise SchedulerClosedError, "cannot execute task on a closed scheduler" if closed?
+          yield(*)
+          return self
+        end
+
+        ran      = Flag.new(false)
+        signal   = Signal.new
+        callback = Ractor.shareable_proc(&callback) unless Ractor.shareable?(callback)
+
+        schedule(callback, ran, signal, *, mode:, auto_local:) do |callback, ran, signal, *args|
+          callback.call(*args)
+        ensure
+          ran.set
+          signal.broadcast
+        end
+
+        signal.wait_until { ran.value }
+        self
+      end
     end
   end
 end

@@ -337,7 +337,9 @@ module Farce
       if auto_local
         owner = @owner.wait_until_non_nil
         raise SchedulerClosedError, "cannot schedule task on a closed scheduler" if closed?
-        mode  = :local if owner == Ractor.current
+        mode = :local if owner == Ractor.current
+      elsif mode == :local && (owner = @owner.value) && owner != Ractor.current
+        raise Ractor::IsolationError, "cannot schedule local task outside the owning Ractor"
       end
 
       task = mode == :local ?
@@ -349,6 +351,12 @@ module Farce
     rescue ClosedQueueError
       raise unless closed?
       raise SchedulerClosedError, "cannot schedule task on a closed scheduler"
+    end
+
+    # (see Farce::Abstract::Scheduler#local?)
+    def local?(wait: true)
+      owner = wait ? @owner.wait_until_non_nil : @owner.value
+      owner == Ractor.current
     end
 
     # Requests shutdown and rejects further submissions. Repeated calls are harmless.
