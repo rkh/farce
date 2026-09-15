@@ -315,15 +315,20 @@ module Farce
         Fiber.set_scheduler(scheduler)
         lease = klass.new { Object.new }
         events = []
+        holding = Farce::Signal.new
+        release = Farce::Signal.new
         Fiber.schedule do
           lease.checkout do
             events << :holding
-            Fiber.scheduler.kernel_sleep(0.01)
+            holding.broadcast
+            release.wait(0)
             events << :releasing
           end
         end
         Fiber.schedule do
+          holding.wait(0)
           events << :waiting
+          release.broadcast
           lease.checkout(timeout: 1) { events << :acquired }
         end
         Fiber.set_scheduler(nil)
