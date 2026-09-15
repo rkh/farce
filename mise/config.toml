@@ -43,7 +43,13 @@ wait_for            = ["install", "compile"]
 
 [tasks.build]
 description         = "Build all gems in parallel"
-run                 = "bundle exec rake gem:all && bundle exec rake clean"
+run = """
+  if [ -z "$JRUBY_JAR" ]; then
+    jruby_home=$(mise where ruby@jruby) || exit 1
+    export JRUBY_JAR="$jruby_home/lib/jruby.jar"
+  fi
+  bundle exec rake gem:all && bundle exec rake clean
+"""
 wait_for            = ["install"]
 
 [tasks.docs]
