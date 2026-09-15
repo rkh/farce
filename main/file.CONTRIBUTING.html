@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: Contributing to Farce
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "CONTRIBUTING";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="index.html" selected>main</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: Contributing to Farce</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="contributing-to-farce">Contributing to Farce<a href="#contributing-to-farce" aria-label="Link to heading 'Contributing to Farce'" data-heading-content="Contributing to Farce" class="anchor"></a></h1>
+<p>Contributions to Farce are welcome and appreciated! 💜💜💜</p>
+<p>To ensure a smooth contribution process, please follow these guidelines:</p>
+<ol>
+<li>Do not open issues or pull requests regarding open <strong>security vulnerabilities</strong>. If you discover a security vulnerability, please report it privately to the maintainers by emailing <a href="mailto:security@rkh.im">security@rkh.im</a> with the subject line &quot;Farce Security Vulnerability Report&quot;.</li>
+<li><strong>Bug reports</strong> and <strong>pull requests</strong> should be submitted to the <a href="https://github.com/rkh/farce">main repository</a> on GitHub.</li>
+<li>Please follow the <strong><a href="file.CODE_OF_CONDUCT.html" title="code of conduct">code of conduct</a></strong> in all your interactions with the project and its community.</li>
+<li>If you use an <strong>AI tool</strong> to assist with your contribution, please follow the guidelines outlined in the <a href="#ai-contribution-policy">AI contribution policy</a> below.</li>
+<li>Any code contributions added to Farce directly should be licensed under the <strong><a href="file.MIT-LICENSE.html" title="MIT License">MIT License</a></strong>. By submitting a pull request, you are agreeing to license your contribution under the MIT License. This does not apply to third-party plugins, repositories, redistributions, or other works that you may link to or reference in your contribution, which may be subject to their own licenses.</li>
+<li><strong>Run <a href="#local-development">the tests</a></strong> and make sure it's happy before submitting a pull request. If your contribution includes new features, please also add tests and documentation as needed.</li>
+</ol>
+<p>Feel free to reach out with any questions and feedback.</p>
+<p>Thank you for being part of the Ruby Open Source community and for contributing to Farce! 🙌</p>
+<h2 id="local-development">Local Development<a href="#local-development" aria-label="Link to heading 'Local Development'" data-heading-content="Local Development" class="anchor"></a></h2>
+<p>You can use <a href="https://mise.jdx.dev">mise</a> to run tasks against all supported Ruby versions.</p>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>With mise</th>
+<th>Without mise</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>install dependencies</td>
+<td><code>mise install</code></td>
+<td><code>bundle install</code></td>
+</tr>
+<tr>
+<td>compile extensions</td>
+<td><code>mise compile</code></td>
+<td><code>bundle exec rake compile</code></td>
+</tr>
+<tr>
+<td>run tests</td>
+<td><code>mise run test</code></td>
+<td><code>bundle exec rake test</code></td>
+</tr>
+<tr>
+<td>builds gems</td>
+<td><code>mise build</code></td>
+<td><code>bundle exec rake gem:all</code></td>
+</tr>
+<tr>
+<td>update dependencies</td>
+<td><code>mise update</code></td>
+<td>see mise/tasks/update</td>
+</tr>
+</tbody>
+</table>
+<p>To install dependencies, compile extensions, run the tests and build the gems, you can run <code>mise run</code> (without any arguments) and to do so on file changes, you can use <code>mise watch</code>.</p>
+<p>Test runs have an external 120-second watchdog so a deadlocked Ruby VM cannot leave local development or CI stuck indefinitely. Set <code>TEST_TIMEOUT</code> to change the deadline. A timed-out run reports its Minitest seed and, on macOS, attempts to write a native stack sample to <code>tmp/test-watchdog</code>. The unsupervised <code>bundle exec rake test:run</code> task is available for debugging.</p>
+<h3 id="test-coverage-reports">Test coverage reports<a href="#test-coverage-reports" aria-label="Link to heading 'Test coverage reports'" data-heading-content="Test coverage reports" class="anchor"></a></h3>
+<p>If you use mise, this will be handled automatically.</p>
+<p>Otherwise you will need to set the <code>COVERAGE</code> environment variable to <code>true</code> when running tests. For a full report, you also need to run the tests with different Ruby versions within SimpleCov's merge timeout (defaults to 10 minutes), as they cover different parts of the codebase.</p>
+<p>For instance, using <a href="https://rvm.io/">rvm</a> could look like this:</p>
+<pre class="code bash"><code class="bash">COVERAGE=true rvm 3.4,4.0,jruby do bundle exec rake test
+bundle exec rake coverage:report
+</code></pre>
+<h3 id="ruby-subprocess-tests">Ruby subprocess tests<a href="#ruby-subprocess-tests" aria-label="Link to heading 'Ruby subprocess tests'" data-heading-content="Ruby subprocess tests" class="anchor"></a></h3>
+<p>Use <code>ruby_subprocess(source, env: {})</code> in tests that need a fresh Ruby process. It returns stdout, stderr, and <code>Process::Status</code>, adds the repository's <code>lib</code> and <code>test</code> directories to the load path, and reports captured output if the child times out.</p>
+<p>The subprocess timeout defaults to 15 seconds. Set <code>TEST_SUBPROCESS_TIMEOUT</code> for slower runtime startup, such as TruffleRuby on the JVM. An explicit <code>timeout:</code> argument overrides this setting. The whole-suite <code>TEST_TIMEOUT</code> watchdog remains independent.</p>
+<p>When <code>COVERAGE=true</code>, the helper starts SimpleCov before the child script loads Farce. Each child records a separate result for the merged report without adding coverage output to stdout or stderr. Use <code>coverage: false</code> for timing-sensitive probes. Use <code>ruby_command(source, coverage: false)</code> when a test needs to manage the process itself.</p>
+<h2 id="ai-contribution-policy">AI contribution policy<a href="#ai-contribution-policy" aria-label="Link to heading 'AI contribution policy'" data-heading-content="AI contribution policy" class="anchor"></a></h2>
+<p>If you wish to use an AI tool for assistance, please adhere to the following guidelines:</p>
+<ul>
+<li>As a contributor, you are always the author and fully accountable for your contributions.</li>
+<li>You must carefully read and review all LLM-generated code or text before asking maintainers to review it. This includes pull request descriptions, where we want to hear your personal voice rather than an unfiltered AI summary.</li>
+<li>You should be transparent and make note if your contribution contains substantial amounts of tool-generated content.</li>
+<li>You should be confident that your contribution is high enough quality to merit a maintainer’s time for review. You should be able to answer questions about your work during review.</li>
+<li>You are responsible for ensuring you have the legal right to make your contribution under our license, and that your contribution does not violate the intellectual property rights of any third party.</li>
+</ul>
+<p>Any agents used for contributions may not take action without human review and approval. This includes, but is not limited to, making commits, opening pull requests, or posting in issue trackers.</p>
+<p>This policy is based on the <a href="https://discourse.hanamirb.org/t/ai-contribution-policy">Hanami AI contribution policy</a>.</p>
+</div></div>
+
+      <div id="footer">
+  Generated on Tue Sep 15 10:44:24 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>

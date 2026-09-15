@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: README
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "README";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="index.html" selected>main</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="farce-fiber-and-ractor-compatibility-enabler">Farce: Fiber and Ractor Compatibility Enabler<a href="#farce-fiber-and-ractor-compatibility-enabler" aria-label="Link to heading 'Farce: Fiber and Ractor Compatibility Enabler'" data-heading-content="Farce: Fiber and Ractor Compatibility Enabler" class="anchor"></a></h1>
+<p>Farce provides tools and data structures to write code that works well with both <strong>Fiber schedulers</strong> and <strong>Ractors</strong>, as well as the classic <strong>Threads</strong>. Its main purpose is to be used by other gems to provide better compatibility with these concurrency primitives, but it can also be used directly in applications.</p>
+<h2 id="table-of-contents">Table of Contents<a href="#table-of-contents" aria-label="Link to heading 'Table of Contents'" data-heading-content="Table of Contents" class="anchor"></a></h2>
+<ul>
+<li><a href="#farce-fiber-and-ractor-compatibility-enabler">Farce: Fiber and Ractor Compatibility Enabler</a>
+<ul>
+<li><a href="#table-of-contents">Table of Contents</a></li>
+<li><a href="#introduction">Introduction</a>
+<ul>
+<li><a href="#the-problem">The Problem</a></li>
+<li><a href="#the-solution">The Solution</a></li>
+</ul>
+</li>
+<li><a href="#features">Features</a></li>
+<li><a href="#compatibility-and-dependencies">Compatibility and Dependencies</a>
+<ul>
+<li><a href="#ruby">Ruby</a></li>
+<li><a href="#similar-projects">Similar Projects</a></li>
+</ul>
+</li>
+<li><a href="#installation">Installation</a>
+<ul>
+<li><a href="#globally">Globally</a></li>
+<li><a href="#as-a-project-dependency">As a project dependency</a></li>
+<li><a href="#as-a-library-dependency">As a library dependency</a></li>
+<li><a href="#local-setup">Local setup</a></li>
+<li><a href="#loading-farce">Loading Farce</a></li>
+</ul>
+</li>
+<li><a href="#housekeeping">Housekeeping</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="introduction">Introduction<a href="#introduction" aria-label="Link to heading 'Introduction'" data-heading-content="Introduction" class="anchor"></a></h2>
+<p>Ruby 3.0 introduced two powerful concurrency primitives: <strong>Fiber schedulers</strong> and <strong>Ractors</strong>, besides the already existing <strong>Threads</strong>:</p>
+<ul>
+<li><strong>Threads</strong> are the classic concurrency primitive in Ruby, and mostly map to native operating system threads. This way any system calls, IO, or other blocking operations will block a thread, allowing another one to run. However, on the official Ruby implementation (often referred to as CRuby or MRI), Threads cannot run in parallel due to the Global VM Lock (GVL). This means that even if you have multiple threads, only one of them can execute Ruby code at a time.</li>
+<li><strong>Ractors</strong> provide parallelism, even on CRuby. They make it very hard to introduce concurrency issues between them, but put severe limitations on state sharing and cross-ractor communication. Ractors are only supported by CRuby, but that is generally not an issue, as other implementations, such as JRuby and TruffleRuby, support true parallelism with Threads. As of Ruby 4.0, Ractors are still considered experimental.</li>
+<li><strong>Fiber schedulers</strong> allow you to run multiple Fibers concurrently on a single Thread, without having to explicitly pass control between them. This is a very efficient way to run concurrent code, especially for IO-bound workloads. As of Ruby 4.0, Fiber schedulers with IO support are still considered experimental.</li>
+</ul>
+<p>All three of these need some form of <strong>concurrency coordination</strong> for shared state. These are usually the most complicated for Threads, as state is shared between them freely, and an interrupt can happen at any time. Fibers on the other hand have explicit control transfer (only on blocking operations or when giving up control), so their behavior is much more predictable. Ractors disallow sharing mutable state between them (or have built-in locking for the few cases where they allow it).</p>
+<h3 id="the-problem">The Problem<a href="#the-problem" aria-label="Link to heading 'The Problem'" data-heading-content="The Problem" class="anchor"></a></h3>
+<p>Both the Ruby core library, and other libraries, like the very popular <a href="https://github.com/ruby-concurrency/concurrent-ruby">concurrent-ruby</a> gem, provide plenty of primitives to solve this. However, most of them are not compatible with Ractors. And those that are, are then in turn usually not compatible with Fiber schedulers. Due to this, most of the popular frameworks and libraries out there do not support Ractors at all:</p>
+<table>
+  <thead>
+    <tr>
+      <th>Library</th>
+      <th>Example classes</th>
+      <th>Multithreading</th>
+      <th>Non-blocking Fibers</th>
+      <th>Cross-Ractor Usage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="5"><a href="https://www.ruby-lang.org/">Ruby</a></td>
+      <td>Array, Hash, String, Set, …</td>
+      <td>⚠️ not thread-safe</td>
+      <td>✅ supported</td>
+      <td>⚠️ immutable/copy/move only</td>
+    </tr>
+    <tr>
+      <td>Thread, Fiber</td>
+      <td>✅ supported</td>
+      <td>✅ supported</td>
+      <td>❌ <b>not supported</b></td>
+    </tr>
+    <tr>
+      <td>Mutex, ConditionVariable, Queue</td>
+      <td>✅ supported</td>
+      <td>⚠️ CRuby only</td>
+      <td>❌ <b>not supported</b></td>
+    </tr>
+    <tr>
+      <td>Ractor, Ractor::Port</td>
+      <td>✅ supported</td>
+      <td>❌ <b>not supported</b></td>
+      <td>✅ supported</td>
+    </tr>
+    <tr>
+      <td>WeakRef, Ruby::Box</td>
+      <td>⚠️ Main Ractor only</td>
+      <td>⚠️ Main Ractor only</td>
+      <td>❌ <b>not supported</b></td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/ruby-concurrency/concurrent-ruby">concurrent-ruby</a></td>
+      <td>Future, Exchanger, Tuple, …</td>
+      <td>⚠️ Main Ractor only</td>
+      <td>⚠️ Main Ractor only</td>
+      <td>❌ <b>not supported</b></td>
+    </tr>
+    <tr>
+      <td rowspan="2"><a href="https://github.com/socketry/async">async</a></td>
+      <td>Promise, Condition, Queue, …</td>
+      <td>✅ supported</td>
+      <td>✅ supported</td>
+      <td>❌ <b>not supported</b></td>
+    </tr>
+    <tr>
+      <td>Scheduler</td>
+      <td>⚠️ Main Ractor only</td>
+      <td>⚠️ Main Ractor only</td>
+      <td>❌ <b>not supported</b></td>
+    </tr>
+    <tr>
+      <td rowspan="3"><a href="https://github.com/mperham/ratomic">ratomic</a></td>
+      <td>Pool</td>
+      <td>⚠️ CRuby only</td>
+      <td>❌ <b>not supported</b></td>
+      <td>⚠️ CRuby only</td>
+    </tr>
+    <tr>
+      <td>LocalPool</td>
+      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only</td>
+    </tr>
+    <tr>
+      <td>Queue, Map</td>
+      <td>⚠️ CRuby only</td>
+      <td>❌ <b>not supported</b></td>
+      <td>💣 <b>breaks isolation</b></td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/MadBomber/ractor_queue">ractor_queue</a></td>
+      <td>RactorQueue</td>
+      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only</td>
+      <td>💣 <b>breaks isolation</b></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://github.com/hamstergem/hamster">hamster</a> /
+        <a href="https://github.com/immutable-ruby/immutable-ruby">immutable</a>
+      </td>
+      <td>Hash, Vector, Set, List, …</td>
+      <td>⚠️ Main Ractor only</td>
+      <td>⚠️ Main Ractor only</td>
+      <td>❌ <b>not supported</b></td>
+    </tr>
+  </tbody>
+</table>
+<p>💣 Breaking Ractor isolation introduces concurrency issues not just in application code, but in Ruby itself, possibly leading to segmentation faults or undefined behavior.</p>
+<p>Please keep in mind that many of these libraries may gain better Ractor support in the future, and that the table might already be outdated. Feel free to open an issue if you find any inaccuracies. This is also in no way meant as a criticism of any of the libraries mentioned. They all have their own scopes, goals and priorities, and largely rely on volunteer contributions.</p>
+<h3 id="the-solution">The Solution<a href="#the-solution" aria-label="Link to heading 'The Solution'" data-heading-content="The Solution" class="anchor"></a></h3>
+<p><strong>Farce is an attempt to solve this.</strong> Code relying on Farce will work well with any concurrency primitive. Use an <strong>event loop with the <a href="https://github.com/socketry/async">async</a></strong> gem? Farce will fit right in. Running a <strong>pool of Ractors</strong> with <a href="https://github.com/yaroslav/kino">Kino</a>? Farce got you covered! You manually manage a single <strong>background thread</strong>? Farce solves that, too!</p>
+<p>And it does so in a non-invasive way. You should be able to use Farce alongside any other gem!</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># Using a counter as an example, there are many more classes provided by Farce
+</span><span class='id identifier rubyid_counter'>counter</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Counter.html" title="Farce::Counter (class)">Counter</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Counter.html#initialize-instance_method" title="Farce::Counter#initialize (method)">new</a></span></span>
+
+<span class='comment'># Works in code without concurrency
+</span><span class='id identifier rubyid_counter'>counter</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='int'>5</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_counter'>counter</span><span class='period'>.</span><span class='id identifier rubyid_to_i'>to_i</span> <span class='comment'># =&gt; 5
+</span>
+<span class='comment'># Works with threads
+</span><span class='id identifier rubyid_wait_for'>wait_for</span> <span class='op'>=</span> <span class='int'>5</span><span class='period'>.</span><span class='id identifier rubyid_times'>times</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='kw'>do</span>
+  <span class='const'>Thread</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_counter'>counter</span><span class='period'>.</span><span class='id identifier rubyid_increment'>increment</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span>
+
+<span class='comment'># Works with ractors
+</span><span class='id identifier rubyid_wait_for'>wait_for</span> <span class='op'>+=</span> <span class='int'>5</span><span class='period'>.</span><span class='id identifier rubyid_times'>times</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='kw'>do</span>
+  <span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_counter'>counter</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_it'>it</span><span class='period'>.</span><span class='id identifier rubyid_increment'>increment</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span>
+
+<span class='comment'># Works with tha async gem
+</span><span class='const'>Async</span> <span class='kw'>do</span>
+  <span class='int'>5</span><span class='period'>.</span><span class='id identifier rubyid_times'>times</span> <span class='kw'>do</span>
+    <span class='const'>Async</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_counter'>counter</span><span class='period'>.</span><span class='id identifier rubyid_increment'>increment</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_wait_for'>wait_for</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:join</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_counter'>counter</span><span class='period'>.</span><span class='id identifier rubyid_to_i'>to_i</span> <span class='comment'># =&gt; 20
+</span></code></pre>
+<p>Farce also aims to be fast and efficient, aiming for anywhere between a minimal overhead to outperforming other options.</p>
+<p>It does so by choosing the best implementation for the situation. The counter in the above example will use Java's <code>AtomicLong</code> on JRuby and TruffleRuby in GraalVM mode, an <code>AtomicReference</code> on TruffleRuby in native mode, and an atomic, native counter on CRuby, so it runs without having to use any locks on any of these platforms.</p>
+<p>This is especially useful when coordinating work between Fiber schedulers and Ractors:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_queue'>queue</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Queue.html" title="Farce::Queue (class)">Queue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Queue.html#initialize-instance_method" title="Farce::Queue#initialize (method)">new</a></span></span>
+
+<span class='comment'># Background ractor pushing work into the queue
+</span><span class='comment'># This would not work with Ruby&#39;s built-in Queue
+</span><span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_queue'>queue</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_queue'>queue</span><span class='op'>|</span>
+  <span class='id identifier rubyid_loop'>loop</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span> <span class='id identifier rubyid_expensive_work'>expensive_work</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span>
+
+<span class='comment'># This would not work with Ratomic::Queue
+</span><span class='const'>Async</span> <span class='kw'>do</span>
+  <span class='comment'># Task waiting for work from the queue
+</span>  <span class='const'>Async</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_loop'>loop</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_do_something'>do_something</span> <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span>  <span class='rbrace'>}</span> <span class='rbrace'>}</span>
+
+  <span class='comment'># Doesn&#39;t get blocked by the other task waiting for the queue
+</span>  <span class='const'>Async</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_unrelated_work'>unrelated_work</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span>
+</code></pre>
+<h2 id="features">Features<a href="#features" aria-label="Link to heading 'Features'" data-heading-content="Features" class="anchor"></a></h2>
+<p>TODO</p>
+<h2 id="compatibility-and-dependencies">Compatibility and Dependencies<a href="#compatibility-and-dependencies" aria-label="Link to heading 'Compatibility and Dependencies'" data-heading-content="Compatibility and Dependencies" class="anchor"></a></h2>
+<p>Farce has no mandatory dependencies beyond Ruby itself.</p>
+<h3 id="ruby">Ruby<a href="#ruby" aria-label="Link to heading 'Ruby'" data-heading-content="Ruby" class="anchor"></a></h3>
+<p>Upon release of the latest version of Farce, it assumes to be compatible with:</p>
+<ul>
+<li>The <a href="https://www.ruby-lang.org/en/downloads/releases/">latest patch release</a> for each <a href="https://www.ruby-lang.org/en/">CRuby</a> version <a href="https://www.ruby-lang.org/en/downloads/branches/">still receiving bug fixes</a>.</li>
+<li>Ruby's <a href="https://github.com/ruby/ruby/tree/master">master branch</a> at the time of release (ie the upcoming major version of CRuby).</li>
+<li>The latest stable release of <a href="https://www.jruby.org/">JRuby</a> and <a href="https://truffleruby.dev/">TruffleRuby</a> (both in native and GraalVM modes).</li>
+</ul>
+<p>Moreover:</p>
+<ul>
+<li>Dropping support for a CRuby version is only done in major releases.</li>
+<li>If support for an older CRuby version is dropped, Farce will still backport security fixes for at least as long as that CRuby version is <a href="https://www.ruby-lang.org/en/downloads/branches/">still receiving security fixes</a>.</li>
+</ul>
+<h3 id="similar-projects">Similar Projects<a href="#similar-projects" aria-label="Link to heading 'Similar Projects'" data-heading-content="Similar Projects" class="anchor"></a></h3>
+<ul>
+<li><a href="https://github.com/eregon/ractor-shim/">ractor-shim</a> provides similar functionality to <code>Farce::Ractor</code>. See <a href="file.ractor-shim.html" title="the comparison document">the comparison document</a> for more details.</li>
+<li><a href="https://github.com/ruby-concurrency/concurrent-ruby">concurrent-ruby</a> provides a more complete set of concurrency primitives than Farce, but is not compatible with Ractors.</li>
+<li><a href="https://mperham.github.io/ratomic/">ratomic</a> has overlapping functionality with Farce. See <a href="docs/gems/ratomic.md">the comparison document</a> for more details.</li>
+</ul>
+<p>All of the above projects can safely be used alongside Farce in the same application.</p>
+<h2 id="installation">Installation<a href="#installation" aria-label="Link to heading 'Installation'" data-heading-content="Installation" class="anchor"></a></h2>
+<h3 id="globally">Globally<a href="#globally" aria-label="Link to heading 'Globally'" data-heading-content="Globally" class="anchor"></a></h3>
+<p>To install Farce globally, you can use the following command:</p>
+<pre class="code console"><code class="console">$ gem install farce
+</code></pre>
+<h3 id="as-a-project-dependency">As a project dependency<a href="#as-a-project-dependency" aria-label="Link to heading 'As a project dependency'" data-heading-content="As a project dependency" class="anchor"></a></h3>
+<p>If you want to use Farce directly in your project, it is recommended to do so via <a href="https://bundler.io">Bundler</a>.
+Add Farce to your <code>Gemfile</code>:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_source'>source</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>https://gem.coop</span><span class='tstring_end'>&quot;</span></span> <span class='comment'># or &quot;https://rubygems.org&quot;
+</span>
+<span class='id identifier rubyid_gem'>gem</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>farce</span><span class='tstring_end'>&quot;</span></span>
+</code></pre>
+<p>Then run <code>bundle install</code> to install the dependencies.</p>
+<h3 id="as-a-library-dependency">As a library dependency<a href="#as-a-library-dependency" aria-label="Link to heading 'As a library dependency'" data-heading-content="As a library dependency" class="anchor"></a></h3>
+<p>Farce's main purpose is to be used as a dependency for other libraries. As such, it will most commonly be added as a <a href="https://guides.rubygems.org/specification-reference/#add_dependency">runtime dependency</a> to your gemspec:</p>
+<pre class="code ruby"><code class="ruby"><span class='const'>Gem</span><span class='op'>::</span><span class='const'>Specification</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_spec'>spec</span><span class='op'>|</span>
+  <span class='comment'># ...
+</span>  <span class='id identifier rubyid_spec'>spec</span><span class='period'>.</span><span class='id identifier rubyid_add_dependency'>add_dependency</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>farce</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span>
+</code></pre>
+<h3 id="local-setup">Local setup<a href="#local-setup" aria-label="Link to heading 'Local setup'" data-heading-content="Local setup" class="anchor"></a></h3>
+<p>If you want to work on Farce itself, you can clone the repository and use <a href="https://mise.jdx.dev">mise</a> to set everything up:</p>
+<p>For more details, or if you aren't using mise, check the <a href="file.CONTRIBUTING.html" title="contribution guidelines">contribution guidelines</a>.</p>
+<pre class="code console"><code class="console">$ git clone https://github.com/rkh/farce.git # prefix with `jj` if you&#39;re using Jujutsu
+$ cd farce
+$ mise run
+</code></pre>
+<h3 id="loading-farce">Loading Farce<a href="#loading-farce" aria-label="Link to heading 'Loading Farce'" data-heading-content="Loading Farce" class="anchor"></a></h3>
+<p>You should always require <code>farce</code>, rather than any other files in <code>lib</code>. Other files are not intended as entry points.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_require'>require</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>farce</span><span class='tstring_end'>&quot;</span></span>
+</code></pre>
+<p>Constants (classes, modules, etc.) under the <code>Farce</code> namespace are loaded lazily (thread- and ractor-safe), so there is no
+need to specifically load any particular file.</p>
+<h2 id="housekeeping">Housekeeping<a href="#housekeeping" aria-label="Link to heading 'Housekeeping'" data-heading-content="Housekeeping" class="anchor"></a></h2>
+<p>Farce follows <a href="https://semver.org/">Semantic Versioning</a> and <a href="https://guides.rubygems.org/patterns/#versioning">the RubyGems versioning policy</a>. Farce's original code is released under the <a href="file.MIT-LICENSE.html" title="MIT License">MIT License</a>. Native builds also contain Kazlib 1.20-derived <code>dict.c</code> and <code>dict.h</code>; their original permissive license and copyright notice are retained in those files. The native gem therefore declares <code>MIT</code> and <code>LicenseRef-Kazlib-1.20</code>, while the pure-Java gem declares only <code>MIT</code> because it does not ship Kazlib.</p>
+<p>Built with love in Berlin, by Konstantin Haase.</p>
+</div></div>
+
+      <div id="footer">
+  Generated on Tue Sep 15 10:44:24 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>

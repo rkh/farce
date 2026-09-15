@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Module: Farce
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "Farce";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="index.html" selected>main</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index (F)</a> &raquo;
+    
+    
+    <span class="title">Farce</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Module: Farce
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+
+  
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/farce/map.rb<span class="defines">,<br>
+  lib/farce/_yard/ractor.rb,<br> lib/farce/_yard/internal.rb,<br> lib/farce/atom.rb,<br> lib/farce/flag.rb,<br> lib/farce/lazy.rb,<br> lib/farce/lock.rb,<br> lib/farce/pool.rb,<br> lib/farce/port.rb,<br> lib/farce/clock.rb,<br> lib/farce/error.rb,<br> lib/farce/lease.rb,<br> lib/farce/local.rb,<br> lib/farce/queue.rb,<br> lib/farce/config.rb,<br> lib/farce/ractor.rb,<br> lib/farce/resolv.rb,<br> lib/farce/signal.rb,<br> lib/farce/strict.rb,<br> lib/farce/system.rb,<br> lib/farce/unsafe.rb,<br> lib/farce/vector.rb,<br> lib/farce/counter.rb,<br> lib/farce/version.rb,<br> lib/farce/abstract.rb,<br> lib/farce/envelope.rb,<br> lib/farce/lazy_ref.rb,<br> lib/farce/tree_map.rb,<br> lib/farce/unshared.rb,<br> lib/farce/weak_ref.rb,<br> lib/farce/exchanger.rb,<br> lib/farce/lease_map.rb,<br> lib/farce/local/map.rb,<br> lib/farce/reference.rb,<br> lib/farce/scheduler.rb,<br> lib/farce/shareable.rb,<br> lib/farce/lease_pool.rb,<br> lib/farce/local/atom.rb,<br> lib/farce/local/lazy.rb,<br> lib/farce/resolv/dns.rb,<br> lib/farce/strict/map.rb,<br> lib/farce/weak_value.rb,<br> lib/farce/local/lease.rb,<br> lib/farce/local/queue.rb,<br> lib/farce/strict/atom.rb,<br> lib/farce/timer_queue.rb,<br> lib/farce/unshareable.rb,<br> lib/farce/abstract/map.rb,<br> lib/farce/local/scoped.rb,<br> lib/farce/local/vector.rb,<br> lib/farce/mode_manager.rb,<br> lib/farce/strict/queue.rb,<br> lib/farce/unshared/map.rb,<br> lib/farce/weak_key_map.rb,<br> lib/farce/abstract/atom.rb,<br> lib/farce/abstract/lazy.rb,<br> lib/farce/strict/vector.rb,<br> lib/farce/abstract/lease.rb,<br> lib/farce/abstract/queue.rb,<br> lib/farce/abstract/value.rb,<br> lib/farce/local/lazy_ref.rb,<br> lib/farce/local/tree_map.rb,<br> lib/farce/local/weak_map.rb,<br> lib/farce/main_scheduler.rb,<br> lib/farce/priority_queue.rb,<br> lib/farce/unshared/lease.rb,<br> lib/farce/unshared/queue.rb,<br> lib/farce/abstract/vector.rb,<br> lib/farce/local/lease_map.rb,<br> lib/farce/local/weak_atom.rb,<br> lib/farce/read_write_lock.rb,<br> lib/farce/strict/tree_map.rb,<br> lib/farce/strict/weak_map.rb,<br> lib/farce/unsafe/tree_map.rb,<br> lib/farce/unshared/vector.rb,<br> lib/farce/local/lease_pool.rb,<br> lib/farce/strict/exchanger.rb,<br> lib/farce/strict/weak_atom.rb,<br> lib/farce/abstract/tree_map.rb,<br> lib/farce/abstract/weak_map.rb,<br> lib/farce/local/timer_queue.rb,<br> lib/farce/unshared/tree_map.rb,<br> lib/farce/unshared/weak_map.rb,<br> lib/farce/abstract/exchanger.rb,<br> lib/farce/abstract/lease_map.rb,<br> lib/farce/abstract/scheduler.rb,<br> lib/farce/abstract/weak_atom.rb,<br> lib/farce/local/weak_key_map.rb,<br> lib/farce/strict/timer_queue.rb,<br> lib/farce/unshared/lease_map.rb,<br> lib/farce/unshared/weak_atom.rb,<br> lib/farce/abstract/lease_pool.rb,<br> lib/farce/strict/weak_key_map.rb,<br> lib/farce/unshared/lease_pool.rb,<br> lib/farce/abstract/timer_queue.rb,<br> lib/farce/local/priority_queue.rb,<br> lib/farce/local/weak_value_map.rb,<br> lib/farce/unshared/timer_queue.rb,<br> lib/farce/abstract/weak_key_map.rb,<br> lib/farce/strict/priority_queue.rb,<br> lib/farce/strict/weak_value_map.rb,<br> lib/farce/unshared/weak_key_map.rb,<br> lib/farce/abstract/concurrent_map.rb,<br> lib/farce/abstract/priority_queue.rb,<br> lib/farce/abstract/weak_value_map.rb,<br> lib/farce/unshared/priority_queue.rb,<br> lib/farce/unshared/weak_value_map.rb,<br> lib/farce.rb</span>
+
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>Namespace for everything provided by Farce.</p>
+<h2 id="including-farce">Including Farce<a href="#including-farce" aria-label="Link to heading 'Including Farce'" data-heading-content="Including Farce" class="anchor"></a></h2>
+<p>Including Farce in a class or module will include <strong>all public camel-case constants</strong> defined under the Farce
+namespace.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_require'>require</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>farce</span><span class='tstring_end'>&quot;</span></span>
+
+<span class='comment'># This could also be done under a class or module, to avoid polluting the global namespace.
+</span><span class='id identifier rubyid_include'>include</span> <span class='const'>Farce</span>
+
+<span class='comment'># Now Ractor is available, even on JRuby or TruffleRuby!
+</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Hello from a Ractor!</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
+
+<span class='comment'># Other constants are also available.
+</span><span class='const'><span class='object_link'><a href="Farce/Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_parse'><span class='object_link'><a href="Farce/Clock.html#parse-instance_method" title="Farce::Clock#parse (method)">parse</a></span></span><span class='lparen'>(</span><span class='int'>1</span><span class='period'>.</span><span class='id identifier rubyid_minute'>minute</span><span class='period'>.</span><span class='id identifier rubyid_from_now'>from_now</span><span class='rparen'>)</span>
+
+<span class='comment'># VERSION is not exposed. This is to avoid polluting other libraries with it.
+</span><span class='kw'>defined?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="#VERSION-constant" title="Farce::VERSION (constant)">VERSION</a></span></span><span class='rparen'>)</span> <span class='comment'># =&gt; false
+</span></code></pre>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><h2>Defined Under Namespace</h2>
+<p class="children">
+  
+    
+      <strong class="modules">Modules:</strong> <span class='object_link'><a href="Farce/Abstract.html" title="Farce::Abstract (module)">Abstract</a></span>, <span class='object_link'><a href="Farce/Clock.html" title="Farce::Clock (module)">Clock</a></span>, <span class='object_link'><a href="Farce/Local.html" title="Farce::Local (module)">Local</a></span>, <span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span>, <span class='object_link'><a href="Farce/Resolv.html" title="Farce::Resolv (module)">Resolv</a></span>, <span class='object_link'><a href="Farce/Shareable.html" title="Farce::Shareable (module)">Shareable</a></span>, <span class='object_link'><a href="Farce/Strict.html" title="Farce::Strict (module)">Strict</a></span>, <span class='object_link'><a href="Farce/System.html" title="Farce::System (module)">System</a></span>, <span class='object_link'><a href="Farce/Unsafe.html" title="Farce::Unsafe (module)">Unsafe</a></span>, <span class='object_link'><a href="Farce/Unshareable.html" title="Farce::Unshareable (module)">Unshareable</a></span>, <span class='object_link'><a href="Farce/Unshared.html" title="Farce::Unshared (module)">Unshared</a></span>
+    
+  
+    
+      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Farce/Atom.html" title="Farce::Atom (class)">Atom</a></span>, <span class='object_link'><a href="Farce/Config.html" title="Farce::Config (class)">Config</a></span>, <span class='object_link'><a href="Farce/Counter.html" title="Farce::Counter (class)">Counter</a></span>, <span class='object_link'><a href="Farce/Envelope.html" title="Farce::Envelope (class)">Envelope</a></span>, <span class='object_link'><a href="Farce/Exchanger.html" title="Farce::Exchanger (class)">Exchanger</a></span>, <span class='object_link'><a href="Farce/Flag.html" title="Farce::Flag (class)">Flag</a></span>, <span class='object_link'><a href="Farce/Lazy.html" title="Farce::Lazy (class)">Lazy</a></span>, <span class='object_link'><a href="Farce/LazyRef.html" title="Farce::LazyRef (class)">LazyRef</a></span>, <span class='object_link'><a href="Farce/Lease.html" title="Farce::Lease (class)">Lease</a></span>, <span class='object_link'><a href="Farce/LeaseMap.html" title="Farce::LeaseMap (class)">LeaseMap</a></span>, <span class='object_link'><a href="Farce/LeasePool.html" title="Farce::LeasePool (class)">LeasePool</a></span>, <span class='object_link'><a href="Farce/Lock.html" title="Farce::Lock (class)">Lock</a></span>, <span class='object_link'><a href="Farce/Map.html" title="Farce::Map (class)">Map</a></span>, <span class='object_link'><a href="Farce/ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span>, <span class='object_link'><a href="Farce/Pool.html" title="Farce::Pool (class)">Pool</a></span>, <span class='object_link'><a href="Farce/Port.html" title="Farce::Port (class)">Port</a></span>, <span class='object_link'><a href="Farce/PriorityQueue.html" title="Farce::PriorityQueue (class)">PriorityQueue</a></span>, <span class='object_link'><a href="Farce/Queue.html" title="Farce::Queue (class)">Queue</a></span>, <span class='object_link'><a href="Farce/ReadWriteLock.html" title="Farce::ReadWriteLock (class)">ReadWriteLock</a></span>, <span class='object_link'><a href="Farce/Reference.html" title="Farce::Reference (class)">Reference</a></span>, <span class='object_link'><a href="Farce/Scheduler.html" title="Farce::Scheduler (class)">Scheduler</a></span>, <span class='object_link'><a href="Farce/Signal.html" title="Farce::Signal (class)">Signal</a></span>, <span class='object_link'><a href="Farce/TimerQueue.html" title="Farce::TimerQueue (class)">TimerQueue</a></span>, <span class='object_link'><a href="Farce/TreeMap.html" title="Farce::TreeMap (class)">TreeMap</a></span>, <span class='object_link'><a href="Farce/Vector.html" title="Farce::Vector (class)">Vector</a></span>, <span class='object_link'><a href="Farce/WeakKeyMap.html" title="Farce::WeakKeyMap (class)">WeakKeyMap</a></span>, <span class='object_link'><a href="Farce/WeakRef.html" title="Farce::WeakRef (class)">WeakRef</a></span>, <span class='object_link'><a href="Farce/WeakValue.html" title="Farce::WeakValue (class)">WeakValue</a></span>
+    
+  
+</p>
+
+  
+    <h2>
+      Constant Summary
+      <small><a href="#" class="constants_summary_toggle">collapse</a></small>
+    </h2>
+
+    <dl class="constants">
+      
+        <dt id="ClosedQueueError-constant" class="">ClosedQueueError =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Raised when an operation cannot proceed because a queue is closed.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'>Class</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>::</span><span class='const'>ClosedQueueError</span><span class='rparen'>)</span></pre></dd>
+      
+        <dt id="SealedQueueError-constant" class="">SealedQueueError =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Raised when a push cannot proceed because a queue is sealed.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'>Class</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="#ClosedQueueError-constant" title="Farce::ClosedQueueError (constant)">ClosedQueueError</a></span></span><span class='rparen'>)</span></pre></dd>
+      
+        <dt id="SchedulerClosedError-constant" class="">SchedulerClosedError =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Raised when attempting to schedule a task on a closed scheduler.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'>Class</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='const'>StandardError</span><span class='rparen'>)</span></pre></dd>
+      
+        <dt id="PoolClosedError-constant" class="">PoolClosedError =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Raised when attempting to schedule a task on a closed pool.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'>Class</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='rparen'>)</span></pre></dd>
+      
+        <dt id="TimeoutError-constant" class="">TimeoutError =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Raised when a timed operation does not complete before its timeout.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'>Class</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='const'>StandardError</span><span class='rparen'>)</span></pre></dd>
+      
+        <dt id="OwnershipError-constant" class="">OwnershipError =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Raised when an operation requires ownership by the current Fiber.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'>Class</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='const'>StandardError</span><span class='rparen'>)</span></pre></dd>
+      
+        <dt id="RetiredLeaseError-constant" class="">RetiredLeaseError =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Raised when attempting to use a permanently retired lease.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'>Class</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='const'>StandardError</span><span class='rparen'>)</span></pre></dd>
+      
+        <dt id="WeakRefError-constant" class="">WeakRefError =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Raised when a weak reference is no longer valid because the referenced object has been garbage collected.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'>Class</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='kw'>defined?</span><span class='lparen'>(</span><span class='op'>::</span><span class='const'>WeakRef</span><span class='op'>::</span><span class='const'>RefError</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='op'>::</span><span class='const'>WeakRef</span><span class='op'>::</span><span class='const'>RefError</span> <span class='op'>:</span> <span class='const'>StandardError</span><span class='rparen'>)</span></pre></dd>
+      
+        <dt id="VERSION-constant" class="">VERSION =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Returns the current version of Farce.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the current version of Farce</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>0.1.0</span><span class='tstring_end'>&quot;</span></span></pre></dd>
+      
+        <dt id="MainScheduler-constant" class="">MainScheduler =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Returns the scheduler used to schedule tasks on the main ractor.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Farce/Scheduler.html" title="Farce::Scheduler (class)">Scheduler</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the scheduler used to schedule tasks on the main ractor</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'><span class='object_link'><a href="Farce/Scheduler.html" title="Farce::Scheduler (class)">Scheduler</a></span></span><span class='period'>.</span><span class='id identifier rubyid_create'><span class='object_link'><a href="Farce/Scheduler.html#create-class_method" title="Farce::Scheduler.create (method)">create</a></span></span><span class='lparen'>(</span><span class='const'>Thread</span><span class='rparen'>)</span></pre></dd>
+      
+    </dl>
+  
+
+
+
+
+
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#clock-class_method" title="clock (class method)">.<strong>clock</strong>  &#x21d2; Float </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Monotonic clock time in seconds, from when clock was called the first time.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#config-class_method" title="config (class method)">.<strong>config</strong> {|CONFIG| ... } &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#rebind-class_method" title="rebind (class method)">.<strong>rebind</strong>(bindable = nil, lambda: nil, **self_option, &amp;block)  &#x21d2; Proc, Method </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Binds a proc, lambda, block, bound or unbound method to a new self.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="clock-class_method">
+  
+    
+      <span class="overload">.<strong>clock</strong>  &#x21d2; <tt>Float</tt> </span>
+    
+      <span class="overload">.<strong>clock</strong>(value)  &#x21d2; <tt>Float</tt> </span>
+    
+      <span class="overload">.<strong>clock</strong>(at:)  &#x21d2; <tt>Float</tt> </span>
+    
+      <span class="overload">.<strong>clock</strong>(time:)  &#x21d2; <tt>Float</tt> </span>
+    
+      <span class="overload">.<strong>clock</strong>(timeout_at:)  &#x21d2; <tt>Float</tt> </span>
+    
+      <span class="overload">.<strong>clock</strong>(delay:)  &#x21d2; <tt>Float</tt> </span>
+    
+      <span class="overload">.<strong>clock</strong>(offset:)  &#x21d2; <tt>Float</tt> </span>
+    
+      <span class="overload">.<strong>clock</strong>(timeout:)  &#x21d2; <tt>Float</tt> </span>
+    
+      <span class="overload">.<strong>clock</strong>(wait:)  &#x21d2; <tt>Float</tt> </span>
+    
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns monotonic clock time in seconds, from when clock was called the first time.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <p class="tag_title">Overloads:</p>
+  <ul class="overload">
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>clock</strong>  &#x21d2; <tt>Float</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>The current clock time</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>clock</strong>(value)  &#x21d2; <tt>Float</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Parses value into a monotonic clock time.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>nil</tt>, <tt>Numeric</tt>, <tt>Time</tt>, <tt>ActiveSupport::Duration</tt>, <tt>Hash</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to convert to clock time</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+  <p class="tag_title">See Also:</p>
+  <ul class="see">
+    
+      <li><span class='object_link'><a href="Farce/Clock.html#parse-instance_method" title="Farce::Clock#parse (method)">Farce::Clock#parse</a></span></li>
+    
+  </ul>
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>clock</strong>(at:)  &#x21d2; <tt>Float</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Gives the clock time for a fixed point in time. Independent of the current time.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>at</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>Time</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to convert to clock time</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>clock</strong>(time:)  &#x21d2; <tt>Float</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Gives the clock time for a fixed point in time. Independent of the current time.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>time</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>Time</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to convert to clock time</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>clock</strong>(timeout_at:)  &#x21d2; <tt>Float</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Gives the clock time for a fixed point in time. Independent of the current time.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>timeout_at</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>Time</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to convert to clock time</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>clock</strong>(delay:)  &#x21d2; <tt>Float</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Gives the clock time for a relative offset from the current time.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>delay</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to convert to clock time</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>clock</strong>(offset:)  &#x21d2; <tt>Float</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Gives the clock time for a relative offset from the current time.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>offset</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to convert to clock time</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>clock</strong>(timeout:)  &#x21d2; <tt>Float</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Gives the clock time for a relative offset from the current time.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to convert to clock time</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>clock</strong>(wait:)  &#x21d2; <tt>Float</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Gives the clock time for a relative offset from the current time.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>wait</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to convert to clock time</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+      </li>
+    
+  </ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Float</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>monotonic clock time in seconds, from when clock was called the first time</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+78</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce.rb', line 78</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_clock'>clock</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce/Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_parse'><span class='object_link'><a href="Farce/Clock.html#parse-instance_method" title="Farce::Clock#parse (method)">parse</a></span></span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="config-class_method">
+  
+    .<strong>config</strong> {|CONFIG| ... } &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'>CONFIG</span></tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+125
+126
+127
+128</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 125</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_config'>config</span>
+  <span class='kw'>yield</span> <span class='const'>CONFIG</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+  <span class='const'>CONFIG</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="rebind-class_method">
+  
+    
+      <span class="overload">.<strong>rebind</strong>(self: nil, lambda: nil) { ... } &#x21d2; <tt>Proc</tt> </span>
+    
+      <span class="overload">.<strong>rebind</strong>(bindable, self: nil, lambda: nil)  &#x21d2; <tt>Proc</tt>, <tt>Method</tt> </span>
+    
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Binds a proc, lambda, block, bound or unbound method to a new self.</p>
+<p>This is similar to the following common approaches:</p>
+<ol>
+<li><strong><code>Ractor</code></strong>: using <code>Ractor.shareable_proc</code>/<code>Ractor.shareable_lambda</code></li>
+<li><strong><code>BasicObject</code></strong>:  using <code>#instance_exec</code>/<code>#instance_eval</code> (used by many DSLs, like Hanami or the dry-rb gems)</li>
+<li><strong><code>Module</code></strong>: using <code>#define_method</code> and method binding (used by many DSLs, like Sinatra or the money gem)</li>
+</ol>
+<p>Approach 2 and 3 are very popular for DSLs, but the resulting objects cannot be shared across ractors.
+The first approach fixes that, but only works on a limited number of procs and receivers, and is not available on
+all Ruby implementations.</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th><code>Ractor</code></th>
+<th><code>BasicObject</code></th>
+<th><code>Module</code></th>
+<th><code>Farce</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Works with every proc</td>
+<td>🚫 <strong>no</strong></td>
+<td>✅ yes</td>
+<td>✅ yes</td>
+<td>✅ yes</td>
+</tr>
+<tr>
+<td>Results can be made shareable</td>
+<td>✅ yes</td>
+<td>🚫 <strong>no</strong></td>
+<td>🚫 <strong>no</strong></td>
+<td>✅ yes</td>
+</tr>
+<tr>
+<td>Preserves parameters</td>
+<td>✅ yes</td>
+<td>🚫 <strong>no</strong></td>
+<td>✅ yes</td>
+<td>✅ yes</td>
+</tr>
+<tr>
+<td>Procs can accept blocks</td>
+<td>✅ yes</td>
+<td>🚫 <strong>no</strong></td>
+<td>✅ yes</td>
+<td>✅ yes</td>
+</tr>
+<tr>
+<td>Preserves lambda-ness</td>
+<td>⚠️ manually</td>
+<td>🚫 <strong>no</strong></td>
+<td>🚫 <strong>no</strong></td>
+<td>✅ yes</td>
+</tr>
+<tr>
+<td>Works on JRuby and TruffleRuby</td>
+<td>🚫 <strong>no</strong></td>
+<td>✅ yes</td>
+<td>✅ yes</td>
+<td>✅ yes</td>
+</tr>
+<tr>
+<td>Performance overhead</td>
+<td>✅ none</td>
+<td>⚠️ up to 200%</td>
+<td>⚠️ up to 80%</td>
+<td>✅ none</td>
+</tr>
+</tbody>
+</table>
+<p>If you want the proc to also be shareable, use <span class='object_link'><a href="Farce/Ractor.html#shareable_proc-class_method" title="Farce::Ractor.shareable_proc (method)">Farce::Ractor.shareable_proc</a></span> instead.</p>
+<p>The performance overhead of <code>BasicObject#instance_exec</code>/<code>BasicObject#instance_eval</code> is the most significant on the
+official Ruby implementation, but is still present on JRuby, which does not exhibit a performance penalty for
+<code>Module#define_method</code>. On TruffleRuby, all approaches have similar performance. The more work is done inside
+the proc, the less significant the overhead becomes.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+      <pre class="example code"><code><span class='comment'># Rebinding a block to a new self
+</span><span class='id identifier rubyid_callback'>callback</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_rebind'>rebind</span><span class='lparen'>(</span><span class='label'>self:</span> <span class='int'>42</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>self</span> <span class='op'>*</span> <span class='int'>10</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_callback'>callback</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span> <span class='comment'># =&gt; 420
+</span>
+<span class='comment'># Rebound procs preserve parameters and can accept blocks
+</span><span class='id identifier rubyid_block'>block</span>   <span class='op'>=</span> <span class='tlambda'>-&gt;</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_fallback'>fallback</span><span class='rparen'>)</span> <span class='tlambeg'>{</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_fallback'>fallback</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_rebound'>rebound</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_rebind'>rebind</span><span class='lparen'>(</span><span class='id identifier rubyid_block'>block</span><span class='comma'>,</span> <span class='label'>self:</span> <span class='lbrace'>{</span> <span class='label'>a:</span> <span class='int'>1</span><span class='comma'>,</span> <span class='label'>b:</span> <span class='int'>2</span> <span class='rbrace'>}</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_rebound'>rebound</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='symbol'>:a</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='int'>0</span> <span class='rbrace'>}</span> <span class='comment'># =&gt; 1
+</span><span class='id identifier rubyid_rebound'>rebound</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='symbol'>:c</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='int'>0</span> <span class='rbrace'>}</span> <span class='comment'># =&gt; 0
+</span><span class='id identifier rubyid_rebound'>rebound</span><span class='period'>.</span><span class='id identifier rubyid_parameters'>parameters</span> <span class='op'>==</span> <span class='id identifier rubyid_block'>block</span><span class='period'>.</span><span class='id identifier rubyid_parameters'>parameters</span> <span class='comment'># =&gt; true
+</span>
+<span class='comment'># Rebinding an unbound method to a new self returns a bound method
+</span><span class='id identifier rubyid_method'>method</span> <span class='op'>=</span> <span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_instance_method'>instance_method</span><span class='lparen'>(</span><span class='symbol'>:inspect</span><span class='rparen'>)</span> <span class='comment'># =&gt; #&lt;UnboundMethod&gt;
+</span><span class='id identifier rubyid_method'>method</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_rebind'>rebind</span><span class='lparen'>(</span><span class='id identifier rubyid_method'>method</span><span class='comma'>,</span> <span class='label'>self:</span> <span class='int'>42</span><span class='rparen'>)</span>   <span class='comment'># =&gt; #&lt;Method&gt;
+</span><span class='id identifier rubyid_method'>method</span><span class='period'>.</span><span class='id identifier rubyid_receiver'>receiver</span> <span class='comment'># =&gt; 42
+</span><span class='id identifier rubyid_method'>method</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span>     <span class='comment'># =&gt; &quot;42&quot;
+</span>
+<span class='comment'># lambda-ness is preserved
+</span><span class='const'><span class='object_link'><a href="" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_rebind'>rebind</span><span class='lparen'>(</span><span class='id identifier rubyid_proc'>proc</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_lambda?'>lambda?</span>   <span class='comment'># =&gt; false
+</span><span class='const'><span class='object_link'><a href="" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_rebind'>rebind</span><span class='lparen'>(</span><span class='id identifier rubyid_lambda'>lambda</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_lambda?'>lambda?</span> <span class='comment'># =&gt; true
+</span>
+<span class='comment'># If there is no binding change, identity is preserved
+</span><span class='const'><span class='object_link'><a href="" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_rebind'>rebind</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_s</span><span class='rparen'>)</span> <span class='op'>==</span> <span class='symbol'>:to_s</span><span class='period'>.</span><span class='id identifier rubyid_to_proc'>to_proc</span> <span class='comment'># =&gt; true</span></code></pre>
+    
+  </div>
+
+  <p class="tag_title">Overloads:</p>
+  <ul class="overload">
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>rebind</strong>(self: nil, lambda: nil) { ... } &#x21d2; <tt>Proc</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Returns The bound proc.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>self</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The new self to bind to.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'></span>
+      
+      
+      
+        
+        <div class='inline'><p>The block to bind to the new self.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Proc</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The bound proc.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Receiver:</p>
+<ul class="yieldreceiver">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The object passed as <code>self</code> (or <code>nil</code>)</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>rebind</strong>(bindable, self: nil, lambda: nil)  &#x21d2; <tt>Proc</tt>, <tt>Method</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Returns The bound proc or method.
+A method is returned if the argument was a Method or UnboundMethod, otherwise a Proc is returned.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>bindable</span>
+      
+      
+        <span class='type'>(<tt>Proc</tt>, <tt>Method</tt>, <tt>UnboundMethod</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The proc or method to bind to the new self.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>self</span>
+      
+      
+        <span class='type'>(<tt>Object</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The new self to bind to.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Proc</tt>, <tt>Method</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The bound proc or method.
+A method is returned if the argument was a Method or UnboundMethod, otherwise a Proc is returned.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+      </li>
+    
+  </ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Proc</tt>, <tt>Method</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The bound proc or method.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>ArgumentError</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce.rb', line 154</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_rebind'>rebind</span><span class='lparen'>(</span><span class='id identifier rubyid_bindable'>bindable</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>lambda:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_self_option'>self_option</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>more than one block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_bindable'>bindable</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_block'>block</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>tried to create Proc object without a block</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_bindable'>bindable</span> <span class='op'>||=</span> <span class='id identifier rubyid_block'>block</span>
+  <span class='id identifier rubyid_new_self'>new_self</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_self_option'>self_option</span><span class='lparen'>(</span><span class='id identifier rubyid_self_option'>self_option</span><span class='rparen'>)</span>
+
+  <span class='kw'>if</span> <span class='id identifier rubyid_bindable'>bindable</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span> <span class='const'>Proc</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_bindable'>bindable</span> <span class='kw'>if</span> <span class='op'>!</span><span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_rebindable?'>rebindable?</span><span class='lparen'>(</span><span class='id identifier rubyid_bindable'>bindable</span><span class='rparen'>)</span> <span class='op'>||</span> <span class='id identifier rubyid_bindable'>bindable</span><span class='period'>.</span><span class='id identifier rubyid_binding'>binding</span><span class='period'>.</span><span class='id identifier rubyid_receiver'>receiver</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_new_self'>new_self</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_rebound'>rebound</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_rebind'>rebind</span><span class='lparen'>(</span><span class='id identifier rubyid_bindable'>bindable</span><span class='comma'>,</span> <span class='id identifier rubyid_new_self'>new_self</span><span class='comma'>,</span> <span class='id identifier rubyid_lambda'>lambda</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_rebound'>rebound</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span> <span class='kw'>if</span> <span class='id identifier rubyid_bindable'>bindable</span><span class='period'>.</span><span class='id identifier rubyid_frozen?'>frozen?</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_rebound'>rebound</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>if</span> <span class='id identifier rubyid_bindable'>bindable</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span> <span class='const'>Method</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_bindable'>bindable</span> <span class='kw'>if</span> <span class='id identifier rubyid_bindable'>bindable</span><span class='period'>.</span><span class='id identifier rubyid_receiver'>receiver</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_new_self'>new_self</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_bindable'>bindable</span> <span class='op'>=</span> <span class='id identifier rubyid_bindable'>bindable</span><span class='period'>.</span><span class='id identifier rubyid_unbind'>unbind</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_bindable'>bindable</span><span class='period'>.</span><span class='id identifier rubyid_bind'>bind</span><span class='lparen'>(</span><span class='id identifier rubyid_new_self'>new_self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_bindable'>bindable</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span> <span class='const'>UnboundMethod</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>invalid bindable: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_bindable'>bindable</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Tue Sep 15 10:44:24 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>

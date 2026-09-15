@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: Farce::LeaseMap
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="../css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="../css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="../css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "Farce::LeaseMap";
+  relpath = '../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../index.html" selected>main</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../_index.html">Index (L)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span>
+     &raquo; 
+    <span class="title">LeaseMap</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: Farce::LeaseMap
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName"><span class='object_link'><a href="Abstract/LeaseMap.html" title="Farce::Abstract::LeaseMap (class)">Abstract::LeaseMap</a></span></span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next"><span class='object_link'><a href="Abstract/Map.html" title="Farce::Abstract::Map (class)">Abstract::Map</a></span></li>
+          
+            <li class="next"><span class='object_link'><a href="Abstract/LeaseMap.html" title="Farce::Abstract::LeaseMap (class)">Abstract::LeaseMap</a></span></li>
+          
+            <li class="next">Farce::LeaseMap</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  <dl>
+      <dt>Includes:</dt>
+      <dd><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></dd>
+  </dl>
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/farce/lease_map.rb
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>A Ractor-shareable map that moves each resource on checkout and checkin.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Updating independently leased resources</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_leases'>leases</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>LeaseMap</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='lbrace'>{</span> <span class='label'>primary:</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='label'>replica:</span> <span class='lbracket'>[</span><span class='rbracket'>]</span> <span class='rbrace'>}</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_leases'>leases</span><span class='period'>.</span><span class='id identifier rubyid_checkout'>checkout</span><span class='lparen'>(</span><span class='symbol'>:primary</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_items'>items</span><span class='op'>|</span> <span class='id identifier rubyid_items'>items</span> <span class='op'>&lt;&lt;</span> <span class='symbol'>:updated</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_leases'>leases</span><span class='period'>.</span><span class='id identifier rubyid_checkout'>checkout</span><span class='lparen'>(</span><span class='symbol'>:primary</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='symbol'>:dup</span><span class='rparen'>)</span> <span class='comment'># =&gt; [:updated]</span></code></pre>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Automatically checking out resources as they are accessed</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_leases'>leases</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>LeaseMap</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='lbrace'>{</span> <span class='label'>primary:</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='label'>replica:</span> <span class='lbracket'>[</span><span class='rbracket'>]</span> <span class='rbrace'>}</span> <span class='rbrace'>}</span>
+
+<span class='id identifier rubyid_leases'>leases</span><span class='period'>.</span><span class='id identifier rubyid_auto_lease'>auto_lease</span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_leases'>leases</span><span class='lbracket'>[</span><span class='symbol'>:primary</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='symbol'>:updated</span>
+  <span class='id identifier rubyid_leases'>leases</span><span class='lbracket'>[</span><span class='symbol'>:replica</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='symbol'>:replicated</span>
+  <span class='id identifier rubyid_leases'>leases</span><span class='lbracket'>[</span><span class='symbol'>:primary</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='symbol'>:verified</span> <span class='comment'># Reuses the same checkout
+</span><span class='kw'>end</span>
+
+<span class='comment'># Both resources are checked back in when the block exits, even on an exception.
+</span><span class='id identifier rubyid_leases'>leases</span><span class='period'>.</span><span class='id identifier rubyid_available?'>available?</span><span class='lparen'>(</span><span class='symbol'>:primary</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
+</span><span class='id identifier rubyid_leases'>leases</span><span class='period'>.</span><span class='id identifier rubyid_checkout'>checkout</span><span class='lparen'>(</span><span class='symbol'>:primary</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='symbol'>:dup</span><span class='rparen'>)</span> <span class='comment'># =&gt; [:updated, :verified]</span></code></pre>
+    
+  </div>
+
+
+</div>
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  <h2>Method Summary</h2>
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">#initialize</a></span>, <span class='object_link'><a href="Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Abstract/LeaseMap.html" title="Farce::Abstract::LeaseMap (class)">Abstract::LeaseMap</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Abstract/LeaseMap.html#[]-instance_method" title="Farce::Abstract::LeaseMap#[] (method)">#[]</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#[]=-instance_method" title="Farce::Abstract::LeaseMap#[]= (method)">#[]=</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#auto_lease-instance_method" title="Farce::Abstract::LeaseMap#auto_lease (method)">#auto_lease</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#available%3F-instance_method" title="Farce::Abstract::LeaseMap#available? (method)">#available?</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#checked_out%3F-instance_method" title="Farce::Abstract::LeaseMap#checked_out? (method)">#checked_out?</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#checkin-instance_method" title="Farce::Abstract::LeaseMap#checkin (method)">#checkin</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#checkout-instance_method" title="Farce::Abstract::LeaseMap#checkout (method)">#checkout</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#clear-instance_method" title="Farce::Abstract::LeaseMap#clear (method)">#clear</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#compare_keys_by_identity%3F-instance_method" title="Farce::Abstract::LeaseMap#compare_keys_by_identity? (method)">#compare_keys_by_identity?</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#compare_values_by_identity%3F-instance_method" title="Farce::Abstract::LeaseMap#compare_values_by_identity? (method)">#compare_values_by_identity?</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#delete-instance_method" title="Farce::Abstract::LeaseMap#delete (method)">#delete</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#each-instance_method" title="Farce::Abstract::LeaseMap#each (method)">#each</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#each_key-instance_method" title="Farce::Abstract::LeaseMap#each_key (method)">#each_key</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#each_value-instance_method" title="Farce::Abstract::LeaseMap#each_value (method)">#each_value</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#fetch-instance_method" title="Farce::Abstract::LeaseMap#fetch (method)">#fetch</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#getkey-instance_method" title="Farce::Abstract::LeaseMap#getkey (method)">#getkey</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#initialize-instance_method" title="Farce::Abstract::LeaseMap#initialize (method)">#initialize</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#inspect-instance_method" title="Farce::Abstract::LeaseMap#inspect (method)">#inspect</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#key%3F-instance_method" title="Farce::Abstract::LeaseMap#key? (method)">#key?</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#keys-instance_method" title="Farce::Abstract::LeaseMap#keys (method)">#keys</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#lease_for-instance_method" title="Farce::Abstract::LeaseMap#lease_for (method)">#lease_for</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#owned%3F-instance_method" title="Farce::Abstract::LeaseMap#owned? (method)">#owned?</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#shareable_keys%3F-instance_method" title="Farce::Abstract::LeaseMap#shareable_keys? (method)">#shareable_keys?</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#shareable_values%3F-instance_method" title="Farce::Abstract::LeaseMap#shareable_values? (method)">#shareable_values?</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#size-instance_method" title="Farce::Abstract::LeaseMap#size (method)">#size</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#to_a-instance_method" title="Farce::Abstract::LeaseMap#to_a (method)">#to_a</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#to_h-instance_method" title="Farce::Abstract::LeaseMap#to_h (method)">#to_h</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#try_checkout-instance_method" title="Farce::Abstract::LeaseMap#try_checkout (method)">#try_checkout</a></span>, <span class='object_link'><a href="Abstract/LeaseMap.html#values-instance_method" title="Farce::Abstract::LeaseMap#values (method)">#values</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Abstract/Map.html" title="Farce::Abstract::Map (class)">Abstract::Map</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Map.html#[]-instance_method" title="Farce::Abstract::Map#[] (method)">#[]</a></span>, <span class='object_link'><a href="Abstract/Map.html#[]=-instance_method" title="Farce::Abstract::Map#[]= (method)">#[]=</a></span>, <span class='object_link'><a href="Abstract/Map.html#assoc-instance_method" title="Farce::Abstract::Map#assoc (method)">#assoc</a></span>, <span class='object_link'><a href="Abstract/Map.html#clear-instance_method" title="Farce::Abstract::Map#clear (method)">#clear</a></span>, <span class='object_link'><a href="Abstract/Map.html#compare_by_identity%3F-instance_method" title="Farce::Abstract::Map#compare_by_identity? (method)">#compare_by_identity?</a></span>, <span class='object_link'><a href="Abstract/Map.html#compare_keys_by_identity%3F-instance_method" title="Farce::Abstract::Map#compare_keys_by_identity? (method)">#compare_keys_by_identity?</a></span>, <span class='object_link'><a href="Abstract/Map.html#compare_values_by_identity%3F-instance_method" title="Farce::Abstract::Map#compare_values_by_identity? (method)">#compare_values_by_identity?</a></span>, <span class='object_link'><a href="Abstract/Map.html#delete-instance_method" title="Farce::Abstract::Map#delete (method)">#delete</a></span>, <span class='object_link'><a href="Abstract/Map.html#dig-instance_method" title="Farce::Abstract::Map#dig (method)">#dig</a></span>, <span class='object_link'><a href="Abstract/Map.html#each-instance_method" title="Farce::Abstract::Map#each (method)">#each</a></span>, <span class='object_link'><a href="Abstract/Map.html#each_key-instance_method" title="Farce::Abstract::Map#each_key (method)">#each_key</a></span>, <span class='object_link'><a href="Abstract/Map.html#each_pair-instance_method" title="Farce::Abstract::Map#each_pair (method)">#each_pair</a></span>, <span class='object_link'><a href="Abstract/Map.html#each_value-instance_method" title="Farce::Abstract::Map#each_value (method)">#each_value</a></span>, <span class='object_link'><a href="Abstract/Map.html#empty%3F-instance_method" title="Farce::Abstract::Map#empty? (method)">#empty?</a></span>, <span class='object_link'><a href="Abstract/Map.html#fetch-instance_method" title="Farce::Abstract::Map#fetch (method)">#fetch</a></span>, <span class='object_link'><a href="Abstract/Map.html#fetch_values-instance_method" title="Farce::Abstract::Map#fetch_values (method)">#fetch_values</a></span>, <span class='object_link'><a href="Abstract/Map.html#getkey-instance_method" title="Farce::Abstract::Map#getkey (method)">#getkey</a></span>, <span class='object_link'><a href="Abstract/Map.html#has_key%3F-instance_method" title="Farce::Abstract::Map#has_key? (method)">#has_key?</a></span>, <span class='object_link'><a href="Abstract/Map.html#inspect-instance_method" title="Farce::Abstract::Map#inspect (method)">#inspect</a></span>, <span class='object_link'><a href="Abstract/Map.html#key%3F-instance_method" title="Farce::Abstract::Map#key? (method)">#key?</a></span>, <span class='object_link'><a href="Abstract/Map.html#keys-instance_method" title="Farce::Abstract::Map#keys (method)">#keys</a></span>, <span class='object_link'><a href="Abstract/Map.html#shareable_keys%3F-instance_method" title="Farce::Abstract::Map#shareable_keys? (method)">#shareable_keys?</a></span>, <span class='object_link'><a href="Abstract/Map.html#shareable_values%3F-instance_method" title="Farce::Abstract::Map#shareable_values? (method)">#shareable_values?</a></span>, <span class='object_link'><a href="Abstract/Map.html#size-instance_method" title="Farce::Abstract::Map#size (method)">#size</a></span>, <span class='object_link'><a href="Abstract/Map.html#to_a-instance_method" title="Farce::Abstract::Map#to_a (method)">#to_a</a></span>, <span class='object_link'><a href="Abstract/Map.html#to_h-instance_method" title="Farce::Abstract::Map#to_h (method)">#to_h</a></span>, <span class='object_link'><a href="Abstract/Map.html#values_at-instance_method" title="Farce::Abstract::Map#values_at (method)">#values_at</a></span>, <span class='object_link'><a href="Abstract/Map.html#weak_keys%3F-instance_method" title="Farce::Abstract::Map#weak_keys? (method)">#weak_keys?</a></span>, <span class='object_link'><a href="Abstract/Map.html#weak_values%3F-instance_method" title="Farce::Abstract::Map#weak_values? (method)">#weak_values?</a></span></p>
+
+  
+
+</div>
+
+      <div id="footer">
+  Generated on Tue Sep 15 10:44:26 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>
