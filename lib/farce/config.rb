@@ -11,16 +11,12 @@ module Farce
   # Configuration for Farce. Will be frozen by Farce once it is accessed, to prevent accidental changes and make it
   # shareable across Ractors.
   #
-  # You may load this file individually before loading farce to make sure that the configuration isn't frozen yet:
-  #
   # ```ruby
-  # require "farce/config"
+  # require "farce"
   #
   # Farce.config do |c|
   #   c.fiber_scheduler_implementation = :select
   # end
-  #
-  # require "farce"
   # ```
   class Config
     # The fiber scheduler implementation to use for Farce's built-in fiber scheduler.
