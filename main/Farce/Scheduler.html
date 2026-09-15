@@ -443,6 +443,29 @@ fibers with <code>Fiber.schedule</code> while it is closing.</p>
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#local%3F-instance_method" title="#local? (instance method)">#<strong>local?</strong>(wait: true)  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether the scheduler is local for the current Ractor.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#owner-instance_method" title="#owner (instance method)">#<strong>owner</strong>  &#x21d2; Ractor<sup>?</sup> </a>
     
 
@@ -582,7 +605,7 @@ fibers with <code>Fiber.schedule</code> while it is closing.</p>
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Abstract/Scheduler.html" title="Farce::Abstract::Scheduler (class)">Abstract::Scheduler</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Abstract/Scheduler.html#ractor_safe%3F-instance_method" title="Farce::Abstract::Scheduler#ractor_safe? (method)">#ractor_safe?</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Scheduler.html#execute-instance_method" title="Farce::Abstract::Scheduler#execute (method)">#execute</a></span>, <span class='object_link'><a href="Abstract/Scheduler.html#ractor_safe%3F-instance_method" title="Farce::Abstract::Scheduler#ractor_safe? (method)">#ractor_safe?</a></span></p>
 <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
@@ -1296,10 +1319,10 @@ that scheduler. Returns <code>nil</code> when no fiber scheduler is installed.</
       <pre class="lines">
 
 
-392</pre>
+400</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/scheduler.rb', line 392</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/scheduler.rb', line 400</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_alive?'>alive?</span> <span class='op'>=</span> <span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>==</span> <span class='symbol'>:running</span></pre>
     </td>
@@ -1353,19 +1376,19 @@ close the underlying fiber scheduler.</p>
       <pre class="lines">
 
 
-361
-362
-363
-364
-365
-366
-367
-368
 369
-370</pre>
+370
+371
+372
+373
+374
+375
+376
+377
+378</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/scheduler.rb', line 361</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/scheduler.rb', line 369</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_close'>close</span>
   <span class='kw'>until</span> <span class='id identifier rubyid_closed?'>closed?</span>
@@ -1435,10 +1458,10 @@ Does not imply all tasks have finished.</p>
       <pre class="lines">
 
 
-388</pre>
+396</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/scheduler.rb', line 388</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/scheduler.rb', line 396</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>=</span> <span class='const'>CLOSED_STATES</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span></pre>
     </td>
@@ -2002,6 +2025,86 @@ launching/setup states before returning. Returns the created worker instance.</p
 </div>
     
       <div class="method_details ">
+  <h3 class="signature " id="local?-instance_method">
+  
+    #<strong>local?</strong>(wait: true)  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns Whether the scheduler is local for the current Ractor.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>wait</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>true</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether to wait for the owner to be non-nil before checking if the scheduler is local.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether the scheduler is local for the current Ractor.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+357
+358
+359
+360</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/scheduler.rb', line 357</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_local?'>local?</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='kw'>true</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_owner'>owner</span> <span class='op'>=</span> <span class='id identifier rubyid_wait'>wait</span> <span class='op'>?</span> <span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span> <span class='op'>:</span> <span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
+  <span class='id identifier rubyid_owner'>owner</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current'><span class='object_link'><a href="Ractor.html#current-class_method" title="Farce::Ractor.current (method)">current</a></span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
   <h3 class="signature " id="owner-instance_method">
   
     #<strong>owner</strong>  &#x21d2; <tt><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></tt><sup>?</sup> 
@@ -2326,7 +2429,9 @@ See <span class='object_link'><a href="ModeManager.html#wrap-instance_method" ti
 349
 350
 351
-352</pre>
+352
+353
+354</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/scheduler.rb', line 334</span>
@@ -2337,7 +2442,9 @@ See <span class='object_link'><a href="ModeManager.html#wrap-instance_method" ti
   <span class='kw'>if</span> <span class='id identifier rubyid_auto_local'>auto_local</span>
     <span class='id identifier rubyid_owner'>owner</span> <span class='op'>=</span> <span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot schedule task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-    <span class='id identifier rubyid_mode'>mode</span>  <span class='op'>=</span> <span class='symbol'>:local</span> <span class='kw'>if</span> <span class='id identifier rubyid_owner'>owner</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current'><span class='object_link'><a href="Ractor.html#current-class_method" title="Farce::Ractor.current (method)">current</a></span></span>
+    <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:local</span> <span class='kw'>if</span> <span class='id identifier rubyid_owner'>owner</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current'><span class='object_link'><a href="Ractor.html#current-class_method" title="Farce::Ractor.current (method)">current</a></span></span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span> <span class='op'>&amp;&amp;</span> <span class='lparen'>(</span><span class='id identifier rubyid_owner'>owner</span> <span class='op'>=</span> <span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_owner'>owner</span> <span class='op'>!=</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current'><span class='object_link'><a href="Ractor.html#current-class_method" title="Farce::Ractor.current (method)">current</a></span></span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Ractor.html#IsolationError-constant" title="Farce::Ractor::IsolationError (constant)">IsolationError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot schedule local task outside the owning Ractor</span><span class='tstring_end'>&quot;</span></span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_task'>task</span> <span class='op'>=</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span> <span class='op'>?</span>
@@ -2415,10 +2522,10 @@ See <span class='object_link'><a href="ModeManager.html#wrap-instance_method" ti
       <pre class="lines">
 
 
-381</pre>
+389</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/scheduler.rb', line 381</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/scheduler.rb', line 389</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_state'>state</span> <span class='op'>=</span> <span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span></pre>
     </td>
@@ -2484,7 +2591,7 @@ See <span class='object_link'><a href="ModeManager.html#wrap-instance_method" ti
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 15 11:00:21 2026 by
+  Generated on Tue Sep 15 11:35:07 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
