@@ -51,8 +51,8 @@ module Farce
     #
     # @!method each
     #   Iterate over the map's key-value pairs.
-    #   The entries are captured when iteration begins, so the map can be modified safely from the block. Iteration
-    #   order is not guaranteed to match insertion order.
+    #   Entry consistency and access requirements depend on the implementation. Iteration order is not guaranteed
+    #   to match insertion order.
     #   @overload each
     #     @yield [pair] Called once for each entry.
     #     @yieldparam pair [Array<BasicObject>] A two-element `[key, value]` pair.

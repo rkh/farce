@@ -142,6 +142,8 @@ module Farce
       # @return [Array<BasicObject>] A new array of values in iteration order.
       def values = each_value.to_a
 
+      # Iterate over entries captured when iteration begins.
+      # The map can be modified safely from the block.
       # (see Map#each)
       def each(&block)
         return enum_for(__callee__) { size } unless block
