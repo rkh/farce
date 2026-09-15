@@ -1,0 +1,54 @@
+name: Documentation
+
+on:
+  push:
+    branches: [main]
+    tags: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Keep the read, update, and publish steps together across all refs.
+concurrency:
+  group: documentation-gh-pages
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  publish:
+    if: github.event.deleted != true && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+    runs-on: ubuntu-24.04
+    env:
+      BUNDLE_WITHOUT: compatibility:benchmark:test:development
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+
+      - name: Generate YARD documentation
+        run: bundle exec yard doc
+
+      - name: Restore published documentation
+        shell: bash
+        run: |
+          mkdir -p tmp/pages
+          if git ls-remote --exit-code origin refs/heads/gh-pages; then
+            git fetch origin gh-pages
+            git archive FETCH_HEAD | tar -x -C tmp/pages
+          else
+            status=$?
+            if [ "$status" -ne 2 ]; then exit "$status"; fi
+          fi
+
+      - name: Update documentation and version switchers
+        run: ruby misc/docs/publish.rb yardoc tmp/pages
+
+      - name: Publish documentation
+        uses: peaceiris/actions-gh-pages@v4.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./tmp/pages
