@@ -9,6 +9,10 @@
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
+/* Older MinGW headers omit this flag even when the runtime supports it. */
+#ifndef CREATE_WAITABLE_TIMER_HIGH_RESOLUTION
+#define CREATE_WAITABLE_TIMER_HIGH_RESOLUTION 0x00000002
+#endif
 #endif
 
 static VALUE eIsolationError;
