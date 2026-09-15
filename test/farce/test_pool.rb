@@ -186,7 +186,9 @@ module Farce
     end
 
     def test_close_rejects_a_submission_blocked_by_capacity
-      pool = Pool.new(max_size: 1, capacity: 1, shrink_after: nil)
+      # Hold admission below max_size so the queue stays full with thread-based tasks too.
+      # Delay growth until after this test, since reaching max_size relaxes the inflight limit.
+      pool = Pool.new(max_size: 2, max_inflight: 1, capacity: 1, grow_after: 60, shrink_after: nil)
       started = Queue.new
       gate = Atom.new(false, mode: :raise)
       pool.schedule(started, gate, mode: :raise) do |queue, wait|
