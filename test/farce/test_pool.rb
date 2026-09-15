@@ -17,6 +17,24 @@ module Farce
       end
     end
 
+    def test_custom_scheduler_resumes_dispatcher_after_starting_a_task
+      return if RUBY_ENGINE == "truffleruby"
+      require "helpers/queue_test_scheduler"
+      pool = Pool.new(max_size: 1, shrink_after: nil) { Helpers::QueueTestScheduler.new }
+      results = Queue.new
+      pool.schedule(results) { |queue| queue << :first }
+      pool.schedule(results) { |queue| queue << :second }
+
+      assert_equal :first, results.pop(timeout: 2)
+      assert_equal :second, results.pop(timeout: 2)
+      close_pool(pool)
+
+      assert_equal :closed, pool.state
+      assert_nil pool.error
+    ensure
+      close_pool(pool)
+    end
+
     def test_initialization_starts_the_minimum_size
       pool = Pool.new(min_size: 2, max_size: 3, shrink_after: nil)
 

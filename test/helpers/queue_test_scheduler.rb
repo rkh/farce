@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 module Helpers
   # A deliberately small IO.select scheduler derived from Ruby's own scheduler
@@ -19,6 +21,9 @@ module Helpers
     end
 
     def fiber(&)
+      # A transferred task returns to the root when it finishes or suspends.
+      # Keep its caller runnable so nested scheduling can resume the dispatcher.
+      @ready << Fiber.current unless Fiber.current.equal?(@root)
       Fiber.new(blocking: false, &).tap(&:transfer)
     end
 

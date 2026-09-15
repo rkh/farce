@@ -19,7 +19,10 @@ module Farce
       private_constant :SEGMENTS
 
       def self.inflect(name, **inflections)
-        inflections.fetch(name.to_sym) { name.split("_").map { SEGMENTS.fetch(it, it.capitalize) }.join }
+        name.split(%r{::|/}).map do |part|
+          next if part.empty?
+          inflections.fetch(part.to_sym) { part.split("_").map { SEGMENTS.fetch(it, it.sub(/^./, &:upcase)) }.join }
+        end.compact.join("::")
       end
 
       def self.define(namespace, path = nil, skip: nil, **)

@@ -54,7 +54,8 @@ module Farce
     # @return [Float, nil] Idle time before an extra worker retires.
     attr_reader :shrink_after
 
-    # Create and start an elastic pool.
+    # Create and start an elastic pool using the configured fiber scheduler.
+    # An explicit constructor block overrides the configured default.
     #
     # `max_inflight` is a soft limit. A worker may exceed it when its scheduler
     # has no runnable fibers or when the pool has reached `max_size`.
@@ -70,6 +71,7 @@ module Farce
     def initialize(min_size: 0, max_size: 4, max_inflight: 64,
                    grow_after: 0.005, shrink_after: 30, capacity: 1024,
                    backend: CONFIG.freeze.io_backend, &constructor)
+      constructor ||= CONFIG.freeze.fiber_scheduler_constructor
       @min_size     = Integer(min_size)
       @max_size     = Integer(max_size)
       @max_inflight = max_inflight && Integer(max_inflight)

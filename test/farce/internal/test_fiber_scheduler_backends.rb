@@ -12,7 +12,7 @@ module Farce
                             ["jvm"]
                           end
         implementations.each do |implementation|
-          env = { "FARCE_FIBER_SCHEDULER_IMPLEMENTATION" => implementation, "FARCE_IO_BACKEND" => nil }
+          env = { "FARCE_FIBER_SCHEDULER" => implementation }
           output, error, status = ruby_subprocess(<<~RUBY, env: env)
             require "farce"
             module Farce
@@ -57,12 +57,12 @@ module Farce
       end
 
       def test_programmatic_config_overrides_environment_and_freezes_on_use
-        output, error, status = ruby_subprocess(<<~RUBY, env: { "FARCE_FIBER_SCHEDULER_IMPLEMENTATION" => "native" })
+        output, error, status = ruby_subprocess(<<~RUBY, env: { "FARCE_FIBER_SCHEDULER" => "native" })
           require "farce/config"
           module Farce
             module Internal
               config = Farce.config do |c|
-                c.fiber_scheduler_implementation = RUBY_ENGINE == "ruby" ? :select : :jvm
+                c.fiber_scheduler = RUBY_ENGINE == "ruby" ? :select : :jvm
               end
               require "farce"
               abort "configuration frozen too early" if config.frozen?
@@ -71,7 +71,7 @@ module Farce
               abort "backend ignored" unless scheduler.backend == expected
               abort "configuration not frozen" unless config.frozen?
               begin
-                Farce.config { |c| c.fiber_scheduler_implementation = :native }
+                Farce.config { |c| c.fiber_scheduler = :native }
                 abort "configuration changed after use"
               rescue FrozenError
                 # Expected once the backend has loaded.
@@ -89,17 +89,17 @@ module Farce
 
       def test_unknown_implementation_fails_clearly
         _, error, status = ruby_subprocess('require "farce"',
-          env: { "FARCE_FIBER_SCHEDULER_IMPLEMENTATION" => "unknown" })
+          env: { "FARCE_FIBER_SCHEDULER" => "unknown" })
 
         refute_predicate status, :success?
-        assert_includes error, "unknown fiber scheduler implementation"
+        assert_includes error, "unknown fiber scheduler"
       end
 
       def test_incompatible_implementation_is_a_load_error
         implementations = RUBY_ENGINE == "ruby" ? ["jvm"] : %w[native select]
         implementations << "native" if RUBY_ENGINE == "ruby" && Gem.win_platform?
         implementations.each do |implementation|
-          env = { "FARCE_FIBER_SCHEDULER_IMPLEMENTATION" => implementation, "FARCE_IO_BACKEND" => nil }
+          env = { "FARCE_FIBER_SCHEDULER" => implementation }
           output, error, status = ruby_subprocess(<<~RUBY, env: env)
             require "farce"
             module Farce
@@ -120,42 +120,25 @@ module Farce
       end
 
       def test_configured_backend_and_constructor_override
-        implementation = RUBY_ENGINE == "ruby" ? "select" : "jvm"
         backend = RUBY_ENGINE == "ruby" ? "select" : "nio"
-        [backend, "io_uring"].each do |configured|
-          env = {
-            "FARCE_FIBER_SCHEDULER_IMPLEMENTATION" => implementation,
-            "FARCE_IO_BACKEND"                     => configured,
-          }
-          output, error, status = ruby_subprocess(<<~RUBY, env: env)
-            require "farce"
-            module Farce
-              module Internal
-                klass = FiberScheduler
-                abort "config ignored" unless Farce.config.io_backend == :#{configured}
-                if :#{configured} == :#{backend}
-                  scheduler = klass.new
-                  abort "driver ignored" unless scheduler.backend == :#{backend}
-                  scheduler.close
-                else
-                  begin
-                    klass.new
-                    abort "incompatible driver accepted"
-                  rescue ArgumentError
-                    # Driver availability belongs to the selected implementation.
-                  end
-                end
-                scheduler = klass.new(backend: :auto)
-                abort "override ignored" unless scheduler.backend == :#{backend}
-                scheduler.close
-                puts "ok"
-              end
+        output, error, status = ruby_subprocess(<<~RUBY, env: { "FARCE_FIBER_SCHEDULER" => backend })
+          require "farce"
+          module Farce
+            module Internal
+              abort "config ignored" unless Farce.config.io_backend == :#{backend}
+              scheduler = FiberScheduler.new
+              abort "driver ignored" unless scheduler.backend == :#{backend}
+              scheduler.close
+              scheduler = FiberScheduler.new(backend: :auto)
+              abort "override ignored" unless scheduler.backend == :#{backend}
+              scheduler.close
+              puts "ok"
             end
-          RUBY
+          end
+        RUBY
 
-          assert_predicate status, :success?, error
-          assert_equal "ok", output.strip
-        end
+        assert_predicate status, :success?, error
+        assert_equal "ok", output.strip
       end
 
       def test_forced_unavailable_driver_does_not_silently_fall_back

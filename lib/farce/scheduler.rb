@@ -83,8 +83,8 @@ module Farce
     # Creates a new scheduler and starts it in a background ractor, thread, or custom executor.
     #
     # @overload create(executor = nil, name: nil, priority: nil, capacity: 1024, backend: Farce.config.io_backend)
-    #   Runs tasks on Farce's built-in fiber scheduler. Use this when you don't
-    #   need another library's event loop. The backend option selects its IO driver.
+    #   Runs tasks on the configured fiber scheduler. The backend option selects
+    #   the IO driver when using Farce's built-in scheduler.
     #
     #   @example
     #     scheduler = Farce::Scheduler.create
@@ -143,7 +143,7 @@ module Farce
     # thread with `Fiber.set_scheduler(scheduler)`.
     #
     # @overload initialize(capacity: 1024, backend: Farce.config.io_backend)
-    #   Uses Farce's built-in fiber scheduler when launched or installed.
+    #   Uses the configured fiber scheduler when launched or installed.
     #
     #   @param capacity [Integer, nil] Pending-task capacity; nil creates an unbounded queue.
     #   @param backend [Symbol] IO backend for the built-in scheduler; defaults to Farce configuration.
@@ -171,10 +171,11 @@ module Farce
     #   @yieldreturn [Object] The fiber scheduler to install when launched or installed.
     def initialize(capacity: 1024, backend: CONFIG.freeze.io_backend, queue: nil, external: false,
                    pool_worker: nil, queue_owner: true, &constructor)
+      constructor ||= CONFIG.freeze.fiber_scheduler_constructor
       @capacity    = capacity ? Integer(capacity) : nil
       @backend     = backend
       @constructor = Ractor.shareable?(constructor) ? constructor : Ractor.shareable_proc(&constructor) if constructor
-      @external    = external || block_given?
+      @external    = external || !constructor.nil?
       @owner       = Internal::Atom.new(nil)
       @state       = Internal::Atom.new(:initialized)
       @error       = Internal::Atom.new

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
 # warn_indent: true
+
+require "farce/internal/autoloads"
 
 # Checks against RUBY_ENGINE, RUBY_VERSION, RUBY_PLATFORM, and ENV are explicitly allowed in this file.
 # Checks against RUBY_ENGINE and similar should be avoided within lib outside this file, lib/farce/engine,
@@ -15,24 +18,10 @@ module Farce
   # require "farce"
   #
   # Farce.config do |c|
-  #   c.fiber_scheduler_implementation = :select
+  #   c.fiber_scheduler = :select
   # end
   # ```
   class Config
-    # The fiber scheduler implementation to use for Farce's built-in fiber scheduler.
-    # This primarily impacts which scheduler implementation is loaded.
-    #
-    # Can also be set via the `FARCE_FIBER_SCHEDULER_IMPLEMENTATION` environment variable.
-    #
-    # @return [Symbol] the fiber scheduler implementation to use. One of `:native`, `:select`, or `:jvm`.
-    attr_reader :fiber_scheduler_implementation
-
-    # Default IO driver for new schedulers. An explicit `backend:` overrides this value.
-    # Availability is checked by the selected implementation when a scheduler is created.
-    # Can also be set via `FARCE_IO_BACKEND`.
-    # @return [Symbol] one of `:auto`, `:epoll`, `:kqueue`, `:io_uring`, `:select`, or `:nio`
-    attr_reader :io_backend
-
     # Maximum workers in a pool created on the main Ractor. Workers start lazily.
     # Can also be set via `FARCE_MAIN_THREAD_POOL_SIZE`. Defaults to 4.
     attr_reader :main_thread_pool_size
@@ -45,24 +34,69 @@ module Farce
     # @yieldparam config [Config] the configuration object to configure
     def initialize
       yield self if block_given?
-      self.fiber_scheduler_implementation ||= ENV["FARCE_FIBER_SCHEDULER_IMPLEMENTATION"]
-      self.io_backend                     ||= ENV["FARCE_IO_BACKEND"]
-      self.main_thread_pool_size          ||= ENV.fetch("FARCE_MAIN_THREAD_POOL_SIZE", 4)
-      self.additional_thread_pool_size    ||= ENV.fetch("FARCE_ADDITIONAL_THREAD_POOL_SIZE", 2)
+      self.fiber_scheduler = ENV["FARCE_FIBER_SCHEDULER"] unless instance_variable_defined?(:@fiber_scheduler)
+      self.main_thread_pool_size       ||= ENV.fetch("FARCE_MAIN_THREAD_POOL_SIZE", 4)
+      self.additional_thread_pool_size ||= ENV.fetch("FARCE_ADDITIONAL_THREAD_POOL_SIZE", 2)
     end
 
-    # Sets the fiber scheduler implementation to use. One of `:detect`, `:native`, `:select`, or `:jvm`.
-    # @param value [Symbol, String, nil] the fiber scheduler implementation to use
-    # @raise [ArgumentError] if the value is not one of `:native`, `:select`, or `:jvm`
-    def fiber_scheduler_implementation=(value)
-      @fiber_scheduler_implementation = normalize_fiber_scheduler_implementation(value)
+    # Default fiber scheduler for Pool and Scheduler.
+    # Explicit constructor blocks override it.
+    #
+    # Uses `FARCE_FIBER_SCHEDULER` unless assigned explicitly, including an explicit nil.
+    #
+    # Built-in choices are `:auto`, `:native`, `:jvm`, `:select`, `:kqueue`, `:epoll`,
+    # `:io_uring`, and `:nio`. Strings are also accepted. `nil` or an empty string are treated like `:auto`.
+    #
+    # Other names resolve constants, such as `carbon_fiber` to `CarbonFiber`.
+    # If the constant is not defined, it attempts to require the corresponding file.
+    # Modules must define their own `Scheduler` class.
+    #
+    # Classes are constructed without arguments in each worker. Procs must be shareable.
+    # Custom schedulers must support the executor used by the Pool or Scheduler.
+    #
+    # @return [Symbol, Class, Proc] normalized choice
+    def fiber_scheduler(&constructor)
+      self.fiber_scheduler = constructor if constructor
+      @fiber_scheduler
     end
 
-    # Sets the default IO driver. Nil, empty strings and `:detect` select `:auto`.
-    # @param value [Symbol, String, nil] the IO driver to use
-    # @raise [ArgumentError] if the driver name is unknown
-    def io_backend=(value)
-      @io_backend = normalize_io_backend(value)
+    # Sets the default scheduler. Use `config.fiber_scheduler { MyScheduler.new }`
+    # or assign a proc to configure construction. Invalid assignments preserve the old value.
+    def fiber_scheduler=(value)
+      raise FrozenError, "can't modify frozen Config" if frozen?
+      @fiber_scheduler = normalize_fiber_scheduler(value)
+    end
+
+    # Implementation used by Farce's built-in scheduler.
+    # @return [Symbol] one of `:native`, `:select`, or `:jvm`
+    def fiber_scheduler_implementation
+      case @fiber_scheduler
+      when :native, :jvm, :select     then @fiber_scheduler
+      when :kqueue, :epoll, :io_uring then :native
+      when :nio                       then :jvm
+      else detected_fiber_scheduler_implementation
+      end
+    end
+
+    # IO backend used by the built-in scheduler. Explicit `backend:` options override it.
+    # Availability is checked when a scheduler is created.
+    # @return [Symbol] the configured backend or `:auto`
+    def io_backend
+      case @fiber_scheduler
+      when :kqueue, :epoll, :io_uring, :nio, :select then @fiber_scheduler
+      else :auto
+      end
+    end
+
+    # Constructor for a custom scheduler, or nil for the built-in scheduler.
+    # @api private
+    def fiber_scheduler_constructor
+      case @fiber_scheduler
+      when Class
+        require "farce" unless Farce.const_defined?(:Ractor, false)
+        Ractor.shareable_proc(self: @fiber_scheduler) { new }
+      when Proc then @fiber_scheduler
+      end
     end
 
     # Sets a positive worker limit for pools created on the main Ractor.
@@ -91,30 +125,56 @@ module Farce
       size
     end
 
-    def normalize_io_backend(value)
+    def normalize_fiber_scheduler(value, original = value)
       case value
-      when nil, "", :detect, "detect"                             then :auto
-      when :auto, :epoll, :kqueue, :io_uring, :select, :nio       then value
-      when "auto", "epoll", "kqueue", "io_uring", "select", "nio" then value.to_sym
-      else raise ArgumentError, "unknown IO backend: #{value.inspect}"
+      when nil, "", "auto", :auto
+        return :auto
+
+      when :native, :jvm, :select, :kqueue, :epoll, :io_uring, :nio, Class
+        return value
+
+      when "native", "jvm", "select", "kqueue", "epoll", "io_uring", "nio"
+        return value.to_sym
+
+      when Symbol, String
+        constant = Internal::Autoloads.inflect(value.to_s)
+        path     = original.to_s if original.is_a?(String) || original.is_a?(Symbol)
+
+        begin
+          require path if path && !Object.const_defined?(constant)
+        rescue LoadError => e
+          raise e unless e.path == path
+        end
+
+        value = Object.const_get(constant)
+        return normalize_fiber_scheduler(value, original) if value.is_a?(Module) || value.is_a?(Proc)
+
+      when Module
+        if value.const_defined?(:Scheduler, false)
+          scheduler = value.const_get(:Scheduler, false)
+          return scheduler if scheduler.is_a?(Class)
+        end
+
+      when Proc
+        require "farce" unless Farce.const_defined?(:Ractor, false)
+        return Ractor.shareable?(value) ? value : Ractor.shareable_proc(&value)
       end
+
+      raise ArgumentError, "invalid fiber scheduler: #{value.inspect}"
+    rescue NameError => e
+      raise ArgumentError, "unknown fiber scheduler: #{original.inspect} (#{e.message})"
     end
 
-    def normalize_fiber_scheduler_implementation(value)
-      case value
-      when nil, "", :detect, "detect"
-        case RUBY_ENGINE
-        when "ruby"  then RUBY_PLATFORM.match?(/linux|darwin|bsd/) ? :native : :select
-        when "jruby" then :jvm
-        else :select
-        end
-      when :native,  :select,  :jvm  then value
-      when "native", "select", "jvm" then value.to_sym
-      else raise ArgumentError, "unknown fiber scheduler implementation: #{value.inspect}"
+    def detected_fiber_scheduler_implementation
+      case RUBY_ENGINE
+      when "ruby"  then RUBY_PLATFORM.match?(/linux|darwin|bsd/) ? :native : :select
+      when "jruby" then :jvm
+      else :select
       end
     end
   end
 
+  # shareable_constant_value: none
   CONFIG = Config.new
   private_constant :CONFIG
 

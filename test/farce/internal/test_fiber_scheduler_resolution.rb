@@ -17,7 +17,7 @@ module Farce
       private
 
       def check_non_main_ractors(implementation)
-        env = { "FARCE_FIBER_SCHEDULER_IMPLEMENTATION" => implementation, "FARCE_IO_BACKEND" => "auto" }
+        env = { "FARCE_FIBER_SCHEDULER" => implementation }
         output, error, status = ruby_subprocess(<<~RUBY, env: env)
           require "farce"
           require "helpers/dns_server"
