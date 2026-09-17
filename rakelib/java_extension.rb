@@ -9,6 +9,10 @@ module JavaExtension
   ROOT = File.expand_path("..", __dir__)
   JAR = "lib/farce/engine/jvm/farce.jar"
   CLASSES = %w[
+    org/farce/BoundedMap$Bucket.class
+    org/farce/BoundedMap$Entry.class
+    org/farce/BoundedMap$LFUEntry.class
+    org/farce/BoundedMap.class
     org/farce/PriorityKey.class
     org/farce/PriorityQueue$Bucket.class
     org/farce/PriorityQueue$Entry.class

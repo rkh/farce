@@ -14,6 +14,8 @@
 #define MAP_INITIAL_CAPACITY 16
 
 static VALUE cMap;
+static VALUE cUnsharedKeyLockMap;
+static VALUE cSharedKeyLockMap;
 
 
 typedef enum { MAP_EMPTY = 0, MAP_OCCUPIED = 1, MAP_TOMBSTONE = 2 } map_slot_state_t;
@@ -58,6 +60,15 @@ typedef struct {
     atomic_size_t reservation_count;
     bool initialized;
 } map_t;
+
+enum { KEY_LOCK_UNINITIALIZED, KEY_LOCK_INITIALIZING, KEY_LOCK_PUBLISHING, KEY_LOCK_INITIALIZED };
+
+/* Keep the map core first so its GC, waiter and reservation helpers can be
+ * reused without changing the public Map layout or publication protocol. */
+typedef struct {
+    map_t core;
+    atomic_int state;
+} key_lock_map_t;
 
 typedef struct {
     bool finite;
@@ -229,6 +240,37 @@ static const rb_data_type_t map_type = {
     .flags = RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
+static size_t
+key_lock_memsize(const void *pointer)
+{
+    if (!pointer) return 0;
+    return map_memsize(pointer) + sizeof(key_lock_map_t) - sizeof(map_t);
+}
+
+/* Local reservations may retain arbitrary Ruby keys. They must never use the
+ * frozen-shareable Map type, including while a loader is running. */
+static const rb_data_type_t unshared_key_lock_type = {
+    .wrap_struct_name = "Farce::Internal::UnsharedKeyLockMap",
+    .function = {
+        .dmark = map_mark,
+        .dfree = map_free,
+        .dsize = key_lock_memsize,
+        .dcompact = map_compact,
+    },
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY,
+};
+
+static const rb_data_type_t shared_key_lock_type = {
+    .wrap_struct_name = "Farce::Internal::SharedKeyLockMap",
+    .function = {
+        .dmark = map_mark,
+        .dfree = map_free,
+        .dsize = key_lock_memsize,
+        .dcompact = map_compact,
+    },
+    .flags = RUBY_TYPED_FROZEN_SHAREABLE,
+};
+
 static map_slot_t *
 allocate_slots(size_t capacity)
 {
@@ -237,11 +279,9 @@ allocate_slots(size_t capacity)
     return slots;
 }
 
-static VALUE
-map_allocate(VALUE klass)
+static void
+map_initialize_storage(map_t *map)
 {
-    map_t *map;
-    VALUE object = TypedData_Make_Struct(klass, map_t, &map_type, map);
     pthread_mutex_init(&map->lock, NULL);
     map->slots = NULL;
     map->capacity = 0;
@@ -257,7 +297,40 @@ map_allocate(VALUE klass)
     map->reservations = NULL;
     atomic_init(&map->reservation_count, 0);
     map->initialized = false;
+}
+
+static VALUE
+map_allocate(VALUE klass)
+{
+    map_t *map;
+    VALUE object = TypedData_Make_Struct(klass, map_t, &map_type, map);
+    map_initialize_storage(map);
     return object;
+}
+
+static VALUE
+key_lock_allocate(VALUE klass, const rb_data_type_t *type)
+{
+    key_lock_map_t *map;
+    VALUE object = TypedData_Make_Struct(klass, key_lock_map_t, type, map);
+    map_initialize_storage(&map->core);
+    atomic_init(&map->state, KEY_LOCK_UNINITIALIZED);
+    return object;
+}
+
+static VALUE
+shared_key_lock_allocate(VALUE klass)
+{
+    return key_lock_allocate(klass, &shared_key_lock_type);
+}
+
+static VALUE
+unshared_key_lock_allocate(VALUE klass)
+{
+    VALUE self = key_lock_allocate(klass, &unshared_key_lock_type);
+    VALUE guard = rb_path2class("Farce::Internal::Unshareable");
+    rb_funcall(guard, rb_intern("pin_to_current_ractor"), 1, self);
+    return self;
 }
 
 static map_t *
@@ -1357,10 +1430,127 @@ map_update(int argc, VALUE *argv, VALUE self)
     return rb_ensure(map_upsert_body, (VALUE)&operation, map_operation_cleanup, (VALUE)&operation);
 }
 
+static key_lock_map_t *
+key_lock_get_raw(VALUE self)
+{
+    key_lock_map_t *map;
+    if (rb_typeddata_is_kind_of(self, &unshared_key_lock_type)) {
+        TypedData_Get_Struct(self, key_lock_map_t, &unshared_key_lock_type, map);
+    }
+    else {
+        TypedData_Get_Struct(self, key_lock_map_t, &shared_key_lock_type, map);
+    }
+    return map;
+}
+
+static VALUE
+key_lock_publish(VALUE self)
+{
+    containers_finish_initialization(self);
+    return self;
+}
+
+static VALUE
+key_lock_finish_publication(VALUE self)
+{
+    key_lock_map_t *map = key_lock_get_raw(self);
+    int state = rb_ractor_shareable_p(self) ? KEY_LOCK_INITIALIZED : KEY_LOCK_UNINITIALIZED;
+    atomic_store_explicit(&map->state, state, memory_order_release);
+    return Qnil;
+}
+
+static VALUE
+key_lock_initialize(int argc, VALUE *argv, VALUE self)
+{
+    VALUE keywords = Qnil;
+    ID ids[] = {
+        rb_intern("compare_by_identity"),
+        rb_intern("compare_keys_by_identity"),
+        rb_intern("compare_values_by_identity")
+    };
+    VALUE values[3] = {Qundef, Qundef, Qundef};
+    rb_scan_args(argc, argv, "0:", &keywords);
+    if (!NIL_P(keywords)) rb_get_kwargs(keywords, ids, 0, 3, values);
+    key_lock_map_t *map = key_lock_get_raw(self);
+    if (atomic_load_explicit(&map->state, memory_order_acquire) != KEY_LOCK_UNINITIALIZED) {
+        rb_raise(rb_eRuntimeError, "key lock map is already initialized");
+    }
+    rb_check_frozen(self);
+    bool common = values[0] == Qundef ? false : containers_strict_bool(values[0], "compare_by_identity");
+    bool keys = values[1] == Qundef ? common : containers_strict_bool(values[1], "compare_keys_by_identity");
+    if (values[2] != Qundef) containers_strict_bool(values[2], "compare_values_by_identity");
+    int expected = KEY_LOCK_UNINITIALIZED;
+    if (!atomic_compare_exchange_strong(&map->state, &expected, KEY_LOCK_INITIALIZING)) {
+        rb_raise(rb_eRuntimeError, "key lock map is already initialized");
+    }
+    map->core.compare_keys_by_identity = keys;
+    if (rb_typeddata_is_kind_of(self, &unshared_key_lock_type)) {
+        atomic_store_explicit(&map->state, KEY_LOCK_INITIALIZED, memory_order_release);
+        return self;
+    }
+    atomic_store_explicit(&map->state, KEY_LOCK_PUBLISHING, memory_order_release);
+    return rb_ensure(key_lock_publish, self, key_lock_finish_publication, self);
+}
+
+static VALUE
+key_lock_yield(VALUE opaque)
+{
+    (void)opaque;
+    return rb_yield_values(0);
+}
+
+static VALUE
+key_lock_synchronize(VALUE self, VALUE key)
+{
+    key_lock_map_t *storage = key_lock_get_raw(self);
+    int state = atomic_load_explicit(&storage->state, memory_order_acquire);
+    bool shared = rb_typeddata_is_kind_of(self, &shared_key_lock_type);
+    if (state != KEY_LOCK_INITIALIZED &&
+        !(shared && state == KEY_LOCK_PUBLISHING && rb_ractor_shareable_p(self))) {
+        rb_raise(rb_eRuntimeError, "uninitialized key lock map");
+    }
+    rb_need_block();
+    if (shared) containers_check_shareable(key);
+    map_t *map = &storage->core;
+    map_operation_t operation = {
+        .map = map,
+        .execution = map_current_execution_context(),
+        .key = key,
+        .complete = false,
+    };
+    operation.hash = map_key_hash(map, key);
+    map_lock_for_key(map, key, operation.hash, &operation.execution);
+    operation.reservation = map_begin_reservation_locked(
+        map, key, operation.hash, &operation.execution
+    );
+    pthread_mutex_unlock(&map->lock);
+    return rb_ensure(key_lock_yield, (VALUE)&operation, map_operation_cleanup, (VALUE)&operation);
+}
+
+static VALUE
+key_lock_initialize_copy(VALUE self, VALUE other)
+{
+    (void)self;
+    (void)other;
+    rb_raise(rb_eTypeError, "key lock maps cannot be copied");
+}
+
 
 void
 containers_init_map(VALUE namespace)
 {
+    cUnsharedKeyLockMap = rb_define_class_under(namespace, "UnsharedKeyLockMap", rb_cObject);
+    rb_define_alloc_func(cUnsharedKeyLockMap, unshared_key_lock_allocate);
+    rb_define_method(cUnsharedKeyLockMap, "initialize", key_lock_initialize, -1);
+    rb_define_method(cUnsharedKeyLockMap, "initialize_copy", key_lock_initialize_copy, 1);
+    rb_define_method(cUnsharedKeyLockMap, "synchronize", key_lock_synchronize, 1);
+
+    cSharedKeyLockMap = rb_define_class_under(namespace, "SharedKeyLockMap", rb_cObject);
+    rb_define_alloc_func(cSharedKeyLockMap, shared_key_lock_allocate);
+    rb_define_method(cSharedKeyLockMap, "initialize", key_lock_initialize, -1);
+    rb_define_method(cSharedKeyLockMap, "initialize_copy", key_lock_initialize_copy, 1);
+    rb_define_method(cSharedKeyLockMap, "synchronize", key_lock_synchronize, 1);
+
     cMap = rb_define_class_under(namespace, "Map", rb_cObject);
     rb_define_alloc_func(cMap, map_allocate);
     rb_define_method(cMap, "initialize", map_initialize, -1);

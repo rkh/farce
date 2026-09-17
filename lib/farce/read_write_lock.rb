@@ -23,10 +23,9 @@ module Farce
     WRITE_DEPTH   = 1
     LOCAL_STATES  = :__farce_read_write_lock_states__
     INTERRUPTS_IMMEDIATE = { Exception => :immediate }.freeze
-    INTERRUPTS_NEVER     = { Exception => :never }.freeze
     private_constant :READER_BITS, :READER_MASK, :WRITER_BIT, :UPGRADER_BIT,
       :WAITER_UNIT, :MAX_WAITERS, :READ_DEPTH, :WRITE_DEPTH, :LOCAL_STATES,
-      :INTERRUPTS_IMMEDIATE, :INTERRUPTS_NEVER
+      :INTERRUPTS_IMMEDIATE
 
     def initialize
       @state  = Internal::Vector.new([0])
@@ -42,7 +41,7 @@ module Farce
       raise LocalJumpError, "no block given" unless block_given?
 
       local = local_state
-      Thread.handle_interrupt(INTERRUPTS_NEVER) do
+      Thread.handle_interrupt(Internal::INTERRUPT_MASK) do
         global = local[READ_DEPTH].zero? && local[WRITE_DEPTH].zero?
         acquire_read_lock if global
         local[READ_DEPTH] += 1
@@ -69,7 +68,7 @@ module Farce
       raise LocalJumpError, "no block given" unless block_given?
 
       local = local_state
-      Thread.handle_interrupt(INTERRUPTS_NEVER) do
+      Thread.handle_interrupt(Internal::INTERRUPT_MASK) do
         reentrant = local[WRITE_DEPTH].positive?
         upgraded  = !reentrant && local[READ_DEPTH].positive?
         acquire_write_lock(upgraded) unless reentrant

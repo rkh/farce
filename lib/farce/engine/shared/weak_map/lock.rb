@@ -23,22 +23,20 @@ module Farce
             unless @reserved
               @reserved = true
               @owner_fiber = Fiber.current
-              @owner_thread = Thread.current
+              @owner_thread = Internal.storage_thread(Thread.current)
               return :acquired
             end
             reject_recursive_wait!
             @signal ||= Signal.new
             [@signal, @signal.generation]
           end
-          timeout = deadline - Clock.now if deadline
-          return :timed_out if timeout && !timeout.positive?
-          return :timed_out unless signal.wait(observed, timeout:) { false }
+          return :timed_out unless ReservationWaiting.wait(signal, observed, deadline)
         end
       end
 
       def release
         signal = @mutex.synchronize do
-          @reserved = false
+          @reserved    = false
           @owner_fiber = @owner_thread = nil
           @signal
         end
@@ -55,9 +53,9 @@ module Farce
       def try_synchronize
         acquired = @mutex.synchronize do
           next false if @reserved
-          @reserved = true
-          @owner_fiber = Fiber.current
-          @owner_thread = Thread.current
+          @reserved     = true
+          @owner_fiber  = Fiber.current
+          @owner_thread = Internal.storage_thread(Thread.current)
           true
         end
         acquired ? [true, yield] : [false, nil]
@@ -72,7 +70,7 @@ module Farce
       def reject_recursive_wait!
         raise ThreadError, "deadlock; recursive weak-map access during an update" if @owner_fiber.equal?(Fiber.current)
         scheduler = Fiber.scheduler if Fiber.respond_to?(:scheduler)
-        return unless @owner_thread.equal?(Thread.current) && !scheduler
+        return unless @owner_thread.equal?(Internal.storage_thread(Thread.current)) && !scheduler
 
         raise ThreadError, "deadlock; weak-map update is owned by another unscheduled fiber"
       end

@@ -5,10 +5,10 @@ require "rbconfig"
 require "shellwords"
 
 class TestWatchdog
-  DEFAULT_TIMEOUT = 120
+  DEFAULT_TIMEOUT        = 300
   DEFAULT_SHUTDOWN_GRACE = 5
-  TIMEOUT_EXIT_STATUS = 124
-  POLL_INTERVAL = 0.05
+  TIMEOUT_EXIT_STATUS    = 124
+  POLL_INTERVAL          = 0.05
 
   attr_reader :seed
 

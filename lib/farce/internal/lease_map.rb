@@ -8,14 +8,14 @@ module Farce
     # Portable per-key ownership and lifecycle implementation for LeaseMap.
     class LeaseMap
       AUTO_LEASE_CONTEXTS = Object.new.freeze
-      INTERRUPT_MASK      = { Exception => :never }.freeze
-      private_constant :AUTO_LEASE_CONTEXTS, :INTERRUPT_MASK
+      private_constant :AUTO_LEASE_CONTEXTS
 
       def initialize(initial_mapping, lease_class:, registry_class:)
         raise TypeError, "lease map initializer must return a Hash" unless initial_mapping.is_a?(Hash)
 
-        @lease_class   = lease_class
-        @registry_lock = Lock.new
+        @lease_class    = lease_class
+        @registry_lock  = Lock.new
+        @creation_locks = KeyLockMap.new(registry_class:)
 
         initial_mapping.each_key { validate_key!(it) }
         initial_mapping.each_value { validate_resource!(it) }
@@ -110,18 +110,20 @@ module Farce
         lease = nil
         inserted = false
         context = auto_context
-        Thread.handle_interrupt(INTERRUPT_MASK) do
-          @registry_lock.synchronize do
-            lease = @registry[key]
-            if lease&.retired?
-              @registry.delete(key)
-              lease = nil
-            end
-            unless lease
-              lease = new_lease(resource)
-              @registry[key] = lease
-              acquire_for_context(lease, context) if context
-              inserted = true
+        @creation_locks.synchronize(key) do
+          Thread.handle_interrupt(INTERRUPT_MASK) do
+            @registry_lock.synchronize do
+              lease = @registry[key]
+              if lease&.retired?
+                @registry.delete(key)
+                lease = nil
+              end
+              unless lease
+                lease = new_lease(resource)
+                @registry[key] = lease
+                acquire_for_context(lease, context) if context
+                inserted = true
+              end
             end
           end
         end
@@ -131,6 +133,36 @@ module Farce
       rescue RetiredLeaseError
         prune_binding(key, lease)
         retry
+      end
+
+      def store_if_absent(key, &)
+        raise LocalJumpError, "no block given" unless block_given?
+        validate_key!(key)
+
+        while true
+          present, resource = read_entry(key)
+          return resource if present
+
+          context = auto_context
+          raise OwnershipError, "resource construction requires an automatic lease scope" unless context
+
+          inserted = false
+          @creation_locks.synchronize(key) do
+            next if current_lease(key)
+
+            Thread.handle_interrupt(INTERRUPT_MASK) do
+              resource = Thread.handle_interrupt(Exception => :immediate, &)
+              validate_resource!(resource)
+              @registry_lock.synchronize do
+                lease          = new_lease(resource)
+                @registry[key] = lease
+                resource       = acquire_for_context(lease, context)
+                inserted       = true
+              end
+            end
+          end
+          return resource if inserted
+        end
       end
 
       def delete(key)

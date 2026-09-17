@@ -23,6 +23,7 @@ module Farce
           entries = converted
         end
         @map = new_tree_map
+        @key_locks = new_key_locks
         entries&.each { self[_1] = _2 }
         super()
       end
@@ -32,9 +33,40 @@ module Farce
 
       # (see Map#[]=)
       def []=(key, value)
-        key = prepare_key(key)
-        internal_map[key] = wrap_value(value)
+        key = internal_map.prepare_key(prepare_key(key))
+        with_key_lock(key) { internal_map[key] = wrap_value(value) }
         value
+      end
+
+      # Return an existing value, or store the block result for an absent key.
+      # Concurrent callers for equally ordered keys share one initialization.
+      # The block runs without holding the map's structural lock. Other keys
+      # remain accessible. Assigning the same key waits for initialization.
+      # Deletion or clearing can precede a pending initialization's insertion.
+      # Unsafe maps require callers to provide their own synchronization.
+      # @param key [BasicObject] The key to retrieve or initialize.
+      # @yieldreturn [BasicObject] The value to store.
+      # @return [BasicObject] The existing or newly stored value.
+      # @raise [LocalJumpError] If no block is given, even when the key exists.
+      # @raise [ThreadError] If initialization recursively accesses its own gate.
+      def store_if_absent(key)
+        raise LocalJumpError, "no block given" unless block_given?
+
+        map      = internal_map
+        key      = map.prepare_key(prepare_key(key))
+        found    = true
+        existing = map.fetch(key) { found = false }
+        return unwrap_value(existing) if found
+
+        with_key_lock(key) do
+          stored     = map.fetch(key) do
+            value    = yield
+            wrapped  = wrap_value(value)
+            map[key] = wrapped
+            return unwrap_value(wrapped)
+          end
+          unwrap_value(stored)
+        end
       end
 
       # (see Map#delete)
@@ -180,8 +212,10 @@ module Farce
         raise Ractor::IsolationError, "key must be Ractor-shareable"
       end
 
-      def unwrap_value(value) = value
-      def wrap_value(value)   = value
+      def unwrap_value(value)   = value
+      def wrap_value(value)     = value
+      def new_key_locks         = Internal::OrderedKeyLockMap.new
+      def with_key_lock(key, &) = @key_locks.synchronize(key, &)
 
       # simplecov:disable
       def new_tree_map(...)

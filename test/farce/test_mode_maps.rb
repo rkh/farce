@@ -12,12 +12,14 @@ module Farce
     class ObservedWaitValue
       include Unshareable
 
-      def initialize(entered)
+      def initialize(entered, resume)
         @entered = entered
+        @resume = resume
       end
 
       def ==(other)
         @entered << :compared
+        @resume.pop
         other == :expected
       end
     end
@@ -394,25 +396,29 @@ module Farce
 
     def test_weak_key_waiter_survives_key_collection_and_reinsertion
       entered = Thread::Queue.new
+      resume = Thread::Queue.new
+      key_holder = []
       map = Thread.new do
-        key = shared_string("key")
-        WeakKeyMap.new({ key => ObservedWaitValue.new(entered) }, mode: :local)
+        key_holder << shared_string("key")
+        WeakKeyMap.new({ key_holder.first => ObservedWaitValue.new(entered, resume) }, mode: :local)
       end.value
       lookup_key = shared_string("key")
       waiter = Thread.new { map.wait_until_changed(lookup_key, :expected) }
 
       begin
         Timeout.timeout(5) { entered.pop }
-        10.times do
-          collect_garbage
-          Thread.pass
-        end
+        key_holder.clear
+        # Clear the Vault's last canonical-key reply while comparison is paused.
+        map[:missing]
 
+        assert_eventually_empty(map)
         map[lookup_key] = :changed
+        resume << true
 
         assert waiter.join(5), "waiter remained on an orphaned weak-key entry"
         assert_includes [nil, :changed], waiter.value
       ensure
+        resume << true
         waiter.kill if waiter.alive?
         waiter.join
       end

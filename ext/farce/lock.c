@@ -44,6 +44,13 @@ typedef struct {
     bool released;
 } containers_lock_sleep_context_t;
 
+typedef struct {
+    VALUE self;
+    bool acquired;
+    containers_lock_operation_t operation;
+    VALUE opaque;
+} containers_lock_call_context_t;
+
 static void
 containers_lock_set_fd_flags(int fd)
 {
@@ -359,6 +366,53 @@ containers_lock_synchronize(VALUE self)
         (VALUE)&context,
         containers_lock_synchronize_cleanup,
         (VALUE)&context
+    );
+}
+
+static VALUE
+containers_lock_call_body(VALUE opaque)
+{
+    containers_lock_call_context_t *context =
+        (containers_lock_call_context_t *)opaque;
+    containers_lock_acquire(context->self);
+    context->acquired = true;
+    return context->operation(context->opaque);
+}
+
+static VALUE
+containers_lock_call_cleanup(VALUE opaque)
+{
+    containers_lock_call_context_t *context =
+        (containers_lock_call_context_t *)opaque;
+    if (context->acquired) containers_lock_release(context->self);
+    return Qnil;
+}
+
+VALUE
+containers_lock_new(void)
+{
+    return rb_class_new_instance(0, NULL, cLock);
+}
+
+VALUE
+containers_lock_synchronize_call(
+    VALUE lock,
+    containers_lock_operation_t operation,
+    VALUE opaque
+)
+{
+    containers_lock_call_context_t call = {
+        .self = lock,
+        .acquired = false,
+        .operation = operation,
+        .opaque = opaque,
+    };
+
+    return rb_ensure(
+        containers_lock_call_body,
+        (VALUE)&call,
+        containers_lock_call_cleanup,
+        (VALUE)&call
     );
 }
 

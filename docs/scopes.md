@@ -245,6 +245,8 @@ These classes accept the same five scopes. The scope determines which backing co
 | `Farce::Local::WeakAtom` | A reference that does not keep its value alive. |
 | `Farce::Local::Map` | A mutable map. |
 | `Farce::Local::TreeMap` | A map sorted by key. |
+| `Farce::Local::LRUMap` | A bounded map with independent recency and capacity in each scope. |
+| `Farce::Local::LFUMap` | A bounded map with independent frequency history and capacity in each scope. |
 | `Farce::Local::WeakMap` | A map with weak keys and weak values. |
 | `Farce::Local::WeakKeyMap` | A map with weak keys. |
 | `Farce::Local::WeakValueMap` | A map with weak values. |

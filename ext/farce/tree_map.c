@@ -50,39 +50,6 @@ typedef struct tc_link {
 static ID tc_id_compare;
 static VALUE tc_eIsolationError;
 
-static VALUE
-tc_map_normalize_key(VALUE key)
-{
-    VALUE stored_key;
-
-    if (!RB_TYPE_P(key, T_STRING)) return key;
-
-    /* Match String#-@ for ordinary Strings: use CRuby's globally deduplicated,
-     * frozen fstring as both the comparison key and the stored key. Do not
-     * collapse String subclasses to String, since a subclass may provide its
-     * own ordering semantics. */
-    if (rb_obj_class(key) == rb_cString) {
-        return rb_str_to_interned_str(key);
-    }
-
-    /* Preserve the existing String-subclass behavior without dispatching
-     * overridable #dup, #initialize_copy, #class, or #freeze methods. */
-    stored_key = rb_obj_alloc(rb_obj_class(key));
-    rb_str_replace(stored_key, key);
-    {
-        VALUE instance_variables = rb_obj_instance_variables(key);
-        long index;
-
-        for (index = 0; index < RARRAY_LEN(instance_variables); index++) {
-            ID id = SYM2ID(RARRAY_AREF(instance_variables, index));
-            rb_ivar_set(stored_key, id, rb_ivar_get(key, id));
-        }
-        RB_GC_GUARD(instance_variables);
-    }
-    rb_obj_freeze(stored_key);
-    return stored_key;
-}
-
 static inline tc_color
 tc_link_color(const tc_link *link)
 {
@@ -1076,7 +1043,7 @@ tc_core_map_initialize_entry(VALUE key, VALUE value, VALUE opaque)
 {
     tc_core_map_arguments *arguments = (tc_core_map_arguments *)opaque;
 
-    key = tc_map_normalize_key(key);
+    key = containers_normalize_string_key(key);
     tc_core_map_check_key(key);
     tc_core_map_check_value(arguments->core, value);
     tc_map_store_unlocked(
@@ -1272,7 +1239,7 @@ tc_core_map_aref(VALUE self, VALUE key)
 {
     tc_core_map *core = tc_core_map_get(self);
 
-    key = tc_map_normalize_key(key);
+    key = containers_normalize_string_key(key);
     tc_core_map_arguments arguments = {
         .self = self,
         .core = core,
@@ -1282,6 +1249,15 @@ tc_core_map_aref(VALUE self, VALUE key)
 
     tc_core_map_check_key(key);
     return tc_core_map_call_locked(self, core, tc_core_map_aref_body, &arguments);
+}
+
+static VALUE
+tc_core_map_prepare_key(VALUE self, VALUE key)
+{
+    (void)tc_core_map_get(self);
+    key = containers_normalize_string_key(key);
+    tc_core_map_check_key(key);
+    return key;
 }
 
 static VALUE
@@ -1304,7 +1280,7 @@ tc_core_map_fetch(int argc, VALUE *argv, VALUE self)
     }
 
     core = tc_core_map_get(self);
-    normalized_key = tc_map_normalize_key(key);
+    normalized_key = containers_normalize_string_key(key);
     arguments = (tc_core_map_arguments){
         .self = self,
         .core = core,
@@ -1332,7 +1308,7 @@ tc_core_map_key_p(VALUE self, VALUE key)
 {
     tc_core_map *core = tc_core_map_get(self);
 
-    key = tc_map_normalize_key(key);
+    key = containers_normalize_string_key(key);
     tc_core_map_arguments arguments = {
         .self = self,
         .core = core,
@@ -1370,7 +1346,7 @@ tc_core_map_getkey(VALUE self, VALUE key)
 {
     tc_core_map *core = tc_core_map_get(self);
 
-    key = tc_map_normalize_key(key);
+    key = containers_normalize_string_key(key);
     tc_core_map_arguments arguments = {
         .self = self,
         .core = core,
@@ -1407,7 +1383,7 @@ tc_core_map_store(VALUE self, VALUE key, VALUE value)
 {
     tc_core_map *core = tc_core_map_get(self);
 
-    key = tc_map_normalize_key(key);
+    key = containers_normalize_string_key(key);
     tc_core_map_arguments arguments = {
         .self = self,
         .core = core,
@@ -1445,7 +1421,7 @@ tc_core_map_delete(VALUE self, VALUE key)
 {
     tc_core_map *core = tc_core_map_get(self);
 
-    key = tc_map_normalize_key(key);
+    key = containers_normalize_string_key(key);
     tc_core_map_arguments arguments = {
         .self = self,
         .core = core,
@@ -1674,6 +1650,7 @@ tc_core_map_define_methods(VALUE klass)
     rb_define_method(klass, "initialize", tc_core_map_initialize, -1);
     rb_define_method(klass, "initialize_copy", tc_core_map_initialize_copy, 1);
     rb_define_method(klass, "[]", tc_core_map_aref, 1);
+    rb_define_method(klass, "prepare_key", tc_core_map_prepare_key, 1);
     rb_define_method(klass, "[]=", tc_core_map_store, 2);
     rb_define_method(klass, "fetch", tc_core_map_fetch, -1);
     rb_define_method(klass, "key?", tc_core_map_key_p, 1);

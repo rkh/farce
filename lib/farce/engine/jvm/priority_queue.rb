@@ -11,21 +11,23 @@ module Farce
     # Java owns the lock, ordered buckets, FIFO links, and cancellation index.
     # Ruby callbacks retain Ruby comparison, identity, and notification semantics.
     class PriorityQueue
-      Box = Struct.new(:value)
+      Box                 = Struct.new(:value)
       INITIALIZATION_LOCK = Mutex.new
-      INTERRUPT_MASK = { Exception => :never }.freeze
-      JAVA_CAPACITY_MAX = (1 << 63) - 1
+      JAVA_CAPACITY_MAX   = (1 << 63) - 1
+      IDENTITY            = ->(box) { JVMContainers.identity_token(box.value).to_s }
+      EQUAL               = ->(stored, requested) { stored.value == requested.value }
+      IDENTICAL           = ->(stored, requested) { JVMContainers.identical?(stored.value, requested.value) }
+      MATCH               = ->(stored, requested) { requested.value === stored.value } # rubocop:disable Style/CaseEquality
+
       COMPARATOR = JVMExtension::PriorityKey.comparator(JVMContainers.comparator do |left, right|
         JVMContainers.compare(left.value, right.value)
       end)
+
       SNAPSHOT = lambda do |key|
         value = JVMContainers.copy_frozen_string(key.getRubyKey.value)
         JVMExtension::PriorityKey.new(Box.new(value), false, 0.0)
       end
-      IDENTITY = ->(box) { JVMContainers.identity_token(box.value).to_s }
-      EQUAL = ->(stored, requested) { stored.value == requested.value }
-      IDENTICAL = ->(stored, requested) { JVMContainers.identical?(stored.value, requested.value) }
-      MATCH = ->(stored, requested) { requested.value === stored.value } # rubocop:disable Style/CaseEquality
+
       SCHEDULED = lambda do
         next false unless Fiber.respond_to?(:scheduler)
         next false if Fiber.current.respond_to?(:blocking?) && Fiber.current.blocking?
@@ -34,7 +36,8 @@ module Farce
         scheduler ||= Fiber.scheduler
         !scheduler.nil?
       end
-      private_constant :Box, :INITIALIZATION_LOCK, :INTERRUPT_MASK, :JAVA_CAPACITY_MAX,
+
+      private_constant :Box, :INITIALIZATION_LOCK, :JAVA_CAPACITY_MAX,
         :COMPARATOR, :SNAPSHOT, :IDENTITY, :EQUAL, :IDENTICAL, :MATCH, :SCHEDULED
 
       def initialize(capacity: nil, signal: nil, track_age: false)
@@ -90,14 +93,13 @@ module Farce
         raise_failure(e)
       end
 
-      def peek(&fallback) = read(1, false, nil, fallback)
-      def peek_last(&fallback) = read(1, true, nil, fallback)
-      def peek_priority(&fallback) = read(2, false, nil, fallback)
-      def peek_last_priority(&fallback) = read(2, true, nil, fallback)
-
-      def delete(priority, value) = remove(priority, value, 0)
+      def peek(&fallback)                  = read(1, false, nil, fallback)
+      def peek_last(&fallback)             = read(1, true, nil, fallback)
+      def peek_priority(&fallback)         = read(2, false, nil, fallback)
+      def peek_last_priority(&fallback)    = read(2, true, nil, fallback)
+      def delete(priority, value)          = remove(priority, value, 0)
       def delete_identity(priority, value) = remove(priority, value, 1)
-      def delete_match(priority, pattern) = remove(priority, pattern, 2)
+      def delete_match(priority, pattern)  = remove(priority, pattern, 2)
 
       def size
         storage.size
@@ -124,11 +126,10 @@ module Farce
         raise_failure(e)
       end
 
-      def age_tracking? = storage.isAgeTracking
-
-      def generation = JVMContainers.nullable(storage.generation)
+      def age_tracking?      = storage.isAgeTracking
+      def generation         = JVMContainers.nullable(storage.generation)
       def oldest_enqueued_at = JVMContainers.nullable(storage.oldestEnqueuedAt)
-      def oldest_age = JVMContainers.nullable(storage.oldestAge)
+      def oldest_age         = JVMContainers.nullable(storage.oldestAge)
 
       def clear
         storage.clear

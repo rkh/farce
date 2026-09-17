@@ -38,6 +38,26 @@ module Farce
         Fiber.set_scheduler(nil) if Fiber.respond_to?(:scheduler) && Fiber.scheduler
       end
 
+      def test_unscheduled_sibling_fiber_rejects_same_key_without_blocking_other_keys
+        map_classes.each do |klass|
+          map = klass.new({ key: :original })
+          owner = Fiber.new do
+            map.update(:key) do
+              Fiber.yield :reserved
+              :updated
+            end
+          end
+
+          assert_equal :reserved, owner.resume
+          assert_raises(ThreadError) { map[:key] = :conflict }
+          assert_equal :independent, map[:other] = :independent
+          assert_equal :updated, owner.resume
+          assert_equal :updated, map[:key]
+        ensure
+          owner.resume if owner&.alive?
+        end
+      end
+
       def test_key_equality_does_not_hold_native_mutex_across_fiber_yield
         return unless Fiber.respond_to?(:set_scheduler)
 

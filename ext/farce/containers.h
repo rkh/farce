@@ -15,6 +15,7 @@
 void containers_check_shareable(VALUE value);
 bool containers_strict_bool(VALUE value, const char *name);
 void containers_finish_initialization(VALUE self);
+VALUE containers_normalize_string_key(VALUE key);
 bool containers_wait_for_readable(int fd, VALUE timeout);
 bool containers_wait_for_readable_level(int fd, VALUE timeout);
 RBIMPL_ATTR_NORETURN()
@@ -25,6 +26,14 @@ void containers_init_counter(VALUE namespace);
 void containers_init_exchanger(VALUE namespace);
 void containers_init_flag(VALUE namespace);
 void containers_init_lock(VALUE namespace);
+typedef VALUE (*containers_lock_operation_t)(VALUE opaque);
+VALUE containers_lock_new(void);
+VALUE containers_lock_synchronize_call(
+    VALUE lock,
+    containers_lock_operation_t operation,
+    VALUE opaque
+);
+void containers_init_lru_maps(VALUE namespace);
 void containers_init_map(VALUE namespace);
 void containers_init_priority_queue(VALUE namespace);
 void containers_init_darwin(VALUE namespace);

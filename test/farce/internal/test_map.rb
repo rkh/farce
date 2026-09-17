@@ -379,10 +379,7 @@ module Farce
 
       def test_unscheduled_sibling_fiber_cannot_wait_for_the_owners_update
         map = Map.new({ key: 1 })
-        owner_thread = Thread.current
         contender = Fiber.new do
-          next :different_thread unless Thread.current.equal?(owner_thread)
-
           map[:key] = 9
         rescue ThreadError => e
           e
@@ -393,12 +390,6 @@ module Farce
           error = contender.resume
           old + 1
         end)
-        if error == :different_thread
-          assert_equal({ key: 2 }, map.each.to_h)
-          assert_equal 3, map[:key] = 3
-          return
-        end
-
         assert_kind_of ThreadError, error
         assert_match(/another unscheduled fiber/, error.message)
         assert_equal({ key: 2 }, map.each.to_h)
@@ -412,10 +403,7 @@ module Farce
         thread = Thread.current
         singleton = thread.singleton_class
         thread.define_singleton_method(:equal?) { |_other| false }
-        primitive_equal = BasicObject.instance_method(:equal?)
         contender = Fiber.new do
-          next :different_thread unless primitive_equal.bind_call(Thread.current, thread)
-
           map[:key] = 9
         rescue ThreadError => e
           e
@@ -428,8 +416,6 @@ module Farce
             old + 1
           end
         end
-
-        return assert_equal({ key: 2 }, map.each.to_h) if error == :different_thread
 
         assert_kind_of ThreadError, error
         assert_match(/another unscheduled fiber/, error.message)

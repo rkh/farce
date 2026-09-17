@@ -42,6 +42,8 @@ module Farce
         raise TypeError, "tree maps cannot be copied"
       end
 
+      def prepare_key(key) = canonical_ordered_key(key)
+
       def [](key)
         key = canonical_ordered_key(key)
         state = initialized_state

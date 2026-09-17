@@ -52,6 +52,71 @@ module Farce
         assert_equal 0, signal.num_waiting
       end
 
+      def test_cancellation_without_broadcast_releases_waiter_registration
+        [nil, 30].each do |timeout|
+          %i[kill raise].each do |action|
+            signal = signal_class.new
+            waiter = Thread.new do
+              signal.wait(timeout:) { flunk "cancellation became a timeout" }
+            rescue RuntimeError => e
+              e.message
+            end
+            Timeout.timeout(2) { Thread.pass until signal.num_waiting == 1 }
+            action == :kill ? waiter.kill : waiter.raise("canceled wait")
+
+            assert waiter.join(2), "#{action} did not cancel #{timeout.inspect} wait"
+            assert_equal "canceled wait", waiter.value if action == :raise
+
+            assert_equal 0, signal.num_waiting
+            assert_equal 0, signal.generation
+          ensure
+            signal&.broadcast
+            waiter&.kill&.join
+          end
+        end
+      end
+
+      def test_timeout_retains_one_deadline_across_wait_slices
+        signal = signal_class.new
+        started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        calls = 0
+        result = signal.wait(timeout: 0.18) do
+          calls += 1
+          :expired
+        end
+        elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
+
+        assert_equal :expired, result
+        assert_equal 1, calls
+        assert_operator elapsed, :>=, 0.16
+        assert_equal 0, signal.num_waiting
+      end
+
+      def test_wait_respects_deferred_and_on_blocking_interrupt_masks
+        %i[never on_blocking].each do |mask|
+          signal = signal_class.new
+          waiter = Thread.new do
+            Thread.handle_interrupt(RuntimeError => mask) { signal.wait }
+          rescue RuntimeError => e
+            e.message
+          end
+          Timeout.timeout(2) { Thread.pass until signal.num_waiting == 1 }
+          waiter.raise("masked cancellation")
+          if mask == :never
+            refute waiter.join(0.12), "deferred cancellation escaped its mask"
+            assert_equal 1, signal.num_waiting
+            signal.broadcast
+          end
+
+          assert waiter.join(2), "#{mask} cancellation did not unwind"
+          assert_equal "masked cancellation", waiter.value
+          assert_equal 0, signal.num_waiting
+        ensure
+          signal&.broadcast
+          waiter&.kill&.join
+        end
+      end
+
       def test_broadcast_wakes_all_waiters
         signal = signal_class.new
         observed = signal.generation

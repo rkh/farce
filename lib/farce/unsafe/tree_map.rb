@@ -9,7 +9,11 @@ module Farce
     class TreeMap < Abstract::TreeMap
       include Unshareable
 
-      private def new_tree_map(...) = Internal::UnsafeTreeMap.new(...)
+      private
+
+      def new_tree_map(...)   = Internal::UnsafeTreeMap.new(...)
+      def new_key_locks       = nil
+      def with_key_lock(_key) = yield
     end
   end
 end

@@ -100,6 +100,19 @@ module Farce
         internal_lease_map.store(key, resource)
       end
 
+      # Read an owned resource or construct an absent resource in an automatic scope.
+      # Constructors for the same key run one at a time, outside the map lock.
+      # Missing-key assignments wait for construction. Deletion and clear only
+      # affect published entries and do not cancel a pending constructor.
+      # @param key [BasicObject] the key to read or initialize
+      # @yield builds the missing resource without arguments
+      # @yieldreturn [BasicObject] a resource other than nil or a boolean
+      # @return [BasicObject] the existing or newly constructed resource
+      # @raise [LocalJumpError] if no block is given
+      # @raise [Farce::OwnershipError] if reading requires ownership or creation lacks an automatic scope
+      # @raise [ArgumentError] if the constructor returns nil or a boolean
+      def store_if_absent(key, &) = internal_lease_map.store_if_absent(key, &)
+
       # Delete a key after acquiring and retiring its Lease.
       # @return [BasicObject, nil] the removed resource, or nil if absent
       def delete(key) = internal_lease_map.delete(key)

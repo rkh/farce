@@ -11,8 +11,7 @@ module Farce
       include MapKeyCoordination
 
       BASIC_OBJECT_EQUAL_METHOD = BasicObject.instance_method(:equal?)
-      INTERRUPT_MASK = { Exception => :never }.freeze
-      private_constant :BASIC_OBJECT_EQUAL_METHOD, :INTERRUPT_MASK
+      private_constant :BASIC_OBJECT_EQUAL_METHOD
 
       alias concurrent_get []
       alias concurrent_store []=

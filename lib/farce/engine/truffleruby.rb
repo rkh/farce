@@ -10,9 +10,16 @@ module Farce
   module Internal # :nodoc: all
     include Autoloads["#{__dir__}/truffleruby"]
 
+    require "farce/engine/shared/portable_bounded_map"
+
     autoload :WeakMap,      "farce/engine/shared/unshared_weak_map"
     autoload :WeakKeyMap,   "farce/engine/shared/unshared_weak_map"
     autoload :WeakValueMap, "farce/engine/shared/unshared_weak_map"
+
+    LFUMap          = PortableLFUMap
+    LRUMap          = PortableLRUMap
+    ShareableLFUMap = StrictLFUMap = PortableStrictLFUMap
+    ShareableLRUMap = StrictLRUMap = PortableStrictLRUMap
 
     if TruffleRuby.native?
       path = "farce/engine/truffleruby/native"

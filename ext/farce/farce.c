@@ -47,6 +47,32 @@ containers_finish_initialization(VALUE self)
     rb_ractor_make_shareable(self);
 }
 
+VALUE
+containers_normalize_string_key(VALUE key)
+{
+    VALUE stored_key;
+
+    if (!RB_TYPE_P(key, T_STRING)) return key;
+    if (rb_obj_class(key) == rb_cString) return rb_str_to_interned_str(key);
+
+    /* Preserve String subclasses and their instance state without dispatching
+     * overridable duplication or freezing methods. */
+    stored_key = rb_obj_alloc(rb_obj_class(key));
+    rb_str_replace(stored_key, key);
+    {
+        VALUE instance_variables = rb_obj_instance_variables(key);
+        long index;
+
+        for (index = 0; index < RARRAY_LEN(instance_variables); index++) {
+            ID id = SYM2ID(RARRAY_AREF(instance_variables, index));
+            rb_ivar_set(stored_key, id, rb_ivar_get(key, id));
+        }
+        RB_GC_GUARD(instance_variables);
+    }
+    rb_obj_freeze(stored_key);
+    return stored_key;
+}
+
 typedef struct {
     int fd;
     ssize_t result;
@@ -244,6 +270,7 @@ Init_farce(void)
     containers_init_exchanger(mInternal);
     containers_init_flag(mInternal);
     containers_init_lock(mInternal);
+    containers_init_lru_maps(mInternal);
     containers_init_map(mInternal);
     containers_init_priority_queue(mInternal);
     containers_init_darwin(mInternal);

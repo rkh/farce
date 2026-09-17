@@ -9,11 +9,9 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     class Signal < JVMExtension::QueueSignal
-      MAXIMUM_TIMEOUT    = (2**63) - 1
       NANOSECONDS        = java.util.concurrent.TimeUnit::NANOSECONDS
       READABLE           = IO::READABLE
-      INTERRUPT_MASK     = { Exception => :never }.freeze
-      private_constant :MAXIMUM_TIMEOUT, :NANOSECONDS, :READABLE, :INTERRUPT_MASK
+      private_constant :NANOSECONDS, :READABLE
 
       def initialize
         super
@@ -73,21 +71,35 @@ module Farce
         current = generation
         return current unless current == observed
 
-        @thread_waiters.increment_and_get
+        deadline = Clock.now + timeout if timeout
+        registered = false
         begin
-          return await_advance(observed) unless timeout
+          Thread.handle_interrupt(INTERRUPT_MASK) do
+            @thread_waiters.increment_and_get
+            registered = true
+          end
+          loop do
+            current = generation
+            return current unless current == observed
 
-          nanoseconds =
-            if timeout >= MAXIMUM_TIMEOUT.fdiv(1_000_000_000)
-              MAXIMUM_TIMEOUT
-            else
-              (timeout * 1_000_000_000).ceil
+            remaining = deadline - Clock.now if deadline
+            return yield if remaining && !remaining.positive?
+
+            # Java Phaser waits do not deliver Ruby cancellation until they return.
+            # Retry bounded slices without shortening the caller's deadline.
+            interval = LeaseWaiting.wait_interval(remaining)
+            begin
+              return await_advance_interruptibly(observed, (interval * 1_000_000_000).ceil, NANOSECONDS)
+            rescue Java::JavaUtilConcurrent::TimeoutException
+              # A positive Ruby sleep delivers :on_blocking interrupts too.
+              # JRuby optimizes sleep(0) without entering a blocking region.
+              sleep 0.000001
             end
-          await_advance_interruptibly(observed, nanoseconds, NANOSECONDS)
-        rescue Java::JavaUtilConcurrent::TimeoutException
-          yield if block_given?
+          end
         ensure
-          @thread_waiters.decrement_and_get
+          Thread.handle_interrupt(INTERRUPT_MASK) do
+            @thread_waiters.decrement_and_get if registered
+          end
         end
       end
 

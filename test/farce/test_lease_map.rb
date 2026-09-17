@@ -846,6 +846,133 @@ module Farce
       assert_raises(ArgumentError) { klass.new(scope: :invalid) { {} } }
     end
 
+    def test_store_if_absent_obeys_ownership_and_resource_validation
+      map_classes.each do |klass|
+        map = klass.new { { existing: [] } }
+        assert_raises(LocalJumpError) { map.store_if_absent(:existing) }
+        assert_raises(OwnershipError) { map.store_if_absent(:missing) { flunk "constructor ran without scope" } }
+        assert_raises(OwnershipError) { map.store_if_absent(:existing) { flunk "existing constructor ran" } }
+        map.checkout(:existing) do |resource|
+          assert_same resource, map.store_if_absent(:existing) { flunk "existing constructor ran" }
+        end
+        map.auto_lease do
+          [nil, true, false].each do |invalid|
+            assert_raises(ArgumentError) { map.store_if_absent(:missing) { invalid } }
+            refute map.key?(:missing)
+          end
+          resource = map.store_if_absent(:missing) { [:created] }
+
+          assert_equal [:created], resource
+          assert_same resource, map[:missing]
+          assert map.owned?(:missing)
+          assert_same resource, map.store_if_absent(:missing) { flunk "constructor repeated" }
+        end
+        assert map.available?(:missing)
+      end
+    end
+
+    def test_store_if_absent_coordinates_constructors_and_assignments
+      map_classes.each do |klass|
+        map         = klass.new { {} }
+        entered     = ::Queue.new
+        release     = ::Queue.new
+        created     = ::Queue.new
+        leave_scope = ::Queue.new
+        calls       = Counter.new
+        owner       = Thread.new do
+          map.auto_lease do
+            resource = map.store_if_absent(:key) do
+              calls.increment
+              entered << true
+              release.pop
+              [:created]
+            end
+            created << resource.dup
+            leave_scope.pop
+          end
+        end
+        entered.pop
+        waiter = Thread.new do
+          map.auto_lease do
+            map.store_if_absent(:key) do
+              calls.increment
+              [:duplicate]
+            end.dup
+          end
+        end
+        writer = Thread.new { map[:key] = [:replacement] }
+
+        refute waiter.join(0.01), "competing constructor did not wait"
+        refute writer.join(0.01), "assignment did not wait for construction"
+        map[:other] = [:unrelated]
+
+        assert_equal [:unrelated], map.checkout(:other, &:dup)
+        refute map.key?(:key)
+        assert_nil map.delete(:key)
+        map.clear
+        release << true
+
+        assert_equal [:created], created.pop
+        assert_equal 1, calls.value
+        leave_scope << true
+        owner.value
+        writer.value
+
+        assert_includes [[:created], [:replacement]], waiter.value
+        assert_equal 1, calls.value
+        assert_equal [:replacement], map.checkout(:key, &:dup)
+      ensure
+        owner&.kill&.join
+        waiter&.kill&.join
+        writer&.kill&.join
+      end
+    end
+
+    def test_store_if_absent_cancellation_recursion_and_retirement
+      map_classes.each do |klass|
+        map = klass.new { {} }
+        entered = ::Queue.new
+        owner = Thread.new do
+          map.auto_lease do
+            map.store_if_absent(:key) do
+              entered << true
+              sleep
+            end
+          end
+        end
+        entered.pop
+        owner.kill.join
+
+        refute map.key?(:key)
+        map.auto_lease do
+          assert_raises(ThreadError) { map.store_if_absent(:key) { map.store_if_absent(:key) { [] } } }
+          assert_raises(ThreadError) { map.store_if_absent(:key) { map[:key] = [] } }
+          assert_raises(RuntimeError) { map.store_if_absent(:key) { raise "failed" } }
+          assert_equal :left, catch(:leave) { map.store_if_absent(:key) { throw :leave, :left } }
+          assert_equal [], map.store_if_absent(:key) { [] }
+          map.lease_for(:key).retire
+
+          assert_equal [:new], map.store_if_absent(:key) { [:new] }
+        end
+        assert map.available?(:key)
+      ensure
+        owner&.kill&.join
+      end
+    end
+
+    def test_store_if_absent_creates_resource_from_another_ractor
+      map = Farce::LeaseMap.new { {} }
+      worker = Ractor.new(map) do |shared|
+        shared.auto_lease do
+          shared.store_if_absent(:key) { [:worker] } << :changed
+          :done
+        end
+      end
+
+      assert_equal :done, ractor_value(worker)
+      assert_equal %i[worker changed], map.checkout(:key, &:dup)
+    end
+
     private
 
     def map_classes = MAP_CLASSES

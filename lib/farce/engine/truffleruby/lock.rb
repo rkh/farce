@@ -11,8 +11,7 @@ module Farce
     # remains mutable after Farce::Shareable freezes the public subclass.
     class Lock < Mutex
       BASIC_OBJECT_EQUAL_METHOD = BasicObject.instance_method(:equal?)
-      INTERRUPT_MASK = { Exception => :never }.freeze
-      private_constant :BASIC_OBJECT_EQUAL_METHOD, :INTERRUPT_MASK
+      private_constant :BASIC_OBJECT_EQUAL_METHOD
 
       def initialize
         @farce_owner_thread = TruffleRuby::AtomicReference.new(nil)

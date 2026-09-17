@@ -30,6 +30,19 @@ module Farce
     #   @return [BasicObject] `value`.
     #   @abstract
     #
+    # @!method store_if_absent(key)
+    #   Read an existing value or construct and store a value for an absent key.
+    #   Existing nil and false values count as present when the implementation permits them.
+    #   The block runs without holding a map-wide lock. Implementations document their
+    #   coordination guarantees, ownership requirements, and optional timeout support.
+    #   A later removal or eviction can cause another call to construct a new value.
+    #   @param key [BasicObject] The key to look up or store.
+    #   @yield Called without arguments when the key is absent.
+    #   @yieldreturn [BasicObject] The value to store and return.
+    #   @return [BasicObject] The existing or newly constructed value.
+    #   @raise [LocalJumpError] If no block is given.
+    #   @abstract
+    #
     # @!method clear
     #   Remove all entries from the map.
     #   @return [self]

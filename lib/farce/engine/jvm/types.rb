@@ -108,9 +108,6 @@ module Farce
     end
 
     class JVMOperationGuard
-      TEARDOWN_INTERRUPT_MASK = { Exception => :never }.freeze
-      private_constant :TEARDOWN_INTERRUPT_MASK
-
       def initialize(synchronized:, label:, recursive_error: nil)
         @lock            = JVMContainers::ReentrantLock.new if synchronized
         @label           = label
@@ -119,7 +116,10 @@ module Farce
       end
 
       def synchronize(&)
-        current = Thread.current
+        # JRuby exposes a distinct Ruby Thread wrapper to sibling Fibers on the
+        # same Java thread. Normalize it before checking logical ownership so a
+        # reentrant Java lock cannot admit a sibling while callbacks hold state.
+        current = Internal.storage_thread(Thread.current)
         if JVMContainers.identical?(@owner, current)
           message = @recursive_error == ThreadError ? "recursive #{@label} access" :
             "container cannot be modified during comparison"
@@ -133,7 +133,7 @@ module Farce
             @owner = current
             yield
           ensure
-            Thread.handle_interrupt(TEARDOWN_INTERRUPT_MASK) { @owner = nil }
+            Thread.handle_interrupt(INTERRUPT_MASK) { @owner = nil }
           end
         end
       end
@@ -157,7 +157,7 @@ module Farce
         @owner = current
         yield
       ensure
-        Thread.handle_interrupt(TEARDOWN_INTERRUPT_MASK) do
+        Thread.handle_interrupt(INTERRUPT_MASK) do
           if @lock.isHeldByCurrentThread
             @owner = nil
             @lock.unlock

@@ -33,6 +33,8 @@ module Farce
     end
 
     StrictAtom    = Atom
+    StrictLFUMap  = ShareableLFUMap
+    StrictLRUMap  = ShareableLRUMap
     StrictTreeMap = ShareableTreeMap
 
     autoload :Lease,                "farce/engine/ruby/shared/lease"
@@ -87,3 +89,5 @@ module Farce
     patch[Ractor::Port, :receive, signature: "...", schedule: "self"] if RUBY_VERSION >= "4"
   end
 end
+
+require "farce/engine/ruby/key_lock_map"

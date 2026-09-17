@@ -14,10 +14,17 @@ module Farce
     class TreeMap < Abstract::TreeMap
       include Scoped
 
+      State = Data.define(:map, :key_locks)
+      private_constant :State
+
       private
 
-      def internal_map          = scoped_value
-      def new_scoped_value(...) = Internal::TreeMap.new(...)
+      def internal_map          = scoped_value.map
+      def with_key_lock(key, &) = scoped_value.key_locks.synchronize(key, &)
+
+      def new_scoped_value(...)
+        State.new(Internal::TreeMap.new(...), Internal::OrderedKeyLockMap.new)
+      end
     end
   end
 end

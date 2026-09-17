@@ -8,8 +8,7 @@ module Farce
     # Coordinates an update block for one logical map key.
     class MapKeyReservation
       BASIC_OBJECT_EQUAL_METHOD = BasicObject.instance_method(:equal?)
-      INTERRUPT_MASK            = { Exception => :never }.freeze
-      private_constant :BASIC_OBJECT_EQUAL_METHOD, :INTERRUPT_MASK
+      private_constant :BASIC_OBJECT_EQUAL_METHOD
 
       def initialize
         @mutex        = Mutex.new
@@ -31,7 +30,7 @@ module Farce
               Thread.handle_interrupt(INTERRUPT_MASK) do
                 @reserved     = true
                 @owner_fiber  = Fiber.current
-                @owner_thread = Thread.current
+                @owner_thread = Internal.storage_thread(Thread.current)
                 yield if block_given?
               end
               return :acquired
@@ -40,9 +39,7 @@ module Farce
             @signal ||= Signal.new
             [@signal, @signal.generation]
           end
-          timeout = deadline - Clock.now if deadline
-          return :timed_out if timeout && !timeout.positive?
-          return :timed_out unless signal.wait(observed, timeout:) { false }
+          return :timed_out unless ReservationWaiting.wait(signal, observed, deadline)
         end
       end
 
@@ -78,7 +75,7 @@ module Farce
           raise ThreadError, "deadlock; recursive map access during an update"
         end
         scheduler = Fiber.scheduler if Fiber.respond_to?(:scheduler)
-        owner_thread = BASIC_OBJECT_EQUAL_METHOD.bind_call(@owner_thread, Thread.current)
+        owner_thread = BASIC_OBJECT_EQUAL_METHOD.bind_call(@owner_thread, Internal.storage_thread(Thread.current))
         return unless owner_thread && !scheduler
 
         raise ThreadError, "deadlock; map update is owned by another unscheduled fiber"
@@ -88,8 +85,7 @@ module Farce
 
     module MapKeyCoordination
       BASIC_OBJECT_EQUAL_METHOD = BasicObject.instance_method(:equal?)
-      INTERRUPT_MASK = { Exception => :never }.freeze
-      private_constant :BASIC_OBJECT_EQUAL_METHOD, :INTERRUPT_MASK
+      private_constant :BASIC_OBJECT_EQUAL_METHOD
 
       def initialize_key_coordination
         @reservation_mutex        = Mutex.new
@@ -183,9 +179,7 @@ module Farce
           end
           return result if result
 
-          timeout = deadline - Clock.now if deadline
-          return :timed_out if timeout && !timeout.positive?
-          return :timed_out unless @reservation_signal.wait(generation, timeout:) { false }
+          return :timed_out unless ReservationWaiting.wait(@reservation_signal, generation, deadline)
         end
       end
 
@@ -206,7 +200,7 @@ module Farce
           @reservation_mutex.synchronize do
             Thread.handle_interrupt(INTERRUPT_MASK) do
               @reservation_owner_fiber  = Fiber.current
-              @reservation_owner_thread = Thread.current
+              @reservation_owner_thread = Internal.storage_thread(Thread.current)
               yield
             ensure
               @reservation_owner_fiber = @reservation_owner_thread = nil
@@ -220,7 +214,8 @@ module Farce
           raise ThreadError, "recursive map access from key equality"
         end
         scheduler    = Fiber.scheduler if Fiber.respond_to?(:scheduler)
-        owner_thread = BASIC_OBJECT_EQUAL_METHOD.bind_call(@reservation_owner_thread, Thread.current)
+        owner_thread = BASIC_OBJECT_EQUAL_METHOD.bind_call(@reservation_owner_thread,
+          Internal.storage_thread(Thread.current))
         return unless owner_thread && !scheduler
 
         raise ThreadError, "deadlock; map key equality is owned by another unscheduled fiber"

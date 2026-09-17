@@ -15,7 +15,7 @@ module Farce
         end
       end
 
-      SEGMENTS = { "io" => "IO" }.freeze
+      SEGMENTS = { "io" => "IO", "lru" => "LRU", "lfu" => "LFU" }.freeze
       private_constant :SEGMENTS
 
       def self.inflect(name, **inflections)

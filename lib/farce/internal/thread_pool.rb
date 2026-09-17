@@ -60,7 +60,7 @@ module Farce
         def cancel_and_wait
           # Skip a job that has not started. Otherwise wait for its block to finish
           # before the caller can clean up resources that the block still uses.
-          Thread.handle_interrupt(Exception => :never) do
+          Thread.handle_interrupt(INTERRUPT_MASK) do
             skipped = @mutex.synchronize do
               unless @started
                 @cancelled = true
@@ -103,7 +103,7 @@ module Farce
         raise IOError, "thread pool is closed" unless admitted
         job = Job.new(operation)
         submitted = false
-        Thread.handle_interrupt(Exception => :never) do
+        Thread.handle_interrupt(INTERRUPT_MASK) do
           submit(job)
           submitted = true
         end

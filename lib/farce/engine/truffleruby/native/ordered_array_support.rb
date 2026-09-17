@@ -9,20 +9,18 @@ module Farce
     # Bound primitive methods protect stored String snapshots and identity
     # checks from user overrides.
     module TruffleOrderedArraySupport
-      INTERRUPT_MASK = { Exception => :never }.freeze
-      INTERRUPT_IMMEDIATE = { Exception => :immediate }.freeze
-
-      BASIC_OBJECT_EQUAL = BasicObject.instance_method(:equal?)
-      CLASS_ALLOCATE = Class.instance_method(:allocate)
-      OBJECT_CLASS = Object.instance_method(:class)
-      OBJECT_FREEZE = Object.instance_method(:freeze)
-      OBJECT_FROZEN = Object.instance_method(:frozen?)
-      OBJECT_INSTANCE_VARIABLES = Object.instance_method(:instance_variables)
+      INTERRUPT_IMMEDIATE          = { Exception => :immediate }.freeze
+      BASIC_OBJECT_EQUAL           = BasicObject.instance_method(:equal?)
+      CLASS_ALLOCATE               = Class.instance_method(:allocate)
+      OBJECT_CLASS                 = Object.instance_method(:class)
+      OBJECT_FREEZE                = Object.instance_method(:freeze)
+      OBJECT_FROZEN                = Object.instance_method(:frozen?)
+      OBJECT_INSTANCE_VARIABLES    = Object.instance_method(:instance_variables)
       OBJECT_INSTANCE_VARIABLE_GET = Object.instance_method(:instance_variable_get)
       OBJECT_INSTANCE_VARIABLE_SET = Object.instance_method(:instance_variable_set)
-      OBJECT_IS_A = Object.instance_method(:is_a?)
-      STRING_INITIALIZE_COPY = String.instance_method(:initialize_copy)
-      STRING_UMINUS = String.instance_method(:-@)
+      OBJECT_IS_A                  = Object.instance_method(:is_a?)
+      STRING_INITIALIZE_COPY       = String.instance_method(:initialize_copy)
+      STRING_UMINUS                = String.instance_method(:-@)
 
       private_constant :BASIC_OBJECT_EQUAL, :CLASS_ALLOCATE, :OBJECT_CLASS, :OBJECT_FREEZE,
         :OBJECT_FROZEN, :OBJECT_INSTANCE_VARIABLES,
@@ -31,9 +29,9 @@ module Farce
 
       private
 
-      def primitive_freeze(object) = OBJECT_FREEZE.bind_call(object)
-      def primitive_frozen?(object) = OBJECT_FROZEN.bind_call(object)
-      def primitive_is_a?(object, klass) = OBJECT_IS_A.bind_call(object, klass)
+      def primitive_freeze(object)          = OBJECT_FREEZE.bind_call(object)
+      def primitive_frozen?(object)         = OBJECT_FROZEN.bind_call(object)
+      def primitive_is_a?(object, klass)    = OBJECT_IS_A.bind_call(object, klass)
       def primitive_identical?(left, right) = BASIC_OBJECT_EQUAL.bind_call(left, right)
 
       def canonical_ordered_key(key)

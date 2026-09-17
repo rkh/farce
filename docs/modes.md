@@ -256,6 +256,8 @@ The same choices appear in several Farce APIs. Containers normally default to `:
 | `Farce::Vector` | `new`, `push`, `store`, `update`, and other replacement operations | Element values. |
 | `Farce::Map`, `Farce::WeakKeyMap` | `new`, `store`, `update`, and other replacement operations | Values only. Keys must already be shareable. |
 | `Farce::TreeMap` | `new` | Values only. Keys follow the tree map's own rules. |
+| `Farce::LRUMap` | `new` | Values only. Individual value hits and writes update eviction order. |
+| `Farce::LFUMap` | `new` | Values only. Individual value hits and writes update eviction frequency. |
 | `Farce::Scheduler` | `schedule` | Task arguments, with automatic local transfer enabled by default. |
 | `Farce::Pool` | `schedule` | Task arguments. `:local` is rejected. |
 

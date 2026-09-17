@@ -15,10 +15,16 @@ module Farce
 
     Lock = Mutex
 
-    autoload :WeakMap,      "farce/engine/shared/unshared_weak_map"
-    autoload :WeakKeyMap,   "farce/engine/shared/unshared_weak_map"
-    autoload :WeakValueMap, "farce/engine/shared/unshared_weak_map"
-    autoload :LeaseWaiting, "farce/engine/jruby/lease_waiting"
+    autoload :WeakMap,         "farce/engine/shared/unshared_weak_map"
+    autoload :WeakKeyMap,      "farce/engine/shared/unshared_weak_map"
+    autoload :WeakValueMap,    "farce/engine/shared/unshared_weak_map"
+    autoload :LeaseWaiting,    "farce/engine/jruby/lease_waiting"
+    autoload :LFUMap,          "farce/engine/jruby/bounded_map"
+    autoload :LRUMap,          "farce/engine/jruby/bounded_map"
+    autoload :ShareableLFUMap, "farce/engine/jruby/bounded_map"
+    autoload :ShareableLRUMap, "farce/engine/jruby/bounded_map"
+    autoload :StrictLFUMap,    "farce/engine/jruby/bounded_map"
+    autoload :StrictLRUMap,    "farce/engine/jruby/bounded_map"
 
     java_import org.jruby.RubyProc
     java_import org.jruby.runtime.Block

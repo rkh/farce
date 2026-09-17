@@ -7,14 +7,13 @@ module Farce
   module Internal # :nodoc: all
     # Coordinates ownership and lifecycle for one leased resource.
     class LeaseState
-      INTERRUPT_MASK = { Exception => :never }.freeze
-      OWNED_RESOURCES = Object.new.freeze
+      OWNED_RESOURCES         = Object.new.freeze
       SCOPE_MANAGED_RESOURCES = Object.new.freeze
-      AVAILABLE      = :available
-      EXPLICIT       = :explicit
-      BLOCK          = :block
-      RETIRED        = :retired
-      private_constant :INTERRUPT_MASK, :OWNED_RESOURCES, :SCOPE_MANAGED_RESOURCES,
+      AVAILABLE               = :available
+      EXPLICIT                = :explicit
+      BLOCK                   = :block
+      RETIRED                 = :retired
+      private_constant :OWNED_RESOURCES, :SCOPE_MANAGED_RESOURCES,
         :AVAILABLE, :EXPLICIT, :BLOCK, :RETIRED
 
       def initialize(resource)

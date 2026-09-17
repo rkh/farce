@@ -7,9 +7,8 @@ module Farce
   module Internal # :nodoc: all
     # Coordinates capacity, ownership, waiting, and cleanup for a resource pool.
     class LeasePoolState
-      INTERRUPT_MASK = { Exception => :never }.freeze
-      OWNERSHIP      = Object.new.freeze
-      private_constant :INTERRUPT_MASK, :OWNERSHIP
+      OWNERSHIP = Object.new.freeze
+      private_constant :OWNERSHIP
 
       attr_reader :max_size
 

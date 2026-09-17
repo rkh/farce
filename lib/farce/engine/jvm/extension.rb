@@ -14,12 +14,14 @@ module Farce
       if RUBY_ENGINE == "jruby"
         require "java"
         require jar
+        BoundedMap    = Java::OrgFarce::BoundedMap
         PriorityKey   = Java::OrgFarce::PriorityKey
         PriorityQueue = Java::OrgFarce::PriorityQueue
         QueueFailure  = Java::OrgFarce::PriorityQueue::Failure
         QueueSignal   = Java::OrgFarce::QueueSignal
       else
         Java.add_to_classpath(jar)
+        BoundedMap    = Java.type("org.farce.BoundedMap")
         PriorityKey   = Java.type("org.farce.PriorityKey")
         PriorityQueue = Java.type("org.farce.PriorityQueue")
         QueueFailure  = Java.type("org.farce.PriorityQueue$Failure")

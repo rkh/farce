@@ -21,10 +21,8 @@ module Farce
       end
 
       INITIALIZATION_LOCK = Mutex.new
-      INITIALIZE_INTERRUPT_MASK = { Exception => :never }.freeze
       State = Data.define(:tree)
-      private_constant :Key, :Value, :KEY_COMPARATOR, :INITIALIZATION_LOCK,
-        :INITIALIZE_INTERRUPT_MASK, :State
+      private_constant :Key, :Value, :KEY_COMPARATOR, :INITIALIZATION_LOCK, :State
 
       def initialize(entries = nil)
         check_uninitialized
@@ -40,6 +38,8 @@ module Farce
           publish_initialization(guard, state)
         end
       end
+
+      def prepare_key(key) = canonical_key(key)
 
       def [](key)
         key = canonical_key(key)
@@ -110,7 +110,7 @@ module Farce
           begin
             @state.tree.put(wrapped_key, Value.new(value))
           ensure
-            Thread.handle_interrupt(INITIALIZE_INTERRUPT_MASK) do
+            Thread.handle_interrupt(INTERRUPT_MASK) do
               wrapped_key.mutation_owner = nil
             end
           end
@@ -189,7 +189,7 @@ module Farce
 
       def publish_initialization(guard, state)
         INITIALIZATION_LOCK.synchronize do
-          Thread.handle_interrupt(INITIALIZE_INTERRUPT_MASK) do
+          Thread.handle_interrupt(INTERRUPT_MASK) do
             raise "tree map is already initialized" if defined?(@state)
             raise FrozenError, "can't modify frozen #{self.class}" if
               JVMContainers.frozen_object?(self)
@@ -235,7 +235,7 @@ module Farce
           begin
             tree.put(wrapped_key, Value.new(value))
           ensure
-            Thread.handle_interrupt(INITIALIZE_INTERRUPT_MASK) do
+            Thread.handle_interrupt(INTERRUPT_MASK) do
               wrapped_key.mutation_owner = nil
             end
           end

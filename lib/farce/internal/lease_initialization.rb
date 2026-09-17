@@ -7,9 +7,6 @@ module Farce
   module Internal # :nodoc: all
     # Coordinates lazy Lease construction without running user code under a storage lock.
     class LeaseInitialization
-      INTERRUPT_MASK = { Exception => :never }.freeze
-      private_constant :INTERRUPT_MASK
-
       def initialize
         @mutex        = Mutex.new
         @signal       = Signal.new

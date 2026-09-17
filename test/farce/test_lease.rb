@@ -598,13 +598,13 @@ module Farce
 
     def test_interrupting_local_initializer_releases_the_reservation
       calls = Counter.new
-      entered = Flag.new
-      release = Flag.new
+      entered = Farce::Queue.new
+      release = Farce::Queue.new
       lease = Local::Lease.new do
         attempt = calls.increment.value
         if attempt == 1
-          entered.set
-          Thread.pass until release.value
+          entered << true
+          release.pop
         end
         []
       end
@@ -613,7 +613,7 @@ module Farce
       rescue RuntimeError => e
         e
       end
-      wait_until { entered.value }
+      entered.pop
       waiter = Thread.new { lease.checkout(timeout: 2) { :acquired } }
       wait_until_initialization_waiters(lease, 1)
 
@@ -625,7 +625,7 @@ module Farce
       assert_equal :acquired, waiter.value
       assert_equal 2, calls.value
     ensure
-      release&.set
+      release << true if release
       initializer&.kill&.join
       waiter&.kill&.join
     end
