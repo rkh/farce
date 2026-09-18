@@ -457,7 +457,7 @@ manager.unwrap(manager.wrap(explicit)).equal?(explicit) # => true
 explicit.claimed? # => false
 ```
 
-This distinction is what makes forwarding safe. Containers automatically open the envelopes they created to implement a mode. They preserve envelopes supplied as application data. Ports use the underlying port's native copy and move paths for those two modes, and a mode manager for the additional behaviors.
+Containers automatically open the envelopes they created to implement a mode. They preserve envelopes supplied as application data. Ports use the underlying port's native copy and move paths for those two modes, and a mode manager for the additional behaviors.
 
 ### Add modes to your own abstraction
 

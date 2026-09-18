@@ -276,7 +276,7 @@ module Farce
       def synchronized? = true
     end
 
-    # JVM engines do not expose CRuby's Ractor-sharing distinction.
+    # No Ractors, no problems :)
     ShareableTreeMap = TreeMap
 
     private_constant :JVMTreeMapBackend

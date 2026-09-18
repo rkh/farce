@@ -42,7 +42,7 @@ Farce's local containers let you share one object while keeping separate content
 
 ## Introduction: What Ruby gives you
 
-Ruby has several places to store execution-local state. `Thread.current.thread_variable_set` stores a value for an entire thread. Despite its name, `Thread.current[:key]` stores a value for the current fiber. Ruby's [thread documentation](https://docs.ruby-lang.org/en/4.0/Thread.html#class-Thread-label-Fiber-local+vs.+Thread-local) explains this distinction.
+Ruby has several places to store execution-local state. `Thread.current.thread_variable_set` stores a value for an entire thread. Despite its name, `Thread.current[:key]` stores a value for the current fiber.
 
 ```ruby
 Thread.current.thread_variable_set(:scopes_example, :thread_value)

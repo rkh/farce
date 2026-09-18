@@ -108,54 +108,22 @@ class TestConfig < Test
 
   def test_configured_constructors_run_in_workers_and_allow_overrides
     return if RUBY_ENGINE == "truffleruby"
-    ["c.fiber_scheduler = CustomScheduler", "c.fiber_scheduler { CustomScheduler.new }"].each do |setting|
-      output, error, status = ruby_subprocess(<<~CODE)
-        require "farce"
-        class CustomScheduler
-          def self.new
-            scheduler = Farce.const_get(:Internal)::FiberScheduler.new
-            scheduler.instance_variable_set(:@constructor_name, name)
-            scheduler.instance_variable_set(:@created_in_worker, !(Farce::Ractor.main? && Thread.current == Thread.main))
-            scheduler
-          end
-        end
-        class OverrideScheduler < CustomScheduler
-        end
-        Farce.config { |c| #{setting} }
-        results = Farce::Queue.new
-        scheduler = Farce::Scheduler.new
-        abort "custom scheduler not recognized" unless scheduler.wraps_external?
-        worker = scheduler.launch_thread
-        scheduler.schedule(results) do |queue|
-          current = Fiber.scheduler
-          queue << [current.instance_variable_get(:@constructor_name), current.instance_variable_get(:@created_in_worker)]
-        end
-        abort "default ignored" unless results.pop(timeout: 2) == ["CustomScheduler", true]
-        scheduler.close
-        worker.join
-        scheduler = Farce::Scheduler.create(Thread) { OverrideScheduler.new }
-        scheduler.schedule(results) { |queue| queue << Fiber.scheduler.instance_variable_get(:@constructor_name) }
-        abort "override ignored" unless results.pop(timeout: 2) == "OverrideScheduler"
-        scheduler.close
-        [false, true].each do |override|
-          constructor = proc { OverrideScheduler.new } if override
-          pool = Farce::Pool.new(max_size: 1, shrink_after: nil, &constructor)
-          pool.schedule(results) do |queue|
-            current = Fiber.scheduler
-            queue << [current.instance_variable_get(:@constructor_name), current.instance_variable_get(:@created_in_worker)]
-          end
-          expected = override ? "OverrideScheduler" : "CustomScheduler"
-          abort "pool constructor ignored" unless results.pop(timeout: 2) == [expected, true]
-          pool.close
-          sleep 0.001 until pool.state == :closed
-          raise pool.error if pool.error
-        end
-        puts "ok"
-      CODE
 
-      assert_predicate status, :success?, error
-      assert_equal "ok", output.strip
+    ["c.fiber_scheduler = CustomScheduler", "c.fiber_scheduler { CustomScheduler.new }"].each do |setting|
+      %i[thread pool].product([false, true]).each do |executor, override|
+        assert_configured_constructor(setting, executor, override)
+      end
     end
+  end
+
+  def test_configured_worker_results_copy_across_ractors
+    return if RUBY_ENGINE == "truffleruby"
+    if RUBY_ENGINE == "ruby" && RUBY_VERSION.start_with?("4.0.") && Gem.win_platform? &&
+        ENV["FARCE_RUN_QUARANTINED_TESTS"] != "1"
+      skip "Windows CRuby 4.0 Vault copy regression runs in the non-blocking copy-transfer CI job"
+    end
+
+    assert_copied_worker_results
   end
 
   def with_thread_pool_env(main, other)
@@ -289,5 +257,100 @@ class TestConfig < Test
 
     assert_predicate status, :success?, error
     assert_equal "ok", output.strip
+  end
+
+  private def assert_configured_constructor(setting, executor, override)
+    output, error, status = ruby_subprocess(<<~CODE)
+      require "farce"
+      class CustomScheduler
+        def self.new
+          scheduler = Farce.const_get(:Internal)::FiberScheduler.new
+          scheduler.instance_variable_set(:@constructor_name, name)
+          scheduler.instance_variable_set(:@created_in_worker, !(Farce::Ractor.main? && Thread.current == Thread.main))
+          scheduler
+        end
+      end
+      class OverrideScheduler < CustomScheduler
+      end
+      Farce.config { |c| #{setting} }
+      results = Farce::Queue.new
+      constructor = proc { OverrideScheduler.new } if #{override}
+      if #{executor == :thread}
+        if #{override}
+          scheduler = Farce::Scheduler.create(Thread, &constructor)
+        else
+          scheduler = Farce::Scheduler.new
+          worker = scheduler.launch_thread
+        end
+        abort "custom scheduler not recognized" unless scheduler.wraps_external?
+      else
+        scheduler = Farce::Pool.new(max_size: 1, shrink_after: nil, &constructor)
+      end
+      scheduler.schedule(results) do |queue|
+        current = Fiber.scheduler
+        result = [current.instance_variable_get(:@constructor_name), current.instance_variable_get(:@created_in_worker)]
+        queue << Farce::Ractor.make_shareable(result)
+      end
+      expected = #{override ? '"OverrideScheduler"' : '"CustomScheduler"'}
+      abort "constructor ignored" unless results.pop(timeout: 2) == [expected, true]
+      scheduler.close
+      worker ? worker.join : (sleep 0.001 until scheduler.state == :closed)
+      raise scheduler.error if scheduler.error
+      puts "ok"
+    CODE
+
+    assert_predicate status, :success?, "#{setting}, #{executor}, override=#{override}: #{error}"
+    assert_equal "ok", output.strip
+  end
+
+  private def assert_copied_worker_results
+    ["c.fiber_scheduler = CustomScheduler", "c.fiber_scheduler { CustomScheduler.new }"].each do |setting|
+      output, error, status = ruby_subprocess(<<~CODE)
+        require "farce"
+        class CustomScheduler
+          def self.new
+            scheduler = Farce.const_get(:Internal)::FiberScheduler.new
+            scheduler.instance_variable_set(:@constructor_name, name)
+            scheduler.instance_variable_set(:@created_in_worker, !(Farce::Ractor.main? && Thread.current == Thread.main))
+            scheduler
+          end
+        end
+        class OverrideScheduler < CustomScheduler
+        end
+        Farce.config { |c| #{setting} }
+        results = Farce::Queue.new
+        scheduler = Farce::Scheduler.new
+        abort "custom scheduler not recognized" unless scheduler.wraps_external?
+        worker = scheduler.launch_thread
+        scheduler.schedule(results) do |queue|
+          current = Fiber.scheduler
+          queue << [current.instance_variable_get(:@constructor_name), current.instance_variable_get(:@created_in_worker)]
+        end
+        abort "default ignored" unless results.pop(timeout: 2) == ["CustomScheduler", true]
+        scheduler.close
+        worker.join
+        scheduler = Farce::Scheduler.create(Thread) { OverrideScheduler.new }
+        scheduler.schedule(results) { |queue| queue << Fiber.scheduler.instance_variable_get(:@constructor_name) }
+        abort "override ignored" unless results.pop(timeout: 2) == "OverrideScheduler"
+        scheduler.close
+        [false, true].each do |override|
+          constructor = proc { OverrideScheduler.new } if override
+          pool = Farce::Pool.new(max_size: 1, shrink_after: nil, &constructor)
+          pool.schedule(results) do |queue|
+            current = Fiber.scheduler
+            queue << [current.instance_variable_get(:@constructor_name), current.instance_variable_get(:@created_in_worker)]
+          end
+          expected = override ? "OverrideScheduler" : "CustomScheduler"
+          abort "pool constructor ignored" unless results.pop(timeout: 2) == [expected, true]
+          pool.close
+          sleep 0.001 until pool.state == :closed
+          raise pool.error if pool.error
+        end
+        puts "ok"
+      CODE
+
+      assert_predicate status, :success?, error
+      assert_equal "ok", output.strip
+    end
   end
 end

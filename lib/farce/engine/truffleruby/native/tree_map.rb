@@ -33,7 +33,7 @@ module Farce
       end
     end
 
-    # Native TruffleRuby has no Ractor-sharing distinction.
+    # No Ractors, no problems :)
     ShareableTreeMap = TreeMap
   end
 end

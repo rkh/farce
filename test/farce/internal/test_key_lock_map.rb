@@ -88,11 +88,14 @@ module Farce
         locks = KeyLockMap.new(registry_class: Farce::Map)
         events = Farce::Queue.new
         cancel = Farce::Queue.new
-        owner = Ractor.new(locks, events, cancel) do |shared, reports, cancellation|
+        hold = Farce::Queue.new
+        owner = Ractor.new(locks, events, cancel, hold) do |shared, reports, cancellation, blocker|
           thread = Thread.new do
             shared.synchronize(:key) do
               reports.push(:owned)
-              sleep
+              # https://bugs.ruby-lang.org/issues/21537
+              # Indefinite Thread#sleep inside a Ractor can stall CRuby's GC barrier on Windows.
+              blocker.pop
             end
           end
           cancellation.pop
@@ -125,6 +128,7 @@ module Farce
         assert_equal :released, locks.synchronize(:key) { :released }
       ensure
         cancel&.push(true)
+        hold&.push(true)
       end
 
       def test_scheduled_fibers_wait_per_key_and_release_after_exception
