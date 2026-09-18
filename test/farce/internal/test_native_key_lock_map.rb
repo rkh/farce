@@ -267,6 +267,28 @@ module Farce
         assert_equal ObjectSpace.memsize_of(SharedKeyLockMap.allocate), baseline
       end
 
+      def test_shared_reachability_excludes_active_reservation_state
+        locks = SharedKeyLockMap.new
+        key = Key.new(1).freeze
+        reference = WeakRef.new(key)
+
+        locks.synchronize(key) do
+          reachable = ObjectSpace.reachable_objects_from(locks)
+
+          refute_includes reachable, key
+          refute_includes reachable, Fiber.current
+          refute_includes reachable, Thread.current
+          key = nil
+          GC.verify_compaction_references(double_heap: true, toward: :empty)
+
+          assert_predicate reference, :weakref_alive?
+          assert_raises(ThreadError) do
+            locks.synchronize(reference.__getobj__) { flunk "active key lost" }
+          end
+        end
+        assert_equal :recovered, locks.synchronize(Key.new(1).freeze) { :recovered }
+      end
+
       def test_canceling_a_waiter_preserves_owner_and_other_waiters
         locks = UnsharedKeyLockMap.new
         baseline = ObjectSpace.memsize_of(locks)

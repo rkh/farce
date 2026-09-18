@@ -260,10 +260,21 @@ static const rb_data_type_t unshared_key_lock_type = {
     .flags = RUBY_TYPED_FREE_IMMEDIATELY,
 };
 
+static void
+shared_key_lock_mark(void *pointer)
+{
+    /* Reservations are transient synchronization state, not part of the
+     * shareability graph. Their keys are validated before insertion, while
+     * their Fiber and Thread owners are intentionally unshareable. Excluding
+     * them from non-GC reachability also keeps concurrent Ractor shareability
+     * traversals from walking a reservation that another Ractor can remove. */
+    if (rb_during_gc()) map_mark(pointer);
+}
+
 static const rb_data_type_t shared_key_lock_type = {
     .wrap_struct_name = "Farce::Internal::SharedKeyLockMap",
     .function = {
-        .dmark = map_mark,
+        .dmark = shared_key_lock_mark,
         .dfree = map_free,
         .dsize = key_lock_memsize,
         .dcompact = map_compact,
