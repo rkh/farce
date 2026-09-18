@@ -6,6 +6,18 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     module StrictMapValues
+      def self.included(base)
+        base.class_eval do
+          alias_method :assignment_prepared, :[]=
+          alias_method :get_prepared, :get
+          alias_method :store_prepared, :store
+          alias_method :swap_prepared, :swap
+          alias_method :update_prepared, :update
+          alias_method :wait_until_changed_prepared, :wait_until_changed
+        end
+        super
+      end
+
       def initialize(initial_mapping = nil, **)
         raise TypeError, "initial mapping must be a Hash" unless initial_mapping.nil? || initial_mapping.is_a?(Hash)
         initial_mapping&.each { |key, value| check_pair(key, value) }
@@ -15,19 +27,29 @@ module Farce
       def [](key) = super(check_key(key))
 
       def []=(key, value)
-        super(check_key(key), check_value(value))
+        key = check_key(key)
+        super(key, check_value(value))
       end
 
-      def get(key, **)                = super(check_key(key), **)
-      def store(key, value, **)       = super(check_key(key), check_value(value), **)
-      def swap(key, value, **)        = super(check_key(key), check_value(value), **)
+      def get(key, **) = super(check_key(key), **)
+
+      def store(key, value, **)
+        key = check_key(key)
+        super(key, check_value(value), **)
+      end
+
+      def swap(key, value, **)
+        key = check_key(key)
+        super(key, check_value(value), **)
+      end
+
       def key?(key)                   = super(check_key(key))
       def delete(key)                 = super(check_key(key))
       def getkey(key)                 = super(check_key(key))
       def wait_until_non_nil(key, **) = super(check_key(key), **)
 
       def fetch(*arguments, &)
-        check_key(arguments.first) unless arguments.empty?
+        arguments[0] = check_key(arguments.first) unless arguments.empty?
         super
       end
 
@@ -54,6 +76,8 @@ module Farce
         super(check_key(key), check_value(expected), **)
       end
 
+      def normalize_external_key(key) = check_key(key)
+
       private
 
       def check_pair(key, value)
@@ -62,6 +86,7 @@ module Farce
       end
 
       def check_key(key)
+        key = String.instance_method(:-@).bind_call(key) if String === key && !key.frozen? && !compare_keys_by_identity?
         return key if Ractor.shareable?(key)
         raise Ractor::IsolationError, "key must be Ractor-shareable"
       end

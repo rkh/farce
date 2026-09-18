@@ -22,8 +22,14 @@ module Farce
       def internal_map          = scoped_value.map
       def with_key_lock(key, &) = scoped_value.key_locks.synchronize(key, &)
 
-      def new_scoped_value(...)
-        State.new(Internal::TreeMap.new(...), Internal::OrderedKeyLockMap.new)
+      def new_scoped_value(entries = nil, **)
+        unless Internal::KeyNormalizer.canonical_entries?(entries)
+          return State.new(Internal::TreeMap.new(entries, **), Internal::OrderedKeyLockMap.new)
+        end
+
+        map = Internal::TreeMap.new(nil, **)
+        entries.each { map[_1] = _2 }
+        State.new(map, Internal::OrderedKeyLockMap.new)
       end
     end
   end

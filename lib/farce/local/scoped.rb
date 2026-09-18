@@ -11,15 +11,40 @@ module Farce
       module EncodeWith
         # @api private
         # Called by Psych for generating YAML
-        def encode_with(coder) = super(coder).tap { it["scope"] = scope }
+        def encode_with(coder) = super.tap { it["scope"] = scope }
+      end
+
+      module Map
+        def initialize(*arguments, normalize_keys: nil, **)
+          restoring  = Internal::KeyNormalizer.restoration?(normalize_keys)
+          normalizer = Internal::KeyNormalizer.build(normalize_keys, shareable: true)
+
+          if is_a?(Abstract::ConcurrentMap)
+            @key_normalizer = normalizer
+          else
+            Internal::KeyNormalizer.install(self, normalizer, Internal::KeyNormalizer.operations_for(self))
+          end
+
+          if normalizer && !restoring && !is_a?(Abstract::LeaseMap) && !arguments.empty? && arguments.first
+            entries = arguments.first
+            raise TypeError, "initial mapping must be a Hash" if is_a?(Abstract::ConcurrentMap) && !entries.is_a?(Hash)
+            entries = convert_entries(entries) if respond_to?(:convert_entries, true)
+            canonical = Internal::KeyNormalizer.canonical_entries
+            entries.each { |key, value| canonical << [normalizer.call(key), value] }
+            arguments = arguments.dup
+            arguments[0] = canonical
+          end
+          super(*arguments, **)
+        end
       end
 
       MANAGER = ModeManager.new
-      private_constant :MANAGER, :EncodeWith
+      private_constant :MANAGER, :EncodeWith, :Map
 
       # @!visibility private
       def self.included(base)
         base.include EncodeWith if base.method_defined?(:encode_with)
+        base.include Map        if base < Abstract::Map
         super
       end
 

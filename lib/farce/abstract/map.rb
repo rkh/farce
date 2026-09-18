@@ -145,6 +145,14 @@ module Farce
     class Map
       include Enumerable
 
+      # @api private
+      def initialize_copy(other)
+        super
+        normalizer = other.instance_variable_get(:@key_normalizer)
+        return unless normalizer && !is_a?(ConcurrentMap)
+        Internal::KeyNormalizer.install(self, normalizer, Internal::KeyNormalizer.operations_for(self))
+      end
+
       # Return a two-element array containing a key and its associated value, if the key is present,
       # or nil if the key is absent.
       # @param key [BasicObject] The key to look up.
@@ -252,6 +260,8 @@ module Farce
         coder["entries"]                    = to_h
         coder["compare_values_by_identity"] = compare_values_by_identity?
         coder["compare_keys_by_identity"]   = compare_keys_by_identity?
+        normalizer = instance_variable_get(:@key_normalizer)
+        coder["normalize_keys"] = Internal::KeyNormalizer.dump(normalizer) if normalizer
         coder
       end
 
@@ -259,6 +269,10 @@ module Farce
       # Called by Psych when parsing YAML
       def init_with(coder)
         options = coder.map.except("entries").transform_keys(&:to_sym)
+        if options.key?(:normalize_keys)
+          options[:normalize_keys] =
+            Internal::KeyNormalizer.restore(options[:normalize_keys])
+        end
         initialize(coder["entries"], **options)
       end
 

@@ -204,6 +204,7 @@ module Farce
       end
 
       def with_entry(key, deadline, create:)
+        key = String.instance_method(:-@).bind_call(key) if String === key && !key.frozen? && !compare_keys_by_identity?
         @index.sweep_one
         while true
           entry, created = @index.resolve(key, deadline:, create:) do |key_reference|
@@ -262,6 +263,7 @@ module Farce
       end
 
       def wait_for_value(key, expected, deadline, fallback, non_nil:)
+        key = String.instance_method(:-@).bind_call(key) if String === key && !key.frozen? && !compare_keys_by_identity?
         while true
           @index.sweep_one
           observed         = @index.change_signal.generation

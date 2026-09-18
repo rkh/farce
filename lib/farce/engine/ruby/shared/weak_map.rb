@@ -67,14 +67,14 @@ module Farce
       end
 
       def store(key, value, timeout: nil, &fallback)
-        check_value(key, "key")
+        key = canonical_key(key)
         check_value(value, "value")
         result = await_response(deadline: timeout_deadline(timeout)) { request(:store, key, value, false) }
         result.equal?(TIMED_OUT) ? fallback&.call : value
       end
 
       def swap(key, replacement, timeout: nil, &fallback)
-        check_value(key, "key")
+        key = canonical_key(key)
         check_value(replacement, "value")
         result = await_response(deadline: timeout_deadline(timeout)) { request(:store, key, replacement, true) }
         result.equal?(TIMED_OUT) ? fallback&.call : result[1]
@@ -148,13 +148,13 @@ module Farce
       end
 
       def delete(key)
-        check_value(key, "key")
+        key = canonical_key(key)
         result = await_response(deadline: nil) { request(:delete, key) }
         result.first == :ok ? result[1] : nil
       end
 
       def getkey(key)
-        check_value(key, "key")
+        key = canonical_key(key)
         result = await_response(deadline: nil) { request(:getkey, key) }
         result.first == :ok ? result[1] : nil
       end
@@ -169,7 +169,7 @@ module Farce
       def request(action, *) = @vault.weak_map(@token, action, *)
 
       def read(key, deadline)
-        check_value(key, "key")
+        key = canonical_key(key)
         result = await_response(deadline:) { request(:read, key) }
         return TIMED_OUT if result.equal?(TIMED_OUT)
         return [false, nil] if result.first == :missing
@@ -178,7 +178,7 @@ module Farce
       end
 
       def claimed_update(key, deadline, claim:, initial: TIMED_OUT)
-        check_value(key, "key")
+        key = canonical_key(key)
         ticket = Object.new.freeze
         sent   = finished = false
 
@@ -245,7 +245,7 @@ module Farce
       end
 
       def wait_for_value(key, expected, deadline, fallback, non_nil:)
-        check_value(key, "key")
+        key = canonical_key(key)
         check_value(expected, "value")
         checked_after_timeout = false
         loop do
@@ -283,6 +283,11 @@ module Farce
 
       def values_equal?(left, right)
         compare_values_by_identity? ? left.equal?(right) : left == right
+      end
+
+      def canonical_key(key)
+        key = String.instance_method(:-@).bind_call(key) if String === key && !key.frozen? && !compare_keys_by_identity?
+        check_value(key, "key")
       end
 
       def check_value(value, name)

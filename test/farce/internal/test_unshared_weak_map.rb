@@ -190,8 +190,8 @@ module Farce
 
             assert_equal identity ? 2 : 1, map.size
             assert_equal identity ? 1 : 2, map[first]
-            assert_same first, map.getkey(first)
-            assert_same identity ? second : first, map.getkey(second)
+            assert_same identity ? first : -first, map.getkey(first)
+            assert_same identity ? second : -first, map.getkey(second)
           end
         end
       end

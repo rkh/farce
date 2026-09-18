@@ -722,6 +722,16 @@ map_store_locked(
     return value;
 }
 
+static VALUE
+map_prepare_key(map_t *map, VALUE key)
+{
+    if (!map->compare_keys_by_identity && RB_TYPE_P(key, T_STRING) && !RB_OBJ_FROZEN(key)) {
+        key = containers_normalize_string_key(key);
+    }
+    containers_check_shareable(key);
+    return key;
+}
+
 typedef struct {
     map_t *map;
     map_execution_context_t execution;
@@ -731,7 +741,7 @@ static int
 map_initialize_entry(VALUE key, VALUE value, VALUE opaque)
 {
     map_init_context_t *context = (map_init_context_t *)opaque;
-    containers_check_shareable(key);
+    key = map_prepare_key(context->map, key);
     containers_check_shareable(value);
     st_index_t hash = map_key_hash(context->map, key);
     map_lock_state(context->map, &context->execution);
@@ -787,7 +797,7 @@ static VALUE
 map_get(VALUE self, VALUE key)
 {
     map_t *map = get_map(self);
-    containers_check_shareable(key);
+    key = map_prepare_key(map, key);
     st_index_t hash = map_key_hash(map, key);
     bool found;
     VALUE result = Qnil;
@@ -812,8 +822,9 @@ map_fetch(int argc, VALUE *argv, VALUE self)
         rb_warn("block supersedes default value argument");
     }
 
+    VALUE original_key = key;
     map_t *map = get_map(self);
-    containers_check_shareable(key);
+    key = map_prepare_key(map, key);
     st_index_t hash = map_key_hash(map, key);
     bool found;
     VALUE result = Qnil;
@@ -824,9 +835,9 @@ map_fetch(int argc, VALUE *argv, VALUE self)
     pthread_mutex_unlock(&map->lock);
 
     if (found) return result;
-    if (block_given) return rb_yield(key);
+    if (block_given) return rb_yield(original_key);
     if (default_given) return default_value;
-    containers_raise_key_error(self, key);
+    containers_raise_key_error(self, original_key);
     return Qnil;
 }
 
@@ -834,7 +845,7 @@ static VALUE
 map_set(VALUE self, VALUE key, VALUE value)
 {
     map_t *map = get_map(self);
-    containers_check_shareable(key);
+    key = map_prepare_key(map, key);
     containers_check_shareable(value);
     st_index_t hash = map_key_hash(map, key);
     map_execution_context_t execution = map_current_execution_context();
@@ -848,7 +859,7 @@ static VALUE
 map_key_p(VALUE self, VALUE key)
 {
     map_t *map = get_map(self);
-    containers_check_shareable(key);
+    key = map_prepare_key(map, key);
     st_index_t hash = map_key_hash(map, key);
     bool found;
     map_execution_context_t execution = map_current_execution_context();
@@ -862,7 +873,7 @@ static VALUE
 map_getkey(VALUE self, VALUE key)
 {
     map_t *map = get_map(self);
-    containers_check_shareable(key);
+    key = map_prepare_key(map, key);
     st_index_t hash = map_key_hash(map, key);
     bool found;
     VALUE result = Qnil;
@@ -878,7 +889,7 @@ static VALUE
 map_delete(VALUE self, VALUE key)
 {
     map_t *map = get_map(self);
-    containers_check_shareable(key);
+    key = map_prepare_key(map, key);
     st_index_t hash = map_key_hash(map, key);
     bool found;
     VALUE result = Qnil;
@@ -979,13 +990,13 @@ map_store_if_absent(int argc, VALUE *argv, VALUE self)
     if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
 
     map_t *map = get_map(self);
+    key = map_prepare_key(map, key);
     map_operation_t operation = {
         .map = map,
         .execution = map_current_execution_context(),
         .key = key,
         .complete = false,
     };
-    containers_check_shareable(key);
     rb_need_block();
     operation.hash = map_key_hash(map, key);
     map_timeout_t timeout = map_parse_timeout(
@@ -1047,6 +1058,7 @@ map_compare_and_set(int argc, VALUE *argv, VALUE self)
     if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
 
     map_t *map = get_map(self);
+    key = map_prepare_key(map, key);
     map_operation_t operation = {
         .map = map,
         .execution = map_current_execution_context(),
@@ -1056,7 +1068,6 @@ map_compare_and_set(int argc, VALUE *argv, VALUE self)
         .identity = map->compare_values_by_identity,
         .complete = false,
     };
-    containers_check_shareable(key);
     containers_check_shareable(expected);
     containers_check_shareable(replacement);
     operation.hash = map_key_hash(map, key);
@@ -1116,13 +1127,13 @@ map_upsert(int argc, VALUE *argv, VALUE self)
     if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
 
     map_t *map = get_map(self);
+    key = map_prepare_key(map, key);
     map_operation_t operation = {
         .map = map,
         .execution = map_current_execution_context(),
         .key = key,
         .complete = false,
     };
-    containers_check_shareable(key);
     containers_check_shareable(initial);
     rb_need_block();
     operation.hash = map_key_hash(map, key);
@@ -1275,7 +1286,7 @@ map_get_with_timeout(int argc, VALUE *argv, VALUE self)
     if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
 
     map_t *map = get_map(self);
-    containers_check_shareable(key);
+    key = map_prepare_key(map, key);
     st_index_t hash = map_key_hash(map, key);
     map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
     map_execution_context_t execution = map_current_execution_context();
@@ -1302,7 +1313,7 @@ map_store_with_timeout(int argc, VALUE *argv, VALUE self)
     if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
 
     map_t *map = get_map(self);
-    containers_check_shareable(key);
+    key = map_prepare_key(map, key);
     containers_check_shareable(value);
     st_index_t hash = map_key_hash(map, key);
     map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
@@ -1327,7 +1338,7 @@ map_swap(int argc, VALUE *argv, VALUE self)
     if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
 
     map_t *map = get_map(self);
-    containers_check_shareable(key);
+    key = map_prepare_key(map, key);
     containers_check_shareable(replacement);
     st_index_t hash = map_key_hash(map, key);
     map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
@@ -1363,7 +1374,7 @@ map_wait_for_value(int argc, VALUE *argv, VALUE self, bool non_nil)
     if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
 
     map_t *map = get_map(self);
-    containers_check_shareable(key);
+    key = map_prepare_key(map, key);
     if (!non_nil) containers_check_shareable(expected);
     st_index_t hash = map_key_hash(map, key);
     map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
@@ -1417,13 +1428,13 @@ map_update(int argc, VALUE *argv, VALUE self)
     if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
 
     map_t *map = get_map(self);
+    key = map_prepare_key(map, key);
     map_operation_t operation = {
         .map = map,
         .execution = map_current_execution_context(),
         .key = key,
         .complete = false,
     };
-    containers_check_shareable(key);
     rb_need_block();
     operation.hash = map_key_hash(map, key);
     map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);

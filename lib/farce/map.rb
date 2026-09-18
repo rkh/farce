@@ -4,7 +4,8 @@
 
 module Farce
   # A concurrent map with direct shareable keys and strongly retained values.
-  # Transfer modes apply only to values. Keys are never copied or wrapped.
+  # Transfer modes apply only to values. String keys use their frozen unary-minus form,
+  # except when comparing keys by identity. Other keys must already be shareable.
   # Values stored through this map's mode manager are automatically unwrapped.
   # Updates on different keys can run concurrently.
   # Clearing the map invalidates unfinished updates so they cannot restore removed entries.
@@ -25,4 +26,6 @@ module Farce
 
     private def new_map(**) = Internal::StrictMap.new(**)
   end
+
+  Internal::KeyNormalizer.prepare_concurrent_class(Internal::StrictMap)
 end

@@ -16,15 +16,27 @@ module Farce
       # @param entries [Hash, Array<Array(BasicObject, BasicObject)>, Map, #each, nil]
       #   Optional initial entries for the map. Needs to implement #each and yield key-value pairs.
       #   If nil, the map will be empty.
-      def initialize(entries = nil)
+      # @!macro key_normalization
+      def initialize(entries = nil, normalize_keys: nil, **keyword_entries)
+        unless keyword_entries.empty?
+          raise ArgumentError, "entries given as both positional and keyword arguments" unless entries.nil?
+          entries = keyword_entries
+        end
         if entries.respond_to?(:to_hash)
           converted = Hash.try_convert(entries)
           raise TypeError, "entries must be a Hash or respond to #to_hash" unless converted
           entries = converted
         end
-        @map = new_tree_map
+        @map       = new_tree_map
         @key_locks = new_key_locks
+        restoring  = Internal::KeyNormalizer.restoration?(normalize_keys)
+        normalizer = Internal::KeyNormalizer.build(
+          normalize_keys,
+          shareable: normalize_keys && Internal::KeyNormalizer.shareable_target?(self),
+        )
+        Internal::KeyNormalizer.install(self, normalizer, Internal::KeyNormalizer::TreeOperations) unless restoring
         entries&.each { self[_1] = _2 }
+        Internal::KeyNormalizer.install(self, normalizer, Internal::KeyNormalizer::TreeOperations) if restoring
         super()
       end
 

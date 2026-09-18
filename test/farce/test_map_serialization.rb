@@ -81,5 +81,42 @@ module Farce
         assert_equal 3, restored[:three]
       end
     end
+
+    def test_normalized_map_round_trip_does_not_normalize_stored_keys_again
+      map = Map.new(normalize_keys: :succ)
+      map[1] = :value
+
+      restored = Psych.unsafe_load(Psych.dump(map))
+
+      assert_equal({ 2 => :value }, restored.to_h)
+      assert_equal :value, restored[1]
+    end
+
+    def test_local_normalized_map_restores_canonical_entries_in_new_scopes
+      map = Local::LRUMap.new({ 1 => :value }, max_size: 2, scope: :fiber, normalize_keys: :succ)
+      restored = Psych.unsafe_load(Psych.dump(map))
+
+      assert_equal({ 2 => :value }, restored.to_h)
+      assert_equal({ 2 => :value }, Fiber.new { restored.to_h }.resume)
+      assert_equal :value, restored[1]
+    end
+
+    def test_proc_normalizers_cannot_be_serialized
+      map = Unshared::Map.new(normalize_keys: ->(key) { key })
+
+      error = assert_raises(TypeError) { Psych.dump(map) }
+      assert_match(/Proc key normalizers/, error.message)
+    end
+
+    def test_shared_lookup_normalizer_round_trip
+      [Map, Strict::Map, Local::Map].each do |type|
+        aliases = { "one" => :one }.freeze
+        map = type.new({ one: 1 }, normalize_keys: aliases)
+        restored = Psych.unsafe_load(Psych.dump(map))
+
+        assert_equal 1, restored["one"]
+        assert Ractor.shareable?(restored)
+      end
+    end
   end
 end

@@ -12,25 +12,34 @@ module Farce
       # @param entries [Hash, Array<Array(BasicObject, BasicObject)>, Map, #each, nil]
       #   Optional initial entries. Entries are stored sequentially and may be evicted.
       # @param max_size [Integer] Maximum number of retained entries.
+      # @!macro key_normalization
       # @param compare_by_identity [Boolean] Whether keys and values are compared by identity.
       # @param compare_keys_by_identity [Boolean] Whether keys are compared by identity.
       # @param compare_values_by_identity [Boolean] Whether values are compared by identity.
       def initialize(
         entries = nil,
         max_size:,
+        normalize_keys: nil,
         compare_by_identity: false,
         compare_keys_by_identity: compare_by_identity,
         compare_values_by_identity: compare_by_identity
       )
         entries = convert_entries(entries)
-        @map = new_bounded_map(
+        @map    = new_bounded_map(
           max_size:,
           compare_by_identity:,
           compare_keys_by_identity:,
           compare_values_by_identity:,
         )
         @key_locks = new_key_locks(compare_keys_by_identity:)
+        restoring  = Internal::KeyNormalizer.restoration?(normalize_keys)
+        normalizer = Internal::KeyNormalizer.build(
+          normalize_keys,
+          shareable: normalize_keys && Internal::KeyNormalizer.shareable_target?(self),
+        )
+        Internal::KeyNormalizer.install(self, normalizer, Internal::KeyNormalizer::BoundedOperations) unless restoring
         entries&.each { self[_1] = _2 }
+        Internal::KeyNormalizer.install(self, normalizer, Internal::KeyNormalizer::BoundedOperations) if restoring
         super()
       end
 
@@ -183,7 +192,7 @@ module Farce
 
       # @api private
       # Called by Psych for generating YAML
-      def encode_with(coder) = super(coder).tap { it["max_size"] = max_size }
+      def encode_with(coder) = super.tap { it["max_size"] = max_size }
 
       private
 

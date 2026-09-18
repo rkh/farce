@@ -19,28 +19,26 @@ module Farce
       # @param scope [Symbol] the scope of the lease map
       # @yield builds the initial mapping for each initialized scope
       # @yieldreturn [Hash] the initial mapping for that scope
-      def initialize(scope: :ractor, &initializer)
+      def initialize(scope: :ractor, normalize_keys: nil, &initializer)
         raise ArgumentError, "a resource constructor block is required" unless initializer
 
         @initializer = Ractor.shareable?(initializer) ? initializer : Ractor.shareable_proc(&initializer)
-        super(scope:)
+        super(scope:, normalize_keys:)
       end
 
-      # (see Farce::Abstract::LeaseMap#checkout)
-      def checkout(key, timeout: nil, &)
+      private def checkout_canonical(key, missing_key:, timeout: nil, &)
         deadline = timeout_deadline(timeout)
         map = scoped_lease_map(timeout: remaining_timeout(deadline))
         raise TimeoutError, "lease checkout timed out" unless map
 
-        map.checkout(key, timeout: remaining_timeout(deadline), receiver: self, &)
+        map.checkout(key, timeout: remaining_timeout(deadline), receiver: self, missing_key:, &)
       end
 
-      # (see Farce::Abstract::LeaseMap#try_checkout)
-      def try_checkout(key, &)
+      private def try_checkout_canonical(key, missing_key:, &)
         map = scoped_lease_map(wait: false)
         return unless map
 
-        map.try_checkout(key, receiver: self, &)
+        map.try_checkout(key, receiver: self, missing_key:, &)
       end
 
       private
@@ -51,8 +49,20 @@ module Farce
 
       def scoped_lease_map(**)
         scoped_value.fetch(**) do
+          mapping = @initializer.call
+          normalizer = @key_normalizer
+          if normalizer && mapping.is_a?(Hash)
+            mapping.each_value do |resource|
+              if resource.nil? || resource.equal?(true) || resource.equal?(false)
+                raise ArgumentError, "resource must not be nil or a boolean"
+              end
+            end
+            mapping = mapping.to_h do |key, resource|
+              [normalizer.call(key), resource]
+            end
+          end
           Internal::LeaseMap.new(
-            @initializer.call,
+            mapping,
             lease_class:    Farce::Unshared::Lease,
             registry_class: Farce::Unshared::Map,
           )

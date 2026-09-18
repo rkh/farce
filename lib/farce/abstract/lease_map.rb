@@ -7,13 +7,28 @@ module Farce
     # @abstract Shared per-key checkout, mutation, and automatic cleanup behavior for lease maps.
     class LeaseMap < Map
       # Construct a lease map from a Hash-building block.
+      # @!macro key_normalization
       # @yield builds the initial key and resource mapping
       # @yieldreturn [Hash] the initial mapping
-      def initialize
+      def initialize(normalize_keys: nil)
         raise ArgumentError, "a resource constructor block is required" unless block_given?
 
-        @lease_map = new_internal_lease_map(yield)
-        super
+        normalizer = Internal::KeyNormalizer.build(
+          normalize_keys,
+          shareable: Internal::KeyNormalizer.shareable_target?(self),
+        )
+        Internal::KeyNormalizer.install(self, normalizer, Internal::KeyNormalizer::LeaseOperations)
+        mapping = yield
+        if normalizer && mapping.is_a?(Hash)
+          mapping.each_value do |resource|
+            if resource.nil? || resource.equal?(true) || resource.equal?(false)
+              raise ArgumentError, "resource must not be nil or a boolean"
+            end
+          end
+          mapping = mapping.to_h { |key, resource| [normalizer.call(key), resource] }
+        end
+        @lease_map = new_internal_lease_map(mapping)
+        super()
       end
 
       # Acquire one key's resource, waiting until it is available.
@@ -23,14 +38,14 @@ module Farce
       # @return [BasicObject] the resource without a block, or the block result
       # @raise [KeyError] if the key is absent or its entry is deleted while waiting
       # @raise [Farce::TimeoutError] if the timeout expires
-      def checkout(key, timeout: nil, &) = internal_lease_map.checkout(key, timeout:, receiver: self, &)
+      def checkout(key, timeout: nil, &) = checkout_canonical(key, missing_key: key, timeout:, &)
 
       # Acquire one key's resource immediately if it is available.
       # @param key [BasicObject] the key to acquire
       # @yieldparam resource [BasicObject] the acquired resource
       # @return [BasicObject, nil] the resource or block result, or nil when unavailable
       # @raise [KeyError] if the key is absent
-      def try_checkout(key, &) = internal_lease_map.try_checkout(key, receiver: self, &)
+      def try_checkout(key, &) = try_checkout_canonical(key, missing_key: key, &)
 
       # Return an explicitly checked-out resource, replace it, or delete it with nil.
       # @param key [BasicObject] the checked-out key
@@ -38,17 +53,14 @@ module Farce
       # @return [self]
       # @raise [Farce::OwnershipError] unless the current Fiber owns an explicit checkout
       # @raise [ArgumentError] if the replacement is boolean
-      def checkin(key, resource)
-        internal_lease_map.checkin(key, resource, receiver: self)
-        self
-      end
+      def checkin(key, resource) = checkin_canonical(key, resource, missing_key: key)
 
       # Return the Lease attached to a key's current entry.
       # A retained handle becomes retired when its entry is deleted.
       # @param key [BasicObject] the key to look up
       # @return [Farce::Abstract::Lease] the current entry's Lease
       # @raise [KeyError] if the key is absent
-      def lease_for(key) = internal_lease_map.lease_for(key, receiver: self)
+      def lease_for(key) = lease_for_canonical(key, missing_key: key)
 
       # Keep resources acquired by reads checked out until the block exits.
       # Checkouts already owned before the scope remain owned afterward.
@@ -200,6 +212,23 @@ module Farce
       end
 
       private
+
+      def checkout_canonical(key, missing_key:, timeout: nil, &)
+        internal_lease_map.checkout(key, timeout:, receiver: self, missing_key:, &)
+      end
+
+      def try_checkout_canonical(key, missing_key:, &)
+        internal_lease_map.try_checkout(key, receiver: self, missing_key:, &)
+      end
+
+      def checkin_canonical(key, resource, missing_key:)
+        internal_lease_map.checkin(key, resource, receiver: self, missing_key:)
+        self
+      end
+
+      def lease_for_canonical(key, missing_key:)
+        internal_lease_map.lease_for(key, receiver: self, missing_key:)
+      end
 
       def each_for_inspect
         return enum_for(__method__) { size } unless block_given?

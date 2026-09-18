@@ -14,10 +14,11 @@ module Farce
       # @!macro modes
       # @param initial_mapping [Hash, nil] initial entries with shareable keys
       # @param mode [Symbol] the default value transfer mode
+      # @!macro key_normalization
       # @param compare_by_identity [Boolean] the default comparison mode for keys and values
       # @param compare_keys_by_identity [Boolean] whether keys are compared by identity
       # @param compare_values_by_identity [Boolean] whether values are compared by identity
-      def initialize(initial_mapping = nil, mode: :copy, compare_by_identity: false,
+      def initialize(initial_mapping = nil, mode: :copy, normalize_keys: nil, compare_by_identity: false,
                      compare_keys_by_identity: compare_by_identity, compare_values_by_identity: compare_by_identity)
         raise TypeError, "initial mapping must be a Hash" unless initial_mapping.nil? || initial_mapping.is_a?(Hash)
 
@@ -30,8 +31,14 @@ module Farce
 
         @manager = ModeManager.new(mode:)
         @map     = new_map(compare_by_identity:, compare_keys_by_identity:, compare_values_by_identity: true)
+        KeyNormalizer.prepare_concurrent(@map)
+
+        restoring  = KeyNormalizer.restoration?(normalize_keys)
+        normalizer = KeyNormalizer.build(normalize_keys, shareable: true)
+        KeyNormalizer.install_concurrent(self, normalizer) unless restoring
 
         initial_mapping&.each { |key, value| self[key] = value }
+        KeyNormalizer.install_concurrent(self, normalizer) if restoring
         super()
       end
 
@@ -44,8 +51,8 @@ module Farce
       def [](key)                     = unwrap_value(@map[key])
 
       def []=(key, value)
-        check_key(key)
-        @map.store(key, wrap_value(value))
+        key = @map.normalize_external_key(key)
+        @map.store_prepared(key, wrap_value(value))
         value
       end
 
@@ -68,15 +75,15 @@ module Farce
       # (see Abstract::ConcurrentMap#store)
       # @param mode [Symbol, nil] the value transfer mode, or nil to use the default
       def store(key, value, mode: nil, timeout: nil, &)
-        check_key(key)
-        unwrap_result(@map.store(key, wrap_value(value, mode:), timeout:) { TIMED_OUT }, &)
+        key = @map.normalize_external_key(key)
+        unwrap_result(@map.store_prepared(key, wrap_value(value, mode:), timeout:) { TIMED_OUT }, &)
       end
 
       # (see Abstract::ConcurrentMap#swap)
       # @param mode [Symbol, nil] the replacement's transfer mode, or nil to use the default
       def swap(key, replacement, mode: nil, timeout: nil, &)
-        check_key(key)
-        unwrap_result(@map.swap(key, wrap_value(replacement, mode:), timeout:) { TIMED_OUT }, &)
+        key = @map.normalize_external_key(key)
+        unwrap_result(@map.swap_prepared(key, wrap_value(replacement, mode:), timeout:) { TIMED_OUT }, &)
       end
 
       # (see Abstract::ConcurrentMap#store_if_absent)
@@ -105,10 +112,10 @@ module Farce
       # (see Abstract::ConcurrentMap#compare_and_set)
       # @param mode [Symbol, nil] the replacement's transfer mode, or nil to use the default
       def compare_and_set(key, expected, replacement, mode: nil, timeout: nil)
-        check_key(key)
+        key = @map.normalize_external_key(key)
         expected = wrap_comparison(expected)
         catch(CANCEL_UPDATE) do
-          result = @map.update(key, timeout:) do |current|
+          result = @map.update_prepared(key, timeout:) do |current|
             # Abort the update instead of inserting a value for a missing key.
             throw CANCEL_UPDATE, false if nil.equal?(current) || !values_equal?(current, expected)
             wrap_value(replacement, mode:)
@@ -118,14 +125,18 @@ module Farce
       end
 
       def wait_until_changed(key, expected, timeout: nil, &)
-        check_key(key)
+        prepared_key = @map.normalize_external_key(key)
         expected = wrap_comparison(expected)
         deadline = timeout_deadline(timeout)
         loop do
-          current = @map.get(key, timeout: remaining_timeout(deadline)) { TIMED_OUT }
+          current = @map.get_prepared(prepared_key, timeout: remaining_timeout(deadline)) { TIMED_OUT }
           return unwrap_result(current, &) if TIMED_OUT.equal?(current)
           return unwrap_value(current) unless values_equal?(nil.equal?(current) ? NIL_VALUE : current, expected)
-          result = @map.wait_until_changed(key, current, timeout: remaining_timeout(deadline)) { TIMED_OUT }
+          result = @map.wait_until_changed_prepared(
+            prepared_key,
+            current,
+            timeout: remaining_timeout(deadline),
+          ) { TIMED_OUT }
           return unwrap_result(result, &) if TIMED_OUT.equal?(result)
         end
       end

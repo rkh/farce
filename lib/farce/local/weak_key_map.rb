@@ -20,8 +20,17 @@ module Farce
 
       private
 
-      def internal_map          = scoped_value
-      def new_scoped_value(...) = Internal::UnsharedWeakKeyMap.new(...)
+      def internal_map = scoped_value
+
+      def new_scoped_value(entries = nil, **)
+        unless @key_normalizer || Internal::KeyNormalizer.canonical_entries?(entries)
+          return Internal::UnsharedWeakKeyMap.new(entries, **)
+        end
+
+        map = Internal::UnsharedWeakKeyMap.new(nil, **)
+        entries&.each { map[_1] = _2 }
+        Internal::KeyNormalizer.wrap_concurrent(map, @key_normalizer)
+      end
     end
   end
 end

@@ -30,3 +30,10 @@
 #     Unless explicitly specified, storage is inherited from the parent fiber for blocking fibers,
 #     but not for non-blocking fibers (such as those created by {Scheduler#schedule}).
 #   * `:fiber` - Each fiber has its own independent value.
+
+# @!macro key_normalization
+#   @param normalize_keys [Symbol, Proc, Hash, Farce::Abstract::Map, nil]
+#     Converts incoming keys to their canonical stored form:
+#     * If a `Symbol` is provided, it will be used as a method name to call on each key.
+#     * If a `Proc` is provided, it will be called with each key and should return the normalized key.
+#     * If a `Hash` or {Farce::Abstract::Map Map} is provided, it will be used to look up the normalized key for each incoming key.

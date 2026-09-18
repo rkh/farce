@@ -23,4 +23,6 @@ module Farce
 
     private def new_map(**) = Internal::StrictWeakKeyMap.new(**)
   end
+
+  Internal::KeyNormalizer.prepare_concurrent_class(Internal::StrictWeakKeyMap)
 end

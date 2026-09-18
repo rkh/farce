@@ -371,7 +371,12 @@ module Farce
 
       private
 
-      def wrap_key(key) = compare_keys_by_identity? ? IdentityKey.new(key) : key
+      def wrap_key(key)
+        return IdentityKey.new(key) if compare_keys_by_identity?
+        key = String.instance_method(:-@).bind_call(key) if String === key && !key.frozen?
+        key
+      end
+
       def unwrap_key(key) = key.is_a?(IdentityKey) ? key.value : key
 
       def entries_snapshot

@@ -29,8 +29,8 @@ module Farce
         freeze
       end
 
-      def checkout(key, receiver:, timeout: nil, &block)
-        lease = fetch_lease(key, receiver:)
+      def checkout(key, receiver:, missing_key: key, timeout: nil, &block)
+        lease = fetch_lease(key, receiver:, missing_key:)
         if block
           entered = false
           lease.checkout(timeout:) do |resource|
@@ -44,11 +44,11 @@ module Farce
       rescue RetiredLeaseError
         raise if entered
         prune_binding(key, lease)
-        raise_missing_key(key, receiver)
+        raise_missing_key(missing_key, receiver)
       end
 
-      def try_checkout(key, receiver:, &block)
-        lease = fetch_lease(key, receiver:)
+      def try_checkout(key, receiver:, missing_key: key, &block)
+        lease = fetch_lease(key, receiver:, missing_key:)
         if block
           entered = false
           lease.try_checkout do |resource|
@@ -62,11 +62,11 @@ module Farce
       rescue RetiredLeaseError
         raise if entered
         prune_binding(key, lease)
-        raise_missing_key(key, receiver)
+        raise_missing_key(missing_key, receiver)
       end
 
-      def checkin(key, resource, receiver:)
-        lease = fetch_lease(key, receiver:)
+      def checkin(key, resource, receiver:, missing_key: key)
+        lease = fetch_lease(key, receiver:, missing_key:)
 
         if nil.equal?(resource)
           unless explicitly_owned?(lease) && !scope_managed?(lease)
@@ -100,10 +100,10 @@ module Farce
         [false, nil]
       end
 
-      def lease_for(key, receiver:) = fetch_lease(key, receiver:)
+      def lease_for(key, receiver:, missing_key: key) = fetch_lease(key, receiver:, missing_key:)
 
       def store(key, resource)
-        validate_key!(key)
+        key = validate_key!(key)
         return delete(key) if nil.equal?(resource)
         validate_resource!(resource)
 
@@ -137,7 +137,7 @@ module Farce
 
       def store_if_absent(key, &)
         raise LocalJumpError, "no block given" unless block_given?
-        validate_key!(key)
+        key = validate_key!(key)
 
         while true
           present, resource = read_entry(key)
@@ -274,8 +274,8 @@ module Farce
         end
       end
 
-      def fetch_lease(key, receiver:)
-        current_lease(key) || raise_missing_key(key, receiver)
+      def fetch_lease(key, receiver:, missing_key: key)
+        current_lease(key) || raise_missing_key(missing_key, receiver)
       end
 
       def raise_missing_key(key, receiver)
@@ -427,7 +427,8 @@ module Farce
       end
 
       def validate_key!(key)
-        return if Ractor.shareable?(key)
+        key = String.instance_method(:-@).bind_call(key) if String === key && !key.frozen?
+        return key if Ractor.shareable?(key)
 
         raise Ractor::IsolationError, "key must be Ractor-shareable"
       end
