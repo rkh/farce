@@ -100,7 +100,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></dd>
+      <dd><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span>, <span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span></dd>
   </dl>
   
   
@@ -442,6 +442,18 @@ retains it weakly.</p>
   
   
   
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="ValueSerialization.html#to_json-instance_method" title="Farce::Abstract::ValueSerialization#to_json (method)">#to_json</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="Value.html#unwrap-instance_method" title="Farce::Abstract::Value#unwrap (method)">#unwrap</a></span></p>
 
@@ -543,12 +555,12 @@ retains it weakly.</p>
       <pre class="lines">
 
 
-62
-63
-64</pre>
+81
+82
+83</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 62</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 81</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_new_value'>new_value</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_atom'>internal_atom</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_new_value'>new_value</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
@@ -596,10 +608,10 @@ retains it weakly.</p>
       <pre class="lines">
 
 
-17</pre>
+36</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 17</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 36</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_atom'>internal_atom</span><span class='period'>.</span><span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span></pre>
     </td>
@@ -687,10 +699,10 @@ retains it weakly.</p>
       <pre class="lines">
 
 
-34</pre>
+53</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 34</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 53</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_atom'>internal_atom</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -793,10 +805,10 @@ retains it weakly.</p>
       <pre class="lines">
 
 
-41</pre>
+60</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 60</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_new_value'>new_value</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_atom'>internal_atom</span><span class='period'>.</span><span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_new_value'>new_value</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -901,10 +913,10 @@ retains it weakly.</p>
       <pre class="lines">
 
 
-55</pre>
+74</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 55</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 74</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_atom'>internal_atom</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -1007,10 +1019,10 @@ retains it weakly.</p>
       <pre class="lines">
 
 
-48</pre>
+67</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 48</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 67</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_new_value'>new_value</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_atom'>internal_atom</span><span class='period'>.</span><span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_new_value'>new_value</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -1134,10 +1146,10 @@ retains it weakly.</p>
       <pre class="lines">
 
 
-72</pre>
+91</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 72</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 91</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_atom'>internal_atom</span><span class='period'>.</span><span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -1276,10 +1288,10 @@ retains it weakly.</p>
       <pre class="lines">
 
 
-81</pre>
+100</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 81</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 100</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='id identifier rubyid_initial_value'>initial_value</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_atom'>internal_atom</span><span class='period'>.</span><span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='id identifier rubyid_initial_value'>initial_value</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -1329,10 +1341,10 @@ retains it weakly.</p>
       <pre class="lines">
 
 
-21</pre>
+40</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 21</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 40</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_atom'>internal_atom</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span></pre>
     </td>
@@ -1401,12 +1413,12 @@ retains it weakly.</p>
       <pre class="lines">
 
 
-26
-27
-28</pre>
+45
+46
+47</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 26</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 45</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value='>value=</span><span class='lparen'>(</span><span class='id identifier rubyid_new_value'>new_value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_new_value'>new_value</span><span class='rparen'>)</span>
@@ -1511,12 +1523,12 @@ retains it weakly.</p>
       <pre class="lines">
 
 
-88
-89
-90</pre>
+107
+108
+109</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 88</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 107</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_atom'>internal_atom</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
@@ -1606,10 +1618,10 @@ retains it weakly.</p>
       <pre class="lines">
 
 
-96</pre>
+115</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 96</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/atom.rb', line 115</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_atom'>internal_atom</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -1622,7 +1634,7 @@ retains it weakly.</p>
 </div>
 
       <div id="footer">
-  Generated on Fri Sep 18 13:59:21 2026 by
+  Generated on Fri Sep 18 17:05:07 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

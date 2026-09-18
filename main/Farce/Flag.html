@@ -102,7 +102,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Abstract::Value</a></span>, <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></dd>
+      <dd><span class='object_link'><a href="Abstract/Flag.html" title="Farce::Abstract::Flag (module)">Abstract::Flag</a></span>, <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></dd>
   </dl>
   
   
@@ -121,8 +121,8 @@
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
     <p>A Ractor-shareable atomic boolean for coordinating threads and Ractors.
-Only true and false are accepted. Read <span class='object_link'><a href="#value-instance_method" title="Farce::Flag#value (method)">#value</a></span> when testing the flag's state.
-Use <span class='object_link'><a href="#compare_and_set-instance_method" title="Farce::Flag#compare_and_set (method)">#compare_and_set</a></span> to check and change the state in a single atomic operation.</p>
+Only true and false are accepted. Read <span class='object_link'><a href="Abstract/Flag.html#value-instance_method" title="Farce::Abstract::Flag#value (method)">Abstract::Flag#value</a></span> when testing the flag's state.
+Use <span class='object_link'><a href="Abstract/Flag.html#compare_and_set-instance_method" title="Farce::Abstract::Flag#compare_and_set (method)">Abstract::Flag#compare_and_set</a></span> to check and change the state in a single atomic operation.</p>
 
 
   </div>
@@ -164,29 +164,6 @@ Use <span class='object_link'><a href="#compare_and_set-instance_method" title="
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#compare_and_set-instance_method" title="#compare_and_set (instance method)">#<strong>compare_and_set</strong>(expected_value, replacement_value)  &#x21d2; Boolean </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Replace the value only if it matches the expected value.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(value = false)  &#x21d2; BasicObject </a>
     
 
@@ -204,144 +181,6 @@ Use <span class='object_link'><a href="#compare_and_set-instance_method" title="
 
   
     <span class="summary_desc"><div class='inline'></div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#set-instance_method" title="#set (instance method)">#<strong>set</strong>  &#x21d2; true </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Set the flag to true.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#store-instance_method" title="#store (instance method)">#<strong>store</strong>(value)  &#x21d2; Boolean </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Set the flag to the given value.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#swap-instance_method" title="#swap (instance method)">#<strong>swap</strong>(value)  &#x21d2; Boolean </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Replace the value and return its previous state.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#toggle-instance_method" title="#toggle (instance method)">#<strong>toggle</strong>  &#x21d2; Boolean </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Atomically invert the value.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#value-instance_method" title="#value (instance method)">#<strong>value</strong>  &#x21d2; Boolean </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>The current value.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#value=-instance_method" title="#value= (instance method)">#<strong>value=</strong>(value)  &#x21d2; BasicObject </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Alias for <span class='object_link'><a href="#store-instance_method" title="Farce::Flag#store (method)">#store</a></span>.</p>
-</div></span>
   
 </li>
 
@@ -372,8 +211,32 @@ Use <span class='object_link'><a href="#compare_and_set-instance_method" title="
   
   
   
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="Abstract/Flag.html" title="Farce::Abstract::Flag (module)">Abstract::Flag</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Flag.html#compare_and_set-instance_method" title="Farce::Abstract::Flag#compare_and_set (method)">#compare_and_set</a></span>, <span class='object_link'><a href="Abstract/Flag.html#set-instance_method" title="Farce::Abstract::Flag#set (method)">#set</a></span>, <span class='object_link'><a href="Abstract/Flag.html#store-instance_method" title="Farce::Abstract::Flag#store (method)">#store</a></span>, <span class='object_link'><a href="Abstract/Flag.html#swap-instance_method" title="Farce::Abstract::Flag#swap (method)">#swap</a></span>, <span class='object_link'><a href="Abstract/Flag.html#toggle-instance_method" title="Farce::Abstract::Flag#toggle (method)">#toggle</a></span>, <span class='object_link'><a href="Abstract/Flag.html#value-instance_method" title="Farce::Abstract::Flag#value (method)">#value</a></span>, <span class='object_link'><a href="Abstract/Flag.html#value=-instance_method" title="Farce::Abstract::Flag#value= (method)">#value=</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="Abstract/ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">Abstract::ValueSerialization</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Abstract/ValueSerialization.html#to_json-instance_method" title="Farce::Abstract::ValueSerialization#to_json (method)">#to_json</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Abstract::Value</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Abstract/Value.html#unwrap-instance_method" title="Farce::Abstract::Value#unwrap (method)">#unwrap</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Value.html#unwrap-instance_method" title="Farce::Abstract::Value#unwrap (method)">#unwrap</a></span>, <span class='object_link'><a href="Abstract/Value.html#value-instance_method" title="Farce::Abstract::Value#value (method)">#value</a></span></p>
 
   <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
@@ -440,16 +303,16 @@ Use <span class='object_link'><a href="#compare_and_set-instance_method" title="
       <pre class="lines">
 
 
-54
-55
-56
-57</pre>
+21
+22
+23
+24</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/flag.rb', line 54</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/flag.rb', line 21</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Flag (class)">Flag</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Flag</span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Flag.html" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
 <span class='kw'>end</span></pre>
     </td>
@@ -459,532 +322,11 @@ Use <span class='object_link'><a href="#compare_and_set-instance_method" title="
   
 </div>
 
-
-  <div id="instance_method_details" class="method_details_list">
-    <h2>Instance Method Details</h2>
-
-    
-      <div class="method_details first">
-  <h3 class="signature first" id="compare_and_set-instance_method">
-  
-    #<strong>compare_and_set</strong>(expected_value, replacement_value)  &#x21d2; <tt>Boolean</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Replace the value only if it matches the expected value.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
-  
-    <li>
-      
-        <span class='name'>expected_value</span>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>the expected current value</p>
-</div>
-      
-    </li>
-  
-    <li>
-      
-        <span class='name'>replacement_value</span>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>the new value</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>whether the replacement succeeded</p>
-</div>
-      
-    </li>
-  
-</ul>
-<p class="tag_title">Raises:</p>
-<ul class="raise">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>ArgumentError</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>if either argument is not true or false</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-54
-55
-56
-57</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/flag.rb', line 54</span>
-
-<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Flag (class)">Flag</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Flag</span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="set-instance_method">
-  
-    #<strong>set</strong>  &#x21d2; <tt>true</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Set the flag to true.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>true</tt>)</span>
-      
-      
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-54
-55
-56
-57</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/flag.rb', line 54</span>
-
-<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Flag (class)">Flag</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Flag</span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="store-instance_method">
-  
-    #<strong>store</strong>(value)  &#x21d2; <tt>Boolean</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Set the flag to the given value.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
-  
-    <li>
-      
-        <span class='name'>value</span>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>the new value</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>the new value</p>
-</div>
-      
-    </li>
-  
-</ul>
-<p class="tag_title">Raises:</p>
-<ul class="raise">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>ArgumentError</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>if the value is not true or false</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-54
-55
-56
-57</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/flag.rb', line 54</span>
-
-<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Flag (class)">Flag</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Flag</span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="swap-instance_method">
-  
-    #<strong>swap</strong>(value)  &#x21d2; <tt>Boolean</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Replace the value and return its previous state.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
-  
-    <li>
-      
-        <span class='name'>value</span>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>the new value</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>the previous value</p>
-</div>
-      
-    </li>
-  
-</ul>
-<p class="tag_title">Raises:</p>
-<ul class="raise">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>ArgumentError</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>if the value is not true or false</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-54
-55
-56
-57</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/flag.rb', line 54</span>
-
-<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Flag (class)">Flag</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Flag</span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="toggle-instance_method">
-  
-    #<strong>toggle</strong>  &#x21d2; <tt>Boolean</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Atomically invert the value.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>the new value</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-54
-55
-56
-57</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/flag.rb', line 54</span>
-
-<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Flag (class)">Flag</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Flag</span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="value-instance_method">
-  
-    #<strong>value</strong>  &#x21d2; <tt>Boolean</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Returns the current value.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>the current value</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-54
-55
-56
-57</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/flag.rb', line 54</span>
-
-<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Flag (class)">Flag</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Flag</span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="value=-instance_method">
-  
-    #<strong>value=</strong>(value)  &#x21d2; <tt>BasicObject</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Alias for <span class='object_link'><a href="#store-instance_method" title="Farce::Flag#store (method)">#store</a></span></p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-54
-55
-56
-57</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/flag.rb', line 54</span>
-
-<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Flag (class)">Flag</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Flag</span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-  </div>
 
 </div>
 
       <div id="footer">
-  Generated on Fri Sep 18 13:59:19 2026 by
+  Generated on Fri Sep 18 17:05:05 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
