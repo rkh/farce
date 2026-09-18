@@ -2,6 +2,7 @@
 
 require "stringio"
 require "tempfile"
+require "rake"
 require_relative "../rakelib/test_watchdog"
 require_relative "setup"
 
@@ -33,6 +34,26 @@ class TestWatchdogTest < Minitest::Test
   def test_seed_detection_accepts_short_minitest_forms
     assert_equal "345", TestWatchdog.seed_from(["-s345"])
     assert_equal "456", TestWatchdog.seed_from(["-s", "456"])
+  end
+
+  def test_ci_test_command_enables_verbose_output_without_duplication
+    task = Struct.new(:options) do
+      def verbose = false # rubocop:disable Naming/PredicateMethod
+      def option_list(verbose:) = options # rubocop:disable Lint/UnusedMethodArgument
+      def ruby_opts_string = ""
+      def run_code = "require 'minitest/autorun'"
+      def file_list = []
+    end
+    previous = ENV["CI"]
+    ENV["CI"] = "true"
+
+    command, = TestWatchdog.test_command(task.new(""), seed: 1)
+    existing_command, = TestWatchdog.test_command(task.new("--verbose"), seed: 1)
+
+    assert_equal 1, command.count("--verbose")
+    assert_equal 1, existing_command.count("--verbose")
+  ensure
+    ENV["CI"] = previous
   end
 
   def test_timeout_terminates_descendant_processes

@@ -225,6 +225,43 @@ module Farce
         end
       end
 
+      def test_claim_keeps_the_canonical_key_alive_during_an_update
+        key_holder = []
+        map = Thread.new do
+          key_holder << "key".freeze
+          WeakKeyMap.new({ key_holder.first => 1 })
+        end.value
+        equal_key = "key".freeze
+        entered = Queue.new
+        release = Queue.new
+        worker = Thread.new do
+          map.update(equal_key) do |old|
+            entered.push(:updating)
+            release.pop(timeout: 5) or raise "test release timed out"
+            old + 1
+          end
+        end
+        begin
+          assert_equal :updating, entered.pop(timeout: 5)
+          key_holder.clear
+          map[:missing]
+          20.times do
+            2_000.times { Object.new }
+            GC.start
+          end
+        ensure
+          release.push(:resume)
+        end
+
+        assert worker.join(5), "update did not finish"
+        assert_equal 2, worker.value
+        assert_equal 2, map[equal_key]
+      ensure
+        release&.push(:resume)
+        worker&.kill if worker&.alive?
+        worker&.join
+      end
+
       def test_clear_invalidates_an_update_already_running_in_another_ractor
         map_classes.each do |klass|
           map = klass.new({ key: 1 })

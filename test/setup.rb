@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 $VERBOSE = false if RUBY_ENGINE == "jruby"
+$stdout.sync = $stderr.sync = true if ENV["CI"]
 require "bundler/setup" unless ENV["FARCE_STANDALONE_TESTS"] == "1"
 
 if ENV["COVERAGE"] && ENV["COVERAGE"].downcase != "false"

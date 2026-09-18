@@ -20,7 +20,7 @@ struct containers_lock_waiter {
 typedef struct {
     pthread_mutex_t guard;
     VALUE owner;
-    pthread_t owner_thread;
+    VALUE owner_thread;
     containers_lock_waiter_t *waiters;
     containers_lock_waiter_t *last_waiter;
     bool initialized;
@@ -88,6 +88,7 @@ containers_lock_mark(void *pointer)
 {
     containers_lock_t *lock = pointer;
     rb_gc_mark_movable(lock->owner);
+    rb_gc_mark_movable(lock->owner_thread);
 }
 
 static void
@@ -95,6 +96,7 @@ containers_lock_compact(void *pointer)
 {
     containers_lock_t *lock = pointer;
     lock->owner = rb_gc_location(lock->owner);
+    lock->owner_thread = rb_gc_location(lock->owner_thread);
 }
 
 static void
@@ -129,6 +131,7 @@ containers_lock_allocate(VALUE klass)
     VALUE object = TypedData_Make_Struct(klass, containers_lock_t, &containers_lock_type, lock);
     pthread_mutex_init(&lock->guard, NULL);
     lock->owner = Qnil;
+    lock->owner_thread = Qnil;
     lock->waiters = NULL;
     lock->last_waiter = NULL;
     lock->initialized = false;
@@ -238,7 +241,7 @@ containers_lock_acquire(VALUE self)
     containers_lock_t *lock = containers_lock_get(self);
     VALUE current = rb_fiber_current();
     VALUE scheduler = rb_fiber_scheduler_current();
-    pthread_t current_thread = pthread_self();
+    VALUE current_thread = rb_thread_current();
 
     for (;;) {
         pthread_mutex_lock(&lock->guard);
@@ -252,7 +255,7 @@ containers_lock_acquire(VALUE self)
             pthread_mutex_unlock(&lock->guard);
             return;
         }
-        if (pthread_equal(lock->owner_thread, current_thread) && NIL_P(scheduler)) {
+        if (lock->owner_thread == current_thread && NIL_P(scheduler)) {
             pthread_mutex_unlock(&lock->guard);
             rb_raise(
                 rb_eThreadError,
@@ -279,6 +282,7 @@ containers_lock_release(VALUE self)
         rb_raise(rb_eThreadError, "Attempt to unlock a mutex which is locked by another thread/fiber");
     }
     lock->owner = Qnil;
+    lock->owner_thread = Qnil;
     containers_lock_notify_one_locked(lock);
     pthread_mutex_unlock(&lock->guard);
 }
@@ -300,7 +304,7 @@ containers_lock_try_lock(VALUE self)
     pthread_mutex_lock(&lock->guard);
     if (NIL_P(lock->owner)) {
         lock->owner = current;
-        lock->owner_thread = pthread_self();
+        lock->owner_thread = rb_thread_current();
         acquired = true;
     }
     pthread_mutex_unlock(&lock->guard);

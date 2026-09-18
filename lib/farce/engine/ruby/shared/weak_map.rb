@@ -249,7 +249,7 @@ module Farce
         check_value(expected, "value")
         checked_after_timeout = false
         loop do
-          response = await_response(deadline:) { request(:read, key) }
+          response = await_response(deadline:) { request(:wait_read, key) }
           return fallback&.call if response.equal?(TIMED_OUT)
           # Keep the canonical stored key alive, even when the lookup used a
           # different equal key. It arrives atomically with the entry's signal.

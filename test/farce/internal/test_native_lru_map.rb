@@ -127,7 +127,7 @@ module Farce
           assert_raises(ArgumentError) { klass.new(max_size: 1, compare_keys_by_identity: 1) }
           assert_raises(ArgumentError) { klass.new(max_size: 1, compare_values_by_identity: :yes) }
 
-          maximum = (1 << (0.size * 8)) - 1
+          maximum = (1 << ([0].pack("J").bytesize * 8)) - 1
           map = klass.new(max_size: maximum)
 
           assert_equal maximum, map.max_size

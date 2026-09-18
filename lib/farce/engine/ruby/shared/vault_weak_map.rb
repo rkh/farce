@@ -22,19 +22,27 @@ module Farce
         @changes = Atom.new(0)
       end
 
-      def read
+      def read(retain_key: false)
         return [:retired] if @retired
         return busy if @claim
         alive, key = @key.read
         return [:dead] unless alive
-        return [:ok, false, nil, @changes, @changes.value, key] unless @present
+        unless @present
+          state = [:ok, false, nil, @changes, @changes.value]
+          state << key if retain_key
+          return state
+        end
 
         alive, value = read_value
-        alive ? [:ok, true, value, @changes, @changes.value, key] : [:dead]
+        return [:dead] unless alive
+
+        state = [:ok, true, value, @changes, @changes.value]
+        state << key if retain_key
+        state
       end
 
       def claim(ticket)
-        current = read
+        current = read(retain_key: true)
         return current unless current.first == :ok
 
         @claim = ticket
@@ -141,23 +149,28 @@ module Farce
 
       def dispatch(action, *arguments)
         case action
-        when :read     then read(arguments.first)
-        when :getkey   then getkey(arguments.first)
-        when :claim    then claim(*arguments)
-        when :finish   then finish(*arguments)
-        when :store    then store(*arguments)
-        when :delete   then delete(arguments.first)
-        when :size     then size
-        when :snapshot then snapshot
-        when :clear    then clear
+        when :read      then read(arguments.first, retain_key: false)
+        when :wait_read then read(arguments.first, retain_key: true)
+        when :getkey    then getkey(arguments.first)
+        when :claim     then claim(*arguments)
+        when :finish    then finish(*arguments)
+        when :store     then store(*arguments)
+        when :delete    then delete(arguments.first)
+        when :size      then size
+        when :snapshot  then snapshot
+        when :clear     then clear
         else raise ArgumentError, "unknown weak-map action: #{action.inspect}"
         end
       end
 
       private
 
-      def read(key)
-        with_entry(key) { |entry| entry ? entry.read : missing }
+      def read(key, retain_key:)
+        with_entry(key) do |entry|
+          next missing unless entry
+
+          entry.read(retain_key:)
+        end
       end
 
       def getkey(key)

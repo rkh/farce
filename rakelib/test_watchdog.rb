@@ -17,6 +17,7 @@ class TestWatchdog
     options = Shellwords.split(test_task.option_list(verbose: verbose))
     seed ||= seed_from(options) || (Random.new_seed % 0x1_0000)
     options << "--seed=#{seed}" unless seed_from(options)
+    options << "--verbose" if ENV["CI"] && !verbose_option?(options)
 
     command = [RbConfig.ruby]
     command.concat(Shellwords.split(test_task.ruby_opts_string))
@@ -42,6 +43,10 @@ class TestWatchdog
     end
 
     nil
+  end
+
+  def self.verbose_option?(options)
+    options.any? { |option| option == "--verbose" || option == "-v" }
   end
 
   def initialize(command, seed:, timeout: DEFAULT_TIMEOUT, shutdown_grace: DEFAULT_SHUTDOWN_GRACE,

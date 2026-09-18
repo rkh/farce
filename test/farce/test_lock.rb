@@ -98,6 +98,32 @@ module Farce
       workers&.each { it.kill.join }
     end
 
+    def test_contention_across_ractors_with_one_native_worker
+      return unless RUBY_ENGINE == "ruby" && Internal.native_ractors?
+
+      output, error, status = ruby_subprocess(<<~RUBY, env: { "RUBY_MN_THREADS" => "1", "RUBY_MAX_CPU" => "1" })
+        require "farce"
+        lock = Farce::Lock.new
+        count = Farce::Counter.new
+        workers = 4.times.map do
+          Ractor.new(lock, count) do |shared_lock, shared_count|
+            1_000.times do
+              shared_lock.synchronize do
+                shared_count.increment
+                sleep 0.0001
+              end
+            end
+          end
+        end
+        workers.each { |worker| worker.respond_to?(:value) ? worker.value : worker.take }
+        abort "lost update" unless count.value == 4_000
+        puts "ok"
+      RUBY
+
+      assert_predicate status, :success?, error
+      assert_equal "ok", output.strip
+    end
+
     def test_ownership_is_fiber_local
       lock = Lock.new
       lock.lock
