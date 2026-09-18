@@ -240,6 +240,7 @@ These classes accept the same five scopes. The scope determines which backing co
 
 | Class | What each scope gets |
 | --- | --- |
+| `Farce::Local::Flag` | An atomic boolean with its own current value. |
 | `Farce::Local::Counter` | An atomic integer counter with its own current value. |
 | `Farce::Local::Atom` | An atomic reference with its own current value. |
 | `Farce::Local::WeakAtom` | A reference that does not keep its value alive. |

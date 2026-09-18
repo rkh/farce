@@ -10,6 +10,7 @@ module Farce
       flag = Flag.new
 
       assert_equal Internal::Flag, Flag.superclass
+      assert_kind_of Abstract::Flag, flag
       assert_kind_of Abstract::Value, flag
       assert_predicate flag, :frozen?
       assert_predicate flag, :ractor_shareable?

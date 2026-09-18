@@ -8,8 +8,20 @@ module Farce
     module Scoped
       include Shareable
 
+      module EncodeWith
+        # @api private
+        # Called by Psych for generating YAML
+        def encode_with(coder) = super(coder).tap { it["scope"] = scope }
+      end
+
       MANAGER = ModeManager.new
-      private_constant :MANAGER
+      private_constant :MANAGER, :EncodeWith
+
+      # @!visibility private
+      def self.included(base)
+        base.include EncodeWith if base.method_defined?(:encode_with)
+        super
+      end
 
       # @return [Symbol] The scope used to resolve this object's contents.
       attr_reader :scope

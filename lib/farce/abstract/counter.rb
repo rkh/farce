@@ -9,6 +9,23 @@ module Farce
     #   directly from the native counter and avoid delegation overhead.
     module Counter
       include Value
+      include ValueSerialization
+
+      # @api private
+      # Called by Psych for generating YAML.
+      def encode_with(coder)
+        super
+        coder["initial"] = initial
+        coder
+      end
+
+      # @api private
+      # Called by Psych when parsing YAML.
+      def init_with(coder)
+        options = coder.map.except("value", "initial").transform_keys(&:to_sym)
+        initialize(coder["initial"], **options)
+        self.value = coder["value"]
+      end
 
       # @return [Integer] The initial value of the counter.
       attr_reader :initial

@@ -201,6 +201,14 @@ module Farce
     # @return [BasicObject, nil] the non-nil value or the fallback result
     def wait_until_non_nil(timeout: nil, &) = wait_until_changed(nil, timeout:, &)
 
+    # @api private
+    # Called by Psych for generating YAML.
+    def encode_with(coder)
+      super
+      coder["mode"] = mode
+      coder
+    end
+
     private
 
     def wrap_value(value, mode: nil)

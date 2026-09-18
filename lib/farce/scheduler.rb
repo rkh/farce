@@ -426,7 +426,11 @@ module Farce
       Thread.current.priority = priority if priority
 
       if Fiber.respond_to?(:set_scheduler)
-        set_scheduler!(:launching)
+        begin
+          set_scheduler!(:launching)
+        ensure
+          Fiber.set_scheduler(nil) if Fiber.scheduler
+        end
       else
         setup_owner(:launching)
         group = ThreadGroup.new

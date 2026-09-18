@@ -246,6 +246,24 @@ module Farce
         end
       end
 
+      # @api private
+      # Called by Psych for generating YAML
+      def encode_with(coder)
+        coder["entries"]                    = to_h
+        coder["compare_values_by_identity"] = compare_values_by_identity?
+        coder["compare_keys_by_identity"]   = compare_keys_by_identity?
+        coder
+      end
+
+      # @api private
+      # Called by Psych when parsing YAML
+      def init_with(coder)
+        options = coder.map.except("entries").transform_keys(&:to_sym)
+        initialize(coder["entries"], **options)
+      end
+
+      def to_json(...) = to_h.to_json(...)
+
       private
 
       def each_for_inspect(&) = each(&)

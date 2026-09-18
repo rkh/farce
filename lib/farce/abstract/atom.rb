@@ -11,6 +11,25 @@ module Farce
     # retains it weakly.
     class Atom
       include Value
+      include ValueSerialization
+
+      # @api private
+      # Called by Psych for generating YAML.
+      def encode_with(coder)
+        super
+        coder["compare_by_identity"] = compare_by_identity?
+        coder["shareable"]           = Ractor.shareable?(coder["value"])
+        coder
+      end
+
+      # @api private
+      # Restore the value and its shareability when parsing YAML.
+      def init_with(coder)
+        value   = coder["value"]
+        value   = Ractor.make_shareable(value) if coder["shareable"]
+        options = coder.map.except("value", "shareable").transform_keys(&:to_sym)
+        initialize(value, **options)
+      end
 
       # Whether comparisons use object identity instead of equality.
       # @return [Boolean]
