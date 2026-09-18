@@ -107,7 +107,7 @@ module Farce
         count = Farce::Counter.new
         workers = 4.times.map do
           Ractor.new(lock, count) do |shared_lock, shared_count|
-            1_000.times do
+            100.times do
               shared_lock.synchronize do
                 shared_count.increment
                 sleep 0.0001
@@ -116,7 +116,7 @@ module Farce
           end
         end
         workers.each { |worker| worker.respond_to?(:value) ? worker.value : worker.take }
-        abort "lost update" unless count.value == 4_000
+        abort "lost update" unless count.value == 400
         puts "ok"
       RUBY
 

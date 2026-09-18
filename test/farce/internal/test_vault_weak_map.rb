@@ -228,10 +228,10 @@ module Farce
       def test_claim_keeps_the_canonical_key_alive_during_an_update
         key_holder = []
         map = Thread.new do
-          key_holder << "key".freeze
+          key_holder << String.new("key").freeze
           WeakKeyMap.new({ key_holder.first => 1 })
         end.value
-        equal_key = "key".freeze
+        equal_key = String.new("key").freeze
         entered = Queue.new
         release = Queue.new
         worker = Thread.new do
