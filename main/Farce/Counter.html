@@ -102,7 +102,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Abstract::Value</a></span>, <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></dd>
+      <dd><span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Abstract::Counter</a></span>, <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></dd>
   </dl>
   
   
@@ -173,40 +173,12 @@ resulting stored value must still fit.</p>
 
 
 
-  <h2>Instance Attribute Summary <small><a href="#" class="summary_toggle">collapse</a></small></h2>
-  <ul class="summary">
-    
-      <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#initial-instance_method" title="#initial (instance method)">#<strong>initial</strong>  &#x21d2; Integer </a>
-    
-
-    
-  </span>
-  
-  
-  
-    
-      <span class="note title readonly">readonly</span>
-    
-    
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>The initial value of the counter.</p>
-</div></span>
-  
-</li>
-
-    
-  </ul>
 
 
+  <h2>Instance Attribute Summary</h2>
+  
+  <h3 class="inherited">Attributes included from <span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Abstract::Counter</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Counter.html#initial-instance_method" title="Farce::Abstract::Counter#initial (method)">#initial</a></span></p>
 
 
   
@@ -216,28 +188,6 @@ resulting stored value must still fit.</p>
     </h2>
 
     <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#add-instance_method" title="#add (instance method)">#<strong>add</strong>(by = 1)  &#x21d2; BasicObject </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'></div></span>
-  
-</li>
-
       
         <li class="public ">
   <span class="summary_signature">
@@ -259,29 +209,6 @@ resulting stored value must still fit.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Decrement the counter by the given amount (default is 1).</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#decrement_if_above-instance_method" title="#decrement_if_above (instance method)">#<strong>decrement_if_above</strong>(floor)  &#x21d2; Boolean </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Decrement the counter by one if its current value is above the floor.</p>
 </div></span>
   
 </li>
@@ -313,29 +240,6 @@ resulting stored value must still fit.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#increment_if_below-instance_method" title="#increment_if_below (instance method)">#<strong>increment_if_below</strong>(limit)  &#x21d2; Boolean </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Increment the counter by one if its current value is below the limit.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(value = 0)  &#x21d2; Counter </a>
     
 
@@ -353,52 +257,6 @@ resulting stored value must still fit.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>A new instance of Counter.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#inspect-instance_method" title="#inspect (instance method)">#<strong>inspect</strong>  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Returns a string representation of the counter.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#reset-instance_method" title="#reset (instance method)">#<strong>reset</strong>  &#x21d2; self </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Reset the counter to its initial value.</p>
 </div></span>
   
 </li>
@@ -443,6 +301,18 @@ resulting stored value must still fit.</p>
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Abstract::Counter</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Counter.html#add-instance_method" title="Farce::Abstract::Counter#add (method)">#add</a></span>, <span class='object_link'><a href="Abstract/Counter.html#decrement_if_above-instance_method" title="Farce::Abstract::Counter#decrement_if_above (method)">#decrement_if_above</a></span>, <span class='object_link'><a href="Abstract/Counter.html#increment_if_below-instance_method" title="Farce::Abstract::Counter#increment_if_below (method)">#increment_if_below</a></span>, <span class='object_link'><a href="Abstract/Counter.html#inspect-instance_method" title="Farce::Abstract::Counter#inspect (method)">#inspect</a></span>, <span class='object_link'><a href="Abstract/Counter.html#reset-instance_method" title="Farce::Abstract::Counter#reset (method)">#reset</a></span></p>
 
   
   
@@ -518,14 +388,14 @@ resulting stored value must still fit.</p>
       <pre class="lines">
 
 
+56
+57
+58
 59
-60
-61
-62
-63</pre>
+60</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 59</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 56</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>FrozenError</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>can&#39;t initialize a frozen counter</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='label'>receiver:</span> <span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
@@ -540,102 +410,14 @@ resulting stored value must still fit.</p>
 </div>
 <div id="method_missing_details" class="method_details_list">
   <h2>Dynamic Method Handling</h2>
-  <p class="notice this">
+  <p class="notice super">
     This class handles dynamic methods through the <tt>method_missing</tt> method
+    
+      in the class <span class='object_link'>Farce::Abstract::Counter</span>
     
   </p>
   
-    <div class="method_details first">
-  <h3 class="signature first" id="method_missing-instance_method">
-  
-    #<strong>method_missing</strong>  &#x21d2; <tt>BasicObject</tt>  <span class="extras">(private)</span>
-  
-
-  
-
-  
-</h3><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-125</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 125</span>
-
-<span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_public_send'>public_send</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
-    </td>
-  </tr>
-</table>
 </div>
-  
-</div>
-
-  <div id="instance_attr_details" class="attr_details">
-    <h2>Instance Attribute Details</h2>
-    
-      
-      <span id=""></span>
-      <div class="method_details first">
-  <h3 class="signature first" id="initial-instance_method">
-  
-    #<strong>initial</strong>  &#x21d2; <tt>Integer</tt>  <span class="extras">(readonly)</span>
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Returns The initial value of the counter.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Integer</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>The initial value of the counter.</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-56
-57
-58</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 56</span>
-
-<span class='kw'>def</span> <span class='id identifier rubyid_initial'>initial</span>
-  <span class='ivar'>@initial</span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-  </div>
 
 
   <div id="instance_method_details" class="method_details_list">
@@ -643,44 +425,7 @@ resulting stored value must still fit.</p>
 
     
       <div class="method_details first">
-  <h3 class="signature first" id="add-instance_method">
-  
-    #<strong>add</strong>(by = 1)  &#x21d2; <tt>BasicObject</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    
-
-  </div>
-</div>
-<div class="tags">
-  
-  
-
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-106</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 106</span>
-
-<span class='kw'>def</span> <span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_increment'>increment</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="decrement-instance_method">
+  <h3 class="signature first" id="decrement-instance_method">
   
     #<strong>decrement</strong>(by = 1)  &#x21d2; <tt>self</tt> 
   
@@ -759,80 +504,14 @@ resulting stored value must still fit.</p>
 61
 62
 63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-101
-102
-103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113
-114
-115
-116
-117
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127</pre>
+64</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 51</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Counter (class)">Counter</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Counter</span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Counter</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
-
-  <span class='comment'># @return [Integer] The initial value of the counter.
-</span>  <span class='id identifier rubyid_attr_reader'>attr_reader</span> <span class='symbol'>:initial</span>
 
   <span class='comment'># @param [Numeric, String, #to_int] value The initial value, converted to an Integer.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span>
@@ -841,161 +520,8 @@ resulting stored value must still fit.</p>
     <span class='kw'>super</span><span class='lparen'>(</span><span class='ivar'>@initial</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='comment'># Reset the counter to its initial value.
-</span>  <span class='comment'># @return [self] Returns self for chaining.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_reset'>reset</span>
-    <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='ivar'>@initial</span>
-    <span class='kw'>self</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># Increment the counter by one if its current value is below the limit.
-</span>  <span class='comment'># The check and increment happen atomically.
-</span>  <span class='comment'># @param [Numeric, String, #to_int] limit The upper bound, converted to an Integer.
-</span>  <span class='comment'># @return [Boolean] true if the counter changed, otherwise false.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_increment_if_below'>increment_if_below</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
-</span>    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-
-    <span class='kw'>while</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>&lt;</span> <span class='id identifier rubyid_limit'>limit</span>
-      <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>+</span> <span class='int'>1</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-    <span class='kw'>end</span>
-
-    <span class='kw'>false</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># Decrement the counter by one if its current value is above the floor.
-</span>  <span class='comment'># The check and decrement happen atomically.
-</span>  <span class='comment'># @param [Numeric, String, #to_int] floor The lower bound, converted to an Integer.
-</span>  <span class='comment'># @return [Boolean] true if the counter changed, otherwise false.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_decrement_if_above'>decrement_if_above</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
-</span>    <span class='id identifier rubyid_floor'>floor</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-
-    <span class='kw'>while</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>&gt;</span> <span class='id identifier rubyid_floor'>floor</span>
-      <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>-</span> <span class='int'>1</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-    <span class='kw'>end</span>
-
-    <span class='kw'>false</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @overload add(by = 1)
-</span>  <span class='comment'>#   (see #increment)
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_increment'>increment</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
-
   <span class='kw'>alias</span> <span class='id identifier rubyid_subtract'>subtract</span> <span class='id identifier rubyid_decrement'>decrement</span>
   <span class='kw'>alias</span> <span class='id identifier rubyid_remove'>remove</span>   <span class='id identifier rubyid_decrement'>decrement</span>
-
-  <span class='id identifier rubyid_methods'>methods</span>  <span class='op'>=</span> <span class='const'>Integer</span><span class='period'>.</span><span class='id identifier rubyid_public_instance_methods'>public_instance_methods</span> <span class='op'>-</span> <span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_public_instance_methods'>public_instance_methods</span> <span class='op'>-</span> <span class='lbracket'>[</span><span class='symbol'>:singleton_method_added</span><span class='rbracket'>]</span>
-  <span class='id identifier rubyid_methods'>methods</span> <span class='op'>+=</span> <span class='qsymbols_beg'>%i[</span><span class='tstring_content'>+</span><span class='words_sep'> </span><span class='tstring_content'>-</span><span class='words_sep'> </span><span class='tstring_content'>/</span><span class='words_sep'> </span><span class='tstring_content'>*</span><span class='words_sep'> </span><span class='tstring_content'>**</span><span class='words_sep'> </span><span class='tstring_content'>&lt;=&gt;</span><span class='words_sep'> </span><span class='tstring_content'>coerce</span><span class='words_sep'> </span><span class='tstring_content'>rationalize</span><span class='words_sep'> </span><span class='tstring_content'>to_i</span><span class='words_sep'> </span><span class='tstring_content'>to_int</span><span class='words_sep'> </span><span class='tstring_content'>to_f</span><span class='words_sep'> </span><span class='tstring_content'>to_c</span><span class='words_sep'> </span><span class='tstring_content'>to_r</span><span class='words_sep'> </span><span class='tstring_content'>to_s</span><span class='tstring_end'>]</span></span>
-  <span class='id identifier rubyid_methods'>methods</span><span class='period'>.</span><span class='id identifier rubyid_uniq!'>uniq!</span>
-  <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_delegate'>delegate</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='symbol'>:value</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_methods'>methods</span><span class='rparen'>)</span>
-
-  <span class='comment'># @return [String] Returns a string representation of the counter.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># @return [void]
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
-
-  <span class='id identifier rubyid_private'>private</span>
-
-  <span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_public_send'>public_send</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
-  <span class='kw'>def</span> <span class='id identifier rubyid_respond_to_missing?'>respond_to_missing?</span><span class='lparen'>(</span><span class='id identifier rubyid_method'>method</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='id identifier rubyid_method'>method</span><span class='rparen'>)</span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="decrement_if_above-instance_method">
-  
-    #<strong>decrement_if_above</strong>(floor)  &#x21d2; <tt>Boolean</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Decrement the counter by one if its current value is above the floor.
-The check and decrement happen atomically.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
-  
-    <li>
-      
-        <span class='name'>floor</span>
-      
-      
-        <span class='type'>(<tt>Numeric</tt>, <tt>String</tt>, <tt>#to_int</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>The lower bound, converted to an Integer.</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>true if the counter changed, otherwise false.</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-92
-93
-94
-95
-96
-97
-98
-99
-100
-101
-102</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 92</span>
-
-<span class='kw'>def</span> <span class='id identifier rubyid_decrement_if_above'>decrement_if_above</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
-</span>  <span class='id identifier rubyid_floor'>floor</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-
-  <span class='kw'>while</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>&gt;</span> <span class='id identifier rubyid_floor'>floor</span>
-    <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>-</span> <span class='int'>1</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-  <span class='kw'>end</span>
-
-  <span class='kw'>false</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -1078,80 +604,14 @@ The check and decrement happen atomically.</p>
 61
 62
 63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-101
-102
-103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113
-114
-115
-116
-117
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127</pre>
+64</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 51</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Counter (class)">Counter</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Counter</span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Counter</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
-
-  <span class='comment'># @return [Integer] The initial value of the counter.
-</span>  <span class='id identifier rubyid_attr_reader'>attr_reader</span> <span class='symbol'>:initial</span>
 
   <span class='comment'># @param [Numeric, String, #to_int] value The initial value, converted to an Integer.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span>
@@ -1160,273 +620,8 @@ The check and decrement happen atomically.</p>
     <span class='kw'>super</span><span class='lparen'>(</span><span class='ivar'>@initial</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='comment'># Reset the counter to its initial value.
-</span>  <span class='comment'># @return [self] Returns self for chaining.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_reset'>reset</span>
-    <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='ivar'>@initial</span>
-    <span class='kw'>self</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># Increment the counter by one if its current value is below the limit.
-</span>  <span class='comment'># The check and increment happen atomically.
-</span>  <span class='comment'># @param [Numeric, String, #to_int] limit The upper bound, converted to an Integer.
-</span>  <span class='comment'># @return [Boolean] true if the counter changed, otherwise false.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_increment_if_below'>increment_if_below</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
-</span>    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-
-    <span class='kw'>while</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>&lt;</span> <span class='id identifier rubyid_limit'>limit</span>
-      <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>+</span> <span class='int'>1</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-    <span class='kw'>end</span>
-
-    <span class='kw'>false</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># Decrement the counter by one if its current value is above the floor.
-</span>  <span class='comment'># The check and decrement happen atomically.
-</span>  <span class='comment'># @param [Numeric, String, #to_int] floor The lower bound, converted to an Integer.
-</span>  <span class='comment'># @return [Boolean] true if the counter changed, otherwise false.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_decrement_if_above'>decrement_if_above</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
-</span>    <span class='id identifier rubyid_floor'>floor</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-
-    <span class='kw'>while</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>&gt;</span> <span class='id identifier rubyid_floor'>floor</span>
-      <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>-</span> <span class='int'>1</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-    <span class='kw'>end</span>
-
-    <span class='kw'>false</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @overload add(by = 1)
-</span>  <span class='comment'>#   (see #increment)
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_increment'>increment</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
-
   <span class='kw'>alias</span> <span class='id identifier rubyid_subtract'>subtract</span> <span class='id identifier rubyid_decrement'>decrement</span>
   <span class='kw'>alias</span> <span class='id identifier rubyid_remove'>remove</span>   <span class='id identifier rubyid_decrement'>decrement</span>
-
-  <span class='id identifier rubyid_methods'>methods</span>  <span class='op'>=</span> <span class='const'>Integer</span><span class='period'>.</span><span class='id identifier rubyid_public_instance_methods'>public_instance_methods</span> <span class='op'>-</span> <span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_public_instance_methods'>public_instance_methods</span> <span class='op'>-</span> <span class='lbracket'>[</span><span class='symbol'>:singleton_method_added</span><span class='rbracket'>]</span>
-  <span class='id identifier rubyid_methods'>methods</span> <span class='op'>+=</span> <span class='qsymbols_beg'>%i[</span><span class='tstring_content'>+</span><span class='words_sep'> </span><span class='tstring_content'>-</span><span class='words_sep'> </span><span class='tstring_content'>/</span><span class='words_sep'> </span><span class='tstring_content'>*</span><span class='words_sep'> </span><span class='tstring_content'>**</span><span class='words_sep'> </span><span class='tstring_content'>&lt;=&gt;</span><span class='words_sep'> </span><span class='tstring_content'>coerce</span><span class='words_sep'> </span><span class='tstring_content'>rationalize</span><span class='words_sep'> </span><span class='tstring_content'>to_i</span><span class='words_sep'> </span><span class='tstring_content'>to_int</span><span class='words_sep'> </span><span class='tstring_content'>to_f</span><span class='words_sep'> </span><span class='tstring_content'>to_c</span><span class='words_sep'> </span><span class='tstring_content'>to_r</span><span class='words_sep'> </span><span class='tstring_content'>to_s</span><span class='tstring_end'>]</span></span>
-  <span class='id identifier rubyid_methods'>methods</span><span class='period'>.</span><span class='id identifier rubyid_uniq!'>uniq!</span>
-  <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_delegate'>delegate</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='symbol'>:value</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_methods'>methods</span><span class='rparen'>)</span>
-
-  <span class='comment'># @return [String] Returns a string representation of the counter.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># @return [void]
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
-
-  <span class='id identifier rubyid_private'>private</span>
-
-  <span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_public_send'>public_send</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
-  <span class='kw'>def</span> <span class='id identifier rubyid_respond_to_missing?'>respond_to_missing?</span><span class='lparen'>(</span><span class='id identifier rubyid_method'>method</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='id identifier rubyid_method'>method</span><span class='rparen'>)</span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="increment_if_below-instance_method">
-  
-    #<strong>increment_if_below</strong>(limit)  &#x21d2; <tt>Boolean</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Increment the counter by one if its current value is below the limit.
-The check and increment happen atomically.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
-  
-    <li>
-      
-        <span class='name'>limit</span>
-      
-      
-        <span class='type'>(<tt>Numeric</tt>, <tt>String</tt>, <tt>#to_int</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>The upper bound, converted to an Integer.</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>true if the counter changed, otherwise false.</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 76</span>
-
-<span class='kw'>def</span> <span class='id identifier rubyid_increment_if_below'>increment_if_below</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
-</span>  <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-
-  <span class='kw'>while</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>&lt;</span> <span class='id identifier rubyid_limit'>limit</span>
-    <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>+</span> <span class='int'>1</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-  <span class='kw'>end</span>
-
-  <span class='kw'>false</span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="inspect-instance_method">
-  
-    #<strong>inspect</strong>  &#x21d2; <tt>String</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Returns a string representation of the counter.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>String</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>Returns a string representation of the counter.</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-117</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 117</span>
-
-<span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="reset-instance_method">
-  
-    #<strong>reset</strong>  &#x21d2; <tt>self</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Reset the counter to its initial value.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>self</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>Returns self for chaining.</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-67
-68
-69
-70</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 67</span>
-
-<span class='kw'>def</span> <span class='id identifier rubyid_reset'>reset</span>
-  <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='ivar'>@initial</span>
-  <span class='kw'>self</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -1488,80 +683,14 @@ The check and increment happen atomically.</p>
 61
 62
 63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-101
-102
-103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113
-114
-115
-116
-117
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127</pre>
+64</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 51</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Counter (class)">Counter</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Counter</span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Counter</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
-
-  <span class='comment'># @return [Integer] The initial value of the counter.
-</span>  <span class='id identifier rubyid_attr_reader'>attr_reader</span> <span class='symbol'>:initial</span>
 
   <span class='comment'># @param [Numeric, String, #to_int] value The initial value, converted to an Integer.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span>
@@ -1570,68 +699,8 @@ The check and increment happen atomically.</p>
     <span class='kw'>super</span><span class='lparen'>(</span><span class='ivar'>@initial</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='comment'># Reset the counter to its initial value.
-</span>  <span class='comment'># @return [self] Returns self for chaining.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_reset'>reset</span>
-    <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='ivar'>@initial</span>
-    <span class='kw'>self</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># Increment the counter by one if its current value is below the limit.
-</span>  <span class='comment'># The check and increment happen atomically.
-</span>  <span class='comment'># @param [Numeric, String, #to_int] limit The upper bound, converted to an Integer.
-</span>  <span class='comment'># @return [Boolean] true if the counter changed, otherwise false.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_increment_if_below'>increment_if_below</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
-</span>    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-
-    <span class='kw'>while</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>&lt;</span> <span class='id identifier rubyid_limit'>limit</span>
-      <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>+</span> <span class='int'>1</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-    <span class='kw'>end</span>
-
-    <span class='kw'>false</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># Decrement the counter by one if its current value is above the floor.
-</span>  <span class='comment'># The check and decrement happen atomically.
-</span>  <span class='comment'># @param [Numeric, String, #to_int] floor The lower bound, converted to an Integer.
-</span>  <span class='comment'># @return [Boolean] true if the counter changed, otherwise false.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_decrement_if_above'>decrement_if_above</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
-</span>    <span class='id identifier rubyid_floor'>floor</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-
-    <span class='kw'>while</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>&gt;</span> <span class='id identifier rubyid_floor'>floor</span>
-      <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_current'>current</span> <span class='op'>-</span> <span class='int'>1</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
-    <span class='kw'>end</span>
-
-    <span class='kw'>false</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @overload add(by = 1)
-</span>  <span class='comment'>#   (see #increment)
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_increment'>increment</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
-
   <span class='kw'>alias</span> <span class='id identifier rubyid_subtract'>subtract</span> <span class='id identifier rubyid_decrement'>decrement</span>
   <span class='kw'>alias</span> <span class='id identifier rubyid_remove'>remove</span>   <span class='id identifier rubyid_decrement'>decrement</span>
-
-  <span class='id identifier rubyid_methods'>methods</span>  <span class='op'>=</span> <span class='const'>Integer</span><span class='period'>.</span><span class='id identifier rubyid_public_instance_methods'>public_instance_methods</span> <span class='op'>-</span> <span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_public_instance_methods'>public_instance_methods</span> <span class='op'>-</span> <span class='lbracket'>[</span><span class='symbol'>:singleton_method_added</span><span class='rbracket'>]</span>
-  <span class='id identifier rubyid_methods'>methods</span> <span class='op'>+=</span> <span class='qsymbols_beg'>%i[</span><span class='tstring_content'>+</span><span class='words_sep'> </span><span class='tstring_content'>-</span><span class='words_sep'> </span><span class='tstring_content'>/</span><span class='words_sep'> </span><span class='tstring_content'>*</span><span class='words_sep'> </span><span class='tstring_content'>**</span><span class='words_sep'> </span><span class='tstring_content'>&lt;=&gt;</span><span class='words_sep'> </span><span class='tstring_content'>coerce</span><span class='words_sep'> </span><span class='tstring_content'>rationalize</span><span class='words_sep'> </span><span class='tstring_content'>to_i</span><span class='words_sep'> </span><span class='tstring_content'>to_int</span><span class='words_sep'> </span><span class='tstring_content'>to_f</span><span class='words_sep'> </span><span class='tstring_content'>to_c</span><span class='words_sep'> </span><span class='tstring_content'>to_r</span><span class='words_sep'> </span><span class='tstring_content'>to_s</span><span class='tstring_end'>]</span></span>
-  <span class='id identifier rubyid_methods'>methods</span><span class='period'>.</span><span class='id identifier rubyid_uniq!'>uniq!</span>
-  <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_delegate'>delegate</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='symbol'>:value</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_methods'>methods</span><span class='rparen'>)</span>
-
-  <span class='comment'># @return [String] Returns a string representation of the counter.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># @return [void]
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
-
-  <span class='id identifier rubyid_private'>private</span>
-
-  <span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_public_send'>public_send</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
-  <span class='kw'>def</span> <span class='id identifier rubyid_respond_to_missing?'>respond_to_missing?</span><span class='lparen'>(</span><span class='id identifier rubyid_method'>method</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='id identifier rubyid_method'>method</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -1643,7 +712,7 @@ The check and increment happen atomically.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 15 14:11:51 2026 by
+  Generated on Fri Sep 18 07:57:49 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -120,7 +120,7 @@
 </tbody>
 </table>
 <p>To install dependencies, compile extensions, run the tests and build the gems, you can run <code>mise run</code> (without any arguments) and to do so on file changes, you can use <code>mise watch</code>.</p>
-<p>Test runs have an external 120-second watchdog so a deadlocked Ruby VM cannot leave local development or CI stuck indefinitely. Set <code>TEST_TIMEOUT</code> to change the deadline. A timed-out run reports its Minitest seed and, on macOS, attempts to write a native stack sample to <code>tmp/test-watchdog</code>. The unsupervised <code>bundle exec rake test:run</code> task is available for debugging.</p>
+<p>Test runs have an external 300-second watchdog so a deadlocked Ruby VM cannot leave local development or CI stuck indefinitely. Set <code>TEST_TIMEOUT</code> to change the deadline. A timed-out run reports its Minitest seed and, on macOS, attempts to write a native stack sample to <code>tmp/test-watchdog</code>. The unsupervised <code>bundle exec rake test:run</code> task is available for debugging.</p>
 <h3 id="test-coverage-reports">Test coverage reports<a href="#test-coverage-reports" aria-label="Link to heading 'Test coverage reports'" data-heading-content="Test coverage reports" class="anchor"></a></h3>
 <p>If you use mise, this will be handled automatically.</p>
 <p>Otherwise you will need to set the <code>COVERAGE</code> environment variable to <code>true</code> when running tests. For a full report, you also need to run the tests with different Ruby versions within SimpleCov's merge timeout (defaults to 10 minutes), as they cover different parts of the codebase.</p>
@@ -146,7 +146,7 @@ bundle exec rake coverage:report
 </div></div>
 
       <div id="footer">
-  Generated on Tue Sep 15 14:11:50 2026 by
+  Generated on Fri Sep 18 07:57:48 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

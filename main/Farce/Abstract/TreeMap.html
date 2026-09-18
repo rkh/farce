@@ -663,6 +663,29 @@ This is much slower than a hash map, but much faster than ad hoc sorting of the 
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#store_if_absent-instance_method" title="#store_if_absent (instance method)">#<strong>store_if_absent</strong>(key)  &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return an existing value, or store the block result for an absent key.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#values-instance_method" title="#values (instance method)">#<strong>values</strong>  &#x21d2; Array&lt;BasicObject&gt; </a>
     
 
@@ -766,7 +789,8 @@ If nil, the map will be empty.</p>
 25
 26
 27
-28</pre>
+28
+29</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 19</span>
@@ -778,6 +802,7 @@ If nil, the map will be empty.</p>
     <span class='id identifier rubyid_entries'>entries</span> <span class='op'>=</span> <span class='id identifier rubyid_converted'>converted</span>
   <span class='kw'>end</span>
   <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_new_tree_map'>new_tree_map</span>
+  <span class='ivar'>@key_locks</span> <span class='op'>=</span> <span class='id identifier rubyid_new_key_locks'>new_key_locks</span>
   <span class='id identifier rubyid_entries'>entries</span><span class='op'>&amp;.</span><span class='id identifier rubyid_each'>each</span> <span class='lbrace'>{</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid__1'>_1</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid__2'>_2</span> <span class='rbrace'>}</span>
   <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
@@ -858,10 +883,10 @@ If nil, the map will be empty.</p>
       <pre class="lines">
 
 
-31</pre>
+32</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 31</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 32</span>
 
 <span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_unwrap_value'>unwrap_value</span><span class='lparen'>(</span><span class='id identifier rubyid_internal_map'>internal_map</span><span class='lbracket'>[</span><span class='id identifier rubyid_prepare_key'>prepare_key</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span><span class='rbracket'>]</span><span class='rparen'>)</span></pre>
     </td>
@@ -949,18 +974,18 @@ If nil, the map will be empty.</p>
       <pre class="lines">
 
 
-34
 35
 36
 37
-38</pre>
+38
+39</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 34</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 35</span>
 
 <span class='kw'>def</span> <span class='op'>[]=</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_key'>key</span> <span class='op'>=</span> <span class='id identifier rubyid_prepare_key'>prepare_key</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_internal_map'>internal_map</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_wrap_value'>wrap_value</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_key'>key</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_prepare_key'>prepare_key</span><span class='lparen'>(</span><span class='id identifier rubyid_prepare_key'>prepare_key</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_with_key_lock'>with_key_lock</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_wrap_value'>wrap_value</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
   <span class='id identifier rubyid_value'>value</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -1006,13 +1031,13 @@ If nil, the map will be empty.</p>
       <pre class="lines">
 
 
-99
-100
-101
-102</pre>
+131
+132
+133
+134</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 99</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 131</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
   <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -1061,10 +1086,10 @@ If nil, the map will be empty.</p>
       <pre class="lines">
 
 
-168</pre>
+200</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 168</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 200</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -1110,10 +1135,10 @@ If nil, the map will be empty.</p>
       <pre class="lines">
 
 
-172</pre>
+204</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 172</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 204</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -1186,10 +1211,10 @@ If nil, the map will be empty.</p>
       <pre class="lines">
 
 
-41</pre>
+73</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 73</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_delete'>delete</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_unwrap_value'>unwrap_value</span><span class='lparen'>(</span><span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_delete'>delete</span><span class='lparen'>(</span><span class='id identifier rubyid_prepare_key'>prepare_key</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -1333,14 +1358,14 @@ Order is guaranteed to be from smallest to largest key according.</p>
       <pre class="lines">
 
 
-113
-114
-115
-116
-117</pre>
+145
+146
+147
+148
+149</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 113</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 145</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each'>each</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1484,14 +1509,14 @@ Keys are yielded from smallest to largest.</p>
       <pre class="lines">
 
 
-130
-131
-132
-133
-134</pre>
+162
+163
+164
+165
+166</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 130</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 162</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_key'>each_key</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1635,14 +1660,14 @@ Values are yielded in the order of their corresponding keys (from smallest to la
       <pre class="lines">
 
 
-145
-146
-147
-148
-149</pre>
+177
+178
+179
+180
+181</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 145</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 177</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_value'>each_value</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1696,10 +1721,10 @@ Values are yielded in the order of their corresponding keys (from smallest to la
       <pre class="lines">
 
 
-44</pre>
+76</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 44</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 76</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span></pre>
     </td>
@@ -1989,24 +2014,24 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61</pre>
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 47</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 79</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_arguments'>arguments</span><span class='rparen'>)</span>
   <span class='kw'>unless</span> <span class='id identifier rubyid_arguments'>arguments</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span><span class='period'>.</span><span class='id identifier rubyid_between?'>between?</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
@@ -2070,10 +2095,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-65</pre>
+97</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 65</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 97</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_first_key'>first_key</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_first_key'>first_key</span></pre>
     </td>
@@ -2146,10 +2171,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-68</pre>
+100</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 68</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 100</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_getkey'>getkey</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_getkey'>getkey</span><span class='lparen'>(</span><span class='id identifier rubyid_prepare_key'>prepare_key</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -2222,10 +2247,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-71</pre>
+103</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 71</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 103</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='id identifier rubyid_prepare_key'>prepare_key</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -2276,10 +2301,10 @@ The result is frozen and ordered from smallest to largest key.</p>
       <pre class="lines">
 
 
-154</pre>
+186</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 154</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 186</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_keys'>keys</span> <span class='op'>=</span> <span class='id identifier rubyid_each_key'>each_key</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre>
     </td>
@@ -2329,10 +2354,10 @@ The result is frozen and ordered from smallest to largest key.</p>
       <pre class="lines">
 
 
-75</pre>
+107</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 75</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 107</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_last_key'>last_key</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_last_key'>last_key</span></pre>
     </td>
@@ -2386,10 +2411,10 @@ The result is frozen and ordered from smallest to largest key.</p>
       <pre class="lines">
 
 
-78</pre>
+110</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 78</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 110</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span></pre>
     </td>
@@ -2439,13 +2464,13 @@ The result is frozen and ordered from smallest to largest key.</p>
       <pre class="lines">
 
 
-82
-83
-84
-85</pre>
+114
+115
+116
+117</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 82</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 114</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_pop'>pop</span>
   <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span>
@@ -2495,10 +2520,10 @@ Mutable strings are accepted however and will be converted to an immutable strin
       <pre class="lines">
 
 
-164</pre>
+196</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 164</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 196</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_keys?'>shareable_keys?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -2548,13 +2573,13 @@ Mutable strings are accepted however and will be converted to an immutable strin
       <pre class="lines">
 
 
-89
-90
-91
-92</pre>
+121
+122
+123
+124</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 89</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 121</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shift'>shift</span>
   <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_shift'>shift</span>
@@ -2611,12 +2636,172 @@ Mutable strings are accepted however and will be converted to an immutable strin
       <pre class="lines">
 
 
-95</pre>
+127</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 95</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 127</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="store_if_absent-instance_method">
+  
+    #<strong>store_if_absent</strong>(key)  &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Return an existing value, or store the block result for an absent key.
+Concurrent callers for equally ordered keys share one initialization.
+The block runs without holding the map's structural lock. Other keys
+remain accessible. Assigning the same key waits for initialization.
+Deletion or clearing can precede a pending initialization's insertion.
+Unsafe maps require callers to provide their own synchronization.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to retrieve or initialize.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to store.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The existing or newly stored value.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>LocalJumpError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>If no block is given, even when the key exists.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>ThreadError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>If initialization recursively accesses its own gate.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 52</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+
+  <span class='id identifier rubyid_map'>map</span>      <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span>
+  <span class='id identifier rubyid_key'>key</span>      <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_prepare_key'>prepare_key</span><span class='lparen'>(</span><span class='id identifier rubyid_prepare_key'>prepare_key</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_found'>found</span>    <span class='op'>=</span> <span class='kw'>true</span>
+  <span class='id identifier rubyid_existing'>existing</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_found'>found</span> <span class='op'>=</span> <span class='kw'>false</span> <span class='rbrace'>}</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_unwrap_value'>unwrap_value</span><span class='lparen'>(</span><span class='id identifier rubyid_existing'>existing</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_found'>found</span>
+
+  <span class='id identifier rubyid_with_key_lock'>with_key_lock</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='kw'>do</span>
+    <span class='id identifier rubyid_stored'>stored</span>     <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='kw'>do</span>
+      <span class='id identifier rubyid_value'>value</span>    <span class='op'>=</span> <span class='kw'>yield</span>
+      <span class='id identifier rubyid_wrapped'>wrapped</span>  <span class='op'>=</span> <span class='id identifier rubyid_wrap_value'>wrap_value</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_wrapped'>wrapped</span>
+      <span class='kw'>return</span> <span class='id identifier rubyid_unwrap_value'>unwrap_value</span><span class='lparen'>(</span><span class='id identifier rubyid_wrapped'>wrapped</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_unwrap_value'>unwrap_value</span><span class='lparen'>(</span><span class='id identifier rubyid_stored'>stored</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -2665,10 +2850,10 @@ The result is frozen and ordered according to the order of their corresponding k
       <pre class="lines">
 
 
-159</pre>
+191</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 159</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 191</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_values'>values</span> <span class='op'>=</span> <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre>
     </td>
@@ -2681,7 +2866,7 @@ The result is frozen and ordered according to the order of their corresponding k
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 15 14:11:54 2026 by
+  Generated on Fri Sep 18 07:57:52 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

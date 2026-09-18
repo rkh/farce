@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: Farce::Unsafe::LRUMap
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="../../css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "Farce::Unsafe::LRUMap";
+  relpath = '../../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="../../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../index.html" selected>main</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../../_index.html">Index (L)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Unsafe.html" title="Farce::Unsafe (module)">Unsafe</a></span></span>
+     &raquo; 
+    <span class="title">LRUMap</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: Farce::Unsafe::LRUMap
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName"><span class='object_link'><a href="../Abstract/LRUMap.html" title="Farce::Abstract::LRUMap (class)">Abstract::LRUMap</a></span></span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next"><span class='object_link'><a href="../Abstract/Map.html" title="Farce::Abstract::Map (class)">Abstract::Map</a></span></li>
+          
+            <li class="next"><span class='object_link'><a href="../Abstract/BoundedMap.html" title="Farce::Abstract::BoundedMap (class)">Abstract::BoundedMap</a></span></li>
+          
+            <li class="next"><span class='object_link'><a href="../Abstract/LRUMap.html" title="Farce::Abstract::LRUMap (class)">Abstract::LRUMap</a></span></li>
+          
+            <li class="next">Farce::Unsafe::LRUMap</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  <dl>
+      <dt>Includes:</dt>
+      <dd><span class='object_link'><a href="../Unshareable.html" title="Farce::Unshareable (module)">Farce::Unshareable</a></span></dd>
+  </dl>
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/farce/unsafe/lru_map.rb
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>Instances of this class are <strong>not thread-safe</strong> and should not be shared concurrently.
+This does not just apply to Ractors, but also Threads and possibly Fibers.</p>
+<p>Only use them if you are absolutely certain of this and they do not leave a tightly controlled scope.
+They can provide a memory or performance advantage over their thread-safe counterparts, so they
+might be useful for hot path optimizations.</p>
+<p>Concurrent access, especially modifications, may corrupt the internal state of the object.</p>
+</div>
+  </div>
+
+<p>An LRU map for caches whose caller provides exclusive access to composed operations.
+Individual storage operations retain the engine backend's integrity guard. Cache loading
+does not coordinate competing callers, including callers loading the same key.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+
+
+
+
+
+
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#[]=-instance_method" title="#[]= (instance method)">#<strong>[]=</strong>(key, value)  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Look up a key without waiting for atomic-update access.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#store_if_absent-instance_method" title="#store_if_absent (instance method)">#<strong>store_if_absent</strong>(key)  &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Read an existing value or construct and store a value for an absent key.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../Unshareable.html" title="Farce::Unshareable (module)">Farce::Unshareable</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Unshareable.html#initialize-instance_method" title="Farce::Unshareable#initialize (method)">#initialize</a></span>, <span class='object_link'><a href="../Unshareable.html#ractor_shareable%3F-instance_method" title="Farce::Unshareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/BoundedMap.html" title="Farce::Abstract::BoundedMap (class)">Abstract::BoundedMap</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/BoundedMap.html#[]-instance_method" title="Farce::Abstract::BoundedMap#[] (method)">#[]</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#clear-instance_method" title="Farce::Abstract::BoundedMap#clear (method)">#clear</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#compare_keys_by_identity%3F-instance_method" title="Farce::Abstract::BoundedMap#compare_keys_by_identity? (method)">#compare_keys_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#compare_values_by_identity%3F-instance_method" title="Farce::Abstract::BoundedMap#compare_values_by_identity? (method)">#compare_values_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#delete-instance_method" title="Farce::Abstract::BoundedMap#delete (method)">#delete</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#each-instance_method" title="Farce::Abstract::BoundedMap#each (method)">#each</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#each_key-instance_method" title="Farce::Abstract::BoundedMap#each_key (method)">#each_key</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#each_value-instance_method" title="Farce::Abstract::BoundedMap#each_value (method)">#each_value</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#fetch-instance_method" title="Farce::Abstract::BoundedMap#fetch (method)">#fetch</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#getkey-instance_method" title="Farce::Abstract::BoundedMap#getkey (method)">#getkey</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#initialize-instance_method" title="Farce::Abstract::BoundedMap#initialize (method)">#initialize</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#key%3F-instance_method" title="Farce::Abstract::BoundedMap#key? (method)">#key?</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#keys-instance_method" title="Farce::Abstract::BoundedMap#keys (method)">#keys</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#max_size-instance_method" title="Farce::Abstract::BoundedMap#max_size (method)">#max_size</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#max_size=-instance_method" title="Farce::Abstract::BoundedMap#max_size= (method)">#max_size=</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#prune-instance_method" title="Farce::Abstract::BoundedMap#prune (method)">#prune</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#shift-instance_method" title="Farce::Abstract::BoundedMap#shift (method)">#shift</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#size-instance_method" title="Farce::Abstract::BoundedMap#size (method)">#size</a></span>, <span class='object_link'><a href="../Abstract/BoundedMap.html#values-instance_method" title="Farce::Abstract::BoundedMap#values (method)">#values</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/Map.html" title="Farce::Abstract::Map (class)">Abstract::Map</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/Map.html#[]-instance_method" title="Farce::Abstract::Map#[] (method)">#[]</a></span>, <span class='object_link'><a href="../Abstract/Map.html#assoc-instance_method" title="Farce::Abstract::Map#assoc (method)">#assoc</a></span>, <span class='object_link'><a href="../Abstract/Map.html#clear-instance_method" title="Farce::Abstract::Map#clear (method)">#clear</a></span>, <span class='object_link'><a href="../Abstract/Map.html#compare_by_identity%3F-instance_method" title="Farce::Abstract::Map#compare_by_identity? (method)">#compare_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#compare_keys_by_identity%3F-instance_method" title="Farce::Abstract::Map#compare_keys_by_identity? (method)">#compare_keys_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#compare_values_by_identity%3F-instance_method" title="Farce::Abstract::Map#compare_values_by_identity? (method)">#compare_values_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#delete-instance_method" title="Farce::Abstract::Map#delete (method)">#delete</a></span>, <span class='object_link'><a href="../Abstract/Map.html#dig-instance_method" title="Farce::Abstract::Map#dig (method)">#dig</a></span>, <span class='object_link'><a href="../Abstract/Map.html#each-instance_method" title="Farce::Abstract::Map#each (method)">#each</a></span>, <span class='object_link'><a href="../Abstract/Map.html#each_key-instance_method" title="Farce::Abstract::Map#each_key (method)">#each_key</a></span>, <span class='object_link'><a href="../Abstract/Map.html#each_pair-instance_method" title="Farce::Abstract::Map#each_pair (method)">#each_pair</a></span>, <span class='object_link'><a href="../Abstract/Map.html#each_value-instance_method" title="Farce::Abstract::Map#each_value (method)">#each_value</a></span>, <span class='object_link'><a href="../Abstract/Map.html#empty%3F-instance_method" title="Farce::Abstract::Map#empty? (method)">#empty?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#fetch-instance_method" title="Farce::Abstract::Map#fetch (method)">#fetch</a></span>, <span class='object_link'><a href="../Abstract/Map.html#fetch_values-instance_method" title="Farce::Abstract::Map#fetch_values (method)">#fetch_values</a></span>, <span class='object_link'><a href="../Abstract/Map.html#getkey-instance_method" title="Farce::Abstract::Map#getkey (method)">#getkey</a></span>, <span class='object_link'><a href="../Abstract/Map.html#has_key%3F-instance_method" title="Farce::Abstract::Map#has_key? (method)">#has_key?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#inspect-instance_method" title="Farce::Abstract::Map#inspect (method)">#inspect</a></span>, <span class='object_link'><a href="../Abstract/Map.html#key%3F-instance_method" title="Farce::Abstract::Map#key? (method)">#key?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#keys-instance_method" title="Farce::Abstract::Map#keys (method)">#keys</a></span>, <span class='object_link'><a href="../Abstract/Map.html#shareable_keys%3F-instance_method" title="Farce::Abstract::Map#shareable_keys? (method)">#shareable_keys?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#shareable_values%3F-instance_method" title="Farce::Abstract::Map#shareable_values? (method)">#shareable_values?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#size-instance_method" title="Farce::Abstract::Map#size (method)">#size</a></span>, <span class='object_link'><a href="../Abstract/Map.html#to_a-instance_method" title="Farce::Abstract::Map#to_a (method)">#to_a</a></span>, <span class='object_link'><a href="../Abstract/Map.html#to_h-instance_method" title="Farce::Abstract::Map#to_h (method)">#to_h</a></span>, <span class='object_link'><a href="../Abstract/Map.html#values_at-instance_method" title="Farce::Abstract::Map#values_at (method)">#values_at</a></span>, <span class='object_link'><a href="../Abstract/Map.html#weak_keys%3F-instance_method" title="Farce::Abstract::Map#weak_keys? (method)">#weak_keys?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#weak_values%3F-instance_method" title="Farce::Abstract::Map#weak_values? (method)">#weak_values?</a></span></p>
+
+  
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="[]=-instance_method">
+  
+    #<strong>[]=</strong>(key, value)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Look up a key without waiting for atomic-update access.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to look up.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The associated value, or nil if the key is absent.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+24
+25
+26
+27</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/unsafe/lru_map.rb', line 24</span>
+
+<span class='kw'>def</span> <span class='op'>[]=</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_internal_map'>internal_map</span><span class='lbracket'>[</span><span class='id identifier rubyid_prepare_key'>prepare_key</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+  <span class='id identifier rubyid_value'>value</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="store_if_absent-instance_method">
+  
+    #<strong>store_if_absent</strong>(key)  &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Read an existing value or construct and store a value for an absent key.
+Competing callers can run the loader concurrently, including for equal keys.
+The caller must provide exclusive access when a single initialization is required.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to retrieve or initialize.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to store.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The existing or newly stored value.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>LocalJumpError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>If no block is given.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/unsafe/lru_map.rb', line 14</span>
+
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Fri Sep 18 07:57:51 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>

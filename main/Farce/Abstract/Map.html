@@ -145,7 +145,7 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
 </div><div id="subclasses">
   <h2>Direct Known Subclasses</h2>
-  <p class="children"><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span>, <span class='object_link'><a href="LeaseMap.html" title="Farce::Abstract::LeaseMap (class)">LeaseMap</a></span>, <span class='object_link'><a href="TreeMap.html" title="Farce::Abstract::TreeMap (class)">TreeMap</a></span></p>
+  <p class="children"><span class='object_link'><a href="BoundedMap.html" title="Farce::Abstract::BoundedMap (class)">BoundedMap</a></span>, <span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span>, <span class='object_link'><a href="LeaseMap.html" title="Farce::Abstract::LeaseMap (class)">LeaseMap</a></span>, <span class='object_link'><a href="TreeMap.html" title="Farce::Abstract::TreeMap (class)">TreeMap</a></span></p>
 </div>
 
 
@@ -719,6 +719,29 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#store_if_absent-instance_method" title="#store_if_absent (instance method)">#<strong>store_if_absent</strong>(key) { ... } &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Read an existing value or construct and store a value for an absent key.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#to_a-instance_method" title="#to_a (instance method)">#<strong>to_a</strong>  &#x21d2; Array&lt;Array(BasicObject, BasicObject)&gt; </a>
     
 
@@ -907,19 +930,6 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -1014,10 +1024,23 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -1212,19 +1235,6 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -1319,10 +1329,23 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -1499,13 +1522,13 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-139
-140
-141
-142</pre>
+152
+153
+154
+155</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 139</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 152</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_assoc'>assoc</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>return</span> <span class='kw'>nil</span> <span class='rbrace'>}</span>
@@ -1558,19 +1581,6 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -1665,10 +1675,23 @@ or nil if the key is absent.</p>
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -1829,10 +1852,10 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-145</pre>
+158</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 158</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span></pre>
     </td>
@@ -1886,19 +1909,6 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -1993,10 +2003,23 @@ or nil if the key is absent.</p>
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -2157,19 +2180,6 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -2264,10 +2274,23 @@ or nil if the key is absent.</p>
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -2447,19 +2470,6 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -2554,10 +2564,23 @@ or nil if the key is absent.</p>
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -2748,14 +2771,14 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-151
-152
-153
-154
-155</pre>
+164
+165
+166
+167
+168</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 151</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 164</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_dig'>dig</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_rest'>rest</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span>
@@ -2904,19 +2927,6 @@ to match insertion order.</p>
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -3011,10 +3021,23 @@ to match insertion order.</p>
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -3265,19 +3288,6 @@ Keys are not guaranteed to be yielded in insertion order.</p>
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -3372,10 +3382,23 @@ Keys are not guaranteed to be yielded in insertion order.</p>
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -3526,19 +3549,6 @@ Keys are not guaranteed to be yielded in insertion order.</p>
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -3633,10 +3643,23 @@ Keys are not guaranteed to be yielded in insertion order.</p>
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -3887,19 +3910,6 @@ Values are not guaranteed to be yielded in insertion order.</p>
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -3994,10 +4004,23 @@ Values are not guaranteed to be yielded in insertion order.</p>
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -4154,10 +4177,10 @@ Values are not guaranteed to be yielded in insertion order.</p>
       <pre class="lines">
 
 
-159</pre>
+172</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 159</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 172</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span></pre>
     </td>
@@ -4447,19 +4470,6 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -4554,10 +4564,23 @@ If both a default and a block are provided, the block takes precedence and a war
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -4786,10 +4809,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-172</pre>
+185</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 172</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 185</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fetch_values'>fetch_values</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_keys'>keys</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -4862,19 +4885,6 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -4969,10 +4979,23 @@ If both a default and a block are provided, the block takes precedence and a war
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -5129,10 +5152,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-162</pre>
+175</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 162</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 175</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix</span></pre>
     </td>
@@ -5182,25 +5205,25 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-206
-207
-208
-209
-210
-211
-212
-213
-214
-215
-216
-217
-218
 219
 220
-221</pre>
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 206</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 219</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span>
   <span class='id identifier rubyid_out'>out</span>   <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> {</span><span class='tstring_end'>&quot;</span></span>
@@ -5288,19 +5311,6 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -5395,10 +5405,23 @@ If both a default and a block are provided, the block takes precedence and a war
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -5560,19 +5583,6 @@ The returned keys are not guaranteed to be in insertion order.</p>
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -5667,10 +5677,23 @@ The returned keys are not guaranteed to be in insertion order.</p>
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -5835,10 +5858,10 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-179</pre>
+192</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 179</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 192</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_keys?'>shareable_keys?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -5888,10 +5911,10 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-182</pre>
+195</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 182</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 195</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -5945,19 +5968,6 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
 145
 146
 147
@@ -6052,10 +6062,368 @@ This method will still return <code>true</code> for such maps.</p>
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
+</span>  <span class='comment'># or nil if the key is absent.
+</span>  <span class='comment'># @param key [BasicObject] The key to look up.
+</span>  <span class='comment'># @return [Array(BasicObject, BasicObject), nil] A two-element `[key, value]` array, or nil if the key is absent.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_assoc'>assoc</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>return</span> <span class='kw'>nil</span> <span class='rbrace'>}</span>
+    <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rbracket'>]</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># (see #compare_keys_by_identity?)
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
+
+  <span class='comment'># Implements Ruby&#39;s [dig interface](https://docs.ruby-lang.org/en/master/language/dig_methods_rdoc.html).
+</span>  <span class='comment'># @param key [BasicObject] The key to look up.
+</span>  <span class='comment'># @param rest [Array&lt;BasicObject&gt;] Additional keys to look up in nested maps.
+</span>  <span class='comment'># @return [BasicObject, nil] The value found at the nested location, or nil if any key is absent or nil.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_dig'>dig</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_rest'>rest</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_value'>value</span> <span class='kw'>if</span> <span class='id identifier rubyid_rest'>rest</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>||</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_dig'>dig</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_rest'>rest</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Returns whether the map contains no entries.
+</span>  <span class='comment'># @return [Boolean] Whether the map is empty.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Alias for {#key?}
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
+</span>  <span class='kw'>alias</span> <span class='id identifier rubyid_member?'>member?</span>  <span class='id identifier rubyid_has_key?'>has_key?</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_include?'>include?</span> <span class='id identifier rubyid_has_key?'>has_key?</span>
+
+  <span class='comment'># Fetches the values associated with multiple keys, using the same missing-key behavior as Hash#fetch.
+</span>  <span class='comment'># @yield [key] Called for each missing key.
+</span>  <span class='comment'># @yieldparam key [BasicObject] The missing key.
+</span>  <span class='comment'># @yieldreturn [BasicObject] The value to return for the missing key.
+</span>  <span class='comment'># @param keys [Array&lt;BasicObject&gt;] The keys to look up.
+</span>  <span class='comment'># @return [Array&lt;BasicObject&gt;] An array of the associated values.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_fetch_values'>fetch_values</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_keys'>keys</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+
+  <span class='comment'># @note
+</span>  <span class='comment'>#   Some maps may still accept non-shareable keys or values, but convert them into shareable representations.
+</span>  <span class='comment'>#   This method will still return `true` for such maps.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @return [Boolean] Whether the map requires keys to be Ractor-shareable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_shareable_keys?'>shareable_keys?</span> <span class='op'>=</span> <span class='kw'>false</span>
+
+  <span class='comment'># @return [Boolean] Whether the map requires values to be Ractor-shareable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>false</span>
+
+  <span class='comment'># Creates a new Array containing the map&#39;s key-value pairs as two-element arrays.
+</span>  <span class='comment'># @return [Array&lt;Array(BasicObject, BasicObject)&gt;&gt;] A new Array of `[key, value]` arrays.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_a'>to_a</span> <span class='op'>=</span> <span class='id identifier rubyid_each_pair'>each_pair</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span>
+
+  <span class='comment'># Creates a new Hash containing the map&#39;s entries.
+</span>  <span class='comment'># @return [Hash] A new Hash with the same entries.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_h'>to_h</span> <span class='op'>=</span> <span class='id identifier rubyid_each_pair'>each_pair</span><span class='period'>.</span><span class='id identifier rubyid_to_h'>to_h</span>
+
+  <span class='comment'># Fetches the values associated with multiple keys, returning nil for any missing keys.
+</span>  <span class='comment'># @param keys [Array&lt;BasicObject&gt;] The keys to look up.
+</span>  <span class='comment'># @return [Array&lt;BasicObject&gt;] An array of the associated values, with nil for any missing keys.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_values_at'>values_at</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_keys'>keys</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_it'>it</span><span class='rbracket'>]</span> <span class='rbrace'>}</span>
+
+  <span class='comment'># Some maps reference their keys weakly, automatically dropping entries when a key gets garbage-collected.
+</span>  <span class='comment'># @return [Boolean] Whether the map uses weak references for keys.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_weak_keys?'>weak_keys?</span> <span class='op'>=</span> <span class='kw'>false</span>
+
+  <span class='comment'># Some maps reference their values weakly, automatically dropping entries when a value gets garbage-collected.
+</span>  <span class='comment'># @return [Boolean] Whether the map uses weak references for values.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_weak_values?'>weak_values?</span> <span class='op'>=</span> <span class='kw'>false</span>
+
+  <span class='comment'># @return [String] String representation of the map, suitable for debugging.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span>
+    <span class='id identifier rubyid_out'>out</span>   <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> {</span><span class='tstring_end'>&quot;</span></span>
+    <span class='id identifier rubyid_comma'>comma</span> <span class='op'>=</span> <span class='kw'>false</span>
+    <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+      <span class='id identifier rubyid_out'>out</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>, </span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_comma'>comma</span>
+      <span class='id identifier rubyid_comma'>comma</span> <span class='op'>=</span> <span class='kw'>true</span>
+      <span class='kw'>if</span> <span class='const'>Symbol</span> <span class='op'>===</span> <span class='id identifier rubyid_key'>key</span>
+        <span class='id identifier rubyid_key'>key</span> <span class='op'>=</span> <span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span> <span class='kw'>if</span> <span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='period'>.</span><span class='id identifier rubyid_match?'>match?</span><span class='lparen'>(</span><span class='tstring'><span class='regexp_beg'>%r{</span><span class='tstring_content'>\A:[&quot;$@!]|[%&amp;*+\-/&lt;=&gt;@\]^`|~]\z</span><span class='regexp_end'>}</span></span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_out'>out</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>:</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_out'>out</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'> =&gt;</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>end</span>
+      <span class='id identifier rubyid_out'>out</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_out'>out</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>}&gt;</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='comment'># @return [void]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+      <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>{</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_seplist'>seplist</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='symbol'>:each_for_inspect</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp_hash_pair'>pp_hash_pair</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="store_if_absent-instance_method">
+  
+    #<strong>store_if_absent</strong>(key) { ... } &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Read an existing value or construct and store a value for an absent key.
+Existing nil and false values count as present when the implementation permits them.
+The block runs without holding a map-wide lock. Implementations document their
+coordination guarantees, ownership requirements, and optional timeout support.
+A later removal or eviction can cause another call to construct a new value.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to look up or store.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'></span>
+      
+      
+      
+        
+        <div class='inline'><p>Called without arguments when the key is absent.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to store and return.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The existing or newly constructed value.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>LocalJumpError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>If no block is given.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 145</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
@@ -6212,10 +6580,10 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-186</pre>
+199</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 186</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 199</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_a'>to_a</span> <span class='op'>=</span> <span class='id identifier rubyid_each_pair'>each_pair</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span></pre>
     </td>
@@ -6265,10 +6633,10 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-190</pre>
+203</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 190</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 203</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_h'>to_h</span> <span class='op'>=</span> <span class='id identifier rubyid_each_pair'>each_pair</span><span class='period'>.</span><span class='id identifier rubyid_to_h'>to_h</span></pre>
     </td>
@@ -6337,10 +6705,10 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-195</pre>
+208</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 195</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 208</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_values_at'>values_at</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_keys'>keys</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_it'>it</span><span class='rbracket'>]</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -6390,10 +6758,10 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-199</pre>
+212</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 199</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 212</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_weak_keys?'>weak_keys?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -6443,10 +6811,10 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-203</pre>
+216</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 203</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 216</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_weak_values?'>weak_values?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -6459,7 +6827,7 @@ This method will still return <code>true</code> for such maps.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 15 14:11:52 2026 by
+  Generated on Fri Sep 18 07:57:51 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
