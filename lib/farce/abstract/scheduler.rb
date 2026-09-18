@@ -90,7 +90,7 @@ module Farce
           return self
         end
 
-        ran      = Flag.new(false)
+        ran      = Farce::Flag.new(false)
         signal   = Signal.new
         callback = Ractor.shareable_proc(&callback) unless Ractor.shareable?(callback)
 
