@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
+
 require "resolv"
 require "socket"
 
@@ -10,12 +13,9 @@ module Helpers
     def initialize(pause_first: false, truncate_udp: false, drop_tcp_first: false)
       @pause_first = pause_first
       @release = Thread::Queue.new
-      @socket = UDPSocket.new
-      @socket.bind("127.0.0.1", 0)
-      @port = @socket.addr[1]
+      bind_sockets(tcp: truncate_udp)
       @requests = Thread::Queue.new
       if truncate_udp
-        @tcp_socket = TCPServer.new("127.0.0.1", port)
         @tcp_thread = Thread.new do
           loop do
             client = @tcp_socket.accept
@@ -72,6 +72,23 @@ module Helpers
     end
 
     private
+
+    def bind_sockets(tcp:)
+      10.times do |attempt|
+        @socket = @tcp_socket = nil
+        # Let TCP choose a usable port, then check that UDP can share it.
+        # Ephemeral ports can be reserved or occupied for only one protocol.
+        @socket = UDPSocket.new
+        @tcp_socket = TCPServer.new("127.0.0.1", 0) if tcp
+        @socket.bind("127.0.0.1", @tcp_socket ? @tcp_socket.addr[1] : 0)
+        @port = @socket.addr[1]
+        return
+      rescue SystemCallError => e
+        @socket&.close
+        @tcp_socket&.close
+        raise unless attempt < 9 && (e.is_a?(Errno::EADDRINUSE) || e.is_a?(Errno::EACCES))
+      end
+    end
 
     def response(wire)
       message = ::Resolv::DNS::Message.decode(wire)
