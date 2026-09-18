@@ -123,7 +123,7 @@
 </li>
 </ul>
 <h2 id="introduction-what-ruby-gives-you">Introduction: What Ruby gives you<a href="#introduction-what-ruby-gives-you" aria-label="Link to heading 'Introduction: What Ruby gives you'" data-heading-content="Introduction: What Ruby gives you" class="anchor"></a></h2>
-<p>Ruby has several places to store execution-local state. <code>Thread.current.thread_variable_set</code> stores a value for an entire thread. Despite its name, <code>Thread.current[:key]</code> stores a value for the current fiber. Ruby's <a href="https://docs.ruby-lang.org/en/4.0/Thread.html#class-Thread-label-Fiber-local+vs.+Thread-local">thread documentation</a> explains this distinction.</p>
+<p>Ruby has several places to store execution-local state. <code>Thread.current.thread_variable_set</code> stores a value for an entire thread. Despite its name, <code>Thread.current[:key]</code> stores a value for the current fiber.</p>
 <pre class="code ruby"><code class="ruby"><span class='const'>Thread</span><span class='period'>.</span><span class='id identifier rubyid_current'>current</span><span class='period'>.</span><span class='id identifier rubyid_thread_variable_set'>thread_variable_set</span><span class='lparen'>(</span><span class='symbol'>:scopes_example</span><span class='comma'>,</span> <span class='symbol'>:thread_value</span><span class='rparen'>)</span>
 <span class='const'>Thread</span><span class='period'>.</span><span class='id identifier rubyid_current'>current</span><span class='lbracket'>[</span><span class='symbol'>:scopes_example</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='symbol'>:fiber_value</span>
 
@@ -707,7 +707,7 @@
 </div></div>
 
       <div id="footer">
-  Generated on Fri Sep 18 10:00:46 2026 by
+  Generated on Fri Sep 18 13:59:18 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

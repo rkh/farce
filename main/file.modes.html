@@ -550,7 +550,7 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <span class='id identifier rubyid_manager'>manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='id identifier rubyid_manager'>manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_explicit'>explicit</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_explicit'>explicit</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
 </span><span class='id identifier rubyid_explicit'>explicit</span><span class='period'>.</span><span class='id identifier rubyid_claimed?'>claimed?</span> <span class='comment'># =&gt; false
 </span></code></pre>
-<p>This distinction is what makes forwarding safe. Containers automatically open the envelopes they created to implement a mode. They preserve envelopes supplied as application data. Ports use the underlying port's native copy and move paths for those two modes, and a mode manager for the additional behaviors.</p>
+<p>Containers automatically open the envelopes they created to implement a mode. They preserve envelopes supplied as application data. Ports use the underlying port's native copy and move paths for those two modes, and a mode manager for the additional behaviors.</p>
 <h3 id="add-modes-to-your-own-abstraction">Add modes to your own abstraction<a href="#add-modes-to-your-own-abstraction" aria-label="Link to heading 'Add modes to your own abstraction'" data-heading-content="Add modes to your own abstraction" class="anchor"></a></h3>
 <p>Keep one manager per instance when building an abstraction around shareable storage. Use the same manager on both the write and read paths. Here a strict Farce queue stands in for storage that accepts only shareable objects.</p>
 <pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>WorkInbox</span>
@@ -582,7 +582,7 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </div></div>
 
       <div id="footer">
-  Generated on Fri Sep 18 10:00:46 2026 by
+  Generated on Fri Sep 18 13:59:18 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
