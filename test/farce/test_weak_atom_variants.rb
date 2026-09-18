@@ -217,7 +217,10 @@ module Farce
       20.times do
         2_000.times { Object.new }
         collect_garbage
-        return assert_nil(atom.value) if atom.value.nil?
+        # Read on a disposable stack so a live value observed on one attempt
+        # cannot remain in a conservative GC root during the next collection.
+        collected = Thread.new { atom.value.nil? }.value
+        return assert_nil(atom.value) if collected
         sleep 0.01
       end
 
