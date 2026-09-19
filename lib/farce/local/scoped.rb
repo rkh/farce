@@ -25,17 +25,23 @@ module Farce
             Internal::KeyNormalizer.install(self, normalizer, Internal::KeyNormalizer.operations_for(self))
           end
 
-          if normalizer && !restoring && !is_a?(Abstract::LeaseMap) && !arguments.empty? && arguments.first
-            entries = arguments.first
-            raise TypeError, "initial mapping must be a Hash" if is_a?(Abstract::ConcurrentMap) && !entries.is_a?(Hash)
-            entries = convert_entries(entries) if respond_to?(:convert_entries, true)
-            canonical = Internal::KeyNormalizer.canonical_entries
-            entries.each { |key, value| canonical << [normalizer.call(key), value] }
+          if !is_a?(Abstract::LeaseMap) && !arguments.empty?
+            entries = convert_entries(arguments.first)
+            if entries && ((normalizer && !restoring) || !entries.is_a?(Hash))
+              canonical = Internal::KeyNormalizer.canonical_entries
+              entries.each do |key, value|
+                key = normalizer.call(key) if normalizer && !restoring
+                canonical << [key, value]
+              end
+              entries = canonical
+            end
             arguments = arguments.dup
-            arguments[0] = canonical
+            arguments[0] = entries
           end
           super(*arguments, **)
         end
+
+        private def indifferent_access_options = super.merge(scope:)
       end
 
       MANAGER = ModeManager.new

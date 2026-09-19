@@ -22,11 +22,7 @@ module Farce
           raise ArgumentError, "entries given as both positional and keyword arguments" unless entries.nil?
           entries = keyword_entries
         end
-        if entries.respond_to?(:to_hash)
-          converted = Hash.try_convert(entries)
-          raise TypeError, "entries must be a Hash or respond to #to_hash" unless converted
-          entries = converted
-        end
+        entries = convert_entries(entries)
         @map       = new_tree_map
         @key_locks = new_key_locks
         restoring  = Internal::KeyNormalizer.restoration?(normalize_keys)

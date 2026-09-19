@@ -180,6 +180,10 @@ module Farce
         self
       end
 
+      private def indifferent_access_options
+        super.merge(compare_keys_by_identity: false, compare_values_by_identity: compare_values_by_identity?)
+      end
+
       private def internal_map = @map
     end
   end

@@ -15,7 +15,7 @@ module Helpers
         assert_same value, map[key]
         assert_same key, map.getkey(shared_string("key"))
         assert_equal 1, map.size
-        assert_raises(TypeError) { klass.new([]) }
+        assert_raises(TypeError) { klass.new(Object.new) }
         assert_raises(ArgumentError) { klass.new(compare_by_identity: nil) }
         assert_raises(ArgumentError) { klass.new(compare_keys_by_identity: 1) }
         assert_raises(ArgumentError) { klass.new(compare_values_by_identity: :yes) }

@@ -11,6 +11,10 @@ module Farce
     #
     # A Hash-like collection with slightly reduced functionality to allow for better concurrency models.
     #
+    # Constructors accept a Hash, another map, or an object whose #each yields key/value pairs.
+    # Arrays of pairs and enumerators are supported. Initial entries are inserted in source order.
+    # Local maps retain the initial entries for reuse in each scope.
+    #
     # Iteration order is implementation-dependent. In particular, insertion order is not guaranteed.
     #
     # Implementations can compare keys and values either by equality or by identity. Operations accepting a
@@ -210,6 +214,17 @@ module Farce
       # @return [Hash] A new Hash with the same entries.
       def to_h = each_pair.to_h
 
+      # Return a new map of the same class with interchangeable Symbol and String keys.
+      # Other key types and nested hashes are not normalized. Existing normalization is replaced.
+      # The copy preserves its value mode, value comparison, capacity, and Local scope where supported.
+      # Keys use equality. Entries from the current scope seed a Local copy.
+      # Lease resources and values in move mode are copied to preserve the source.
+      # @return [Map] An independent map with indifferent key access.
+      def with_indifferent_access
+        normalizer = Ractor.shareable_proc { |key| Symbol === key ? key.name : key }
+        build_indifferent_access(**indifferent_access_options, normalize_keys: normalizer)
+      end
+
       # Fetches the values associated with multiple keys, returning nil for any missing keys.
       # @param keys [Array<BasicObject>] The keys to look up.
       # @return [Array<BasicObject>] An array of the associated values, with nil for any missing keys.
@@ -279,6 +294,28 @@ module Farce
       def to_json(...) = to_h.to_json(...)
 
       private
+
+      def indifferent_access_options
+        respond_to?(:mode) ? { mode: mode } : {}
+      end
+
+      def build_indifferent_access(**options)
+        entries = self
+        if options[:mode] == :move
+          copier = ModeManager.new(mode: :copy)
+          entries = each_pair.map { |key, value| [key, copier.unwrap(copier.wrap(value))] }
+        end
+        self.class.new(entries, **options)
+      end
+
+      def convert_entries(entries)
+        if entries.respond_to?(:to_hash)
+          entries = Hash.try_convert(entries)
+          raise TypeError, "entries must be a Hash or respond to #to_hash" unless entries
+        end
+        return entries if entries.nil? || entries.respond_to?(:each)
+        raise TypeError, "entries must yield key/value pairs with #each"
+      end
 
       def each_for_inspect(&) = each(&)
     end

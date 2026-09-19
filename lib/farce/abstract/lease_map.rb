@@ -6,10 +6,13 @@ module Farce
   module Abstract
     # @abstract Shared per-key checkout, mutation, and automatic cleanup behavior for lease maps.
     class LeaseMap < Map
-      # Construct a lease map from a Hash-building block.
+      COPY_VAULT = Internal::Atom.new
+      private_constant :COPY_VAULT
+
+      # Construct a lease map from a block returning key/value entries.
       # @!macro key_normalization
       # @yield builds the initial key and resource mapping
-      # @yieldreturn [Hash] the initial mapping
+      # @yieldreturn [Hash, Farce::Abstract::Map, #each] the initial mapping
       def initialize(normalize_keys: nil)
         raise ArgumentError, "a resource constructor block is required" unless block_given?
 
@@ -18,15 +21,7 @@ module Farce
           shareable: Internal::KeyNormalizer.shareable_target?(self),
         )
         Internal::KeyNormalizer.install(self, normalizer, Internal::KeyNormalizer::LeaseOperations)
-        mapping = yield
-        if normalizer && mapping.is_a?(Hash)
-          mapping.each_value do |resource|
-            if resource.nil? || resource.equal?(true) || resource.equal?(false)
-              raise ArgumentError, "resource must not be nil or a boolean"
-            end
-          end
-          mapping = mapping.to_h { |key, resource| [normalizer.call(key), resource] }
-        end
+        mapping = prepare_initial_resources(yield, normalizer)
         @lease_map = new_internal_lease_map(mapping)
         super()
       end
@@ -212,6 +207,36 @@ module Farce
       end
 
       private
+
+      def build_indifferent_access(**)
+        vault   = COPY_VAULT.store_if_absent { Internal::Vault.new }
+        entries = each_pair.map do |key, resource|
+          token = Object.new.freeze
+          vault.copy_in(token, resource)
+          [key, token]
+        end
+        snapshot    = Ractor.make_shareable([vault, entries])
+        initializer = Ractor.shareable_proc(self: snapshot) do
+          self[1].map { |key, token| [key, self[0].copy_out(token)] }
+        end
+        self.class.new(**, &initializer)
+      end
+
+      def prepare_initial_resources(entries, normalizer)
+        entries = convert_entries(entries)
+        raise TypeError, "lease map initializer must yield key/value pairs" unless entries
+        return entries if entries.is_a?(Hash) && !normalizer
+
+        mapping = {}
+        entries.each do |key, resource|
+          if resource.nil? || resource.equal?(true) || resource.equal?(false)
+            raise ArgumentError, "resource must not be nil or a boolean"
+          end
+          key = normalizer.call(key) if normalizer
+          mapping[key] = resource
+        end
+        mapping
+      end
 
       def checkout_canonical(key, missing_key:, timeout: nil, &)
         internal_lease_map.checkout(key, timeout:, receiver: self, missing_key:, &)

@@ -111,7 +111,7 @@ module Farce
         refute map.compare_and_set(key, equal_value, :replacement)
         assert_predicate map, :compare_keys_by_identity?
         assert_predicate map, :compare_values_by_identity?
-        assert_raises(TypeError) { klass.new([]) }
+        assert_raises(TypeError) { klass.new(Object.new) }
         assert_raises(ArgumentError) { klass.new(compare_by_identity: nil) }
       end
     end

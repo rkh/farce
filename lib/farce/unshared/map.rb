@@ -17,7 +17,7 @@ module Farce
       #   counters.update(:jobs) { |jobs| jobs << :finished }
       #   counters[:jobs] # => [:finished]
       #
-      # @param initial_mapping [Hash, nil] The entries to store initially.
+      # @param initial_mapping [Hash, Farce::Abstract::Map, #each, nil] The entries to store initially.
       # @param compare_by_identity [Boolean] Whether keys and values are compared by identity.
       # @param compare_keys_by_identity [Boolean] Whether keys are compared by identity.
       # @param compare_values_by_identity [Boolean] Whether values are compared by identity.
@@ -28,17 +28,18 @@ module Farce
         compare_keys_by_identity: compare_by_identity,
         compare_values_by_identity: compare_by_identity
       )
-        raise TypeError, "initial mapping must be a Hash" unless initial_mapping.nil? || initial_mapping.is_a?(Hash)
+        initial_mapping = convert_entries(initial_mapping)
         restoring  = Internal::KeyNormalizer.restoration?(normalize_keys)
         normalizer = Internal::KeyNormalizer.build(normalize_keys, shareable: false)
+        populate   = initial_mapping && ((normalizer && !restoring) || !initial_mapping.is_a?(Hash))
         @map       = Internal::UnsharedMap.new(
-          normalizer && !restoring ? nil : initial_mapping,
+          populate ? nil : initial_mapping,
           compare_by_identity:,
           compare_keys_by_identity:,
           compare_values_by_identity:,
         )
         Internal::KeyNormalizer.install_concurrent(self, normalizer) unless restoring
-        initial_mapping&.each { self[_1] = _2 } if normalizer && !restoring
+        initial_mapping.each { |key, value| self[key] = value } if populate
         Internal::KeyNormalizer.install_concurrent(self, normalizer) if restoring
         super()
       end

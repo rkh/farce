@@ -196,11 +196,8 @@ module Farce
 
       private
 
-      def convert_entries(entries)
-        return entries unless entries.respond_to?(:to_hash)
-        converted = Hash.try_convert(entries)
-        raise TypeError, "entries must be a Hash or respond to #to_hash" unless converted
-        converted
+      def indifferent_access_options
+        super.merge(max_size:, compare_keys_by_identity: false, compare_values_by_identity: compare_values_by_identity?)
       end
 
       def each_for_inspect(&)    = each(&)

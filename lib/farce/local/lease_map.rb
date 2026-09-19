@@ -18,7 +18,7 @@ module Farce
       # @!macro scopes
       # @param scope [Symbol] the scope of the lease map
       # @yield builds the initial mapping for each initialized scope
-      # @yieldreturn [Hash] the initial mapping for that scope
+      # @yieldreturn [Hash, Farce::Abstract::Map, #each] the initial mapping for that scope
       def initialize(scope: :ractor, normalize_keys: nil, &initializer)
         raise ArgumentError, "a resource constructor block is required" unless initializer
 
@@ -49,18 +49,7 @@ module Farce
 
       def scoped_lease_map(**)
         scoped_value.fetch(**) do
-          mapping = @initializer.call
-          normalizer = @key_normalizer
-          if normalizer && mapping.is_a?(Hash)
-            mapping.each_value do |resource|
-              if resource.nil? || resource.equal?(true) || resource.equal?(false)
-                raise ArgumentError, "resource must not be nil or a boolean"
-              end
-            end
-            mapping = mapping.to_h do |key, resource|
-              [normalizer.call(key), resource]
-            end
-          end
+          mapping = prepare_initial_resources(@initializer.call, @key_normalizer)
           Internal::LeaseMap.new(
             mapping,
             lease_class:    Farce::Unshared::Lease,

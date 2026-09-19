@@ -19,16 +19,16 @@ module Farce
       refute_operator Abstract::LeaseMap, :<, Abstract::Lease
     end
 
-    def test_constructor_requires_only_a_hash_building_block
+    def test_constructor_requires_only_an_entry_building_block
       map_classes.each do |klass|
         assert_raises(ArgumentError) { klass.new }
         assert_raises(ArgumentError) { klass.new({}) { {} } }
         if klass.name == "Farce::Local::LeaseMap"
-          map = klass.new { [] }
+          map = klass.new { Object.new }
 
           assert_raises(TypeError, ArgumentError) { map.size }
         else
-          assert_raises(TypeError, ArgumentError) { klass.new { [] } }
+          assert_raises(TypeError, ArgumentError) { klass.new { Object.new } }
         end
       end
     end

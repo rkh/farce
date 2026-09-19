@@ -8,7 +8,7 @@ module Farce
     #
     # @!method initialize(entries = nil, scope: :ractor)
     #   @!macro scopes
-    #   @param entries [Hash, #to_hash, nil] the entries to store initially
+    #   @param entries [Hash, Farce::Abstract::Map, #each, #to_hash, nil] the entries to store initially
     #   @param scope [Symbol] the scope of the tree map
     #   @return [TreeMap]
     class TreeMap < Abstract::TreeMap

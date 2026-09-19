@@ -12,7 +12,7 @@ module Farce
       private_constant :NIL_VALUE, :TIMED_OUT, :CANCEL_UPDATE
 
       # @!macro modes
-      # @param initial_mapping [Hash, nil] initial entries with shareable keys
+      # @param initial_mapping [Hash, Farce::Abstract::Map, #each, nil] initial entries with shareable keys
       # @param mode [Symbol] the default value transfer mode
       # @!macro key_normalization
       # @param compare_by_identity [Boolean] the default comparison mode for keys and values
@@ -20,7 +20,7 @@ module Farce
       # @param compare_values_by_identity [Boolean] whether values are compared by identity
       def initialize(initial_mapping = nil, mode: :copy, normalize_keys: nil, compare_by_identity: false,
                      compare_keys_by_identity: compare_by_identity, compare_values_by_identity: compare_by_identity)
-        raise TypeError, "initial mapping must be a Hash" unless initial_mapping.nil? || initial_mapping.is_a?(Hash)
+        initial_mapping = convert_entries(initial_mapping)
 
         identity         = BasicObject.instance_method(:equal?)
         valid_comparison = identity.bind_call(compare_values_by_identity, true) ||
