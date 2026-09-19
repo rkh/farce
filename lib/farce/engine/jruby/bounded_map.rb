@@ -191,7 +191,16 @@ module Farce
         self
       end
 
-      def initialize_copy(_other) = raise TypeError, "bounded maps cannot be copied"
+      def initialize_copy(other)
+        super
+        other.send(:access) do
+          @compare_keys_by_identity   = other.compare_keys_by_identity?
+          @compare_values_by_identity = other.compare_values_by_identity?
+          @guard = JVMOperationGuard.new(synchronized: true, label: "bounded map")
+          @state = State.new(other.send(:core).copy)
+          JVMContainers.freeze_object(self)
+        end
+      end
 
       private
 

@@ -6,7 +6,10 @@ module Farce
   module Unshared
     # A thread-safe concurrent map for mutable objects used within one Ractor.
     # Updates on different keys can run concurrently.
+    #
     # Clearing the map invalidates unfinished updates so they cannot restore removed entries.
+    #
+    # `dup` and `clone` copy entries into independent storage while sharing stored values.
     class Map < Abstract::ConcurrentMap
       include Unshareable
 

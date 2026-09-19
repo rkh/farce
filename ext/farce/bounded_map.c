@@ -1501,11 +1501,99 @@ lru_initialize(int argc, VALUE *argv, VALUE self)
 }
 
 static VALUE
+lru_copy_body(VALUE opaque)
+{
+    lru_arguments_t *arguments = (lru_arguments_t *)opaque;
+    lru_map_t *source = lru_get(arguments->value);
+    lru_map_t *copy = arguments->map;
+    VALUE self = arguments->self;
+
+    lru_check_initializable(self, copy);
+    lru_entry_t **slots = lru_allocate_slots(source->capacity);
+    if (copy->lfu_policy) lfu_free_buckets(copy->least_frequency);
+    else lru_free_entries(copy->least_recent);
+    ruby_xfree(copy->slots);
+    copy->slots = slots;
+    copy->capacity = source->capacity;
+    copy->size = 0;
+    copy->tombstones = 0;
+    copy->max_size = source->max_size;
+    copy->least_recent = NULL;
+    copy->most_recent = NULL;
+    copy->least_frequency = NULL;
+    copy->most_frequency = NULL;
+    copy->bucket_count = 0;
+    copy->compare_keys_by_identity = source->compare_keys_by_identity;
+    copy->compare_values_by_identity = source->compare_values_by_identity;
+
+    if (source->lfu_policy) {
+        for (lfu_bucket_t *source_bucket = source->least_frequency;
+             source_bucket != NULL;
+             source_bucket = source_bucket->following) {
+            lfu_bucket_t *bucket = lfu_allocate_bucket(self, source_bucket->frequency);
+            lfu_link_bucket_after(copy, copy->most_frequency, bucket);
+            for (lru_entry_t *source_entry = source_bucket->least_recent;
+                 source_entry != NULL;
+                 source_entry = source_entry->following) {
+                lfu_entry_t *entry = ALLOC(lfu_entry_t);
+                entry->base.key = Qnil;
+                entry->base.value = Qnil;
+                entry->base.hash = source_entry->hash;
+                entry->base.previous = NULL;
+                entry->base.following = NULL;
+                entry->bucket = NULL;
+                RB_OBJ_WRITE(self, &entry->base.key, source_entry->key);
+                RB_OBJ_WRITE(self, &entry->base.value, source_entry->value);
+                lru_place_resized_entry(copy->slots, copy->capacity - 1, &entry->base);
+                lfu_append_entry(bucket, &entry->base);
+                copy->size++;
+            }
+        }
+    }
+    else {
+        for (lru_entry_t *source_entry = source->least_recent;
+             source_entry != NULL;
+             source_entry = source_entry->following) {
+            lru_entry_t *entry = ALLOC(lru_entry_t);
+            entry->key = Qnil;
+            entry->value = Qnil;
+            entry->hash = source_entry->hash;
+            entry->previous = NULL;
+            entry->following = NULL;
+            RB_OBJ_WRITE(self, &entry->key, source_entry->key);
+            RB_OBJ_WRITE(self, &entry->value, source_entry->value);
+            lru_place_resized_entry(copy->slots, copy->capacity - 1, entry);
+            lru_append(copy, entry);
+            copy->size++;
+        }
+    }
+
+    if (!copy->shareable_container) {
+        RUBY_ATOMIC_SET(copy->state, LRU_INITIALIZED);
+        return self;
+    }
+
+    RUBY_ATOMIC_SET(copy->state, LRU_PUBLISHING);
+    return rb_ensure(lru_make_shareable, opaque, lru_finish_publication, opaque);
+}
+
+static VALUE
 lru_initialize_copy(VALUE self, VALUE other)
 {
-    (void)self;
-    (void)other;
-    rb_raise(rb_eTypeError, "bounded maps cannot be copied");
+    lru_map_t *source = lru_get(other);
+    lru_map_t *copy = lru_get_raw(self);
+    lru_arguments_t arguments = {
+        .self = self,
+        .map = copy,
+        .value = other,
+    };
+
+    lru_check_initializable(self, copy);
+    if (source->lfu_policy != copy->lfu_policy ||
+        source->shareable_container != copy->shareable_container) {
+        rb_raise(rb_eTypeError, "incompatible bounded map copy");
+    }
+    return lru_call_locked(source, lru_copy_body, &arguments);
 }
 
 static void

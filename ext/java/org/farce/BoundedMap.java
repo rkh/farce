@@ -178,6 +178,38 @@ public final class BoundedMap {
         return result;
     }
 
+    /** Copy storage and eviction history without invoking Ruby key callbacks. */
+    public BoundedMap copy() {
+        BoundedMap copy = new BoundedMap(lfu, maxSize, equal);
+        copy.table = new Object[table.length];
+        if (lfu) {
+            for (Bucket sourceBucket = leastFrequency; sourceBucket != null; sourceBucket = sourceBucket.following) {
+                Bucket bucket = new Bucket(sourceBucket.frequency, sourceBucket.bigFrequency);
+                copy.linkBucketBefore(bucket, null);
+                for (Entry source = sourceBucket.leastRecent; source != null; source = source.following) {
+                    Entry entry = new LFUEntry(source.key, source.value, source.hash);
+                    copy.insertCopiedEntry(entry);
+                    copy.appendToBucket(bucket, entry);
+                }
+            }
+        } else {
+            for (Entry source = leastRecent; source != null; source = source.following) {
+                Entry entry = new Entry(source.key, source.value, source.hash);
+                copy.insertCopiedEntry(entry);
+                copy.appendLRU(entry);
+            }
+        }
+        return copy;
+    }
+
+    private void insertCopiedEntry(Entry entry) {
+        int slot = emptySlot(entry.hash);
+        table[slot] = entry;
+        entry.slot = slot;
+        size++;
+        used++;
+    }
+
     private Entry victim() {
         return lfu ? (leastFrequency == null ? null : leastFrequency.leastRecent) : leastRecent;
     }

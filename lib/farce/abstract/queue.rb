@@ -255,13 +255,15 @@ module Farce
 
       def wait_push(timeout: nil) = internal_queue.wait_push(timeout:)
 
+      # Compatibility method for ActiveSupport
+      # @return [Boolean] false
+      def duplicable? = false
+
+      private
+
       def initialize_copy(_other)
         raise TypeError, "queues cannot be copied"
       end
-
-      private :initialize_copy
-
-      private
 
       def inspect_info
         info = { size:, capacity: }.compact

@@ -8,6 +8,7 @@ module Farce
     #
     # Successful individual value reads and writes update the map's eviction policy.
     # Observational operations such as iteration, {#key?}, and {#getkey} do not.
+    # Copies preserve capacity and eviction history without counting copying as an access.
     class BoundedMap < Map
       # @param entries [Hash, Array<Array(BasicObject, BasicObject)>, Map, #each, nil]
       #   Optional initial entries. Entries are stored sequentially and may be evicted.
@@ -195,6 +196,13 @@ module Farce
       def encode_with(coder) = super.tap { it["max_size"] = max_size }
 
       private
+
+      def copy_map_backend(source) = source.dup
+
+      def install_copied_map(map)
+        super
+        @key_locks = new_key_locks(compare_keys_by_identity: map.compare_keys_by_identity?)
+      end
 
       def indifferent_access_options
         super.merge(max_size:, compare_keys_by_identity: false, compare_values_by_identity: compare_values_by_identity?)

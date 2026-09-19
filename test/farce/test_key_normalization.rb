@@ -330,7 +330,7 @@ module Farce
           ],
           key_free:   %i[
             auto_lease clear compare_keys_by_identity? compare_values_by_identity? each each_key each_pair each_value
-            inspect keys shareable_keys? shareable_values? size to_a to_h values
+            duplicable? inspect keys shareable_keys? shareable_values? size to_a to_h values
           ],
         },
       }

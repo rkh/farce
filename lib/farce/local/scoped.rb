@@ -42,6 +42,12 @@ module Farce
         end
 
         private def indifferent_access_options = super.merge(scope:)
+
+        private def install_copied_map(map)
+          Internal::Storage.scope(scope)[self] = new_copied_scoped_value(map)
+        end
+
+        private def new_copied_scoped_value(map) = map
       end
 
       MANAGER = ModeManager.new

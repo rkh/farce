@@ -8,7 +8,12 @@ module Farce
   # except when comparing keys by identity. Other keys must already be shareable.
   # Values stored through this map's mode manager are automatically unwrapped.
   # Updates on different keys can run concurrently.
+  #
   # Clearing the map invalidates unfinished updates so they cannot restore removed entries.
+  #
+  # `dup` and `clone` copy entries into independent storage while sharing stored values.
+  # Move-mode envelopes keep their ownership across copies. `dup` and ordinary `clone`
+  # remain Ractor-shareable.
   #
   # @example Atomically updating a value
   #   map = Farce::Map.new({ count: 0 })

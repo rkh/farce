@@ -19,6 +19,10 @@ module Farce
 
       private
 
+      def new_copied_scoped_value(map)
+        State.new(map, Internal::OrderedKeyLockMap.new)
+      end
+
       def internal_map          = scoped_value.map
       def with_key_lock(key, &) = scoped_value.key_locks.synchronize(key, &)
 

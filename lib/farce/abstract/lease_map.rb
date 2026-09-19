@@ -26,6 +26,11 @@ module Farce
         super()
       end
 
+      # @api private
+      def initialize_copy(_other)
+        raise TypeError, "lease maps cannot be copied"
+      end
+
       # Acquire one key's resource, waiting until it is available.
       # @param key [BasicObject] the key to acquire
       # @param timeout [Numeric, nil] maximum seconds to wait
@@ -205,6 +210,10 @@ module Farce
         states = to_a.map { |key, lease| "#{key.inspect} => #{lease_state(lease)}" }.join(", ")
         "#<#{self.class.name} {#{states}}>"
       end
+
+      # Compatibility method for ActiveSupport
+      # @return [Boolean] false
+      def duplicable? = false
 
       private
 

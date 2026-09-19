@@ -6,7 +6,11 @@ module Farce
   module Strict
     # A Ractor-shareable concurrent map that stores shareable keys and values directly.
     # Updates on different keys can run concurrently.
+    #
     # Clearing the map invalidates unfinished updates so they cannot restore removed entries.
+    #
+    # `dup` and `clone` copy entries into independent storage while sharing stored values.
+    # `dup` and ordinary `clone` remain Ractor-shareable.
     #
     # @example Atomically counting occurrences
     #   counts = Farce::Strict::Map.new

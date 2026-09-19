@@ -15,6 +15,12 @@ module Farce
     # Arrays of pairs and enumerators are supported. Initial entries are inserted in source order.
     # Local maps retain the initial entries for reuse in each scope.
     #
+    # `dup` and `clone` create independent storage and coordination while sharing keys and stored values.
+    # Value modes and key normalization are preserved without transferring values again.
+    # Copies of shareable maps remain shareable unless explicitly cloned with `freeze: false`.
+    # Local copies retain the current scope's contents. Other scopes use the original constructor configuration.
+    # Lease maps reject copying because resources cannot safely be given independent ownership controls.
+    #
     # Iteration order is implementation-dependent. In particular, insertion order is not guaranteed.
     #
     # Implementations can compare keys and values either by equality or by identity. Operations accepting a
@@ -150,11 +156,26 @@ module Farce
       include Enumerable
 
       # @api private
+      def initialize_dup(other)
+        super
+        make_copy_shareable if is_a?(Shareable)
+      end
+
+      # @api private
+      def initialize_clone(other, freeze: nil)
+        super
+        make_copy_shareable if is_a?(Shareable) && freeze != false
+      end
+
+      # @api private
       def initialize_copy(other)
         super
         normalizer = other.instance_variable_get(:@key_normalizer)
-        return unless normalizer && !is_a?(ConcurrentMap)
-        Internal::KeyNormalizer.install(self, normalizer, Internal::KeyNormalizer.operations_for(self))
+        if normalizer && !is_a?(ConcurrentMap)
+          operations = Internal::KeyNormalizer.operations_for(self)
+          Internal::KeyNormalizer.install(self, normalizer, operations) unless is_a?(operations)
+        end
+        install_copied_map(copy_map_backend(other.__send__(:internal_map)))
       end
 
       # Return a two-element array containing a key and its associated value, if the key is present,
@@ -293,7 +314,20 @@ module Farce
 
       def to_json(...) = to_h.to_json(...)
 
+      # Compatibility method for ActiveSupport
+      # @return [Boolean] Whether the map is duplicable
+      def duplicable? = true
+
       private
+
+      def make_copy_shareable
+        Ractor.make_shareable(self) if Internal.native_ractors?
+        freeze
+      end
+
+      def install_copied_map(map)
+        @map = map
+      end
 
       def indifferent_access_options
         respond_to?(:mode) ? { mode: mode } : {}

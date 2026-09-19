@@ -71,6 +71,20 @@ module Farce
         end
       end
 
+      def initialize_copy(other)
+        super
+        other.send(:synchronize) do
+          @max_size                   = other.instance_variable_get(:@max_size)
+          @compare_keys_by_identity   = other.instance_variable_get(:@compare_keys_by_identity)
+          @compare_values_by_identity = other.instance_variable_get(:@compare_values_by_identity)
+          @mutex                      = Mutex.new
+          @buckets                    = {}
+          @size                       = 0
+          initialize_policy
+          copy_policy_nodes(other)
+        end
+      end
+
       def [](key)
         synchronize do
           node = find_node(key)
@@ -321,6 +335,15 @@ module Farce
         node
       end
 
+      def copy_node(node)
+        copy = Node.new(node.key, node.hash_code, node.value)
+        bucket = (@buckets[node.hash_code] ||= [])
+        copy.collision_index = bucket.length
+        bucket << copy
+        @size += 1
+        copy
+      end
+
       def remove_victims_until(target)
         remove_node(policy_victim) while @size > target
       end
@@ -353,6 +376,7 @@ module Farce
       def policy_prepare_insert(node) = raise NotImplementedError
       def policy_remove(node) = raise NotImplementedError
       def policy_victim = raise NotImplementedError
+      def copy_policy_nodes(_other) = raise NotImplementedError
     end
 
     class PortableLRUMap < PortableBoundedMap
@@ -361,6 +385,14 @@ module Farce
       def initialize_policy
         @least_recent = nil
         @most_recent = nil
+      end
+
+      def copy_policy_nodes(other)
+        node = other.instance_variable_get(:@least_recent)
+        while node
+          append(copy_node(node))
+          node = node.following
+        end
       end
 
       def policy_prepare_access(_node) = nil
@@ -464,6 +496,24 @@ module Farce
 
       def initialize_policy
         @least_frequent = nil
+      end
+
+      def copy_policy_nodes(other)
+        source_bucket = other.instance_variable_get(:@least_frequent)
+        previous = nil
+        while source_bucket
+          bucket = Bucket.new(source_bucket.frequency)
+          bucket.previous = previous
+          previous.following = bucket if previous
+          @least_frequent ||= bucket
+          node = source_bucket.least_recent
+          while node
+            append_to_bucket(copy_node(node), bucket)
+            node = node.following
+          end
+          previous = bucket
+          source_bucket = source_bucket.following
+        end
       end
 
       def policy_prepare_insert(_node)

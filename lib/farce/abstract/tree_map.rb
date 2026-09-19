@@ -213,6 +213,17 @@ module Farce
 
       private
 
+      def copy_map_backend(source)
+        copied = source.class.new
+        source.each { |key, value| copied[key] = value }
+        copied
+      end
+
+      def install_copied_map(map)
+        super
+        @key_locks = new_key_locks
+      end
+
       def each_for_inspect(&) = each(&)
 
       def prepare_key(key)

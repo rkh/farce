@@ -25,6 +25,14 @@ module Farce
 
       private
 
+      def new_copied_scoped_value(map)
+        locks = Internal::KeyLockMap.new(
+          registry_class:           Farce::Unshared::Map,
+          compare_keys_by_identity: map.compare_keys_by_identity?,
+        )
+        State.new(map, locks)
+      end
+
       def internal_map          = scoped_value.map
       def with_key_lock(key, &) = scoped_value.key_locks.synchronize(key, &)
 
