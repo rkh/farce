@@ -2,6 +2,27 @@
 require_relative "../../setup"
 
 class TestInternalAutoloads < Test
+  def test_reservation_waits_during_concurrent_first_use
+    output, error, status = ruby_subprocess(<<~RUBY)
+      require "farce"
+      waiting = Farce.const_get(:Internal)::ReservationWaiting
+      signal = Object.new
+      def signal.wait(*) = true
+
+      # Widen the interval between publishing the module and defining its methods.
+      trace = TracePoint.new(:class) do |event|
+        10_000.times { Thread.pass } if event.self.name == "Farce::Internal::LeaseWaiting"
+      end
+      trace.enable do
+        8.times.map { Thread.new { waiting.wait(signal, 0, nil) } }.each(&:value)
+      end
+      puts "ok"
+    RUBY
+
+    assert_predicate status, :success?, error
+    assert_equal "ok", output.strip
+  end
+
   def test_thread_pool_and_scheduler_helpers_load_independently
     output, error, status = ruby_subprocess(<<~'RUBY')
       require "farce"

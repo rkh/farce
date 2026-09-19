@@ -3,6 +3,11 @@
 # warn_indent: true
 
 require "farce/engine/shared"
+
+# Concurrent lexical lookup can expose this module before its methods are defined.
+# Load it before reservation or lease waits can first run on competing threads.
+require "farce/internal/lease_waiting"
+
 require "farce/engine/jvm" unless TruffleRuby.native?
 
 module Farce
