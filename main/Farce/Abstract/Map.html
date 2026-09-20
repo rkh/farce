@@ -135,6 +135,11 @@ with the notable exception of <span class='object_link'><a href="ConcurrentMap.h
 <p>Constructors accept a Hash, another map, or an object whose #each yields key/value pairs.
 Arrays of pairs and enumerators are supported. Initial entries are inserted in source order.
 Local maps retain the initial entries for reuse in each scope.</p>
+<p><code>dup</code> and <code>clone</code> create independent storage and coordination while sharing keys and stored values.
+Value modes and key normalization are preserved without transferring values again.
+Copies of shareable maps remain shareable unless explicitly cloned with <code>freeze: false</code>.
+Local copies retain the current scope's contents. Other scopes use the original constructor configuration.
+Lease maps reject copying because resources cannot safely be given independent ownership controls.</p>
 <p>Iteration order is implementation-dependent. In particular, insertion order is not guaranteed.</p>
 <p>Implementations can compare keys and values either by equality or by identity. Operations accepting a
 <code>timeout</code> wait at most that many seconds to acquire the access needed for the operation. A timeout must be a
@@ -367,6 +372,29 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Implements Ruby's <a href="https://docs.ruby-lang.org/en/master/language/dig_methods_rdoc.html">dig interface</a>.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#duplicable%3F-instance_method" title="#duplicable? (instance method)">#<strong>duplicable?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Compatibility method for ActiveSupport.</p>
 </div></span>
   
 </li>
@@ -978,12 +1006,6 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -1150,20 +1172,69 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -1302,7 +1373,20 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -1413,12 +1497,6 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -1585,20 +1663,69 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -1737,7 +1864,20 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -1830,13 +1970,13 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-164
-165
-166
-167</pre>
+185
+186
+187
+188</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 164</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 185</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_assoc'>assoc</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>return</span> <span class='kw'>nil</span> <span class='rbrace'>}</span>
@@ -1889,12 +2029,6 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -2061,20 +2195,69 @@ or nil if the key is absent.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -2213,7 +2396,20 @@ or nil if the key is absent.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -2290,10 +2486,10 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-170</pre>
+191</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 170</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 191</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span></pre>
     </td>
@@ -2347,12 +2543,6 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -2519,20 +2709,69 @@ or nil if the key is absent.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -2671,7 +2910,20 @@ or nil if the key is absent.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -2748,12 +3000,6 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -2920,20 +3166,69 @@ or nil if the key is absent.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -3072,7 +3367,20 @@ or nil if the key is absent.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -3168,12 +3476,6 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -3340,20 +3642,69 @@ or nil if the key is absent.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -3492,7 +3843,20 @@ or nil if the key is absent.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -3599,20 +3963,73 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-176
-177
-178
-179
-180</pre>
+197
+198
+199
+200
+201</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 176</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 197</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_dig'>dig</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_rest'>rest</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_value'>value</span> <span class='kw'>if</span> <span class='id identifier rubyid_rest'>rest</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>||</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
   <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_dig'>dig</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_rest'>rest</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="duplicable?-instance_method">
+  
+    #<strong>duplicable?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Compatibility method for ActiveSupport</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether the map is duplicable</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+319</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 319</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
   </tr>
 </table>
@@ -3755,12 +4172,6 @@ to match insertion order.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -3927,20 +4338,69 @@ to match insertion order.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -4079,7 +4539,20 @@ to match insertion order.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -4246,12 +4719,6 @@ Keys are not guaranteed to be yielded in insertion order.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -4418,20 +4885,69 @@ Keys are not guaranteed to be yielded in insertion order.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -4570,7 +5086,20 @@ Keys are not guaranteed to be yielded in insertion order.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -4637,12 +5166,6 @@ Keys are not guaranteed to be yielded in insertion order.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -4809,20 +5332,69 @@ Keys are not guaranteed to be yielded in insertion order.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -4961,7 +5533,20 @@ Keys are not guaranteed to be yielded in insertion order.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -5128,12 +5713,6 @@ Values are not guaranteed to be yielded in insertion order.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -5300,20 +5879,69 @@ Values are not guaranteed to be yielded in insertion order.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -5452,7 +6080,20 @@ Values are not guaranteed to be yielded in insertion order.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -5525,10 +6166,10 @@ Values are not guaranteed to be yielded in insertion order.</p>
       <pre class="lines">
 
 
-184</pre>
+205</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 184</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 205</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span></pre>
     </td>
@@ -5818,12 +6459,6 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -5990,20 +6625,69 @@ If both a default and a block are provided, the block takes precedence and a war
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -6142,7 +6826,20 @@ If both a default and a block are provided, the block takes precedence and a war
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -6287,10 +6984,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-197</pre>
+218</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 197</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 218</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fetch_values'>fetch_values</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_keys'>keys</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -6363,12 +7060,6 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -6535,20 +7226,69 @@ If both a default and a block are provided, the block takes precedence and a war
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -6687,7 +7427,20 @@ If both a default and a block are provided, the block takes precedence and a war
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -6760,10 +7513,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-187</pre>
+208</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 187</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 208</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix</span></pre>
     </td>
@@ -6813,25 +7566,25 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-242
-243
-244
-245
-246
-247
-248
-249
-250
-251
-252
-253
-254
-255
-256
-257</pre>
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 242</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 263</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span>
   <span class='id identifier rubyid_out'>out</span>   <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> {</span><span class='tstring_end'>&quot;</span></span>
@@ -6919,12 +7672,6 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -7091,20 +7838,69 @@ If both a default and a block are provided, the block takes precedence and a war
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -7243,7 +8039,20 @@ If both a default and a block are provided, the block takes precedence and a war
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -7321,12 +8130,6 @@ The returned keys are not guaranteed to be in insertion order.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -7493,20 +8296,69 @@ The returned keys are not guaranteed to be in insertion order.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -7645,7 +8497,20 @@ The returned keys are not guaranteed to be in insertion order.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -7726,10 +8591,10 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-204</pre>
+225</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 204</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 225</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_keys?'>shareable_keys?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -7779,10 +8644,10 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-207</pre>
+228</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 207</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 228</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -7836,12 +8701,6 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -8008,20 +8867,69 @@ This method will still return <code>true</code> for such maps.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -8160,7 +9068,20 @@ This method will still return <code>true</code> for such maps.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -8311,12 +9232,6 @@ A later removal or eviction can cause another call to construct a new value.</p>
       <pre class="lines">
 
 
-149
-150
-151
-152
-153
-154
 155
 156
 157
@@ -8483,20 +9398,69 @@ A later removal or eviction can cause another call to construct a new value.</p>
 318
 319
 320
-321</pre>
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
 
   <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_dup'>initialize_dup</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_clone'>initialize_clone</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>super</span>
+    <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_freeze'>freeze</span> <span class='op'>!=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
     <span class='kw'>super</span>
     <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_operations'>operations</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_operations_for'>operations_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='id identifier rubyid_operations'>operations</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_copy_map_backend'>copy_map_backend</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:internal_map</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
@@ -8635,7 +9599,20 @@ A later removal or eviction can cause another call to construct a new value.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
+  <span class='comment'># Compatibility method for ActiveSupport
+</span>  <span class='comment'># @return [Boolean] Whether the map is duplicable
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
   <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_make_copy_shareable'>make_copy_shareable</span>
+    <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
+    <span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_install_copied_map'>install_copied_map</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span>
+    <span class='ivar'>@map</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_indifferent_access_options'>indifferent_access_options</span>
     <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='lbrace'>{</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='rbrace'>}</span> <span class='op'>:</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -8708,10 +9685,10 @@ A later removal or eviction can cause another call to construct a new value.</p>
       <pre class="lines">
 
 
-211</pre>
+232</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 211</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 232</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_a'>to_a</span> <span class='op'>=</span> <span class='id identifier rubyid_each_pair'>each_pair</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span></pre>
     </td>
@@ -8761,10 +9738,10 @@ A later removal or eviction can cause another call to construct a new value.</p>
       <pre class="lines">
 
 
-215</pre>
+236</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 215</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 236</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_h'>to_h</span> <span class='op'>=</span> <span class='id identifier rubyid_each_pair'>each_pair</span><span class='period'>.</span><span class='id identifier rubyid_to_h'>to_h</span></pre>
     </td>
@@ -8787,10 +9764,10 @@ A later removal or eviction can cause another call to construct a new value.</p>
       <pre class="lines">
 
 
-294</pre>
+315</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 294</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 315</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -8859,10 +9836,10 @@ A later removal or eviction can cause another call to construct a new value.</p>
       <pre class="lines">
 
 
-231</pre>
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 231</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 252</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_values_at'>values_at</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_keys'>keys</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_it'>it</span><span class='rbracket'>]</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -8912,10 +9889,10 @@ A later removal or eviction can cause another call to construct a new value.</p>
       <pre class="lines">
 
 
-235</pre>
+256</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 235</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 256</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_weak_keys?'>weak_keys?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -8965,10 +9942,10 @@ A later removal or eviction can cause another call to construct a new value.</p>
       <pre class="lines">
 
 
-239</pre>
+260</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 239</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 260</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_weak_values?'>weak_values?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -9022,13 +9999,13 @@ Lease resources and values in move mode are copied to preserve the source.</p>
       <pre class="lines">
 
 
-223
-224
-225
-226</pre>
+244
+245
+246
+247</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 223</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 244</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_with_indifferent_access'>with_indifferent_access</span>
   <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable_proc'><span class='object_link'><a href="../Ractor.html#shareable_proc-class_method" title="Farce::Ractor.shareable_proc (method)">shareable_proc</a></span></span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='op'>|</span> <span class='const'>Symbol</span> <span class='op'>===</span> <span class='id identifier rubyid_key'>key</span> <span class='op'>?</span> <span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span> <span class='op'>:</span> <span class='id identifier rubyid_key'>key</span> <span class='rbrace'>}</span>
@@ -9044,7 +10021,7 @@ Lease resources and values in move mode are copied to preserve the source.</p>
 </div>
 
       <div id="footer">
-  Generated on Sat Sep 19 11:11:22 2026 by
+  Generated on Sun Sep 20 09:19:10 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

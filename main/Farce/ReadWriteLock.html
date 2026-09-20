@@ -100,7 +100,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></dd>
+      <dd><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span>, Internal::Noncopyable</dd>
   </dl>
   
   
@@ -233,7 +233,8 @@ before returning to the outer read-lock block.</p>
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
-<div id="constructor_details" class="method_details_list">
+
+  <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
     <div class="method_details first">
@@ -261,14 +262,14 @@ before returning to the outer read-lock block.</p>
       <pre class="lines">
 
 
-30
 31
 32
 33
-34</pre>
+34
+35</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/read_write_lock.rb', line 30</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/read_write_lock.rb', line 31</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span>
   <span class='ivar'>@state</span>  <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Vector</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span><span class='rparen'>)</span>
@@ -359,7 +360,6 @@ before returning to the outer read-lock block.</p>
       <pre class="lines">
 
 
-40
 41
 42
 43
@@ -378,10 +378,11 @@ before returning to the outer read-lock block.</p>
 56
 57
 58
-59</pre>
+59
+60</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/read_write_lock.rb', line 40</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/read_write_lock.rb', line 41</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_with_read_lock'>with_read_lock</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -481,7 +482,6 @@ before returning to the outer read-lock block.</p>
       <pre class="lines">
 
 
-67
 68
 69
 70
@@ -503,10 +503,11 @@ before returning to the outer read-lock block.</p>
 86
 87
 88
-89</pre>
+89
+90</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/read_write_lock.rb', line 67</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/read_write_lock.rb', line 68</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_with_write_lock'>with_write_lock</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -541,7 +542,7 @@ before returning to the outer read-lock block.</p>
 </div>
 
       <div id="footer">
-  Generated on Sat Sep 19 11:11:23 2026 by
+  Generated on Sun Sep 20 09:19:11 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

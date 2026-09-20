@@ -98,6 +98,11 @@
   
   
   
+  <dl>
+      <dt>Includes:</dt>
+      <dd>Internal::Noncopyable</dd>
+  </dl>
+  
   
 
   
@@ -333,6 +338,7 @@
   
 
 
+  
 
   <div id="instance_method_details" class="method_details_list">
     <h2>Instance Method Details</h2>
@@ -424,12 +430,16 @@ Will drain any pending tasks before fully closing. If tasks are running indefini
 104
 105
 106
-107</pre>
+107
+108
+109</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 66</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Scheduler (class)">Scheduler</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Noncopyable</span>
+
   <span class='comment'># An error that occurred during the scheduler&#39;s operation, if any.
 </span>  <span class='comment'># This is primarily for scheduling errors, not execution errors.
 </span>  <span class='comment'># You can check this if the {#state} is `:error`.
@@ -564,12 +574,16 @@ Will drain any pending tasks before fully closing. If tasks are running indefini
 104
 105
 106
-107</pre>
+107
+108
+109</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 66</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Scheduler (class)">Scheduler</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Noncopyable</span>
+
   <span class='comment'># An error that occurred during the scheduler&#39;s operation, if any.
 </span>  <span class='comment'># This is primarily for scheduling errors, not execution errors.
 </span>  <span class='comment'># You can check this if the {#state} is `:error`.
@@ -643,10 +657,10 @@ You can check this if the <span class='object_link'><a href="#state-instance_met
       <pre class="lines">
 
 
-70</pre>
+72</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 70</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 72</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_error'>error</span> <span class='op'>=</span> <span class='kw'>nil</span></pre>
     </td>
@@ -766,8 +780,6 @@ May be ignored by some schedulers.</p>
       <pre class="lines">
 
 
-83
-84
 85
 86
 87
@@ -789,10 +801,12 @@ May be ignored by some schedulers.</p>
 103
 104
 105
-106</pre>
+106
+107
+108</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 83</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 85</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Cannot yield without a block</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -886,10 +900,10 @@ May be ignored by some schedulers.</p>
       <pre class="lines">
 
 
-74</pre>
+76</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 74</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 76</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_local?'>local?</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='kw'>true</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>false</span> <span class='comment'># rubocop:disable Lint/UnusedMethodArgument</span></pre>
     </td>
@@ -985,12 +999,16 @@ May be ignored by some schedulers.</p>
 104
 105
 106
-107</pre>
+107
+108
+109</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 66</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Scheduler (class)">Scheduler</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Noncopyable</span>
+
   <span class='comment'># An error that occurred during the scheduler&#39;s operation, if any.
 </span>  <span class='comment'># This is primarily for scheduling errors, not execution errors.
 </span>  <span class='comment'># You can check this if the {#state} is `:error`.
@@ -1246,12 +1264,16 @@ May be ignored by some schedulers.</p>
 104
 105
 106
-107</pre>
+107
+108
+109</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 66</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Scheduler (class)">Scheduler</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Noncopyable</span>
+
   <span class='comment'># An error that occurred during the scheduler&#39;s operation, if any.
 </span>  <span class='comment'># This is primarily for scheduling errors, not execution errors.
 </span>  <span class='comment'># You can check this if the {#state} is `:error`.
@@ -1400,12 +1422,16 @@ May be ignored by some schedulers.</p>
 104
 105
 106
-107</pre>
+107
+108
+109</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 66</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Scheduler (class)">Scheduler</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Noncopyable</span>
+
   <span class='comment'># An error that occurred during the scheduler&#39;s operation, if any.
 </span>  <span class='comment'># This is primarily for scheduling errors, not execution errors.
 </span>  <span class='comment'># You can check this if the {#state} is `:error`.
@@ -1457,7 +1483,7 @@ May be ignored by some schedulers.</p>
 </div>
 
       <div id="footer">
-  Generated on Sat Sep 19 11:11:24 2026 by
+  Generated on Sun Sep 20 09:19:11 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

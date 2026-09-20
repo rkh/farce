@@ -98,6 +98,11 @@
   
   
   
+  <dl>
+      <dt>Includes:</dt>
+      <dd>Internal::Noncopyable</dd>
+  </dl>
+  
   
 
   
@@ -357,7 +362,8 @@
     
   
 
-<div id="constructor_details" class="method_details_list">
+
+  <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
     <div class="method_details first">
@@ -436,15 +442,15 @@
       <pre class="lines">
 
 
-13
-14
 15
 16
 17
-18</pre>
+18
+19
+20</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 13</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 15</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>a resource constructor block is required</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -506,10 +512,10 @@
       <pre class="lines">
 
 
-64</pre>
+66</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 64</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 66</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_available?'>available?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease'>internal_lease</span><span class='period'>.</span><span class='id identifier rubyid_available?'>available?</span></pre>
     </td>
@@ -559,10 +565,10 @@
       <pre class="lines">
 
 
-67</pre>
+69</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 67</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 69</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_checked_out?'>checked_out?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease'>internal_lease</span><span class='period'>.</span><span class='id identifier rubyid_checked_out?'>checked_out?</span></pre>
     </td>
@@ -670,13 +676,13 @@
       <pre class="lines">
 
 
-46
-47
 48
-49</pre>
+49
+50
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 46</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 48</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_checkin'>checkin</span><span class='lparen'>(</span><span class='id identifier rubyid_resource'>resource</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_lease'>internal_lease</span><span class='period'>.</span><span class='id identifier rubyid_checkin'>checkin</span><span class='lparen'>(</span><span class='id identifier rubyid_resource'>resource</span><span class='rparen'>)</span>
@@ -799,13 +805,13 @@
       <pre class="lines">
 
 
-26
-27
 28
-29</pre>
+29
+30
+31</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 26</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 28</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_checkout'>checkout</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_lease'>lease</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease'>internal_lease</span>
@@ -858,10 +864,10 @@
       <pre class="lines">
 
 
-70</pre>
+72</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 70</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 72</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_owned?'>owned?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease'>internal_lease</span><span class='period'>.</span><span class='id identifier rubyid_owned?'>owned?</span></pre>
     </td>
@@ -927,13 +933,13 @@ not closed or otherwise disposed. Calling this again after retirement is safe.</
       <pre class="lines">
 
 
-58
-59
 60
-61</pre>
+61
+62
+63</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 58</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 60</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_retire'>retire</span>
   <span class='id identifier rubyid_internal_lease'>internal_lease</span><span class='period'>.</span><span class='id identifier rubyid_retire'>retire</span>
@@ -986,10 +992,10 @@ not closed or otherwise disposed. Calling this again after retirement is safe.</
       <pre class="lines">
 
 
-73</pre>
+75</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 73</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 75</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_retired?'>retired?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease'>internal_lease</span><span class='period'>.</span><span class='id identifier rubyid_retired?'>retired?</span></pre>
     </td>
@@ -1075,13 +1081,13 @@ not closed or otherwise disposed. Calling this again after retirement is safe.</
       <pre class="lines">
 
 
-35
-36
 37
-38</pre>
+38
+39
+40</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 35</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease.rb', line 37</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_try_checkout'>try_checkout</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_lease'>lease</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease'>internal_lease</span>
@@ -1097,7 +1103,7 @@ not closed or otherwise disposed. Calling this again after retirement is safe.</
 </div>
 
       <div id="footer">
-  Generated on Sat Sep 19 11:11:23 2026 by
+  Generated on Sun Sep 20 09:19:11 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

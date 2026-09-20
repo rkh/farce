@@ -98,6 +98,11 @@
   
   
   
+  <dl>
+      <dt>Includes:</dt>
+      <dd>Internal::Noncopyable</dd>
+  </dl>
+  
   
 
   
@@ -169,6 +174,7 @@ Each call participates in one exchange. The exchanger can be reused by any numbe
   
 
 
+  
 
   <div id="instance_method_details" class="method_details_list">
     <h2>Instance Method Details</h2>
@@ -289,10 +295,10 @@ A successful exchange of nil does not invoke the fallback.</p>
       <pre class="lines">
 
 
-20</pre>
+22</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/exchanger.rb', line 20</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/exchanger.rb', line 22</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_exchange'>exchange</span><span class='lparen'>(</span><span class='id identifier rubyid_offered'>offered</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@exchanger</span><span class='period'>.</span><span class='id identifier rubyid_exchange'>exchange</span><span class='lparen'>(</span><span class='id identifier rubyid_offered'>offered</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -305,7 +311,7 @@ A successful exchange of nil does not invoke the fallback.</p>
 </div>
 
       <div id="footer">
-  Generated on Sat Sep 19 11:11:24 2026 by
+  Generated on Sun Sep 20 09:19:11 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

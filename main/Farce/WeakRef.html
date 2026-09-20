@@ -180,6 +180,29 @@
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#duplicable%3F-instance_method" title="#duplicable? (instance method)">#<strong>duplicable?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Copies retain the same weak reference without duplicating its target.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(value)  &#x21d2; WeakRef </a>
     
 
@@ -283,7 +306,56 @@
 
     
       <div class="method_details first">
-  <h3 class="signature first" id="weakref_alive?-instance_method">
+  <h3 class="signature first" id="duplicable?-instance_method">
+  
+    #<strong>duplicable?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Copies retain the same weak reference without duplicating its target.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+36</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/weak_ref.rb', line 36</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="weakref_alive?-instance_method">
   
     #<strong>weakref_alive?</strong>  &#x21d2; <tt>Boolean</tt> 
   
@@ -340,7 +412,7 @@
 </div>
 
       <div id="footer">
-  Generated on Sat Sep 19 11:11:21 2026 by
+  Generated on Sun Sep 20 09:19:10 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

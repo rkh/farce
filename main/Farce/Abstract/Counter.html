@@ -84,7 +84,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span>, <span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span></dd>
+      <dd><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span>, <span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span>, Internal::Copyable</dd>
   </dl>
   
   
@@ -167,6 +167,38 @@ directly from the native counter and avoid delegation overhead.</p>
 
 
 
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#included-class_method" title="included (class method)">.<strong>included</strong>(base)  &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+    </ul>
+    
   
     <h2>
       Instance Method Summary
@@ -317,7 +349,8 @@ directly from the native counter and avoid delegation overhead.</p>
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="Value.html#unwrap-instance_method" title="Farce::Abstract::Value#unwrap (method)">#unwrap</a></span>, <span class='object_link'><a href="Value.html#value-instance_method" title="Farce::Abstract::Value#value (method)">#value</a></span></p>
-<div id="method_missing_details" class="method_details_list">
+
+  <div id="method_missing_details" class="method_details_list">
   <h2>Dynamic Method Handling</h2>
   <p class="notice this">
     This class handles dynamic methods through the <tt>method_missing</tt> method
@@ -339,10 +372,10 @@ directly from the native counter and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-90</pre>
+101</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 90</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 101</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>              <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_public_send'>public_send</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -399,12 +432,12 @@ directly from the native counter and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-31
-32
-33</pre>
+42
+43
+44</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 31</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 42</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initial'>initial</span>
   <span class='ivar'>@initial</span>
@@ -416,6 +449,44 @@ directly from the native counter and avoid delegation overhead.</p>
     
   </div>
 
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="included-class_method">
+  
+    .<strong>included</strong>(base)  &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+13
+14
+15
+16</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 13</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_included'>included</span><span class='lparen'>(</span><span class='id identifier rubyid_base'>base</span><span class='rparen'>)</span>
+  <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_prepare_mutable_numeric'>prepare_mutable_numeric</span><span class='lparen'>(</span><span class='id identifier rubyid_base'>base</span><span class='rparen'>)</span>
+  <span class='kw'>super</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
 
   <div id="instance_method_details" class="method_details_list">
     <h2>Instance Method Details</h2>
@@ -447,10 +518,10 @@ directly from the native counter and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-74</pre>
+85</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 74</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 85</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_increment'>increment</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -520,20 +591,20 @@ The check and decrement happen atomically.</p>
       <pre class="lines">
 
 
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70</pre>
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 60</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 71</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_decrement_if_above'>decrement_if_above</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
 </span>  <span class='id identifier rubyid_floor'>floor</span>   <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span>
@@ -613,20 +684,20 @@ The check and increment happen atomically.</p>
       <pre class="lines">
 
 
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54</pre>
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 44</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 55</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_increment_if_below'>increment_if_below</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
 </span>  <span class='id identifier rubyid_limit'>limit</span>   <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span>
@@ -686,10 +757,10 @@ The check and increment happen atomically.</p>
       <pre class="lines">
 
 
-82</pre>
+93</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 82</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 93</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span></pre>
     </td>
@@ -739,13 +810,13 @@ The check and increment happen atomically.</p>
       <pre class="lines">
 
 
-35
-36
-37
-38</pre>
+46
+47
+48
+49</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 35</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 46</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_reset'>reset</span>
   <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='ivar'>@initial</span>
@@ -761,7 +832,7 @@ The check and increment happen atomically.</p>
 </div>
 
       <div id="footer">
-  Generated on Sat Sep 19 11:11:20 2026 by
+  Generated on Sun Sep 20 09:19:09 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
