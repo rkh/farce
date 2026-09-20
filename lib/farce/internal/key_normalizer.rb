@@ -95,6 +95,7 @@ module Farce
         end
 
         def update(key, ...)                       = @map.update(@normalizer.call(key), ...)
+        def modify(key, ...)                       = @map.modify(@normalizer.call(key), ...)
         def upsert(key, initial, ...)              = @map.upsert(@normalizer.call(key), initial, ...)
         def delete(key)                            = @map.delete(@normalizer.call(key))
         def key?(key)                              = @map.key?(@normalizer.call(key))

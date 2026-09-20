@@ -21,6 +21,8 @@ void rb_gc_declare_weak_references(VALUE object);
 bool rb_gc_handle_weak_references_alive_p(VALUE object);
 
 static VALUE cWeakKeyMap;
+static VALUE weak_map_keep;
+static VALUE weak_map_delete_token;
 static VALUE cWeakValueMap;
 static VALUE cWeakMap;
 
@@ -44,6 +46,17 @@ typedef struct weak_map_waiter {
     struct weak_map_waiter *next;
 } weak_map_waiter_t;
 
+/* Owned by the active operation's C stack, including while its Fiber sleeps. */
+typedef struct weak_map_reservation {
+    VALUE key;
+    VALUE current;
+    st_index_t hash;
+    VALUE fiber;
+    VALUE thread;
+    bool invalidated;
+    struct weak_map_reservation *next;
+} weak_map_reservation_t;
+
 typedef struct {
     pthread_mutex_t lock;
     weak_map_slot_t *slots;
@@ -59,9 +72,7 @@ typedef struct {
     bool comparing;
     VALUE comparing_owner;
     pthread_t comparing_thread;
-    bool updating;
-    VALUE updating_fiber;
-    VALUE updating_thread;
+    weak_map_reservation_t *reservations;
     bool initialized;
 } weak_map_t;
 
@@ -153,8 +164,12 @@ weak_map_mark(void *pointer)
 {
     weak_map_t *map = pointer;
     rb_gc_mark_movable(map->comparing_owner);
-    rb_gc_mark_movable(map->updating_fiber);
-    rb_gc_mark_movable(map->updating_thread);
+    for (weak_map_reservation_t *entry = map->reservations; entry; entry = entry->next) {
+        rb_gc_mark_movable(entry->key);
+        rb_gc_mark_movable(entry->current);
+        rb_gc_mark_movable(entry->fiber);
+        rb_gc_mark_movable(entry->thread);
+    }
     if (!map->slots) return;
 
     for (size_t index = 0; index < map->capacity; index++) {
@@ -170,8 +185,12 @@ weak_map_compact(void *pointer)
 {
     weak_map_t *map = pointer;
     map->comparing_owner = rb_gc_location(map->comparing_owner);
-    map->updating_fiber = rb_gc_location(map->updating_fiber);
-    map->updating_thread = rb_gc_location(map->updating_thread);
+    for (weak_map_reservation_t *entry = map->reservations; entry; entry = entry->next) {
+        entry->key = rb_gc_location(entry->key);
+        entry->current = rb_gc_location(entry->current);
+        entry->fiber = rb_gc_location(entry->fiber);
+        entry->thread = rb_gc_location(entry->thread);
+    }
     if (!map->slots) return;
 
     for (size_t index = 0; index < map->capacity; index++) {
@@ -275,9 +294,7 @@ weak_map_allocate(VALUE klass)
     map->weak_values = klass == cWeakValueMap || klass == cWeakMap;
     map->comparing = false;
     map->comparing_owner = Qnil;
-    map->updating = false;
-    map->updating_fiber = Qnil;
-    map->updating_thread = Qnil;
+    map->reservations = NULL;
     map->initialized = false;
     return object;
 }
@@ -391,80 +408,10 @@ weak_map_lock_state(weak_map_t *map, weak_map_execution_context_t *execution)
     }
 }
 
-static void
-weak_map_check_update_wait_locked(
-    weak_map_t *map,
-    const weak_map_execution_context_t *execution
-)
-{
-    if (map->updating_fiber == execution->fiber) {
-        pthread_mutex_unlock(&map->lock);
-        rb_raise(rb_eThreadError, "deadlock; recursive weak-map access during an update");
-    }
-    if (map->updating_thread == execution->thread && NIL_P(execution->scheduler)) {
-        pthread_mutex_unlock(&map->lock);
-        rb_raise(
-            rb_eThreadError,
-            "deadlock; weak-map update is owned by another unscheduled fiber"
-        );
-    }
-}
-
-static void
-weak_map_begin_update_locked(
-    weak_map_t *map,
-    const weak_map_execution_context_t *execution
-)
-{
-    map->updating = true;
-    map->updating_fiber = execution->fiber;
-    map->updating_thread = execution->thread;
-}
-
-static void
-weak_map_finish_update_locked(weak_map_t *map)
-{
-    map->updating = false;
-    map->updating_fiber = Qnil;
-    map->updating_thread = Qnil;
-}
-
-static bool
-weak_map_lock_for_update_with_timeout(
-    weak_map_t *map,
-    weak_map_timeout_t *timeout,
-    weak_map_execution_context_t *execution
-)
-{
-    for (;;) {
-        weak_map_lock_state(map, execution);
-        if (!map->updating) return true;
-        weak_map_check_update_wait_locked(map, execution);
-        uint64_t generation = map->generation;
-        pthread_mutex_unlock(&map->lock);
-        if (!weak_map_wait_once(map, generation, timeout)) return false;
-    }
-}
-
 static VALUE
 weak_map_timeout_result(void)
 {
     return rb_block_given_p() ? rb_yield_values(0) : Qnil;
-}
-
-static void
-weak_map_lock_for_update(weak_map_t *map, weak_map_execution_context_t *execution)
-{
-    weak_map_timeout_t timeout = {.finite = false, .deadline = 0};
-
-    for (;;) {
-        weak_map_lock_state(map, execution);
-        if (!map->updating) return;
-        weak_map_check_update_wait_locked(map, execution);
-        uint64_t generation = map->generation;
-        pthread_mutex_unlock(&map->lock);
-        (void)weak_map_wait_once(map, generation, &timeout);
-    }
 }
 
 static st_index_t
@@ -521,6 +468,95 @@ weak_map_keys_equal(
         rb_jump_tag(state);
     }
     return RTEST(result);
+}
+
+static weak_map_reservation_t *
+weak_map_find_reservation_locked(
+    weak_map_t *map, VALUE key, st_index_t hash,
+    const weak_map_execution_context_t *execution
+)
+{
+    for (;;) {
+        bool restart = false;
+        for (weak_map_reservation_t *entry = map->reservations; entry; entry = entry->next) {
+            if (entry->invalidated || entry->hash != hash) continue;
+            bool stale;
+            bool equal = weak_map_keys_equal(map, entry->key, key, &stale, execution);
+            if (stale) {
+                restart = true;
+                break;
+            }
+            if (equal) return entry;
+        }
+        if (!restart) return NULL;
+    }
+}
+
+static void
+weak_map_check_reservation_wait_locked(
+    weak_map_t *map, weak_map_reservation_t *entry,
+    const weak_map_execution_context_t *execution
+)
+{
+    if (entry->fiber == execution->fiber) {
+        pthread_mutex_unlock(&map->lock);
+        rb_raise(rb_eThreadError, "deadlock; recursive weak-map access during an update");
+    }
+    if (entry->thread == execution->thread && NIL_P(execution->scheduler)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_raise(rb_eThreadError, "deadlock; weak-map update is owned by another unscheduled fiber");
+    }
+}
+
+static bool
+weak_map_lock_for_key_with_timeout(
+    weak_map_t *map, VALUE key, st_index_t hash,
+    weak_map_timeout_t *timeout, weak_map_execution_context_t *execution
+)
+{
+    for (;;) {
+        weak_map_lock_state(map, execution);
+        weak_map_reservation_t *entry = weak_map_find_reservation_locked(map, key, hash, execution);
+        if (!entry) return true;
+        weak_map_check_reservation_wait_locked(map, entry, execution);
+        uint64_t generation = map->generation;
+        pthread_mutex_unlock(&map->lock);
+        if (!weak_map_wait_once(map, generation, timeout)) return false;
+    }
+}
+
+static void
+weak_map_lock_for_key(
+    weak_map_t *map, VALUE key, st_index_t hash, weak_map_execution_context_t *execution
+)
+{
+    weak_map_timeout_t timeout = {.finite = false, .deadline = 0};
+    (void)weak_map_lock_for_key_with_timeout(map, key, hash, &timeout, execution);
+}
+
+static void
+weak_map_begin_reservation_locked(
+    weak_map_t *map, weak_map_reservation_t *entry, VALUE key, VALUE current,
+    st_index_t hash, const weak_map_execution_context_t *execution
+)
+{
+    entry->key = key;
+    entry->current = current;
+    entry->hash = hash;
+    entry->fiber = execution->fiber;
+    entry->thread = execution->thread;
+    entry->invalidated = false;
+    entry->next = map->reservations;
+    map->reservations = entry;
+}
+
+static void
+weak_map_finish_reservation_locked(weak_map_t *map, weak_map_reservation_t *entry)
+{
+    weak_map_reservation_t **cursor = &map->reservations;
+    while (*cursor && *cursor != entry) cursor = &(*cursor)->next;
+    if (*cursor) *cursor = entry->next;
+    weak_map_notify_waiters_locked(map);
 }
 
 static size_t
@@ -763,7 +799,7 @@ weak_map_set(VALUE self, VALUE key, VALUE value)
     containers_check_shareable(value);
     st_index_t hash = weak_map_key_hash(map, key);
     weak_map_execution_context_t execution;
-    weak_map_lock_for_update(map, &execution);
+    weak_map_lock_for_key(map, key, hash, &execution);
     weak_map_store_locked(self, map, key, value, hash, &execution);
     pthread_mutex_unlock(&map->lock);
     return value;
@@ -808,7 +844,7 @@ weak_map_delete(VALUE self, VALUE key)
     bool found;
     VALUE result = Qnil;
     weak_map_execution_context_t execution;
-    weak_map_lock_for_update(map, &execution);
+    weak_map_lock_for_key(map, key, hash, &execution);
     size_t index = weak_map_find_slot(map, key, hash, &found, &execution);
     if (found) {
         weak_map_slot_t *slot = &map->slots[index];
@@ -829,7 +865,10 @@ weak_map_clear(VALUE self)
 {
     weak_map_t *map = get_weak_map(self);
     weak_map_execution_context_t execution;
-    weak_map_lock_for_update(map, &execution);
+    weak_map_lock_state(map, &execution);
+    for (weak_map_reservation_t *entry = map->reservations; entry; entry = entry->next) {
+        entry->invalidated = true;
+    }
     for (size_t index = 0; index < map->capacity; index++) {
         weak_map_slot_t *slot = &map->slots[index];
         slot->key = Qnil;
@@ -854,6 +893,8 @@ typedef struct {
     st_index_t hash;
     bool identity;
     bool complete;
+    bool present;
+    weak_map_reservation_t reservation;
 } weak_map_operation_t;
 
 static VALUE
@@ -863,7 +904,7 @@ weak_map_operation_cleanup(VALUE opaque)
     if (!operation->complete) {
         weak_map_execution_context_t execution;
         weak_map_lock_state(operation->map, &execution);
-        weak_map_finish_update_locked(operation->map);
+        weak_map_finish_reservation_locked(operation->map, &operation->reservation);
         weak_map_notify_waiters_locked(operation->map);
         pthread_mutex_unlock(&operation->map->lock);
     }
@@ -878,18 +919,21 @@ weak_map_store_body(VALUE opaque)
     containers_check_shareable(result);
     weak_map_execution_context_t execution;
     weak_map_lock_state(operation->map, &execution);
-    weak_map_store_locked(
-        operation->self,
-        operation->map,
-        operation->key,
-        result,
-        operation->hash,
-        &execution
-    );
-    weak_map_finish_update_locked(operation->map);
+    bool stored = !operation->reservation.invalidated;
+    if (stored) {
+        weak_map_store_locked(
+            operation->self,
+            operation->map,
+            operation->key,
+            result,
+            operation->hash,
+            &execution
+        );
+    }
+    weak_map_finish_reservation_locked(operation->map, &operation->reservation);
     pthread_mutex_unlock(&operation->map->lock);
     operation->complete = true;
-    return result;
+    return stored ? result : Qnil;
 }
 
 static VALUE
@@ -917,7 +961,7 @@ weak_map_store_if_absent(int argc, VALUE *argv, VALUE self)
     );
 
     weak_map_execution_context_t execution;
-    if (!weak_map_lock_for_update_with_timeout(map, &timeout, &execution)) return Qnil;
+    if (!weak_map_lock_for_key_with_timeout(map, key, operation.hash, &timeout, &execution)) return Qnil;
     bool found;
     size_t index = weak_map_find_slot(map, key, operation.hash, &found, &execution);
     if (found) {
@@ -925,7 +969,9 @@ weak_map_store_if_absent(int argc, VALUE *argv, VALUE self)
         pthread_mutex_unlock(&map->lock);
         return value;
     }
-    weak_map_begin_update_locked(map, &execution);
+    operation.key = found ? map->slots[index].key : key;
+    weak_map_begin_reservation_locked(map, &operation.reservation, operation.key,
+        operation.current, operation.hash, &execution);
     pthread_mutex_unlock(&map->lock);
     return rb_ensure(weak_map_store_body, (VALUE)&operation, weak_map_operation_cleanup, (VALUE)&operation);
 }
@@ -940,6 +986,7 @@ weak_map_cas_body(VALUE opaque)
 
     weak_map_execution_context_t execution;
     weak_map_lock_state(operation->map, &execution);
+    matches = matches && !operation->reservation.invalidated;
     if (matches) {
         weak_map_store_locked(
             operation->self,
@@ -950,7 +997,7 @@ weak_map_cas_body(VALUE opaque)
             &execution
         );
     }
-    weak_map_finish_update_locked(operation->map);
+    weak_map_finish_reservation_locked(operation->map, &operation->reservation);
     if (!matches) weak_map_notify_waiters_locked(operation->map);
     pthread_mutex_unlock(&operation->map->lock);
     operation->complete = true;
@@ -988,7 +1035,7 @@ weak_map_compare_and_set(int argc, VALUE *argv, VALUE self)
     );
 
     weak_map_execution_context_t execution;
-    if (!weak_map_lock_for_update_with_timeout(map, &timeout, &execution)) return Qfalse;
+    if (!weak_map_lock_for_key_with_timeout(map, key, operation.hash, &timeout, &execution)) return Qfalse;
     bool found;
     size_t index = weak_map_find_slot(map, key, operation.hash, &found, &execution);
     if (!found) {
@@ -996,9 +1043,74 @@ weak_map_compare_and_set(int argc, VALUE *argv, VALUE self)
         return Qfalse;
     }
     operation.current = map->slots[index].value;
-    weak_map_begin_update_locked(map, &execution);
+    operation.key = found ? map->slots[index].key : key;
+    weak_map_begin_reservation_locked(map, &operation.reservation, operation.key,
+        operation.current, operation.hash, &execution);
     pthread_mutex_unlock(&map->lock);
     return rb_ensure(weak_map_cas_body, (VALUE)&operation, weak_map_operation_cleanup, (VALUE)&operation);
+}
+
+/* Decisions are interpreted before value validation. KEEP never writes storage. */
+static VALUE
+weak_map_modify_body(VALUE opaque)
+{
+    weak_map_operation_t *operation = (weak_map_operation_t *)opaque;
+    VALUE value = rb_yield_values(2, operation->present ? Qtrue : Qfalse, operation->current);
+    bool remove = value == weak_map_delete_token;
+    bool store = !remove && value != weak_map_keep;
+    if (store) containers_check_shareable(value);
+    weak_map_execution_context_t execution;
+    weak_map_lock_state(operation->map, &execution);
+    bool changed = false;
+    if (store && !operation->reservation.invalidated) {
+        weak_map_store_locked(operation->self, operation->map, operation->key,
+            value, operation->hash, &execution);
+        changed = true;
+    } else if (remove && !operation->reservation.invalidated) {
+        bool found;
+        size_t index = weak_map_find_slot(operation->map, operation->key,
+            operation->hash, &found, &execution);
+        if (found) {
+            weak_map_slot_t *slot = &operation->map->slots[index];
+            slot->key = Qnil;
+            slot->value = Qnil;
+            slot->state = WEAK_MAP_TOMBSTONE;
+            operation->map->size--;
+            operation->map->tombstones++;
+            weak_map_notify_waiters_locked(operation->map);
+            changed = true;
+        }
+    }
+    operation->complete = true;
+    weak_map_finish_reservation_locked(operation->map, &operation->reservation);
+    pthread_mutex_unlock(&operation->map->lock);
+    return changed ? Qtrue : Qfalse;
+}
+
+static VALUE
+weak_map_modify(VALUE self, VALUE key)
+{
+    rb_need_block();
+    weak_map_t *map = get_weak_map(self);
+    key = weak_map_prepare_key(map, key);
+    weak_map_operation_t operation = {
+        .self = self,
+        .map = map,
+        .key = key,
+        .complete = false,
+    };
+    operation.hash = weak_map_key_hash(map, key);
+    weak_map_execution_context_t execution;
+    weak_map_lock_for_key(map, key, operation.hash, &execution);
+    bool found;
+    size_t index = weak_map_find_slot(map, key, operation.hash, &found, &execution);
+    operation.present = found;
+    operation.current = found ? map->slots[index].value : Qnil;
+    operation.key = found ? map->slots[index].key : key;
+    weak_map_begin_reservation_locked(map, &operation.reservation, operation.key,
+        operation.current, operation.hash, &execution);
+    pthread_mutex_unlock(&map->lock);
+    return rb_ensure(weak_map_modify_body, (VALUE)&operation, weak_map_operation_cleanup, (VALUE)&operation);
 }
 
 static VALUE
@@ -1009,18 +1121,21 @@ weak_map_upsert_body(VALUE opaque)
     containers_check_shareable(result);
     weak_map_execution_context_t execution;
     weak_map_lock_state(operation->map, &execution);
-    weak_map_store_locked(
-        operation->self,
-        operation->map,
-        operation->key,
-        result,
-        operation->hash,
-        &execution
-    );
-    weak_map_finish_update_locked(operation->map);
+    bool stored = !operation->reservation.invalidated;
+    if (stored) {
+        weak_map_store_locked(
+            operation->self,
+            operation->map,
+            operation->key,
+            result,
+            operation->hash,
+            &execution
+        );
+    }
+    weak_map_finish_reservation_locked(operation->map, &operation->reservation);
     pthread_mutex_unlock(&operation->map->lock);
     operation->complete = true;
-    return result;
+    return stored ? result : Qnil;
 }
 
 static VALUE
@@ -1050,7 +1165,7 @@ weak_map_upsert(int argc, VALUE *argv, VALUE self)
     );
 
     weak_map_execution_context_t execution;
-    if (!weak_map_lock_for_update_with_timeout(map, &timeout, &execution)) return Qnil;
+    if (!weak_map_lock_for_key_with_timeout(map, key, operation.hash, &timeout, &execution)) return Qnil;
     bool found;
     size_t index = weak_map_find_slot(map, key, operation.hash, &found, &execution);
     if (!found) {
@@ -1059,7 +1174,9 @@ weak_map_upsert(int argc, VALUE *argv, VALUE self)
         return initial;
     }
     operation.current = map->slots[index].value;
-    weak_map_begin_update_locked(map, &execution);
+    operation.key = found ? map->slots[index].key : key;
+    weak_map_begin_reservation_locked(map, &operation.reservation, operation.key,
+        operation.current, operation.hash, &execution);
     pthread_mutex_unlock(&map->lock);
     return rb_ensure(weak_map_upsert_body, (VALUE)&operation, weak_map_operation_cleanup, (VALUE)&operation);
 }
@@ -1208,7 +1325,7 @@ weak_map_get_with_timeout(int argc, VALUE *argv, VALUE self)
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
     weak_map_execution_context_t execution;
-    if (!weak_map_lock_for_update_with_timeout(map, &timeout, &execution)) {
+    if (!weak_map_lock_for_key_with_timeout(map, key, hash, &timeout, &execution)) {
         return weak_map_timeout_result();
     }
 
@@ -1238,7 +1355,7 @@ weak_map_store_with_timeout(int argc, VALUE *argv, VALUE self)
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
     weak_map_execution_context_t execution;
-    if (!weak_map_lock_for_update_with_timeout(map, &timeout, &execution)) {
+    if (!weak_map_lock_for_key_with_timeout(map, key, hash, &timeout, &execution)) {
         return weak_map_timeout_result();
     }
     weak_map_store_locked(self, map, key, value, hash, &execution);
@@ -1265,7 +1382,7 @@ weak_map_swap(int argc, VALUE *argv, VALUE self)
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
     weak_map_execution_context_t execution;
-    if (!weak_map_lock_for_update_with_timeout(map, &timeout, &execution)) {
+    if (!weak_map_lock_for_key_with_timeout(map, key, hash, &timeout, &execution)) {
         return weak_map_timeout_result();
     }
 
@@ -1309,6 +1426,7 @@ weak_map_wait_for_value(int argc, VALUE *argv, VALUE self, bool non_nil)
         uint64_t generation;
         weak_map_execution_context_t execution;
         weak_map_lock_state(map, &execution);
+        weak_map_reservation_t *entry = weak_map_find_reservation_locked(map, key, hash, &execution);
         size_t index = weak_map_find_slot(map, key, hash, &found, &execution);
         if (found) current = map->slots[index].value;
         generation = map->generation;
@@ -1322,7 +1440,7 @@ weak_map_wait_for_value(int argc, VALUE *argv, VALUE self, bool non_nil)
             pthread_mutex_unlock(&map->lock);
             continue;
         }
-        if (map->updating) weak_map_check_update_wait_locked(map, &execution);
+        if (entry) weak_map_check_reservation_wait_locked(map, entry, &execution);
         pthread_mutex_unlock(&map->lock);
         if (!weak_map_wait_once(map, generation, &timeout)) return weak_map_timeout_result();
     }
@@ -1365,11 +1483,13 @@ weak_map_update(int argc, VALUE *argv, VALUE self)
     );
 
     weak_map_execution_context_t execution;
-    if (!weak_map_lock_for_update_with_timeout(map, &timeout, &execution)) return Qnil;
+    if (!weak_map_lock_for_key_with_timeout(map, key, operation.hash, &timeout, &execution)) return Qnil;
     bool found;
     size_t index = weak_map_find_slot(map, key, operation.hash, &found, &execution);
     operation.current = found ? map->slots[index].value : Qnil;
-    weak_map_begin_update_locked(map, &execution);
+    operation.key = found ? map->slots[index].key : key;
+    weak_map_begin_reservation_locked(map, &operation.reservation, operation.key,
+        operation.current, operation.hash, &execution);
     pthread_mutex_unlock(&map->lock);
     return rb_ensure(
         weak_map_upsert_body,
@@ -1391,6 +1511,7 @@ define_weak_map_methods(VALUE klass)
     rb_define_method(klass, "store", weak_map_store_with_timeout, -1);
     rb_define_method(klass, "swap", weak_map_swap, -1);
     rb_define_method(klass, "update", weak_map_update, -1);
+    rb_define_method(klass, "modify", weak_map_modify, 1);
     rb_define_method(klass, "wait_until_changed", weak_map_wait_until_changed, -1);
     rb_define_method(klass, "wait_until_non_nil", weak_map_wait_until_non_nil, -1);
     rb_define_method(klass, "store_if_absent", weak_map_store_if_absent, -1);
@@ -1415,6 +1536,10 @@ define_weak_map_methods(VALUE klass)
 void
 containers_init_weak_maps(VALUE namespace)
 {
+    weak_map_keep = rb_const_get(namespace, rb_intern("MAP_KEEP"));
+    weak_map_delete_token = rb_const_get(namespace, rb_intern("MAP_DELETE"));
+    rb_global_variable(&weak_map_keep);
+    rb_global_variable(&weak_map_delete_token);
     cWeakKeyMap = rb_define_class_under(namespace, "WeakKeyMap", rb_cObject);
     cWeakValueMap = rb_define_class_under(namespace, "WeakValueMap", rb_cObject);
     cWeakMap = rb_define_class_under(namespace, "WeakMap", rb_cObject);

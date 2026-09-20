@@ -14,6 +14,8 @@
 #define MAP_INITIAL_CAPACITY 16
 
 static VALUE cMap;
+static VALUE map_keep;
+static VALUE map_delete_token;
 static VALUE cUnsharedKeyLockMap;
 static VALUE cSharedKeyLockMap;
 
@@ -942,6 +944,7 @@ typedef struct {
     map_reservation_t *reservation;
     bool identity;
     bool complete;
+    bool present;
 } map_operation_t;
 
 static VALUE
@@ -1090,6 +1093,65 @@ map_compare_and_set(int argc, VALUE *argv, VALUE self)
     );
     pthread_mutex_unlock(&map->lock);
     return rb_ensure(map_cas_body, (VALUE)&operation, map_operation_cleanup, (VALUE)&operation);
+}
+
+/* Decisions are interpreted before value validation. KEEP never writes storage. */
+static VALUE
+map_modify_body(VALUE opaque)
+{
+    map_operation_t *operation = (map_operation_t *)opaque;
+    VALUE value = rb_yield_values(2, operation->present ? Qtrue : Qfalse, operation->current);
+    bool remove = value == map_delete_token;
+    bool store = !remove && value != map_keep;
+    if (store) containers_check_shareable(value);
+    map_lock_state(operation->map, &operation->execution);
+    bool changed = false;
+    if (store && !operation->reservation->invalidated) {
+        map_store_locked(operation->map, operation->key, value,
+            operation->hash, &operation->execution);
+        changed = true;
+    } else if (remove && !operation->reservation->invalidated) {
+        bool found;
+        size_t index = map_find_slot(operation->map, operation->key,
+            operation->hash, &found, &operation->execution);
+        if (found) {
+            map_slot_t *slot = &operation->map->slots[index];
+            slot->key = Qnil;
+            slot->value = Qnil;
+            slot->state = MAP_TOMBSTONE;
+            operation->map->size--;
+            operation->map->tombstones++;
+            map_notify_waiters_locked(operation->map);
+            changed = true;
+        }
+    }
+    operation->complete = true;
+    map_finish_reservation_locked(operation->map, operation->reservation);
+    pthread_mutex_unlock(&operation->map->lock);
+    return changed ? Qtrue : Qfalse;
+}
+
+static VALUE
+map_modify(VALUE self, VALUE key)
+{
+    rb_need_block();
+    map_t *map = get_map(self);
+    key = map_prepare_key(map, key);
+    map_operation_t operation = {
+        .execution = map_current_execution_context(),
+        .map = map,
+        .key = key,
+        .complete = false,
+    };
+    operation.hash = map_key_hash(map, key);
+    map_lock_for_key(map, key, operation.hash, &operation.execution);
+    bool found;
+    size_t index = map_find_slot(map, key, operation.hash, &found, &operation.execution);
+    operation.present = found;
+    operation.current = found ? map->slots[index].value : Qnil;
+    operation.reservation = map_begin_reservation_locked(map, key, operation.hash, &operation.execution);
+    pthread_mutex_unlock(&map->lock);
+    return rb_ensure(map_modify_body, (VALUE)&operation, map_operation_cleanup, (VALUE)&operation);
 }
 
 static VALUE
@@ -1561,6 +1623,10 @@ key_lock_initialize_copy(VALUE self, VALUE other)
 void
 containers_init_map(VALUE namespace)
 {
+    map_keep = rb_const_get(namespace, rb_intern("MAP_KEEP"));
+    map_delete_token = rb_const_get(namespace, rb_intern("MAP_DELETE"));
+    rb_global_variable(&map_keep);
+    rb_global_variable(&map_delete_token);
     cUnsharedKeyLockMap = rb_define_class_under(namespace, "UnsharedKeyLockMap", rb_cObject);
     rb_define_alloc_func(cUnsharedKeyLockMap, unshared_key_lock_allocate);
     rb_define_method(cUnsharedKeyLockMap, "initialize", key_lock_initialize, -1);
@@ -1583,6 +1649,7 @@ containers_init_map(VALUE namespace)
     rb_define_method(cMap, "store", map_store_with_timeout, -1);
     rb_define_method(cMap, "swap", map_swap, -1);
     rb_define_method(cMap, "update", map_update, -1);
+    rb_define_method(cMap, "modify", map_modify, 1);
     rb_define_method(cMap, "wait_until_changed", map_wait_until_changed, -1);
     rb_define_method(cMap, "wait_until_non_nil", map_wait_until_non_nil, -1);
     rb_define_method(cMap, "store_if_absent", map_store_if_absent, -1);

@@ -125,6 +125,26 @@ module Farce
         completed ? result : nil
       end
 
+      # Yield presence and value under the entry reservation.
+      # MAP_KEEP and MAP_DELETE are control results. Other results replace the value.
+      # Return whether a change committed.
+      def modify(key) # rubocop:disable Naming/PredicateMethod
+        raise LocalJumpError, "no block given" unless block_given?
+        _, result = with_entry(key, nil, create: true) do |present, current, entry, index|
+          value = yield(present, current)
+          if MAP_KEEP.equal?(value)
+            false
+          elsif MAP_DELETE.equal?(value)
+            next false unless present
+            index.remove(key, entry)
+            entry.retire
+          else
+            entry.store(value)
+          end
+        end
+        !!result
+      end
+
       def wait_until_changed(key, expected, timeout: nil, &fallback)
         wait_for_value(key, expected, timeout_deadline(timeout), fallback, non_nil: false)
       end

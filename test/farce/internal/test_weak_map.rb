@@ -199,7 +199,7 @@ module Farce
         MAP_CLASSES.each do |klass|
           map = klass.new({ key: 1 })
           error = assert_raises(ThreadError) do
-            map.update(:key) { map[:other] = 9 }
+            map.update(:key) { map[:key] = 9 }
           end
 
           assert_match(/recursive weak-map access during an update/, error.message)
@@ -216,7 +216,7 @@ module Farce
         MAP_CLASSES.each do |klass|
           map = klass.new({ key: 1 })
           contender = Fiber.new do
-            map[:other] = 9
+            map[:key] = 9
           rescue ThreadError => e
             e
           end

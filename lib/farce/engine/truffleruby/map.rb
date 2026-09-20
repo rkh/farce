@@ -169,6 +169,28 @@ module Farce
         completed ? result : nil
       end
 
+      # Yield presence and value under the key reservation.
+      # MAP_KEEP and MAP_DELETE are control results. Other results replace the value.
+      # Return whether a change committed.
+      def modify(key) # rubocop:disable Naming/PredicateMethod
+        raise LocalJumpError, "no block given" unless block_given?
+        wrapped = wrap_key(key)
+        _, result = with_key_operation(wrapped, nil) do |reservation|
+          present, current = native_operation { [concurrent_key?(wrapped), concurrent_get(wrapped)] }
+          value = yield(present, current)
+          next false if MAP_KEEP.equal?(value)
+          remove = MAP_DELETE.equal?(value)
+          next false if remove && !present
+          reservation.commit do
+            native_operation do
+              remove ? concurrent_delete(wrapped) : concurrent_store(wrapped, value)
+            end
+            changed!
+          end
+        end
+        !!result
+      end
+
       def upsert(key, initial_value, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
 

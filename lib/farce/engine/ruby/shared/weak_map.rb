@@ -112,6 +112,41 @@ module Farce
         claimed_update(key, timeout_deadline(timeout), claim: :present, initial: initial_value, &update)
       end
 
+      # Yield presence and value under the entry claim.
+      # MAP_KEEP and MAP_DELETE are control results. Other results replace the value.
+      # Return whether a change committed.
+      def modify(key)
+        raise LocalJumpError, "no block given" unless block_given?
+        key = canonical_key(key)
+        ticket = Object.new.freeze
+        sent = finished = false
+        begin
+          response = await_response(deadline: nil) do
+            sent = true
+            request(:claim, key, ticket, true)
+          end
+          present, current, signal = response[1], response[2], response[3]
+          key = response[5]
+          owners = claim_owners
+          owners[signal] = Fiber.current
+          value = yield(present, current)
+          action = if MAP_KEEP.equal?(value)
+                     :abort
+                   elsif MAP_DELETE.equal?(value)
+                     :delete
+                   else
+                     :store
+                   end
+          check_value(value, "value") if action == :store
+          result = request(:finish, key, ticket, action, value)
+          finished = true
+          result.first != :stale && (action == :store || (action == :delete && present))
+        ensure
+          owners&.delete(signal)
+          request(:finish, key, ticket, :abort) if sent && !finished
+        end
+      end
+
       def wait_until_changed(key, expected, timeout: nil, &fallback)
         wait_for_value(key, expected, timeout_deadline(timeout), fallback, non_nil: false)
       end
@@ -208,9 +243,9 @@ module Farce
           end
 
           check_value(replacement, "value")
-          request(:finish, key, ticket, :store, replacement)
+          result = request(:finish, key, ticket, :store, replacement)
           finished = true
-          replacement
+          result.first == :stale ? nil : replacement
         ensure
           owners&.delete(signal)
           request(:finish, key, ticket, :abort) if sent && !finished

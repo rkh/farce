@@ -295,7 +295,10 @@ module Farce
 
       facade_protocol = Abstract::ConcurrentMap.public_instance_methods(false) |
         Internal.const_get(:MapValueModes).public_instance_methods(false)
-      facade_helpers = %i[each_pair mode shareable_keys? shareable_values? values]
+      facade_helpers = %i[
+        each_pair mode shareable_keys? shareable_values? values
+        delete_if reject! keep_if select! filter! transform_values! merge!
+      ]
       backend_protocol = backend.class.public_instance_methods(false)
 
       assert_respond_to backend, :normalize_external_key

@@ -22,6 +22,8 @@ module Farce
   module Internal # :nodoc: all
     EMPTY_ARRAY    = [].freeze
     INTERRUPT_MASK = { Exception => :never }.freeze
+    MAP_KEEP       = Object.new.freeze
+    MAP_DELETE     = Object.new.freeze
 
     include Autoloads
     extend self
