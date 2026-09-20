@@ -10,6 +10,8 @@ module Farce
     # Observational operations such as iteration, {#key?}, and {#getkey} do not.
     # Copies preserve capacity and eviction history without counting copying as an access.
     class BoundedMap < Map
+      include DuplicableMap
+
       # @param entries [Hash, Array<Array(BasicObject, BasicObject)>, Map, #each, nil]
       #   Optional initial entries. Entries are stored sequentially and may be evicted.
       # @param max_size [Integer] Maximum number of retained entries.

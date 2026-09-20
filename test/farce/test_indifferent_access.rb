@@ -21,6 +21,8 @@ module Farce
         original = type.new({ a: 1 }, **options)
         copy = original.with_indifferent_access
 
+        assert_kind_of Abstract::DuplicableMap, original
+        assert_predicate original, :duplicable?
         assert_instance_of type, copy
         refute_same original, copy
         assert_equal 1, copy[:a]
@@ -73,16 +75,6 @@ module Farce
       assert_equal 1, Fiber.new { copy["a"] }.resume
     end
 
-    def test_local_lease_copy_resources_are_independent_between_scopes
-      original = Local::LeaseMap.new(scope: :fiber) { { a: [1] } }
-      copy = original.with_indifferent_access
-      copy.checkout("a") { |resource| resource << 2 }
-
-      assert_equal :fiber, copy.scope
-      assert_equal [1], Fiber.new { copy.checkout(:a, &:dup) }.resume
-      assert_equal [1, 2], copy.checkout(:a, &:dup)
-    end
-
     def test_copy_replaces_existing_normalization
       original = Unshared::Map.new({ 1 => :value }, normalize_keys: :succ)
       copy = original.with_indifferent_access
@@ -94,17 +86,24 @@ module Farce
       assert_equal :added, copy["a"]
     end
 
-    def test_lease_maps_copy_resources_without_moving_the_original
+    def test_lease_maps_do_not_offer_copying_operations
       [LeaseMap, Unshared::LeaseMap, Local::LeaseMap].each do |type|
         original = type.new { { a: [1] } }
-        copy = original.with_indifferent_access
 
-        assert_instance_of type, copy
-        assert_equal [1], copy.checkout("a", &:dup)
-        copy.checkout(:a) { |resource| resource << 2 }
-
+        refute_respond_to original, :with_indifferent_access
+        refute_predicate original, :duplicable?
+        assert_raises(NoMethodError) { original.with_indifferent_access }
         assert_equal [1], original.checkout(:a, &:dup)
-        assert_equal [1, 2], copy.checkout("a", &:dup)
+      end
+    end
+
+    def test_lease_maps_can_normalize_keys_at_construction
+      [LeaseMap, Unshared::LeaseMap, Local::LeaseMap].each do |type|
+        normalizer = Ractor.shareable_proc { |key| Symbol === key ? key.name : key }
+        original = type.new(normalize_keys: normalizer) { { a: [1] } }
+
+        assert_same original.lease_for(:a), original.lease_for("a")
+        assert_equal [1], original.checkout("a", &:dup)
       end
     end
   end

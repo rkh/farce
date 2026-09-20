@@ -6,6 +6,8 @@ module Farce
   module Abstract
     # @abstract Super class for {Map maps} with added concurrency features.
     class ConcurrentMap < Map
+      include DuplicableMap
+
       # (see Map#[])
       def [](key) = internal_map[key]
 

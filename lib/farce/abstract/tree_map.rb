@@ -12,6 +12,8 @@ module Farce
     # This means lookups, insertions, and deletions are O(log n) operations (vs O(1) for a hash map).
     # This is much slower than a hash map, but much faster than ad hoc sorting of the map.
     class TreeMap < Map
+      include DuplicableMap
+
       # @note Subclasses may accept additional, optional arguments (usually keyword arguments) to configure the map.
       # @param entries [Hash, Array<Array(BasicObject, BasicObject)>, Map, #each, nil]
       #   Optional initial entries for the map. Needs to implement #each and yield key-value pairs.

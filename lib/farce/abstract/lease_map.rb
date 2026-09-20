@@ -6,9 +6,6 @@ module Farce
   module Abstract
     # @abstract Shared per-key checkout, mutation, and automatic cleanup behavior for lease maps.
     class LeaseMap < Map
-      COPY_VAULT = Internal::Atom.new
-      private_constant :COPY_VAULT
-
       # Construct a lease map from a block returning key/value entries.
       # @!macro key_normalization
       # @yield builds the initial key and resource mapping
@@ -216,20 +213,6 @@ module Farce
       def duplicable? = false
 
       private
-
-      def build_indifferent_access(**)
-        vault   = COPY_VAULT.store_if_absent { Internal::Vault.new }
-        entries = each_pair.map do |key, resource|
-          token = Object.new.freeze
-          vault.copy_in(token, resource)
-          [key, token]
-        end
-        snapshot    = Ractor.make_shareable([vault, entries])
-        initializer = Ractor.shareable_proc(self: snapshot) do
-          self[1].map { |key, token| [key, self[0].copy_out(token)] }
-        end
-        self.class.new(**, &initializer)
-      end
 
       def prepare_initial_resources(entries, normalizer)
         entries = convert_entries(entries)
