@@ -31,6 +31,8 @@ module Farce
 
     def native_ractors? = false
 
+    def prepare_mutable_numeric(klass) = klass.include MutableNumericCopy
+
     # Fibers expose their backing thread through Thread.current.
     def storage_thread(thread) = JRuby.reference(thread).getFiberCurrentThread
 

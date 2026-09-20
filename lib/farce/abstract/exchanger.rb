@@ -7,6 +7,8 @@ module Farce
     # A rendezvous where callers pair up and receive each other's offered value.
     # Each call participates in one exchange. The exchanger can be reused by any number of callers.
     class Exchanger
+      include Internal::Noncopyable
+
       # Wait for a partner and return the partner's value.
       # Offering nil allows a caller to receive a value without sending a payload.
       # A timeout of zero only exchanges with a partner that is already waiting.

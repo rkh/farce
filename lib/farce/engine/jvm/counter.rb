@@ -62,6 +62,8 @@ module Farce
 
       alias value get
       alias value= store
+
+      private def initialize_copy(other) = @counter = JVMContainers::AtomicLong.new(other.value)
     end
   end
 end

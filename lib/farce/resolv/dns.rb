@@ -8,6 +8,8 @@ module Farce
   module Resolv
     # Ractor-compatible DNS resolver
     class DNS < ::Resolv::DNS
+      include Internal::Noncopyable
+
       # @api private
       # Share reservations between threads in this Ractor without sharing mutable Ruby objects.
       def self.allocate_request_id(host, port)

@@ -41,6 +41,7 @@ module Farce
     #   Atomically invert the value.
     #   @return [Boolean] the new value
     module Flag
+      include Internal::Copyable
       include Value
       include ValueSerialization
     end

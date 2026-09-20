@@ -47,6 +47,10 @@ module Farce
         return value if value.equal?(true) || value.equal?(false)
         raise ArgumentError, "#{name} must be true or false"
       end
+
+      def initialize_copy(other)
+        @reference = TruffleRuby::AtomicReference.new(other.value)
+      end
     end
   end
 end

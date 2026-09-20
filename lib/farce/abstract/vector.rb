@@ -9,6 +9,8 @@ module Farce
     # Atomic updates reserve the entire vector. Reads through {#[]} do not wait for updates.
     # Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.
     class Vector
+      include Internal::Copyable
+
       # Read an index without waiting for atomic-update access.
       # @return [BasicObject, nil] The value, or nil for an index outside the vector.
       def [](index) = internal_vector[index]
@@ -101,6 +103,17 @@ module Farce
       end
 
       private def internal_vector = @vector
+
+      private def initialize_copy(other)
+        super
+        source = other.__send__(:internal_vector)
+        copy = source.class.new(source.snapshot, compare_by_identity: source.compare_by_identity?)
+        if is_a?(Local::Scoped)
+          Internal::Storage.scope(scope)[self] = copy
+        else
+          @vector = copy
+        end
+      end
     end
   end
 end

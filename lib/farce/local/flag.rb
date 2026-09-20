@@ -49,6 +49,11 @@ module Farce
 
       private
 
+      def initialize_copy(other)
+        super
+        Internal::Storage.scope(scope)[self] = Internal::Flag.new(other.value)
+      end
+
       def new_scoped_value(...) = Internal::Flag.new(...)
     end
   end

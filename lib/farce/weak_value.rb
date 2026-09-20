@@ -33,6 +33,8 @@ module Farce
     nil_value = new
 
     class << nil_value
+      def dup               = self
+      def clone(**)         = self
       def value             = nil
       def alive?            = true
       def moved?            = false
@@ -62,7 +64,11 @@ module Farce
       end
     end
 
-    # Checks if the weak value is still alive (i.e., the referenced object has not been garbage collected or moved).
+    # Copies share the weak reference without copying its target.
+    # @return [Boolean] true
+    def duplicable? = true
+
+    # Checks whether the referenced object has avoided garbage collection and has not been moved.
     # @return [Boolean] true if the weak value is still alive, false otherwise
     def alive?
       !_value.nil?

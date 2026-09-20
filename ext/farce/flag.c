@@ -117,6 +117,24 @@ flag_value(VALUE self)
 }
 
 static VALUE
+flag_initialize_copy(VALUE self, VALUE other)
+{
+    if (self == other) return self;
+    rb_check_frozen(self);
+    flag_t *copy;
+    TypedData_Get_Struct(self, flag_t, &flag_type, copy);
+    if (copy->initialized) rb_raise(rb_eRuntimeError, "copy is already initialized");
+    bool value = RTEST(flag_value(other));
+#if CONTAINERS_FLAG_LOCK_FREE
+    atomic_store_explicit(&copy->value, value, memory_order_relaxed);
+#else
+    copy->value = value;
+#endif
+    copy->initialized = true;
+    return self;
+}
+
+static VALUE
 flag_set(VALUE self)
 {
     flag_t *flag = get_flag(self);
@@ -221,6 +239,7 @@ containers_init_flag(VALUE namespace)
     cFlag = rb_define_class_under(namespace, "Flag", rb_cObject);
     rb_define_alloc_func(cFlag, flag_allocate);
     rb_define_method(cFlag, "initialize", flag_initialize, -1);
+    rb_define_private_method(cFlag, "initialize_copy", flag_initialize_copy, 1);
     rb_define_method(cFlag, "value", flag_value, 0);
     rb_define_alias(cFlag, "get", "value");
     rb_define_method(cFlag, "set", flag_set, 0);

@@ -124,6 +124,24 @@ counter_value(VALUE self)
 }
 
 static VALUE
+counter_initialize_copy(VALUE self, VALUE other)
+{
+    if (self == other) return self;
+    rb_check_frozen(self);
+    counter_t *copy;
+    TypedData_Get_Struct(self, counter_t, &counter_type, copy);
+    if (copy->initialized) rb_raise(rb_eRuntimeError, "copy is already initialized");
+    long long value = NUM2LL(counter_value(other));
+#if CONTAINERS_COUNTER_LOCK_FREE
+    atomic_store_explicit(&copy->value, value, memory_order_relaxed);
+#else
+    copy->value = value;
+#endif
+    copy->initialized = true;
+    return self;
+}
+
+static VALUE
 counter_store(VALUE self, VALUE input)
 {
     counter_t *counter = get_counter(self);
@@ -294,6 +312,7 @@ containers_init_counter(VALUE namespace)
     cCounter = rb_define_class_under(namespace, "Counter", rb_cNumeric);
     rb_define_alloc_func(cCounter, counter_allocate);
     rb_define_method(cCounter, "initialize", counter_initialize, -1);
+    rb_define_private_method(cCounter, "initialize_copy", counter_initialize_copy, 1);
     rb_define_method(cCounter, "value", counter_value, 0);
     rb_define_alias(cCounter, "get", "value");
     rb_define_method(cCounter, "store", counter_store, 1);

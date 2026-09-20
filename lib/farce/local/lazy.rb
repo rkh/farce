@@ -20,14 +20,16 @@ module Farce
       #   @yieldreturn [BasicObject] the initial value for the scope, which may be mutable
       # @return [Lazy]
       def initialize(factory = nil, scope: :ractor, **, &)
-        @factory = prepare_factory(factory, **, &)
+        @factory   = prepare_factory(factory, **, &)
+        @state_key = Object.new.freeze
         super(scope:)
       end
 
       private
 
-      def internal_atom    = scoped_value
-      def new_scoped_value = Internal::UnsharedAtom.new
+      def eager_scoped_value? = false
+      def internal_atom       = Internal::Storage.store_if_absent(@state_key, scope:) { new_scoped_value }
+      def new_scoped_value    = Internal::UnsharedAtom.new
     end
   end
 end

@@ -10,6 +10,7 @@ module Farce
     # A value may become `nil` without an explicit update when an implementation
     # retains it weakly.
     class Atom
+      include Internal::Copyable
       include Value
       include ValueSerialization
 
@@ -113,7 +114,21 @@ module Farce
       # @yield called when the timeout expires
       # @return [BasicObject, nil] the non-nil value or the fallback result
       def wait_until_non_nil(timeout: nil, &) = internal_atom.wait_until_non_nil(timeout:, &)
-      private def internal_atom = @atom
+
+      private
+
+      def internal_atom = @atom
+
+      def initialize_copy(other)
+        super
+        source = other.__send__(:internal_atom)
+        copy = source.class.new(source.value, compare_by_identity: source.compare_by_identity?)
+        if is_a?(Local::Scoped)
+          Internal::Storage.scope(scope)[self] = copy
+        else
+          @atom = copy
+        end
+      end
     end
   end
 end

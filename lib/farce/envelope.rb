@@ -22,6 +22,8 @@ module Farce
   # @!method owned?
   #   @return [Boolean] `true` if the envelope has been claimed by the current Ractor, `false` otherwise.
   class Envelope
+    include Internal::Noncopyable
+
     VAULT_ATOM = Internal::Atom.new
     private_constant :VAULT_ATOM
 

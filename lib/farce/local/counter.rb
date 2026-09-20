@@ -64,6 +64,10 @@ module Farce
 
       private
 
+      def initialize_copy(other)
+        Internal::Storage.scope(scope)[self] = Internal::Counter.new(other.value)
+      end
+
       def internal_counter      = scoped_value
       def new_scoped_value(...) = Internal::Counter.new(...)
     end

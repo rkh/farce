@@ -10,6 +10,7 @@ module Farce
   # `Ractor::Port` subclass with additional features, namely {#owned? ownership tracking} and
   # {#send mode based sending}.
   class Port < Internal::Port
+    include Internal::Noncopyable
     include Shareable
 
     MANAGER    = ModeManager.new

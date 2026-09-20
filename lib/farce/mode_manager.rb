@@ -49,6 +49,7 @@ module Farce
   #
   # @!macro modes
   class ModeManager
+    include Internal::Copyable
     include Shareable
 
     # The set of valid modes for wrapping values.

@@ -6,6 +6,7 @@ module Farce
   module Abstract
     # @abstract Shared factory, caching, and delegation behavior for lazy values.
     class Lazy
+      include Internal::Copyable
       include Value
 
       # @overload initialize(factory)

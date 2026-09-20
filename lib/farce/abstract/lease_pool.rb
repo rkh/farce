@@ -6,6 +6,8 @@ module Farce
   module Abstract
     # @abstract Shared checkout, return, ownership, and capacity behavior for resource pools.
     class LeasePool
+      include Internal::Noncopyable
+
       # Construct an empty pool whose resources are created on demand.
       # @param max_size [Integer] the maximum number of managed resources
       # @yield builds one resource after capacity has been reserved

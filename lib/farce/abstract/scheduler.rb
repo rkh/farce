@@ -64,6 +64,8 @@ module Farce
     #   @abstract Schedulers should include {Shareable} or {Unshareable}, which implement this method.
     #   @return [Boolean] Whether the scheduler is safe to use across Ractors.
     class Scheduler
+      include Internal::Noncopyable
+
       # An error that occurred during the scheduler's operation, if any.
       # This is primarily for scheduling errors, not execution errors.
       # You can check this if the {#state} is `:error`.

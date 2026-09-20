@@ -392,6 +392,27 @@ vector_initialize(int argc, VALUE *argv, VALUE self)
 }
 
 static VALUE
+vector_snapshot_locked(VALUE self)
+{
+    vector_t *vector = get_vector(self);
+    return rb_ary_new_from_values((long)vector->size, vector->values);
+}
+
+static VALUE
+vector_snapshot_unlock(VALUE self)
+{
+    pthread_mutex_unlock(&get_vector(self)->lock);
+    return Qnil;
+}
+
+static VALUE
+vector_snapshot(VALUE self)
+{
+    pthread_mutex_lock(&get_vector(self)->lock);
+    return rb_ensure(vector_snapshot_locked, self, vector_snapshot_unlock, self);
+}
+
+static VALUE
 vector_size(VALUE self)
 {
     vector_t *vector = get_vector(self);
@@ -849,6 +870,7 @@ containers_init_vector(VALUE namespace)
     rb_define_alloc_func(cVector, vector_allocate);
     rb_define_method(cVector, "initialize", vector_initialize, -1);
     rb_define_method(cVector, "size", vector_size, 0);
+    rb_define_method(cVector, "snapshot", vector_snapshot, 0);
     rb_define_method(cVector, "clear", vector_clear, 0);
     rb_define_method(cVector, "[]", vector_get_fast, 1);
     rb_define_method(cVector, "[]=", vector_set_fast, 2);

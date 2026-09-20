@@ -8,6 +8,17 @@ module Farce
     # @note This is a module rather than a class so {Farce::Counter} can inherit
     #   directly from the native counter and avoid delegation overhead.
     module Counter
+      include Internal::Copyable
+
+      def self.included(base)
+        Internal.prepare_mutable_numeric(base)
+        super
+      end
+
+      # Numeric's default copying returns self, which is unsuitable for mutable counters.
+      define_method(:dup,   Kernel.instance_method(:dup))
+      define_method(:clone, Kernel.instance_method(:clone))
+
       include Value
       include ValueSerialization
 

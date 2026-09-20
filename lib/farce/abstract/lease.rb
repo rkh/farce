@@ -6,6 +6,8 @@ module Farce
   module Abstract
     # @abstract Shared checkout, return, ownership, and retirement behavior for leases.
     class Lease
+      include Internal::Noncopyable
+
       # Construct a lease from one resource-building block.
       # @yield builds the resource managed by the lease
       # @yieldreturn [BasicObject] the initial resource

@@ -64,6 +64,10 @@ module Farce
           return new_value if @reference.compare_and_set(old_value, new_value)
         end
       end
+
+      def initialize_copy(other)
+        @reference = TruffleRuby::AtomicReference.new(other.value)
+      end
     end
   end
 end

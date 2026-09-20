@@ -19,6 +19,7 @@ module Farce
   #   resource # => :resource, or nil if the timeout expires
   #
   class Signal
+    include Internal::Noncopyable
     include Shareable
 
     def initialize

@@ -19,6 +19,8 @@ module Farce
 
       def size = @mutex.synchronize { @values.size }
 
+      def snapshot = @mutex.synchronize { @values.dup }
+
       def [](index)
         index = convert_index(index)
         @mutex.synchronize { @values[index] }
