@@ -42,6 +42,31 @@ module Farce
         end
       end
 
+      # Return an independent map containing entries accepted by the block.
+      # The block receives public values from the copy. Stored values and map settings are preserved.
+      # @yieldparam key [BasicObject] an existing key
+      # @yieldparam value [BasicObject] the public value
+      # @return [Map, Enumerator] A map of the same class, or an Enumerator without a block.
+      def select
+        return enum_for(__method__) { size } unless block_given?
+        with_map_copy do |copy, map|
+          map.each { |key, value| map.delete(key) unless yield(key, copy.unwrap_value(value)) }
+        end
+      end
+      alias filter select
+
+      # Return an independent map excluding entries accepted by the block.
+      # The block receives public values from the copy. Stored values and map settings are preserved.
+      # @yieldparam key [BasicObject] an existing key
+      # @yieldparam value [BasicObject] the public value
+      # @return [Map, Enumerator] A map of the same class, or an Enumerator without a block.
+      def reject
+        return enum_for(__method__) { size } unless block_given?
+        with_map_copy do |copy, map|
+          map.each { |key, value| map.delete(key) if yield(key, copy.unwrap_value(value)) }
+        end
+      end
+
       # Return an independent map with transformed keys and unchanged stored values.
       # Mapping entries take precedence over the block. Unmapped keys are retained when no block is given.
       # Transformed keys pass through this map's normalizer. On collisions, the last visited entry wins.

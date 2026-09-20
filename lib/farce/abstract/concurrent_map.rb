@@ -205,6 +205,11 @@ module Farce
         self if filter_entries(&)
       end
 
+      # Remove nil values using per-key update coordination. False values are retained.
+      # The whole operation is not atomic, as with {#delete_if}.
+      # @return [self, nil] self if this operation deletes entries, otherwise nil.
+      def compact! = reject! { |_, value| nil.equal?(value) }
+
       # Keep entries selected by the block. Uses the same coordination as {#delete_if}.
       # @return [self, Enumerator]
       def keep_if

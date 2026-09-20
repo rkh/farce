@@ -181,6 +181,41 @@ module Farce
       # @return [Boolean] Whether the map is empty.
       def empty? = size.zero?
 
+      # Return the number of entries currently in the map.
+      # @return [Integer]
+      def length = size
+
+      # Return whether an observed value matches using this map's value comparison setting.
+      # Values are unwrapped before comparison. Concurrent changes may make the result stale.
+      # @param value [BasicObject] the value to find
+      # @return [Boolean]
+      def value?(value)
+        identity = compare_values_by_identity?
+        each_value.any? { |stored| identity ? stored.equal?(value) : stored == value }
+      end
+      alias has_value? value?
+
+      # Return a matching key using this map's value comparison setting, or nil.
+      # The first observed match is returned. No insertion order is guaranteed.
+      # @param value [BasicObject] the value to find
+      # @return [BasicObject, nil]
+      def key(value)
+        pair = rassoc(value)
+        pair&.first
+      end
+
+      # Return an observed key/value pair using this map's value comparison setting, or nil.
+      # Values are unwrapped before comparison. Concurrent changes may make the result stale.
+      # @param value [BasicObject] the value to find
+      # @return [Array, nil]
+      def rassoc(value)
+        identity = compare_values_by_identity?
+        each_pair do |key, stored|
+          return [key, stored] if identity ? stored.equal?(value) : stored == value
+        end
+        nil
+      end
+
       # Alias for {#key?}
       def has_key?(...) = key?(...) # rubocop:disable Naming/PredicatePrefix
       alias member?  has_key?
@@ -293,13 +328,6 @@ module Farce
             Internal::KeyNormalizer.restore(options[:normalize_keys])
         end
         initialize(coder["entries"], **options)
-      end
-
-      # @note If ActiveSupport isn't loaded, this will be equivalent to calling {#to_h} and any arguments are ignored.
-      # @return [Hash] The entries, converted using Hash#as_json when available.
-      def as_json(...)
-        hash = to_h
-        hash.respond_to?(:as_json) ? hash.as_json(...) : hash
       end
 
       # @return [String] JSON representation of the map.

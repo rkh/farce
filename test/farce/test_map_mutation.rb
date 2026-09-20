@@ -30,6 +30,19 @@ module Farce
       end
     end
 
+    def test_compact_removes_only_nil_and_reports_its_own_changes
+      MAPS.each do |type|
+        map = type.new({ 1 => nil, 2 => false, 3 => :value }, normalize_keys: :succ)
+
+        assert_same map, map.compact!
+        assert_equal({ 3 => false, 4 => :value }, map.to_h)
+        assert_nil map.compact!
+        map.clear
+
+        assert_nil map.compact!
+      end
+    end
+
     def test_transform_and_merge_preserve_nil_presence
       MAPS.each do |type|
         map = type.new({ 1 => nil }, normalize_keys: :succ)

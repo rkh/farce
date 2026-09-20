@@ -297,7 +297,7 @@ module Farce
         Internal.const_get(:MapValueModes).public_instance_methods(false)
       facade_helpers = %i[
         each_pair mode shareable_keys? shareable_values? values
-        delete_if reject! keep_if select! filter! transform_values! merge!
+        delete_if reject! compact! keep_if select! filter! transform_values! merge!
       ]
       backend_protocol = backend.class.public_instance_methods(false)
 

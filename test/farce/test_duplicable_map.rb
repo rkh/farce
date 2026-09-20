@@ -38,6 +38,114 @@ module Farce
       end
     end
 
+    def test_filters_return_independent_maps_and_enumerators
+      MAPS.each do |type|
+        source = new_map(type, { 1 => nil, 2 => false, 3 => :keep }, normalize_keys: :succ)
+        %i[select filter reject].each do |method|
+          predicate = ->(_key, value) { method == :reject ? nil.equal?(value) : !nil.equal?(value) }
+          copy = source.public_send(method, &predicate)
+
+          assert_instance_of type, copy
+          assert_equal({ 3 => false, 4 => :keep }, copy.to_h)
+          assert_equal :keep, copy[3]
+          assert_equal source.max_size, copy.max_size if source.is_a?(Abstract::BoundedMap)
+          assert Ractor.shareable?(copy) if source.is_a?(Shareable)
+          enumerator = source.public_send(method)
+
+          assert_instance_of Enumerator, enumerator
+          assert_equal 3, enumerator.size
+          assert_equal copy.to_h, enumerator.each(&predicate).to_h
+          copy.clear
+
+          assert_equal({ 2 => nil, 3 => false, 4 => :keep }, source.to_h)
+          assert_raises(RuntimeError) { source.public_send(method) { raise "failure" } }
+          assert_equal 3, source.size
+        end
+      end
+    end
+
+    def test_filter_blocks_receive_public_values_without_moving_the_source
+      %i[copy move].each do |mode|
+        %i[select filter reject].each do |method|
+          source = Map.new({ a: [1], b: [2] }, mode:)
+          seen = []
+          copy = source.public_send(method) do |key, value|
+            seen << [key, value]
+            value == (method == :reject ? [2] : [1])
+          end
+
+          assert_equal({ a: [1], b: [2] }, seen.to_h)
+          assert_equal({ a: [1] }, copy.to_h)
+          assert_equal mode, copy.mode
+          assert_equal({ a: [1], b: [2] }, source.to_h)
+        end
+      end
+    end
+
+    def test_value_lookup_uses_equality_and_preserves_nil_and_false
+      MAPS.each do |type|
+        value = String.new("value").freeze
+        equal_value = String.new("value").freeze
+        map = new_map(type, { 1 => value, 2 => nil, 3 => false }, normalize_keys: :succ)
+
+        assert map.value?(equal_value)
+        assert map.has_value?(equal_value) # rubocop:disable Style/PreferredHashMethods
+        assert_equal 2, map.key(equal_value)
+        assert_equal [2, value], map.rassoc(equal_value)
+        assert map.value?(nil)
+        assert map.value?(false)
+        assert_equal 3, map.key(nil)
+        assert_equal [4, false], map.rassoc(false)
+        refute map.value?(:missing)
+        assert_nil map.key(:missing)
+        assert_nil map.rassoc(:missing)
+      end
+      map = Unshared::Map.new({ nil => :value })
+
+      assert map.value?(:value)
+      assert_nil map.key(:value)
+      assert_equal [nil, :value], map.rassoc(:value)
+    end
+
+    def test_value_lookup_honors_identity_comparison
+      MAPS.reject { it < Abstract::TreeMap }.each do |type|
+        value = String.new("value").freeze
+        equal_value = String.new("value").freeze
+        map = new_map(type, { 1 => value }, compare_values_by_identity: true)
+
+        assert map.value?(value)
+        assert map.has_value?(value) # rubocop:disable Style/PreferredHashMethods
+        assert_equal 1, map.key(value)
+        assert_equal [1, value], map.rassoc(value)
+        refute map.value?(equal_value)
+        refute map.has_value?(equal_value) # rubocop:disable Style/PreferredHashMethods
+        assert_nil map.key(equal_value)
+        assert_nil map.rassoc(equal_value)
+      end
+    end
+
+    def test_value_lookup_unwraps_values
+      %i[copy move].each do |mode|
+        map = Map.new({ a: [1] }, mode:)
+
+        assert map.value?([1])
+        assert_equal :a, map.key([1])
+        assert_equal [:a, [1]], map.rassoc([1])
+        assert_equal [1], map[:a]
+      end
+    end
+
+    def test_length_tracks_size
+      MAPS.each do |type|
+        map = new_map(type, { 1 => false })
+
+        assert_equal 1, map.length
+        map.clear
+
+        assert_equal 0, map.length
+      end
+    end
+
     def test_normalization_is_applied_once_to_external_and_transformed_keys
       MAPS.each do |type|
         source = new_map(type, { 1 => :a, 2 => nil }, normalize_keys: :succ)
