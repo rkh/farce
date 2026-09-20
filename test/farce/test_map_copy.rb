@@ -26,6 +26,25 @@ module Farce
       end
     end
 
+    def test_backing_storage_is_a_protected_duplicable_map_hook
+      (TREE_TYPES + BOUNDED_TYPES + WEAK_TYPES + [Map, Strict::Map, Unshared::Map, Local::Map]).each do |type|
+        assert type.protected_method_defined?(:internal_map)
+        refute type.public_method_defined?(:internal_map)
+        assert_equal Abstract::DuplicableMap, type.instance_method(:initialize_copy).owner
+        assert_equal Abstract::DuplicableMap, type.instance_method(:initialize_dup).owner
+        assert_equal Abstract::DuplicableMap, type.instance_method(:initialize_clone).owner
+      end
+      %i[initialize_copy initialize_dup initialize_clone].each do |method|
+        refute_equal Abstract::Map, Abstract::Map.instance_method(method).owner
+      end
+      refute Abstract::Map.method_defined?(:internal_map)
+      refute Abstract::Map.private_method_defined?(:internal_map)
+      [LeaseMap, Unshared::LeaseMap, Local::LeaseMap].each do |type|
+        refute type.method_defined?(:internal_map)
+        refute type.private_method_defined?(:internal_map)
+      end
+    end
+
     def test_tree_copies_have_independent_storage
       TREE_TYPES.each { assert_independent_copy(it) }
     end

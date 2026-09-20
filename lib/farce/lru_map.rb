@@ -39,6 +39,11 @@ module Farce
     # @return [true]
     def shareable_values? = true
 
+    protected
+
+    def unwrap_value(value) = @manager.unwrap(value)
+    def wrap_value(value)   = @manager.wrap(value)
+
     private
 
     def new_bounded_map(...) = Internal::StrictLRUMap.new(...)
@@ -46,8 +51,5 @@ module Farce
     def new_key_locks(compare_keys_by_identity:)
       Internal::KeyLockMap.new(registry_class: Farce::Strict::Map, compare_keys_by_identity:)
     end
-
-    def unwrap_value(value) = @manager.unwrap(value)
-    def wrap_value(value)   = @manager.wrap(value)
   end
 end

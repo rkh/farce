@@ -37,10 +37,13 @@ module Farce
     # @return [true]
     def shareable_values? = true
 
+    protected
+
+    def unwrap_value(value) = @manager.unwrap(value)
+    def wrap_value(value)   = @manager.wrap(value)
+
     private
 
     def new_tree_map(...) = Internal::StrictTreeMap.new(...)
-    def unwrap_value(value) = @manager.unwrap(value)
-    def wrap_value(value)   = @manager.wrap(value)
   end
 end

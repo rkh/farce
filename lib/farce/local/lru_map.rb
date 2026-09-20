@@ -23,6 +23,10 @@ module Farce
       State = Data.define(:map, :key_locks)
       private_constant :State
 
+      protected
+
+      def internal_map = scoped_value.map
+
       private
 
       def new_copied_scoped_value(map)
@@ -33,7 +37,6 @@ module Farce
         State.new(map, locks)
       end
 
-      def internal_map          = scoped_value.map
       def with_key_lock(key, &) = scoped_value.key_locks.synchronize(key, &)
 
       def new_scoped_value(

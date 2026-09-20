@@ -199,7 +199,14 @@ module Farce
 
       private
 
-      def copy_map_backend(source) = source.dup
+      def copy_map_backend(source, empty: false)
+        return source.dup unless empty
+        source.class.new(
+          max_size:                   source.max_size,
+          compare_keys_by_identity:   source.compare_keys_by_identity?,
+          compare_values_by_identity: source.compare_values_by_identity?,
+        )
+      end
 
       def install_copied_map(map)
         super
@@ -211,11 +218,8 @@ module Farce
       end
 
       def each_for_inspect(&)    = each(&)
-      def internal_map           = @map
       def prepare_key(key)       = key
       def prepare_store_key(key) = internal_map.prepare_key(prepare_key(key))
-      def unwrap_value(value)    = value
-      def wrap_value(value)      = value
       def with_key_lock(key, &)  = @key_locks.synchronize(key, &)
 
       # simplecov:disable

@@ -18,9 +18,11 @@ module Farce
     class WeakMap < Abstract::WeakMap
       include Scoped
 
-      private
+      protected
 
       def internal_map = scoped_value
+
+      private
 
       def new_scoped_value(entries = nil, **)
         unless @key_normalizer || Internal::KeyNormalizer.canonical_entries?(entries)

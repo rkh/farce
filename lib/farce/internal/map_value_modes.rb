@@ -157,6 +157,11 @@ module Farce
         self
       end
 
+      protected
+
+      def wrap_value(value, mode: nil) = nil.equal?(value) ? NIL_VALUE : @manager.wrap(value, mode:)
+      def unwrap_value(value)          = NIL_VALUE.equal?(value) ? nil : @manager.unwrap(value)
+
       private
 
       def check_key(key)
@@ -164,9 +169,7 @@ module Farce
         raise Ractor::IsolationError, "key must be Ractor-shareable"
       end
 
-      def wrap_value(value, mode: nil) = nil.equal?(value) ? NIL_VALUE : @manager.wrap(value, mode:)
       def wrap_comparison(value) = wrap_value(value, mode: compare_values_by_identity? ? :local : :copy)
-      def unwrap_value(value) = NIL_VALUE.equal?(value) ? nil : @manager.unwrap(value)
 
       def unwrap_result(result)
         return unwrap_value(result) unless TIMED_OUT.equal?(result)

@@ -186,16 +186,16 @@ module Farce
         super.merge(compare_keys_by_identity: false, compare_values_by_identity: compare_values_by_identity?)
       end
 
-      private def internal_map = @map
+      private
 
-      private def copy_map_backend(source)
+      def copy_map_backend(source, empty: false)
         raise TypeError, "copy this backend through its public map" unless source
         source = source.instance_variable_get(:@map) if source.is_a?(Internal::KeyNormalizer::ConcurrentMap)
         copied = source.class.new(
           compare_keys_by_identity:   source.compare_keys_by_identity?,
           compare_values_by_identity: source.compare_values_by_identity?,
         )
-        source.each { |key, value| copied[key] = value }
+        source.each { |key, value| copied[key] = value } unless empty
         normalizer = instance_variable_get(:@key_normalizer)
         Internal::KeyNormalizer.wrap_concurrent(copied, normalizer)
       end

@@ -195,8 +195,9 @@ module Farce
 
       # Return a key to Lease handle mapping.
       # Unlike iteration, this method never checks resources out.
+      # A block receives each key and Lease handle and returns a pair for the new Hash.
       # @return [Hash{BasicObject => Farce::Abstract::Lease}]
-      def to_h = to_a.to_h
+      def to_h(&) = entries_to_hash(to_a, &)
 
       # Return the current Lease handles.
       # @return [Array<Farce::Abstract::Lease>]

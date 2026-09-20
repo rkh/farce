@@ -215,9 +215,9 @@ module Farce
 
       private
 
-      def copy_map_backend(source)
+      def copy_map_backend(source, empty: false)
         copied = source.class.new
-        source.each { |key, value| copied[key] = value }
+        source.each { |key, value| copied[key] = value } unless empty
         copied
       end
 
@@ -233,8 +233,6 @@ module Farce
         raise Ractor::IsolationError, "key must be Ractor-shareable"
       end
 
-      def unwrap_value(value)   = value
-      def wrap_value(value)     = value
       def new_key_locks         = Internal::OrderedKeyLockMap.new
       def with_key_lock(key, &) = @key_locks.synchronize(key, &)
 
@@ -244,8 +242,6 @@ module Farce
         raise NoMethodError, "Farce::Abstract::TreeMap should not be instantiated directly. Use a subclass instead."
       end
       # simplecov:enable
-
-      private def internal_map = @map
     end
   end
 end

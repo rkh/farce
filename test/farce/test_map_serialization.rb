@@ -47,10 +47,10 @@ module Farce
 
       assert_instance_of Local::Map, restored
       assert_equal :fiber, restored.scope
-      assert_equal({ one: 1, two: 2 }, restored.to_h)
+      assert_equal map.to_h, restored.to_h
       assert_predicate restored, :compare_keys_by_identity?
       assert_predicate restored, :compare_values_by_identity?
-      assert_equal({ one: 1, two: 2 }, Fiber.new { restored.to_h }.resume)
+      assert_equal map.to_h, Fiber.new { restored.to_h }.resume
       assert_equal 3, restored[:three] = 3
       assert_equal 3, restored[:three]
     end
@@ -71,7 +71,7 @@ module Farce
         assert_equal 2, restored.max_size
         assert_equal :fiber, restored.scope if type == Local::LRUMap
 
-        assert_equal({ one: 1, two: 2 }, restored.to_h)
+        assert_equal map.to_h, restored.to_h
         assert_predicate restored, :compare_keys_by_identity?
         assert_predicate restored, :compare_values_by_identity?
 

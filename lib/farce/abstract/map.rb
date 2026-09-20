@@ -155,29 +155,6 @@ module Farce
     class Map
       include Enumerable
 
-      # @api private
-      def initialize_dup(other)
-        super
-        make_copy_shareable if is_a?(Shareable)
-      end
-
-      # @api private
-      def initialize_clone(other, freeze: nil)
-        super
-        make_copy_shareable if is_a?(Shareable) && freeze != false
-      end
-
-      # @api private
-      def initialize_copy(other)
-        super
-        normalizer = other.instance_variable_get(:@key_normalizer)
-        if normalizer && !is_a?(ConcurrentMap)
-          operations = Internal::KeyNormalizer.operations_for(self)
-          Internal::KeyNormalizer.install(self, normalizer, operations) unless is_a?(operations)
-        end
-        install_copied_map(copy_map_backend(other.__send__(:internal_map)))
-      end
-
       # Return a two-element array containing a key and its associated value, if the key is present,
       # or nil if the key is absent.
       # @param key [BasicObject] The key to look up.
@@ -232,8 +209,22 @@ module Farce
       def to_a = each_pair.to_a
 
       # Creates a new Hash containing the map's entries.
-      # @return [Hash] A new Hash with the same entries.
-      def to_h = each_pair.to_h
+      # Preserves identity comparison for keys, including when a block transforms entries.
+      # @yieldparam key [BasicObject] an existing key
+      # @yieldparam value [BasicObject] its value
+      # @yieldreturn [Array(BasicObject, BasicObject)] the key and value for the new Hash
+      # @return [Hash] A new Hash with the original entries, or the pairs returned by the block.
+      def to_h(&) = entries_to_hash(each_pair, &)
+
+      # Support implicit Hash conversion using this map's {#to_h} implementation.
+      # @return [Hash] A new Hash containing the map's entries.
+      def to_hash = to_h
+
+      # Support hash patterns using the same entries and key comparison as {#to_h}.
+      # Like Hash, this returns all entries regardless of the requested keys.
+      # @param keys [Array, nil] the optional key hint supplied by Ruby's pattern matcher
+      # @return [Hash] A new Hash containing the map's entries.
+      def deconstruct_keys(keys) = to_h # rubocop:disable Lint/UnusedMethodArgument
 
       # Fetches the values associated with multiple keys, returning nil for any missing keys.
       # @param keys [Array<BasicObject>] The keys to look up.
@@ -265,6 +256,9 @@ module Farce
         end
         out << "}>"
       end
+
+      # @return [String] The same representation as {#inspect}.
+      def to_s = inspect
 
       # @api private
       # @return [void]
@@ -303,18 +297,35 @@ module Farce
 
       def to_json(...) = to_h.to_json(...)
 
+      protected
+
+      # Convert a public value to its stored representation.
+      # @api private
+      def wrap_value(value) = value
+
+      # Convert a stored representation to its public value.
+      # @api private
+      def unwrap_value(value) = value
+
       private
 
-      def make_copy_shareable
-        Ractor.make_shareable(self) if Internal.native_ractors?
-        freeze
-      end
-
-      def install_copied_map(map)
-        @map = map
+      def entries_to_hash(entries, &)
+        return entries.to_h(&) unless compare_keys_by_identity?
+        hash = {}.compare_by_identity
+        entries.each do |key, value|
+          if block_given?
+            pair = Array.try_convert(yield(key, value))
+            raise TypeError, "block must return an Array or respond to #to_ary" unless pair
+            raise ArgumentError, "block must return a two-element pair" unless pair.size == 2
+            key, value = pair
+          end
+          hash[key] = value
+        end
+        hash
       end
 
       def convert_entries(entries)
+        return entries if Map === entries
         if entries.respond_to?(:to_hash)
           entries = Hash.try_convert(entries)
           raise TypeError, "entries must be a Hash or respond to #to_hash" unless entries
