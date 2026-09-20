@@ -46,6 +46,7 @@ platform :mri_40 do # rubocop:disable Naming/VariableNumber
 end
 
 group :test do
+  gem "activesupport"
   gem "minitest"
   gem "minitest-reporters"
 

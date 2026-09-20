@@ -295,6 +295,14 @@ module Farce
         initialize(coder["entries"], **options)
       end
 
+      # @note If ActiveSupport isn't loaded, this will be equivalent to calling {#to_h} and any arguments are ignored.
+      # @return [Hash] The entries, converted using Hash#as_json when available.
+      def as_json(...)
+        hash = to_h
+        hash.respond_to?(:as_json) ? hash.as_json(...) : hash
+      end
+
+      # @return [String] JSON representation of the map.
       def to_json(...) = to_h.to_json(...)
 
       protected
