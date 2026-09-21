@@ -10,6 +10,8 @@ module Farce
     class TestKeyLockMap < Test
       include Helpers::InternalTestHelpers
 
+      class OwnerCanceled < StandardError; end
+
       def run(...) = Timeout.timeout(10) { super }
 
       def test_results_and_all_exit_paths_release_without_retained_entries
@@ -88,18 +90,13 @@ module Farce
         locks = KeyLockMap.new(registry_class: Farce::Map)
         events = Farce::Queue.new
         cancel = Farce::Queue.new
-        hold = Farce::Queue.new
-        owner = Ractor.new(locks, events, cancel, hold) do |shared, reports, cancellation, blocker|
-          thread = Thread.new do
-            shared.synchronize(:key) do
-              reports.push(:owned)
-              # https://bugs.ruby-lang.org/issues/21537
-              # Indefinite Thread#sleep inside a Ractor can stall CRuby's GC barrier on Windows.
-              blocker.pop
-            end
+        owner = Ractor.new(locks, events, cancel) do |shared, reports, cancellation|
+          shared.synchronize(:key) do
+            reports.push(:owned)
+            cancellation.pop
+            raise OwnerCanceled
           end
-          cancellation.pop
-          thread.kill.join
+        rescue OwnerCanceled
           :canceled
         end
 
@@ -128,7 +125,6 @@ module Farce
         assert_equal :released, locks.synchronize(:key) { :released }
       ensure
         cancel&.push(true)
-        hold&.push(true)
       end
 
       def test_scheduled_fibers_wait_per_key_and_release_after_exception
