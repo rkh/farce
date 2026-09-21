@@ -26,18 +26,17 @@ jobs:
             verify_gems: true
             # Avoid virtual-thread starvation during pool growth on Java 21.
             jruby_opts: --debug -Xfiber.vthread=false
-            # The full suite and fresh JVM subprocesses can exceed 300 seconds on CI.
             test_timeout: 600
           - name: jruby-dev
             version: jruby-head
-            # Avoid virtual-thread starvation during nested fiber creation.
             jruby_opts: --debug -Xfiber.vthread=false
-            # Head builds can spend over 300 seconds on the suite and fresh JVM startup.
             test_timeout: 600
           - name: truffleruby
             version: truffleruby
+            test_timeout: 600
           - name: truffleruby-dev
             version: truffleruby-head
+            test_timeout: 600
           - name: truffleruby+graalvm
             version: truffleruby+graalvm
             # Each subprocess starts a fresh JVM, which can exceed 15 seconds on CI.
