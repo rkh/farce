@@ -1139,10 +1139,10 @@ If nil, the map will be empty.</p>
       <pre class="lines">
 
 
-210</pre>
+221</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 210</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 221</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -1188,10 +1188,10 @@ If nil, the map will be empty.</p>
       <pre class="lines">
 
 
-214</pre>
+225</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 214</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 225</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -1562,14 +1562,14 @@ Keys are yielded from smallest to largest.</p>
       <pre class="lines">
 
 
-172
-173
-174
-175
-176</pre>
+183
+184
+185
+186
+187</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 172</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 183</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_key'>each_key</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1713,14 +1713,14 @@ Values are yielded in the order of their corresponding keys (from smallest to la
       <pre class="lines">
 
 
-187
-188
-189
-190
-191</pre>
+198
+199
+200
+201
+202</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 187</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 198</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_value'>each_value</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -2354,10 +2354,10 @@ The result is frozen and ordered from smallest to largest key.</p>
       <pre class="lines">
 
 
-196</pre>
+207</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 196</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 207</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_keys'>keys</span> <span class='op'>=</span> <span class='id identifier rubyid_each_key'>each_key</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre>
     </td>
@@ -2573,10 +2573,10 @@ Mutable strings are accepted however and will be converted to an immutable strin
       <pre class="lines">
 
 
-206</pre>
+217</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 206</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 217</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_keys?'>shareable_keys?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -2903,10 +2903,10 @@ The result is frozen and ordered according to the order of their corresponding k
       <pre class="lines">
 
 
-201</pre>
+212</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 201</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/tree_map.rb', line 212</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_values'>values</span> <span class='op'>=</span> <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre>
     </td>
@@ -2919,7 +2919,7 @@ The result is frozen and ordered according to the order of their corresponding k
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 13:16:21 2026 by
+  Generated on Mon Sep 21 19:14:58 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
