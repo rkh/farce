@@ -11,7 +11,7 @@ module Farce
 
       def initialize(namespace, ignore: nil)
         @namespace = namespace
-        @ignore    = Set[*ignore] if ignore
+        @ignore    = ::Set[*ignore] if ignore
         @mutex     = Mutex.new
         namespace.constants.each do |const|
           next if @ignore&.include?(const) || namespace.autoload?(const)

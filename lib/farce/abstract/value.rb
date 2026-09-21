@@ -52,7 +52,7 @@ module Farce
         value = value()
         return value unless value.is_a?(Value)
 
-        seen = Set.new.compare_by_identity
+        seen = ::Set.new.compare_by_identity
         seen << self
 
         while value.is_a?(Value)

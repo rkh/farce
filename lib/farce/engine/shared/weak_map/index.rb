@@ -11,10 +11,12 @@ module Farce
       attr_reader :change_signal
 
       def initialize
-        @lock = UnsharedWeakMapLock.new
-        @registry_mutex = Mutex.new
-        @change_signal = Signal.new
-        @sweep_cursor = 0
+        @lock            = UnsharedWeakMapLock.new
+        @registry_mutex  = Mutex.new
+        @change_signal   = Signal.new
+        @sweep_cursor    = 0
+        @iteration_epoch = 0
+        @registry_holes  = 0
         reset
       end
 
@@ -85,15 +87,57 @@ module Farce
         @lock.try_synchronize { sweep_entry(entry) }
       end
 
-      def snapshot = @registry_mutex.synchronize { @entries.dup }
+      def snapshot = @registry_mutex.synchronize { @entries.compact }
+
+      def live_cursor
+        @registry_mutex.synchronize do
+          [registry_enumerator, @iteration_epoch]
+        end
+      end
+
+      def next_live(cursor)
+        @registry_mutex.synchronize do
+          raise "map structurally changed during live iteration" if cursor[1] != @iteration_epoch
+          while (entry = cursor[0].next).nil?
+            # Deletion leaves a hole while an array cursor is active.
+          end
+          entry
+        end
+      end
+
+      def close_cursor(cursor)
+        cursor[0] = nil
+      end
 
       private
 
       def data_for(_key) = @data
       def index_key(key) = key
       def key_reference(key) = UnsharedWeakMapReference.new(key)
-      def register(entry) = @registry_mutex.synchronize { @entries << entry }
-      def forget(entry) = @registry_mutex.synchronize { @entries.delete(entry) }
+      def registry_enumerator = @entries.to_enum(:each)
+
+      def register(entry)
+        @registry_mutex.synchronize do
+          @iteration_epoch += 1
+          @entries << entry
+        end
+      end
+
+      def forget(entry)
+        @registry_mutex.synchronize do
+          if (index = @entries.index(entry))
+            @entries[index] = nil
+            @registry_holes += 1
+            if @registry_holes > @entries.size / 4
+              # Existing cursors keep their old array. Retired cells release
+              # their keys and values, so abandoning a cursor retains no
+              # registration in the map and requires no finalizer.
+              @entries = @entries.compact
+              @registry_holes = 0
+            end
+          end
+        end
+      end
 
       def sweep_entry(entry)
         retired, alive, key = entry.retire_if_dead
@@ -117,19 +161,38 @@ module Farce
     # instead of eql?, and JVM runtimes defer stale value cleanup until access.
     class UnsharedWeakKeyMapIndex < UnsharedWeakMapIndex
       def snapshot = @registry_mutex.synchronize { @entries.values }
-      def sweep_one; end
+
+      def sweep_one
+        return unless @entries.respond_to?(:sweep_one)
+        @registry_mutex.synchronize { @entries.sweep_one }
+      end
 
       private
 
       def reset
         @data = ObjectSpace::WeakKeyMap.new
         @immediate = {}
-        @registry_mutex.synchronize { @entries = ObjectSpace::WeakMap.new }
+        @registry_mutex.synchronize do
+          @entries = if Internal.const_defined?(:ConcurrentWeakRegistry, false)
+                       ConcurrentWeakRegistry.new
+                     else
+                       ObjectSpace::WeakMap.new
+                     end
+          @iteration_epoch += 1
+        end
       end
 
       def data_for(key) = Internal.garbage_collectable?(key) ? @data : @immediate
       def key_reference(key) = UnsharedWeakMapWeakReference.for(key)
-      def register(entry) = @registry_mutex.synchronize { @entries[entry.token] = entry }
+      def registry_enumerator = @entries.to_enum(:each_value)
+
+      def register(entry)
+        @registry_mutex.synchronize do
+          @iteration_epoch += 1
+          @entries[entry.token] = entry
+        end
+      end
+
       def forget(entry) = @registry_mutex.synchronize { @entries.delete(entry.token) }
     end
     private_constant :UnsharedWeakKeyMapIndex
@@ -141,7 +204,11 @@ module Farce
 
       def reset
         @data = ObjectSpace::WeakMap.new
-        @registry_mutex.synchronize { @entries = [] }
+        @registry_mutex.synchronize do
+          @entries = []
+          @registry_holes = 0
+          @iteration_epoch += 1
+        end
       end
 
       def key_reference(key) = UnsharedWeakMapWeakReference.for(key)
@@ -153,7 +220,11 @@ module Farce
 
       def reset
         @data = {}
-        @registry_mutex.synchronize { @entries = [] }
+        @registry_mutex.synchronize do
+          @entries = []
+          @registry_holes = 0
+          @iteration_epoch += 1
+        end
       end
     end
     private_constant :UnsharedStrongKeyMapIndex

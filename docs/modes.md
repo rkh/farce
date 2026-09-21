@@ -254,6 +254,7 @@ The same choices appear in several Farce APIs. Containers normally default to `:
 | `Farce::Exchanger` | `new`, `exchange` | The value offered to a partner. |
 | `Farce::Atom` | `new`, `store`, `swap`, `update`, and other replacement operations | The stored value. |
 | `Farce::Vector` | `new`, `push`, `store`, `update`, and other replacement operations | Element values. |
+| `Farce::Set`, `Farce::SortedSet` | `new`, `add`, `add?` | Set elements. Membership uses an insertion-time snapshot. |
 | `Farce::Map`, `Farce::WeakKeyMap` | `new`, `store`, `update`, and other replacement operations | Values only. Keys must already be shareable. |
 | `Farce::TreeMap` | `new` | Values only. Keys follow the tree map's own rules. |
 | `Farce::LRUMap` | `new` | Values only. Individual value hits and writes update eviction order. |

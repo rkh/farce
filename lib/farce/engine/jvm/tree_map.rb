@@ -20,7 +20,7 @@ module Farce
       end
 
       INITIALIZATION_LOCK = Mutex.new
-      State = Data.define(:tree)
+      State = Struct.new(:tree, :revision)
       private_constant :Key, :Value, :KEY_COMPARATOR, :INITIALIZATION_LOCK, :State
 
       def initialize(entries = nil)
@@ -114,6 +114,34 @@ module Farce
         self
       end
 
+      def each_live
+        return enum_for(__method__) { size } unless block_given?
+
+        iterator = nil
+        last_key = nil
+        revision = nil
+        started = false
+        loop do
+          pair = access do
+            current = @state.revision
+            if !started || revision != current
+              entries = started ? @state.tree.tailMap(Key.new(last_key), false).entrySet : @state.tree.entrySet
+              iterator = entries.iterator
+            end
+            next unless iterator.hasNext
+
+            entry = iterator.next
+            last_key = entry.getKey.key
+            revision = current
+            [last_key, entry.getValue.value]
+          end
+          break unless pair
+          started = true
+          yield pair
+        end
+        self
+      end
+
       def []=(key, value)
         key = canonical_key(key)
         access do
@@ -121,6 +149,7 @@ module Farce
           wrapped_key = mutation_key(key)
           begin
             @state.tree.put(wrapped_key, Value.new(value))
+            @state.revision += 1
           ensure
             Thread.handle_interrupt(INTERRUPT_MASK) do
               wrapped_key.mutation_owner = nil
@@ -135,6 +164,7 @@ module Farce
         access do
           check_local_frozen
           wrapped = JVMContainers.nullable(@state.tree.remove(mutation_key(key)))
+          @state.revision += 1 if wrapped
           wrapped&.value
         end
       end
@@ -162,6 +192,7 @@ module Farce
           entry = iterator.next
           result = [entry.getKey.key, entry.getValue.value]
           iterator.remove
+          @state.revision += 1
           result
         end
       end
@@ -175,6 +206,7 @@ module Farce
           entry = iterator.next
           result = [entry.getKey.key, entry.getValue.value]
           iterator.remove
+          @state.revision += 1
           result
         end
       end
@@ -188,7 +220,10 @@ module Farce
       def clear
         access do
           check_local_frozen
-          @state.tree.clear
+          unless @state.tree.isEmpty
+            @state.tree.clear
+            @state.revision += 1
+          end
         end
         self
       end
@@ -254,7 +289,7 @@ module Farce
           end
           check_uninitialized
         end
-        State.new(tree)
+        State.new(tree, 0)
       end
 
       def check_uninitialized
@@ -288,6 +323,8 @@ module Farce
 
       def synchronized? = true
     end
+
+    MutableTreeMap = TreeMap
 
     # No Ractors, no problems :)
     ShareableTreeMap = TreeMap

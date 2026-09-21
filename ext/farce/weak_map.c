@@ -65,6 +65,7 @@ typedef struct {
     size_t size;
     size_t tombstones;
     uint64_t generation;
+    uint64_t iteration_epoch;
     weak_map_waiter_t *waiters;
     bool compare_keys_by_identity;
     bool compare_values_by_identity;
@@ -301,6 +302,7 @@ weak_map_allocate(VALUE klass)
     map->size = 0;
     map->tombstones = 0;
     map->generation = 0;
+    map->iteration_epoch = 0;
     map->waiters = NULL;
     map->compare_keys_by_identity = false;
     map->compare_values_by_identity = false;
@@ -629,6 +631,7 @@ weak_map_find_slot(
 static void
 weak_map_resize(weak_map_t *map, size_t new_capacity)
 {
+    map->iteration_epoch++;
     weak_map_slot_t *old_slots = map->slots;
     size_t old_capacity = map->capacity;
     map->slots = weak_map_allocate_slots_locked(map, new_capacity);
@@ -683,6 +686,7 @@ weak_map_store_locked(
         slot->hash = hash;
         slot->state = WEAK_MAP_OCCUPIED;
         map->size++;
+        map->iteration_epoch++;
     }
     slot->value = value;
     RB_OBJ_WRITTEN(self, Qundef, key);
@@ -928,6 +932,7 @@ weak_map_clear(VALUE self)
         slot->hash = 0;
         slot->state = WEAK_MAP_EMPTY;
     }
+    map->iteration_epoch++;
     map->size = 0;
     map->tombstones = 0;
     weak_map_notify_waiters_locked(map);
@@ -1366,6 +1371,51 @@ weak_map_each(VALUE self)
     return self;
 }
 
+/* A bounded live traversal. No native lock is held across a Ruby yield.
+ * Insertions, rehashing and clearing invalidate the cursor. Deletions and
+ * value replacement are permitted while the table layout stays unchanged. */
+static VALUE
+weak_map_each_live(VALUE self)
+{
+    RETURN_SIZED_ENUMERATOR(self, 0, NULL, weak_map_enumerator_size);
+    weak_map_t *map = get_weak_map(self);
+    weak_map_execution_context_t execution;
+    size_t cursor = 0;
+    uint64_t epoch = 0;
+    bool started = false;
+    const long batch_slots = 64;
+    VALUE batch = rb_ary_new_capa(batch_slots);
+    rb_ary_resize(batch, batch_slots);
+
+    for (;;) {
+        VALUE *storage = RARRAY_PTR(batch);
+        for (long index = 0; index < batch_slots; index++) {
+            RB_OBJ_WRITE(batch, &storage[index], Qnil);
+        }
+        weak_map_lock_state(map, &execution);
+        if (started && epoch != map->iteration_epoch) {
+            pthread_mutex_unlock(&map->lock);
+            rb_raise(rb_eRuntimeError, "map structurally changed during live iteration");
+        }
+        epoch = map->iteration_epoch;
+        started = true;
+        long length = 0;
+        while (cursor < map->capacity && length < batch_slots) {
+            weak_map_slot_t *slot = &map->slots[cursor++];
+            if (slot->state != WEAK_MAP_OCCUPIED) continue;
+            RB_OBJ_WRITE(batch, &storage[length++], slot->key);
+            RB_OBJ_WRITE(batch, &storage[length++], slot->value);
+        }
+        pthread_mutex_unlock(&map->lock);
+        if (length == 0) break;
+        for (long index = 0; index < length; index += 2) {
+            rb_yield(rb_assoc_new(RARRAY_AREF(batch, index), RARRAY_AREF(batch, index + 1)));
+        }
+    }
+    RB_GC_GUARD(batch);
+    return self;
+}
+
 static VALUE
 weak_map_each_key(VALUE self)
 {
@@ -1628,6 +1678,7 @@ define_weak_map_methods(VALUE klass)
     rb_define_method(klass, "size", weak_map_size, 0);
     rb_define_method(klass, "keys", weak_map_keys, 0);
     rb_define_method(klass, "each", weak_map_each, 0);
+    rb_define_method(klass, "each_live", weak_map_each_live, 0);
     rb_define_method(klass, "each_pair", weak_map_each, 0);
     rb_define_method(klass, "each_key", weak_map_each_key, 0);
     rb_define_method(klass, "each_value", weak_map_each_value, 0);

@@ -50,7 +50,7 @@ module Farce
           state = State.new(
             default_port:    BasePort.new,
             id:              @@ractor_counter_mutex.synchronize { @@ractor_counter += 1 },
-            monitors:        Set.new,
+            monitors:        ::Set.new,
             mutex:           Mutex.new,
             name:            name,
             source_location: -(block.source_location&.join(":") || "(unknown)"),

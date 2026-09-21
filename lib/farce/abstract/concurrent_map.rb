@@ -154,6 +154,18 @@ module Farce
         self
       end
 
+      # Iterate incrementally without copying every entry first.
+      # Entries can be removed or updated by the block. Insertion or clearing
+      # may invalidate traversal and raise RuntimeError. No entry lock is held
+      # while the block runs. A small batch of entries may be retained at once.
+      # @return [self, Enumerator]
+      # @api private
+      def each_live
+        return enum_for(__method__) { size } unless block_given?
+        internal_map.each_live { yield it }
+        self
+      end
+
       # (see Map#each_pair)
       alias each_pair each
 

@@ -78,6 +78,22 @@ tc_link_maximum(tc_link *link)
     return link;
 }
 
+static tc_link *
+tc_link_successor(tc_link *link)
+{
+    tc_link *parent;
+
+    if (link == NULL) return NULL;
+    if (link->right != NULL) return tc_link_minimum(link->right);
+
+    parent = link->parent;
+    while (parent != NULL && link == parent->right) {
+        link = parent;
+        parent = parent->parent;
+    }
+    return parent;
+}
+
 static void
 tc_rotate_left(tc_link **root, tc_link *upper)
 {
@@ -412,6 +428,7 @@ typedef struct {
     tc_link *root;
     size_t size;
     unsigned int guard;
+    uint64_t revision;
 } tc_map;
 
 #define TC_MAP_NODE(link_pointer) ((tc_map_node *)(link_pointer))
@@ -513,6 +530,7 @@ tc_map_store_unlocked(VALUE self, tc_map *map, VALUE key, VALUE value,
     if (honor_freeze) rb_check_frozen(self);
     if (node != NULL) {
         tc_map_store_node_value(self, node, value);
+        map->revision++;
         return value;
     }
 
@@ -524,6 +542,7 @@ tc_map_store_unlocked(VALUE self, tc_map *map, VALUE key, VALUE value,
     tc_insert_link(&map->root, parent == NULL ? NULL : &parent->link,
                    &node->link, insert_left);
     map->size++;
+    map->revision++;
     return value;
 }
 /* ------------------------------------------------------------------------- */
@@ -532,8 +551,9 @@ tc_map_store_unlocked(VALUE self, tc_map *map, VALUE key, VALUE value,
 /* The three maps deliberately share the exact same node layout and red-black
  * tree operations. The policy bits decide whether a public operation takes
  * the mutex and whether values and the container must be Ractor-shareable.
- * Keys are always shareable so comparator callbacks cannot capture an object
- * graph that is unsafe to use as ordered state. */
+ * Shared containers require shareable keys and values. The mutable local
+ * adapter can retain ordinary Ruby keys because its comparator callbacks never
+ * cross a Ractor boundary. */
 typedef struct tc_core_map_waiter tc_core_map_waiter;
 
 struct tc_core_map_waiter {
@@ -557,6 +577,7 @@ typedef struct {
     bool mutex_initialized;
     bool synchronized;
     bool shareable_container;
+    bool shareable_keys;
     rb_atomic_t publication_state;
 } tc_core_map;
 
@@ -646,7 +667,8 @@ static const rb_data_type_t tc_shared_map_type = {
 
 static VALUE
 tc_core_map_allocate(VALUE klass, const rb_data_type_t *type,
-                     bool synchronized, bool shareable_container)
+                     bool synchronized, bool shareable_container,
+                     bool shareable_keys)
 {
     tc_core_map *core;
     VALUE self = TypedData_Make_Struct(klass, tc_core_map, type, core);
@@ -655,6 +677,7 @@ tc_core_map_allocate(VALUE klass, const rb_data_type_t *type,
     core->map.root = NULL;
     core->map.size = 0;
     core->map.guard = 0;
+    core->map.revision = 0;
     core->owner_fiber = Qnil;
     core->owner_ruby_thread = Qnil;
     core->waiters = NULL;
@@ -664,6 +687,7 @@ tc_core_map_allocate(VALUE klass, const rb_data_type_t *type,
     core->mutex_initialized = false;
     core->synchronized = synchronized;
     core->shareable_container = shareable_container;
+    core->shareable_keys = shareable_keys;
     RUBY_ATOMIC_SET(core->publication_state, TC_MAP_UNINITIALIZED);
 
     if (synchronized) {
@@ -677,19 +701,25 @@ tc_core_map_allocate(VALUE klass, const rb_data_type_t *type,
 static VALUE
 tc_unsafe_map_allocate(VALUE klass)
 {
-    return tc_core_map_allocate(klass, &tc_unsafe_map_type, false, false);
+    return tc_core_map_allocate(klass, &tc_unsafe_map_type, false, false, true);
 }
 
 static VALUE
 tc_map_allocate(VALUE klass)
 {
-    return tc_core_map_allocate(klass, &tc_map_type, true, false);
+    return tc_core_map_allocate(klass, &tc_map_type, true, false, true);
+}
+
+static VALUE
+tc_mutable_map_allocate(VALUE klass)
+{
+    return tc_core_map_allocate(klass, &tc_map_type, true, false, false);
 }
 
 static VALUE
 tc_shareable_map_allocate(VALUE klass)
 {
-    return tc_core_map_allocate(klass, &tc_shared_map_type, true, true);
+    return tc_core_map_allocate(klass, &tc_shared_map_type, true, true, true);
 }
 
 static tc_core_map *
@@ -1011,7 +1041,7 @@ tc_core_map_unlock_ensure(VALUE opaque)
 static VALUE
 tc_core_map_call_locked(VALUE self, tc_core_map *core,
                         tc_core_map_operation operation,
-                        tc_core_map_arguments *arguments)
+                        void *arguments)
 {
     tc_core_map_call call;
 
@@ -1028,9 +1058,9 @@ tc_core_map_call_locked(VALUE self, tc_core_map *core,
 }
 
 static void
-tc_core_map_check_key(VALUE key)
+tc_core_map_check_key(const tc_core_map *core, VALUE key)
 {
-    if (!rb_ractor_shareable_p(key)) {
+    if (core->shareable_keys && !rb_ractor_shareable_p(key)) {
         rb_raise(tc_eIsolationError, "key is not shareable: %" PRIsVALUE,
                  rb_inspect(key));
     }
@@ -1060,7 +1090,7 @@ tc_core_map_initialize_entry(VALUE key, VALUE value, VALUE opaque)
     tc_core_map_arguments *arguments = (tc_core_map_arguments *)opaque;
 
     key = containers_normalize_string_key(key);
-    tc_core_map_check_key(key);
+    tc_core_map_check_key(arguments->core, key);
     tc_core_map_check_value(arguments->core, value);
     tc_map_store_unlocked(
         arguments->self,
@@ -1262,16 +1292,16 @@ tc_core_map_aref(VALUE self, VALUE key)
         .value = Qnil,
     };
 
-    tc_core_map_check_key(key);
+    tc_core_map_check_key(core, key);
     return tc_core_map_call_locked(self, core, tc_core_map_aref_body, &arguments);
 }
 
 static VALUE
 tc_core_map_prepare_key(VALUE self, VALUE key)
 {
-    (void)tc_core_map_get(self);
+    tc_core_map *core = tc_core_map_get(self);
     key = containers_normalize_string_key(key);
-    tc_core_map_check_key(key);
+    tc_core_map_check_key(core, key);
     return key;
 }
 
@@ -1303,7 +1333,7 @@ tc_core_map_fetch(int argc, VALUE *argv, VALUE self)
         .value = Qnil,
         .found = false,
     };
-    tc_core_map_check_key(normalized_key);
+    tc_core_map_check_key(core, normalized_key);
     result = tc_core_map_call_locked(
         self,
         core,
@@ -1332,7 +1362,7 @@ tc_core_map_key_p(VALUE self, VALUE key)
         .found = false,
     };
 
-    tc_core_map_check_key(key);
+    tc_core_map_check_key(core, key);
     (void)tc_core_map_call_locked(
         self,
         core,
@@ -1369,7 +1399,7 @@ tc_core_map_getkey(VALUE self, VALUE key)
         .value = Qnil,
     };
 
-    tc_core_map_check_key(key);
+    tc_core_map_check_key(core, key);
     return tc_core_map_call_locked(
         self,
         core,
@@ -1406,7 +1436,7 @@ tc_core_map_store(VALUE self, VALUE key, VALUE value)
         .value = value,
     };
 
-    tc_core_map_check_key(key);
+    tc_core_map_check_key(core, key);
     tc_core_map_check_value(core, value);
     return tc_core_map_call_locked(self, core, tc_core_map_store_body, &arguments);
 }
@@ -1427,6 +1457,7 @@ tc_core_map_delete_body(VALUE opaque)
     value = node->value;
     tc_remove_link(&map->root, &node->link);
     map->size--;
+    map->revision++;
     xfree(node);
     return value;
 }
@@ -1444,7 +1475,7 @@ tc_core_map_delete(VALUE self, VALUE key)
         .value = Qnil,
     };
 
-    tc_core_map_check_key(key);
+    tc_core_map_check_key(core, key);
     return tc_core_map_call_locked(self, core, tc_core_map_delete_body, &arguments);
 }
 
@@ -1501,6 +1532,7 @@ tc_core_map_shift_body(VALUE opaque)
     pair = rb_assoc_new(node->key, node->value);
     tc_remove_link(&map->root, first);
     map->size--;
+    map->revision++;
     xfree(node);
     return pair;
 }
@@ -1531,6 +1563,7 @@ tc_core_map_pop_body(VALUE opaque)
     pair = rb_assoc_new(node->key, node->value);
     tc_remove_link(&map->root, last);
     map->size--;
+    map->revision++;
     xfree(node);
     return pair;
 }
@@ -1592,6 +1625,88 @@ tc_core_map_snapshot_body(VALUE opaque)
     return entries;
 }
 
+typedef struct {
+    tc_core_map *core;
+    tc_map_node *node;
+    uint64_t revision;
+    VALUE last_key;
+    bool started;
+} tc_core_map_cursor;
+
+static tc_map_node *
+tc_map_find_greater(tc_map *map, VALUE key)
+{
+    tc_link *link = map->root;
+    tc_map_node *candidate = NULL;
+
+    while (link != NULL) {
+        tc_map_node *node = TC_MAP_NODE(link);
+        int comparison = tc_compare_keys(&map->guard, key, node->key);
+
+        if (comparison < 0) {
+            candidate = node;
+            link = link->left;
+        }
+        else {
+            link = link->right;
+        }
+    }
+    return candidate;
+}
+
+static VALUE
+tc_core_map_cursor_step(VALUE opaque)
+{
+    tc_core_map_cursor *cursor = (tc_core_map_cursor *)opaque;
+    tc_map *map = &cursor->core->map;
+    tc_map_node *node;
+
+    if (!cursor->started) {
+        tc_link *first = tc_link_minimum(map->root);
+        node = first == NULL ? NULL : TC_MAP_NODE(first);
+    }
+    else if (cursor->revision == map->revision) {
+        tc_link *next = tc_link_successor(&cursor->node->link);
+        node = next == NULL ? NULL : TC_MAP_NODE(next);
+    }
+    else {
+        node = tc_map_find_greater(map, cursor->last_key);
+    }
+
+    cursor->started = true;
+    cursor->node = node;
+    cursor->revision = map->revision;
+    if (node == NULL) return Qnil;
+    cursor->last_key = node->key;
+    return rb_assoc_new(node->key, node->value);
+}
+
+static VALUE
+tc_core_map_each_live(VALUE self)
+{
+    tc_core_map *core = tc_core_map_get(self);
+    tc_core_map_cursor cursor = {
+        .core = core,
+        .node = NULL,
+        .revision = 0,
+        .last_key = Qnil,
+        .started = false,
+    };
+    VALUE pair;
+
+    RETURN_SIZED_ENUMERATOR(self, 0, NULL, tc_core_map_enumerator_size);
+    while (!NIL_P(pair = tc_core_map_call_locked(
+        self,
+        core,
+        tc_core_map_cursor_step,
+        &cursor
+    ))) {
+        rb_yield(pair);
+    }
+    RB_GC_GUARD(cursor.last_key);
+    return self;
+}
+
 static VALUE
 tc_core_map_each(VALUE self)
 {
@@ -1647,6 +1762,7 @@ tc_core_map_clear_body(VALUE opaque)
     tc_map_free_node(map->root);
     map->root = NULL;
     map->size = 0;
+    map->revision++;
     return arguments->self;
 }
 
@@ -1671,6 +1787,7 @@ tc_core_map_define_methods(VALUE klass)
     rb_define_method(klass, "key?", tc_core_map_key_p, 1);
     rb_define_method(klass, "getkey", tc_core_map_getkey, 1);
     rb_define_method(klass, "each", tc_core_map_each, 0);
+    rb_define_method(klass, "each_live", tc_core_map_each_live, 0);
     rb_define_method(klass, "delete", tc_core_map_delete, 1);
     rb_define_method(klass, "first_key", tc_core_map_first_key, 0);
     rb_define_method(klass, "last_key", tc_core_map_last_key, 0);
@@ -1686,6 +1803,7 @@ containers_init_tree_maps(VALUE internal)
 {
     VALUE unsafe_map_class;
     VALUE map_class;
+    VALUE mutable_map_class;
     VALUE shareable_map_class;
     VALUE ractor;
     ID ractor_id = rb_intern("Ractor");
@@ -1701,6 +1819,14 @@ containers_init_tree_maps(VALUE internal)
     map_class = rb_define_class_under(internal, "TreeMap", rb_cObject);
     rb_define_alloc_func(map_class, tc_map_allocate);
     tc_core_map_define_methods(map_class);
+
+    mutable_map_class = rb_define_class_under(
+        internal,
+        "MutableTreeMap",
+        rb_cObject
+    );
+    rb_define_alloc_func(mutable_map_class, tc_mutable_map_allocate);
+    tc_core_map_define_methods(mutable_map_class);
 
     shareable_map_class = rb_define_class_under(
         internal,

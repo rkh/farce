@@ -32,7 +32,7 @@ module Farce
   class Scheduler < Farce::Abstract::Scheduler
     include Shareable::Unfreezable
 
-    CLOSED_STATES = Set[:closed, :closing, :error].freeze
+    CLOSED_STATES = ::Set[:closed, :closing, :error].freeze
     private_constant :CLOSED_STATES
 
     # Returns a Farce scheduler for the current thread's installed fiber scheduler.

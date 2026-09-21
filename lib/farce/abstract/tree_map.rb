@@ -158,6 +158,17 @@ module Farce
         self
       end
 
+      # Iterate incrementally in key order without allocating a full snapshot.
+      # Deletion and value replacement between yields are permitted. Insertion
+      # or clearing can invalidate traversal and raise RuntimeError. No tree
+      # lock is held while the block runs.
+      # @api private
+      def each_live
+        return enum_for(__method__) { size } unless block_given?
+        internal_map.each_live { |key, value| yield [key, unwrap_value(value)] }
+        self
+      end
+
       alias each_pair each
 
       # Iterate over the keys currently stored in the map.

@@ -277,6 +277,16 @@ module Farce
       end
       alias each_pair each
 
+      def each_live
+        return enum_for(__method__) { size } unless block_given?
+        iterator = @map.entry_set.iterator
+        while iterator.has_next
+          entry = iterator.next
+          yield [entry.key.value, entry.value.value]
+        end
+        self
+      end
+
       def each_key(&block)
         return enum_for(__callee__) { size } unless block
 

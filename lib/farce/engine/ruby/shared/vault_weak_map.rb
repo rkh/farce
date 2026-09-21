@@ -136,29 +136,34 @@ module Farce
     # used by the Vault registry.
     class VaultWeakMapState
       def initialize(weak_keys:, weak_values:, compare_keys_by_identity:)
-        @weak_values = weak_values
-        @changes = Atom.new(0)
-        @claims = {}.compare_by_identity
-        index_class = if weak_keys
-                        compare_keys_by_identity ? UnsharedWeakIdentityMapIndex : UnsharedWeakKeyMapIndex
-                      else
-                        compare_keys_by_identity ? UnsharedStrongIdentityMapIndex : UnsharedStrongKeyMapIndex
-                      end
+        @weak_values  = weak_values
+        @changes      = Atom.new(0)
+        @claims       = {}.compare_by_identity
+        @live_cursors = {}.compare_by_identity
+        index_class   =
+          if weak_keys
+            compare_keys_by_identity ? UnsharedWeakIdentityMapIndex : UnsharedWeakKeyMapIndex
+          else
+            compare_keys_by_identity ? UnsharedStrongIdentityMapIndex : UnsharedStrongKeyMapIndex
+          end
         @index = index_class.new
       end
 
       def dispatch(action, *arguments)
         case action
-        when :read      then read(arguments.first, retain_key: false)
-        when :wait_read then read(arguments.first, retain_key: true)
-        when :getkey    then getkey(arguments.first)
-        when :claim     then claim(*arguments)
-        when :finish    then finish(*arguments)
-        when :store     then store(*arguments)
-        when :delete    then delete(arguments.first)
-        when :size      then size
-        when :snapshot  then snapshot
-        when :clear     then clear
+        when :read         then read(arguments.first, retain_key: false)
+        when :wait_read    then read(arguments.first, retain_key: true)
+        when :getkey       then getkey(arguments.first)
+        when :claim        then claim(*arguments)
+        when :finish       then finish(*arguments)
+        when :store        then store(*arguments)
+        when :delete       then delete(arguments.first)
+        when :size         then size
+        when :snapshot     then snapshot
+        when :open_cursor  then open_cursor
+        when :next_live    then next_live(arguments.first)
+        when :close_cursor then close_cursor(arguments.first)
+        when :clear        then clear
         else raise ArgumentError, "unknown weak-map action: #{action.inspect}"
         end
       end
@@ -237,6 +242,35 @@ module Farce
         end
         @index.sweep(entries)
         [:ok, count].freeze
+      end
+
+      def open_cursor
+        token = Object.new.freeze
+        @live_cursors[token] = [@index.live_cursor, nil]
+        [:ok, token].freeze
+      end
+
+      def next_live(token)
+        cursor = @live_cursors.fetch(token)
+        while true
+          begin
+            entry = cursor[1] ||= @index.next_live(cursor[0])
+          rescue StopIteration
+            return [:done].freeze
+          end
+          state = entry.read
+          return state if state.first == :busy
+          cursor[1] = nil
+          next unless state.first == :ok && state[1]
+          alive, key = entry.lookup_key
+          return [:ok, key, state[2]].freeze if alive
+        end
+      end
+
+      def close_cursor(token)
+        cursor = @live_cursors.delete(token)
+        @index.close_cursor(cursor[0]) if cursor
+        [:ok].freeze
       end
 
       def snapshot

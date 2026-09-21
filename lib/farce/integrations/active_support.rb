@@ -7,4 +7,5 @@ require "active_support"
 require "active_support/core_ext"
 
 require "farce/integrations/active_support/map"
+require "farce/integrations/active_support/set"
 require "farce/integrations/active_support/vector"

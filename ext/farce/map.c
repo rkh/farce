@@ -54,6 +54,7 @@ typedef struct {
     size_t size;
     size_t tombstones;
     uint64_t generation;
+    uint64_t iteration_epoch;
     map_waiter_t *waiters;
     bool compare_keys_by_identity;
     bool compare_values_by_identity;
@@ -315,6 +316,7 @@ map_initialize_storage(map_t *map)
     map->size = 0;
     map->tombstones = 0;
     map->generation = 0;
+    map->iteration_epoch = 0;
     map->waiters = NULL;
     map->compare_keys_by_identity = false;
     map->compare_values_by_identity = false;
@@ -678,6 +680,7 @@ map_invalidate_reservations_locked(map_t *map)
 static void
 map_resize(map_t *map, size_t new_capacity)
 {
+    map->iteration_epoch++;
     map_slot_t *old_slots = map->slots;
     size_t old_capacity = map->capacity;
     map_slot_t *new_slots = calloc(new_capacity, sizeof(map_slot_t));
@@ -737,6 +740,7 @@ map_store_locked(
         slot->hash = hash;
         slot->state = MAP_OCCUPIED;
         map->size++;
+        map->iteration_epoch++;
     }
     slot->value = value;
     map_notify_waiters_locked(map);
@@ -981,6 +985,7 @@ map_clear(VALUE self)
         slot->hash = 0;
         slot->state = MAP_EMPTY;
     }
+    map->iteration_epoch++;
     map->size = 0;
     map->tombstones = 0;
     map_notify_waiters_locked(map);
@@ -1410,6 +1415,51 @@ map_each(VALUE self)
     return self;
 }
 
+/* A bounded live traversal. No native lock is held across a Ruby yield.
+ * Insertions, rehashing and clearing invalidate the cursor. Deletions and
+ * value replacement are permitted while the table layout stays unchanged. */
+static VALUE
+map_each_live(VALUE self)
+{
+    RETURN_SIZED_ENUMERATOR(self, 0, NULL, map_enumerator_size);
+    map_t *map = get_map(self);
+    map_execution_context_t execution = map_current_execution_context();
+    size_t cursor = 0;
+    uint64_t epoch = 0;
+    bool started = false;
+    const long batch_slots = 64;
+    VALUE batch = rb_ary_new_capa(batch_slots);
+    rb_ary_resize(batch, batch_slots);
+
+    for (;;) {
+        VALUE *storage = RARRAY_PTR(batch);
+        for (long index = 0; index < batch_slots; index++) {
+            RB_OBJ_WRITE(batch, &storage[index], Qnil);
+        }
+        map_lock_state(map, &execution);
+        if (started && epoch != map->iteration_epoch) {
+            pthread_mutex_unlock(&map->lock);
+            rb_raise(rb_eRuntimeError, "map structurally changed during live iteration");
+        }
+        epoch = map->iteration_epoch;
+        started = true;
+        long length = 0;
+        while (cursor < map->capacity && length < batch_slots) {
+            map_slot_t *slot = &map->slots[cursor++];
+            if (slot->state != MAP_OCCUPIED) continue;
+            RB_OBJ_WRITE(batch, &storage[length++], slot->key);
+            RB_OBJ_WRITE(batch, &storage[length++], slot->value);
+        }
+        pthread_mutex_unlock(&map->lock);
+        if (length == 0) break;
+        for (long index = 0; index < length; index += 2) {
+            rb_yield(rb_assoc_new(RARRAY_AREF(batch, index), RARRAY_AREF(batch, index + 1)));
+        }
+    }
+    RB_GC_GUARD(batch);
+    return self;
+}
+
 static VALUE
 map_each_key(VALUE self)
 {
@@ -1797,6 +1847,7 @@ containers_init_map(VALUE namespace)
     rb_define_method(cMap, "size", map_size, 0);
     rb_define_method(cMap, "keys", map_keys, 0);
     rb_define_method(cMap, "each", map_each, 0);
+    rb_define_method(cMap, "each_live", map_each_live, 0);
     rb_define_method(cMap, "each_pair", map_each, 0);
     rb_define_method(cMap, "each_key", map_each_key, 0);
     rb_define_method(cMap, "each_value", map_each_value, 0);

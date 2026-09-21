@@ -165,6 +165,12 @@ module Farce
       end
       alias each_pair each
 
+      def each_live
+        return enum_for(__method__) { size } unless block_given?
+        @map.each_live { |key, value| yield [key, unwrap_value(value)] }
+        self
+      end
+
       def each_value
         return enum_for(__method__) { size } unless block_given?
         @map.each_value { |value| yield unwrap_value(value) }

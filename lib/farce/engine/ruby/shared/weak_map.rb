@@ -191,6 +191,21 @@ module Farce
       end
       alias each_pair each
 
+      def each_live
+        return enum_for(__method__) { size } unless block_given?
+        token = request(:open_cursor)[1]
+        begin
+          while true
+            result = await_response(deadline: nil) { request(:next_live, token) }
+            break if result.first == :done
+            yield [result[1], result[2]]
+          end
+        ensure
+          request(:close_cursor, token)
+        end
+        self
+      end
+
       def each_key(&block)
         return enum_for(__callee__) { size } unless block
         entries_snapshot.each { block.call(it.first) }

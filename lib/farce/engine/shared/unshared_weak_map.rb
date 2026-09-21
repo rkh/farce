@@ -185,6 +185,32 @@ module Farce
       end
       alias each_pair each
 
+      def each_live
+        return enum_for(__method__) { size } unless block_given?
+        cursor = @index.live_cursor
+        begin
+          while true
+            begin
+              entry = @index.next_live(cursor)
+            rescue StopIteration
+              break
+            end
+            next unless entry.reserve(nil) == :acquired
+            pair = begin
+              state, present, value = entry.state
+              alive, key            = entry.lookup_key if state == :ok && present
+              [key, value] if alive
+            ensure
+              entry.release
+            end
+            yield pair if pair
+          end
+        ensure
+          @index.close_cursor(cursor)
+        end
+        self
+      end
+
       def each_key(&block)
         return enum_for(__callee__) { size } unless block
         entries_snapshot.each { block.call(it.first) }

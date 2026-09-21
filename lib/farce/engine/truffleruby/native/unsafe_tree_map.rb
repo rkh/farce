@@ -19,20 +19,21 @@ module Farce
       private_constant :Entry
 
       class State
-        attr_accessor :operation_owner
+        attr_accessor :operation_owner, :revision
         attr_reader :entries, :lock
 
         def initialize(lock:)
-          @entries = []
-          @lock = lock
+          @entries         = []
+          @lock            = lock
           @operation_owner = nil
+          @revision        = 0
         end
       end
       private_constant :State
 
       def initialize(entries = nil)
         ensure_initializable!
-        entries = normalize_entries(entries)
+        entries  = normalize_entries(entries)
         prepared = State.new(lock: operation_lock)
         entries&.each { |key, value| stage_store(prepared, key, value) }
         commit_initialization(prepared)
@@ -120,6 +121,36 @@ module Farce
         self
       end
 
+      def each_live
+        return enum_for(__method__) { size } unless block_given?
+
+        state    = initialized_state
+        index    = 0
+        last_key = nil
+        revision = nil
+        started  = false
+
+        loop do
+          pair = with_map_operation(state, mutation: false) do
+            if started && revision != state.revision
+              index, found = locate_key(state.entries, last_key)
+              index += 1 if found
+            end
+            entry = state.entries[index]
+            next unless entry
+
+            index   += 1
+            last_key = entry.key
+            revision = state.revision
+            [entry.key, entry.value]
+          end
+          break unless pair
+          started = true
+          yield pair
+        end
+        self
+      end
+
       def []=(key, value)
         key = canonical_ordered_key(key)
         state = initialized_state
@@ -127,7 +158,10 @@ module Farce
           index, found = locate_key(state.entries, key)
           if found
             ensure_mutation_still_allowed!
-            without_async_interrupts { state.entries[index].value = value }
+            without_async_interrupts do
+              state.entries[index].value = value
+              state.revision += 1
+            end
           else
             pending = Entry.new(key, value)
             without_async_interrupts do
@@ -137,6 +171,7 @@ module Farce
               raise "key comparator changed during insertion" if duplicate
               ensure_mutation_still_allowed!
               state.entries.insert(index, pending)
+              state.revision += 1
             end
           end
           value
@@ -151,7 +186,10 @@ module Farce
           next unless found
 
           ensure_mutation_still_allowed!
-          without_async_interrupts { state.entries.delete_at(index).value }
+          without_async_interrupts do
+            state.revision += 1
+            state.entries.delete_at(index).value
+          end
         end
       end
 
@@ -172,7 +210,10 @@ module Farce
           next unless entry
 
           pair = [entry.key, entry.value]
-          without_async_interrupts { state.entries.shift }
+          without_async_interrupts do
+            state.entries.shift
+            state.revision += 1
+          end
           pair
         end
       end
@@ -184,7 +225,10 @@ module Farce
           next unless entry
 
           pair = [entry.key, entry.value]
-          without_async_interrupts { state.entries.pop }
+          without_async_interrupts do
+            state.entries.pop
+            state.revision += 1
+          end
           pair
         end
       end
@@ -203,7 +247,12 @@ module Farce
       def clear
         state = initialized_state
         with_map_operation(state, mutation: true) do
-          without_async_interrupts { state.entries.clear }
+          without_async_interrupts do
+            unless state.entries.empty?
+              state.entries.clear
+              state.revision += 1
+            end
+          end
           self
         end
       end

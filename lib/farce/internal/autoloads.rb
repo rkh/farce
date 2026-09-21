@@ -28,7 +28,7 @@ module Farce
       def self.define(namespace, path = nil, skip: nil, **)
         path ||= namespace.name.gsub(/([a-z])([A-Z])/, "\\1_\\2").gsub("::", "/").downcase
         path = File.expand_path(path, "#{__dir__}/../..")
-        skip = Set[*skip]
+        skip = ::Set[*skip]
 
         skip.map!(&:to_s)
 

@@ -287,6 +287,12 @@ module Farce
       end
       alias each_pair each
 
+      def each_live
+        return enum_for(__method__) { size } unless block_given?
+        concurrent_each_pair { |key, value| yield [unwrap_key(key), value] }
+        self
+      end
+
       def each_key(&block)
         return enum_for(__callee__) { size } unless block
 

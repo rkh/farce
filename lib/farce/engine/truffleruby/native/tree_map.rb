@@ -32,6 +32,8 @@ module Farce
       end
     end
 
+    MutableTreeMap = TreeMap
+
     # No Ractors, no problems :)
     ShareableTreeMap = TreeMap
   end

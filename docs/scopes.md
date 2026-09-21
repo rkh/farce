@@ -253,6 +253,9 @@ These classes accept the same five scopes. The scope determines which backing co
 | `Farce::Local::WeakMap` | A map with weak keys and weak values. |
 | `Farce::Local::WeakKeyMap` | A map with weak keys. |
 | `Farce::Local::WeakValueMap` | A map with weak values. |
+| `Farce::Local::Set` | A mutable set. |
+| `Farce::Local::SortedSet` | A set maintained in ascending comparator order. |
+| `Farce::Local::WeakSet` | A set that retains its elements weakly. |
 | `Farce::Local::Vector` | An indexed collection. |
 | `Farce::Local::Queue` | A FIFO queue with independent capacity and lifecycle. |
 | `Farce::Local::PriorityQueue` | A queue ordered by priority. |

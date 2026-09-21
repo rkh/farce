@@ -23,19 +23,21 @@ module Farce
       STRING_INITIALIZE_COPY_METHOD       = String.instance_method(:initialize_copy)
 
       if RUBY_ENGINE == "jruby"
-        TreeMap       = Java::JavaUtil::TreeMap
-        ArrayDeque    = Java::JavaUtil::ArrayDeque
-        AtomicBoolean = Java::JavaUtilConcurrentAtomic::AtomicBoolean
-        AtomicLong    = Java::JavaUtilConcurrentAtomic::AtomicLong
-        Comparator    = Java::JavaUtil::Comparator
-        ReentrantLock = Java::JavaUtilConcurrentLocks::ReentrantLock
+        ConcurrentHashMap = Java::JavaUtilConcurrent::ConcurrentHashMap
+        TreeMap           = Java::JavaUtil::TreeMap
+        ArrayDeque        = Java::JavaUtil::ArrayDeque
+        AtomicBoolean     = Java::JavaUtilConcurrentAtomic::AtomicBoolean
+        AtomicLong        = Java::JavaUtilConcurrentAtomic::AtomicLong
+        Comparator        = Java::JavaUtil::Comparator
+        ReentrantLock     = Java::JavaUtilConcurrentLocks::ReentrantLock
       else
-        TreeMap       = Java.type("java.util.TreeMap")
-        ArrayDeque    = Java.type("java.util.ArrayDeque")
-        AtomicBoolean = Java.type("java.util.concurrent.atomic.AtomicBoolean")
-        AtomicLong    = Java.type("java.util.concurrent.atomic.AtomicLong")
-        Comparator    = Java.type("java.util.Comparator")
-        ReentrantLock = Java.type("java.util.concurrent.locks.ReentrantLock")
+        ConcurrentHashMap = Java.type("java.util.concurrent.ConcurrentHashMap")
+        TreeMap           = Java.type("java.util.TreeMap")
+        ArrayDeque        = Java.type("java.util.ArrayDeque")
+        AtomicBoolean     = Java.type("java.util.concurrent.atomic.AtomicBoolean")
+        AtomicLong        = Java.type("java.util.concurrent.atomic.AtomicLong")
+        Comparator        = Java.type("java.util.Comparator")
+        ReentrantLock     = Java.type("java.util.concurrent.locks.ReentrantLock")
       end
 
       module_function

@@ -112,11 +112,6 @@ module Farce
         def normalize_external_key(key)            = @map.normalize_external_key(@normalizer.call(key))
         def check_mutation                         = @map.check_mutation
 
-        def prepare_mutation_key(key)
-          @map.check_mutation
-          @map.prepare_mutation_key(@normalizer.call(key))
-        end
-
         def get_prepared(...)                      = @map.get_prepared(...)
         def store_prepared(...)                    = @map.store_prepared(...)
         def swap_prepared(...)                     = @map.swap_prepared(...)
@@ -126,12 +121,18 @@ module Farce
         def size                                   = @map.size
         def keys                                   = @map.keys
         def each(&)                                = @map.each(&)
+        def each_live(&)                           = @map.each_live(&)
         def each_key(&)                            = @map.each_key(&)
         def each_value(&)                          = @map.each_value(&)
         def clear                                  = @map.clear
         def compare_keys_by_identity?              = @map.compare_keys_by_identity?
         def compare_values_by_identity?            = @map.compare_values_by_identity?
         def ractor_shareable?                      = Ractor.shareable?(@map)
+
+        def prepare_mutation_key(key)
+          @map.check_mutation
+          @map.prepare_mutation_key(@normalizer.call(key))
+        end
       end
 
       module ConcurrentBackend

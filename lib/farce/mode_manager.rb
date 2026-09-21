@@ -53,7 +53,7 @@ module Farce
     include Shareable::Immutable
 
     # The set of valid modes for wrapping values.
-    MODES = Set[:copy, :move, :local, :make_shareable, :raise, :shareable_copy].freeze
+    MODES = ::Set[:copy, :move, :local, :make_shareable, :raise, :shareable_copy].freeze
 
     # @return [Symbol] The default mode to use when wrapping values.
     attr_reader :mode
