@@ -384,15 +384,15 @@ The value will be moved once when the envelope is created, and then once when th
       <pre class="lines">
 
 
-76
-77
-78
-79
-80
-81</pre>
+112
+113
+114
+115
+116
+117</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 76</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 112</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='ivar'>@vault</span> <span class='op'>=</span> <span class='const'>VAULT_ATOM</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span> <span class='lbrace'>{</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Vault</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='rbrace'>}</span>
@@ -454,35 +454,35 @@ The value will be moved once when the envelope is created, and then once when th
       <pre class="lines">
 
 
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96</pre>
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 71</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 107</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Envelope::Move (class)">Move</a></span></span> <span class='op'>&lt;</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Envelope.html" title="Farce::Envelope (class)">Envelope</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
@@ -563,13 +563,13 @@ The value will be moved once when the envelope is created, and then once when th
       <pre class="lines">
 
 
-84
-85
-86
-87</pre>
+120
+121
+122
+123</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 84</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 120</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_claim'>claim</span>
   <span class='id identifier rubyid_owner'>owner</span> <span class='op'>=</span> <span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span> <span class='lbrace'>{</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current'><span class='object_link'><a href="../Ractor.html#current-class_method" title="Farce::Ractor.current (method)">current</a></span></span> <span class='rbrace'>}</span>
@@ -622,10 +622,10 @@ The value will be moved once when the envelope is created, and then once when th
       <pre class="lines">
 
 
-90</pre>
+126</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 90</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 126</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_claimed?'>claimed?</span> <span class='op'>=</span> <span class='op'>!</span><span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span></pre>
     </td>
@@ -675,10 +675,10 @@ The value will be moved once when the envelope is created, and then once when th
       <pre class="lines">
 
 
-93</pre>
+129</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 93</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 129</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_owned?'>owned?</span> <span class='op'>=</span> <span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current'><span class='object_link'><a href="../Ractor.html#current-class_method" title="Farce::Ractor.current (method)">current</a></span></span></pre>
     </td>
@@ -691,7 +691,7 @@ The value will be moved once when the envelope is created, and then once when th
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 11:07:46 2026 by
+  Generated on Mon Sep 21 11:24:51 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
