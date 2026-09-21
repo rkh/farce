@@ -323,6 +323,41 @@ module Farce
         end
       end
 
+      def test_native_key_comparison_across_ractors_with_one_native_worker
+        return unless native_weak_maps? && Internal.native_ractors?
+
+        output, error, status = ruby_subprocess(<<~RUBY, env: { "RUBY_MN_THREADS" => "1", "RUBY_MAX_CPU" => "1" })
+          require "farce"
+          class BlockingEqualityKey
+            def hash = 0
+
+            def eql?(other)
+              # Release the native worker while this comparison owns the map.
+              sleep 0.001
+              other.instance_of?(self.class)
+            end
+          end
+
+          internal = Farce.const_get(:Internal)
+          [internal::WeakKeyMap, internal::WeakValueMap, internal::WeakMap].each do |type|
+            key = BlockingEqualityKey.new.freeze
+            map = type.new({ key => 0 })
+            workers = 4.times.map do
+              Farce::Ractor.new(map) do |shared|
+                candidate = BlockingEqualityKey.new.freeze
+                25.times { shared.upsert(candidate, 0) { |value| value + 1 } }
+              end
+            end
+            workers.each { |worker| worker.respond_to?(:value) ? worker.value : worker.take }
+            abort "lost update" unless map[key] == 100
+          end
+          puts "ok"
+        RUBY
+
+        assert_predicate status, :success?, error
+        assert_equal "ok", output.strip
+      end
+
       def test_mutation_from_multiple_ractors
         return unless RUBY_ENGINE == "ruby"
 

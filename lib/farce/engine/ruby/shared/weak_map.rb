@@ -146,7 +146,6 @@ module Farce
             request(:claim, key, ticket, true)
           end
           present, current, signal = response[1], response[2], response[3]
-          key = response[5]
           owners = claim_owners
           owners[signal] = Fiber.current
           value = yield(present, current)

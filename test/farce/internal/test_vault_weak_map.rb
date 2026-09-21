@@ -262,6 +262,25 @@ module Farce
         worker&.join
       end
 
+      def test_store_if_absent_releases_its_canonical_key_after_finishing
+        map, key_reference = Thread.new do
+          key = Object.new.freeze
+          weak_map = WeakKeyMap.new
+          weak_map.store_if_absent(key) { true }
+          [weak_map, ::WeakRef.new(key)]
+        end.value
+
+        50.times do
+          2_000.times { Object.new }
+          GC.start
+          break unless key_reference.weakref_alive?
+          sleep 0.01
+        end
+
+        refute_predicate key_reference, :weakref_alive?
+        assert_empty map
+      end
+
       def test_clear_invalidates_an_update_already_running_in_another_ractor
         map_classes.each do |klass|
           map = klass.new({ key: 1 })

@@ -73,7 +73,7 @@ typedef struct {
     bool weak_values;
     bool comparing;
     VALUE comparing_owner;
-    pthread_t comparing_thread;
+    VALUE comparing_thread;
     weak_map_reservation_t *reservations;
     bool initialized;
 } weak_map_t;
@@ -87,7 +87,6 @@ typedef struct {
     VALUE fiber;
     VALUE thread;
     VALUE scheduler;
-    pthread_t native_thread;
 } weak_map_execution_context_t;
 
 static double
@@ -166,6 +165,7 @@ weak_map_mark(void *pointer)
 {
     weak_map_t *map = pointer;
     rb_gc_mark_movable(map->comparing_owner);
+    rb_gc_mark_movable(map->comparing_thread);
     for (weak_map_reservation_t *entry = map->reservations; entry; entry = entry->next) {
         rb_gc_mark_movable(entry->key);
         rb_gc_mark_movable(entry->current);
@@ -187,6 +187,7 @@ weak_map_compact(void *pointer)
 {
     weak_map_t *map = pointer;
     map->comparing_owner = rb_gc_location(map->comparing_owner);
+    map->comparing_thread = rb_gc_location(map->comparing_thread);
     for (weak_map_reservation_t *entry = map->reservations; entry; entry = entry->next) {
         entry->key = rb_gc_location(entry->key);
         entry->current = rb_gc_location(entry->current);
@@ -310,6 +311,7 @@ weak_map_allocate(VALUE klass)
     map->weak_values = klass == cWeakValueMap || klass == cWeakMap;
     map->comparing = false;
     map->comparing_owner = Qnil;
+    map->comparing_thread = Qnil;
     map->reservations = NULL;
     map->initialized = false;
     return object;
@@ -399,7 +401,6 @@ weak_map_lock_state(weak_map_t *map, weak_map_execution_context_t *execution)
     execution->fiber = rb_fiber_current();
     execution->thread = rb_thread_current();
     execution->scheduler = rb_fiber_scheduler_current();
-    execution->native_thread = pthread_self();
 
     for (;;) {
         pthread_mutex_lock(&map->lock);
@@ -409,7 +410,7 @@ weak_map_lock_state(weak_map_t *map, weak_map_execution_context_t *execution)
             pthread_mutex_unlock(&map->lock);
             rb_raise(rb_eThreadError, "recursive weak-map access from key equality");
         }
-        if (pthread_equal(map->comparing_thread, execution->native_thread) &&
+        if (map->comparing_thread == execution->thread &&
             NIL_P(execution->scheduler)) {
             pthread_mutex_unlock(&map->lock);
             rb_raise(
@@ -469,7 +470,7 @@ weak_map_keys_equal(
 
     map->comparing = true;
     map->comparing_owner = execution->fiber;
-    map->comparing_thread = execution->native_thread;
+    map->comparing_thread = execution->thread;
     pthread_mutex_unlock(&map->lock);
 
     VALUE result = rb_protect(weak_map_eql_protected, (VALUE)&arguments, &state);
@@ -478,6 +479,7 @@ weak_map_keys_equal(
     *stale = map->generation != generation;
     map->comparing = false;
     map->comparing_owner = Qnil;
+    map->comparing_thread = Qnil;
     weak_map_notify_waiters_locked(map);
     if (state) {
         pthread_mutex_unlock(&map->lock);

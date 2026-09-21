@@ -76,7 +76,14 @@ module Farce
           end
         RUBY
 
-        assert_predicate status, :success?, error
+        failure = <<~MESSAGE
+          scheduler resolution subprocess failed
+          stdout:
+          #{output}
+          stderr:
+          #{error}
+        MESSAGE
+        assert_predicate status, :success?, failure
         assert_equal "ok", output.strip
       end
     end

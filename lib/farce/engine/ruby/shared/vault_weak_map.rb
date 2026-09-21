@@ -195,18 +195,22 @@ module Farce
           next missing unless entry
 
           result = entry.claim(ticket)
-          @claims[ticket] = entry if result.first == :claimed
-          result
+          next result unless result.first == :claimed
+
+          # Retain the canonical key through the callback without placing it in
+          # the reply, which can outlive a completed operation.
+          @claims[ticket] = [entry, result[5]]
+          result.first(5).freeze
         end
       end
 
       def finish(_key, ticket, action, value = nil)
-        entry = @claims.delete(ticket)
-        return [:stale].freeze unless entry
+        claim = @claims.delete(ticket)
+        return [:stale].freeze unless claim
 
-        alive, key = entry.lookup_key
+        entry, key = claim
         result = entry.finish(ticket, action, value)
-        remove(key, entry) if result.first == :remove && alive
+        remove(key, entry) if result.first == :remove
         result
       end
 
