@@ -250,11 +250,14 @@ module Farce
       assert_equal 0, queue.num_waiting
       assert_wait_protocol(scheduler)
     end
-    private def fiber_wait = :auto
-    private def new_queue(klass, **) = klass.new(fiber_wait:, **)
-    private def io_path? = fiber_wait == :auto ? Internal::UNSHARED_FIBER_IO : fiber_wait == :io
 
-    private def assert_wait_protocol(scheduler)
+    private
+
+    def fiber_wait = :auto
+    def new_queue(klass, **) = klass.new(fiber_wait:, **)
+    def io_path? = fiber_wait == :auto ? Internal::UNSHARED_FIBER_IO : fiber_wait == :io
+
+    def assert_wait_protocol(scheduler)
       if io_path?
         assert_operator scheduler.io_wait_calls, :>=, 1
       else

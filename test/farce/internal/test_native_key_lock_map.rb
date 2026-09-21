@@ -189,7 +189,8 @@ module Farce
         called = false
 
         assert Ractor.shareable?(locks)
-        assert_predicate locks, :frozen?
+        refute_predicate locks, :frozen?
+        assert_raises(TypeError) { locks.freeze }
         assert_raises(Ractor::IsolationError) { locks.synchronize([]) { called = true } }
         refute called
         worker = Ractor.new(locks) do |shared|
@@ -205,22 +206,30 @@ module Farce
         assert_raises(RuntimeError) { locks.__send__(:initialize) }
       end
 
-      def test_shared_publication_reentry_and_failure_leave_safe_state
+      def test_shared_publication_rejects_ivars_without_reentry_and_leaves_safe_state
         locks = SharedKeyLockMap.allocate
         metadata = PublicationReentry.new(locks)
         locks.instance_variable_set(:@metadata, metadata)
 
         assert_raises(RuntimeError) { locks.synchronize(:key) { flunk "uninitialized operation entered" } }
-        locks.__send__(:initialize)
+        error = assert_raises(TypeError) { locks.__send__(:initialize) }
 
-        assert metadata.reinitialize_rejected
-        assert metadata.access_rejected
-        assert Ractor.shareable?(locks)
-        assert_equal :ready, locks.synchronize(:key) { :ready }
+        assert_match(/cannot be published with Ruby instance variables/, error.message)
+        refute metadata.reinitialize_rejected
+        refute metadata.access_rejected
+        refute_predicate metadata, :frozen?
+        refute Ractor.shareable?(locks)
+        assert_raises(RuntimeError) { locks.synchronize(:key) { flunk "failed publication entered" } }
+
+        ready = SharedKeyLockMap.new
+
+        assert Ractor.shareable?(ready)
+        assert_equal :ready, ready.synchronize(:key) { :ready }
+
         failed = SharedKeyLockMap.allocate
         failed.instance_variable_set(:@thread, Thread.current)
 
-        assert_raises(Ractor::Error) { failed.__send__(:initialize) }
+        assert_raises(TypeError) { failed.__send__(:initialize) }
         refute Ractor.shareable?(failed)
         assert_raises(RuntimeError) { failed.synchronize(:key) { flunk "failed publication entered" } }
       end

@@ -17,12 +17,17 @@ module Farce
         assert_equal MAXIMUM, Counter.new(MAXIMUM).value
       end
 
-      def test_counter_is_frozen_and_shareable
+      def test_counter_is_mutable_and_shareable
         return unless Internal.native_ractors?
         counter = Counter.new
 
-        assert_predicate counter, :frozen?
+        refute_predicate counter, :frozen?
         assert Ractor.shareable?(counter)
+
+        counter.freeze
+
+        assert_predicate counter, :frozen?
+        assert_raises(FrozenError) { counter.increment }
       end
 
       def test_frozen_uninitialized_counter_cannot_be_initialized

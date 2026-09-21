@@ -334,10 +334,10 @@ module Farce
         assert_equal %i[alpha middle omega], [map.shift.last, map.shift.last, map.shift.last]
       end
 
-      def test_shared_tree_map_is_frozen_but_guarded_methods_mutate
+      def test_shared_tree_map_is_logically_mutable_until_frozen
         map = Internal::TreeMap.new
 
-        assert_predicate map, :frozen?
+        refute_predicate map, :frozen?
         assert_equal :one, map[1] = :one
         assert_equal :one, map.delete(1)
 
@@ -345,6 +345,11 @@ module Farce
         recursive = JVMTreeRank.new(2, reenter: map)
         assert_raises(ThreadError) { map[recursive] = :two }
         assert_equal :one, map[1]
+
+        map.freeze
+
+        assert_predicate map, :frozen?
+        assert_raises(FrozenError) { map[2] = :two }
       end
 
       def test_shared_tree_map_initialization_uses_primitive_freeze
@@ -354,7 +359,8 @@ module Farce
 
         map = map_class.new
 
-        assert_predicate map, :frozen?
+        assert Internal::JVMContainers.frozen_object?(map)
+        refute_predicate map, :frozen?
         assert_equal :one, map[1] = :one
       end
 
@@ -464,7 +470,7 @@ module Farce
         assert_instance_of Internal::UnsafeTreeMap, local
         assert_equal Object, Internal::TreeMap.superclass
         assert_equal Object, Internal::UnsafeTreeMap.superclass
-        assert_predicate map, :frozen?
+        refute_predicate map, :frozen?
         refute_predicate local, :frozen?
         assert_equal [1, :one], map.shift
         assert_equal [1, :one], local.shift

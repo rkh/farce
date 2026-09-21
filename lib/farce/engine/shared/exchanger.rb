@@ -6,6 +6,8 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     class Exchanger
+      include Freeze::Unfreezable
+
       TIMED_OUT = Object.new.freeze
       WAITING   = Object.new.freeze
       Waiter = Struct.new(:condition, :matched, :offered, :reader, :received, :scheduler, :writer)
@@ -14,7 +16,7 @@ module Farce
       def initialize
         @mutex   = Mutex.new
         @waiting = [nil]
-        freeze
+        Freeze.publish(self)
       end
 
       def exchange(offered, timeout: nil, &fallback)

@@ -194,6 +194,7 @@ module Farce
       # @return [self, Enumerator]
       def delete_if(&)
         return enum_for(__method__) { size } unless block_given?
+        check_frozen! if respond_to?(:check_frozen!, true)
         filter_entries(&)
         self
       end
@@ -202,6 +203,7 @@ module Farce
       # @return [self, nil, Enumerator]
       def reject!(&)
         return enum_for(__method__) { size } unless block_given?
+        check_frozen! if respond_to?(:check_frozen!, true)
         self if filter_entries(&)
       end
 
@@ -214,6 +216,7 @@ module Farce
       # @return [self, Enumerator]
       def keep_if
         return enum_for(__method__) { size } unless block_given?
+        check_frozen! if respond_to?(:check_frozen!, true)
         filter_entries { |key, value| !yield(key, value) }
         self
       end
@@ -222,6 +225,7 @@ module Farce
       # @return [self, nil, Enumerator]
       def select!
         return enum_for(__method__) { size } unless block_given?
+        check_frozen! if respond_to?(:check_frozen!, true)
         self if filter_entries { |key, value| !yield(key, value) }
       end
       alias filter! select!
@@ -235,6 +239,7 @@ module Farce
       # @return [self, Enumerator]
       def transform_values!
         return enum_for(__method__) { size } unless block_given?
+        check_frozen! if respond_to?(:check_frozen!, true)
         keys.each do |key|
           modify_entry(key, canonical: true) do |present, value|
             present ? yield(value) : Internal::MAP_KEEP
@@ -254,6 +259,7 @@ module Farce
       # @yieldparam new_value [BasicObject] the incoming value
       # @return [self]
       def merge!(*others)
+        check_frozen! if respond_to?(:check_frozen!, true)
         others.each do |other|
           unless Map === other
             other = Hash.try_convert(other) || raise(TypeError, "input must be a Map, Hash, or respond to #to_hash")

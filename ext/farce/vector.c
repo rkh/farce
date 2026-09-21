@@ -85,6 +85,16 @@ static const rb_data_type_t vector_type = {
     .flags = RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
+static void
+vector_validate_references(VALUE self)
+{
+    vector_t *vector;
+    TypedData_Get_Struct(self, vector_t, &vector_type, vector);
+    for (size_t index = 0; index < vector->size; index++) {
+        containers_check_shareable(vector->values[index]);
+    }
+}
+
 static VALUE
 vector_allocate(VALUE klass)
 {
@@ -358,6 +368,7 @@ vector_initialize(int argc, VALUE *argv, VALUE self)
     VALUE keyword_values[1];
     vector_t *vector;
 
+    rb_check_frozen(self);
     rb_scan_args(argc, argv, "01:", &source, &keywords);
     if (!NIL_P(keywords)) {
         rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
@@ -387,8 +398,7 @@ vector_initialize(int argc, VALUE *argv, VALUE self)
     }
     vector->size = size;
     vector->initialized = true;
-    containers_finish_initialization(self);
-    return self;
+    return containers_publish_native_with_references(self, vector_validate_references);
 }
 
 static VALUE
@@ -460,8 +470,9 @@ vector_get(int argc, VALUE *argv, VALUE self)
 }
 
 static VALUE
-vector_store_internal(vector_t *vector, long long raw, VALUE value, vector_timeout_t *timeout)
+vector_store_internal(VALUE self, vector_t *vector, long long raw, VALUE value, vector_timeout_t *timeout)
 {
+    rb_check_frozen(self);
     if (!vector_lock_for_update(vector, timeout)) return Qfalse;
     size_t index = vector_assignment_index(vector, raw);
     if (!vector_ensure_capacity(vector, index + 1)) {
@@ -479,10 +490,12 @@ static VALUE
 vector_set_fast(VALUE self, VALUE index_value, VALUE value)
 {
     vector_t *vector = get_vector(self);
+    rb_check_frozen(self);
     long long raw = vector_convert_index(index_value);
+    rb_check_frozen(self);
     vector_timeout_t timeout = {.finite = false, .deadline = 0};
     containers_check_shareable(value);
-    return vector_store_internal(vector, raw, value, &timeout);
+    return vector_store_internal(self, vector, raw, value, &timeout);
 }
 
 static VALUE
@@ -492,17 +505,20 @@ vector_store(int argc, VALUE *argv, VALUE self)
     VALUE value;
     VALUE keywords = Qnil;
     rb_scan_args(argc, argv, "2:", &index_value, &value, &keywords);
+    rb_check_frozen(self);
     long long raw = vector_convert_index(index_value);
     vector_timeout_t timeout = vector_parse_timeout(vector_timeout_keyword(keywords));
+    rb_check_frozen(self);
     vector_t *vector = get_vector(self);
     containers_check_shareable(value);
-    return vector_store_internal(vector, raw, value, &timeout);
+    return vector_store_internal(self, vector, raw, value, &timeout);
 }
 
 static VALUE
 vector_clear(VALUE self)
 {
     vector_t *vector = get_vector(self);
+    rb_check_frozen(self);
     vector_timeout_t timeout = {.finite = false, .deadline = 0};
     (void)vector_lock_for_update(vector, &timeout);
     for (size_t index = 0; index < vector->size; index++) vector->values[index] = Qnil;
@@ -518,7 +534,9 @@ vector_push(int argc, VALUE *argv, VALUE self)
     VALUE value;
     VALUE keywords = Qnil;
     rb_scan_args(argc, argv, "1:", &value, &keywords);
+    rb_check_frozen(self);
     vector_timeout_t timeout = vector_parse_timeout(vector_timeout_keyword(keywords));
+    rb_check_frozen(self);
     vector_t *vector = get_vector(self);
     containers_check_shareable(value);
 
@@ -538,7 +556,9 @@ vector_pop(int argc, VALUE *argv, VALUE self)
 {
     VALUE keywords = Qnil;
     rb_scan_args(argc, argv, "0:", &keywords);
+    rb_check_frozen(self);
     vector_timeout_t timeout = vector_parse_timeout(vector_timeout_keyword(keywords));
+    rb_check_frozen(self);
     vector_t *vector = get_vector(self);
 
     if (!vector_lock_for_update(vector, &timeout)) return Qnil;
@@ -560,8 +580,10 @@ vector_swap(int argc, VALUE *argv, VALUE self)
     VALUE replacement;
     VALUE keywords = Qnil;
     rb_scan_args(argc, argv, "2:", &index_value, &replacement, &keywords);
+    rb_check_frozen(self);
     long long raw = vector_convert_index(index_value);
     vector_timeout_t timeout = vector_parse_timeout(vector_timeout_keyword(keywords));
+    rb_check_frozen(self);
     vector_t *vector = get_vector(self);
     containers_check_shareable(replacement);
 
@@ -580,6 +602,7 @@ vector_swap(int argc, VALUE *argv, VALUE self)
 }
 
 typedef struct {
+    VALUE self;
     vector_t *vector;
     size_t index;
     VALUE current;
@@ -606,6 +629,7 @@ vector_store_if_absent_body(VALUE opaque)
 {
     vector_operation_t *operation = (vector_operation_t *)opaque;
     VALUE result = rb_yield_values(0);
+    rb_check_frozen(operation->self);
     containers_check_shareable(result);
     pthread_mutex_lock(&operation->vector->lock);
     if (operation->index >= operation->vector->size) {
@@ -624,8 +648,10 @@ vector_store_if_absent(int argc, VALUE *argv, VALUE self)
     VALUE index_value;
     VALUE keywords = Qnil;
     rb_scan_args(argc, argv, "1:", &index_value, &keywords);
+    rb_check_frozen(self);
     long long raw = vector_convert_index(index_value);
     vector_timeout_t timeout = vector_parse_timeout(vector_timeout_keyword(keywords));
+    rb_check_frozen(self);
     vector_t *vector = get_vector(self);
     rb_need_block();
 
@@ -642,6 +668,7 @@ vector_store_if_absent(int argc, VALUE *argv, VALUE self)
     }
 
     vector_operation_t operation = {
+        .self = self,
         .vector = vector,
         .index = index,
         .complete = false,
@@ -663,6 +690,7 @@ vector_cas_body(VALUE opaque)
     bool matches = operation->identity
         ? operation->current == operation->argument
         : RTEST(rb_equal(operation->current, operation->argument));
+    rb_check_frozen(operation->self);
 
     pthread_mutex_lock(&operation->vector->lock);
     if (matches) operation->vector->values[operation->index] = operation->replacement;
@@ -680,8 +708,10 @@ vector_compare_and_set(int argc, VALUE *argv, VALUE self)
     VALUE replacement;
     VALUE keywords = Qnil;
     rb_scan_args(argc, argv, "3:", &index_value, &expected, &replacement, &keywords);
+    rb_check_frozen(self);
     long long raw = vector_convert_index(index_value);
     vector_timeout_t timeout = vector_parse_timeout(vector_timeout_keyword(keywords));
+    rb_check_frozen(self);
     vector_t *vector = get_vector(self);
     containers_check_shareable(expected);
     containers_check_shareable(replacement);
@@ -693,6 +723,7 @@ vector_compare_and_set(int argc, VALUE *argv, VALUE self)
         return Qfalse;
     }
     vector_operation_t operation = {
+        .self = self,
         .vector = vector,
         .index = index,
         .current = vector->values[index],
@@ -711,6 +742,7 @@ vector_upsert_body(VALUE opaque)
 {
     vector_operation_t *operation = (vector_operation_t *)opaque;
     VALUE result = rb_yield(operation->current);
+    rb_check_frozen(operation->self);
     containers_check_shareable(result);
     pthread_mutex_lock(&operation->vector->lock);
     operation->vector->values[operation->index] = result;
@@ -727,8 +759,10 @@ vector_upsert(int argc, VALUE *argv, VALUE self)
     VALUE initial;
     VALUE keywords = Qnil;
     rb_scan_args(argc, argv, "2:", &index_value, &initial, &keywords);
+    rb_check_frozen(self);
     long long raw = vector_convert_index(index_value);
     vector_timeout_t timeout = vector_parse_timeout(vector_timeout_keyword(keywords));
+    rb_check_frozen(self);
     vector_t *vector = get_vector(self);
     containers_check_shareable(initial);
     rb_need_block();
@@ -748,6 +782,7 @@ vector_upsert(int argc, VALUE *argv, VALUE self)
     }
 
     vector_operation_t operation = {
+        .self = self,
         .vector = vector,
         .index = index,
         .current = vector->values[index],
@@ -763,6 +798,7 @@ vector_update_body(VALUE opaque)
 {
     vector_operation_t *operation = (vector_operation_t *)opaque;
     VALUE result = rb_yield(operation->current);
+    rb_check_frozen(operation->self);
     containers_check_shareable(result);
     pthread_mutex_lock(&operation->vector->lock);
     if (operation->index >= operation->vector->size) {
@@ -781,8 +817,10 @@ vector_update(int argc, VALUE *argv, VALUE self)
     VALUE index_value;
     VALUE keywords = Qnil;
     rb_scan_args(argc, argv, "1:", &index_value, &keywords);
+    rb_check_frozen(self);
     long long raw = vector_convert_index(index_value);
     vector_timeout_t timeout = vector_parse_timeout(vector_timeout_keyword(keywords));
+    rb_check_frozen(self);
     vector_t *vector = get_vector(self);
     rb_need_block();
 
@@ -794,6 +832,7 @@ vector_update(int argc, VALUE *argv, VALUE self)
     }
 
     vector_operation_t operation = {
+        .self = self,
         .vector = vector,
         .index = index,
         .current = index < vector->size ? vector->values[index] : Qnil,

@@ -8,7 +8,8 @@ module Farce
     # Only true and false are accepted. Read {#value} to test its state.
     class Flag
       include Abstract::Flag
-      include Scoped
+      include Shareable::Tracked
+      include Scoped::Tracked
 
       # @!method initialize(value = false, scope: :ractor)
       #   @!macro scopes

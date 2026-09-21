@@ -117,6 +117,25 @@ module Farce
       end
     end
 
+    def test_mode_manager_copies_remain_shareable_independent_descriptors
+      source = ModeManager.new(mode: :copy)
+      source_envelope = source.wrap([])
+
+      [source.dup, source.clone, source.clone(freeze: false), source.clone(freeze: true)].each do |copy|
+        refute_same source, copy
+        assert_equal :copy, copy.mode
+        assert_predicate copy, :frozen?
+        assert Ractor.shareable?(copy)
+        assert_predicate copy, :ractor_shareable?
+        assert_same source_envelope, copy.unwrap(source_envelope)
+
+        copy_envelope = copy.wrap([])
+
+        assert_same copy_envelope, source.unwrap(copy_envelope)
+        assert_equal [], copy.unwrap(copy_envelope)
+      end
+    end
+
     def test_local_copies_preserve_scope_defaults
       [Local::Atom, Local::WeakAtom, Local::Counter].each do |type|
         source = type.new(1, scope: :fiber)

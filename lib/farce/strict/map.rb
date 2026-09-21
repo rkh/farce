@@ -17,7 +17,7 @@ module Farce
     #   counts.upsert(:ruby, 1) { |count| count + 1 } # => 1
     #   counts.upsert(:ruby, 1) { |count| count + 1 } # => 2
     class Map < Abstract::ConcurrentMap
-      include Shareable
+      include Shareable::Delegated
 
       def initialize(
         initial_mapping = nil,
@@ -44,6 +44,8 @@ module Farce
 
       def shareable_keys? = true
       def shareable_values? = true
+
+      private def freeze_backend = internal_map
     end
   end
 end

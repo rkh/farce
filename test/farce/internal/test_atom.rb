@@ -17,7 +17,46 @@ module Farce
 
         assert_nil atom.value
         refute_predicate atom, :compare_by_identity?
+        refute_predicate atom, :frozen?
         assert Ractor.shareable?(atom) if shareable_atom?
+      end
+
+      class FreezingTimeout
+        def initialize(target)
+          @target = target
+          freeze
+        end
+
+        def to_f
+          @target.freeze
+          0.0
+        end
+      end
+
+      class FreezingComparison
+        def initialize(target)
+          @target = target
+          freeze
+        end
+
+        def ==(_other)
+          @target.freeze
+          true
+        end
+      end
+
+      def test_callbacks_that_freeze_the_atom_cannot_commit
+        atom = atom_class.new(:original)
+
+        assert_raises(FrozenError) { atom.store(:replacement, timeout: FreezingTimeout.new(atom)) }
+        assert_equal :original, atom.value
+
+        atom = atom_class.new
+        current = FreezingComparison.new(atom)
+        atom.store(current)
+
+        assert_raises(FrozenError) { atom.compare_and_set(:expected, :replacement) }
+        assert_same current, atom.value
       end
 
       def test_initialization_validation

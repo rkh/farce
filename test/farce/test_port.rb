@@ -15,7 +15,7 @@ module Farce
       assert_equal :copy, port.mode
       refute_predicate port, :auto_local?
       assert_predicate port, :owned?
-      assert_predicate port, :frozen?
+      refute_predicate port, :frozen?
       assert_predicate port, :ractor_shareable?
       assert Ractor.shareable?(port)
     end

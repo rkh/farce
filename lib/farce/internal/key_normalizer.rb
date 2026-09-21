@@ -75,8 +75,15 @@ module Farce
         def initialize(map, normalizer)
           @map = map
           @normalizer = normalizer
-          freeze if map.frozen?
+          Internal::Freeze.publish(self) if Ractor.shareable?(map)
         end
+
+        def freeze
+          @map.freeze
+          self
+        end
+
+        def frozen? = @map.frozen?
 
         def [](key) = @map[@normalizer.call(key)]
 
@@ -103,6 +110,13 @@ module Farce
         def wait_until_changed(key, expected, ...) = @map.wait_until_changed(@normalizer.call(key), expected, ...)
         def wait_until_non_nil(key, ...)           = @map.wait_until_non_nil(@normalizer.call(key), ...)
         def normalize_external_key(key)            = @map.normalize_external_key(@normalizer.call(key))
+        def check_mutation                         = @map.check_mutation
+
+        def prepare_mutation_key(key)
+          @map.check_mutation
+          @map.prepare_mutation_key(@normalizer.call(key))
+        end
+
         def get_prepared(...)                      = @map.get_prepared(...)
         def store_prepared(...)                    = @map.store_prepared(...)
         def swap_prepared(...)                     = @map.swap_prepared(...)
@@ -117,7 +131,7 @@ module Farce
         def clear                                  = @map.clear
         def compare_keys_by_identity?              = @map.compare_keys_by_identity?
         def compare_values_by_identity?            = @map.compare_values_by_identity?
-        def ractor_shareable?                      = @map.ractor_shareable?
+        def ractor_shareable?                      = Ractor.shareable?(@map)
       end
 
       module ConcurrentBackend

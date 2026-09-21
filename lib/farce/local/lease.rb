@@ -16,6 +16,7 @@ module Farce
     #
     #   lease.checkout { |state| state[:name] } # => :parent
     class Lease < Abstract::Lease
+      include Shareable::Unfreezable
       include Scoped
 
       # Create a lease that initializes once on first use in each scope.

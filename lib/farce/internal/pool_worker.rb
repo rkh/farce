@@ -6,7 +6,7 @@ module Farce
   module Internal # :nodoc: all
     # Coordinates one scheduler with its pool.
     class PoolWorker
-      include Shareable
+      include Shareable::Unfreezable
 
       def initialize(pool)
         @pool       = pool

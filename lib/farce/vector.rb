@@ -10,7 +10,7 @@ module Farce
   #   vector = Farce::Vector.new([[]], mode: :make_shareable)
   #   vector.update(0) { |jobs| jobs + [:finished] } # => [:finished]
   class Vector < Farce::Abstract::Vector
-    include Shareable
+    include Shareable::Delegated
 
     # @!macro modes
     # @param source [Array, nil] Initial values. The source array is not retained.
@@ -42,6 +42,7 @@ module Farce
 
     # (see Farce::Abstract::Vector#[]=)
     def []=(index, value)
+      check_frozen!
       @vector[index] = @manager.wrap(value)
       value
     end
@@ -52,12 +53,14 @@ module Farce
     # (see Farce::Abstract::Vector#store)
     # @param mode [Symbol, nil] The transfer mode, or nil to use the default.
     def store(index, value, mode: nil, timeout: nil)
+      check_frozen!
       @manager.unwrap(@vector.store(index, @manager.wrap(value, mode:), timeout:))
     end
 
     # (see Farce::Abstract::Vector#push)
     # @param mode [Symbol, nil] The transfer mode, or nil to use the default.
     def push(value, mode: nil, timeout: nil)
+      check_frozen!
       @vector.push(@manager.wrap(value, mode:), timeout:) ? self : false
     end
 
@@ -68,6 +71,7 @@ module Farce
     # @!macro modes
     # @param mode [Symbol, nil] The replacement's transfer mode, or nil to use the default.
     def swap(index, replacement, mode: nil, timeout: nil)
+      check_frozen!
       @manager.unwrap(@vector.swap(index, @manager.wrap(replacement, mode:), timeout:))
     end
 
@@ -75,7 +79,12 @@ module Farce
     # @param mode [Symbol, nil] The result's transfer mode, or nil to use the default.
     def store_if_absent(index, mode: nil, timeout: nil)
       raise LocalJumpError, "no block given" unless block_given?
-      @manager.unwrap(@vector.store_if_absent(index, timeout:) { @manager.wrap(yield, mode:) })
+      check_frozen!
+      @manager.unwrap(@vector.store_if_absent(index, timeout:) do
+        value = yield
+        check_frozen!
+        @manager.wrap(value, mode:)
+      end)
     end
 
     # (see Farce::Abstract::Vector#update)
@@ -83,7 +92,12 @@ module Farce
     # @param mode [Symbol, nil] The result's transfer mode, or nil to use the default.
     def update(index, mode: nil, timeout: nil)
       raise LocalJumpError, "no block given" unless block_given?
-      @manager.unwrap(@vector.update(index, timeout:) { @manager.wrap(yield(@manager.unwrap(it)), mode:) })
+      check_frozen!
+      @manager.unwrap(@vector.update(index, timeout:) do |current|
+        value = yield(@manager.unwrap(current))
+        check_frozen!
+        @manager.wrap(value, mode:)
+      end)
     end
 
     # (see Farce::Abstract::Vector#upsert)
@@ -91,8 +105,16 @@ module Farce
     # @param mode [Symbol, nil] The value transfer mode, or nil to use the default.
     def upsert(index, initial, mode: nil, timeout: nil)
       raise LocalJumpError, "no block given" unless block_given?
+      check_frozen!
       @manager.unwrap(@vector.update(index, timeout:) do |current|
-        @manager.wrap(nil.equal?(current) ? initial : yield(@manager.unwrap(current)), mode:)
+        value = if nil.equal?(current)
+                  initial
+                else
+                  yielded = yield(@manager.unwrap(current))
+                  check_frozen!
+                  yielded
+                end
+        @manager.wrap(value, mode:)
       end)
     end
 
@@ -100,12 +122,15 @@ module Farce
     # @!macro modes
     # @param mode [Symbol, nil] The replacement's transfer mode, or nil to use the default.
     def compare_and_set(index, expected, replacement, mode: nil, timeout: nil)
+      check_frozen!
       deadline = timeout_deadline(timeout)
       expected = wrap_comparison(expected)
       wrapped = false
       loop do
         current = @vector[index]
-        return false unless values_equal?(current, expected)
+        equal   = values_equal?(current, expected)
+        check_frozen!
+        return false unless equal
         unless wrapped
           replacement = @manager.wrap(replacement, mode:)
           wrapped = true
@@ -132,7 +157,8 @@ module Farce
 
     private
 
-    def wrap_comparison(value) = @manager.wrap(value, mode: compare_by_identity? ? :local : :copy)
+    def freeze_backend             = @vector
+    def wrap_comparison(value)     = @manager.wrap(value, mode: compare_by_identity? ? :local : :copy)
     def values_equal?(left, right) = @manager.same_value?(left, right, identity: compare_by_identity?)
 
     def timeout_deadline(timeout)

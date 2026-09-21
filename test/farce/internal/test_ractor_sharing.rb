@@ -38,11 +38,13 @@ module Farce
         workers = 4.times.map do
           Ractor.new(map) do |shared|
             250.times { shared.upsert(:counter, 0) { |old| old + 1 } }
+            Thread.current.frozen?
           end
         end
-        workers.each { |worker| ractor_value(worker) }
+        frozen_worker_threads = workers.map { |worker| ractor_value(worker) }
 
         assert_equal 1_000, map[:counter]
+        assert_predicate frozen_worker_threads, :all? unless Internal.native_ractors?
       end
 
       def test_queue_connects_ractors

@@ -286,9 +286,11 @@ module Farce
       assert_equal 0, queue.num_waiting
     end
 
-    private def fiber_wait = :auto
-    private def new_queue(**) = Unshared::Queue.new(fiber_wait:, **)
-    private def io_path? = fiber_wait == :auto ? Internal::UNSHARED_FIBER_IO : fiber_wait == :io
+    private
+
+    def fiber_wait = :auto
+    def new_queue(**) = Unshared::Queue.new(fiber_wait:, **)
+    def io_path? = fiber_wait == :auto ? Internal::UNSHARED_FIBER_IO : fiber_wait == :io
   end
 
   class TestUnsharedQueueIOWaiting < TestUnsharedQueueWaiting

@@ -20,7 +20,7 @@ module Farce
   #
   class Signal
     include Internal::Noncopyable
-    include Shareable
+    include Shareable::Unfreezable
 
     def initialize
       @signal = Internal::Signal.new

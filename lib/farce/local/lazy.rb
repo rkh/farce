@@ -6,6 +6,7 @@ module Farce
   module Local
     # A shareable lazy value computed once per scope. Results may be mutable.
     class Lazy < Abstract::Lazy
+      include Shareable::Unfreezable
       include Scoped
 
       # @!macro scopes

@@ -8,6 +8,33 @@ module Farce
     module Scoped
       include Shareable
 
+      # Freeze the current backing before recording the handle-global state.
+      # @api private
+      module Tracked
+        include Scoped
+
+        # @!visibility private
+        def self.included(base)
+          Scoped.included(base)
+          super
+        end
+
+        def freeze
+          return Object.instance_method(:freeze).bind_call(self) unless @farce_freeze_state
+
+          freeze_scoped_value(scoped_value)
+          super
+        end
+
+        private
+
+        def scoped_value
+          value = super
+          freeze_scoped_value(value) if frozen?
+          value
+        end
+      end
+
       module EncodeWith
         # @api private
         # Called by Psych for generating YAML
@@ -41,13 +68,11 @@ module Farce
           super(*arguments, **)
         end
 
-        private def indifferent_access_options = super.merge(scope:)
+        private
 
-        private def install_copied_map(map)
-          Internal::Storage.scope(scope)[self] = new_copied_scoped_value(map)
-        end
-
-        private def new_copied_scoped_value(map) = map
+        def indifferent_access_options   = super.merge(scope:)
+        def install_copied_map(map)      = Internal::Storage.scope(scope)[self] = new_copied_scoped_value(map)
+        def new_copied_scoped_value(map) = map
       end
 
       MANAGER = ModeManager.new
@@ -71,6 +96,7 @@ module Farce
       def initialize(*arguments, scope: :ractor, **options)
         raise ArgumentError, "Invalid scope: #{scope.inspect}" unless Internal::Storage::SCOPES.include?(scope)
 
+        @farce_freeze_state = Internal::Flag.new(false) if is_a?(Shareable::Tracked)
         @scope         = scope
         @configuration = MANAGER.wrap([arguments.freeze, options.freeze].freeze)
 
@@ -78,14 +104,14 @@ module Farce
 
         # Abstract initializers allocate instance variables. Local backing objects
         # live in Storage instead, so initialization ends here.
-        Ractor.make_shareable(self)
-        freeze
+        Internal::Freeze.publish(self)
       end
 
       private
 
       # Subclasses without initial contents can defer backing storage allocation.
-      def eager_scoped_value?  = true
+      def eager_scoped_value? = true
+      def freeze_scoped_value(value) = value.freeze
       def scoped_configuration = MANAGER.unwrap(@configuration)
 
       def scoped_value

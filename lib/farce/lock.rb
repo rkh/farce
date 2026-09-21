@@ -45,7 +45,8 @@ module Farce
   #   @raise [ThreadError] if the current Fiber does not own the lock
   class Lock < Internal::Lock
     include Internal::Noncopyable
-    include Shareable
+    include Shareable::Native
+    include Shareable::Unfreezable
 
     private def instance_variables_to_inspect = Internal::EMPTY_ARRAY
   end

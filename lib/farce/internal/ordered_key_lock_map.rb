@@ -7,7 +7,7 @@ module Farce
   module Internal # :nodoc: all
     # Coordinate keys using their ordering, independently of their hash values.
     class OrderedKeyLockMap
-      include Shareable
+      include Shareable::Unfreezable
 
       Gate = Data.define(:lock, :participants)
       private_constant :Gate

@@ -13,7 +13,8 @@ module Farce
     #   @param scope [Symbol] the scope of the vector
     #   @return [Vector]
     class Vector < Abstract::Vector
-      include Scoped
+      include Shareable::Tracked
+      include Scoped::Tracked
 
       private
 

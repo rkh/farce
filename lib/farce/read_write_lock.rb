@@ -12,7 +12,7 @@ module Farce
   # before returning to the outer read-lock block.
   class ReadWriteLock
     include Internal::Noncopyable
-    include Shareable
+    include Shareable::Unfreezable
 
     READER_BITS   = 30
     READER_MASK   = (1 << READER_BITS) - 1

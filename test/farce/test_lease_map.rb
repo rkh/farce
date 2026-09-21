@@ -744,7 +744,7 @@ module Farce
       klass = concrete_map_class(Farce)
       map = klass.new { {} }
 
-      assert_predicate map, :frozen?
+      refute_predicate map, :frozen?
       assert_predicate map, :ractor_shareable?
       assert Ractor.shareable?(map)
     end
@@ -753,7 +753,7 @@ module Farce
       klass = concrete_map_class(Local)
       map = klass.new { {} }
 
-      assert_predicate map, :frozen?
+      refute_predicate map, :frozen?
       assert_predicate map, :ractor_shareable?
       assert Ractor.shareable?(map)
     end
@@ -965,11 +965,15 @@ module Farce
       worker = Ractor.new(map) do |shared|
         shared.auto_lease do
           shared.store_if_absent(:key) { [:worker] } << :changed
-          :done
+          [Thread.current.frozen?, :done]
         end
       end
 
-      assert_equal :done, ractor_value(worker)
+      frozen_worker_thread, result = ractor_value(worker)
+
+      assert_equal :done, result
+      assert frozen_worker_thread unless Internal.native_ractors?
+
       assert_equal %i[worker changed], map.checkout(:key, &:dup)
     end
 

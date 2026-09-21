@@ -69,6 +69,8 @@ module Farce
     #   @param (see Farce::Envelope#initialize)
     #   @return [Move, Share] A new envelope wrapping the given value.
     class Move < Farce::Envelope
+      include Shareable::Unfreezable
+
       # @overload initialize(value)
       #   @param [Object] value The value to wrap in the envelope.
       def initialize(value, auto_unwrap = nil)

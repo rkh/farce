@@ -150,11 +150,12 @@ module Farce
       assert_operator scheduler.io_wait_calls, :>=, 1
     end
 
-    private def signal_class = Farce::Signal
+    private
 
-    private def shareable_signal? = true
+    def signal_class = Farce::Signal
+    def shareable_signal? = true
 
-    private def assert_wait_protocol(scheduler)
+    def assert_wait_protocol(scheduler)
       assert_operator scheduler.io_wait_calls, :>=, 1
     end
   end

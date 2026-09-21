@@ -7,6 +7,8 @@ module Farce
   module Internal # :nodoc: all
     # Portable per-key ownership and lifecycle implementation for LeaseMap.
     class LeaseMap
+      include Freeze::Unfreezable
+
       AUTO_LEASE_CONTEXTS = Object.new.freeze
       private_constant :AUTO_LEASE_CONTEXTS
 
@@ -25,8 +27,7 @@ module Farce
 
         return unless @registry.ractor_shareable?
 
-        Ractor.make_shareable(self)
-        freeze
+        Freeze.publish(self)
       end
 
       def checkout(key, receiver:, missing_key: key, timeout: nil, &block)

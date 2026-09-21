@@ -23,6 +23,7 @@ typedef struct {
     pthread_mutex_t lock;
     long long value;
 #endif
+    long long initial;
     bool initialized;
 } counter_t;
 
@@ -99,14 +100,15 @@ counter_initialize(int argc, VALUE *argv, VALUE self)
     rb_check_frozen(self);
 
     long long value = counter_integer(initial, "initial value");
+    rb_check_frozen(self);
 #if CONTAINERS_COUNTER_LOCK_FREE
     atomic_store_explicit(&counter->value, value, memory_order_relaxed);
 #else
     counter->value = value;
 #endif
+    counter->initial = value;
     counter->initialized = true;
-    containers_finish_initialization(self);
-    return self;
+    return containers_publish_native_reference_free(self);
 }
 
 static VALUE
@@ -124,6 +126,12 @@ counter_value(VALUE self)
 }
 
 static VALUE
+counter_initial(VALUE self)
+{
+    return LL2NUM(get_counter(self)->initial);
+}
+
+static VALUE
 counter_initialize_copy(VALUE self, VALUE other)
 {
     if (self == other) return self;
@@ -131,20 +139,29 @@ counter_initialize_copy(VALUE self, VALUE other)
     counter_t *copy;
     TypedData_Get_Struct(self, counter_t, &counter_type, copy);
     if (copy->initialized) rb_raise(rb_eRuntimeError, "copy is already initialized");
-    long long value = NUM2LL(counter_value(other));
+    counter_t *source = get_counter(other);
+#if CONTAINERS_COUNTER_LOCK_FREE
+    long long value = atomic_load_explicit(&source->value, memory_order_relaxed);
+#else
+    pthread_mutex_lock(&source->lock);
+    long long value = source->value;
+    pthread_mutex_unlock(&source->lock);
+#endif
 #if CONTAINERS_COUNTER_LOCK_FREE
     atomic_store_explicit(&copy->value, value, memory_order_relaxed);
 #else
     copy->value = value;
 #endif
+    copy->initial = source->initial;
     copy->initialized = true;
-    return self;
+    return containers_publish_native_reference_free(self);
 }
 
 static VALUE
 counter_store(VALUE self, VALUE input)
 {
     counter_t *counter = get_counter(self);
+    rb_check_frozen(self);
     long long value = counter_integer(input, "value");
 #if CONTAINERS_COUNTER_LOCK_FREE
     atomic_store_explicit(&counter->value, value, memory_order_relaxed);
@@ -160,6 +177,7 @@ static VALUE
 counter_swap(VALUE self, VALUE input)
 {
     counter_t *counter = get_counter(self);
+    rb_check_frozen(self);
     long long replacement = counter_integer(input, "value");
 #if CONTAINERS_COUNTER_LOCK_FREE
     long long current = atomic_load_explicit(&counter->value, memory_order_relaxed);
@@ -246,6 +264,7 @@ counter_add(int argc, VALUE *argv, VALUE self)
 {
     rb_check_arity(argc, 0, 1);
     counter_t *counter = get_counter(self);
+    rb_check_frozen(self);
     VALUE input = argc == 0 ? INT2FIX(1) : argv[0];
     long long delta = counter_integer(input, "delta");
     return counter_change(counter, delta, false);
@@ -256,6 +275,7 @@ counter_subtract(int argc, VALUE *argv, VALUE self)
 {
     rb_check_arity(argc, 0, 1);
     counter_t *counter = get_counter(self);
+    rb_check_frozen(self);
     VALUE input = argc == 0 ? INT2FIX(1) : argv[0];
     long long delta = counter_integer(input, "delta");
     return counter_change(counter, delta, true);
@@ -265,6 +285,7 @@ static VALUE
 counter_compare_and_set(VALUE self, VALUE expected_input, VALUE replacement_input)
 {
     counter_t *counter = get_counter(self);
+    rb_check_frozen(self);
     long long expected = counter_integer(expected_input, "expected value");
     long long replacement = counter_integer(replacement_input, "replacement value");
 #if CONTAINERS_COUNTER_LOCK_FREE
@@ -290,9 +311,15 @@ static VALUE
 counter_increment(int argc, VALUE *argv, VALUE self)
 {
     rb_check_arity(argc, 0, 1);
+    counter_t *counter = get_counter(self);
+    rb_check_frozen(self);
     VALUE input = argc == 0 ? INT2FIX(1) : argv[0];
-    long long delta = NUM2LL(RB_INTEGER_TYPE_P(input) ? input : rb_Integer(input));
-    (void)counter_change(get_counter(self), delta, false);
+    if (!RB_INTEGER_TYPE_P(input)) {
+        input = rb_Integer(input);
+        rb_check_frozen(self);
+    }
+    long long delta = NUM2LL(input);
+    (void)counter_change(counter, delta, false);
     return self;
 }
 
@@ -300,9 +327,15 @@ static VALUE
 counter_decrement(int argc, VALUE *argv, VALUE self)
 {
     rb_check_arity(argc, 0, 1);
+    counter_t *counter = get_counter(self);
+    rb_check_frozen(self);
     VALUE input = argc == 0 ? INT2FIX(1) : argv[0];
-    long long delta = NUM2LL(RB_INTEGER_TYPE_P(input) ? input : rb_Integer(input));
-    (void)counter_change(get_counter(self), delta, true);
+    if (!RB_INTEGER_TYPE_P(input)) {
+        input = rb_Integer(input);
+        rb_check_frozen(self);
+    }
+    long long delta = NUM2LL(input);
+    (void)counter_change(counter, delta, true);
     return self;
 }
 
@@ -315,6 +348,7 @@ containers_init_counter(VALUE namespace)
     rb_define_private_method(cCounter, "initialize_copy", counter_initialize_copy, 1);
     rb_define_method(cCounter, "value", counter_value, 0);
     rb_define_alias(cCounter, "get", "value");
+    rb_define_method(cCounter, "initial", counter_initial, 0);
     rb_define_method(cCounter, "store", counter_store, 1);
     rb_define_alias(cCounter, "value=", "store");
     rb_define_method(cCounter, "swap", counter_swap, 1);

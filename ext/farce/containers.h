@@ -12,9 +12,23 @@
 #include <sys/time.h>
 #endif
 
+/* Use only after validating self as native TypedData. */
+static inline void
+containers_check_typed_frozen(VALUE self)
+{
+    if (RB_UNLIKELY(RB_OBJ_FROZEN_RAW(self))) rb_error_frozen_object(self);
+}
+
 void containers_check_shareable(VALUE value);
 bool containers_strict_bool(VALUE value, const char *name);
-void containers_finish_initialization(VALUE self);
+typedef void (*containers_native_reference_validator_t)(VALUE object);
+VALUE containers_publish_native_reference_free(VALUE self);
+VALUE containers_publish_native_with_references(
+    VALUE self,
+    containers_native_reference_validator_t validate_references
+);
+RBIMPL_ATTR_NORETURN()
+VALUE containers_raise_unfreezable(VALUE self);
 VALUE containers_normalize_string_key(VALUE key);
 bool containers_wait_for_readable(int fd, VALUE timeout);
 bool containers_wait_for_readable_level(int fd, VALUE timeout);

@@ -10,7 +10,7 @@ module Farce
       def test_initialization
         exchanger = Exchanger.new
 
-        assert_predicate exchanger, :frozen?
+        refute_predicate exchanger, :frozen?
         assert Ractor.shareable?(exchanger)
       end
 

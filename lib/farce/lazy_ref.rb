@@ -6,6 +6,9 @@ module Farce
   # @!parse
   #   # A {Reference} for a {Lazy} value.
   #   #
+  #   # Calling `freeze` resolves and freezes the target. Checking `frozen?` before
+  #   # the first successful freeze does not resolve it.
+  #   #
   #   # @example
   #   #   initialized = false
   #   #

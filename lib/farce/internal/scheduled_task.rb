@@ -6,7 +6,8 @@ module Farce
   module Internal # :nodoc: all
     # A shareable task and its transferred arguments.
     class ScheduledTask
-      include Shareable
+      include Internal::Copyable
+      include Shareable::Immutable
 
       MANAGER = ModeManager.new
 

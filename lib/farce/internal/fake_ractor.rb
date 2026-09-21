@@ -14,10 +14,11 @@ module Farce
 
       class Main
         include Farce::Ractor
+        include Freeze::Unfreezable
         extend RactorMethods
 
         private_class_method :new
-        INSTANCE     = new.freeze
+        INSTANCE     = Freeze.publish(new)
         DEFAULT_PORT = BasePort.new
 
         def default_port = DEFAULT_PORT
@@ -37,6 +38,7 @@ module Farce
 
       class NotMain
         include Farce::Ractor
+        include Freeze::Unfreezable
         extend RactorMethods
 
         @@ractor_counter = 1

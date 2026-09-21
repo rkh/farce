@@ -6,6 +6,7 @@ module Farce
   module Local
     # A shareable priority queue with independent mutable storage in each scope.
     class PriorityQueue < Abstract::PriorityQueue
+      include Shareable::Unfreezable
       include Scoped
 
       # @overload initialize(capacity: nil, default_priority: 0, order: :ascending, scope: :ractor, track_age: false)

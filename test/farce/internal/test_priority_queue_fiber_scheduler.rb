@@ -176,38 +176,42 @@ module Farce
         Fiber.set_scheduler(nil)
       end
 
-      private def queue_class = PriorityQueue
-      private def new_queue = queue_class.new
+      private
 
-      private def assert_coordination(scheduler)
+      def queue_class = PriorityQueue
+      def new_queue = queue_class.new
+
+      def assert_coordination(scheduler)
         assert_operator scheduler.io_wait_calls, :>=, 1
       end
 
-      private def cancel_next_wait(scheduler) = scheduler.cancel_next_io_wait!
+      def cancel_next_wait(scheduler) = scheduler.cancel_next_io_wait!
 
-      private def assert_survivor_woken(scheduler, _events)
+      def assert_survivor_woken(scheduler, _events)
         assert_predicate scheduler, :waiting_io_ready?, "the next storage-lock waiter was stranded"
       end
     end
 
     class TestUnsharedPriorityQueueStorageFiberScheduler < TestPriorityQueueStorageFiberScheduler
-      private def queue_class = UnsharedPriorityQueue
-      private def fiber_wait = :auto
-      private def new_queue = queue_class.new(signal: UnsharedSignal.for(fiber_wait))
-      private def io_path? = fiber_wait == :auto ? Internal::UNSHARED_FIBER_IO : fiber_wait == :io
+      private
 
-      private def assert_coordination(scheduler)
+      def queue_class = UnsharedPriorityQueue
+      def fiber_wait = :auto
+      def new_queue = queue_class.new(signal: UnsharedSignal.for(fiber_wait))
+      def io_path? = fiber_wait == :auto ? Internal::UNSHARED_FIBER_IO : fiber_wait == :io
+
+      def assert_coordination(scheduler)
         return super if io_path?
 
         assert_equal 0, scheduler.io_wait_calls
         assert_operator scheduler.block_calls, :>=, 1
       end
 
-      private def cancel_next_wait(scheduler)
+      def cancel_next_wait(scheduler)
         io_path? ? scheduler.cancel_next_io_wait! : scheduler.cancel_next_block!
       end
 
-      private def assert_survivor_woken(scheduler, events)
+      def assert_survivor_woken(scheduler, events)
         # All original lock waiters are notified together. The survivor may
         # have finished in the same scheduler iteration as cancellation.
         assert(events.last == :first || scheduler.waiting_io_ready? || !scheduler.instance_variable_get(:@ready).empty?,

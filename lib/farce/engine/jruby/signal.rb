@@ -17,8 +17,13 @@ module Farce
         super
         @fiber_waiters  = java.util.concurrent.ConcurrentHashMap.new
         @thread_waiters = java.util.concurrent.atomic.AtomicInteger.new
-        freeze
+        Freeze.publish(self)
       end
+
+      # JRuby-dev 10.1.2 cannot construct a Java subclass after a module is included.
+      # Keep these methods local until its reifier is fixed.
+      def freeze  = raise(TypeError, "#{self.class} cannot be frozen")
+      def frozen? = false
 
       def generation = phase
       def num_waiting = @thread_waiters.get + @fiber_waiters.size

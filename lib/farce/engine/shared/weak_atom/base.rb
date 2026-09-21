@@ -20,11 +20,19 @@ module Farce
         @compare_by_identity = compare_by_identity
         @lock                = Atom.new
         @changes             = Atom.new(0)
+        @freeze_state        = Flag.new(false)
         initialize_storage(value)
       end
 
       def value                = read_value
       def compare_by_identity? = @compare_by_identity
+
+      def freeze
+        @freeze_state.set
+        self
+      end
+
+      def frozen? = @freeze_state.value
 
       def value=(new_value)
         store(new_value)
@@ -36,8 +44,10 @@ module Farce
       end
 
       def store(new_value, timeout: nil, &fallback)
+        check_frozen!
         validate_value(new_value)
         result = with_value(timeout) do
+          check_frozen!
           write_value(new_value)
           new_value
         end
@@ -45,8 +55,10 @@ module Farce
       end
 
       def swap(new_value, timeout: nil, &fallback)
+        check_frozen!
         validate_value(new_value)
         result = with_value(timeout) do
+          check_frozen!
           previous = read_value
           write_value(new_value)
           previous
@@ -56,10 +68,13 @@ module Farce
 
       def store_if_absent(timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
         result = with_value(timeout) do
+          check_frozen!
           current = read_value
           next current unless current.nil?
           replacement = yield
+          check_frozen!
           validate_value(replacement)
           write_value(replacement)
           replacement
@@ -68,10 +83,13 @@ module Farce
       end
 
       def compare_and_set(expected, replacement, timeout: nil)
+        check_frozen!
         validate_value(expected)
         validate_value(replacement)
         result = with_value(timeout) do
-          next false unless values_equal?(read_value, expected)
+          matches = values_equal?(read_value, expected)
+          check_frozen!
+          next false unless matches
           write_value(replacement)
           true
         end
@@ -80,8 +98,10 @@ module Farce
 
       def update(timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
         result = with_value(timeout) do
           replacement = yield(read_value)
+          check_frozen!
           validate_value(replacement)
           write_value(replacement)
           replacement
@@ -91,10 +111,12 @@ module Farce
 
       def upsert(initial, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
         validate_value(initial)
         result = with_value(timeout) do
           current = read_value
           replacement = current.nil? ? initial : yield(current)
+          check_frozen!
           validate_value(replacement)
           write_value(replacement)
           replacement
@@ -112,6 +134,12 @@ module Farce
       end
 
       private
+
+      def check_frozen!
+        return unless frozen?
+
+        raise FrozenError.new("can't modify frozen #{self.class}", receiver: self)
+      end
 
       def validate_value(_value); end
 

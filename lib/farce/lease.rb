@@ -19,7 +19,7 @@ module Farce
   #   finished.receive # => 1
   #   lease.checkout { |items| items.dup } # => [:processed]
   class Lease < Farce::Abstract::Lease
-    include Shareable
+    include Shareable::Unfreezable
 
     private
 

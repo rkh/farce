@@ -52,7 +52,7 @@ module Farce
       lazy = Lazy.new { 42 }
 
       assert_kind_of Abstract::Value, lazy
-      assert_predicate lazy, :frozen?
+      refute_predicate lazy, :frozen?
       assert_predicate lazy, :ractor_shareable?
       assert Ractor.shareable?(lazy) if Internal.native_ractors?
 
@@ -122,6 +122,54 @@ module Farce
       assert_equal :ready, lazy.value
       assert_equal :ready, lazy.value
       assert_equal 2, calls.value
+    end
+
+    def test_freeze_retries_after_factory_failure
+      calls = Counter.new
+      lazy = Lazy.new(FlakyFactory.new(calls))
+
+      assert_raises(RuntimeError) { lazy.freeze }
+      refute_predicate lazy, :frozen?
+      assert_same lazy, lazy.freeze
+      assert_predicate lazy, :frozen?
+      assert_equal :ready, lazy.value
+      assert_equal 2, calls.value
+    end
+
+    def test_freeze_caches_nil_without_freezing_the_factory_result
+      calls = Counter.new
+      lazy = Lazy.new(CountingFactory.new(calls, nil))
+
+      assert_same lazy, lazy.freeze
+      assert_nil lazy.value
+      assert_nil lazy.value
+      assert_equal 1, calls.value
+    end
+
+    def test_copies_share_evaluation_and_keep_independent_logical_freeze_state
+      calls = Counter.new
+      result = Map.new
+      source = Lazy.new(CountingFactory.new(calls, result))
+      frozen_copy = source.dup
+
+      assert_same frozen_copy, frozen_copy.freeze
+
+      duplicated = frozen_copy.dup
+      cloned = frozen_copy.clone
+      mutable_clone = frozen_copy.clone(freeze: false)
+      lazies = [source, frozen_copy, duplicated, cloned, mutable_clone]
+      slots = lazies.map { it.instance_variable_get(:@atom) }
+
+      assert_equal 1, slots.map(&:object_id).uniq.length
+      refute_predicate source, :frozen?
+      assert_predicate frozen_copy, :frozen?
+      refute_predicate duplicated, :frozen?
+      assert_predicate cloned, :frozen?
+      refute_predicate mutable_clone, :frozen?
+      lazies.each { assert_same result, it.value }
+
+      assert_equal 1, calls.value
+      refute_predicate result, :frozen?
     end
 
     def test_computes_once_under_thread_contention

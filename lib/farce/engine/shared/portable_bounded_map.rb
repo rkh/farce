@@ -62,6 +62,7 @@ module Farce
               @buckets                    = {}
               @size                       = 0
               @mutex                      = mutex
+              @freeze_state               = Flag.new(false)
               initialize_policy
               @initialized = true
             ensure
@@ -78,6 +79,7 @@ module Farce
           @compare_keys_by_identity   = other.instance_variable_get(:@compare_keys_by_identity)
           @compare_values_by_identity = other.instance_variable_get(:@compare_values_by_identity)
           @mutex                      = Mutex.new
+          @freeze_state               = Flag.new(false)
           @buckets                    = {}
           @size                       = 0
           initialize_policy
@@ -89,11 +91,25 @@ module Farce
         synchronize do
           node = find_node(key)
           return nil unless node
-          check_accessible!
-          prepared = policy_prepare_access(node)
-          commit { policy_commit_access(node, prepared) }
+          unless frozen?
+            prepared = policy_prepare_access(node)
+            commit { policy_commit_access(node, prepared) }
+          end
           node.value
         end
+      end
+
+      def freeze
+        state = @freeze_state
+        return super unless state
+
+        state.set
+        self
+      end
+
+      def frozen?
+        state = @freeze_state
+        state ? state.value : super
       end
 
       def []=(key, value)
@@ -150,9 +166,10 @@ module Farce
         found, value = synchronize do
           node = find_node(key)
           if node
-            check_accessible!
-            prepared = policy_prepare_access(node)
-            commit { policy_commit_access(node, prepared) }
+            unless frozen?
+              prepared = policy_prepare_access(node)
+              commit { policy_commit_access(node, prepared) }
+            end
             [true, node.value]
           else
             [false, nil]
@@ -278,10 +295,7 @@ module Farce
         @mutex.synchronize(&)
       end
 
-      def check_accessible!
-        raise FrozenError, "can't modify frozen #{self.class}" if frozen?
-      end
-      alias check_mutable! check_accessible!
+      def check_mutable! = Internal::Freeze.check(self)
 
       def find_node(key)
         hash_code = key_hash_code(key)

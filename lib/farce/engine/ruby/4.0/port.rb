@@ -7,6 +7,8 @@ module Farce
   module Internal # :nodoc: all
     BasePort = ::Ractor::Port
     class Port < BasePort
+      include Freeze::Unfreezable
+
       def receive(timeout: nil)
         return super() unless timeout
         Selector.ractor_receive(self, timeout:)

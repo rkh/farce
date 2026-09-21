@@ -42,7 +42,7 @@ module Farce
         original = type.new({ present: :source })
         [original.dup, original.clone].each do |copy|
           assert Ractor.shareable?(copy)
-          assert_predicate copy, :frozen?
+          refute_predicate copy, :frozen?
           if Internal.native_ractors?
             worker = Ractor.new(copy) { |map| map[:present] }
 
@@ -55,7 +55,7 @@ module Farce
         unfrozen = original.clone(freeze: false)
 
         refute_predicate unfrozen, :frozen?
-        refute Ractor.shareable?(unfrozen) if Internal.native_ractors?
+        assert Ractor.shareable?(unfrozen)
         unfrozen[:present] = :local_copy
 
         assert_equal :source, original[:present]

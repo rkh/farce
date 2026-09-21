@@ -4,40 +4,6 @@ require_relative "../../setup"
 
 module Farce
   module Internal
-    class PriorityQueuePublicationReentry
-      attr_reader :reentry_rejected
-
-      def initialize(target)
-        @target = target
-        @reentry_rejected = false
-      end
-
-      def freeze
-        begin
-          @target.send(:initialize)
-        rescue FrozenError, ThreadError
-          @reentry_rejected = true
-        end
-        super
-      end
-    end
-
-    class PriorityQueuePublicationResume
-      attr_reader :contender_rejected
-
-      def initialize(contender)
-        @contender = contender
-        @contender_rejected = false
-      end
-
-      def freeze
-        contender = @contender
-        @contender = nil
-        @contender_rejected = contender.resume.is_a?(FrozenError)
-        super
-      end
-    end
-
     class TestPriorityQueueInitialization < Test
       include Helpers::InternalTestHelpers
 
@@ -49,32 +15,17 @@ module Farce
         end
       end
 
-      def test_cruby_native_publication_recursively_shares_preinitialize_ivars
+      def test_cruby_native_publication_rejects_preinitialize_ivars
         return unless RUBY_ENGINE == "ruby"
 
         queue = Internal::PriorityQueue.allocate
-        metadata = Object.new
-        metadata.instance_variable_set(:@values, [1, 2, 3])
-        queue.instance_variable_set(:@metadata, metadata)
+        queue.instance_variable_set(:@metadata, [1, 2, 3].freeze)
 
-        assert_same queue, queue.send(:initialize, capacity: nil)
-        assert_predicate queue, :frozen?
-        assert_predicate metadata, :frozen?
-        assert_predicate metadata.instance_variable_get(:@values), :frozen?
-        assert Ractor.shareable?(queue)
-        assert Ractor.shareable?(metadata)
+        error = assert_raises(TypeError) { queue.send(:initialize, capacity: nil) }
 
-        worker = Ractor.new(queue) do |shared_queue|
-          shared_queue.push(1.0, :from_ractor)
-          [
-            shared_queue.pop,
-            shared_queue.instance_variable_get(:@metadata)
-              .instance_variable_get(:@values)
-          ]
-        end
-        result = worker.respond_to?(:value) ? worker.value : worker.take
-
-        assert_equal [:from_ractor, [1, 2, 3]], result
+        assert_match(/cannot be published with Ruby instance variables/, error.message)
+        refute Ractor.shareable?(queue)
+        assert_raises(RuntimeError) { queue.size }
       end
 
       def test_cruby_native_publication_does_not_commit_an_unshareable_ivar
@@ -83,22 +34,24 @@ module Farce
         queue = Internal::PriorityQueue.allocate
         queue.instance_variable_set(:@thread, Thread.current)
 
-        assert_raises(Ractor::Error) { queue.send(:initialize) }
+        assert_raises(TypeError) { queue.send(:initialize) }
         refute Ractor.shareable?(queue)
         assert_raises(RuntimeError) { queue.size }
       end
 
-      def test_cruby_recursive_initialize_from_ivar_freeze_does_not_deadlock
+      def test_cruby_native_publication_does_not_dispatch_ivar_freeze
         return unless RUBY_ENGINE == "ruby"
 
         queue = Internal::PriorityQueue.allocate
-        metadata = PriorityQueuePublicationReentry.new(queue)
+        metadata = Object.new
+        metadata.define_singleton_method(:freeze) { raise "must not run" }
         queue.instance_variable_set(:@metadata, metadata)
 
-        Timeout.timeout(2) { queue.send(:initialize) }
+        error = assert_raises(TypeError) { Timeout.timeout(2) { queue.send(:initialize) } }
 
-        assert_predicate metadata, :reentry_rejected
-        assert Ractor.shareable?(queue)
+        assert_match(/cannot be published with Ruby instance variables/, error.message)
+        refute_predicate metadata, :frozen?
+        refute Ractor.shareable?(queue)
       end
 
       def test_cruby_publication_rejects_an_initializer_paused_in_capacity_coercion
@@ -112,19 +65,20 @@ module Farce
         end
         contender = Fiber.new do
           queue.send(:initialize, capacity: capacity)
-        rescue FrozenError => e
+        rescue StandardError => e
           e
         end
 
         assert_equal :capacity_paused, contender.resume
 
-        metadata = PriorityQueuePublicationResume.new(contender)
-        queue.instance_variable_set(:@metadata, metadata)
-
         Timeout.timeout(2) { queue.send(:initialize, capacity: nil) }
 
-        assert_predicate metadata, :contender_rejected
+        error = contender.resume
+
+        assert_instance_of RuntimeError, error
+        assert_match(/already initialized/, error.message)
         assert Ractor.shareable?(queue)
+        refute_predicate queue, :frozen?
         assert_nil queue.capacity
       end
 

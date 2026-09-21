@@ -27,9 +27,12 @@ module Farce
   #   Ractor.shareable?(map[:jobs]) # => true
   class Map < Abstract::ConcurrentMap
     include Internal::MapValueModes
-    include Shareable
+    include Shareable::Delegated
 
-    private def new_map(**) = Internal::StrictMap.new(**)
+    private
+
+    def new_map(**)    = Internal::StrictMap.new(**)
+    def freeze_backend = @map
   end
 
   Internal::KeyNormalizer.prepare_concurrent_class(Internal::StrictMap)

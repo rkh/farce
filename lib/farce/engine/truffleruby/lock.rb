@@ -10,6 +10,8 @@ module Farce
     # reject that cooperative deadlock with ThreadError. The atomic holder
     # remains mutable after Farce::Shareable freezes the public subclass.
     class Lock < Mutex
+      include Freeze::Unfreezable
+
       BASIC_OBJECT_EQUAL_METHOD = BasicObject.instance_method(:equal?)
       private_constant :BASIC_OBJECT_EQUAL_METHOD
 

@@ -171,13 +171,27 @@ get_exchanger(VALUE self)
 }
 
 static VALUE
+exchanger_frozen_p(VALUE self)
+{
+    (void)self;
+    return Qfalse;
+}
+
+static VALUE
+exchanger_freeze(VALUE self)
+{
+    containers_raise_unfreezable(self);
+    return Qnil;
+}
+
+static VALUE
 exchanger_initialize(VALUE self)
 {
     exchanger_t *exchanger;
     TypedData_Get_Struct(self, exchanger_t, &exchanger_type, exchanger);
     if (exchanger->initialized) rb_raise(rb_eRuntimeError, "Exchanger is already initialized");
     exchanger->initialized = true;
-    containers_finish_initialization(self);
+    containers_publish_native_reference_free(self);
     return self;
 }
 
@@ -280,4 +294,6 @@ containers_init_exchanger(VALUE namespace)
     rb_define_alloc_func(cExchanger, exchanger_allocate);
     rb_define_method(cExchanger, "initialize", exchanger_initialize, 0);
     rb_define_method(cExchanger, "exchange", exchanger_exchange, -1);
+    rb_define_method(cExchanger, "freeze", exchanger_freeze, 0);
+    rb_define_method(cExchanger, "frozen?", exchanger_frozen_p, 0);
 }

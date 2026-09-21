@@ -38,13 +38,10 @@ module Farce
         self.value = coder["value"]
       end
 
-      # @return [Integer] The initial value of the counter.
-      attr_reader :initial
-
       # Reset the counter to its initial value.
       # @return [self] Returns self for chaining.
       def reset
-        self.value = @initial
+        self.value = initial
         self
       end
 
@@ -55,6 +52,8 @@ module Farce
       def increment_if_below(limit) # rubocop:disable Naming/PredicateMethod
         limit   = Integer(limit)
         current = value
+
+        Internal::Freeze.check(self)
 
         while current < limit
           return true if compare_and_set(current, current + 1)
@@ -71,6 +70,8 @@ module Farce
       def decrement_if_above(floor) # rubocop:disable Naming/PredicateMethod
         floor   = Integer(floor)
         current = value
+
+        Internal::Freeze.check(self)
 
         while current > floor
           return true if compare_and_set(current, current - 1)

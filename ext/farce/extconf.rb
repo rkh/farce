@@ -13,6 +13,19 @@ end
   have_header(header) or abort "#{header} is required"
 end
 
+ruby_major, ruby_minor = RUBY_VERSION.split(".").first(2).map!(&:to_i)
+ruby_api = (ruby_major * 100) + ruby_minor
+if ruby_api >= 401
+  have_macro("RB_OBJ_SET_SHAREABLE", "ruby/ractor.h") or abort "RB_OBJ_SET_SHAREABLE is required"
+  $defs << "-DFARCE_HAVE_EXPORTED_SHAREABLE_MARKER"
+elsif ruby_api >= 304
+  # CRuby 3.4/4.0 have no exported marker on supported builds. The native
+  # publisher rejects Ruby ivars and requires audited typed-data payloads.
+  $defs << "-DFARCE_USE_LEGACY_SHAREABLE_FLAG"
+else
+  abort "Native unfrozen publication requires CRuby 3.4 or newer"
+end
+
 have_func("clock_gettime", "time.h")
 
 if have_header("pthread/qos.h")

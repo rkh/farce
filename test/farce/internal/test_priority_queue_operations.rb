@@ -122,7 +122,9 @@ module Farce
 
     if Internal.native_ractors?
       class TestUnsharedPriorityQueueSignalOperations < TestPriorityQueueOperations
-        private def queue_class
+        private
+
+        def queue_class
           Class.new(UnsharedPriorityQueue) do
             def initialize
               super(signal: UnsharedSignal.new)

@@ -6,6 +6,7 @@ module Farce
   module Local
     # A shareable timer queue with independent mutable storage in each scope.
     class TimerQueue < Abstract::TimerQueue
+      include Shareable::Unfreezable
       include Scoped
 
       # @overload initialize(capacity: nil, track_age: false, scope: :ractor)

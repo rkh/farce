@@ -17,17 +17,19 @@ module Farce
 
       lock = Lock.new
 
-      assert_predicate lock, :frozen?
+      refute_predicate lock, :frozen?
       assert_predicate lock, :ractor_shareable?
       assert Ractor.shareable?(lock)
     end
 
-    def test_frozen_uninitialized_lock_cannot_be_initialized
+    def test_structurally_frozen_uninitialized_lock_cannot_be_initialized
       return unless Internal.native_ractors?
 
       lock = Lock.allocate
-      lock.freeze
+      Object.instance_method(:freeze).bind_call(lock)
 
+      refute_predicate lock, :frozen?
+      assert Object.instance_method(:frozen?).bind_call(lock)
       assert Ractor.shareable?(lock)
       assert_raises(FrozenError) { lock.send(:initialize) }
       assert_raises(RuntimeError) { lock.lock }

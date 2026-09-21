@@ -16,11 +16,22 @@ module Farce
 
         assert_equal 0, signal.generation
         assert_equal 0, signal.num_waiting
-        assert_predicate signal, :frozen?
+        assert_equal !shareable_signal?, signal.frozen?
         assert_equal shareable_signal?, Ractor.shareable?(signal)
         assert_equal 1, signal.broadcast
         assert_equal 2, signal.broadcast
         assert_equal 2, signal.generation
+      end
+
+      def test_shareable_service_rejects_freeze_and_remains_live
+        return unless shareable_signal?
+
+        signal = signal_class.new
+
+        assert_raises(TypeError) { signal.freeze }
+        refute_predicate signal, :frozen?
+        assert_equal 1, signal.broadcast
+        assert_equal 1, signal.generation
       end
 
       def test_wait_returns_immediately_when_generation_already_changed
@@ -237,11 +248,13 @@ module Farce
         assert_raises(ArgumentError) { signal.wait(timeout: Float::INFINITY) }
       end
 
-      private def signal_class = Signal
+      private
 
-      private def shareable_signal? = signal_class == Signal
+      def signal_class = Signal
 
-      private def assert_wait_protocol(scheduler)
+      def shareable_signal? = signal_class == Signal
+
+      def assert_wait_protocol(scheduler)
         if signal_class == Signal || signal_class.new.fiber_wait == :io
           assert_operator scheduler.io_wait_calls, :>=, 1
         else

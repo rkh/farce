@@ -330,5 +330,17 @@ module Farce
         assert_equal 200, vector[0]
       end
     end
+
+    def test_shareable_vectors_can_be_constructed_in_a_non_main_ractor
+      return unless Internal.native_ractors?
+
+      [Vector, Strict::Vector].each do |type|
+        worker = Ractor.new(type) { |klass| klass.new([:initial]) }
+        vector = ractor_value(worker)
+
+        refute_predicate vector, :frozen?
+        assert_equal :replacement, vector.store(0, :replacement)
+      end
+    end
   end
 end

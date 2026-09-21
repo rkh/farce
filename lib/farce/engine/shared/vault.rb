@@ -6,6 +6,8 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     class Vault
+      include Freeze::Unfreezable
+
       def initialize          = @data = ObjectSpace::WeakKeyMap.new
       def move_in(key, value) = @data[key] = value
       def copy_in(key, value) = @data[key] = value.dup

@@ -155,6 +155,13 @@ module Farce
     class Map
       include Enumerable
 
+      # Store a value using the map's assignment operation.
+      # Concurrent maps override this method to support timeouts.
+      # @param key [BasicObject] the key to store
+      # @param value [BasicObject] the value to store
+      # @return [BasicObject] `value`
+      def store(key, value) = self[key] = value
+
       # Return a two-element array containing a key and its associated value, if the key is present,
       # or nil if the key is absent.
       # @param key [BasicObject] The key to look up.

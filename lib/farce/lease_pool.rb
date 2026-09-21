@@ -16,7 +16,7 @@ module Farce
   #
   #   result # => 1
   class LeasePool < Farce::Abstract::LeasePool
-    include Shareable
+    include Shareable::Unfreezable
 
     private
 

@@ -292,6 +292,34 @@ get_queue(VALUE self)
     return queue;
 }
 
+static void
+queue_validate_references(VALUE self)
+{
+    queue_t *queue = get_queue(self);
+
+    if (queue->size != 0 || queue->unshared_pop_waiters.count != 0 ||
+        queue->unshared_push_waiters.count != 0) {
+        rb_raise(rb_eRuntimeError, "queue publication requires empty storage");
+    }
+}
+
+static VALUE
+queue_freeze(VALUE self)
+{
+    queue_t *queue;
+    TypedData_Get_Struct(self, queue_t, &queue_type, queue);
+    if (queue->shared) containers_raise_unfreezable(self);
+    return rb_obj_freeze(self);
+}
+
+static VALUE
+queue_frozen_p(VALUE self)
+{
+    queue_t *queue;
+    TypedData_Get_Struct(self, queue_t, &queue_type, queue);
+    return queue->shared ? Qfalse : rb_obj_frozen_p(self);
+}
+
 static VALUE
 queue_initialize(int argc, VALUE *argv, VALUE self)
 {
@@ -335,7 +363,7 @@ queue_initialize(int argc, VALUE *argv, VALUE self)
     }
     queue->unshared_fiber_io = fiber_io;
     queue->initialized = true;
-    if (queue->shared) containers_finish_initialization(self);
+    if (queue->shared) containers_publish_native_with_references(self, queue_validate_references);
     else rb_obj_freeze(self);
     return self;
 }
@@ -973,5 +1001,7 @@ containers_init_queue(VALUE namespace)
     rb_define_method(cQueue, "generation", queue_generation, 0);
     rb_define_method(cQueue, "oldest_enqueued_at", queue_oldest_enqueued_at, 0);
     rb_define_method(cQueue, "oldest_age", queue_oldest_age, 0);
+    rb_define_method(cQueue, "freeze", queue_freeze, 0);
+    rb_define_method(cQueue, "frozen?", queue_frozen_p, 0);
     rb_define_private_method(cQueue, "__release_wait_descriptors__", queue_release_wait_descriptors, 0);
 }

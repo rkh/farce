@@ -102,8 +102,10 @@ module Farce
           copy = original.dup
 
           assert Ractor.shareable?(copy)
-          assert_predicate copy, :frozen?
+          refute_predicate copy, :frozen?
           assert_equal :value, copy[:key]
+          assert_equal :added, copy[:added] = :added
+          refute original.key?(:added)
         end
       end
 

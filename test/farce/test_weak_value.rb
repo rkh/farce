@@ -139,6 +139,15 @@ module Farce
       assert_raises(WeakRefError) { reference.value }
       assert_equal "#<Farce::WeakValue state=:moved>", reference.inspect
       assert_equal reference.inspect, reference.pretty_inspect.chomp
+      assert_same reference, reference.freeze
+      assert_same reference, reference.freeze
+      assert Ractor.shareable?(reference)
+      assert_predicate reference, :moved?
+      refute_predicate reference, :alive?
+      assert_raises(WeakRefError) { reference.value }
+      observer = Ractor.new(reference) { |weak| [weak.moved?, weak.alive?, weak.inspect].freeze }
+
+      assert_equal [true, false, "#<Farce::WeakValue state=:moved>"], ractor_value(observer)
     ensure
       if worker
         worker.send(:done)

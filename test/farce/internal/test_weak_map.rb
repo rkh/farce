@@ -110,7 +110,7 @@ module Farce
           map = klass.new
 
           assert_equal flags, [map.weak_keys?, map.weak_values?]
-          assert_predicate map, :frozen?
+          refute_predicate map, :frozen?
           assert Ractor.shareable?(map)
         end
       end

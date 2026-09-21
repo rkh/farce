@@ -422,7 +422,7 @@ module Farce
       [Lease, Local::Lease].each do |klass|
         lease = klass.new { [] }
 
-        assert_predicate lease, :frozen?
+        refute_predicate lease, :frozen?
         assert_predicate lease, :ractor_shareable?
         assert Ractor.shareable?(lease)
       end

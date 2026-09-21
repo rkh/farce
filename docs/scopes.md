@@ -62,7 +62,7 @@ Thread.current[:scopes_example] = nil
 
 ## One handle, separate contents
 
-A `Farce::Local` object is a shareable handle. Each operation finds the contents associated with the current scope. The handle can be frozen and shared even though those contents remain mutable. Unlike a named slot in Ruby's built-in local storage, the local instance can also be garbage collected while the surrounding Ractor, thread, or fiber is still alive.
+A `Farce::Local` object is a shareable handle. Each operation finds the contents associated with the current scope. The handle is shareable while its contents remain mutable. Freezing a Local data container prevents explicit changes in every scope, including scopes first accessed later. Each scope keeps its own values. Local services such as queues and leases, and `Local::Lazy`, reject freezing with `TypeError`. Unlike a named slot in Ruby's built-in local storage, the local instance can also be garbage collected while the surrounding Ractor, thread, or fiber is still alive.
 
 ```ruby
 require "farce"
@@ -79,8 +79,10 @@ child_value                          # => :child
 context[:request_id]                 # => :parent
 context.scope                        # => :fiber
 Farce::Ractor.shareable?(context)    # => true
-context.frozen?                      # => true
+context.frozen?                      # => false
 ```
+
+Call `freeze` only after coordinating with writers. It does not wait for operations already in progress. Freezing is shallow, so objects stored in a container remain independently mutable. Weak containers still allow garbage collection of their contents.
 
 Load `farce` before running the remaining examples. Each code block is independent. Examples use `Farce::Ractor` so they can also use Farce's compatibility layer where native Ractors are unavailable.
 

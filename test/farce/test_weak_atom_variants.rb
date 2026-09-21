@@ -141,8 +141,36 @@ module Farce
 
       assert_instance_of Internal::WeakAtom, atom.instance_variable_get(:@atom)
       assert_predicate atom, :ractor_shareable?
-      assert_predicate atom, :frozen?
+      refute_predicate atom, :frozen?
       assert Ractor.shareable?(atom)
+    end
+
+    def test_strict_freeze_rejects_writes_but_not_weak_collection
+      value = Object.new.freeze
+      atom = Strict::WeakAtom.new(value)
+
+      assert_same atom, atom.freeze
+      assert_predicate atom, :frozen?
+      assert_raises(FrozenError) { atom.store(:replacement) }
+      assert_same value, atom.value
+    end
+
+    def test_strict_frozen_copy_states_are_independent
+      value = Object.new.freeze
+      source = Strict::WeakAtom.new(value)
+      source.freeze
+
+      duplicated = source.dup
+      cloned = source.clone
+      mutable_clone = source.clone(freeze: false)
+
+      refute_predicate duplicated, :frozen?
+      assert_predicate cloned, :frozen?
+      refute_predicate mutable_clone, :frozen?
+      assert_equal :duplicate, duplicated.store(:duplicate)
+      assert_equal :clone, mutable_clone.store(:clone)
+      assert_same value, source.value
+      assert_same value, cloned.value
     end
 
     def test_strict_variant_runs_updates_in_the_requesting_ractor
@@ -160,6 +188,16 @@ module Farce
 
       assert_equal [1, 1], ractor_value(worker)
       assert_equal 1, atom.value
+    end
+
+    def test_strict_variant_can_be_constructed_in_a_non_main_ractor
+      return unless Internal.native_ractors?
+
+      worker = Ractor.new { Farce::Strict::WeakAtom.new(:initial) }
+      atom = ractor_value(worker)
+
+      refute_predicate atom, :frozen?
+      assert_equal :replacement, atom.store(:replacement)
     end
 
     def test_strict_variant_rejects_explicitly_unshareable_values

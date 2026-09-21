@@ -14,7 +14,7 @@ module Farce
   #
   #   map.values # => [["published"], ["draft"]]
   class TreeMap < Farce::Abstract::TreeMap
-    include Shareable
+    include Shareable::Delegated
 
     # @!macro modes
     # @param entries [Hash, Array<Array(BasicObject, BasicObject)>, Abstract::Map, #each, nil]
@@ -40,10 +40,15 @@ module Farce
     protected
 
     def unwrap_value(value) = @manager.unwrap(value)
-    def wrap_value(value)   = @manager.wrap(value)
+
+    def wrap_value(value)
+      check_frozen!
+      @manager.wrap(value)
+    end
 
     private
 
     def new_tree_map(...) = Internal::StrictTreeMap.new(...)
+    def freeze_backend    = internal_map
   end
 end

@@ -70,6 +70,7 @@ module Farce
             @compare_values_by_identity = compare_values_by_identity
             @guard = guard
             @state = state
+            @freeze_state = Flag.new(false)
             JVMContainers.freeze_object(self)
           end
         end
@@ -77,13 +78,32 @@ module Farce
 
       def [](key)
         key     = canonical_key(key)
-        wrapped = access { core.get(Box.new(key), key_hash(key)) }
+        wrapped = access do
+          frozen? ? core.observe(Box.new(key), key_hash(key)) : core.get(Box.new(key), key_hash(key))
+        end
         JVMContainers.nullable(wrapped)&.value
       end
 
+      def freeze
+        state = @freeze_state
+        return super unless state
+
+        state.set
+        self
+      end
+
+      def frozen?
+        state = @freeze_state
+        state ? state.value : super
+      end
+
       def []=(key, value)
+        check_frozen!
         key = canonical_key(key)
-        access { core.put(Box.new(key), Box.new(value), key_hash(key)) }
+        access do
+          check_frozen!
+          core.put(Box.new(key), Box.new(value), key_hash(key))
+        end
         value
       end
 
@@ -98,7 +118,9 @@ module Farce
 
         warn "block supersedes default value argument", uplevel: 1 if block_given? && default_given
 
-        wrapped = access { core.get(Box.new(key), key_hash(key)) }
+        wrapped = access do
+          frozen? ? core.observe(Box.new(key), key_hash(key)) : core.get(Box.new(key), key_hash(key))
+        end
         wrapped = JVMContainers.nullable(wrapped)
 
         return wrapped.value       if wrapped
@@ -130,31 +152,39 @@ module Farce
       end
 
       def delete(key)
+        check_frozen!
         key     = canonical_key(key)
-        wrapped = access { core.delete(Box.new(key), key_hash(key)) }
+        wrapped = access do
+          check_frozen!
+          core.delete(Box.new(key), key_hash(key))
+        end
         JVMContainers.nullable(wrapped)&.value
       end
 
       def clear
-        access { core.clear }
+        check_frozen!
+        access { check_frozen!.then { core.clear } }
         self
       end
 
       def max_size = access { core.getMaxSize }
 
       def max_size=(limit)
+        check_frozen!
         limit = normalize_limit(limit, "max_size")
-        access { core.setMaxSize(limit) }
+        access { check_frozen!.then { core.setMaxSize(limit) } }
         limit
       end
 
       def prune(to:)
+        check_frozen!
         limit = normalize_limit(to, "to")
-        access { core.prune(limit) }
+        access { check_frozen!.then { core.prune(limit) } }
       end
 
       def shift
-        pair = JVMContainers.nullable(access { core.shift })
+        check_frozen!
+        pair = JVMContainers.nullable(access { check_frozen!.then { core.shift } })
         [pair[0].value, pair[1].value] if pair
       end
 
@@ -198,11 +228,14 @@ module Farce
           @compare_values_by_identity = other.compare_values_by_identity?
           @guard = JVMOperationGuard.new(synchronized: true, label: "bounded map")
           @state = State.new(other.send(:core).copy)
+          @freeze_state = Flag.new(false)
           JVMContainers.freeze_object(self)
         end
       end
 
       private
+
+      def check_frozen! = Internal::Freeze.check(self)
 
       def access(&)
         raise "bounded map is not initialized" unless defined?(@guard) && @guard

@@ -11,14 +11,17 @@ module Farce
     # Only the Vault accesses this slot. Publishing belongs here so interrupted
     # callers cannot leave a committed value without notifying its observers.
     class VaultWeakAtomSlot
-      def initialize(value, changes)
+      def initialize(value, changes, freeze_state)
         @reference = UnsharedWeakMapWeakReference.for(value)
         @changes = changes
+        @freeze_state = freeze_state
       end
 
       def value = @reference.read.last
 
       def store(value)
+        raise FrozenError, "can't modify frozen weak atom" if @freeze_state.value
+
         @reference = UnsharedWeakMapWeakReference.for(value)
         @changes.update { |generation| generation + 1 }
         nil
@@ -35,8 +38,8 @@ module Farce
       def initialize_storage(value)
         @token = Object.new.freeze
         @vault = OWNER.store_if_absent { Vault.new }
-        @vault.weak_atom(@token, :create, value, @changes)
-        freeze
+        @vault.weak_atom(@token, :create, value, @changes, @freeze_state)
+        Internal::Freeze.publish(self)
       end
 
       def validate_value(value)

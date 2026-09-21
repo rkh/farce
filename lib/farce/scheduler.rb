@@ -30,7 +30,7 @@ module Farce
   #   Fiber.set_scheduler(scheduler)
   #   Fiber.schedule { puts "Hello from the scheduler!" }
   class Scheduler < Farce::Abstract::Scheduler
-    include Shareable
+    include Shareable::Unfreezable
 
     CLOSED_STATES = Set[:closed, :closing, :error].freeze
     private_constant :CLOSED_STATES

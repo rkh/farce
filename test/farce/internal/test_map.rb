@@ -86,7 +86,7 @@ module Farce
         assert map.key?(key)
         assert_equal 1, map.size
         if Internal.native_ractors?
-          assert_predicate map, :frozen?
+          refute_predicate map, :frozen?
           assert Ractor.shareable?(map)
         end
 

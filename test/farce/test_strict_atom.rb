@@ -19,7 +19,7 @@ module Farce
       assert_kind_of Abstract::Atom, atom
       assert_kind_of Abstract::Value, atom
       refute_kind_of Abstract::WeakAtom, atom
-      assert_predicate atom, :frozen?
+      refute_predicate atom, :frozen?
       assert_predicate atom, :ractor_shareable?
       assert Ractor.shareable?(atom)
       refute_respond_to atom, :mode

@@ -9,7 +9,9 @@ module Farce
   module Internal # :nodoc: all
     class Vault
       class Manager
-        private def receive_request
+        private
+
+        def receive_request
           message = ::Ractor.receive
           return message if message.first.is_a?(Symbol)
 
@@ -17,7 +19,7 @@ module Farce
           [action, *arguments, ticket]
         end
 
-        private def respond(port, message, move: false)
+        def respond(port, message, move: false)
           return port.store(::Ractor.make_shareable(message)) if port.is_a?(Atom)
           ::Ractor.yield([port, message].freeze, move:)
         end
@@ -27,7 +29,7 @@ module Farce
         @lock     = Lock.new
         @sequence = Counter.new
         @ractor   = ::Ractor.new { Manager.new.run }
-        ::Ractor.make_shareable(self)
+        Freeze.publish(self)
       end
 
       private

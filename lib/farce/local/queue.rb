@@ -14,6 +14,7 @@ module Farce
     #   @option options [:auto, :io, :block] fiber_wait (:auto) how scheduled fibers wait on CRuby
     #   @return [Queue]
     class Queue < Abstract::Queue
+      include Shareable::Unfreezable
       include Scoped
 
       # @return [Symbol] always returns `:local`

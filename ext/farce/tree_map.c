@@ -436,6 +436,17 @@ tc_map_mark_node(tc_link *link)
 }
 
 static void
+tc_map_validate_shareable_node(tc_link *link)
+{
+    if (link == NULL) return;
+    tc_map_node *node = TC_MAP_NODE(link);
+    containers_check_shareable(node->key);
+    containers_check_shareable(node->value);
+    tc_map_validate_shareable_node(link->left);
+    tc_map_validate_shareable_node(link->right);
+}
+
+static void
 tc_map_compact_node(tc_link *link)
 {
     tc_map_node *node;
@@ -699,6 +710,14 @@ tc_core_map_get_raw(VALUE self)
         return core;
     }
     rb_raise(rb_eTypeError, "wrong tree map type");
+}
+
+static void
+tc_core_map_validate_references(VALUE self)
+{
+    tc_core_map *core;
+    TypedData_Get_Struct(self, tc_core_map, &tc_shared_map_type, core);
+    tc_map_validate_shareable_node(core->map.root);
 }
 
 static tc_core_map *
@@ -1029,10 +1048,7 @@ tc_core_map_check_value(const tc_core_map *core, VALUE value)
 static void
 tc_core_map_check_mutation(VALUE self, const tc_core_map *core)
 {
-    /* A shareable core is intentionally frozen: its C API remains the
-     * controlled mutation boundary. Other cores retain ordinary Ruby freeze
-     * semantics. */
-    if (!core->shareable_container) rb_check_frozen(self);
+    rb_check_frozen(self);
     if (core->map.guard != 0) {
         rb_raise(rb_eRuntimeError, "container cannot be modified during comparison");
     }
@@ -1067,11 +1083,10 @@ tc_core_map_make_shareable(VALUE opaque)
     tc_core_map_publication *publication =
         (tc_core_map_publication *)opaque;
 
-    /* Primitive freeze bypasses an override on the receiver. The publication
-     * gate and logical owner were installed before this point, so becoming
-     * provisionally Ractor-visible cannot expose uninitialized native state. */
-    rb_obj_freeze(publication->self);
-    return rb_ractor_make_shareable(publication->self);
+    return containers_publish_native_with_references(
+        publication->self,
+        tc_core_map_validate_references
+    );
 }
 
 static VALUE
@@ -1374,7 +1389,7 @@ tc_core_map_store_body(VALUE opaque)
         &arguments->core->map,
         arguments->key,
         arguments->value,
-        !arguments->core->shareable_container
+        true
     );
 }
 

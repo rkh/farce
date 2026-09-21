@@ -12,13 +12,16 @@ module Farce
     #
     #   map.to_a # => [[1, "one"], [2, "two"]]
     class TreeMap < Abstract::TreeMap
-      include Shareable
+      include Shareable::Delegated
 
       # Values must already be Ractor-shareable.
       # @return [true]
       def shareable_values? = true
 
-      private def new_tree_map(...) = Internal::StrictTreeMap.new(...)
+      private
+
+      def new_tree_map(...) = Internal::StrictTreeMap.new(...)
+      def freeze_backend    = internal_map
     end
   end
 end

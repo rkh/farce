@@ -7,7 +7,7 @@ module Farce
     def test_is_shareable
       lock = ReadWriteLock.new
 
-      assert_predicate lock, :frozen?
+      refute_predicate lock, :frozen?
       assert_predicate lock, :ractor_shareable?
       assert Ractor.shareable?(lock) if Internal.native_ractors?
     end

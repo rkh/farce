@@ -11,6 +11,8 @@ module Farce
     # Java owns the lock, ordered buckets, FIFO links, and cancellation index.
     # Ruby callbacks retain Ruby comparison, identity, and notification semantics.
     class PriorityQueue
+      include Freeze::Unfreezable
+
       Box                 = Struct.new(:value)
       INITIALIZATION_LOCK = Mutex.new
       JAVA_CAPACITY_MAX   = (1 << 63) - 1

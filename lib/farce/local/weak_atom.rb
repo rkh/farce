@@ -13,7 +13,8 @@ module Farce
     #   @param scope [Symbol] the scope of the weak atomic reference
     #   @return [WeakAtom]
     class WeakAtom < Abstract::WeakAtom
-      include Scoped
+      include Shareable::Tracked
+      include Scoped::Tracked
 
       private
 

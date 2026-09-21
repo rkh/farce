@@ -18,6 +18,8 @@ static VALUE map_keep;
 static VALUE map_delete_token;
 static VALUE cUnsharedKeyLockMap;
 static VALUE cSharedKeyLockMap;
+static VALUE eIsolationError;
+static const rb_data_type_t map_type;
 
 
 typedef enum { MAP_EMPTY = 0, MAP_OCCUPIED = 1, MAP_TOMBSTONE = 2 } map_slot_state_t;
@@ -205,6 +207,18 @@ map_compact(void *pointer)
             map->slots[index].key = rb_gc_location(map->slots[index].key);
             map->slots[index].value = rb_gc_location(map->slots[index].value);
         }
+    }
+}
+
+static void
+map_validate_references(VALUE self)
+{
+    map_t *map;
+    TypedData_Get_Struct(self, map_t, &map_type, map);
+    for (size_t index = 0; index < map->capacity; index++) {
+        if (map->slots[index].state != MAP_OCCUPIED) continue;
+        containers_check_shareable(map->slots[index].key);
+        containers_check_shareable(map->slots[index].value);
     }
 }
 
@@ -701,6 +715,7 @@ map_prepare_insert(map_t *map)
 
 static VALUE
 map_store_locked(
+    VALUE self,
     map_t *map,
     VALUE key,
     VALUE value,
@@ -711,6 +726,10 @@ map_store_locked(
     bool found;
     map_prepare_insert(map);
     size_t index = map_find_slot(map, key, hash, &found, context);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     map_slot_t *slot = &map->slots[index];
     if (!found) {
         if (slot->state == MAP_TOMBSTONE) map->tombstones--;
@@ -725,16 +744,24 @@ map_store_locked(
 }
 
 static VALUE
-map_prepare_key(map_t *map, VALUE key)
+map_normalize_key(map_t *map, VALUE key)
 {
     if (!map->compare_keys_by_identity && RB_TYPE_P(key, T_STRING) && !RB_OBJ_FROZEN(key)) {
         key = containers_normalize_string_key(key);
     }
+    return key;
+}
+
+static VALUE
+map_prepare_key(map_t *map, VALUE key)
+{
+    key = map_normalize_key(map, key);
     containers_check_shareable(key);
     return key;
 }
 
 typedef struct {
+    VALUE self;
     map_t *map;
     map_execution_context_t execution;
 } map_init_context_t;
@@ -747,7 +774,7 @@ map_initialize_entry(VALUE key, VALUE value, VALUE opaque)
     containers_check_shareable(value);
     st_index_t hash = map_key_hash(context->map, key);
     map_lock_state(context->map, &context->execution);
-    map_store_locked(context->map, key, value, hash, &context->execution);
+    map_store_locked(context->self, context->map, key, value, hash, &context->execution);
     pthread_mutex_unlock(&context->map->lock);
     return ST_CONTINUE;
 }
@@ -785,13 +812,14 @@ map_initialize(int argc, VALUE *argv, VALUE self)
     if (!NIL_P(mapping)) {
         Check_Type(mapping, T_HASH);
         map_init_context_t context = {
+            .self = self,
             .map = map,
             .execution = map_current_execution_context(),
         };
         rb_hash_foreach(mapping, map_initialize_entry, (VALUE)&context);
     }
     map->initialized = true;
-    containers_finish_initialization(self);
+    containers_publish_native_with_references(self, map_validate_references);
     return self;
 }
 
@@ -809,6 +837,24 @@ map_get(VALUE self, VALUE key)
     if (found) result = map->slots[index].value;
     pthread_mutex_unlock(&map->lock);
     return result;
+}
+
+static VALUE
+map_check_mutation(VALUE self)
+{
+    rb_check_frozen(self);
+    return self;
+}
+
+static VALUE
+map_prepare_mutation_key(VALUE self, VALUE key)
+{
+    rb_check_frozen(self);
+    key = map_normalize_key(get_map(self), key);
+    if (!rb_ractor_shareable_p(key)) {
+        rb_raise(eIsolationError, "key must be Ractor-shareable");
+    }
+    return key;
 }
 
 static VALUE
@@ -846,13 +892,15 @@ map_fetch(int argc, VALUE *argv, VALUE self)
 static VALUE
 map_set(VALUE self, VALUE key, VALUE value)
 {
+    rb_check_frozen(self);
     map_t *map = get_map(self);
     key = map_prepare_key(map, key);
     containers_check_shareable(value);
     st_index_t hash = map_key_hash(map, key);
+    rb_check_frozen(self);
     map_execution_context_t execution = map_current_execution_context();
     map_lock_for_key(map, key, hash, &execution);
-    map_store_locked(map, key, value, hash, &execution);
+    map_store_locked(self, map, key, value, hash, &execution);
     pthread_mutex_unlock(&map->lock);
     return value;
 }
@@ -890,14 +938,20 @@ map_getkey(VALUE self, VALUE key)
 static VALUE
 map_delete(VALUE self, VALUE key)
 {
+    rb_check_frozen(self);
     map_t *map = get_map(self);
     key = map_prepare_key(map, key);
     st_index_t hash = map_key_hash(map, key);
+    rb_check_frozen(self);
     bool found;
     VALUE result = Qnil;
     map_execution_context_t execution = map_current_execution_context();
     map_lock_for_key(map, key, hash, &execution);
     size_t index = map_find_slot(map, key, hash, &found, &execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     if (found) {
         map_slot_t *slot = &map->slots[index];
         result = slot->value;
@@ -915,6 +969,7 @@ map_delete(VALUE self, VALUE key)
 static VALUE
 map_clear(VALUE self)
 {
+    rb_check_frozen(self);
     map_t *map = get_map(self);
     map_execution_context_t execution = map_current_execution_context();
     map_lock_state(map, &execution);
@@ -934,6 +989,7 @@ map_clear(VALUE self)
 }
 
 typedef struct {
+    VALUE self;
     map_t *map;
     map_execution_context_t execution;
     VALUE key;
@@ -965,10 +1021,12 @@ map_store_body(VALUE opaque)
     map_operation_t *operation = (map_operation_t *)opaque;
     VALUE result = rb_yield_values(0);
     containers_check_shareable(result);
+    rb_check_frozen(operation->self);
     map_lock_state(operation->map, &operation->execution);
     bool stored = !operation->reservation->invalidated;
     if (stored) {
         map_store_locked(
+            operation->self,
             operation->map,
             operation->key,
             result,
@@ -985,6 +1043,7 @@ map_store_body(VALUE opaque)
 static VALUE
 map_store_if_absent(int argc, VALUE *argv, VALUE self)
 {
+    rb_check_frozen(self);
     VALUE key;
     VALUE keywords = Qnil;
     VALUE keyword_values[1] = {Qundef};
@@ -995,6 +1054,7 @@ map_store_if_absent(int argc, VALUE *argv, VALUE self)
     map_t *map = get_map(self);
     key = map_prepare_key(map, key);
     map_operation_t operation = {
+        .self = self,
         .map = map,
         .execution = map_current_execution_context(),
         .key = key,
@@ -1002,6 +1062,7 @@ map_store_if_absent(int argc, VALUE *argv, VALUE self)
     };
     rb_need_block();
     operation.hash = map_key_hash(map, key);
+    rb_check_frozen(self);
     map_timeout_t timeout = map_parse_timeout(
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
@@ -1009,8 +1070,16 @@ map_store_if_absent(int argc, VALUE *argv, VALUE self)
     if (!map_lock_for_key_with_timeout(
         map, key, operation.hash, &timeout, &operation.execution
     )) return Qnil;
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     bool found;
     size_t index = map_find_slot(map, key, operation.hash, &found, &operation.execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     if (found) {
         VALUE value = map->slots[index].value;
         pthread_mutex_unlock(&map->lock);
@@ -1030,11 +1099,13 @@ map_cas_body(VALUE opaque)
     bool matches = operation->identity
         ? operation->current == operation->argument
         : RTEST(rb_equal(operation->current, operation->argument));
+    rb_check_frozen(operation->self);
 
     map_lock_state(operation->map, &operation->execution);
     bool replaced = matches && !operation->reservation->invalidated;
     if (replaced) {
         map_store_locked(
+            operation->self,
             operation->map,
             operation->key,
             operation->replacement,
@@ -1051,6 +1122,7 @@ map_cas_body(VALUE opaque)
 static VALUE
 map_compare_and_set(int argc, VALUE *argv, VALUE self)
 {
+    rb_check_frozen(self);
     VALUE key;
     VALUE expected;
     VALUE replacement;
@@ -1063,6 +1135,7 @@ map_compare_and_set(int argc, VALUE *argv, VALUE self)
     map_t *map = get_map(self);
     key = map_prepare_key(map, key);
     map_operation_t operation = {
+        .self = self,
         .map = map,
         .execution = map_current_execution_context(),
         .key = key,
@@ -1074,6 +1147,7 @@ map_compare_and_set(int argc, VALUE *argv, VALUE self)
     containers_check_shareable(expected);
     containers_check_shareable(replacement);
     operation.hash = map_key_hash(map, key);
+    rb_check_frozen(self);
     map_timeout_t timeout = map_parse_timeout(
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
@@ -1083,6 +1157,10 @@ map_compare_and_set(int argc, VALUE *argv, VALUE self)
     )) return Qfalse;
     bool found;
     size_t index = map_find_slot(map, key, operation.hash, &found, &operation.execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     if (!found) {
         pthread_mutex_unlock(&map->lock);
         return Qfalse;
@@ -1104,16 +1182,21 @@ map_modify_body(VALUE opaque)
     bool remove = value == map_delete_token;
     bool store = !remove && value != map_keep;
     if (store) containers_check_shareable(value);
+    rb_check_frozen(operation->self);
     map_lock_state(operation->map, &operation->execution);
     bool changed = false;
     if (store && !operation->reservation->invalidated) {
-        map_store_locked(operation->map, operation->key, value,
+        map_store_locked(operation->self, operation->map, operation->key, value,
             operation->hash, &operation->execution);
         changed = true;
     } else if (remove && !operation->reservation->invalidated) {
         bool found;
         size_t index = map_find_slot(operation->map, operation->key,
             operation->hash, &found, &operation->execution);
+        if (RB_OBJ_FROZEN(operation->self)) {
+            pthread_mutex_unlock(&operation->map->lock);
+            rb_check_frozen(operation->self);
+        }
         if (found) {
             map_slot_t *slot = &operation->map->slots[index];
             slot->key = Qnil;
@@ -1134,19 +1217,26 @@ map_modify_body(VALUE opaque)
 static VALUE
 map_modify(VALUE self, VALUE key)
 {
+    rb_check_frozen(self);
     rb_need_block();
     map_t *map = get_map(self);
     key = map_prepare_key(map, key);
     map_operation_t operation = {
+        .self = self,
         .execution = map_current_execution_context(),
         .map = map,
         .key = key,
         .complete = false,
     };
     operation.hash = map_key_hash(map, key);
+    rb_check_frozen(self);
     map_lock_for_key(map, key, operation.hash, &operation.execution);
     bool found;
     size_t index = map_find_slot(map, key, operation.hash, &found, &operation.execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     operation.present = found;
     operation.current = found ? map->slots[index].value : Qnil;
     operation.reservation = map_begin_reservation_locked(map, key, operation.hash, &operation.execution);
@@ -1160,10 +1250,12 @@ map_upsert_body(VALUE opaque)
     map_operation_t *operation = (map_operation_t *)opaque;
     VALUE result = rb_yield(operation->current);
     containers_check_shareable(result);
+    rb_check_frozen(operation->self);
     map_lock_state(operation->map, &operation->execution);
     bool stored = !operation->reservation->invalidated;
     if (stored) {
         map_store_locked(
+            operation->self,
             operation->map,
             operation->key,
             result,
@@ -1180,6 +1272,7 @@ map_upsert_body(VALUE opaque)
 static VALUE
 map_upsert(int argc, VALUE *argv, VALUE self)
 {
+    rb_check_frozen(self);
     VALUE key;
     VALUE initial;
     VALUE keywords = Qnil;
@@ -1191,6 +1284,7 @@ map_upsert(int argc, VALUE *argv, VALUE self)
     map_t *map = get_map(self);
     key = map_prepare_key(map, key);
     map_operation_t operation = {
+        .self = self,
         .map = map,
         .execution = map_current_execution_context(),
         .key = key,
@@ -1199,6 +1293,7 @@ map_upsert(int argc, VALUE *argv, VALUE self)
     containers_check_shareable(initial);
     rb_need_block();
     operation.hash = map_key_hash(map, key);
+    rb_check_frozen(self);
     map_timeout_t timeout = map_parse_timeout(
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
@@ -1208,8 +1303,12 @@ map_upsert(int argc, VALUE *argv, VALUE self)
     )) return Qnil;
     bool found;
     size_t index = map_find_slot(map, key, operation.hash, &found, &operation.execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     if (!found) {
-        map_store_locked(map, key, initial, operation.hash, &operation.execution);
+        map_store_locked(self, map, key, initial, operation.hash, &operation.execution);
         pthread_mutex_unlock(&map->lock);
         return initial;
     }
@@ -1366,6 +1465,7 @@ map_get_with_timeout(int argc, VALUE *argv, VALUE self)
 static VALUE
 map_store_with_timeout(int argc, VALUE *argv, VALUE self)
 {
+    rb_check_frozen(self);
     VALUE key;
     VALUE value;
     VALUE keywords = Qnil;
@@ -1378,12 +1478,13 @@ map_store_with_timeout(int argc, VALUE *argv, VALUE self)
     key = map_prepare_key(map, key);
     containers_check_shareable(value);
     st_index_t hash = map_key_hash(map, key);
+    rb_check_frozen(self);
     map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
     map_execution_context_t execution = map_current_execution_context();
     if (!map_lock_for_key_with_timeout(map, key, hash, &timeout, &execution)) {
         return map_timeout_result();
     }
-    map_store_locked(map, key, value, hash, &execution);
+    map_store_locked(self, map, key, value, hash, &execution);
     pthread_mutex_unlock(&map->lock);
     return value;
 }
@@ -1391,6 +1492,7 @@ map_store_with_timeout(int argc, VALUE *argv, VALUE self)
 static VALUE
 map_swap(int argc, VALUE *argv, VALUE self)
 {
+    rb_check_frozen(self);
     VALUE key;
     VALUE replacement;
     VALUE keywords = Qnil;
@@ -1403,6 +1505,7 @@ map_swap(int argc, VALUE *argv, VALUE self)
     key = map_prepare_key(map, key);
     containers_check_shareable(replacement);
     st_index_t hash = map_key_hash(map, key);
+    rb_check_frozen(self);
     map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
     map_execution_context_t execution = map_current_execution_context();
     if (!map_lock_for_key_with_timeout(map, key, hash, &timeout, &execution)) {
@@ -1411,8 +1514,12 @@ map_swap(int argc, VALUE *argv, VALUE self)
 
     bool found;
     size_t index = map_find_slot(map, key, hash, &found, &execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     VALUE previous = found ? map->slots[index].value : Qnil;
-    map_store_locked(map, key, replacement, hash, &execution);
+    map_store_locked(self, map, key, replacement, hash, &execution);
     pthread_mutex_unlock(&map->lock);
     return previous;
 }
@@ -1482,6 +1589,7 @@ map_wait_until_non_nil(int argc, VALUE *argv, VALUE self)
 static VALUE
 map_update(int argc, VALUE *argv, VALUE self)
 {
+    rb_check_frozen(self);
     VALUE key;
     VALUE keywords = Qnil;
     VALUE keyword_values[1] = {Qundef};
@@ -1492,6 +1600,7 @@ map_update(int argc, VALUE *argv, VALUE self)
     map_t *map = get_map(self);
     key = map_prepare_key(map, key);
     map_operation_t operation = {
+        .self = self,
         .map = map,
         .execution = map_current_execution_context(),
         .key = key,
@@ -1499,6 +1608,7 @@ map_update(int argc, VALUE *argv, VALUE self)
     };
     rb_need_block();
     operation.hash = map_key_hash(map, key);
+    rb_check_frozen(self);
     map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
 
     if (!map_lock_for_key_with_timeout(
@@ -1506,6 +1616,10 @@ map_update(int argc, VALUE *argv, VALUE self)
     )) return Qnil;
     bool found;
     size_t index = map_find_slot(map, key, operation.hash, &found, &operation.execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     operation.current = found ? map->slots[index].value : Qnil;
     operation.reservation = map_begin_reservation_locked(
         map, key, operation.hash, &operation.execution
@@ -1527,11 +1641,26 @@ key_lock_get_raw(VALUE self)
     return map;
 }
 
+static void
+shared_key_lock_validate_references(VALUE self)
+{
+    key_lock_map_t *storage;
+    TypedData_Get_Struct(self, key_lock_map_t, &shared_key_lock_type, storage);
+    map_t *map = &storage->core;
+    for (size_t index = 0; index < map->capacity; index++) {
+        if (map->slots[index].state != MAP_OCCUPIED) continue;
+        containers_check_shareable(map->slots[index].key);
+        containers_check_shareable(map->slots[index].value);
+    }
+    for (map_reservation_t *reservation = map->reservations; reservation; reservation = reservation->next) {
+        containers_check_shareable(reservation->key);
+    }
+}
+
 static VALUE
 key_lock_publish(VALUE self)
 {
-    containers_finish_initialization(self);
-    return self;
+    return containers_publish_native_with_references(self, shared_key_lock_validate_references);
 }
 
 static VALUE
@@ -1623,6 +1752,7 @@ key_lock_initialize_copy(VALUE self, VALUE other)
 void
 containers_init_map(VALUE namespace)
 {
+    eIsolationError = rb_const_get(rb_cRactor, rb_intern("IsolationError"));
     map_keep = rb_const_get(namespace, rb_intern("MAP_KEEP"));
     map_delete_token = rb_const_get(namespace, rb_intern("MAP_DELETE"));
     rb_global_variable(&map_keep);
@@ -1638,12 +1768,15 @@ containers_init_map(VALUE namespace)
     rb_define_method(cSharedKeyLockMap, "initialize", key_lock_initialize, -1);
     rb_define_method(cSharedKeyLockMap, "initialize_copy", key_lock_initialize_copy, 1);
     rb_define_method(cSharedKeyLockMap, "synchronize", key_lock_synchronize, 1);
+    rb_define_method(cSharedKeyLockMap, "freeze", containers_raise_unfreezable, 0);
 
     cMap = rb_define_class_under(namespace, "Map", rb_cObject);
     rb_define_alloc_func(cMap, map_allocate);
     rb_define_method(cMap, "initialize", map_initialize, -1);
     rb_define_method(cMap, "[]", map_get, 1);
     rb_define_method(cMap, "[]=", map_set, 2);
+    rb_define_method(cMap, "check_mutation", map_check_mutation, 0);
+    rb_define_method(cMap, "prepare_mutation_key", map_prepare_mutation_key, 1);
     rb_define_method(cMap, "fetch", map_fetch, -1);
     rb_define_method(cMap, "get", map_get_with_timeout, -1);
     rb_define_method(cMap, "store", map_store_with_timeout, -1);

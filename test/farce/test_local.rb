@@ -20,7 +20,7 @@ module Farce
         assert_kind_of base, object
         assert_kind_of Local::Scoped, object
         assert_equal :ractor, object.scope
-        assert_predicate object, :frozen?
+        refute_predicate object, :frozen?
         assert_predicate object, :ractor_shareable?
         assert Ractor.shareable?(object)
       end

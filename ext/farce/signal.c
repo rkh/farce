@@ -149,13 +149,27 @@ containers_signal_get(VALUE self)
 }
 
 static VALUE
+containers_signal_frozen_p(VALUE self)
+{
+    (void)self;
+    return Qfalse;
+}
+
+static VALUE
+containers_signal_freeze(VALUE self)
+{
+    containers_raise_unfreezable(self);
+    return Qnil;
+}
+
+static VALUE
 containers_signal_initialize(VALUE self)
 {
     containers_signal_t *signal;
     TypedData_Get_Struct(self, containers_signal_t, &containers_signal_type, signal);
     if (signal->initialized) rb_raise(rb_eRuntimeError, "Signal is already initialized");
     signal->initialized = true;
-    containers_finish_initialization(self);
+    containers_publish_native_reference_free(self);
     return self;
 }
 
@@ -324,4 +338,6 @@ containers_init_signal(VALUE namespace)
     rb_define_method(cSignal, "num_waiting", containers_signal_num_waiting, 0);
     rb_define_method(cSignal, "broadcast", containers_signal_broadcast, 0);
     rb_define_method(cSignal, "wait", containers_signal_wait, -1);
+    rb_define_method(cSignal, "freeze", containers_signal_freeze, 0);
+    rb_define_method(cSignal, "frozen?", containers_signal_frozen_p, 0);
 }

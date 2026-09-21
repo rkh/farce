@@ -13,7 +13,7 @@ module Farce
         exchanger = type.new
 
         assert_equal Abstract::Exchanger, type.superclass
-        assert_predicate exchanger, :frozen?
+        refute_predicate exchanger, :frozen?
         assert_predicate exchanger, :ractor_shareable?
         assert Ractor.shareable?(exchanger)
       end

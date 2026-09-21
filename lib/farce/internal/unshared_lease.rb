@@ -7,6 +7,8 @@ module Farce
   module Internal # :nodoc: all
     # Lease storage that passes its resource directly within one Ractor.
     class UnsharedLease < LeaseState
+      include Freeze::Unfreezable
+
       private
 
       def initialize_resource(resource)

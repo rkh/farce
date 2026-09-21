@@ -14,7 +14,8 @@ module Farce
     #   @param scope [Symbol] The scope of the LFU map.
     #   @return [LFUMap]
     class LFUMap < Abstract::LFUMap
-      include Scoped
+      include Shareable::Tracked
+      include Scoped::Tracked
 
       State = Data.define(:map, :key_locks)
       private_constant :State
@@ -24,6 +25,8 @@ module Farce
       def internal_map = scoped_value.map
 
       private
+
+      def freeze_scoped_value(state) = state.map.freeze
 
       def new_copied_scoped_value(map)
         locks = Internal::KeyLockMap.new(

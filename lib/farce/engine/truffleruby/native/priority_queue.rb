@@ -11,6 +11,7 @@ module Farce
     # search locates a priority bucket, whose small Array preserves FIFO order.
     class PriorityQueue
       include TruffleOrderedArraySupport
+      include Freeze::Unfreezable
 
       DEFAULT_CAPACITY = nil
       EMPTY = Object.new.freeze

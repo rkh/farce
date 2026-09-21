@@ -6,6 +6,8 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     class Queue
+      include Freeze::Unfreezable
+
       NIL_VALUE = Object.new.freeze
       attr_reader :capacity
 
@@ -15,7 +17,7 @@ module Farce
         @signal   = Signal.new
         @tracking = track_age ? { lock: Mutex.new, timestamps: [], generation: 0 } : nil
         @lifecycle = { lock: Mutex.new, hard_closed: false }
-        freeze
+        Freeze.publish(self)
       end
 
       def pop(timeout: nil)

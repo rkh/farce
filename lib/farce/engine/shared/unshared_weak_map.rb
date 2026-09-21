@@ -38,6 +38,13 @@ module Farce
 
       def [](key) = read_unreserved(key)[1]
 
+      def check_mutation = check_frozen!
+
+      def prepare_mutation_key(key)
+        check_frozen!
+        canonical_key(key)
+      end
+
       def []=(key, value)
         store(key, value)
       end
@@ -65,16 +72,18 @@ module Farce
       end
 
       def store(key, value, timeout: nil, &fallback)
+        check_frozen!
         deadline          = timeout_deadline(timeout)
-        completed, result = with_entry(key, deadline, create: true) do |_present, _current, entry|
+        completed, result = with_entry(key, deadline, create: true, mutating: true) do |_present, _current, entry|
           value if entry.store(value)
         end
         completed ? result : fallback&.call
       end
 
       def swap(key, replacement, timeout: nil, &fallback)
+        check_frozen!
         deadline          = timeout_deadline(timeout)
-        completed, result = with_entry(key, deadline, create: true) do |present, current, entry|
+        completed, result = with_entry(key, deadline, create: true, mutating: true) do |present, current, entry|
           stored = entry.store(replacement)
           current if stored && present
         end
@@ -83,21 +92,25 @@ module Farce
 
       def store_if_absent(key, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
 
         deadline          = timeout_deadline(timeout)
-        completed, result = with_entry(key, deadline, create: true) do |present, current, entry|
+        completed, result = with_entry(key, deadline, create: true, mutating: true) do |present, current, entry|
           next current if present
           value = yield
+          check_frozen!
           value if entry.store(value)
         end
         completed ? result : nil
       end
 
       def compare_and_set(key, expected, replacement, timeout: nil)
+        check_frozen!
         deadline          = timeout_deadline(timeout)
-        completed, result = with_entry(key, deadline, create: false) do |present, current, entry|
+        completed, result = with_entry(key, deadline, create: false, mutating: true) do |present, current, entry|
           next false unless present && values_equal?(current, expected)
 
+          check_frozen!
           entry.store(replacement)
         end
         completed && result
@@ -105,10 +118,12 @@ module Farce
 
       def update(key, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
 
         deadline          = timeout_deadline(timeout)
-        completed, result = with_entry(key, deadline, create: true) do |_present, current, entry|
+        completed, result = with_entry(key, deadline, create: true, mutating: true) do |_present, current, entry|
           value = yield(current)
+          check_frozen!
           value if entry.store(value)
         end
         completed ? result : nil
@@ -116,10 +131,12 @@ module Farce
 
       def upsert(key, initial_value, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
 
         deadline          = timeout_deadline(timeout)
-        completed, result = with_entry(key, deadline, create: true) do |present, current, entry|
+        completed, result = with_entry(key, deadline, create: true, mutating: true) do |present, current, entry|
           value = present ? yield(current) : initial_value
+          check_frozen!
           value if entry.store(value)
         end
         completed ? result : nil
@@ -130,8 +147,10 @@ module Farce
       # Return whether a change committed.
       def modify(key) # rubocop:disable Naming/PredicateMethod
         raise LocalJumpError, "no block given" unless block_given?
-        _, result = with_entry(key, nil, create: true) do |present, current, entry, index|
+        check_frozen!
+        _, result = with_entry(key, nil, create: true, mutating: true) do |present, current, entry, index|
           value = yield(present, current)
+          check_frozen!
           if MAP_KEEP.equal?(value)
             false
           elsif MAP_DELETE.equal?(value)
@@ -179,7 +198,8 @@ module Farce
       end
 
       def delete(key)
-        completed, result = with_entry(key, nil, create: false) do |present, current, entry, index|
+        check_frozen!
+        completed, result = with_entry(key, nil, create: false, mutating: true) do |present, current, entry, index|
           next nil unless present
           index.remove(key, entry)
           entry.retire
@@ -198,11 +218,20 @@ module Farce
       end
 
       def clear
+        check_frozen!
         @index.clear
         self
       end
 
       private
+
+      def check_frozen! = Internal::Freeze.check(self)
+
+      def canonical_key(key)
+        return key unless String === key && !key.frozen? && !compare_keys_by_identity?
+
+        String.instance_method(:-@).bind_call(key)
+      end
 
       def read_unreserved(key)
         @index.sweep_one
@@ -223,8 +252,8 @@ module Farce
         completed ? [*result, false] : [false, nil, result == :timed_out]
       end
 
-      def with_entry(key, deadline, create:)
-        key = String.instance_method(:-@).bind_call(key) if String === key && !key.frozen? && !compare_keys_by_identity?
+      def with_entry(key, deadline, create:, mutating: false)
+        key = canonical_key(key)
         @index.sweep_one
         while true
           entry, created = @index.resolve(key, deadline:, create:) do |key_reference|
@@ -233,7 +262,10 @@ module Farce
             cell
           end
           return [false, :timed_out] if created == :timed_out
-          return [true, yield(false, nil, nil, @index)] unless entry
+          unless entry
+            check_frozen! if mutating
+            return [true, yield(false, nil, nil, @index)]
+          end
 
           unless created
             status = entry.reserve(deadline)
@@ -244,7 +276,10 @@ module Farce
           retry_entry = false
           begin
             state, present, current = entry.state
-            return [true, yield(present, current, entry, @index)] if state == :ok
+            if state == :ok
+              check_frozen! if mutating
+              return [true, yield(present, current, entry, @index)]
+            end
             retry_entry = true
           ensure
             begin

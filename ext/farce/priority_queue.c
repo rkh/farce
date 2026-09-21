@@ -1096,13 +1096,43 @@ priority_queue_check_initializable(VALUE self, priority_queue_t *queue)
     }
     rb_check_frozen(self);
 
-    /* Publication marks the object busy before primitive freeze. Reject the
-     * narrow pre-freeze window here so a competing initializer cannot enter
+    /* Publication marks the object busy before native shareability is set. Reject the
+     * narrow pre-publication window here so a competing initializer cannot enter
      * user coercion callbacks while publication is already in progress. */
     if (RUBY_ATOMIC_LOAD(queue->publication_state) !=
         PRIORITY_QUEUE_UNINITIALIZED) {
         rb_raise(rb_eRuntimeError, "priority queue is already initialized");
     }
+}
+
+static void
+priority_queue_validate_references(VALUE self)
+{
+    priority_queue_t *queue = priority_queue_get_raw(self);
+
+    containers_check_shareable(queue->owner_fiber);
+    containers_check_shareable(queue->owner_ruby_thread);
+    containers_check_shareable(queue->signal);
+    containers_check_shareable(queue->unshared_self);
+    if (queue->size != 0 || dict_count(&queue->tree) != 0 ||
+        queue->unshared_lock_waiters.count != 0) {
+        rb_raise(rb_eRuntimeError, "priority queue publication requires empty storage");
+    }
+}
+
+static VALUE
+priority_queue_freeze(VALUE self)
+{
+    priority_queue_t *queue = priority_queue_get_raw(self);
+    if (queue->shared) containers_raise_unfreezable(self);
+    return rb_obj_freeze(self);
+}
+
+static VALUE
+priority_queue_frozen_p(VALUE self)
+{
+    priority_queue_t *queue = priority_queue_get_raw(self);
+    return queue->shared ? Qfalse : rb_obj_frozen_p(self);
 }
 
 static VALUE
@@ -1111,11 +1141,10 @@ priority_queue_make_shareable(VALUE opaque)
     priority_queue_initialize_t *initialization =
         (priority_queue_initialize_t *)opaque;
 
-    /* Primitive freeze bypasses an override on the receiver. The publication
-     * gate and logical owner were installed before this point, so becoming
-     * provisionally Ractor-visible cannot expose uninitialized native state. */
-    rb_obj_freeze(initialization->self);
-    return rb_ractor_make_shareable(initialization->self);
+    return containers_publish_native_with_references(
+        initialization->self,
+        priority_queue_validate_references
+    );
 }
 
 static VALUE
@@ -1144,9 +1173,9 @@ priority_queue_publish_shareable(priority_queue_initialize_t *initialization)
 {
     priority_queue_t *queue = initialization->queue;
 
-    /* Install the gate before primitive freeze can make this typed object
-     * Ractor-visible. Move the logical owner out of dmark before recursive
-     * sharing, while retaining it for callback reentry/deadlock detection. */
+    /* Install the gate before native publication can make this typed object
+     * Ractor-visible. Move the logical owner out of dmark, while retaining it
+     * for callback reentry and deadlock detection. */
     priority_queue_mutex_lock(queue);
     RUBY_ATOMIC_SET(queue->publication_state, PRIORITY_QUEUE_PUBLISHING);
     queue->publication_owner_fiber = queue->owner_fiber;
@@ -1189,8 +1218,8 @@ priority_queue_initialize_commit(VALUE opaque)
     queue->capacity = initialization->capacity;
     queue->track_age = initialization->track_age;
     queue->signal = initialization->signal;
-    /* Publication installs its logical gate before primitive freezing and
-     * keeps that whole transition under nested ensure cleanup. */
+    /* Publication installs its logical gate before marking the object shareable
+     * and keeps that whole transition under nested ensure cleanup. */
     if (queue->shared) return priority_queue_publish_shareable(initialization);
     rb_obj_freeze(initialization->self);
     RUBY_ATOMIC_SET(queue->publication_state, PRIORITY_QUEUE_INITIALIZED);
@@ -2000,6 +2029,8 @@ priority_queue_define_methods(VALUE klass)
     rb_define_method(klass, "oldest_enqueued_at", priority_queue_oldest_enqueued_at, 0);
     rb_define_method(klass, "oldest_age", priority_queue_oldest_age, 0);
     rb_define_method(klass, "capacity", priority_queue_capacity, 0);
+    rb_define_method(klass, "freeze", priority_queue_freeze, 0);
+    rb_define_method(klass, "frozen?", priority_queue_frozen_p, 0);
 }
 
 void

@@ -310,9 +310,36 @@ lru_get(VALUE self)
 static void
 lru_check_mutable(VALUE self, lru_map_t *map)
 {
-    if (!map->shareable_container ||
-        RUBY_ATOMIC_LOAD(map->state) != LRU_INITIALIZED) {
-        rb_check_frozen(self);
+    (void)map;
+    rb_check_frozen(self);
+}
+
+static void
+lru_validate_references(VALUE self)
+{
+    lru_map_t *map;
+    TypedData_Get_Struct(self, lru_map_t, &lru_shared_map_type, map);
+    containers_check_shareable(map->lock);
+    if (map->lfu_policy) {
+        for (lfu_bucket_t *bucket = map->least_frequency;
+             bucket != NULL;
+             bucket = bucket->following) {
+            containers_check_shareable(bucket->frequency);
+            for (lru_entry_t *entry = bucket->least_recent;
+                 entry != NULL;
+                 entry = entry->following) {
+                containers_check_shareable(entry->key);
+                containers_check_shareable(entry->value);
+            }
+        }
+    }
+    else {
+        for (lru_entry_t *entry = map->least_recent;
+             entry != NULL;
+             entry = entry->following) {
+            containers_check_shareable(entry->key);
+            containers_check_shareable(entry->value);
+        }
     }
 }
 
@@ -901,9 +928,8 @@ lru_lookup_body(VALUE opaque)
 
     arguments->found = found;
     if (!found) return Qnil;
-    lru_check_mutable(arguments->self, map);
     lru_entry_t *entry = map->slots[slot];
-    lru_promote(map, entry);
+    if (!RB_OBJ_FROZEN(arguments->self)) lru_promote(map, entry);
     return entry->value;
 }
 
@@ -927,9 +953,10 @@ lfu_lookup_body(VALUE opaque)
 
     arguments->found = found;
     if (!found) return Qnil;
-    lru_check_mutable(arguments->self, map);
     lru_entry_t *entry = map->slots[slot];
-    lfu_promote(arguments->self, map, entry);
+    if (!RB_OBJ_FROZEN(arguments->self)) {
+        lfu_promote(arguments->self, map, entry);
+    }
     return entry->value;
 }
 
@@ -1393,8 +1420,10 @@ static VALUE
 lru_make_shareable(VALUE opaque)
 {
     lru_arguments_t *arguments = (lru_arguments_t *)opaque;
-    containers_finish_initialization(arguments->self);
-    return arguments->self;
+    return containers_publish_native_with_references(
+        arguments->self,
+        lru_validate_references
+    );
 }
 
 static VALUE

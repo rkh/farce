@@ -147,6 +147,29 @@ containers_lock_get(VALUE self)
     return lock;
 }
 
+static void
+containers_lock_validate_references(VALUE self)
+{
+    containers_lock_t *lock = containers_lock_get(self);
+
+    containers_check_shareable(lock->owner);
+    containers_check_shareable(lock->owner_thread);
+}
+
+static VALUE
+containers_lock_frozen_p(VALUE self)
+{
+    (void)self;
+    return Qfalse;
+}
+
+static VALUE
+containers_lock_freeze(VALUE self)
+{
+    containers_raise_unfreezable(self);
+    return Qnil;
+}
+
 static VALUE
 containers_lock_initialize(VALUE self)
 {
@@ -155,7 +178,7 @@ containers_lock_initialize(VALUE self)
     if (lock->initialized) rb_raise(rb_eRuntimeError, "Lock is already initialized");
     rb_check_frozen(self);
     lock->initialized = true;
-    containers_finish_initialization(self);
+    containers_publish_native_with_references(self, containers_lock_validate_references);
     return self;
 }
 
@@ -469,4 +492,6 @@ containers_init_lock(VALUE namespace)
     rb_define_method(cLock, "synchronize", containers_lock_synchronize, 0);
     rb_define_method(cLock, "try_lock", containers_lock_try_lock, 0);
     rb_define_method(cLock, "unlock", containers_lock_unlock, 0);
+    rb_define_method(cLock, "freeze", containers_lock_freeze, 0);
+    rb_define_method(cLock, "frozen?", containers_lock_frozen_p, 0);
 }

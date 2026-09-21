@@ -134,7 +134,7 @@ module Farce
         map = klass.new
 
         assert_predicate map, :ractor_shareable?
-        assert_predicate map, :frozen?
+        refute_predicate map, :frozen?
         assert Ractor.shareable?(map)
         assert_predicate map, :shareable_keys?
         assert_predicate map, :shareable_values?

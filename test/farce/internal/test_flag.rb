@@ -12,13 +12,18 @@ module Farce
         assert flag_class.new(true).value
       end
 
-      def test_flag_is_frozen_and_shareable
+      def test_flag_is_mutable_and_shareable
         return unless Internal.native_ractors?
 
         flag = flag_class.new
 
-        assert_predicate flag, :frozen?
+        refute_predicate flag, :frozen?
         assert Ractor.shareable?(flag)
+
+        flag.freeze
+
+        assert_predicate flag, :frozen?
+        assert_raises(FrozenError) { flag.set }
       end
 
       def test_frozen_uninitialized_flag_cannot_be_initialized

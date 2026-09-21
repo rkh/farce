@@ -11,8 +11,16 @@ module Farce
         super(check_value(value), **)
       end
 
-      def store(value, **, &) = super(check_value(value), **, &)
-      def swap(value, **, &) = super(check_value(value), **, &)
+      def store(value, **, &)
+        check_frozen!
+        super(check_value(value), **, &)
+      end
+
+      def swap(value, **, &)
+        check_frozen!
+        super(check_value(value), **, &)
+      end
+
       def wait_until_changed(expected, **, &) = super(check_value(expected), **, &)
 
       def value=(value)
@@ -20,22 +28,38 @@ module Farce
       end
 
       def compare_and_set(expected, value, **)
+        check_frozen!
         super(check_value(expected), check_value(value), **)
       end
 
       def store_if_absent(**)
         raise LocalJumpError, "no block given" unless block_given?
-        super { check_value(yield) }
+        check_frozen!
+        super do
+          value = yield
+          check_frozen!
+          check_value(value)
+        end
       end
 
       def update(**)
         raise LocalJumpError, "no block given" unless block_given?
-        super { |value| check_value(yield(value)) }
+        check_frozen!
+        super do |value|
+          replacement = yield(value)
+          check_frozen!
+          check_value(replacement)
+        end
       end
 
       def upsert(initial, **)
         raise LocalJumpError, "no block given" unless block_given?
-        super(check_value(initial), **) { |value| check_value(yield(value)) }
+        check_frozen!
+        super(check_value(initial), **) do |value|
+          replacement = yield(value)
+          check_frozen!
+          check_value(replacement)
+        end
       end
 
       private

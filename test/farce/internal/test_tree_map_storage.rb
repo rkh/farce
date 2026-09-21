@@ -558,19 +558,22 @@ module Farce
         end
       end
 
-      def test_tree_map_is_frozen_and_ractor_shareable_on_cruby
+      def test_tree_map_is_mutable_and_ractor_shareable_on_cruby
         map = TreeMap.new
 
-        assert_predicate map, :frozen?
+        refute_predicate map, :frozen?
         assert Ractor.shareable?(map) if RUBY_ENGINE == "ruby"
 
-        # Frozen is the object's shareability boundary, not a ban on its guarded
-        # C methods mutating internal state.
         assert_equal :one, map[1] = :one
         assert_equal :one, map.delete(1)
+
+        map.freeze
+
+        assert_predicate map, :frozen?
+        assert_raises(FrozenError) { map[1] = :one }
       end
 
-      def test_cruby_publication_recursively_shares_preinitialize_ivars
+      def test_cruby_publication_rejects_ruby_ivars_and_leaves_safe_state
         return unless RUBY_ENGINE == "ruby"
 
         map = TreeMap.allocate
@@ -578,23 +581,13 @@ module Farce
         metadata.instance_variable_set(:@values, [1, 2, 3])
         map.instance_variable_set(:@metadata, metadata)
 
-        assert_same map, map.send(:initialize, 1.0 => :one)
-        assert_predicate map, :frozen?
-        assert_predicate metadata, :frozen?
-        assert_predicate metadata.instance_variable_get(:@values), :frozen?
-        assert Ractor.shareable?(map)
-        assert Ractor.shareable?(metadata)
+        error = assert_raises(TypeError) { map.send(:initialize, 1.0 => :one) }
 
-        worker = Ractor.new(map) do |shared_map|
-          [
-            shared_map[1.0],
-            shared_map.instance_variable_get(:@metadata)
-              .instance_variable_get(:@values)
-          ]
-        end
-        result = worker.respond_to?(:value) ? worker.value : worker.take
-
-        assert_equal [:one, [1, 2, 3]], result
+        assert_match(/cannot be published with Ruby instance variables/, error.message)
+        refute_predicate metadata, :frozen?
+        refute_predicate metadata.instance_variable_get(:@values), :frozen?
+        refute Ractor.shareable?(map)
+        assert_raises(RuntimeError) { map.size }
       end
 
       def test_cruby_publication_does_not_commit_an_unshareable_ivar
@@ -603,22 +596,24 @@ module Farce
         map = TreeMap.allocate
         map.instance_variable_set(:@thread, Thread.current)
 
-        assert_raises(Ractor::Error) { map.send(:initialize, 1 => :one) }
+        assert_raises(TypeError) { map.send(:initialize, 1 => :one) }
         refute Ractor.shareable?(map)
         assert_raises(RuntimeError) { map.size }
       end
 
-      def test_cruby_recursive_initialize_from_ivar_freeze_does_not_deadlock
+      def test_cruby_rejected_preinitialize_ivar_is_not_frozen_or_published
         return unless RUBY_ENGINE == "ruby"
 
         map = TreeMap.allocate
         metadata = TreeMapPublicationReentry.new(map)
         map.instance_variable_set(:@metadata, metadata)
 
-        Timeout.timeout(2) { map.send(:initialize) }
+        assert_raises(TypeError) { Timeout.timeout(2) { map.send(:initialize) } }
 
-        assert_predicate metadata, :reentry_rejected
-        assert Ractor.shareable?(map)
+        refute_predicate metadata, :reentry_rejected
+        refute_predicate metadata, :frozen?
+        refute Ractor.shareable?(map)
+        assert_raises(RuntimeError) { map.size }
       end
 
       def test_concurrent_initializers_commit_only_once

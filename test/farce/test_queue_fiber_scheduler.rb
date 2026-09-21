@@ -49,9 +49,11 @@ module Farce
       assert_coordination(scheduler)
     end
 
-    private def queue_class = Queue
+    private
 
-    private def assert_coordination(scheduler)
+    def queue_class = Queue
+
+    def assert_coordination(scheduler)
       assert_operator scheduler.io_wait_calls, :>=, 1
     end
   end
@@ -61,9 +63,11 @@ module Farce
   end
 
   class TestUnsharedQueueFiberScheduler < TestQueueFiberScheduler
-    private def queue_class = Unshared::Queue
+    private
 
-    private def assert_coordination(scheduler)
+    def queue_class = Unshared::Queue
+
+    def assert_coordination(scheduler)
       if Internal::UNSHARED_FIBER_IO
         assert_operator scheduler.io_wait_calls, :>=, 1
         return

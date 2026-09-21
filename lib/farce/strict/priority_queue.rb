@@ -7,7 +7,7 @@ module Farce
     # A priority queue that stores and returns values directly.
     class PriorityQueue < Abstract::PriorityQueue
       include Internal::StrictQueueValues unless Internal.native_ractors?
-      include Shareable
+      include Shareable::Unfreezable
 
       def initialize(capacity: nil, default_priority: 0, order: :ascending, track_age: false)
         unless Ractor.shareable?(default_priority)

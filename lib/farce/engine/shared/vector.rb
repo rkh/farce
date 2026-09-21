@@ -12,44 +12,64 @@ module Farce
       end
 
       def []=(index, value)
+        check_frozen!
         check_value(value)
         super
       end
 
       def store(index, value, **)
+        check_frozen!
         check_value(value)
         super
       end
 
       def push(value, **)
+        check_frozen!
         check_value(value)
         super
       end
 
       def swap(index, replacement, **)
+        check_frozen!
         check_value(replacement)
         super
       end
 
       def compare_and_set(index, expected, replacement, **)
+        check_frozen!
         check_value(replacement)
         super
       end
 
       def store_if_absent(index, **)
         raise LocalJumpError, "no block given" unless block_given?
-        super { check_value(yield) }
+        check_frozen!
+        super do
+          value = yield
+          check_frozen!
+          check_value(value)
+        end
       end
 
       def update(index, **)
         raise LocalJumpError, "no block given" unless block_given?
-        super { check_value(yield(it)) }
+        check_frozen!
+        super do |current|
+          value = yield(current)
+          check_frozen!
+          check_value(value)
+        end
       end
 
       def upsert(index, initial, **)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
         check_value(initial)
-        super { check_value(yield(it)) }
+        super do |current|
+          value = yield(current)
+          check_frozen!
+          check_value(value)
+        end
       end
 
       private

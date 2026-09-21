@@ -104,10 +104,11 @@ module Farce
     #   @param deep [Boolean] whether to resolve nested values (like an {Envelope} inside of an {Atom})
     def initialize(value) = @value = value
 
-    # @return [Boolean] whether this object and the referenced value is frozen
+    # Replacing the holder's value can make this false again.
+    # @return [Boolean] whether this proxy and its current target are frozen
     def frozen? = super && method_missing(:frozen?)
 
-    # Freezes this object and the referenced value
+    # Freeze the current target, then this proxy. The value holder may remain mutable.
     # @return [self] this object
     def freeze
       method_missing(:freeze)

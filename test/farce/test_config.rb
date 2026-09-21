@@ -259,7 +259,9 @@ class TestConfig < Test
     assert_equal "ok", output.strip
   end
 
-  private def assert_configured_constructor(setting, executor, override)
+  private
+
+  def assert_configured_constructor(setting, executor, override)
     output, error, status = ruby_subprocess(<<~CODE)
       require "farce"
       class CustomScheduler
@@ -303,7 +305,7 @@ class TestConfig < Test
     assert_equal "ok", output.strip
   end
 
-  private def assert_copied_worker_results
+  def assert_copied_worker_results
     ["c.fiber_scheduler = CustomScheduler", "c.fiber_scheduler { CustomScheduler.new }"].each do |setting|
       output, error, status = ruby_subprocess(<<~CODE)
         require "farce"

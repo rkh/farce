@@ -15,8 +15,7 @@ module Farce
 
         comparison = JVMContainers.compare(left.key, right.key)
         owner = left.mutation_owner || right.mutation_owner
-        raise FrozenError, "can't modify frozen #{owner.class}" if
-          owner && JVMContainers.frozen_object?(owner)
+        raise FrozenError, "can't modify frozen #{owner.class}" if owner&.__send__(:mutation_frozen?)
         comparison
       end
 
@@ -40,6 +39,19 @@ module Farce
       end
 
       def prepare_key(key) = canonical_key(key)
+
+      def freeze
+        state = @freeze_state
+        return super unless synchronized? && state
+
+        state.set
+        self
+      end
+
+      def frozen?
+        state = @freeze_state
+        synchronized? && state ? state.value : super
+      end
 
       def [](key)
         key = canonical_key(key)
@@ -196,6 +208,7 @@ module Farce
 
             @state = state
             @guard = guard
+            @freeze_state = Flag.new(false) if synchronized?
             JVMContainers.freeze_object(self) if synchronized?
           end
         end
@@ -210,13 +223,13 @@ module Farce
       def synchronized? = false
 
       def check_local_frozen
-        raise FrozenError, "can't modify frozen #{self.class}" if
-          !synchronized? && JVMContainers.frozen_object?(self)
+        raise FrozenError, "can't modify frozen #{self.class}" if mutation_frozen?
       end
 
+      def mutation_frozen? = synchronized? ? frozen? : JVMContainers.frozen_object?(self)
+
       def mutation_key(key)
-        owner = self unless synchronized?
-        Key.new(key, owner)
+        Key.new(key, self)
       end
 
       def canonical_key(key)

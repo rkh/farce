@@ -16,7 +16,7 @@ module Farce
       assert_equal :copy, atom.mode
       refute_predicate atom, :compare_by_identity?
       assert_kind_of Abstract::Value, atom
-      assert_predicate atom, :frozen?
+      refute_predicate atom, :frozen?
       assert_predicate atom, :ractor_shareable?
       assert Ractor.shareable?(atom)
     end
@@ -207,6 +207,21 @@ module Farce
       assert_equal(:recovered, atom.update { :recovered })
     end
 
+    def test_freezing_in_an_update_rejects_move_before_transferring_the_result
+      atom = Atom.new(:original, mode: :move)
+      result = ModePayload.new(:replacement)
+
+      assert_raises(FrozenError) do
+        atom.update do
+          atom.freeze
+          result
+        end
+      end
+
+      assert_equal :replacement, result.value
+      assert_equal :original, atom.value
+    end
+
     def test_upsert_stores_an_initial_value_or_updates_the_current_value
       atom = Atom.new(mode: :local)
       initial = ModePayload.new(:initial)
@@ -309,6 +324,16 @@ module Farce
 
       assert_equal :original, ractor_value(worker)
       assert_equal :"original-updated", atom.value.value
+    end
+
+    def test_can_be_constructed_in_a_non_main_ractor
+      return unless Internal.native_ractors?
+
+      worker = Ractor.new { Farce::Atom.new(:initial) }
+      atom = ractor_value(worker)
+
+      refute_predicate atom, :frozen?
+      assert_equal :replacement, atom.store(:replacement)
     end
 
     def test_block_operations_require_a_block_before_wrapping_values

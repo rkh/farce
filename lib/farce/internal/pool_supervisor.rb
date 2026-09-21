@@ -6,7 +6,7 @@ module Farce
   module Internal # :nodoc: all
     # Runs delayed pool control work outside application Ractors.
     class PoolSupervisorService
-      include Shareable
+      include Shareable::Unfreezable
 
       STOP = :stop
       private_constant :STOP

@@ -7,16 +7,14 @@ module Farce
   module Internal # :nodoc: all
     # Lease pool storage that moves resources through the CRuby Vault.
     class LeasePool < LeasePoolState
+      include Freeze::Unfreezable
+
       VAULT = Vault.new
       private_constant :VAULT
 
       private
 
-      def finalize_initialization
-        Ractor.make_shareable(self)
-        freeze
-      end
-
+      def finalize_initialization          = Freeze.publish(self)
       def store_resource(token, resource)  = VAULT.move_in(token, resource)
       def take_resource(token)             = VAULT.move_out(token)
       def return_resource(token, resource) = VAULT.move_in(token, resource)

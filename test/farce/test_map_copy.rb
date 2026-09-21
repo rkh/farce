@@ -30,9 +30,6 @@ module Farce
       (TREE_TYPES + BOUNDED_TYPES + WEAK_TYPES + [Map, Strict::Map, Unshared::Map, Local::Map]).each do |type|
         assert type.protected_method_defined?(:internal_map)
         refute type.public_method_defined?(:internal_map)
-        assert_equal Abstract::DuplicableMap, type.instance_method(:initialize_copy).owner
-        assert_equal Abstract::DuplicableMap, type.instance_method(:initialize_dup).owner
-        assert_equal Abstract::DuplicableMap, type.instance_method(:initialize_clone).owner
       end
       %i[initialize_copy initialize_dup initialize_clone].each do |method|
         refute_equal Abstract::Map, Abstract::Map.instance_method(method).owner
@@ -267,7 +264,7 @@ module Farce
         assert_instance_of type, copy
         assert_equal :current, copy[1], type.name
         if source.is_a?(Shareable)
-          assert_predicate copy, :frozen?, type.name
+          refute_predicate copy, :frozen?, type.name
           assert Ractor.shareable?(copy)
           if Internal.native_ractors? && !source.is_a?(Local::Scoped)
             assert_equal :current, ractor_value(Ractor.new(copy) { |map| map[1] })

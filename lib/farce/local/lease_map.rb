@@ -12,6 +12,7 @@ module Farce
     #   Fiber.new { leases.checkout(:jobs, &:dup) }.resume # => []
     #   leases.checkout(:jobs, &:dup) # => [:parent]
     class LeaseMap < Abstract::LeaseMap
+      include Shareable::Unfreezable
       include Scoped
 
       # Create a map that initializes once on first use in each scope.
@@ -26,26 +27,26 @@ module Farce
         super(scope:, normalize_keys:)
       end
 
-      private def checkout_canonical(key, missing_key:, timeout: nil, &)
+      private
+
+      def eager_scoped_value? = false
+      def new_scoped_value    = Internal::LeaseInitialization.new
+      def internal_lease_map  = scoped_lease_map
+
+      def checkout_canonical(key, missing_key:, timeout: nil, &)
         deadline = timeout_deadline(timeout)
-        map = scoped_lease_map(timeout: remaining_timeout(deadline))
+        map      = scoped_lease_map(timeout: remaining_timeout(deadline))
         raise TimeoutError, "lease checkout timed out" unless map
 
         map.checkout(key, timeout: remaining_timeout(deadline), receiver: self, missing_key:, &)
       end
 
-      private def try_checkout_canonical(key, missing_key:, &)
+      def try_checkout_canonical(key, missing_key:, &)
         map = scoped_lease_map(wait: false)
         return unless map
 
         map.try_checkout(key, receiver: self, missing_key:, &)
       end
-
-      private
-
-      def eager_scoped_value? = false
-      def new_scoped_value = Internal::LeaseInitialization.new
-      def internal_lease_map = scoped_lease_map
 
       def scoped_lease_map(**)
         scoped_value.fetch(**) do

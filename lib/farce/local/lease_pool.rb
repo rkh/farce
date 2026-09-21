@@ -13,6 +13,7 @@ module Farce
     #   Fiber.new { pool.checkout(&:dup) }.resume # => []
     #   pool.checkout(&:dup) # => [:parent]
     class LeasePool < Abstract::LeasePool
+      include Shareable::Unfreezable
       include Scoped
 
       # Construct an empty pool in each scope.

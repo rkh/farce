@@ -30,13 +30,28 @@ module Farce
         @compare_values_by_identity = compare_values_by_identity
         @token                      = Object.new.freeze
         @vault                      = OWNER.store_if_absent { Vault.new }
+        @freeze_state               = Flag.new(false)
         request(:create, {
           weak_keys:                weak_keys?,
           weak_values:              weak_values?,
           compare_keys_by_identity: compare_keys_by_identity?,
         }.freeze)
         initial_mapping&.each { self[it.first] = it.last }
-        freeze
+        Object.instance_method(:freeze).bind_call(self)
+      end
+
+      def freeze
+        @freeze_state.set
+        self
+      end
+
+      def frozen? = @freeze_state.value
+
+      def check_mutation = check_frozen!
+
+      def prepare_mutation_key(key)
+        check_frozen!
+        canonical_key(key)
       end
 
       def [](key) = read(key, nil)[1]
@@ -67,6 +82,7 @@ module Farce
       end
 
       def store(key, value, timeout: nil, &fallback)
+        check_frozen!
         key = canonical_key(key)
         check_value(value, "value")
         result = await_response(deadline: timeout_deadline(timeout)) { request(:store, key, value, false) }
@@ -74,6 +90,7 @@ module Farce
       end
 
       def swap(key, replacement, timeout: nil, &fallback)
+        check_frozen!
         key = canonical_key(key)
         check_value(replacement, "value")
         result = await_response(deadline: timeout_deadline(timeout)) { request(:store, key, replacement, true) }
@@ -87,12 +104,14 @@ module Farce
       end
 
       def compare_and_set(key, expected, replacement, timeout: nil)
+        check_frozen!
         check_value(expected, "value")
         check_value(replacement, "value")
         matched = false
         claimed_update(key, timeout_deadline(timeout), claim: :present) do |current|
           next TIMED_OUT unless values_equal?(current, expected)
 
+          check_frozen!
           matched = true
           replacement
         end
@@ -117,6 +136,7 @@ module Farce
       # Return whether a change committed.
       def modify(key)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
         key = canonical_key(key)
         ticket = Object.new.freeze
         sent = finished = false
@@ -130,6 +150,7 @@ module Farce
           owners = claim_owners
           owners[signal] = Fiber.current
           value = yield(present, current)
+          check_frozen!
           action = if MAP_KEEP.equal?(value)
                      :abort
                    elsif MAP_DELETE.equal?(value)
@@ -183,6 +204,7 @@ module Farce
       end
 
       def delete(key)
+        check_frozen!
         key = canonical_key(key)
         result = await_response(deadline: nil) { request(:delete, key) }
         result.first == :ok ? result[1] : nil
@@ -195,11 +217,14 @@ module Farce
       end
 
       def clear
+        check_frozen!
         request(:clear)
         self
       end
 
       private
+
+      def check_frozen! = Internal::Freeze.check(self)
 
       def request(action, *) = @vault.weak_map(@token, action, *)
 
@@ -213,6 +238,7 @@ module Farce
       end
 
       def claimed_update(key, deadline, claim:, initial: TIMED_OUT)
+        check_frozen!
         key = canonical_key(key)
         ticket = Object.new.freeze
         sent   = finished = false
@@ -235,6 +261,7 @@ module Farce
           owners         = claim_owners
           owners[signal] = Fiber.current
           replacement    = present || initial.equal?(TIMED_OUT) ? yield(current) : initial
+          check_frozen!
 
           if replacement.equal?(TIMED_OUT)
             request(:finish, key, ticket, :abort)

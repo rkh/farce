@@ -8,7 +8,12 @@ module Farce
     # Each scope starts at the initial integer. Reset affects only the current scope.
     class Counter < Numeric
       include Abstract::Counter
-      include Scoped
+      include Shareable::Tracked
+      include Scoped::Tracked
+
+      # The initial value used for new scopes and by {#reset}.
+      # @return [Integer]
+      attr_reader :initial
 
       # @!macro scopes
       # @param value [Numeric, String, #to_int] the initial value, converted to an Integer
@@ -65,6 +70,8 @@ module Farce
       private
 
       def initialize_copy(other)
+        # Numeric#initialize_copy cannot copy mutable Numeric subclasses on JRuby.
+        @farce_freeze_state = Internal::Flag.new(false)
         Internal::Storage.scope(scope)[self] = Internal::Counter.new(other.value)
       end
 

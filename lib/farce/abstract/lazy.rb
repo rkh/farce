@@ -29,9 +29,13 @@ module Farce
       # This is thread-safe and may be called from any Ractor, even concurrently.
       # @return [BasicObject] The value computed by the factory.
       def value
-        value = internal_atom.store_if_absent do
-          value = @factory.is_a?(Class) ? @factory.new : @factory.call
-          value.nil? ? UNDEFINED : value
+        atom  = internal_atom
+        value = atom.value
+        if value.nil?
+          value = atom.store_if_absent do
+            value = @factory.is_a?(Class) ? @factory.new : @factory.call
+            value.nil? ? UNDEFINED : value
+          end
         end
         value unless UNDEFINED.equal?(value)
       end

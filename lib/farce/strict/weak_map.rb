@@ -15,7 +15,7 @@ module Farce
     #   # The entry can disappear once its key or value is collected.
     #   value = nil
     class WeakMap < Abstract::WeakMap
-      include Shareable
+      include Shareable::Delegated
 
       def initialize(
         initial_mapping = nil,
@@ -42,6 +42,8 @@ module Farce
 
       def shareable_keys? = true
       def shareable_values? = true
+
+      private def freeze_backend = internal_map
     end
   end
 end

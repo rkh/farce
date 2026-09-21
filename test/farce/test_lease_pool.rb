@@ -641,7 +641,7 @@ module Farce
       klass = concrete_pool_class(Farce)
       pool = klass.new(max_size: 1) { [] }
 
-      assert_predicate pool, :frozen?
+      refute_predicate pool, :frozen?
       assert_predicate pool, :ractor_shareable?
       assert Ractor.shareable?(pool)
     end
@@ -650,7 +650,7 @@ module Farce
       klass = concrete_pool_class(Local)
       pool = klass.new(max_size: 1) { [] }
 
-      assert_predicate pool, :frozen?
+      refute_predicate pool, :frozen?
       assert_predicate pool, :ractor_shareable?
       assert Ractor.shareable?(pool)
     end

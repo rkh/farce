@@ -46,6 +46,24 @@ module Farce
         end
       end
 
+      def test_descriptor_copies_remain_shareable_without_retransferring_arguments
+        task = ScheduledTask.new([Payload.new(:value)], proc { |value| value }, :copy)
+        copies = [task.dup, task.clone, task.clone(freeze: false), task.clone(freeze: true)]
+
+        copies.each do |copy|
+          refute_same task, copy
+          assert_predicate copy, :frozen?
+          assert Ractor.shareable?(copy)
+          assert_predicate copy, :ractor_shareable?
+          assert_same task.instance_variable_get(:@args), copy.instance_variable_get(:@args)
+          assert_same task.instance_variable_get(:@block), copy.instance_variable_get(:@block)
+        end
+
+        results = ([task] + copies).map { it.to_proc.call }
+
+        results.each { assert_same results.first, it }
+      end
+
       def test_completion_is_notified_when_a_task_raises
         %i[copy raise].each do |mode|
           args = mode == :copy ? [Payload.new(:value)] : [:value]

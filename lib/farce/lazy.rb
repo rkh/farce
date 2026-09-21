@@ -57,6 +57,14 @@ module Farce
   # 5.times { Ractor.new(object) { it.expensive_attribute } }
   # ```
   class Lazy < Farce::Abstract::Lazy
-    include Shareable
+    include Shareable::Tracked
+
+    # Resolve the slot before freezing it. The resolved value remains mutable.
+    # @return [self]
+    def freeze
+      value
+      internal_atom.freeze
+      super
+    end
   end
 end

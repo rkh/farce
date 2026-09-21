@@ -23,7 +23,7 @@ module Farce
   #   leases.available?(:primary) # => true
   #   leases.checkout(:primary, &:dup) # => [:updated, :verified]
   class LeaseMap < Farce::Abstract::LeaseMap
-    include Shareable
+    include Shareable::Unfreezable
 
     private
 

@@ -158,9 +158,9 @@ settings = { retries: [1, 2, 5] }
 port.send(settings)
 
 published = port.receive
-published.equal?(settings)                  # => true
-Farce::Ractor.shareable?(published)          # => true
-settings[:retries].frozen?                  # => true
+published.equal?(settings)           # => true
+Farce::Ractor.shareable?(published)  # => true
+settings[:retries].frozen?           # => true
 port.close
 ```
 
@@ -177,10 +177,10 @@ port.send(draft)
 draft[:tags] << :concurrency
 
 published = port.receive
-published[:tags]                    # => [:ruby]
+published[:tags]                     # => [:ruby]
 Farce::Ractor.shareable?(published)  # => true
-draft[:tags]                        # => [:ruby, :concurrency]
-draft.frozen?                       # => false
+draft[:tags]                         # => [:ruby, :concurrency]
+draft.frozen?                        # => false
 port.close
 ```
 

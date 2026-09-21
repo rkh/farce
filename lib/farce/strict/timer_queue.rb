@@ -7,7 +7,7 @@ module Farce
     # A timer queue that stores and returns values directly.
     class TimerQueue < Abstract::TimerQueue
       include Internal::StrictQueueValues unless Internal.native_ractors?
-      include Shareable
+      include Shareable::Unfreezable
     end
   end
 end

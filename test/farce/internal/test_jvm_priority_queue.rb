@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 jvm = RUBY_ENGINE == "jruby" || (RUBY_ENGINE == "truffleruby" && !TruffleRuby.native?)
 return unless jvm
@@ -284,7 +286,7 @@ module Farce
             frozen_queue.freeze
             1
           end
-          assert_raises(FrozenError) do
+          assert_raises(TypeError) do
             frozen_queue.send(:initialize, capacity: frozen_capacity)
           end
           assert_raises(RuntimeError) { frozen_queue.size }
@@ -522,7 +524,7 @@ module Farce
 
         queue = queue_class.new(capacity: nil)
 
-        assert_predicate queue, :frozen?
+        refute_predicate queue, :frozen?
         assert queue.push(1, :value)
         assert_equal :value, queue.pop
       end
@@ -865,7 +867,7 @@ module Farce
 
         assert_instance_of Internal::PriorityQueue, queue
         assert_equal Object, Internal::PriorityQueue.superclass
-        assert_predicate queue, :frozen?
+        refute_predicate queue, :frozen?
         assert_respond_to queue, :push
         assert_respond_to queue, :pop
         assert Internal::PriorityQueue.private_method_defined?(:initialize)

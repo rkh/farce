@@ -204,6 +204,16 @@ static const rb_data_type_t atom_type = {
     .flags = RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
+static void
+atom_validate_references(VALUE self)
+{
+    atom_t *atom;
+    TypedData_Get_Struct(self, atom_t, &atom_type, atom);
+    containers_check_shareable(atom->value);
+    containers_check_shareable(atom->updating_fiber);
+    containers_check_shareable(atom->updating_thread);
+}
+
 #ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
 /* A separate type keeps mutable referents local even if the wrapper is frozen. */
 static const rb_data_type_t unshared_weak_atom_type = {
@@ -424,6 +434,7 @@ atom_initialize(int argc, VALUE *argv, VALUE self)
     VALUE keyword_values[1];
     atom_t *atom;
 
+    rb_check_frozen(self);
     rb_scan_args(argc, argv, "01:", &value, &keywords);
     if (!NIL_P(keywords)) {
         rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
@@ -439,9 +450,8 @@ atom_initialize(int argc, VALUE *argv, VALUE self)
     if (atom->weak) rb_gc_declare_weak_references(self);
 #endif
     atom->initialized = true;
-    if (atom->unshared) rb_obj_freeze(self);
-    else containers_finish_initialization(self);
-    return self;
+    if (atom->unshared) return self;
+    return containers_publish_native_with_references(self, atom_validate_references);
 }
 
 static VALUE
@@ -459,6 +469,7 @@ static VALUE
 atom_set_value(VALUE self, VALUE value)
 {
     atom_t *atom = get_atom(self);
+    rb_check_frozen(self);
     atom_check_value(atom, value);
     atom_execution_context_t execution = atom_current_execution_context();
     atom_lock_for_update(atom, &execution);
@@ -492,9 +503,11 @@ atom_store(int argc, VALUE *argv, VALUE self)
 {
     VALUE value;
     atom_t *atom = get_atom(self);
+    rb_check_frozen(self);
     VALUE timeout_value = atom_extract_timeout(argc, argv, "1:", &value);
     atom_check_value(atom, value);
     atom_timeout_t timeout = atom_parse_timeout(timeout_value);
+    rb_check_frozen(self);
     atom_execution_context_t execution = atom_current_execution_context();
 
     for (;;) {
@@ -515,9 +528,11 @@ atom_swap(int argc, VALUE *argv, VALUE self)
 {
     VALUE value;
     atom_t *atom = get_atom(self);
+    rb_check_frozen(self);
     VALUE timeout_value = atom_extract_timeout(argc, argv, "1:", &value);
     atom_check_value(atom, value);
     atom_timeout_t timeout = atom_parse_timeout(timeout_value);
+    rb_check_frozen(self);
     atom_execution_context_t execution = atom_current_execution_context();
 
     for (;;) {
@@ -535,6 +550,7 @@ atom_swap(int argc, VALUE *argv, VALUE self)
 }
 
 typedef struct {
+    VALUE self;
     atom_t *atom;
     atom_execution_context_t execution;
     VALUE current;
@@ -560,6 +576,7 @@ atom_store_body(VALUE opaque)
 {
     atom_operation_t *operation = (atom_operation_t *)opaque;
     VALUE result = rb_yield_values(0);
+    rb_check_frozen(operation->self);
     atom_check_value(operation->atom, result);
     pthread_mutex_lock(&operation->atom->lock);
     operation->atom->value = result;
@@ -574,11 +591,14 @@ atom_store_if_absent(int argc, VALUE *argv, VALUE self)
 {
     atom_t *atom = get_atom(self);
     atom_operation_t operation = {
+        .self = self,
         .atom = atom,
         .execution = atom_current_execution_context(),
         .complete = false,
     };
+    rb_check_frozen(self);
     atom_timeout_t timeout = atom_parse_timeout(atom_extract_timeout(argc, argv, "0:", NULL));
+    rb_check_frozen(self);
 
     rb_need_block();
     if (!atom_lock_for_update_with_timeout(atom, &timeout, &operation.execution)) return Qnil;
@@ -593,6 +613,7 @@ atom_store_if_absent(int argc, VALUE *argv, VALUE self)
 }
 
 typedef struct {
+    VALUE self;
     atom_t *atom;
     atom_execution_context_t execution;
     VALUE current;
@@ -621,6 +642,7 @@ atom_cas_body(VALUE opaque)
     bool matches = operation->identity
         ? operation->current == operation->expected
         : RTEST(rb_equal(operation->current, operation->expected));
+    rb_check_frozen(operation->self);
 
     pthread_mutex_lock(&operation->atom->lock);
     if (matches) operation->atom->value = operation->replacement;
@@ -643,15 +665,18 @@ atom_compare_and_set(int argc, VALUE *argv, VALUE self)
 
     atom_t *atom = get_atom(self);
     atom_cas_t operation;
+    rb_check_frozen(self);
     atom_check_value(atom, expected);
     atom_check_value(atom, replacement);
     atom_timeout_t timeout = atom_parse_timeout(
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
+    rb_check_frozen(self);
     atom_execution_context_t execution = atom_current_execution_context();
 
     if (!atom_lock_for_update_with_timeout(atom, &timeout, &execution)) return Qfalse;
     operation.atom = atom;
+    operation.self = self;
     operation.execution = execution;
     operation.current = atom->value;
     operation.expected = expected;
@@ -669,6 +694,7 @@ atom_update_body(VALUE opaque)
 {
     atom_operation_t *operation = (atom_operation_t *)opaque;
     VALUE result = rb_yield(operation->current);
+    rb_check_frozen(operation->self);
     atom_check_value(operation->atom, result);
     pthread_mutex_lock(&operation->atom->lock);
     operation->atom->value = result;
@@ -683,11 +709,14 @@ atom_update(int argc, VALUE *argv, VALUE self)
 {
     atom_t *atom = get_atom(self);
     atom_operation_t operation = {
+        .self = self,
         .atom = atom,
         .execution = atom_current_execution_context(),
         .complete = false,
     };
+    rb_check_frozen(self);
     atom_timeout_t timeout = atom_parse_timeout(atom_extract_timeout(argc, argv, "0:", NULL));
+    rb_check_frozen(self);
     rb_need_block();
 
     if (!atom_lock_for_update_with_timeout(atom, &timeout, &operation.execution)) return Qnil;
@@ -704,11 +733,14 @@ atom_upsert(int argc, VALUE *argv, VALUE self)
     VALUE initial;
     atom_t *atom = get_atom(self);
     atom_operation_t operation = {
+        .self = self,
         .atom = atom,
         .execution = atom_current_execution_context(),
         .complete = false,
     };
+    rb_check_frozen(self);
     atom_timeout_t timeout = atom_parse_timeout(atom_extract_timeout(argc, argv, "1:", &initial));
+    rb_check_frozen(self);
     atom_check_value(atom, initial);
     rb_need_block();
 

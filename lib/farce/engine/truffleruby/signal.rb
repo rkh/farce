@@ -6,6 +6,8 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     class Signal
+      include Freeze::Unfreezable
+
       TIMED_OUT = Object.new.freeze
       private_constant :TIMED_OUT
 
@@ -14,7 +16,7 @@ module Farce
         @num_waiting    = Counter.new
         @condition      = ConditionVariable.new
         @broadcast_lock = Mutex.new
-        freeze
+        Freeze.publish(self)
       end
 
       def generation = @generation.value

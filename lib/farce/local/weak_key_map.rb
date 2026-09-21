@@ -16,7 +16,8 @@ module Farce
     #     whether values are compared by identity
     #   @return [WeakKeyMap]
     class WeakKeyMap < Abstract::WeakKeyMap
-      include Scoped
+      include Shareable::Tracked
+      include Scoped::Tracked
 
       protected
 

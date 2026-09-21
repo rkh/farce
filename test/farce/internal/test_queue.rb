@@ -19,7 +19,7 @@ module Farce
         assert_respond_to queue, :wait_pop
         refute_respond_to queue, :wait_pull
         refute Internal.const_defined?(:QueueClosedError, false)
-        assert_predicate queue, :frozen?
+        refute_predicate queue, :frozen?
         assert Ractor.shareable?(queue)
         assert_raises(ArgumentError) { Queue.new(capacity: 0) }
         assert_raises(ArgumentError) { Queue.new(capacity: -1) }

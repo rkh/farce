@@ -16,7 +16,7 @@ module Farce
   #
   #   cache.key?(:second) # => false
   class LRUMap < Farce::Abstract::LRUMap
-    include Shareable
+    include Shareable::Delegated
 
     # @!macro modes
     # @param entries [Hash, Array<Array(BasicObject, BasicObject)>, Abstract::Map, #each, nil]
@@ -42,11 +42,16 @@ module Farce
     protected
 
     def unwrap_value(value) = @manager.unwrap(value)
-    def wrap_value(value)   = @manager.wrap(value)
+
+    def wrap_value(value)
+      check_frozen!
+      @manager.wrap(value)
+    end
 
     private
 
     def new_bounded_map(...) = Internal::StrictLRUMap.new(...)
+    def freeze_backend = internal_map
 
     def new_key_locks(compare_keys_by_identity:)
       Internal::KeyLockMap.new(registry_class: Farce::Strict::Map, compare_keys_by_identity:)

@@ -102,9 +102,11 @@ module Farce
         self
       end
 
-      private def internal_vector = @vector
+      private
 
-      private def initialize_copy(other)
+      def internal_vector = @vector
+
+      def initialize_copy(other)
         super
         source = other.__send__(:internal_vector)
         copy = source.class.new(source.snapshot, compare_by_identity: source.compare_by_identity?)

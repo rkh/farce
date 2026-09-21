@@ -6,7 +6,7 @@ module Farce
   # A shareable priority queue with transfer modes for unshareable values.
   class PriorityQueue < Farce::Abstract::PriorityQueue
     include Internal::ManagedQueue
-    include Shareable
+    include Shareable::Unfreezable
 
     # (see Farce::Abstract::PriorityQueue#initialize)
     # @!macro modes

@@ -20,9 +20,12 @@ module Farce
     #   atom.value.equal?(value) # => true
     #   # Keeping value referenced also keeps the atom's referent alive.
     class WeakAtom < Abstract::WeakAtom
-      include Shareable
+      include Shareable::Delegated
 
-      private def internal_atom_class = Internal::WeakAtom
+      private
+
+      def internal_atom_class = Internal::WeakAtom
+      def freeze_backend      = @atom
     end
   end
 end

@@ -7,7 +7,7 @@ module Farce
     # A Ractor-shareable rendezvous that exchanges shareable values directly.
     # Values retain their identity and envelopes are returned unopened.
     class Exchanger < Abstract::Exchanger
-      include Shareable
+      include Shareable::Unfreezable
 
       def initialize
         @exchanger = Internal::Exchanger.new

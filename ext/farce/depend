@@ -1,6 +1,6 @@
 bounded_map.o: bounded_map.c containers.h
 dict.o: dict.c dict.h
-farce.o: farce.c containers.h
+farce.o: farce.c containers.h shareable.h
 lock.o: lock.c containers.h
 priority_queue.o: priority_queue.c containers.h dict.h unshared_wait.h
 reactor.o: reactor.c reactor.h

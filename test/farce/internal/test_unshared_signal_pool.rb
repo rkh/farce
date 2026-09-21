@@ -267,7 +267,9 @@ class TestUnsharedSignalPool < Test
     assert_equal before, Dir.children("/dev/fd").size
   end
 
-  private def make_idle_pool
+  private
+
+  def make_idle_pool
     signal = Signal.new
     Fiber.schedule { signal.wait }
     signal.broadcast

@@ -23,10 +23,30 @@ module Farce
         assert_nil vector[3]
         assert_nil vector[-4]
         refute_predicate vector, :compare_by_identity?
+        refute_predicate vector, :frozen?
         return unless Internal.native_ractors?
 
-        assert_predicate vector, :frozen?
         assert Ractor.shareable?(vector)
+      end
+
+      class FreezingIndex
+        def initialize(target, index)
+          @target = target
+          @index = index
+          freeze
+        end
+
+        def to_int
+          @target.freeze
+          @index
+        end
+      end
+
+      def test_index_conversion_that_freezes_the_vector_cannot_commit
+        vector = Vector.new([:original])
+
+        assert_raises(FrozenError) { vector.store(FreezingIndex.new(vector, 0), :replacement) }
+        assert_equal :original, vector[0]
       end
 
       def test_initialization_validation

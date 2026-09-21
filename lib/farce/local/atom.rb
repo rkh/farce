@@ -13,7 +13,8 @@ module Farce
     #   @param scope [Symbol] the scope of the atomic reference
     #   @return [Atom]
     class Atom < Abstract::Atom
-      include Scoped
+      include Shareable::Tracked
+      include Scoped::Tracked
 
       private
 

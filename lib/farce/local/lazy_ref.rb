@@ -6,6 +6,8 @@ module Farce
   module Local
     # @!parse
     #   # A {Reference} for a {Lazy Local::Lazy} value.
+    #   # Freezing affects the current scope's target. Afterward, `frozen?` reflects
+    #   # the current target and may initialize it when entering another scope.
     #   #
     #   # @example
     #   #   # Delegate to a Ractor-local hash

@@ -7,13 +7,17 @@ module Farce
   module Internal # :nodoc: all
     # Fallback for Ruby implementations supporting Ractor but not Ractor::Port (CRuby 3.x)
     class Port
+      include Freeze::Unfreezable
+
       class QueueReader
+        include Freeze::Unfreezable
+
         FROM_RACTOR = Object.new.freeze
 
         def initialize
           @queue = Queue.new(capacity: nil)
           @atom  = Atom.new
-          freeze
+          Freeze.publish(self)
         end
 
         def send(message, move: false)
@@ -38,6 +42,8 @@ module Farce
       end
 
       class RactorReader
+        include Freeze::Unfreezable
+
         PATTERN = /\A#<Ractor:#(?<id>\d+) (?:.+ )?(?<status>\w+)>\z/
 
         def self.info(ractor, key)
@@ -51,7 +57,7 @@ module Farce
         def initialize(ractor)
           @closed = Atom.new(false)
           @ractor = ractor
-          freeze
+          Freeze.publish(self)
         end
 
         def receive(timeout: nil)
@@ -80,7 +86,7 @@ module Farce
       def initialize(reader)
         @owner  = ::Ractor.current
         @reader = reader
-        freeze
+        Freeze.publish(self)
       end
 
       def ==(other) = other.is_a?(Port) && @reader == other.reader

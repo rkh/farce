@@ -42,6 +42,19 @@ module Farce
         raise TypeError, "tree maps cannot be copied"
       end
 
+      def freeze
+        state = @freeze_state
+        return primitive_freeze(self) unless synchronized? && state
+
+        state.set
+        self
+      end
+
+      def frozen?
+        state = @freeze_state
+        synchronized? && state ? state.value : primitive_frozen?(self)
+      end
+
       def prepare_key(key) = canonical_ordered_key(key)
 
       def [](key)
@@ -228,7 +241,8 @@ module Farce
           raise FrozenError, "can't modify frozen tree map" if primitive_frozen?(self)
 
           without_async_interrupts do
-            @state = prepared
+            @state        = prepared
+            @freeze_state = Flag.new(false) if synchronized?
             primitive_freeze(self) if synchronized?
           end
         end

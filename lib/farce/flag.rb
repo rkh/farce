@@ -7,6 +7,8 @@ module Farce
   # Only true and false are accepted. Read {#value} when testing the flag's state.
   # Use {#compare_and_set} to check and change the state in a single atomic operation.
   #
+  # On CRuby, subclasses must not add Ruby instance variables.
+  #
   # @example Allowing one caller to claim work
   #   claimed = Farce::Flag.new
   #   workers = 4.times.map do
@@ -20,6 +22,6 @@ module Farce
   #   @raise [ArgumentError] if the value is not true or false
   class Flag < Internal::Flag
     include Abstract::Flag
-    include Shareable
+    include Shareable::Native
   end
 end

@@ -62,7 +62,10 @@ module Farce
       assert_equal [:other_fiber, nil], events
       assert_wait_protocol(scheduler)
     end
-    private def assert_wait_protocol(scheduler)
+
+    private
+
+    def assert_wait_protocol(scheduler)
       if queue_class == Unshared::PriorityQueue && !Internal::UNSHARED_FIBER_IO
         assert_equal 0, scheduler.io_wait_calls
         assert_operator scheduler.block_calls, :>=, 1
@@ -71,7 +74,7 @@ module Farce
       end
     end
 
-    private def queue_class = PriorityQueue
+    def queue_class = PriorityQueue
   end
 
   class TestStrictPriorityQueueFiberScheduler < TestPriorityQueueFiberScheduler

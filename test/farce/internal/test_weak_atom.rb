@@ -18,7 +18,7 @@ module Farce
         assert_nil atom.value
         refute_predicate atom, :compare_by_identity?
         if shareable_atom?
-          assert_predicate atom, :frozen?
+          refute_predicate atom, :frozen?
           assert Ractor.shareable?(atom)
         elsif RUBY_ENGINE == "ruby"
           refute Ractor.shareable?(atom)
@@ -70,6 +70,15 @@ module Farce
         assert_equal(:replacement, atom.store_if_absent { :replacement })
         assert atom.compare_and_set(:replacement, false)
         assert_same false, atom.value
+      end
+
+      def test_timeout_conversion_that_freezes_the_atom_rejects_no_op_store_if_absent
+        atom = atom_class.new(:present)
+
+        assert_raises(FrozenError) do
+          atom.store_if_absent(timeout: FreezingTimeout.new(atom)) { :replacement }
+        end
+        assert_equal :present, atom.value
       end
 
       def test_nonlocal_exit_releases_the_update

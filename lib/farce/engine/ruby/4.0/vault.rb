@@ -12,10 +12,12 @@ module Farce
         # A Windows Port receiver can remain asleep after its reply was sent.
         # Wait for a native Atom notification before consuming the queued reply.
         class ReplyPort
+          include Freeze::Unfreezable
+
           def initialize
             @port = ::Ractor::Port.new
             @ready = Atom.new
-            ::Ractor.make_shareable(self)
+            Freeze.publish(self)
           end
 
           def send(message, move: false)
@@ -37,9 +39,11 @@ module Farce
       private_constant :ReplyPort
 
       class Manager
-        private def receive_request = ::Ractor.receive
+        private
 
-        private def respond(port, message, move: false)
+        def receive_request = ::Ractor.receive
+
+        def respond(port, message, move: false)
           return port.store(::Ractor.make_shareable(message)) if port.is_a?(Atom)
           port.send(message, move:)
         rescue ::Ractor::ClosedError
@@ -50,7 +54,7 @@ module Farce
 
       def initialize
         @ractor = ::Ractor.new { Manager.new.run }
-        ::Ractor.make_shareable(self)
+        Freeze.publish(self)
       end
 
       private

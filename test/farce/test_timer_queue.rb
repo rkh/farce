@@ -21,7 +21,7 @@ module Farce
       assert_equal :copy, queue.mode
 
       assert_predicate queue, :empty?
-      assert_predicate queue, :frozen?
+      refute_predicate queue, :frozen?
       assert Ractor.shareable?(queue) if RUBY_ENGINE == "ruby"
 
       refute_respond_to queue, :delete_identity

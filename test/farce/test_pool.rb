@@ -42,7 +42,7 @@ module Farce
       assert_equal 2, pool.size
       assert_nil pool.error
       refute_predicate pool, :closed?
-      assert_predicate pool, :frozen?
+      refute_predicate pool, :frozen?
       assert Ractor.shareable?(pool)
     ensure
       close_pool(pool)

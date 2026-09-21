@@ -12,12 +12,11 @@ module Farce
     class TreeMap < UnsafeTreeMap
       private
 
-      def synchronized? = true
-      def operation_lock = Lock.new
-      def ensure_mutation_still_allowed! = nil
+      def synchronized?                  = true
+      def operation_lock                 = Lock.new
+      def ensure_mutation_still_allowed! = Internal::Freeze.check(self)
 
-      def with_map_operation(state, mutation:)
-        _mutation = mutation
+      def with_map_operation(state, mutation:) # rubocop:disable Lint/UnusedMethodArgument
         current = Fiber.current
         raise ThreadError, "deadlock; recursive tree map access" if
           primitive_identical?(state.operation_owner, current)

@@ -15,7 +15,15 @@ module Farce
         @mutex               = Mutex.new
         @signal              = Signal.new
         @updating            = false
+        @farce_frozen        = false
       end
+
+      def freeze
+        @mutex.synchronize { @farce_frozen = true }
+        self
+      end
+
+      def frozen? = @mutex.synchronize { @farce_frozen }
 
       def size = @mutex.synchronize { @values.size }
 
@@ -27,8 +35,12 @@ module Farce
       end
 
       def []=(index, value)
+        check_frozen!
         index     = convert_index(index)
-        _, result = with_available(nil) { store_value(index, value) }
+        _, result = with_available(nil) do
+          check_frozen_locked!
+          store_value(index, value)
+        end
         result
       end
 
@@ -39,13 +51,19 @@ module Farce
       end
 
       def store(index, value, timeout: nil)
+        check_frozen!
         index             = convert_index(index)
-        completed, result = with_available(timeout_deadline(timeout)) { store_value(index, value) }
+        completed, result = with_available(timeout_deadline(timeout)) do
+          check_frozen_locked!
+          store_value(index, value)
+        end
         completed ? result : false
       end
 
       def clear
+        check_frozen!
         with_available(nil) do
+          check_frozen_locked!
           @values.clear
           changed!
         end
@@ -53,7 +71,9 @@ module Farce
       end
 
       def push(value, timeout: nil)
+        check_frozen!
         completed, = with_available(timeout_deadline(timeout)) do
+          check_frozen_locked!
           @values.push(value)
           changed!
         end
@@ -61,7 +81,9 @@ module Farce
       end
 
       def pop(timeout: nil)
+        check_frozen!
         completed, result = with_available(timeout_deadline(timeout)) do
+          check_frozen_locked!
           next if @values.empty?
 
           value = @values.pop
@@ -72,8 +94,10 @@ module Farce
       end
 
       def swap(index, replacement, timeout: nil)
+        check_frozen!
         index             = convert_index(index)
         completed, result = with_available(timeout_deadline(timeout)) do
+          check_frozen_locked!
           index           = assignment_index(index)
           previous        = @values[index]
           @values[index]  = replacement
@@ -85,6 +109,7 @@ module Farce
 
       def store_if_absent(index, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
 
         index                  = convert_index(index)
         completed, reservation = reserve(timeout_deadline(timeout)) do
@@ -102,6 +127,7 @@ module Farce
 
         _, normalized = reservation
         result        = yield
+        check_frozen!
         @mutex.synchronize { @values[normalized] = result }
         result
       ensure
@@ -109,6 +135,7 @@ module Farce
       end
 
       def compare_and_set(index, expected, replacement, timeout: nil)
+        check_frozen!
         index                  = convert_index(index)
         completed, reservation = reserve(timeout_deadline(timeout)) do
           normalized = lookup_index(index)
@@ -121,6 +148,7 @@ module Farce
 
         normalized, current = reservation
         matches             = values_equal?(current, expected)
+        check_frozen!
         @mutex.synchronize { @values[normalized] = replacement if matches }
         matches
       ensure
@@ -129,6 +157,7 @@ module Farce
 
       def upsert(index, initial, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
 
         index                  = convert_index(index)
         completed, reservation = reserve(timeout_deadline(timeout)) do
@@ -148,6 +177,7 @@ module Farce
 
         _, normalized, current = reservation
         result                 = yield(current)
+        check_frozen!
         @mutex.synchronize { @values[normalized] = result }
         result
       ensure
@@ -156,6 +186,7 @@ module Farce
 
       def update(index, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
 
         index                  = convert_index(index)
         completed, reservation = reserve(timeout_deadline(timeout)) do
@@ -167,6 +198,7 @@ module Farce
 
         normalized, current = reservation
         result              = yield(current)
+        check_frozen!
         @mutex.synchronize { @values[normalized] = result }
         result
       ensure
@@ -206,7 +238,12 @@ module Farce
         while true
           generation        = @signal.generation
           completed, result = @mutex.synchronize do
-            @updating ? [false, nil] : [true, yield]
+            if @updating
+              [false, nil]
+            else
+              check_frozen_locked!
+              [true, yield]
+            end
           end
           return [true, result] if completed
           return [false, nil] unless wait_for_signal(generation, deadline)
@@ -219,6 +256,16 @@ module Farce
       end
 
       def changed! = @signal.broadcast
+
+      def check_frozen!
+        @mutex.synchronize { check_frozen_locked! }
+      end
+
+      def check_frozen_locked!
+        return unless @farce_frozen
+
+        raise FrozenError.new("can't modify frozen #{self.class}", receiver: self)
+      end
 
       def wait_for_value(index, expected, deadline, non_nil:)
         while true

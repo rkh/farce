@@ -19,9 +19,12 @@ module Farce
   #   owner = nil
   class WeakKeyMap < Farce::Abstract::WeakKeyMap
     include Internal::MapValueModes
-    include Shareable
+    include Shareable::Delegated
 
-    private def new_map(**) = Internal::StrictWeakKeyMap.new(**)
+    private
+
+    def new_map(**)    = Internal::StrictWeakKeyMap.new(**)
+    def freeze_backend = @map
   end
 
   Internal::KeyNormalizer.prepare_concurrent_class(Internal::StrictWeakKeyMap)

@@ -22,7 +22,7 @@ module Farce
       refute_predicate scheduler, :alive?
       refute_predicate scheduler, :closed?
       refute_predicate scheduler, :wraps_external?
-      assert_predicate scheduler, :frozen?
+      refute_predicate scheduler, :frozen?
       assert_predicate scheduler, :ractor_shareable?
       assert Ractor.shareable?(scheduler)
     end

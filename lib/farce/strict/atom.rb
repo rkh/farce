@@ -19,7 +19,7 @@ module Farce
     #   atom.value.equal?(snapshot) # => true
     #   atom.update { |items| (items + [4]).freeze } # => [1, 2, 3, 4]
     class Atom < Abstract::Atom
-      include Shareable
+      include Shareable::Delegated
 
       # @param value [BasicObject, nil] the initial shareable value
       # @param compare_by_identity [Boolean] whether comparisons use object identity instead of equality
@@ -27,6 +27,8 @@ module Farce
         @atom = Internal::StrictAtom.new(value, compare_by_identity:)
         super()
       end
+
+      private def freeze_backend = @atom
     end
   end
 end

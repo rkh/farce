@@ -315,10 +315,10 @@ module Farce
         map.freeze
 
         assert_nil map[:missing]
+        assert_equal 1, map[:one]
         assert map.key?(:one)
         assert_same :one, map.getkey(:one)
         assert_equal [:one], map.keys
-        assert_raises(FrozenError) { map[:one] }
         assert_raises(FrozenError) { map[:two] = 2 }
         assert_raises(FrozenError) { map.delete(:one) }
         assert_raises(FrozenError) { map.shift }
@@ -327,14 +327,19 @@ module Farce
         assert_raises(FrozenError) { map.clear }
       end
 
-      def test_shared_map_is_frozen_shareable_and_internally_mutable
+      def test_shared_map_is_mutable_and_shareable_until_logically_frozen
         map = Internal::ShareableLRUMap.new(max_size: 2)
 
-        assert_predicate map, :frozen?
+        refute_predicate map, :frozen?
         assert Ractor.shareable?(map)
         assert_equal 1, map[:one] = 1
+
+        map.freeze
+
+        assert_predicate map, :frozen?
         assert_equal 1, map[:one]
-        assert_equal 1, map.delete(:one)
+        assert_raises(FrozenError) { map[:two] = 2 }
+        assert_raises(FrozenError) { map.delete(:one) }
       end
 
       def test_failed_initialization_can_retry_before_publication
@@ -375,33 +380,33 @@ module Farce
         end
       end
 
-      def test_publication_recursively_shares_ivars_and_rejects_bad_ivars
+      def test_publication_rejects_ruby_ivars_and_leaves_safe_state
         map = Internal::ShareableLRUMap.allocate
         metadata = Object.new
         metadata.instance_variable_set(:@values, [1, 2, 3])
         map.instance_variable_set(:@metadata, metadata)
 
-        assert_same map, map.send(:initialize, max_size: 1)
-        assert Ractor.shareable?(map)
-        assert Ractor.shareable?(metadata)
-        assert_predicate metadata, :frozen?
+        error = assert_raises(TypeError) { map.send(:initialize, max_size: 1) }
 
-        bad = Internal::ShareableLRUMap.allocate
-        bad.instance_variable_set(:@thread, Thread.current)
-        assert_raises(Ractor::Error) { bad.send(:initialize, max_size: 1) }
-        refute Ractor.shareable?(bad)
-        assert_raises(RuntimeError) { bad.size }
+        assert_match(/cannot be published with Ruby instance variables/, error.message)
+        refute_predicate metadata, :frozen?
+        refute Ractor.shareable?(map)
+        assert_raises(RuntimeError) { map.size }
       end
 
-      def test_recursive_initialize_from_ivar_freeze_does_not_deadlock
+      def test_rejected_preinitialize_ivar_is_not_frozen_or_published
         map = Internal::ShareableLRUMap.allocate
         metadata = NativeLRUPublicationReentry.new(map)
         map.instance_variable_set(:@metadata, metadata)
 
-        Timeout.timeout(2) { map.send(:initialize, max_size: 1) }
+        assert_raises(TypeError) do
+          Timeout.timeout(2) { map.send(:initialize, max_size: 1) }
+        end
 
-        assert_predicate metadata, :reentry_rejected
-        assert Ractor.shareable?(map)
+        refute_predicate metadata, :reentry_rejected
+        refute_predicate metadata, :frozen?
+        refute Ractor.shareable?(map)
+        assert_raises(RuntimeError) { map.size }
       end
 
       def test_concurrent_initializers_commit_once

@@ -51,7 +51,7 @@ module Farce
       def [](key)                     = unwrap_value(@map[key])
 
       def []=(key, value)
-        key = @map.normalize_external_key(key)
+        key = @map.prepare_mutation_key(key)
         @map.store_prepared(key, wrap_value(value))
         value
       end
@@ -75,14 +75,14 @@ module Farce
       # (see Abstract::ConcurrentMap#store)
       # @param mode [Symbol, nil] the value transfer mode, or nil to use the default
       def store(key, value, mode: nil, timeout: nil, &)
-        key = @map.normalize_external_key(key)
+        key = @map.prepare_mutation_key(key)
         unwrap_result(@map.store_prepared(key, wrap_value(value, mode:), timeout:) { TIMED_OUT }, &)
       end
 
       # (see Abstract::ConcurrentMap#swap)
       # @param mode [Symbol, nil] the replacement's transfer mode, or nil to use the default
       def swap(key, replacement, mode: nil, timeout: nil, &)
-        key = @map.normalize_external_key(key)
+        key = @map.prepare_mutation_key(key)
         unwrap_result(@map.swap_prepared(key, wrap_value(replacement, mode:), timeout:) { TIMED_OUT }, &)
       end
 
@@ -90,34 +90,48 @@ module Farce
       # @param mode [Symbol, nil] the result's transfer mode, or nil to use the default
       def store_if_absent(key, mode: nil, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
-        unwrap_value(@map.store_if_absent(key, timeout:) { wrap_value(yield, mode:) })
+        @map.check_mutation
+        unwrap_value(@map.store_if_absent(key, timeout:) do
+          value = yield
+          @map.check_mutation
+          wrap_value(value, mode:)
+        end)
       end
 
       # (see Abstract::ConcurrentMap#update)
       # @param mode [Symbol, nil] the result's transfer mode, or nil to use the default
       def update(key, mode: nil, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
-        unwrap_value(@map.update(key, timeout:) { |current| wrap_value(yield(unwrap_value(current)), mode:) })
+        @map.check_mutation
+        unwrap_value(@map.update(key, timeout:) do |current|
+          value = yield(unwrap_value(current))
+          @map.check_mutation
+          wrap_value(value, mode:)
+        end)
       end
 
       # (see Abstract::ConcurrentMap#upsert)
       # @param mode [Symbol, nil] the value transfer mode, or nil to use the default
       def upsert(key, initial, mode: nil, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        @map.check_mutation
         unwrap_value(@map.update(key, timeout:) do |current|
-          wrap_value(nil.equal?(current) ? initial : yield(unwrap_value(current)), mode:)
+          value = nil.equal?(current) ? initial : yield(unwrap_value(current))
+          @map.check_mutation
+          wrap_value(value, mode:)
         end)
       end
 
       # (see Abstract::ConcurrentMap#compare_and_set)
       # @param mode [Symbol, nil] the replacement's transfer mode, or nil to use the default
       def compare_and_set(key, expected, replacement, mode: nil, timeout: nil)
-        key = @map.normalize_external_key(key)
+        key = @map.prepare_mutation_key(key)
         expected = wrap_comparison(expected)
         catch(CANCEL_UPDATE) do
           result = @map.update_prepared(key, timeout:) do |current|
             # Abort the update instead of inserting a value for a missing key.
             throw CANCEL_UPDATE, false if nil.equal?(current) || !values_equal?(current, expected)
+            @map.check_mutation
             wrap_value(replacement, mode:)
           end
           !nil.equal?(result)

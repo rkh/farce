@@ -6,7 +6,7 @@ module Farce
   # A shareable timer queue with transfer modes for unshareable values.
   class TimerQueue < Abstract::TimerQueue
     include Internal::ManagedQueue
-    include Shareable
+    include Shareable::Unfreezable
 
     # (see Farce::Abstract::TimerQueue#initialize)
     # @!macro modes

@@ -19,6 +19,8 @@ Farce provides tools and data structures to write code that works well with both
     - [As a library dependency](#as-a-library-dependency)
     - [Local setup](#local-setup)
     - [Loading Farce](#loading-farce)
+  - [Known Issues and Limitations](#known-issues-and-limitations)
+    - [Possible discrepancy regarding frozen state in Ruby and C](#possible-discrepancy-regarding-frozen-state-in-ruby-and-c)
   - [Housekeeping](#housekeeping)
 
 
@@ -285,6 +287,25 @@ require "farce"
 
 Constants (classes, modules, etc.) under the `Farce` namespace are loaded lazily (thread- and ractor-safe), so there is no
 need to specifically load any particular file.
+
+## Known Issues and Limitations
+
+### Possible discrepancy regarding frozen state in Ruby and C
+
+> I agree that **freezing means the object's own state is immutable**, not just its instance variables, so we should not freeze [*shareable, mutable object*]. Forbidding instance variables on them is the right approach. [...] **A shareable object that is not frozen never has instance variables**. This should also hold when C extensions define such objects in the future.
+> — *Yukihiro Matsumoto* (Ruby Issue [#22291](https://bugs.ruby-lang.org/issues/22291#note-4), emphasis added)
+
+In Ruby, Farce objects reflect their frozen state accurately. If a map returns `true` for `frozen?`, you cannot add, remove, or replace its entries.
+
+There are some technical challenges implementing this behavior: From within Ruby, you cannot mark an object as Ractor shareable without freezing it first. This is possible from a C-extension, but then instance variables can no longer be used, so state tracking needs to happen purely at the C level or outside of the Ruby object.
+
+To work around this, Farce follows a hybrid approach, marking objects with state purely defined in a C extension as Ractor shareable without freezing them, and reimplementing freezing behavior in Ruby for objects where this isn't safely possible.
+
+This means:
+
+* `frozen?` and `freeze` will behave as expected for all Farce classes.
+* `Kernel.instance_method(:frozen?).bind_call(object)` might report a different value from `object.frozen?`
+* C-level checks for frozen state, such as `RB_OBJ_FROZEN`, might differ from what Ruby-level methods report.
 
 ## Housekeeping
 

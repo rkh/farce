@@ -40,7 +40,7 @@ module Farce
         assert_predicate map, :shareable_keys?
         assert_predicate map, :shareable_values?
         assert_kind_of Abstract::ConcurrentMap, map
-        assert_predicate map, :frozen?
+        refute_predicate map, :frozen?
         assert_predicate map, :ractor_shareable?
         assert Ractor.shareable?(map)
       end

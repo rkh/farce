@@ -30,6 +30,9 @@ module Farce
   class WeakValue
     include Abstract::Value
 
+    MOVED = Object.new.freeze
+    private_constant :MOVED
+
     nil_value = new
 
     class << nil_value
@@ -39,8 +42,11 @@ module Farce
       def alive?            = true
       def moved?            = false
       def ractor_shareable? = true
-      private def _value    = nil
-      private def state_and_value = [:alive, nil]
+
+      private
+
+      def _value          = nil
+      def state_and_value = [:alive, nil]
     end
 
     nil_value.instance_variable_set(:@mutex, nil)
@@ -83,7 +89,11 @@ module Farce
     def freeze
       @mutex&.synchronize do
         return self if frozen?
-        value  = Ractor.make_shareable(_value)
+        value = begin
+          Ractor.make_shareable(_value)
+        rescue Ractor::MovedError
+          MOVED
+        end
         @atom  = Strict::WeakAtom.new(value)
         @mutex = nil
       end
@@ -101,6 +111,8 @@ module Farce
     # @return [Boolean] true if the referenced object is shareable by Ractor, false otherwise
     def ractor_shareable?
       return false unless Ractor.shareable?(_value)
+      freeze && true
+    rescue Ractor::MovedError
       freeze && true
     end
 
@@ -142,7 +154,16 @@ module Farce
 
     private
 
-    def _value = @atom.value
+    def initialize_clone(other, freeze: nil)
+      super
+      self.freeze if freeze == true
+    end
+
+    def _value
+      value = @atom.value
+      raise Ractor::MovedError, "referenced object has been moved" if MOVED.equal?(value)
+      value
+    end
 
     def state_and_value
       value = _value

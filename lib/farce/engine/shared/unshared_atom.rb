@@ -22,9 +22,17 @@ module Farce
         @updating_fiber      = nil
         @updating_thread     = nil
         @version             = 0
+        @farce_frozen        = false
       end
 
       def value = @mutex.synchronize { @value }
+
+      def freeze
+        @mutex.synchronize { @farce_frozen = true }
+        self
+      end
+
+      def frozen? = @mutex.synchronize { @farce_frozen }
 
       def get(timeout: nil, &fallback)
         result = with_available_value(timeout) { @value }
@@ -32,7 +40,9 @@ module Farce
       end
 
       def store(new_value, timeout: nil, &fallback)
+        check_frozen!
         result = with_available_value(timeout) do
+          check_frozen_locked!
           @value = new_value
           changed!
           new_value
@@ -41,7 +51,9 @@ module Farce
       end
 
       def swap(new_value, timeout: nil, &fallback)
+        check_frozen!
         result = with_available_value(timeout) do
+          check_frozen_locked!
           old_value = @value
           @value = new_value
           changed!
@@ -51,8 +63,9 @@ module Farce
       end
 
       def store_if_absent(timeout: nil, &update)
-        deadline = timeout_deadline(timeout)
         raise LocalJumpError, "no block given" unless update
+        check_frozen!
+        deadline = timeout_deadline(timeout)
 
         current = reserve(deadline) do
           return @value unless @value.nil?
@@ -63,12 +76,15 @@ module Farce
       end
 
       def compare_and_set(expected, new_value, timeout: nil)
+        check_frozen!
         current = reserve(timeout_deadline(timeout))
         return false if TIMED_OUT.equal?(current)
 
         matched = false
         begin
-          matched = true if values_equal?(current, expected)
+          matches = values_equal?(current, expected)
+          check_frozen!
+          matched = matches
         ensure
           finish_update(new_value, changed: matched)
         end
@@ -76,8 +92,9 @@ module Farce
       end
 
       def update(timeout: nil)
-        deadline = timeout_deadline(timeout)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
+        deadline = timeout_deadline(timeout)
 
         current = reserve(deadline)
         return if TIMED_OUT.equal?(current)
@@ -86,8 +103,9 @@ module Farce
       end
 
       def upsert(initial_value, timeout: nil)
-        deadline = timeout_deadline(timeout)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
+        deadline = timeout_deadline(timeout)
 
         current = reserve(deadline) do
           next unless @value.nil?
@@ -142,6 +160,7 @@ module Farce
             reject_update_wait!
             return TIMED_OUT unless wait_for_signal(deadline)
           end
+          check_frozen_locked!
           yield if block_given?
           @updating        = true
           @updating_fiber  = Fiber.current
@@ -154,6 +173,7 @@ module Farce
         changed = false
         begin
           result = yield
+          check_frozen!
           changed = true
           result
         ensure
@@ -175,6 +195,16 @@ module Farce
       def changed!
         @version += 1
         @signal.broadcast
+      end
+
+      def check_frozen!
+        @mutex.synchronize { check_frozen_locked! }
+      end
+
+      def check_frozen_locked!
+        return unless @farce_frozen
+
+        raise FrozenError.new("can't modify frozen #{self.class}", receiver: self)
       end
 
       def timeout_deadline(timeout)

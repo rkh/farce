@@ -137,7 +137,7 @@ module Farce
           refute Ractor.shareable?(map)
           refute Ractor.shareable?(local)
           assert_raises(Ractor::Error) { Ractor.make_shareable(map) }
-          assert_predicate shareable, :frozen?
+          refute_predicate shareable, :frozen?
           assert Ractor.shareable?(shareable)
         else
           assert_same TreeMap, ShareableTreeMap

@@ -198,12 +198,12 @@ module Farce
 
       def initialize_dup(other)
         super
-        make_copy_shareable if is_a?(Shareable)
+        publish_shareable_copy(other, operation: :dup) if is_a?(Shareable)
       end
 
       def initialize_clone(other, freeze: nil)
         super
-        make_copy_shareable if is_a?(Shareable) && freeze != false
+        publish_shareable_copy(other, operation: :clone, freeze:) if is_a?(Shareable)
       end
 
       def initialize_copy(other, empty: false)
@@ -216,11 +216,6 @@ module Farce
         install_copied_map(copy_map_backend(other.internal_map, empty:))
       end
 
-      def make_copy_shareable
-        Ractor.make_shareable(self) if Internal.native_ractors?
-        freeze
-      end
-
       def install_copied_map(map) = @map = map
 
       def empty_copy
@@ -228,7 +223,7 @@ module Farce
         copy = self.class.allocate
         instance_variables.each { |name| copy.instance_variable_set(name, instance_variable_get(name)) }
         copy.__send__(:initialize_copy, self, empty: true)
-        copy.__send__(:make_copy_shareable) if is_a?(Shareable)
+        copy.__send__(:publish_shareable) if is_a?(Shareable)
         copy
       end
 

@@ -12,17 +12,21 @@ module Farce
 
       def initialize_dup(other)
         super
-        publish_copy if is_a?(Shareable)
+        publish_copy(other, operation: :dup) if is_a?(Shareable)
       end
 
       def initialize_clone(other, freeze: nil)
         super
-        publish_copy if is_a?(Shareable) && freeze != false
+        publish_copy(other, operation: :clone, freeze:) if is_a?(Shareable)
       end
 
-      def publish_copy
-        Ractor.make_shareable(self) if Internal.native_ractors?
-        freeze
+      def publish_copy(other, operation:, freeze: nil)
+        if respond_to?(:publish_shareable_copy, true)
+          publish_shareable_copy(other, operation:, freeze:)
+        elsif operation == :dup || freeze != false
+          Ractor.make_shareable(self) if Internal.native_ractors?
+          self.freeze
+        end
       end
     end
   end

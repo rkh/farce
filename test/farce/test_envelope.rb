@@ -258,7 +258,13 @@ module Farce
 
     def assert_envelope_is_shareable(envelope)
       assert_kind_of Abstract::Value, envelope
-      assert_predicate envelope, :frozen?
+      if envelope.is_a?(Envelope::Move)
+        refute_predicate envelope, :frozen?
+        assert_raises(TypeError) { envelope.freeze }
+      else
+        assert_predicate envelope, :frozen?
+      end
+
       assert_predicate envelope, :ractor_shareable?
       assert Ractor.shareable?(envelope)
     end

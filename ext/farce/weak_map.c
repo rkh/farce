@@ -25,6 +25,7 @@ static VALUE weak_map_keep;
 static VALUE weak_map_delete_token;
 static VALUE cWeakValueMap;
 static VALUE cWeakMap;
+static VALUE eIsolationError;
 
 typedef enum {
     WEAK_MAP_EMPTY = 0,
@@ -256,6 +257,19 @@ static const rb_data_type_t weak_map_type = {
     },
     .flags = RUBY_TYPED_FROZEN_SHAREABLE,
 };
+
+static void
+weak_map_validate_references(VALUE self)
+{
+    weak_map_t *map;
+    TypedData_Get_Struct(self, weak_map_t, &weak_map_type, map);
+    for (size_t index = 0; index < map->capacity; index++) {
+        weak_map_slot_t *slot = &map->slots[index];
+        if (slot->state != WEAK_MAP_OCCUPIED) continue;
+        containers_check_shareable(slot->key);
+        containers_check_shareable(slot->value);
+    }
+}
 
 static weak_map_slot_t *
 weak_map_allocate_slots(size_t capacity)
@@ -658,6 +672,10 @@ weak_map_store_locked(
     bool found;
     weak_map_prepare_insert(map);
     size_t index = weak_map_find_slot(map, key, hash, &found, execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     weak_map_slot_t *slot = &map->slots[index];
     if (!found) {
         if (slot->state == WEAK_MAP_TOMBSTONE) map->tombstones--;
@@ -674,11 +692,18 @@ weak_map_store_locked(
 }
 
 static VALUE
-weak_map_prepare_key(weak_map_t *map, VALUE key)
+weak_map_normalize_key(weak_map_t *map, VALUE key)
 {
     if (!map->compare_keys_by_identity && RB_TYPE_P(key, T_STRING) && !RB_OBJ_FROZEN(key)) {
         key = containers_normalize_string_key(key);
     }
+    return key;
+}
+
+static VALUE
+weak_map_prepare_key(weak_map_t *map, VALUE key)
+{
+    key = weak_map_normalize_key(map, key);
     containers_check_shareable(key);
     return key;
 }
@@ -739,7 +764,7 @@ weak_map_initialize(int argc, VALUE *argv, VALUE self)
         rb_hash_foreach(mapping, weak_map_initialize_entry, (VALUE)&context);
     }
     map->initialized = true;
-    containers_finish_initialization(self);
+    containers_publish_native_with_references(self, weak_map_validate_references);
     return self;
 }
 
@@ -757,6 +782,24 @@ weak_map_get(VALUE self, VALUE key)
     if (found) result = map->slots[index].value;
     pthread_mutex_unlock(&map->lock);
     return result;
+}
+
+static VALUE
+weak_map_check_mutation(VALUE self)
+{
+    rb_check_frozen(self);
+    return self;
+}
+
+static VALUE
+weak_map_prepare_mutation_key(VALUE self, VALUE key)
+{
+    rb_check_frozen(self);
+    key = weak_map_normalize_key(get_weak_map(self), key);
+    if (!rb_ractor_shareable_p(key)) {
+        rb_raise(eIsolationError, "key must be Ractor-shareable");
+    }
+    return key;
 }
 
 static VALUE
@@ -794,10 +837,12 @@ weak_map_fetch(int argc, VALUE *argv, VALUE self)
 static VALUE
 weak_map_set(VALUE self, VALUE key, VALUE value)
 {
+    rb_check_frozen(self);
     weak_map_t *map = get_weak_map(self);
     key = weak_map_prepare_key(map, key);
     containers_check_shareable(value);
     st_index_t hash = weak_map_key_hash(map, key);
+    rb_check_frozen(self);
     weak_map_execution_context_t execution;
     weak_map_lock_for_key(map, key, hash, &execution);
     weak_map_store_locked(self, map, key, value, hash, &execution);
@@ -838,14 +883,20 @@ weak_map_getkey(VALUE self, VALUE key)
 static VALUE
 weak_map_delete(VALUE self, VALUE key)
 {
+    rb_check_frozen(self);
     weak_map_t *map = get_weak_map(self);
     key = weak_map_prepare_key(map, key);
     st_index_t hash = weak_map_key_hash(map, key);
+    rb_check_frozen(self);
     bool found;
     VALUE result = Qnil;
     weak_map_execution_context_t execution;
     weak_map_lock_for_key(map, key, hash, &execution);
     size_t index = weak_map_find_slot(map, key, hash, &found, &execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     if (found) {
         weak_map_slot_t *slot = &map->slots[index];
         result = slot->value;
@@ -863,6 +914,7 @@ weak_map_delete(VALUE self, VALUE key)
 static VALUE
 weak_map_clear(VALUE self)
 {
+    rb_check_frozen(self);
     weak_map_t *map = get_weak_map(self);
     weak_map_execution_context_t execution;
     weak_map_lock_state(map, &execution);
@@ -917,6 +969,7 @@ weak_map_store_body(VALUE opaque)
     weak_map_operation_t *operation = (weak_map_operation_t *)opaque;
     VALUE result = rb_yield_values(0);
     containers_check_shareable(result);
+    rb_check_frozen(operation->self);
     weak_map_execution_context_t execution;
     weak_map_lock_state(operation->map, &execution);
     bool stored = !operation->reservation.invalidated;
@@ -939,6 +992,7 @@ weak_map_store_body(VALUE opaque)
 static VALUE
 weak_map_store_if_absent(int argc, VALUE *argv, VALUE self)
 {
+    rb_check_frozen(self);
     VALUE key;
     VALUE keywords = Qnil;
     VALUE keyword_values[1] = {Qundef};
@@ -956,6 +1010,7 @@ weak_map_store_if_absent(int argc, VALUE *argv, VALUE self)
     };
     rb_need_block();
     operation.hash = weak_map_key_hash(map, key);
+    rb_check_frozen(self);
     weak_map_timeout_t timeout = weak_map_parse_timeout(
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
@@ -964,6 +1019,10 @@ weak_map_store_if_absent(int argc, VALUE *argv, VALUE self)
     if (!weak_map_lock_for_key_with_timeout(map, key, operation.hash, &timeout, &execution)) return Qnil;
     bool found;
     size_t index = weak_map_find_slot(map, key, operation.hash, &found, &execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     if (found) {
         VALUE value = map->slots[index].value;
         pthread_mutex_unlock(&map->lock);
@@ -983,6 +1042,7 @@ weak_map_cas_body(VALUE opaque)
     bool matches = operation->identity
         ? operation->current == operation->argument
         : RTEST(rb_equal(operation->current, operation->argument));
+    rb_check_frozen(operation->self);
 
     weak_map_execution_context_t execution;
     weak_map_lock_state(operation->map, &execution);
@@ -1007,6 +1067,7 @@ weak_map_cas_body(VALUE opaque)
 static VALUE
 weak_map_compare_and_set(int argc, VALUE *argv, VALUE self)
 {
+    rb_check_frozen(self);
     VALUE key;
     VALUE expected;
     VALUE replacement;
@@ -1030,6 +1091,7 @@ weak_map_compare_and_set(int argc, VALUE *argv, VALUE self)
     containers_check_shareable(expected);
     containers_check_shareable(replacement);
     operation.hash = weak_map_key_hash(map, key);
+    rb_check_frozen(self);
     weak_map_timeout_t timeout = weak_map_parse_timeout(
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
@@ -1038,6 +1100,10 @@ weak_map_compare_and_set(int argc, VALUE *argv, VALUE self)
     if (!weak_map_lock_for_key_with_timeout(map, key, operation.hash, &timeout, &execution)) return Qfalse;
     bool found;
     size_t index = weak_map_find_slot(map, key, operation.hash, &found, &execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     if (!found) {
         pthread_mutex_unlock(&map->lock);
         return Qfalse;
@@ -1059,6 +1125,7 @@ weak_map_modify_body(VALUE opaque)
     bool remove = value == weak_map_delete_token;
     bool store = !remove && value != weak_map_keep;
     if (store) containers_check_shareable(value);
+    rb_check_frozen(operation->self);
     weak_map_execution_context_t execution;
     weak_map_lock_state(operation->map, &execution);
     bool changed = false;
@@ -1070,6 +1137,10 @@ weak_map_modify_body(VALUE opaque)
         bool found;
         size_t index = weak_map_find_slot(operation->map, operation->key,
             operation->hash, &found, &execution);
+        if (RB_OBJ_FROZEN(operation->self)) {
+            pthread_mutex_unlock(&operation->map->lock);
+            rb_check_frozen(operation->self);
+        }
         if (found) {
             weak_map_slot_t *slot = &operation->map->slots[index];
             slot->key = Qnil;
@@ -1090,6 +1161,7 @@ weak_map_modify_body(VALUE opaque)
 static VALUE
 weak_map_modify(VALUE self, VALUE key)
 {
+    rb_check_frozen(self);
     rb_need_block();
     weak_map_t *map = get_weak_map(self);
     key = weak_map_prepare_key(map, key);
@@ -1100,10 +1172,15 @@ weak_map_modify(VALUE self, VALUE key)
         .complete = false,
     };
     operation.hash = weak_map_key_hash(map, key);
+    rb_check_frozen(self);
     weak_map_execution_context_t execution;
     weak_map_lock_for_key(map, key, operation.hash, &execution);
     bool found;
     size_t index = weak_map_find_slot(map, key, operation.hash, &found, &execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     operation.present = found;
     operation.current = found ? map->slots[index].value : Qnil;
     operation.key = found ? map->slots[index].key : key;
@@ -1119,6 +1196,7 @@ weak_map_upsert_body(VALUE opaque)
     weak_map_operation_t *operation = (weak_map_operation_t *)opaque;
     VALUE result = rb_yield(operation->current);
     containers_check_shareable(result);
+    rb_check_frozen(operation->self);
     weak_map_execution_context_t execution;
     weak_map_lock_state(operation->map, &execution);
     bool stored = !operation->reservation.invalidated;
@@ -1141,6 +1219,7 @@ weak_map_upsert_body(VALUE opaque)
 static VALUE
 weak_map_upsert(int argc, VALUE *argv, VALUE self)
 {
+    rb_check_frozen(self);
     VALUE key;
     VALUE initial;
     VALUE keywords = Qnil;
@@ -1160,6 +1239,7 @@ weak_map_upsert(int argc, VALUE *argv, VALUE self)
     containers_check_shareable(initial);
     rb_need_block();
     operation.hash = weak_map_key_hash(map, key);
+    rb_check_frozen(self);
     weak_map_timeout_t timeout = weak_map_parse_timeout(
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
@@ -1168,6 +1248,10 @@ weak_map_upsert(int argc, VALUE *argv, VALUE self)
     if (!weak_map_lock_for_key_with_timeout(map, key, operation.hash, &timeout, &execution)) return Qnil;
     bool found;
     size_t index = weak_map_find_slot(map, key, operation.hash, &found, &execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     if (!found) {
         weak_map_store_locked(self, map, key, initial, operation.hash, &execution);
         pthread_mutex_unlock(&map->lock);
@@ -1339,6 +1423,7 @@ weak_map_get_with_timeout(int argc, VALUE *argv, VALUE self)
 static VALUE
 weak_map_store_with_timeout(int argc, VALUE *argv, VALUE self)
 {
+    rb_check_frozen(self);
     VALUE key;
     VALUE value;
     VALUE keywords = Qnil;
@@ -1351,6 +1436,7 @@ weak_map_store_with_timeout(int argc, VALUE *argv, VALUE self)
     key = weak_map_prepare_key(map, key);
     containers_check_shareable(value);
     st_index_t hash = weak_map_key_hash(map, key);
+    rb_check_frozen(self);
     weak_map_timeout_t timeout = weak_map_parse_timeout(
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
@@ -1366,6 +1452,7 @@ weak_map_store_with_timeout(int argc, VALUE *argv, VALUE self)
 static VALUE
 weak_map_swap(int argc, VALUE *argv, VALUE self)
 {
+    rb_check_frozen(self);
     VALUE key;
     VALUE replacement;
     VALUE keywords = Qnil;
@@ -1378,6 +1465,7 @@ weak_map_swap(int argc, VALUE *argv, VALUE self)
     key = weak_map_prepare_key(map, key);
     containers_check_shareable(replacement);
     st_index_t hash = weak_map_key_hash(map, key);
+    rb_check_frozen(self);
     weak_map_timeout_t timeout = weak_map_parse_timeout(
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
@@ -1388,6 +1476,10 @@ weak_map_swap(int argc, VALUE *argv, VALUE self)
 
     bool found;
     size_t index = weak_map_find_slot(map, key, hash, &found, &execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     VALUE previous = found ? map->slots[index].value : Qnil;
     weak_map_store_locked(self, map, key, replacement, hash, &execution);
     pthread_mutex_unlock(&map->lock);
@@ -1461,6 +1553,7 @@ weak_map_wait_until_non_nil(int argc, VALUE *argv, VALUE self)
 static VALUE
 weak_map_update(int argc, VALUE *argv, VALUE self)
 {
+    rb_check_frozen(self);
     VALUE key;
     VALUE keywords = Qnil;
     VALUE keyword_values[1] = {Qundef};
@@ -1478,6 +1571,7 @@ weak_map_update(int argc, VALUE *argv, VALUE self)
     };
     rb_need_block();
     operation.hash = weak_map_key_hash(map, key);
+    rb_check_frozen(self);
     weak_map_timeout_t timeout = weak_map_parse_timeout(
         keyword_values[0] == Qundef ? Qnil : keyword_values[0]
     );
@@ -1486,6 +1580,10 @@ weak_map_update(int argc, VALUE *argv, VALUE self)
     if (!weak_map_lock_for_key_with_timeout(map, key, operation.hash, &timeout, &execution)) return Qnil;
     bool found;
     size_t index = weak_map_find_slot(map, key, operation.hash, &found, &execution);
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&map->lock);
+        rb_check_frozen(self);
+    }
     operation.current = found ? map->slots[index].value : Qnil;
     operation.key = found ? map->slots[index].key : key;
     weak_map_begin_reservation_locked(map, &operation.reservation, operation.key,
@@ -1506,6 +1604,8 @@ define_weak_map_methods(VALUE klass)
     rb_define_method(klass, "initialize", weak_map_initialize, -1);
     rb_define_method(klass, "[]", weak_map_get, 1);
     rb_define_method(klass, "[]=", weak_map_set, 2);
+    rb_define_method(klass, "check_mutation", weak_map_check_mutation, 0);
+    rb_define_method(klass, "prepare_mutation_key", weak_map_prepare_mutation_key, 1);
     rb_define_method(klass, "fetch", weak_map_fetch, -1);
     rb_define_method(klass, "get", weak_map_get_with_timeout, -1);
     rb_define_method(klass, "store", weak_map_store_with_timeout, -1);
@@ -1536,6 +1636,7 @@ define_weak_map_methods(VALUE klass)
 void
 containers_init_weak_maps(VALUE namespace)
 {
+    eIsolationError = rb_const_get(rb_cRactor, rb_intern("IsolationError"));
     weak_map_keep = rb_const_get(namespace, rb_intern("MAP_KEEP"));
     weak_map_delete_token = rb_const_get(namespace, rb_intern("MAP_DELETE"));
     rb_global_variable(&weak_map_keep);

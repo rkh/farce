@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 supported = RUBY_ENGINE == "ruby" ||
   (RUBY_ENGINE == "truffleruby" && TruffleRuby.native?)
@@ -10,6 +12,12 @@ module Farce
   module Internal
     module PriorityQueueStorageBehavior
       def queue_class = self.class.const_get(:QueueClass, false)
+
+      def native_unshared_storage?
+        Internal.native_ractors? &&
+          queue_class.equal?(Internal::UnsharedPriorityQueue) &&
+          !queue_class.equal?(Internal::PriorityQueue)
+      end
 
       def new_queue(...) = queue_class.new(...)
 
@@ -49,7 +57,7 @@ module Farce
 
       def test_a_frozen_allocated_queue_cannot_be_initialized
         queue = queue_class.allocate
-        queue.freeze
+        Object.instance_method(:freeze).bind_call(queue)
 
         assert_raises(FrozenError) { queue.send(:initialize, capacity: nil) }
       end
@@ -58,7 +66,7 @@ module Farce
         queue = queue_class.allocate
         capacity = Object.new
         capacity.define_singleton_method(:to_int) do
-          queue.freeze
+          Object.instance_method(:freeze).bind_call(queue)
           1
         end
 
@@ -507,10 +515,10 @@ module Farce
 
       QueueClass = Internal::PriorityQueue
 
-      def test_queue_is_frozen_and_ractor_shareable_on_cruby
+      def test_queue_is_unfrozen_and_ractor_shareable_on_cruby
         queue = queue_class.new
 
-        assert_predicate queue, :frozen?
+        assert_equal native_unshared_storage?, queue.frozen?
         assert Ractor.shareable?(queue) if RUBY_ENGINE == "ruby"
       end
 
@@ -594,7 +602,7 @@ module Farce
         assert native_push(queue, 1, :value)
         assert_equal 1, winner[2].value
         assert_equal 0, loser[2].value
-        assert_predicate queue, :frozen?
+        assert_equal native_unshared_storage?, queue.frozen?
       ensure
         2.times { release << true } if release
         threads&.each { |thread| thread.kill if thread.alive? }
@@ -709,15 +717,21 @@ module Farce
 
       def share(value) = value
 
-      undef_method :test_queue_is_frozen_and_ractor_shareable_on_cruby
+      undef_method :test_queue_is_unfrozen_and_ractor_shareable_on_cruby
       undef_method :test_unshareable_inputs_are_rejected_on_cruby
       undef_method :test_concurrent_ractor_producers
 
-      def test_queue_remains_unshareable_even_when_frozen
+      def test_queue_uses_the_unshared_storage_freeze_policy
         queue = new_queue
 
-        assert_predicate queue, :frozen?
-        refute Ractor.shareable?(queue) if Internal.native_ractors?
+        if native_unshared_storage?
+          assert_predicate queue, :frozen?
+          refute Ractor.shareable?(queue)
+        else
+          refute_predicate queue, :frozen?
+          assert_raises(TypeError) { queue.freeze }
+          refute_predicate queue, :frozen?
+        end
       end
     end
   end

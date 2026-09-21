@@ -11,6 +11,11 @@ module Farce
   # changing the stored value. Conditional-operation bounds may be wider, but a
   # resulting stored value must still fit.
   #
+  # On CRuby, subclasses must not add Ruby instance variables.
+  #
+  # @!method initial
+  #   @return [Integer] The initial value retained by reset and copies.
+  #
   # @!method value
   #   @return [Integer] The current value of the counter.
   #
@@ -50,13 +55,12 @@ module Farce
   #   counter.minutes.to_i # => 600
   class Counter < Internal::Counter
     include Abstract::Counter
-    include Shareable
+    include Shareable::Native
 
     # @param [Numeric, String, #to_int] value The initial value, converted to an Integer.
     def initialize(value = 0)
       raise FrozenError.new("can't initialize a frozen counter", receiver: self) if frozen?
-      @initial = Integer(value)
-      super(@initial)
+      super(Integer(value))
     end
 
     alias subtract decrement

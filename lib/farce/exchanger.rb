@@ -11,7 +11,7 @@ module Farce
   #   worker    = Farce::Ractor.new(exchanger) { |shared| shared.exchange([:worker]) }
   #   exchanger.exchange([:main]) # => [:worker]
   class Exchanger < Farce::Abstract::Exchanger
-    include Shareable
+    include Shareable::Unfreezable
 
     # @!macro modes
     # @param mode [Symbol] the default mode used to transfer values between Ractors

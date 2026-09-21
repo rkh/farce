@@ -16,7 +16,8 @@ module Farce
     #     whether values are compared by identity
     #   @return [Map]
     class Map < Abstract::ConcurrentMap
-      include Scoped
+      include Shareable::Tracked
+      include Scoped::Tracked
 
       protected
 

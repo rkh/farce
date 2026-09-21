@@ -12,7 +12,7 @@ module Farce
       assert_kind_of Abstract::Flag, flag
       assert_kind_of Abstract::Value, flag
       assert_equal :ractor, flag.scope
-      assert_predicate flag, :frozen?
+      refute_predicate flag, :frozen?
       assert_predicate flag, :ractor_shareable?
       assert_raises(ArgumentError) { flag_class.new(scope: :global) }
       assert_raises(FrozenError) { flag.send(:initialize, true) }

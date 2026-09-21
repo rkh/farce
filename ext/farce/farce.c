@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "shareable.h"
 #include "ruby/fiber/scheduler.h"
 #include "ruby/io.h"
 
@@ -40,11 +41,52 @@ containers_strict_bool(VALUE value, const char *name)
     rb_raise(rb_eArgError, "%s must be true or false", name);
 }
 
-void
-containers_finish_initialization(VALUE self)
+static void
+containers_check_native_publication_target(VALUE self)
 {
-    rb_obj_freeze(self);
-    rb_ractor_make_shareable(self);
+    if (!RB_TYPE_P(self, T_DATA) || !RTYPEDDATA_P(self)) {
+        rb_raise(rb_eTypeError, "native publication requires a typed-data object");
+    }
+    if (!(RTYPEDDATA_TYPE(self)->flags & RUBY_TYPED_FROZEN_SHAREABLE)) {
+        rb_raise(rb_eTypeError, "native publication requires a shareable typed-data descriptor");
+    }
+
+    VALUE instance_variables = rb_obj_instance_variables(self);
+    if (RARRAY_LEN(instance_variables) != 0) {
+        rb_raise(
+            rb_eTypeError,
+            "%s cannot be published with Ruby instance variables",
+            rb_obj_classname(self)
+        );
+    }
+    RB_GC_GUARD(instance_variables);
+}
+
+VALUE
+containers_publish_native_reference_free(VALUE self)
+{
+    containers_check_native_publication_target(self);
+    return farce_ruby_mark_shareable(self);
+}
+
+VALUE
+containers_publish_native_with_references(
+    VALUE self,
+    containers_native_reference_validator_t validate_references
+)
+{
+    if (!validate_references) {
+        rb_raise(rb_eArgError, "native publication requires a reference validator");
+    }
+    containers_check_native_publication_target(self);
+    validate_references(self);
+    return farce_ruby_mark_shareable(self);
+}
+
+VALUE
+containers_raise_unfreezable(VALUE self)
+{
+    rb_raise(rb_eTypeError, "%s cannot be frozen", rb_obj_classname(self));
 }
 
 VALUE

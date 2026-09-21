@@ -6,7 +6,7 @@ module Farce
   module Strict
     # A FIFO queue that stores and returns values directly.
     class Queue < Abstract::Queue
-      include Shareable
+      include Shareable::Unfreezable
 
       def initialize(capacity: 1024, track_age: false)
         @queue = Internal::Queue.new(capacity:, track_age:)

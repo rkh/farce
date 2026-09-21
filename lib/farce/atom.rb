@@ -34,7 +34,7 @@ module Farce
   #   atom.value                    # => [:job]
   #   Ractor.shareable?(atom.value) # => true
   class Atom < Farce::Abstract::Atom
-    include Shareable
+    include Shareable::Delegated
 
     NIL_VALUE = Object.new.freeze
     TIMED_OUT = Object.new.freeze
@@ -88,6 +88,7 @@ module Farce
     # @yield called when the timeout expires
     # @return [BasicObject, nil] the stored value or the fallback result
     def store(new_value, mode: nil, timeout: nil, &)
+      check_frozen!
       new_value = wrap_value(new_value, mode:)
       unwrap_result(@atom.store(new_value, timeout:) { TIMED_OUT }, &)
     end
@@ -100,6 +101,7 @@ module Farce
     # @yield called when the timeout expires
     # @return [BasicObject, nil] the previous value or the fallback result
     def swap(new_value, mode: nil, timeout: nil, &)
+      check_frozen!
       new_value = wrap_value(new_value, mode:)
       unwrap_result(@atom.swap(new_value, timeout:) { TIMED_OUT }, &)
     end
@@ -113,9 +115,14 @@ module Farce
     # @return [BasicObject, nil] the current or newly stored value, or nil when the timeout expires
     def store_if_absent(mode: nil, timeout: nil)
       raise LocalJumpError, "no block given" unless block_given?
+      check_frozen!
 
       result = @atom.update(timeout:) do |current|
-        NIL_VALUE.equal?(current) ? wrap_value(yield, mode:) : current
+        next current unless NIL_VALUE.equal?(current)
+
+        value = yield
+        check_frozen!
+        wrap_value(value, mode:)
       end
       unwrap_value(result)
     end
@@ -128,11 +135,14 @@ module Farce
     # @param timeout [Numeric, nil] the maximum number of seconds to wait
     # @return [Boolean] whether the value was replaced
     def compare_and_set(expected, new_value, mode: nil, timeout: nil)
+      check_frozen!
       expected = wrap_comparison(expected)
       matched  = false
 
       @atom.update(timeout:) do |current|
-        next current unless values_equal?(current, expected)
+        equal = values_equal?(current, expected)
+        check_frozen!
+        next current unless equal
 
         matched = true
         wrap_value(new_value, mode:)
@@ -150,7 +160,12 @@ module Farce
     # @return [BasicObject, nil] the replacement value, or nil when the timeout expires
     def update(mode: nil, timeout: nil)
       raise LocalJumpError, "no block given" unless block_given?
-      result = @atom.update(timeout:) { |current| wrap_value(yield(unwrap_value(current)), mode:) }
+      check_frozen!
+      result = @atom.update(timeout:) do |current|
+        value = yield(unwrap_value(current))
+        check_frozen!
+        wrap_value(value, mode:)
+      end
       unwrap_value(result)
     end
 
@@ -165,12 +180,15 @@ module Farce
     # @return [BasicObject, nil] the current replacement or initial value, or nil when the timeout expires
     def upsert(initial_value, mode: nil, timeout: nil)
       raise LocalJumpError, "no block given" unless block_given?
+      check_frozen!
 
       result = @atom.update(timeout:) do |current|
         if NIL_VALUE.equal?(current)
           wrap_value(initial_value, mode:)
         else
-          wrap_value(yield(unwrap_value(current)), mode:)
+          value = yield(unwrap_value(current))
+          check_frozen!
+          wrap_value(value, mode:)
         end
       end
       unwrap_value(result)
@@ -210,6 +228,8 @@ module Farce
     end
 
     private
+
+    def freeze_backend = @atom
 
     def wrap_value(value, mode: nil)
       value.nil? ? NIL_VALUE : @manager.wrap(value, mode:)

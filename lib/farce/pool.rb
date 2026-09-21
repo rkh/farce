@@ -37,7 +37,7 @@ module Farce
   #   # Schedule some work
   #   pool.schedule { MyClass.do_something }
   class Pool < Farce::Abstract::Scheduler
-    include Shareable
+    include Shareable::Unfreezable
 
     # @return [Float] Maximum queue wait before adding a worker.
     attr_reader :grow_after

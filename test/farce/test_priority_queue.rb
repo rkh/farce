@@ -27,7 +27,7 @@ module Farce
       assert_equal 0, queue.size
       assert_predicate queue, :empty?
       refute_predicate queue, :closed?
-      assert_predicate queue, :frozen?
+      refute_predicate queue, :frozen?
       assert Ractor.shareable?(queue) if RUBY_ENGINE == "ruby"
       assert_raises(ArgumentError) { PriorityQueue.new(capacity: 0) }
       assert_raises(ArgumentError) { PriorityQueue.new(capacity: -1) }

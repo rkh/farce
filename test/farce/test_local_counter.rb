@@ -16,7 +16,7 @@ module Farce
       assert_equal :ractor, counter.scope
       assert_equal 7, counter.initial
       assert_equal 7, counter.value
-      assert_predicate counter, :frozen?
+      refute_predicate counter, :frozen?
       assert_predicate counter, :ractor_shareable?
       assert Ractor.shareable?(counter)
       assert_raises(FrozenError) { counter.send(:initialize, 8) }

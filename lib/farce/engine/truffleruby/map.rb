@@ -13,6 +13,30 @@ module Farce
       BASIC_OBJECT_EQUAL_METHOD = BasicObject.instance_method(:equal?)
       private_constant :BASIC_OBJECT_EQUAL_METHOD
 
+      class Key
+        attr_accessor :mutation_owner
+        attr_reader :value
+
+        def initialize(value) = @value = value
+
+        def hash
+          result = value.hash
+          owner = mutation_owner
+          Internal::Freeze.check(owner) if owner
+          result
+        end
+
+        def eql?(other)
+          result = other.is_a?(Key) && value.eql?(other.value)
+          owner = mutation_owner || (other.mutation_owner if other.is_a?(Key))
+          Internal::Freeze.check(owner) if owner
+          result
+        end
+
+        alias == eql?
+      end
+      private_constant :Key
+
       alias concurrent_get []
       alias concurrent_store []=
       alias concurrent_clear clear
@@ -44,6 +68,7 @@ module Farce
         super()
         @compare_keys_by_identity   = compare_keys_by_identity
         @compare_values_by_identity = compare_values_by_identity
+        @freeze_state = Flag.new(false)
         # Native operations may overlap. Block updates reserve one logical key.
         @state_mutex   = Mutex.new
         @change_signal = Signal.new
@@ -51,7 +76,31 @@ module Farce
         @active_owner_thread = nil
         @active_owners = nil
         initialize_key_coordination
-        initial_mapping&.each { |key, value| concurrent_store(wrap_key(key), value) }
+        initial_mapping&.each do |key, value|
+          check_frozen!
+          wrapped = wrap_key(key)
+          with_mutation_callback_guard(wrapped) { concurrent_store(wrapped, value) }
+        end
+      end
+
+      def freeze
+        state = @freeze_state
+        return super unless state
+
+        state.set
+        self
+      end
+
+      def frozen?
+        state = @freeze_state
+        state ? state.value : super
+      end
+
+      def check_mutation = check_frozen!
+
+      def prepare_mutation_key(key)
+        check_frozen!
+        normalize_external_key(key)
       end
 
       def [](key) = concurrent_get(wrap_key(key))
@@ -74,9 +123,10 @@ module Farce
       end
 
       def []=(key, value)
+        check_frozen!
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
-          reservation.commit do
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
+          commit_mutation(reservation) do
             native_operation { concurrent_store(wrapped, value) }
             changed!
           end
@@ -94,9 +144,10 @@ module Farce
       end
 
       def store(key, value, timeout: nil, &fallback)
+        check_frozen!
         wrapped = wrap_key(key)
-        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
-          reservation.commit do
+        completed, result = with_mutating_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
+          commit_mutation(reservation) do
             native_operation { concurrent_store(wrapped, value) }
             changed!
           end
@@ -106,10 +157,11 @@ module Farce
       end
 
       def swap(key, replacement, timeout: nil, &fallback)
+        check_frozen!
         wrapped = wrap_key(key)
-        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
+        completed, result = with_mutating_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
           previous = nil
-          reservation.commit do
+          commit_mutation(reservation) do
             previous = native_operation { concurrent_get_and_set(wrapped, replacement) }
             changed!
           end
@@ -120,14 +172,15 @@ module Farce
 
       def store_if_absent(key, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
 
         wrapped = wrap_key(key)
-        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
+        completed, result = with_mutating_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
           if native_operation { concurrent_key?(wrapped) }
             native_operation { concurrent_get(wrapped) }
           else
             value = yield
-            stored = reservation.commit do
+            stored = commit_mutation(reservation) do
               native_operation { concurrent_store(wrapped, value) }
               changed!
             end
@@ -138,14 +191,15 @@ module Farce
       end
 
       def compare_and_set(key, expected, replacement, timeout: nil)
+        check_frozen!
         wrapped = wrap_key(key)
-        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
+        completed, result = with_mutating_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
           next false unless native_operation { concurrent_key?(wrapped) }
 
           current = native_operation { concurrent_get(wrapped) }
           next false unless values_equal?(current, expected)
 
-          replaced = reservation.commit do
+          replaced = commit_mutation(reservation) do
             native_operation { concurrent_store(wrapped, replacement) }
             changed!
           end
@@ -156,11 +210,12 @@ module Farce
 
       def update(key, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
 
         wrapped = wrap_key(key)
-        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
+        completed, result = with_mutating_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
           value = yield(native_operation { concurrent_get(wrapped) })
-          stored = reservation.commit do
+          stored = commit_mutation(reservation) do
             native_operation { concurrent_store(wrapped, value) }
             changed!
           end
@@ -174,14 +229,15 @@ module Farce
       # Return whether a change committed.
       def modify(key) # rubocop:disable Naming/PredicateMethod
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
           present, current = native_operation { [concurrent_key?(wrapped), concurrent_get(wrapped)] }
           value = yield(present, current)
           next false if MAP_KEEP.equal?(value)
           remove = MAP_DELETE.equal?(value)
           next false if remove && !present
-          reservation.commit do
+          commit_mutation(reservation) do
             native_operation do
               remove ? concurrent_delete(wrapped) : concurrent_store(wrapped, value)
             end
@@ -193,12 +249,13 @@ module Farce
 
       def upsert(key, initial_value, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
 
         wrapped = wrap_key(key)
-        completed, result = with_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
+        completed, result = with_mutating_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
           present = native_operation { concurrent_key?(wrapped) }
           value = present ? yield(native_operation { concurrent_get(wrapped) }) : initial_value
-          stored = reservation.commit do
+          stored = commit_mutation(reservation) do
             native_operation { concurrent_store(wrapped, value) }
             changed!
           end
@@ -245,10 +302,11 @@ module Farce
       end
 
       def delete(key)
+        check_frozen!
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
           value = nil
-          reservation.commit do
+          commit_mutation(reservation) do
             value = native_operation { concurrent_delete(wrapped) }
             changed!
           end
@@ -268,6 +326,7 @@ module Farce
       end
 
       def clear
+        check_frozen!
         clear_key_operations do
           native_operation { concurrent_clear }
           changed!
@@ -276,10 +335,11 @@ module Farce
       end
 
       def compute(key)
+        check_frozen!
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
           value = yield(native_operation { concurrent_get(wrapped) })
-          stored = reservation.commit do
+          stored = commit_mutation(reservation) do
             native_operation { concurrent_store(wrapped, value) }
             changed!
           end
@@ -289,13 +349,14 @@ module Farce
       end
 
       def compute_if_absent(key)
+        check_frozen!
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
           next native_operation { concurrent_get(wrapped) } if
             native_operation { concurrent_key?(wrapped) }
 
           value = yield
-          stored = reservation.commit do
+          stored = commit_mutation(reservation) do
             native_operation { concurrent_store(wrapped, value) }
             changed!
           end
@@ -305,12 +366,13 @@ module Farce
       end
 
       def compute_if_present(key)
+        check_frozen!
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
           next unless native_operation { concurrent_key?(wrapped) }
 
           value = yield(native_operation { concurrent_get(wrapped) })
-          stored = reservation.commit do
+          stored = commit_mutation(reservation) do
             native_operation { concurrent_store(wrapped, value) }
             changed!
           end
@@ -320,12 +382,13 @@ module Farce
       end
 
       def delete_pair(key, value)
+        check_frozen!
         return delete_pair_by_identity(key, value) if compare_values_by_identity?
 
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
           deleted = false
-          reservation.commit do
+          commit_mutation(reservation) do
             deleted = native_operation { concurrent_delete_pair(wrapped, value) }
             changed! if deleted
           end
@@ -335,10 +398,11 @@ module Farce
       end
 
       def get_and_set(key, value)
+        check_frozen!
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
           previous = nil
-          reservation.commit do
+          commit_mutation(reservation) do
             previous = native_operation { concurrent_get_and_set(wrapped, value) }
             changed!
           end
@@ -350,11 +414,12 @@ module Farce
       def get_or_default(key, default) = concurrent_get_or_default(wrap_key(key), default)
 
       def merge_pair(key, value)
+        check_frozen!
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
           present = native_operation { concurrent_key?(wrapped) }
           merged = present ? yield(native_operation { concurrent_get(wrapped) }) : value
-          stored = reservation.commit do
+          stored = commit_mutation(reservation) do
             native_operation { concurrent_store(wrapped, merged) }
             changed!
           end
@@ -364,10 +429,11 @@ module Farce
       end
 
       def replace_if_exists(key, value)
+        check_frozen!
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
           previous = nil
-          reservation.commit do
+          commit_mutation(reservation) do
             previous = native_operation { concurrent_replace_if_exists(wrapped, value) }
             changed!
           end
@@ -377,12 +443,13 @@ module Farce
       end
 
       def replace_pair(key, expected, replacement)
+        check_frozen!
         return replace_pair_by_identity(key, expected, replacement) if compare_values_by_identity?
 
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
           replaced = false
-          reservation.commit do
+          commit_mutation(reservation) do
             replaced = native_operation { concurrent_replace_pair(wrapped, expected, replacement) }
             changed! if replaced
           end
@@ -393,13 +460,38 @@ module Farce
 
       private
 
+      def check_frozen! = Internal::Freeze.check(self)
+
+      def commit_mutation(reservation, &)
+        check_frozen!
+        reservation.commit(&)
+      end
+
+      def with_mutating_key_operation(key, deadline, &)
+        with_key_operation(key, deadline) do |reservation|
+          with_mutation_callback_guard(key) do
+            check_frozen!
+            yield reservation
+          end
+        end
+      end
+
+      def with_mutation_callback_guard(key)
+        return yield unless key.is_a?(Key)
+
+        key.mutation_owner = self
+        yield
+      ensure
+        key.mutation_owner = nil if key.is_a?(Key)
+      end
+
       def wrap_key(key)
         return IdentityKey.new(key) if compare_keys_by_identity?
         key = String.instance_method(:-@).bind_call(key) if String === key && !key.frozen?
-        key
+        Key.new(key)
       end
 
-      def unwrap_key(key) = key.is_a?(IdentityKey) ? key.value : key
+      def unwrap_key(key) = key.is_a?(IdentityKey) || key.is_a?(Key) ? key.value : key
 
       def entries_snapshot
         entries = []
@@ -413,11 +505,11 @@ module Farce
 
       def delete_pair_by_identity(key, expected)
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
           next false unless native_operation { concurrent_key?(wrapped) } &&
             identical?(native_operation { concurrent_get(wrapped) }, expected)
 
-          reservation.commit do
+          commit_mutation(reservation) do
             native_operation { concurrent_delete(wrapped) }
             changed!
           end
@@ -427,11 +519,11 @@ module Farce
 
       def replace_pair_by_identity(key, expected, replacement)
         wrapped = wrap_key(key)
-        _, result = with_key_operation(wrapped, nil) do |reservation|
+        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
           next false unless native_operation { concurrent_key?(wrapped) } &&
             identical?(native_operation { concurrent_get(wrapped) }, expected)
 
-          reservation.commit do
+          commit_mutation(reservation) do
             native_operation { concurrent_store(wrapped, replacement) }
             changed!
           end

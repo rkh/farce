@@ -92,14 +92,14 @@ flag_initialize(int argc, VALUE *argv, VALUE self)
     rb_check_frozen(self);
 
     bool value = containers_strict_bool(initial, "initial value");
+    rb_check_frozen(self);
 #if CONTAINERS_FLAG_LOCK_FREE
     atomic_store_explicit(&flag->value, value, memory_order_relaxed);
 #else
     flag->value = value;
 #endif
     flag->initialized = true;
-    containers_finish_initialization(self);
-    return self;
+    return containers_publish_native_reference_free(self);
 }
 
 static VALUE
@@ -131,13 +131,14 @@ flag_initialize_copy(VALUE self, VALUE other)
     copy->value = value;
 #endif
     copy->initialized = true;
-    return self;
+    return containers_publish_native_reference_free(self);
 }
 
 static VALUE
 flag_set(VALUE self)
 {
     flag_t *flag = get_flag(self);
+    containers_check_typed_frozen(self);
 #if CONTAINERS_FLAG_LOCK_FREE
     atomic_store_explicit(&flag->value, true, memory_order_relaxed);
 #else
@@ -152,6 +153,7 @@ static VALUE
 flag_store(VALUE self, VALUE input)
 {
     flag_t *flag = get_flag(self);
+    containers_check_typed_frozen(self);
     bool value = containers_strict_bool(input, "value");
 #if CONTAINERS_FLAG_LOCK_FREE
     atomic_store_explicit(&flag->value, value, memory_order_relaxed);
@@ -167,6 +169,7 @@ static VALUE
 flag_swap(VALUE self, VALUE input)
 {
     flag_t *flag = get_flag(self);
+    containers_check_typed_frozen(self);
     bool replacement = containers_strict_bool(input, "value");
 #if CONTAINERS_FLAG_LOCK_FREE
     bool previous = atomic_exchange_explicit(
@@ -187,6 +190,7 @@ static VALUE
 flag_compare_and_set(VALUE self, VALUE expected_input, VALUE replacement_input)
 {
     flag_t *flag = get_flag(self);
+    containers_check_typed_frozen(self);
     bool expected = containers_strict_bool(expected_input, "expected value");
     bool replacement = containers_strict_bool(replacement_input, "replacement value");
 #if CONTAINERS_FLAG_LOCK_FREE
@@ -210,6 +214,7 @@ static VALUE
 flag_toggle(VALUE self)
 {
     flag_t *flag = get_flag(self);
+    containers_check_typed_frozen(self);
 #if CONTAINERS_FLAG_LOCK_FREE
     bool current = atomic_load_explicit(&flag->value, memory_order_relaxed);
 

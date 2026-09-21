@@ -75,6 +75,11 @@ public final class BoundedMap {
         return entry.value;
     }
 
+    public Object observe(Object key, int hash) {
+        Entry entry = find(key, hash);
+        return entry == null ? null : entry.value;
+    }
+
     public Object observeKey(Object key, int hash) {
         Entry entry = find(key, hash);
         return entry == null ? null : entry.key;

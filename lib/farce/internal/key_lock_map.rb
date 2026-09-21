@@ -7,9 +7,11 @@ module Farce
   module Internal # :nodoc: all
     # Coordinate equal keys without retaining entries after an operation finishes.
     class KeyLockMap
+      include Freeze::Unfreezable
+
       def initialize(registry_class:, **comparison_options)
         @registry = registry_class.new(**comparison_options)
-        Ractor.make_shareable(self) if @registry.ractor_shareable?
+        Freeze.publish(self) if @registry.ractor_shareable?
       end
 
       def synchronize(key)

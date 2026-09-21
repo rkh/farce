@@ -40,7 +40,7 @@ module Farce
         assert_predicate map, :shareable_keys?
         assert_predicate map, :shareable_values?
         assert_predicate map, :ractor_shareable?
-        assert_predicate map, :frozen?
+        refute_predicate map, :frozen?
         assert Ractor.shareable?(map)
       end
 
@@ -53,7 +53,7 @@ module Farce
 
       refute_predicate Unshared::LRUMap.new(max_size: 1), :ractor_shareable?
       assert_predicate local, :ractor_shareable?
-      assert_predicate local, :frozen?
+      refute_predicate local, :frozen?
       assert Ractor.shareable?(local)
     end
 

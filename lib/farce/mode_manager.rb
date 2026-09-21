@@ -50,7 +50,7 @@ module Farce
   # @!macro modes
   class ModeManager
     include Internal::Copyable
-    include Shareable
+    include Shareable::Immutable
 
     # The set of valid modes for wrapping values.
     MODES = Set[:copy, :move, :local, :make_shareable, :raise, :shareable_copy].freeze

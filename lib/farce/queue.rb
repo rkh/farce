@@ -6,7 +6,7 @@ module Farce
   # A shareable FIFO queue with transfer modes for unshareable values.
   class Queue < Farce::Abstract::Queue
     include Internal::ManagedQueue
-    include Shareable
+    include Shareable::Unfreezable
 
     # (see Farce::Abstract::Queue#initialize)
     # @!macro modes

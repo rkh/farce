@@ -11,7 +11,8 @@ module Farce
   # {#send mode based sending}.
   class Port < Internal::Port
     include Internal::Noncopyable
-    include Shareable
+    include Shareable::Native
+    include Shareable::Unfreezable
 
     MANAGER    = ModeManager.new
     SUBCLASSES = ModeManager::MODES.to_h do |mode|

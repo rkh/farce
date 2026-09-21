@@ -18,7 +18,7 @@ module Farce
       assert_kind_of Abstract::Value, counter
       assert_equal 12, counter.initial
       assert_equal 12, counter.value
-      assert_predicate counter, :frozen?
+      refute_predicate counter, :frozen?
       assert_predicate counter, :ractor_shareable?
       assert Ractor.shareable?(counter) if Internal.native_ractors?
 
@@ -32,7 +32,7 @@ module Farce
 
       assert_equal 7, counter.initial
       assert_equal 7, counter.value
-      assert_raises(FrozenError) { counter.send(:initialize, 9) }
+      assert_raises(RuntimeError) { counter.send(:initialize, 9) }
       assert_equal 7, counter.initial
       assert_equal 7, counter.value
       assert_raises(TypeError) { Counter.new(Object.new) }
@@ -71,9 +71,87 @@ module Farce
         9
       end
 
-      assert_raises(FrozenError) { counter.send(:initialize, coercible) }
+      assert_raises(RuntimeError) { counter.send(:initialize, coercible) }
       assert_equal 7, counter.initial
       assert_equal 7, counter.value
+    end
+
+    def test_coercion_cannot_commit_after_freezing_the_counter
+      counter = Counter.new(1)
+      coercible = Object.new
+      coercible.define_singleton_method(:to_int) do
+        counter.freeze
+        2
+      end
+
+      assert_raises(FrozenError) { counter.increment(coercible) }
+      assert_equal 1, counter.value
+      assert_predicate counter, :frozen?
+    end
+
+    def test_conditional_bound_coercion_cannot_bypass_freeze_on_a_no_op
+      counter = Counter.new(1)
+      limit = Object.new
+      limit.define_singleton_method(:to_int) do
+        counter.freeze
+        1
+      end
+
+      assert_raises(FrozenError) { counter.increment_if_below(limit) }
+      assert_equal 1, counter.value
+      assert_predicate counter, :frozen?
+    end
+
+    def test_copies_preserve_initial_and_current_values_with_independent_state
+      counter = Counter.new(4)
+      counter.increment
+      counter.freeze
+
+      duplicated = counter.dup
+      cloned = counter.clone
+      unfrozen_clone = counter.clone(freeze: false)
+
+      states = [duplicated, cloned, unfrozen_clone].map { [it.initial, it.value] }
+
+      assert_equal [[4, 5], [4, 5], [4, 5]], states
+      refute_predicate duplicated, :frozen?
+      assert_predicate cloned, :frozen?
+      refute_predicate unfrozen_clone, :frozen?
+      [duplicated, cloned, unfrozen_clone].each { assert Ractor.shareable?(it) }
+
+      duplicated.increment
+      unfrozen_clone.decrement
+
+      assert_equal 5, counter.value
+      assert_equal 6, duplicated.value
+      assert_equal 5, cloned.value
+      assert_equal 4, unfrozen_clone.value
+    end
+
+    def test_construction_inside_a_non_main_ractor_publishes_the_counter
+      return unless Internal.native_ractors?
+
+      worker = Ractor.new do
+        counter = Farce::Counter.new(7)
+        [counter.frozen?, Ractor.shareable?(counter), counter.initial, counter.value].freeze
+      end
+
+      assert_equal [false, true, 7, 7], ractor_value(worker)
+    end
+
+    def test_stateful_native_subclass_is_rejected_during_publication
+      return unless Internal.native_ractors?
+
+      subclass = Class.new(Counter) do
+        def initialize
+          @ruby_state = true
+          super
+        end
+      end
+
+      error = assert_raises(TypeError) { subclass.new }
+
+      assert_match(/cannot be published with Ruby instance variables/, error.message)
     end
 
     def test_increment_decrement_aliases_and_reset_return_self
