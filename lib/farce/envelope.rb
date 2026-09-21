@@ -33,6 +33,20 @@ module Farce
     # Raised when trying to claim an envelope that has already been claimed by another Ractor.
     AlreadyClaimed = Class.new(Ractor::IsolationError)
 
+    module Copyable
+      include Internal::Copyable
+
+      define_method(:dup, Object.instance_method(:dup))
+      define_method(:clone, Object.instance_method(:clone))
+
+      private
+
+      def initialize_copy(other)
+        Object.instance_method(:initialize_copy).bind_call(self, other)
+      end
+    end
+    private_constant :Copyable
+
     # An envelope that copies its contents. Can be opened by multiple Ractors.
     # The value will be copied once when the envelope is created, and then once per Ractor that opens the envelope.
     #
@@ -41,6 +55,8 @@ module Farce
     #   @param (see Farce::Envelope#initialize)
     #   @return [Copy, Share] A new envelope wrapping the given value.
     class Copy < Farce::Envelope
+      include Copyable
+
       # @overload initialize(value)
       #   @param [Object] value The value to wrap in the envelope.
       def initialize(value, auto_unwrap = nil)
@@ -58,7 +74,27 @@ module Farce
       # (see Envelope#owned?)
       def owned? = true
 
-      private def retrieve = @vault.copy_out(self)
+      protected
+
+      def retrieve = @vault.copy_out(vault_key)
+
+      private
+
+      def initialize_dup(other)
+        value      = other.retrieve
+        @vault_key = Object.new.freeze
+        super
+        @vault.copy_in(@vault_key, value)
+      end
+
+      def initialize_clone(other, freeze: nil)
+        value      = other.retrieve
+        @vault_key = Object.new.freeze
+        super
+        @vault.copy_in(@vault_key, value)
+      end
+
+      def vault_key = defined?(@vault_key) ? @vault_key : self
     end
 
     # An envelope that moves its contents. Can only be opened by a single Ractor.
@@ -103,6 +139,8 @@ module Farce
     #   @param (see Farce::Envelope#initialize)
     #   @return [Local, Share] A new envelope wrapping the given value.
     class Local < Farce::Envelope
+      include Copyable
+
       # @overload initialize(value)
       #   @param value [Object] The value to wrap in the envelope.
       def initialize(value, auto_unwrap = nil)
@@ -119,6 +157,14 @@ module Farce
 
       # (see Envelope#owned?)
       def owned? = @owner == Ractor.current
+
+      private
+
+      def initialize_copy(other)
+        super
+        other.claim!
+        Internal::Storage.ractor[self] = other.value.dup
+      end
     end
 
     # An envelope that wraps a Ractor-shareable value. Can be opened by any Ractor.
@@ -129,6 +175,8 @@ module Farce
     #   @param (see Farce::Envelope#initialize)
     #   @return [Share] A new envelope wrapping the given value.
     class Share < Farce::Envelope
+      include Copyable
+
       attr_reader :value
 
       # @overload initialize(value)
@@ -222,9 +270,9 @@ module Farce
       if comparison_vault
         other_vault = other.comparison_vault if Envelope === other
         if comparison_vault.equal?(other_vault)
-          return comparison_vault.same_value?(self, other, identity:)
+          return comparison_vault.same_value?(comparison_key, other.comparison_key, identity:)
         elsif !(Envelope === other) && Ractor.shareable?(other)
-          return comparison_vault.same_value?(self, other, identity:, right_stored: false)
+          return comparison_vault.same_value?(comparison_key, other, identity:, right_stored: false)
         end
       end
 
@@ -257,5 +305,6 @@ module Farce
     protected
 
     def comparison_vault = defined?(@vault) && @vault
+    def comparison_key   = defined?(@vault_key) ? @vault_key : self
   end
 end

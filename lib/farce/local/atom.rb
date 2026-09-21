@@ -16,10 +16,8 @@ module Farce
       include Shareable::Tracked
       include Scoped::Tracked
 
-      private
-
-      def internal_atom         = scoped_value
-      def new_scoped_value(...) = Internal::UnsharedAtom.new(...)
+      protected def internal_atom = scoped_value
+      private def new_scoped_value(...) = Internal::UnsharedAtom.new(...)
     end
   end
 end

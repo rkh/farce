@@ -115,14 +115,16 @@ module Farce
       # @return [BasicObject, nil] the non-nil value or the fallback result
       def wait_until_non_nil(timeout: nil, &) = internal_atom.wait_until_non_nil(timeout:, &)
 
-      private
+      protected
 
       def internal_atom = @atom
 
+      private
+
       def initialize_copy(other)
         super
-        source = other.__send__(:internal_atom)
-        copy = source.class.new(source.value, compare_by_identity: source.compare_by_identity?)
+        source = other.internal_atom
+        copy   = source.class.new(source.value, compare_by_identity: source.compare_by_identity?)
         if is_a?(Local::Scoped)
           Internal::Storage.scope(scope)[self] = copy
         else

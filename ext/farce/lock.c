@@ -182,6 +182,18 @@ containers_lock_initialize(VALUE self)
     return self;
 }
 
+static VALUE
+containers_lock_initialize_copy(VALUE self, VALUE other)
+{
+    if (self == other) return self;
+    rb_check_frozen(self);
+    containers_lock_t *copy;
+    TypedData_Get_Struct(self, containers_lock_t, &containers_lock_type, copy);
+    if (copy->initialized) rb_raise(rb_eRuntimeError, "copy is already initialized");
+    copy->initialized = true;
+    return containers_publish_native_with_references(self, containers_lock_validate_references);
+}
+
 static bool
 containers_lock_wait_for_descriptor(int fd)
 {
@@ -485,6 +497,7 @@ containers_init_lock(VALUE namespace)
     cLock = rb_define_class_under(namespace, "Lock", rb_cObject);
     rb_define_alloc_func(cLock, containers_lock_allocate);
     rb_define_method(cLock, "initialize", containers_lock_initialize, 0);
+    rb_define_private_method(cLock, "initialize_copy", containers_lock_initialize_copy, 1);
     rb_define_method(cLock, "lock", containers_lock_lock, 0);
     rb_define_method(cLock, "locked?", containers_lock_locked_p, 0);
     rb_define_method(cLock, "owned?", containers_lock_owned_p, 0);

@@ -11,7 +11,7 @@ module Farce
   # additional upgraders yield their read slot to avoid deadlock and restore it
   # before returning to the outer read-lock block.
   class ReadWriteLock
-    include Internal::Noncopyable
+    include Internal::Copyable
     include Shareable::Unfreezable
 
     READER_BITS   = 30
@@ -90,6 +90,12 @@ module Farce
     end
 
     private
+
+    def initialize_copy(other)
+      super
+      @state  = Internal::Vector.new([0])
+      @signal = Internal::Signal.new
+    end
 
     def local_state
       states = Thread.current[LOCAL_STATES] ||= {}

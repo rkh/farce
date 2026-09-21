@@ -16,10 +16,8 @@ module Farce
       include Shareable::Tracked
       include Scoped::Tracked
 
-      private
-
-      def internal_vector       = scoped_value
-      def new_scoped_value(...) = Internal::UnsharedVector.new(...)
+      protected def internal_vector = scoped_value
+      private def new_scoped_value(...) = Internal::UnsharedVector.new(...)
     end
   end
 end

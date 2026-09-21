@@ -96,6 +96,11 @@ module Farce
 
       private
 
+      def initialize_copy(other)
+        super
+        @farce_owner_thread = TruffleRuby::AtomicReference.new(nil)
+      end
+
       def check_unscheduled_fiber_deadlock
         owner_thread = @farce_owner_thread.get
         scheduler = Fiber.scheduler if Fiber.respond_to?(:scheduler)

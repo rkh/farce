@@ -6,6 +6,8 @@ require_relative "../setup"
 
 module Farce
   class TestObjectCopy < Test
+    include Helpers::InternalTestHelpers
+
     ATOMS = [Atom, Strict::Atom, Strict::WeakAtom, Unshared::WeakAtom, Local::Atom, Local::WeakAtom].freeze
     VECTORS = [Vector, Strict::Vector, Unshared::Vector, Local::Vector].freeze
 
@@ -66,7 +68,7 @@ module Farce
     end
 
     def test_coordination_objects_reject_copies
-      objects = [Scheduler.new, Pool.new, Lock.new, ReadWriteLock.new, Signal.new,
+      objects = [Scheduler.new, Pool.new, Signal.new,
                  Exchanger.new, Strict::Exchanger.new, Port.new,
                  Lease.new { Object.new }, Unshared::Lease.new { Object.new }, Local::Lease.new { Object.new }]
       [LeasePool, Unshared::LeasePool, Local::LeasePool].each do |type|
@@ -80,6 +82,67 @@ module Farce
       end
     ensure
       objects&.each { it.close if it.is_a?(Abstract::Scheduler) || it.is_a?(Port) }
+    end
+
+    def test_lock_copies_are_fresh_unlocked_instances
+      type = Class.new(Lock) do
+        def marker = :preserved
+
+        def initialize(marker)
+          raise ArgumentError, "unexpected marker" unless marker == :preserved
+
+          super()
+        end
+      end
+      source = type.new(:preserved)
+      entered = ::Queue.new
+      release = ::Queue.new
+      worker = Thread.new do
+        source.synchronize do
+          entered << true
+          release.pop
+        end
+      end
+      entered.pop
+
+      copies(source).each do |copy|
+        assert_equal :preserved, copy.marker
+        refute_predicate copy, :locked?
+        assert_equal(:acquired, copy.synchronize { :acquired })
+        assert_predicate source, :locked?
+        refute_predicate copy, :frozen?
+        assert_raises(TypeError) { copy.freeze }
+      end
+      assert_raises(TypeError) { source.clone(freeze: true) }
+      unfrozen = source.clone(freeze: false)
+
+      refute_predicate unfrozen, :frozen?
+      refute_predicate unfrozen, :locked?
+      assert_equal :preserved, unfrozen.marker
+      assert_equal(:acquired, unfrozen.synchronize { :acquired })
+      assert_predicate source, :locked?
+    ensure
+      release&.push(true)
+      worker&.join
+    end
+
+    def test_read_write_lock_copies_exclude_lock_state
+      source = ReadWriteLock.new
+
+      source.with_read_lock do
+        copies(source).each do |copy|
+          assert_equal(:written, copy.with_write_lock { :written })
+        end
+        unfrozen = source.clone(freeze: false)
+
+        refute_predicate unfrozen, :frozen?
+        assert_equal(:written, unfrozen.with_write_lock { :written })
+      end
+      source.with_write_lock do
+        copies(source).each do |copy|
+          assert_equal(:read, copy.with_read_lock { :read })
+        end
+      end
     end
 
     def test_explicit_unfrozen_clones_keep_independent_storage
@@ -175,15 +238,275 @@ module Farce
       end
     end
 
-    def test_envelopes_reject_copies_without_claiming_payloads
-      [Envelope::Copy, Envelope::Move, Envelope::Local, Envelope::Share].each do |type|
-        source = type.new(type == Envelope::Share ? :value : [])
+    def test_copy_envelopes_duplicate_the_stored_snapshot
+      manager = ModeManager.new
+      source = Envelope::Copy.new([["stored"]], manager)
+      local_view = source.value
+      local_view << ["caller mutation"]
 
-        refute_predicate source, :duplicable?
-        assert_raises(TypeError) { source.dup }
-        assert_raises(TypeError) { source.clone }
-        refute_predicate source, :claimed? if type == Envelope::Move
+      copies(source).each do |copy|
+        assert_same manager, copy.auto_unwrap
+        assert_equal [["stored"]], copy.value
+        refute_same local_view, copy.value
+        assert source.same_value?(copy)
+        copy.value << ["copy mutation"]
+
+        assert_equal [["stored"], ["caller mutation"]], source.value
       end
+      unfrozen = source.clone(freeze: false)
+
+      refute_predicate unfrozen, :frozen?
+      assert_equal [["stored"]], unfrozen.value
+      assert_same manager, unfrozen.auto_unwrap
+      assert source.same_value?(unfrozen)
+      unfrozen.value << ["unfrozen caller mutation"]
+      second_generation = unfrozen.dup
+
+      assert_equal [["stored"]], second_generation.value
+      assert unfrozen.same_value?(second_generation)
+      assert source.same_value?(second_generation)
+      assert_same local_view, source.value
+    end
+
+    def test_local_envelope_copies_duplicate_the_payload_once
+      calls = []
+      payload_type = Class.new(Array) do
+        define_method(:initialize_copy) do |other|
+          calls << :dup
+          super(other)
+        end
+      end
+      nested = []
+      payload = payload_type.new([nested])
+      manager = ModeManager.new
+      source = Envelope::Local.new(payload, manager)
+
+      copies(source).each do |copy|
+        assert_same manager, copy.auto_unwrap
+        refute_same payload, copy.value
+        assert_same nested, copy.value.first
+      end
+      unfrozen = source.clone(freeze: false)
+
+      refute_predicate unfrozen, :frozen?
+      refute_same payload, unfrozen.value
+      assert_same nested, unfrozen.value.first
+      assert_same manager, unfrozen.auto_unwrap
+      assert_equal %i[dup dup dup], calls
+    end
+
+    def test_copy_envelope_uses_the_stored_snapshot_in_each_ractor
+      source = Envelope::Copy.new(["stored"])
+      local_view = source.value
+      local_view << "local"
+      worker = Ractor.new(source) do |envelope|
+        remote_view = envelope.value
+        remote_view << "remote"
+        duplicate = envelope.dup
+        [duplicate.value, envelope.value].map { Ractor.make_shareable(it, copy: true) }.freeze
+      end
+
+      assert_equal [["stored"], %w[stored remote]], ractor_value(worker)
+      assert_equal %w[stored local], source.value
+      assert_same local_view, source.value
+    end
+
+    def test_local_envelope_copy_rejects_nonowners_before_payload_dup
+      payload = Object.new
+      def payload.dup = raise("payload dup must not be called")
+      source = Envelope::Local.new(payload)
+      worker = Ractor.new(source) do |envelope|
+        envelope.dup
+      rescue StandardError => e
+        [e.class.name, e.message].freeze
+      end
+
+      assert_equal(
+        ["Farce::Envelope::AlreadyClaimed", "envelope has already been claimed by another Ractor"],
+        ractor_value(worker),
+      )
+    end
+
+    def test_share_envelope_copies_keep_payload_and_manager_identity
+      payload = Ractor.make_shareable(["shared"], copy: true)
+      manager = ModeManager.new
+      source = Envelope::Share.new(payload, manager)
+
+      copies(source).each do |copy|
+        refute_same source, copy
+        assert_same payload, copy.value
+        assert_same manager, copy.auto_unwrap
+      end
+      unfrozen = source.clone(freeze: false)
+
+      refute_same source, unfrozen
+      refute_predicate unfrozen, :frozen?
+      assert_same payload, unfrozen.value
+      assert_same manager, unfrozen.auto_unwrap
+    end
+
+    def test_move_envelopes_still_reject_copies_without_claiming_payloads
+      source = Envelope::Move.new([])
+
+      refute_predicate source, :duplicable?
+      assert_raises(TypeError) { source.dup }
+      assert_raises(TypeError) { source.clone }
+      assert_raises(TypeError) { source.clone(freeze: false) }
+      refute_predicate source, :claimed?
+    end
+
+    def test_reference_copies_duplicate_the_backing_value_once
+      payload = []
+      copies = []
+      value_type = Class.new do
+        include Abstract::Value
+
+        attr_accessor :value
+
+        define_method(:initialize) { |value| @value = value }
+        define_method(:dup) do
+          copies << :dup
+          super()
+        end
+        define_method(:clone) do |**options|
+          copies << :clone
+          super(**options)
+        end
+      end
+      value = value_type.new(payload)
+      source = Reference.new(value)
+      duplicate = source.dup
+      clone = source.clone
+
+      assert_operator Reference, :===, duplicate
+      assert_operator Reference, :===, clone
+      refute_same source, duplicate
+      refute_same source, clone
+      assert_same payload, Reference.deref(duplicate).value
+      assert_same payload, Reference.deref(clone).value
+      refute_same value, Reference.deref(duplicate)
+      refute_same value, Reference.deref(clone)
+      assert_equal %i[dup clone], copies
+    end
+
+    def test_reference_copy_preserves_generated_and_deep_reference_classes
+      factory_calls = []
+      value_type = Class.new do
+        include Abstract::Value
+
+        attr_reader :value
+
+        define_method(:initialize) do |value|
+          factory_calls << value
+          @value = value
+        end
+      end
+      generated = Reference[value_type]
+      source = generated.new(:generated)
+      duplicate = source.dup
+
+      assert_operator generated, :===, duplicate
+      assert_equal [:generated], factory_calls
+      refute_same Reference.deref(source), Reference.deref(duplicate)
+
+      deep = Reference.new(value_type.new(value_type.new(:deep)), deep: true)
+      deep_copy = deep.dup
+
+      assert_operator Reference, :===, deep_copy
+      assert_same Kernel.instance_method(:class).bind_call(deep),
+        Kernel.instance_method(:class).bind_call(deep_copy)
+      assert_equal :deep, deep_copy.itself
+      refute_same Reference.deref(deep), Reference.deref(deep_copy)
+    end
+
+    def test_lazy_reference_copy_does_not_evaluate_factory
+      source = LazyRef.new { raise "factory must not be called" }
+      copy = source.dup
+      source_lazy = Reference.deref(source)
+      copied_lazy = Reference.deref(copy)
+
+      refute_same source_lazy, copied_lazy
+      assert_same source_lazy.instance_variable_get(:@atom), copied_lazy.instance_variable_get(:@atom)
+    end
+
+    def test_reference_clone_preserves_outer_singleton_methods_without_freezing_payload
+      payload = []
+      value = Local::Atom.new(payload)
+      source = Reference.new(value)
+      def source.copy_marker = :preserved
+      Kernel.instance_method(:freeze).bind_call(source)
+
+      duplicate = source.dup
+      copy = source.clone
+
+      assert_raises(NoMethodError) { duplicate.copy_marker }
+      assert_equal :preserved, copy.copy_marker
+      assert Kernel.instance_method(:frozen?).bind_call(copy)
+      refute_predicate payload, :frozen?
+      refute_same value, Reference.deref(copy)
+    end
+
+    def test_reference_copies_run_outer_copy_hooks
+      calls = []
+      type = Class.new(Reference) do
+        attr_reader :copied
+
+        define_method(:initialize_copy) do |other|
+          calls << :copy
+          super(other)
+          @copied = true
+        end
+      end
+      source = type.new(Local::Atom.new([]))
+
+      assert source.dup.copied
+      assert source.clone.copied
+      assert_equal %i[copy copy], calls
+
+      rejecting = Class.new(Reference) do
+        private def initialize_copy(other)
+          super
+          ::Kernel.raise(::ArgumentError, "outer copy hook failure")
+        end
+      end.new(Local::Atom.new([]))
+
+      assert_equal "outer copy hook failure", assert_raises(ArgumentError) { rejecting.dup }.message
+      assert_equal "outer copy hook failure", assert_raises(ArgumentError) { rejecting.clone }.message
+    end
+
+    def test_reference_clone_does_not_forward_outer_freeze_to_backing_value
+      options = []
+      value_type = Class.new do
+        include Abstract::Value
+
+        attr_reader :value
+
+        define_method(:initialize) { |value| @value = value }
+        define_method(:clone) do |**keywords|
+          options << keywords
+          super(**keywords)
+        end
+      end
+      source = Reference.new(value_type.new([]))
+
+      source.clone
+      source.clone(freeze: false)
+
+      assert_equal [{}, {}], options
+    end
+
+    def test_reference_copy_propagates_backing_copy_errors
+      value_type = Class.new do
+        include Abstract::Value
+
+        def value = :value
+        def dup = raise(ArgumentError, "backing dup failure")
+        def clone(**) = raise(ArgumentError, "backing clone failure")
+      end
+      source = Reference.new(value_type.new)
+
+      assert_equal "backing dup failure", assert_raises(ArgumentError) { source.dup }.message
+      assert_equal "backing clone failure", assert_raises(ArgumentError) { source.clone }.message
     end
 
     def test_copies_do_not_inherit_pending_updates

@@ -20,8 +20,15 @@ module Farce
     end
 
     module Inherited
-      define_method(:freeze,  ::Kernel.instance_method(:freeze))
-      define_method(:frozen?, ::Kernel.instance_method(:frozen?))
+      define_method(:dup,              ::Kernel.instance_method(:dup))
+      define_method(:clone,            ::Kernel.instance_method(:clone))
+      define_method(:freeze,           ::Kernel.instance_method(:freeze))
+      define_method(:frozen?,          ::Kernel.instance_method(:frozen?))
+      define_method(:initialize_copy,  ::Kernel.instance_method(:initialize_copy))
+      define_method(:initialize_dup,   ::Kernel.instance_method(:initialize_dup))
+      define_method(:initialize_clone, ::Kernel.instance_method(:initialize_clone))
+
+      private :initialize_copy, :initialize_dup, :initialize_clone
     end
 
     private_constant :Deep, :Inherited
@@ -104,6 +111,9 @@ module Farce
     #   @param deep [Boolean] whether to resolve nested values (like an {Envelope} inside of an {Atom})
     def initialize(value) = @value = value
 
+    # @return [Boolean] true
+    def duplicable? = true
+
     # Replacing the holder's value can make this false again.
     # @return [Boolean] whether this proxy and its current target are frozen
     def frozen? = super && method_missing(:frozen?)
@@ -148,7 +158,19 @@ module Farce
     #   @return [BasicObject] the result of evaluating the block in the context of the referenced value
     def instance_exec(...) = method_missing(:instance_exec, ...)
 
+    private
+
+    def initialize_dup(other)
+      super
+      @value = Reference.deref(other).dup
+    end
+
+    def initialize_clone(other, freeze: nil)
+      super
+      @value = Reference.deref(other).clone
+    end
+
     # Delegates all methods to the referenced value
-    private def method_missing(...) = @value.value.__send__(...) # rubocop:disable Style/MissingRespondToMissing
+    def method_missing(...) = @value.value.__send__(...) # rubocop:disable Style/MissingRespondToMissing
   end
 end

@@ -102,14 +102,16 @@ module Farce
         self
       end
 
-      private
+      protected
 
       def internal_vector = @vector
 
+      private
+
       def initialize_copy(other)
         super
-        source = other.__send__(:internal_vector)
-        copy = source.class.new(source.snapshot, compare_by_identity: source.compare_by_identity?)
+        source = other.internal_vector
+        copy   = source.class.new(source.snapshot, compare_by_identity: source.compare_by_identity?)
         if is_a?(Local::Scoped)
           Internal::Storage.scope(scope)[self] = copy
         else

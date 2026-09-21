@@ -28,10 +28,17 @@ module Farce
       reference.freeze
       copy = reference.dup
 
-      refute_operator Reference, :===, copy
+      assert_operator Reference, :===, copy
       refute_predicate copy, :frozen?
-      copy[:key] = :copy
+      copied_holder = Reference.deref(copy)
 
+      refute_same holder, copied_holder
+      assert_same replacement, copied_holder.value
+      assert_raises(FrozenError) { copy[:key] = :copy }
+      copied_holder.value = Map.new({ key: :copy })
+
+      assert_equal :copy, copy[:key]
+      assert_same replacement, holder.value
       assert_equal :changed, replacement[:key]
     end
 

@@ -44,7 +44,7 @@ module Farce
   #   @return [self]
   #   @raise [ThreadError] if the current Fiber does not own the lock
   class Lock < Internal::Lock
-    include Internal::Noncopyable
+    include Internal::Copyable
     include Shareable::Native
     include Shareable::Unfreezable
 
