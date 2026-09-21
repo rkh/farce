@@ -16,7 +16,14 @@ module Farce
       include Shareable::Tracked
       include Scoped::Tracked
 
-      protected def internal_vector = scoped_value
+      protected
+
+      def internal_vector = scoped_value
+
+      def build_derived_vector(values)
+        self.class.new(values, compare_by_identity: compare_by_identity?, scope:)
+      end
+
       private def new_scoped_value(...) = Internal::UnsharedVector.new(...)
     end
   end

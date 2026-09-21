@@ -15,6 +15,7 @@ module Farce
         super()
       end
 
+      # (see Farce::Abstract::Vector#shareable_values?)
       def shareable_values? = true
 
       private def freeze_backend = @vector

@@ -9,6 +9,13 @@ module Farce
   # @example Atomically updating a collection
   #   vector = Farce::Vector.new([[]], mode: :make_shareable)
   #   vector.update(0) { |jobs| jobs + [:finished] } # => [:finished]
+  #
+  # @!method append(value, mode: nil, timeout: nil)
+  #   Append one value using the same options as {#push}.
+  #   @param value [BasicObject] The value to append.
+  #   @param mode [Symbol, nil] The transfer mode, or nil to use the default.
+  #   @param timeout [Numeric, nil] The maximum wait in seconds. Nil waits indefinitely.
+  #   @return [self, false] Self on success, or false on timeout.
   class Vector < Farce::Abstract::Vector
     include Shareable::Delegated
 
@@ -155,8 +162,32 @@ module Farce
     # (see Farce::Abstract::Vector#wait_until_non_nil)
     def wait_until_non_nil(index, timeout: nil) = @manager.unwrap(@vector.wait_until_non_nil(index, timeout:))
 
+    protected
+
+    def logical_value(value) = @manager.unwrap(value)
+
+    def build_derived_vector(values)
+      self.class.allocate.initialize_derived_vector(values, @manager, @compare_by_identity)
+    end
+
+    def initialize_derived_vector(values, manager, compare_by_identity)
+      @manager = manager
+      @compare_by_identity = compare_by_identity
+      @vector = Internal::Vector.new(values, compare_by_identity: true)
+      publish_shareable
+    end
+
+    attr_reader :manager
+
+    def reusable_operand_snapshot(other)
+      return unless other.is_a?(Farce::Vector)
+      return unless other.manager.equal?(@manager)
+      other.internal_vector.snapshot
+    end
+
     private
 
+    def derived_storage(value)     = @manager.wrap(value)
     def freeze_backend             = @vector
     def wrap_comparison(value)     = @manager.wrap(value, mode: compare_by_identity? ? :local : :copy)
     def values_equal?(left, right) = @manager.same_value?(left, right, identity: compare_by_identity?)
