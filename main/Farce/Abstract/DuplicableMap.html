@@ -95,7 +95,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/duplicable_map.rb<span class="defines">,<br>
-  lib/farce/integrations/active_support.rb</span>
+  lib/farce/integrations/active_support/map.rb</span>
 
 </dd>
   </dl>
@@ -664,7 +664,7 @@ Local copies transform the current scope and retain constructor defaults for oth
 70</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support.rb', line 70</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 70</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compact_blank'>compact_blank</span> <span class='op'>=</span> <span class='id identifier rubyid_reject'>reject</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid__'>_</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_blank?'>blank?</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -725,7 +725,7 @@ Copied keys and values must satisfy the map's normal storage rules.</p>
 51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 41</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_deep_dup'>deep_dup</span>
   <span class='id identifier rubyid_copier'>copier</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../ModeManager.html#initialize-instance_method" title="Farce::ModeManager#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:move</span>
@@ -1393,7 +1393,7 @@ Move-mode defaults are copied so the input remains usable.</p>
 90</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support.rb', line 77</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 77</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_reverse_merge'>reverse_merge</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="Map.html" title="Farce::Abstract::Map (class)">Map</a></span></span> <span class='op'>===</span> <span class='id identifier rubyid_other'>other</span>
@@ -1649,7 +1649,7 @@ The block receives public values from the copy. Stored values and map settings a
 55</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support.rb', line 55</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 55</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_stringify_keys'>stringify_keys</span> <span class='op'>=</span> <span class='id identifier rubyid_transform_keys'>transform_keys</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='op'>|</span> <span class='const'>Symbol</span> <span class='op'>===</span> <span class='id identifier rubyid_key'>key</span> <span class='op'>?</span> <span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span> <span class='op'>:</span> <span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -1708,7 +1708,7 @@ The block receives public values from the copy. Stored values and map settings a
 65</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support.rb', line 59</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 59</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_symbolize_keys'>symbolize_keys</span>
   <span class='id identifier rubyid_transform_keys'>transform_keys</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='op'>|</span>
@@ -2110,7 +2110,7 @@ Values in move mode are copied to preserve the source.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 13:04:01 2026 by
+  Generated on Mon Sep 21 13:16:14 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

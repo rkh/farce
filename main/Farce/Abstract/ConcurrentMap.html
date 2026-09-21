@@ -113,7 +113,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/concurrent_map.rb<span class="defines">,<br>
-  lib/farce/integrations/active_support.rb</span>
+  lib/farce/integrations/active_support/map.rb</span>
 
 </dd>
   </dl>
@@ -1279,7 +1279,7 @@ The operation is not atomic across keys.</p>
 98</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support.rb', line 98</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 98</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compact_blank!'>compact_blank!</span> <span class='op'>=</span> <span class='id identifier rubyid_delete_if'>delete_if</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid__'>_</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_blank?'>blank?</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -3051,7 +3051,7 @@ Inserted values use the map's transfer mode, including move semantics.</p>
 111</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support.rb', line 105</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 105</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_reverse_merge!'>reverse_merge!</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="Map.html" title="Farce::Abstract::Map (class)">Map</a></span></span> <span class='op'>===</span> <span class='id identifier rubyid_other'>other</span>
@@ -4346,7 +4346,7 @@ An absent key is observed as nil. The configured value-comparison mode determine
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 13:04:06 2026 by
+  Generated on Mon Sep 21 13:16:23 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
