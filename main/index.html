@@ -97,6 +97,11 @@
 <li><a href="#loading-farce">Loading Farce</a></li>
 </ul>
 </li>
+<li><a href="#known-issues-and-limitations">Known Issues and Limitations</a>
+<ul>
+<li><a href="#possible-discrepancy-regarding-frozen-state-in-ruby-and-c">Possible discrepancy regarding frozen state in Ruby and C</a></li>
+</ul>
+</li>
 <li><a href="#housekeeping">Housekeeping</a></li>
 </ul>
 </li>
@@ -319,13 +324,28 @@ $ mise run
 </code></pre>
 <p>Constants (classes, modules, etc.) under the <code>Farce</code> namespace are loaded lazily (thread- and ractor-safe), so there is no
 need to specifically load any particular file.</p>
+<h2 id="known-issues-and-limitations">Known Issues and Limitations<a href="#known-issues-and-limitations" aria-label="Link to heading 'Known Issues and Limitations'" data-heading-content="Known Issues and Limitations" class="anchor"></a></h2>
+<h3 id="possible-discrepancy-regarding-frozen-state-in-ruby-and-c">Possible discrepancy regarding frozen state in Ruby and C<a href="#possible-discrepancy-regarding-frozen-state-in-ruby-and-c" aria-label="Link to heading 'Possible discrepancy regarding frozen state in Ruby and C'" data-heading-content="Possible discrepancy regarding frozen state in Ruby and C" class="anchor"></a></h3>
+<blockquote>
+<p>I agree that <strong>freezing means the object's own state is immutable</strong>, not just its instance variables, so we should not freeze [<em>shareable, mutable object</em>]. Forbidding instance variables on them is the right approach. [...] <strong>A shareable object that is not frozen never has instance variables</strong>. This should also hold when C extensions define such objects in the future.
+— <em>Yukihiro Matsumoto</em> (Ruby Issue <a href="https://bugs.ruby-lang.org/issues/22291#note-4">#22291</a>, emphasis added)</p>
+</blockquote>
+<p>In Ruby, Farce objects reflect their frozen state accurately. If a map returns <code>true</code> for <code>frozen?</code>, you cannot add, remove, or replace its entries.</p>
+<p>There are some technical challenges implementing this behavior: From within Ruby, you cannot mark an object as Ractor shareable without freezing it first. This is possible from a C-extension, but then instance variables can no longer be used, so state tracking needs to happen purely at the C level or outside of the Ruby object.</p>
+<p>To work around this, Farce follows a hybrid approach, marking objects with state purely defined in a C extension as Ractor shareable without freezing them, and reimplementing freezing behavior in Ruby for objects where this isn't safely possible.</p>
+<p>This means:</p>
+<ul>
+<li><code>frozen?</code> and <code>freeze</code> will behave as expected for all Farce classes.</li>
+<li><code>Kernel.instance_method(:frozen?).bind_call(object)</code> might report a different value from <code>object.frozen?</code></li>
+<li>C-level checks for frozen state, such as <code>RB_OBJ_FROZEN</code>, might differ from what Ruby-level methods report.</li>
+</ul>
 <h2 id="housekeeping">Housekeeping<a href="#housekeeping" aria-label="Link to heading 'Housekeeping'" data-heading-content="Housekeeping" class="anchor"></a></h2>
 <p>Farce follows <a href="https://semver.org/">Semantic Versioning</a> and <a href="https://guides.rubygems.org/patterns/#versioning">the RubyGems versioning policy</a>. Farce's original code is released under the <a href="file.MIT-LICENSE.html" title="MIT License">MIT License</a>. Native builds also contain Kazlib 1.20-derived <code>dict.c</code> and <code>dict.h</code>; their original permissive license and copyright notice are retained in those files. The native gem therefore declares <code>MIT</code> and <code>LicenseRef-Kazlib-1.20</code>, while the pure-Java gem declares only <code>MIT</code> because it does not ship Kazlib.</p>
 <p>Built with love in Berlin, by Konstantin Haase.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Sun Sep 20 13:02:55 2026 by
+  Generated on Mon Sep 21 11:07:44 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

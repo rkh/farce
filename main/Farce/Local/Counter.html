@@ -102,7 +102,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="../Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Abstract::Counter</a></span>, <span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span></dd>
+      <dd><span class='object_link'><a href="../Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Abstract::Counter</a></span>, <span class='object_link'><a href="../Shareable/Tracked.html" title="Farce::Shareable::Tracked (module)">Shareable::Tracked</a></span></dd>
   </dl>
   
   
@@ -133,17 +133,45 @@ Each scope starts at the initial integer. Reset affects only the current scope.<
 
 
 
+  <h2>Instance Attribute Summary <small><a href="#" class="summary_toggle">collapse</a></small></h2>
+  <ul class="summary">
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initial-instance_method" title="#initial (instance method)">#<strong>initial</strong>  &#x21d2; Integer </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The initial value used for new scopes and by <span class='object_link'><a href="../Abstract/Counter.html#reset-instance_method" title="Farce::Abstract::Counter#reset (method)">Abstract::Counter#reset</a></span>.</p>
+</div></span>
+  
+</li>
+
+    
+  </ul>
 
 
-  <h2>Instance Attribute Summary</h2>
+
+  
   
   <h3 class="inherited">Attributes included from <span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="Scoped.html#scope-instance_method" title="Farce::Local::Scoped#scope (method)">#scope</a></span></p>
-
-  
-  
-  <h3 class="inherited">Attributes included from <span class='object_link'><a href="../Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Abstract::Counter</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="../Abstract/Counter.html#initial-instance_method" title="Farce::Abstract::Counter#initial (method)">#initial</a></span></p>
 
 
   
@@ -344,9 +372,24 @@ Each scope starts at the initial integer. Reset affects only the current scope.<
   
   
   
+  
+  
+  
+  
+  
+  
+  
   <h3 class="inherited">Methods included from <span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
 
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -472,14 +515,14 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-16
-17
-18
-19
-20</pre>
+21
+22
+23
+24
+25</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 16</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 21</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='int'>0</span><span class='comma'>,</span> <span class='label'>scope:</span> <span class='symbol'>:ractor</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>FrozenError</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>can&#39;t initialize a frozen counter</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='label'>receiver:</span> <span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
@@ -502,6 +545,66 @@ but not for non-blocking fibers (such as those created by <span class='object_li
   </p>
   
 </div>
+
+  <div id="instance_attr_details" class="attr_details">
+    <h2>Instance Attribute Details</h2>
+    
+      
+      <span id=""></span>
+      <div class="method_details first">
+  <h3 class="signature first" id="initial-instance_method">
+  
+    #<strong>initial</strong>  &#x21d2; <tt>Integer</tt>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>The initial value used for new scopes and by <span class='object_link'><a href="../Abstract/Counter.html#reset-instance_method" title="Farce::Abstract::Counter#reset (method)">Abstract::Counter#reset</a></span>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+16
+17
+18</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 16</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initial'>initial</span>
+  <span class='ivar'>@initial</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
 
 
   <div id="instance_method_details" class="method_details_list">
@@ -584,10 +687,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-44</pre>
+49</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 44</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 49</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_counter'>internal_counter</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='rparen'>)</span></pre>
     </td>
@@ -658,13 +761,13 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-57
-58
-59
-60</pre>
+62
+63
+64
+65</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 57</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 62</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_decrement'>decrement</span><span class='lparen'>(</span><span class='id identifier rubyid_by'>by</span> <span class='op'>=</span> <span class='int'>1</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_counter'>internal_counter</span><span class='period'>.</span><span class='id identifier rubyid_decrement'>decrement</span><span class='lparen'>(</span><span class='id identifier rubyid_by'>by</span><span class='rparen'>)</span>
@@ -734,13 +837,13 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-49
-50
-51
-52</pre>
+54
+55
+56
+57</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 49</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 54</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_increment'>increment</span><span class='lparen'>(</span><span class='id identifier rubyid_by'>by</span> <span class='op'>=</span> <span class='int'>1</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_counter'>internal_counter</span><span class='period'>.</span><span class='id identifier rubyid_increment'>increment</span><span class='lparen'>(</span><span class='id identifier rubyid_by'>by</span><span class='rparen'>)</span>
@@ -816,10 +919,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-31</pre>
+36</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 31</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 36</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_counter'>internal_counter</span><span class='period'>.</span><span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span></pre>
     </td>
@@ -884,10 +987,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-38</pre>
+43</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 38</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 43</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_counter'>internal_counter</span><span class='period'>.</span><span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span></pre>
     </td>
@@ -937,10 +1040,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-24</pre>
+29</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 24</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 29</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_counter'>internal_counter</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span></pre>
     </td>
@@ -953,7 +1056,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Sun Sep 20 13:02:59 2026 by
+  Generated on Mon Sep 21 11:07:48 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -102,7 +102,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span></dd>
+      <dd><span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span>, <span class='object_link'><a href="../Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Shareable::Unfreezable</a></span></dd>
   </dl>
   
   
@@ -225,6 +225,14 @@
   <h3 class="inherited">Methods included from <span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
 
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -371,12 +379,14 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 26
 27
 28
-29</pre>
+29
+30</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/local/queue.rb', line 16</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Local::Queue (class)">Queue</a></span></span> <span class='op'>&lt;</span> <span class='const'><span class='object_link'><a href="../Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Abstract/Queue.html" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span></span>
 
   <span class='comment'># @return [Symbol] always returns `:local`
@@ -444,10 +454,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-20</pre>
+21</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/queue.rb', line 20</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/queue.rb', line 21</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:local</span></pre>
     </td>
@@ -460,7 +470,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Sun Sep 20 13:02:58 2026 by
+  Generated on Mon Sep 21 11:07:47 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

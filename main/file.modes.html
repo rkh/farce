@@ -238,9 +238,9 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_send'>send</span><span class='lparen'>(</span><span class='id identifier rubyid_settings'>settings</span><span class='rparen'>)</span>
 
 <span class='id identifier rubyid_published'>published</span> <span class='op'>=</span> <span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_receive'>receive</span>
-<span class='id identifier rubyid_published'>published</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_settings'>settings</span><span class='rparen'>)</span>                  <span class='comment'># =&gt; true
-</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Farce/Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_published'>published</span><span class='rparen'>)</span>          <span class='comment'># =&gt; true
-</span><span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:retries</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_frozen?'>frozen?</span>                  <span class='comment'># =&gt; true
+<span class='id identifier rubyid_published'>published</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_settings'>settings</span><span class='rparen'>)</span>           <span class='comment'># =&gt; true
+</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Farce/Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_published'>published</span><span class='rparen'>)</span>  <span class='comment'># =&gt; true
+</span><span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:retries</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_frozen?'>frozen?</span>           <span class='comment'># =&gt; true
 </span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
 </code></pre>
 <p>Ruby raises an error if the value cannot be made shareable. This mode works well for configuration and completed lookup tables, but it cannot turn arbitrary resources into shared objects.</p>
@@ -252,10 +252,10 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <span class='id identifier rubyid_draft'>draft</span><span class='lbracket'>[</span><span class='symbol'>:tags</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='symbol'>:concurrency</span>
 
 <span class='id identifier rubyid_published'>published</span> <span class='op'>=</span> <span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_receive'>receive</span>
-<span class='id identifier rubyid_published'>published</span><span class='lbracket'>[</span><span class='symbol'>:tags</span><span class='rbracket'>]</span>                    <span class='comment'># =&gt; [:ruby]
+<span class='id identifier rubyid_published'>published</span><span class='lbracket'>[</span><span class='symbol'>:tags</span><span class='rbracket'>]</span>                     <span class='comment'># =&gt; [:ruby]
 </span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Farce/Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_published'>published</span><span class='rparen'>)</span>  <span class='comment'># =&gt; true
-</span><span class='id identifier rubyid_draft'>draft</span><span class='lbracket'>[</span><span class='symbol'>:tags</span><span class='rbracket'>]</span>                        <span class='comment'># =&gt; [:ruby, :concurrency]
-</span><span class='id identifier rubyid_draft'>draft</span><span class='period'>.</span><span class='id identifier rubyid_frozen?'>frozen?</span>                       <span class='comment'># =&gt; false
+</span><span class='id identifier rubyid_draft'>draft</span><span class='lbracket'>[</span><span class='symbol'>:tags</span><span class='rbracket'>]</span>                         <span class='comment'># =&gt; [:ruby, :concurrency]
+</span><span class='id identifier rubyid_draft'>draft</span><span class='period'>.</span><span class='id identifier rubyid_frozen?'>frozen?</span>                        <span class='comment'># =&gt; false
 </span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
 </code></pre>
 <h3 id="raise-require-prepared-data"><code>:raise</code>: require prepared data<a href="#raise-require-prepared-data" aria-label="Link to heading ':raise: require prepared data'" data-heading-content=":raise: require prepared data" class="anchor"></a></h3>
@@ -582,7 +582,7 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </div></div>
 
       <div id="footer">
-  Generated on Sun Sep 20 13:02:56 2026 by
+  Generated on Mon Sep 21 11:07:44 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -102,7 +102,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Abstract::Counter</a></span>, <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></dd>
+      <dd><span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Abstract::Counter</a></span>, <span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Shareable::Native</a></span></dd>
   </dl>
   
   
@@ -126,6 +126,7 @@ This is a stateful, numeric object.</p>
 deltas must fit in a signed 64-bit integer; overflow raises RangeError without
 changing the stored value. Conditional-operation bounds may be wider, but a
 resulting stored value must still fit.</p>
+<p>On CRuby, subclasses must not add Ruby instance variables.</p>
 
 
   </div>
@@ -174,11 +175,6 @@ resulting stored value must still fit.</p>
 
 
 
-
-  <h2>Instance Attribute Summary</h2>
-  
-  <h3 class="inherited">Attributes included from <span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Abstract::Counter</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Abstract/Counter.html#initial-instance_method" title="Farce::Abstract::Counter#initial (method)">#initial</a></span></p>
 
 
   
@@ -240,6 +236,29 @@ resulting stored value must still fit.</p>
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#initial-instance_method" title="#initial (instance method)">#<strong>initial</strong>  &#x21d2; Integer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The initial value retained by reset and copies.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(value = 0)  &#x21d2; Counter </a>
     
 
@@ -290,6 +309,14 @@ resulting stored value must still fit.</p>
   
 
 
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -401,19 +428,17 @@ resulting stored value must still fit.</p>
       <pre class="lines">
 
 
-56
-57
-58
-59
-60</pre>
+61
+62
+63
+64</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 56</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 61</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>FrozenError</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>can&#39;t initialize a frozen counter</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='label'>receiver:</span> <span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
-  <span class='ivar'>@initial</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-  <span class='kw'>super</span><span class='lparen'>(</span><span class='ivar'>@initial</span><span class='rparen'>)</span>
+  <span class='kw'>super</span><span class='lparen'>(</span><span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -504,11 +529,6 @@ resulting stored value must still fit.</p>
       <pre class="lines">
 
 
-51
-52
-53
-54
-55
 56
 57
 58
@@ -517,20 +537,23 @@ resulting stored value must still fit.</p>
 61
 62
 63
-64</pre>
+64
+65
+66
+67
+68</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 51</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 56</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Counter (class)">Counter</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Counter</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Counter</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
 
   <span class='comment'># @param [Numeric, String, #to_int] value The initial value, converted to an Integer.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'>FrozenError</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>can&#39;t initialize a frozen counter</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='label'>receiver:</span> <span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
-    <span class='ivar'>@initial</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-    <span class='kw'>super</span><span class='lparen'>(</span><span class='ivar'>@initial</span><span class='rparen'>)</span>
+    <span class='kw'>super</span><span class='lparen'>(</span><span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='kw'>alias</span> <span class='id identifier rubyid_subtract'>subtract</span> <span class='id identifier rubyid_decrement'>decrement</span>
@@ -604,11 +627,6 @@ resulting stored value must still fit.</p>
       <pre class="lines">
 
 
-51
-52
-53
-54
-55
 56
 57
 58
@@ -617,20 +635,100 @@ resulting stored value must still fit.</p>
 61
 62
 63
-64</pre>
+64
+65
+66
+67
+68</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 51</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 56</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Counter (class)">Counter</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Counter</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Counter</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
 
   <span class='comment'># @param [Numeric, String, #to_int] value The initial value, converted to an Integer.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'>FrozenError</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>can&#39;t initialize a frozen counter</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='label'>receiver:</span> <span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
-    <span class='ivar'>@initial</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-    <span class='kw'>super</span><span class='lparen'>(</span><span class='ivar'>@initial</span><span class='rparen'>)</span>
+    <span class='kw'>super</span><span class='lparen'>(</span><span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>alias</span> <span class='id identifier rubyid_subtract'>subtract</span> <span class='id identifier rubyid_decrement'>decrement</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_remove'>remove</span>   <span class='id identifier rubyid_decrement'>decrement</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="initial-instance_method">
+  
+    #<strong>initial</strong>  &#x21d2; <tt>Integer</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns The initial value retained by reset and copies.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The initial value retained by reset and copies.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 56</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Counter (class)">Counter</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Counter</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Counter</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
+
+  <span class='comment'># @param [Numeric, String, #to_int] value The initial value, converted to an Integer.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='const'>FrozenError</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>can&#39;t initialize a frozen counter</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='label'>receiver:</span> <span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
+    <span class='kw'>super</span><span class='lparen'>(</span><span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='kw'>alias</span> <span class='id identifier rubyid_subtract'>subtract</span> <span class='id identifier rubyid_decrement'>decrement</span>
@@ -683,11 +781,6 @@ resulting stored value must still fit.</p>
       <pre class="lines">
 
 
-51
-52
-53
-54
-55
 56
 57
 58
@@ -696,20 +789,23 @@ resulting stored value must still fit.</p>
 61
 62
 63
-64</pre>
+64
+65
+66
+67
+68</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 51</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 56</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Counter (class)">Counter</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Counter</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Counter</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
 
   <span class='comment'># @param [Numeric, String, #to_int] value The initial value, converted to an Integer.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'>FrozenError</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>can&#39;t initialize a frozen counter</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='label'>receiver:</span> <span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
-    <span class='ivar'>@initial</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-    <span class='kw'>super</span><span class='lparen'>(</span><span class='ivar'>@initial</span><span class='rparen'>)</span>
+    <span class='kw'>super</span><span class='lparen'>(</span><span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='kw'>alias</span> <span class='id identifier rubyid_subtract'>subtract</span> <span class='id identifier rubyid_decrement'>decrement</span>
@@ -725,7 +821,7 @@ resulting stored value must still fit.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Sep 20 13:02:57 2026 by
+  Generated on Mon Sep 21 11:07:46 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

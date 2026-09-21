@@ -92,7 +92,7 @@
   
   <dl>
     <dt>Included in:</dt>
-    <dd><span class='object_link'><a href="Atom.html" title="Farce::Local::Atom (class)">Atom</a></span>, <span class='object_link'><a href="Counter.html" title="Farce::Local::Counter (class)">Counter</a></span>, <span class='object_link'><a href="Flag.html" title="Farce::Local::Flag (class)">Flag</a></span>, <span class='object_link'><a href="LFUMap.html" title="Farce::Local::LFUMap (class)">LFUMap</a></span>, <span class='object_link'><a href="LRUMap.html" title="Farce::Local::LRUMap (class)">LRUMap</a></span>, <span class='object_link'><a href="Lazy.html" title="Farce::Local::Lazy (class)">Lazy</a></span>, <span class='object_link'><a href="Lease.html" title="Farce::Local::Lease (class)">Lease</a></span>, <span class='object_link'><a href="LeaseMap.html" title="Farce::Local::LeaseMap (class)">LeaseMap</a></span>, <span class='object_link'><a href="LeasePool.html" title="Farce::Local::LeasePool (class)">LeasePool</a></span>, <span class='object_link'><a href="Map.html" title="Farce::Local::Map (class)">Map</a></span>, <span class='object_link'><a href="PriorityQueue.html" title="Farce::Local::PriorityQueue (class)">PriorityQueue</a></span>, <span class='object_link'><a href="Queue.html" title="Farce::Local::Queue (class)">Queue</a></span>, <span class='object_link'><a href="TimerQueue.html" title="Farce::Local::TimerQueue (class)">TimerQueue</a></span>, <span class='object_link'><a href="TreeMap.html" title="Farce::Local::TreeMap (class)">TreeMap</a></span>, <span class='object_link'><a href="Vector.html" title="Farce::Local::Vector (class)">Vector</a></span>, <span class='object_link'><a href="WeakAtom.html" title="Farce::Local::WeakAtom (class)">WeakAtom</a></span>, <span class='object_link'><a href="WeakKeyMap.html" title="Farce::Local::WeakKeyMap (class)">WeakKeyMap</a></span>, <span class='object_link'><a href="WeakMap.html" title="Farce::Local::WeakMap (class)">WeakMap</a></span>, <span class='object_link'><a href="WeakValueMap.html" title="Farce::Local::WeakValueMap (class)">WeakValueMap</a></span></dd>
+    <dd><span class='object_link'><a href="Lazy.html" title="Farce::Local::Lazy (class)">Lazy</a></span>, <span class='object_link'><a href="Lease.html" title="Farce::Local::Lease (class)">Lease</a></span>, <span class='object_link'><a href="LeaseMap.html" title="Farce::Local::LeaseMap (class)">LeaseMap</a></span>, <span class='object_link'><a href="LeasePool.html" title="Farce::Local::LeasePool (class)">LeasePool</a></span>, <span class='object_link'><a href="PriorityQueue.html" title="Farce::Local::PriorityQueue (class)">PriorityQueue</a></span>, <span class='object_link'><a href="Queue.html" title="Farce::Local::Queue (class)">Queue</a></span>, <span class='object_link'><a href="TimerQueue.html" title="Farce::Local::TimerQueue (class)">TimerQueue</a></span></dd>
   </dl>
   
 
@@ -250,12 +250,12 @@
       <pre class="lines">
 
 
-64
-65
-66</pre>
+89
+90
+91</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/scoped.rb', line 64</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scoped.rb', line 89</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_scope'>scope</span>
   <span class='ivar'>@scope</span>
@@ -371,26 +371,27 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83</pre>
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/scoped.rb', line 71</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scoped.rb', line 96</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_arguments'>arguments</span><span class='comma'>,</span> <span class='label'>scope:</span> <span class='symbol'>:ractor</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Invalid scope: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_scope'>scope</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='op'>::</span><span class='const'>SCOPES</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_scope'>scope</span><span class='rparen'>)</span>
 
+  <span class='ivar'>@farce_freeze_state</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Flag</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='kw'>false</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Shareable/Tracked.html" title="Farce::Shareable::Tracked (module)">Tracked</a></span></span><span class='rparen'>)</span>
   <span class='ivar'>@scope</span>         <span class='op'>=</span> <span class='id identifier rubyid_scope'>scope</span>
   <span class='ivar'>@configuration</span> <span class='op'>=</span> <span class='const'>MANAGER</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='lbracket'>[</span><span class='id identifier rubyid_arguments'>arguments</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span><span class='rparen'>)</span>
 
@@ -398,8 +399,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 
   <span class='comment'># Abstract initializers allocate instance variables. Local backing objects
 </span>  <span class='comment'># live in Storage instead, so initialization ends here.
-</span>  <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_freeze'>freeze</span>
+</span>  <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Freeze</span><span class='period'>.</span><span class='id identifier rubyid_publish'>publish</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -411,7 +411,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Sun Sep 20 13:02:56 2026 by
+  Generated on Mon Sep 21 11:07:44 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

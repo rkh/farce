@@ -110,7 +110,9 @@
   
   <dl>
     <dt>Defined in:</dt>
-    <dd>lib/farce/abstract/map.rb
+    <dd>lib/farce/abstract/map.rb<span class="defines">,<br>
+  lib/farce/integrations/active_support.rb</span>
+
 </dd>
   </dl>
   
@@ -211,6 +213,52 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Associate a value with a key without a timeout.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#as_json-instance_method" title="#as_json (instance method)">#<strong>as_json</strong>  &#x21d2; Hash </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Convert entries using ActiveSupport's Hash JSON conversion.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#assert_valid_keys-instance_method" title="#assert_valid_keys (instance method)">#<strong>assert_valid_keys</strong>(*valid_keys)  &#x21d2; self </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Validate observed keys without normalizing the allowed keys.</p>
 </div></span>
   
 </li>
@@ -635,6 +683,29 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#key-instance_method" title="#key (instance method)">#<strong>key</strong>(value)  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return a matching key using this map's value comparison setting, or nil.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#key%3F-instance_method" title="#key? (instance method)">#<strong>key?</strong>(key)  &#x21d2; Boolean </a>
     
 
@@ -673,6 +744,52 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Return the keys currently stored in the map.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#length-instance_method" title="#length (instance method)">#<strong>length</strong>  &#x21d2; Integer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return the number of entries currently in the map.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#rassoc-instance_method" title="#rassoc (instance method)">#<strong>rassoc</strong>(value)  &#x21d2; Array<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return an observed key/value pair using this map's value comparison setting, or nil.</p>
 </div></span>
   
 </li>
@@ -742,6 +859,29 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Return the number of entries currently in the map.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#store-instance_method" title="#store (instance method)">#<strong>store</strong>(key, value)  &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Store a value using the map's assignment operation.</p>
 </div></span>
   
 </li>
@@ -842,7 +982,7 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>  &#x21d2; BasicObject </a>
+      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>  &#x21d2; String </a>
     
 
     
@@ -856,7 +996,33 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
   
 
   
-    <span class="summary_desc"><div class='inline'></div></span>
+    <span class="summary_desc"><div class='inline'><p>JSON representation of the map.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_query-instance_method" title="#to_query (instance method)">#<strong>to_query</strong>  &#x21d2; String </a>
+    
+
+    
+      (also: #to_param)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Encode public entries as a query string, optionally under a namespace.</p>
+</div></span>
   
 </li>
 
@@ -879,6 +1045,31 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>The same representation as <span class='object_link'><a href="#inspect-instance_method" title="Farce::Abstract::Map#inspect (method)">#inspect</a></span>.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#value%3F-instance_method" title="#value? (instance method)">#<strong>value?</strong>(value)  &#x21d2; Boolean </a>
+    
+
+    
+      (also: #has_value?)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return whether an observed value matches using this map's value comparison setting.</p>
 </div></span>
   
 </li>
@@ -1212,13 +1403,63 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -1245,6 +1486,41 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -1360,7 +1636,8 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -1669,13 +1946,63 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -1702,6 +2029,41 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -1817,7 +2179,8 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -1857,6 +2220,142 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
   <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="as_json-instance_method">
+  
+    #<strong>as_json</strong>  &#x21d2; <tt>Hash</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Convert entries using ActiveSupport's Hash JSON conversion.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Hash</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The entries converted using Hash#as_json.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+14</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support.rb', line 14</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_as_json'>as_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_as_json'>as_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="assert_valid_keys-instance_method">
+  
+    #<strong>assert_valid_keys</strong>(*valid_keys)  &#x21d2; <tt>self</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Validate observed keys without normalizing the allowed keys.
+Concurrent changes may invalidate the result immediately.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>ArgumentError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>if an observed key is not allowed</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+25
+26
+27
+28
+29
+30
+31
+32
+33</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support.rb', line 25</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_assert_valid_keys'>assert_valid_keys</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_valid_keys'>valid_keys</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_valid_keys'>valid_keys</span><span class='period'>.</span><span class='id identifier rubyid_flatten!'>flatten!</span>
+  <span class='id identifier rubyid_each_key'>each_key</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='op'>|</span>
+    <span class='kw'>unless</span> <span class='id identifier rubyid_valid_keys'>valid_keys</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Unknown key: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>. Valid keys are: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_valid_keys'>valid_keys</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:inspect</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>, </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+  <span class='kw'>self</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -1925,13 +2424,13 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-162
-163
-164
-165</pre>
+169
+170
+171
+172</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 162</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 169</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_assoc'>assoc</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>return</span> <span class='kw'>nil</span> <span class='rbrace'>}</span>
@@ -2167,13 +2666,63 @@ or nil if the key is absent.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -2200,6 +2749,41 @@ or nil if the key is absent.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -2315,7 +2899,8 @@ or nil if the key is absent.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -2407,10 +2992,10 @@ or nil if the key is absent.</p>
       <pre class="lines">
 
 
-168</pre>
+175</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 168</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 175</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span></pre>
     </td>
@@ -2647,13 +3232,63 @@ or nil if the key is absent.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -2680,6 +3315,41 @@ or nil if the key is absent.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -2795,7 +3465,8 @@ or nil if the key is absent.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -3070,13 +3741,63 @@ or nil if the key is absent.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -3103,6 +3824,41 @@ or nil if the key is absent.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -3218,7 +3974,8 @@ or nil if the key is absent.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -3326,10 +4083,10 @@ Like Hash, this returns all entries regardless of the requested keys.</p>
       <pre class="lines">
 
 
-227</pre>
+269</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 227</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 269</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_deconstruct_keys'>deconstruct_keys</span><span class='lparen'>(</span><span class='id identifier rubyid_keys'>keys</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span> <span class='comment'># rubocop:disable Lint/UnusedMethodArgument</span></pre>
     </td>
@@ -3585,13 +4342,63 @@ Like Hash, this returns all entries regardless of the requested keys.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -3618,6 +4425,41 @@ Like Hash, this returns all entries regardless of the requested keys.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -3733,7 +4575,8 @@ Like Hash, this returns all entries regardless of the requested keys.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -3855,14 +4698,14 @@ Like Hash, this returns all entries regardless of the requested keys.</p>
       <pre class="lines">
 
 
-174
-175
-176
-177
-178</pre>
+181
+182
+183
+184
+185</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 174</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 181</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_dig'>dig</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_rest'>rest</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span>
@@ -4194,13 +5037,63 @@ to match insertion order.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -4227,6 +5120,41 @@ to match insertion order.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -4342,7 +5270,8 @@ to match insertion order.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -4435,7 +5364,7 @@ Keys are not guaranteed to be yielded in insertion order.</p>
     <li>
       
       
-        <span class='type'>(<tt>key</tt>)</span>
+        <span class='type'>(<tt><span class='object_link'><a href="#key-instance_method" title="Farce::Abstract::Map#key (method)">key</a></span></tt>)</span>
       
       
       
@@ -4707,13 +5636,63 @@ Keys are not guaranteed to be yielded in insertion order.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -4740,6 +5719,41 @@ Keys are not guaranteed to be yielded in insertion order.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -4855,7 +5869,8 @@ Keys are not guaranteed to be yielded in insertion order.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -5120,13 +6135,63 @@ Keys are not guaranteed to be yielded in insertion order.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -5153,6 +6218,41 @@ Keys are not guaranteed to be yielded in insertion order.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -5268,7 +6368,8 @@ Keys are not guaranteed to be yielded in insertion order.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -5633,13 +6734,63 @@ Values are not guaranteed to be yielded in insertion order.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -5666,6 +6817,41 @@ Values are not guaranteed to be yielded in insertion order.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -5781,7 +6967,8 @@ Values are not guaranteed to be yielded in insertion order.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -5869,10 +7056,10 @@ Values are not guaranteed to be yielded in insertion order.</p>
       <pre class="lines">
 
 
-182</pre>
+189</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 182</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 189</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span></pre>
     </td>
@@ -6085,7 +7272,7 @@ If both a default and a block are provided, the block takes precedence and a war
     <li>
       
       
-        <span class='type'>(<tt>key</tt>)</span>
+        <span class='type'>(<tt><span class='object_link'><a href="#key-instance_method" title="Farce::Abstract::Map#key (method)">key</a></span></tt>)</span>
       
       
       
@@ -6345,13 +7532,63 @@ If both a default and a block are provided, the block takes precedence and a war
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -6378,6 +7615,41 @@ If both a default and a block are provided, the block takes precedence and a war
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -6493,7 +7765,8 @@ If both a default and a block are provided, the block takes precedence and a war
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -6582,7 +7855,7 @@ If both a default and a block are provided, the block takes precedence and a war
     <li>
       
       
-        <span class='type'>(<tt>key</tt>)</span>
+        <span class='type'>(<tt><span class='object_link'><a href="#key-instance_method" title="Farce::Abstract::Map#key (method)">key</a></span></tt>)</span>
       
       
       
@@ -6653,10 +7926,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-195</pre>
+237</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 195</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 237</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fetch_values'>fetch_values</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_keys'>keys</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -6912,13 +8185,63 @@ If both a default and a block are provided, the block takes precedence and a war
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -6945,6 +8268,41 @@ If both a default and a block are provided, the block takes precedence and a war
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -7060,7 +8418,8 @@ If both a default and a block are provided, the block takes precedence and a war
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -7148,10 +8507,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-185</pre>
+227</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 185</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 227</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix</span></pre>
     </td>
@@ -7201,25 +8560,25 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-243
-244
-245
-246
-247
-248
-249
-250
-251
-252
-253
-254
-255
-256
-257
-258</pre>
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 243</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 285</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span>
   <span class='id identifier rubyid_out'>out</span>   <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> {</span><span class='tstring_end'>&quot;</span></span>
@@ -7236,6 +8595,81 @@ If both a default and a block are provided, the block takes precedence and a war
     <span class='id identifier rubyid_out'>out</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
   <span class='kw'>end</span>
   <span class='id identifier rubyid_out'>out</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>}&gt;</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="key-instance_method">
+  
+    #<strong>key</strong>(value)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Return a matching key using this map's value comparison setting, or nil.
+The first observed match is returned. No insertion order is guaranteed.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to find</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+209
+210
+211
+212</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 209</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -7490,13 +8924,63 @@ If both a default and a block are provided, the block takes precedence and a war
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -7523,6 +9007,41 @@ If both a default and a block are provided, the block takes precedence and a war
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -7638,7 +9157,8 @@ If both a default and a block are provided, the block takes precedence and a war
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -7914,13 +9434,63 @@ The returned keys are not guaranteed to be in insertion order.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -7947,6 +9517,41 @@ The returned keys are not guaranteed to be in insertion order.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -8062,7 +9667,8 @@ The returned keys are not guaranteed to be in insertion order.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -8102,6 +9708,136 @@ The returned keys are not guaranteed to be in insertion order.</p>
   <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="length-instance_method">
+  
+    #<strong>length</strong>  &#x21d2; <tt>Integer</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Return the number of entries currently in the map.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+193</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 193</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="rassoc-instance_method">
+  
+    #<strong>rassoc</strong>(value)  &#x21d2; <tt>Array</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Return an observed key/value pair using this map's value comparison setting, or nil.
+Values are unwrapped before comparison. Concurrent changes may make the result stale.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to find</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+218
+219
+220
+221
+222
+223
+224</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 218</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+  <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+    <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>end</span>
+  <span class='kw'>nil</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -8158,10 +9894,10 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-202</pre>
+244</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 202</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 244</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_keys?'>shareable_keys?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -8211,10 +9947,10 @@ This method will still return <code>true</code> for such maps.</p>
       <pre class="lines">
 
 
-205</pre>
+247</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 205</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 247</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -8451,13 +10187,63 @@ This method will still return <code>true</code> for such maps.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -8484,6 +10270,41 @@ This method will still return <code>true</code> for such maps.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -8599,7 +10420,8 @@ This method will still return <code>true</code> for such maps.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -8640,6 +10462,94 @@ This method will still return <code>true</code> for such maps.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="store-instance_method">
+  
+    #<strong>store</strong>(key, value)  &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Store a value using the map's assignment operation.
+Concurrent maps override this method to support timeouts.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the key to store</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to store</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p><code>value</code></p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+163</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 163</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span></pre>
     </td>
   </tr>
 </table>
@@ -8948,13 +10858,63 @@ A later removal or eviction can cause another call to construct a new value.</p>
 335
 336
 337
-338</pre>
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Map (class)">Map</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+
+  <span class='comment'># Store a value using the map&#39;s assignment operation.
+</span>  <span class='comment'># Concurrent maps override this method to support timeouts.
+</span>  <span class='comment'># @param key [BasicObject] the key to store
+</span>  <span class='comment'># @param value [BasicObject] the value to store
+</span>  <span class='comment'># @return [BasicObject] `value`
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
 
   <span class='comment'># Return a two-element array containing a key and its associated value, if the key is present,
 </span>  <span class='comment'># or nil if the key is absent.
@@ -8981,6 +10941,41 @@ A later removal or eviction can cause another call to construct a new value.</p>
   <span class='comment'># Returns whether the map contains no entries.
 </span>  <span class='comment'># @return [Boolean] Whether the map is empty.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Return the number of entries currently in the map.
+</span>  <span class='comment'># @return [Integer]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether an observed value matches using this map&#39;s value comparison setting.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Boolean]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+  <span class='kw'>end</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_has_value?'>has_value?</span> <span class='id identifier rubyid_value?'>value?</span>
+
+  <span class='comment'># Return a matching key using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># The first observed match is returned. No insertion order is guaranteed.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [BasicObject, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_key'>key</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span> <span class='op'>=</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pair'>pair</span><span class='op'>&amp;.</span><span class='id identifier rubyid_first'>first</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Return an observed key/value pair using this map&#39;s value comparison setting, or nil.
+</span>  <span class='comment'># Values are unwrapped before comparison. Concurrent changes may make the result stale.
+</span>  <span class='comment'># @param value [BasicObject] the value to find
+</span>  <span class='comment'># @return [Array, nil]
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+    <span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
+      <span class='kw'>return</span> <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_stored'>stored</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># Alias for {#key?}
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicatePrefix
@@ -9096,7 +11091,8 @@ A later removal or eviction can cause another call to construct a new value.</p>
     <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+  <span class='comment'># @return [String] JSON representation of the map.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
 
@@ -9184,10 +11180,10 @@ A later removal or eviction can cause another call to construct a new value.</p>
       <pre class="lines">
 
 
-209</pre>
+251</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 209</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 251</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_a'>to_a</span> <span class='op'>=</span> <span class='id identifier rubyid_each_pair'>each_pair</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span></pre>
     </td>
@@ -9289,10 +11285,10 @@ Preserves identity comparison for keys, including when a block transforms entrie
       <pre class="lines">
 
 
-217</pre>
+259</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 217</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 259</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_entries_to_hash'>entries_to_hash</span><span class='lparen'>(</span><span class='id identifier rubyid_each_pair'>each_pair</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -9342,10 +11338,10 @@ Preserves identity comparison for keys, including when a block transforms entrie
       <pre class="lines">
 
 
-221</pre>
+263</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 221</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 263</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_hash'>to_hash</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span></pre>
     </td>
@@ -9356,24 +11352,104 @@ Preserves identity comparison for keys, including when a block transforms entrie
       <div class="method_details ">
   <h3 class="signature " id="to_json-instance_method">
   
-    #<strong>to_json</strong>  &#x21d2; <tt>BasicObject</tt> 
+    #<strong>to_json</strong>  &#x21d2; <tt>String</tt> 
   
 
   
 
   
-</h3><table class="source_code">
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns JSON representation of the map.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>JSON representation of the map.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
   <tr>
     <td>
       <pre class="lines">
 
 
-298</pre>
+341</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 298</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 341</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="to_query-instance_method">
+  
+    #<strong>to_query</strong>  &#x21d2; <tt>String</tt> 
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='to_param-instance_method'>to_param</span></span>
+    </span>
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Encode public entries as a query string, optionally under a namespace.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+18</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support.rb', line 18</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_to_query'>to_query</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_query'>to_query</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
   </tr>
 </table>
@@ -9421,12 +11497,91 @@ Preserves identity comparison for keys, including when a block transforms entrie
       <pre class="lines">
 
 
-261</pre>
+303</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 261</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 303</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="value?-instance_method">
+  
+    #<strong>value?</strong>(value)  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='has_value?-instance_method'>has_value?</span></span>
+    </span>
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Return whether an observed value matches using this map's value comparison setting.
+Values are unwrapped before comparison. Concurrent changes may make the result stale.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to find</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+199
+200
+201
+202</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 199</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_value?'>value?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_identity'>identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
+  <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span> <span class='id identifier rubyid_identity'>identity</span> <span class='op'>?</span> <span class='id identifier rubyid_stored'>stored</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_stored'>stored</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -9493,10 +11648,10 @@ Preserves identity comparison for keys, including when a block transforms entrie
       <pre class="lines">
 
 
-232</pre>
+274</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 232</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 274</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_values_at'>values_at</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_keys'>keys</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_it'>it</span><span class='rbracket'>]</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -9546,10 +11701,10 @@ Preserves identity comparison for keys, including when a block transforms entrie
       <pre class="lines">
 
 
-236</pre>
+278</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 236</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 278</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_weak_keys?'>weak_keys?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -9599,10 +11754,10 @@ Preserves identity comparison for keys, including when a block transforms entrie
       <pre class="lines">
 
 
-240</pre>
+282</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 240</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 282</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_weak_values?'>weak_values?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -9615,7 +11770,7 @@ Preserves identity comparison for keys, including when a block transforms entrie
 </div>
 
       <div id="footer">
-  Generated on Sun Sep 20 13:02:59 2026 by
+  Generated on Mon Sep 21 11:07:47 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

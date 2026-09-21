@@ -116,6 +116,8 @@
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
     <p>A <span class='object_link'><a href="Reference.html" title="Farce::Reference (class)">Reference</a></span> for a <span class='object_link'><a href="Lazy.html" title="Farce::Lazy (class)">Lazy</a></span> value.</p>
+<p>Calling <code>freeze</code> resolves and freezes the target. Checking <code>frozen?</code> before
+the first successful freeze does not resolve it.</p>
 
 
   </div>
@@ -343,10 +345,10 @@
       <pre class="lines">
 
 
-31</pre>
+34</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/lazy_ref.rb', line 31</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/lazy_ref.rb', line 34</span>
 
 <span class='const'><span class='object_link'><a href="" title="Farce::LazyRef (class)">LazyRef</a></span></span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Reference.html" title="Farce::Reference (class)">Reference</a></span></span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Lazy.html" title="Farce::Lazy (class)">Lazy</a></span></span><span class='rbracket'>]</span></pre>
     </td>
@@ -360,7 +362,7 @@
 </div>
 
       <div id="footer">
-  Generated on Sun Sep 20 13:02:58 2026 by
+  Generated on Mon Sep 21 11:07:46 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

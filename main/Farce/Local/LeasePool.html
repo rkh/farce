@@ -102,7 +102,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span></dd>
+      <dd><span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span>, <span class='object_link'><a href="../Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Shareable::Unfreezable</a></span></dd>
   </dl>
   
   
@@ -226,6 +226,14 @@
   
   
   
+  
+  
+  
+  
+  
+  
+  
+  
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/LeasePool.html" title="Farce::Abstract::LeasePool (class)">Abstract::LeasePool</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Abstract/LeasePool.html#available_count-instance_method" title="Farce::Abstract::LeasePool#available_count (method)">#available_count</a></span>, <span class='object_link'><a href="../Abstract/LeasePool.html#checked_out_count-instance_method" title="Farce::Abstract::LeasePool#checked_out_count (method)">#checked_out_count</a></span>, <span class='object_link'><a href="../Abstract/LeasePool.html#checkin-instance_method" title="Farce::Abstract::LeasePool#checkin (method)">#checkin</a></span>, <span class='object_link'><a href="../Abstract/LeasePool.html#checkout-instance_method" title="Farce::Abstract::LeasePool#checkout (method)">#checkout</a></span>, <span class='object_link'><a href="../Abstract/LeasePool.html#creating_count-instance_method" title="Farce::Abstract::LeasePool#creating_count (method)">#creating_count</a></span>, <span class='object_link'><a href="../Abstract/LeasePool.html#size-instance_method" title="Farce::Abstract::LeasePool#size (method)">#size</a></span>, <span class='object_link'><a href="../Abstract/LeasePool.html#try_checkout-instance_method" title="Farce::Abstract::LeasePool#try_checkout (method)">#try_checkout</a></span></p>
 
@@ -337,15 +345,15 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-24
 25
 26
 27
 28
-29</pre>
+29
+30</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/lease_pool.rb', line 24</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/lease_pool.rb', line 25</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>max_size:</span><span class='comma'>,</span> <span class='label'>scope:</span> <span class='symbol'>:ractor</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_factory'>factory</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_validate_configuration!'>validate_configuration!</span><span class='lparen'>(</span><span class='id identifier rubyid_max_size'>max_size</span><span class='comma'>,</span> <span class='id identifier rubyid_factory'>factory</span><span class='rparen'>)</span>
@@ -364,7 +372,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Sun Sep 20 13:03:01 2026 by
+  Generated on Mon Sep 21 11:07:49 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

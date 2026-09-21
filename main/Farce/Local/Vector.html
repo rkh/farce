@@ -102,7 +102,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span></dd>
+      <dd><span class='object_link'><a href="../Shareable/Tracked.html" title="Farce::Shareable::Tracked (module)">Shareable::Tracked</a></span></dd>
   </dl>
   
   
@@ -194,9 +194,24 @@
   
   
   
+  
+  
+  
+  
+  
+  
+  
   <h3 class="inherited">Methods included from <span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
 
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -308,13 +323,15 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 19
 20
 21
-22</pre>
+22
+23</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/local/vector.rb', line 15</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Local::Vector (class)">Vector</a></span></span> <span class='op'>&lt;</span> <span class='const'><span class='object_link'><a href="../Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Abstract/Vector.html" title="Farce::Abstract::Vector (class)">Vector</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Shareable/Tracked.html" title="Farce::Shareable::Tracked (module)">Tracked</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span></span><span class='op'>::</span><span class='const'>Tracked</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -332,7 +349,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Sun Sep 20 13:02:59 2026 by
+  Generated on Mon Sep 21 11:07:47 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

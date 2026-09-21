@@ -100,7 +100,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="../Abstract/Flag.html" title="Farce::Abstract::Flag (module)">Abstract::Flag</a></span>, <span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span></dd>
+      <dd><span class='object_link'><a href="../Abstract/Flag.html" title="Farce::Abstract::Flag (module)">Abstract::Flag</a></span>, <span class='object_link'><a href="../Shareable/Tracked.html" title="Farce::Shareable::Tracked (module)">Shareable::Tracked</a></span></dd>
   </dl>
   
   
@@ -335,9 +335,24 @@ Only true and false are accepted. Read <span class='object_link'><a href="#value
   
   
   
+  
+  
+  
+  
+  
+  
+  
   <h3 class="inherited">Methods included from <span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
 
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -464,7 +479,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 13</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 14</span>
 
 </pre>
     </td>
@@ -555,10 +570,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-44</pre>
+45</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 44</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 45</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='rparen'>)</span></pre>
     </td>
@@ -604,10 +619,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-26</pre>
+27</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 26</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 27</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_set'>set</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_set'>set</span></pre>
     </td>
@@ -680,10 +695,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-31</pre>
+32</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 31</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 32</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span></pre>
     </td>
@@ -752,10 +767,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-38</pre>
+39</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 38</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 39</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span></pre>
     </td>
@@ -805,10 +820,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-48</pre>
+49</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 48</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 49</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_toggle'>toggle</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_toggle'>toggle</span></pre>
     </td>
@@ -862,10 +877,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-20</pre>
+21</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 20</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 21</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span></pre>
     </td>
@@ -878,7 +893,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Sun Sep 20 13:02:58 2026 by
+  Generated on Mon Sep 21 11:07:47 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

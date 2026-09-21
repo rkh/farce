@@ -312,7 +312,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Freezes this object and the referenced value.</p>
+    <span class="summary_desc"><div class='inline'><p>Freeze the current target, then this proxy.</p>
 </div></span>
   
 </li>
@@ -335,7 +335,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Whether this object and the referenced value is frozen.</p>
+    <span class="summary_desc"><div class='inline'><p>Replacing the holder's value can make this false again.</p>
 </div></span>
   
 </li>
@@ -542,10 +542,10 @@
       <pre class="lines">
 
 
-151</pre>
+152</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 151</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 152</span>
 
 <span class='id identifier rubyid_private'>private</span> <span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@value</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Style/MissingRespondToMissing</span></pre>
     </td>
@@ -917,10 +917,10 @@ automatically.</p>
       <pre class="lines">
 
 
-131</pre>
+132</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 131</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 132</span>
 
 <span class='kw'>def</span> <span class='op'>!</span> <span class='op'>=</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:!</span><span class='rparen'>)</span></pre>
     </td>
@@ -989,12 +989,12 @@ automatically.</p>
       <pre class="lines">
 
 
-125
 126
-127</pre>
+127
+128</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 125</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 126</span>
 
 <span class='kw'>def</span> <span class='op'>!=</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:!=</span><span class='comma'>,</span> <span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
@@ -1065,10 +1065,10 @@ automatically.</p>
       <pre class="lines">
 
 
-120</pre>
+121</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 120</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 121</span>
 
 <span class='kw'>def</span> <span class='op'>==</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:==</span><span class='comma'>,</span> <span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span></pre>
     </td>
@@ -1087,7 +1087,7 @@ automatically.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Freezes this object and the referenced value</p>
+    <p>Freeze the current target, then this proxy. The value holder may remain mutable.</p>
 
 
   </div>
@@ -1118,13 +1118,13 @@ automatically.</p>
       <pre class="lines">
 
 
-112
 113
 114
-115</pre>
+115
+116</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 112</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 113</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_freeze'>freeze</span>
   <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:freeze</span><span class='rparen'>)</span>
@@ -1146,7 +1146,7 @@ automatically.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns whether this object and the referenced value is frozen.</p>
+    <p>Replacing the holder's value can make this false again.</p>
 
 
   </div>
@@ -1164,7 +1164,7 @@ automatically.</p>
       
       
         &mdash;
-        <div class='inline'><p>whether this object and the referenced value is frozen</p>
+        <div class='inline'><p>whether this proxy and its current target are frozen</p>
 </div>
       
     </li>
@@ -1177,10 +1177,10 @@ automatically.</p>
       <pre class="lines">
 
 
-108</pre>
+109</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 108</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 109</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_frozen?'>frozen?</span> <span class='op'>=</span> <span class='kw'>super</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:frozen?</span><span class='rparen'>)</span></pre>
     </td>
@@ -1281,10 +1281,10 @@ automatically.</p>
       <pre class="lines">
 
 
-138</pre>
+139</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 138</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 139</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_instance_eval'>instance_eval</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:instance_eval</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -1434,10 +1434,10 @@ automatically.</p>
       <pre class="lines">
 
 
-148</pre>
+149</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 149</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_instance_exec'>instance_exec</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:instance_exec</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -1450,7 +1450,7 @@ automatically.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Sep 20 13:02:58 2026 by
+  Generated on Mon Sep 21 11:07:46 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
