@@ -279,19 +279,20 @@ module Farce
     end
 
     def test_weak_variants_do_not_retain_elements
-      WEAK_TYPES.each do |type|
-        set = Thread.new do
-          result = type.new
-          result.add(Object.new.freeze)
-          result
-        end.value
+      strong = build_set_with_unreferenced_member(Strict::Set)
+      collect_set_member(strong, attempts: 3)
 
-        50.times do
-          2_000.times { Object.new }
-          RUBY_ENGINE == "jruby" ? java.lang.System.gc : GC.start
-          break if set.empty?
-          sleep 0.01
-        end
+      assert_equal 1, strong.size
+
+      WEAK_TYPES.each do |type|
+        member = Object.new.freeze
+        retained = type[member]
+        collect_set_member(retained, attempts: 3)
+
+        assert_includes retained, member, type.name
+
+        set = build_set_with_unreferenced_member(type)
+        collect_set_member(set)
 
         assert_empty set, type.name
       end
@@ -354,6 +355,27 @@ module Farce
       [Set, SortedSet].each do |type|
         error = assert_raises(ArgumentError) { type.new([nested_identity], mode: :local) }
         assert_match(/stable equality snapshot/, error.message)
+      end
+    end
+
+    private
+
+    def build_set_with_unreferenced_member(type)
+      # Keep the producer Thread temporary out of the frame that runs GC.
+      # Conservative scans can otherwise retain references from its stack.
+      Thread.new do
+        set = type.new
+        set.add(Object.new.freeze)
+        set
+      end.value
+    end
+
+    def collect_set_member(set, attempts: 50)
+      attempts.times do
+        2_000.times { Object.new }
+        RUBY_ENGINE == "jruby" ? java.lang.System.gc : GC.start
+        break if set.empty?
+        sleep 0.01
       end
     end
   end

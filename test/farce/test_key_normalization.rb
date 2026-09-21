@@ -307,14 +307,25 @@ module Farce
       refute_includes backend.class.instance_methods(false), :method_missing
     end
 
+    def test_tree_live_iteration_yields_canonical_keys_without_normalizing_again
+      [TreeMap, Strict::TreeMap, Unshared::TreeMap, Local::TreeMap].each do |type|
+        map = type.new({ 1 => :one, 2 => :two }, normalize_keys: ->(key) { key + 1 })
+        pairs = []
+
+        assert_same(map, map.each_live { |pair| pairs << pair })
+        assert_equal [[2, :one], [3, :two]], pairs, type.name
+        assert_equal pairs, map.each_live.to_a, type.name
+      end
+    end
+
     def test_extended_map_protocols_classify_every_public_operation
       protocols = {
         Abstract::TreeMap    => {
           operations: :TreeOperations,
           keyed:      %i[[] []= delete fetch getkey key? store_if_absent],
           key_free:   %i[
-            clear compare_keys_by_identity? compare_values_by_identity? each each_key each_pair each_value empty?
-            first_key keys last_key length pop shareable_keys? shift size values
+            clear compare_keys_by_identity? compare_values_by_identity? each each_key each_live each_pair each_value
+            empty? first_key keys last_key length pop shareable_keys? shift size values
           ],
         },
         Abstract::BoundedMap => {
