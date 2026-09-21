@@ -205,6 +205,29 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#append-instance_method" title="#append (instance method)">#<strong>append</strong>(value, mode: nil, timeout: nil)  &#x21d2; self, false </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Append one value using the same options as <span class='object_link'><a href="#push-instance_method" title="Farce::Vector#push (method)">#push</a></span>.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#compare_and_set-instance_method" title="#compare_and_set (instance method)">#<strong>compare_and_set</strong>(index, expected, replacement, mode: nil, timeout: nil)  &#x21d2; Boolean </a>
     
 
@@ -414,7 +437,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#store_if_absent-instance_method" title="#store_if_absent (instance method)">#<strong>store_if_absent</strong>(index, mode: nil, timeout: nil)  &#x21d2; BasicObject<sup>?</sup> </a>
+      <a href="#store_if_absent-instance_method" title="#store_if_absent (instance method)">#<strong>store_if_absent</strong>(index, mode: nil, timeout: nil) { ... } &#x21d2; BasicObject<sup>?</sup> </a>
     
 
     
@@ -584,8 +607,9 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Abstract/Vector.html" title="Farce::Abstract::Vector (class)">Abstract::Vector</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Abstract/Vector.html#<<-instance_method" title="Farce::Abstract::Vector#&lt;&lt; (method)">#<<</a></span>, <span class='object_link'><a href="Abstract/Vector.html#clear-instance_method" title="Farce::Abstract::Vector#clear (method)">#clear</a></span>, <span class='object_link'><a href="Abstract/Vector.html#empty%3F-instance_method" title="Farce::Abstract::Vector#empty? (method)">#empty?</a></span>, <span class='object_link'><a href="Abstract/Vector.html#size-instance_method" title="Farce::Abstract::Vector#size (method)">#size</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Vector.html#&-instance_method" title="Farce::Abstract::Vector#&amp; (method)">#&</a></span>, <span class='object_link'><a href="Abstract/Vector.html#*-instance_method" title="Farce::Abstract::Vector#* (method)">#*</a></span>, <span class='object_link'><a href="Abstract/Vector.html#%2B-instance_method" title="Farce::Abstract::Vector#+ (method)">#+</a></span>, <span class='object_link'><a href="Abstract/Vector.html#--instance_method" title="Farce::Abstract::Vector#- (method)">#-</a></span>, <span class='object_link'><a href="Abstract/Vector.html#<<-instance_method" title="Farce::Abstract::Vector#&lt;&lt; (method)">#<<</a></span>, <span class='object_link'><a href="Abstract/Vector.html#assoc-instance_method" title="Farce::Abstract::Vector#assoc (method)">#assoc</a></span>, <span class='object_link'><a href="Abstract/Vector.html#at-instance_method" title="Farce::Abstract::Vector#at (method)">#at</a></span>, <span class='object_link'><a href="Abstract/Vector.html#bsearch-instance_method" title="Farce::Abstract::Vector#bsearch (method)">#bsearch</a></span>, <span class='object_link'><a href="Abstract/Vector.html#bsearch_index-instance_method" title="Farce::Abstract::Vector#bsearch_index (method)">#bsearch_index</a></span>, <span class='object_link'><a href="Abstract/Vector.html#chunk-instance_method" title="Farce::Abstract::Vector#chunk (method)">#chunk</a></span>, <span class='object_link'><a href="Abstract/Vector.html#chunk_while-instance_method" title="Farce::Abstract::Vector#chunk_while (method)">#chunk_while</a></span>, <span class='object_link'><a href="Abstract/Vector.html#clear-instance_method" title="Farce::Abstract::Vector#clear (method)">#clear</a></span>, <span class='object_link'><a href="Abstract/Vector.html#compact-instance_method" title="Farce::Abstract::Vector#compact (method)">#compact</a></span>, <span class='object_link'><a href="Abstract/Vector.html#count-instance_method" title="Farce::Abstract::Vector#count (method)">#count</a></span>, <span class='object_link'><a href="Abstract/Vector.html#deconstruct-instance_method" title="Farce::Abstract::Vector#deconstruct (method)">#deconstruct</a></span>, <span class='object_link'><a href="Abstract/Vector.html#difference-instance_method" title="Farce::Abstract::Vector#difference (method)">#difference</a></span>, <span class='object_link'><a href="Abstract/Vector.html#dig-instance_method" title="Farce::Abstract::Vector#dig (method)">#dig</a></span>, <span class='object_link'><a href="Abstract/Vector.html#drop-instance_method" title="Farce::Abstract::Vector#drop (method)">#drop</a></span>, <span class='object_link'><a href="Abstract/Vector.html#drop_while-instance_method" title="Farce::Abstract::Vector#drop_while (method)">#drop_while</a></span>, <span class='object_link'><a href="Abstract/Vector.html#each-instance_method" title="Farce::Abstract::Vector#each (method)">#each</a></span>, <span class='object_link'><a href="Abstract/Vector.html#each_cons-instance_method" title="Farce::Abstract::Vector#each_cons (method)">#each_cons</a></span>, <span class='object_link'><a href="Abstract/Vector.html#each_index-instance_method" title="Farce::Abstract::Vector#each_index (method)">#each_index</a></span>, <span class='object_link'><a href="Abstract/Vector.html#each_slice-instance_method" title="Farce::Abstract::Vector#each_slice (method)">#each_slice</a></span>, <span class='object_link'><a href="Abstract/Vector.html#empty%3F-instance_method" title="Farce::Abstract::Vector#empty? (method)">#empty?</a></span>, <span class='object_link'><a href="Abstract/Vector.html#entries-instance_method" title="Farce::Abstract::Vector#entries (method)">#entries</a></span>, <span class='object_link'><a href="Abstract/Vector.html#fetch-instance_method" title="Farce::Abstract::Vector#fetch (method)">#fetch</a></span>, <span class='object_link'><a href="Abstract/Vector.html#fetch_values-instance_method" title="Farce::Abstract::Vector#fetch_values (method)">#fetch_values</a></span>, <span class='object_link'><a href="Abstract/Vector.html#filter_map-instance_method" title="Farce::Abstract::Vector#filter_map (method)">#filter_map</a></span>, <span class='object_link'><a href="Abstract/Vector.html#first-instance_method" title="Farce::Abstract::Vector#first (method)">#first</a></span>, <span class='object_link'><a href="Abstract/Vector.html#flat_map-instance_method" title="Farce::Abstract::Vector#flat_map (method)">#flat_map</a></span>, <span class='object_link'><a href="Abstract/Vector.html#grep-instance_method" title="Farce::Abstract::Vector#grep (method)">#grep</a></span>, <span class='object_link'><a href="Abstract/Vector.html#grep_v-instance_method" title="Farce::Abstract::Vector#grep_v (method)">#grep_v</a></span>, <span class='object_link'><a href="Abstract/Vector.html#group_by-instance_method" title="Farce::Abstract::Vector#group_by (method)">#group_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#include%3F-instance_method" title="Farce::Abstract::Vector#include? (method)">#include?</a></span>, <span class='object_link'><a href="Abstract/Vector.html#index-instance_method" title="Farce::Abstract::Vector#index (method)">#index</a></span>, <span class='object_link'><a href="Abstract/Vector.html#intersect%3F-instance_method" title="Farce::Abstract::Vector#intersect? (method)">#intersect?</a></span>, <span class='object_link'><a href="Abstract/Vector.html#intersection-instance_method" title="Farce::Abstract::Vector#intersection (method)">#intersection</a></span>, <span class='object_link'><a href="Abstract/Vector.html#join-instance_method" title="Farce::Abstract::Vector#join (method)">#join</a></span>, <span class='object_link'><a href="Abstract/Vector.html#last-instance_method" title="Farce::Abstract::Vector#last (method)">#last</a></span>, <span class='object_link'><a href="Abstract/Vector.html#map-instance_method" title="Farce::Abstract::Vector#map (method)">#map</a></span>, <span class='object_link'><a href="Abstract/Vector.html#max-instance_method" title="Farce::Abstract::Vector#max (method)">#max</a></span>, <span class='object_link'><a href="Abstract/Vector.html#max_by-instance_method" title="Farce::Abstract::Vector#max_by (method)">#max_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#min-instance_method" title="Farce::Abstract::Vector#min (method)">#min</a></span>, <span class='object_link'><a href="Abstract/Vector.html#min_by-instance_method" title="Farce::Abstract::Vector#min_by (method)">#min_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#minmax-instance_method" title="Farce::Abstract::Vector#minmax (method)">#minmax</a></span>, <span class='object_link'><a href="Abstract/Vector.html#minmax_by-instance_method" title="Farce::Abstract::Vector#minmax_by (method)">#minmax_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#pack-instance_method" title="Farce::Abstract::Vector#pack (method)">#pack</a></span>, <span class='object_link'><a href="Abstract/Vector.html#partition-instance_method" title="Farce::Abstract::Vector#partition (method)">#partition</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rassoc-instance_method" title="Farce::Abstract::Vector#rassoc (method)">#rassoc</a></span>, <span class='object_link'><a href="Abstract/Vector.html#reject-instance_method" title="Farce::Abstract::Vector#reject (method)">#reject</a></span>, <span class='object_link'><a href="Abstract/Vector.html#reverse-instance_method" title="Farce::Abstract::Vector#reverse (method)">#reverse</a></span>, <span class='object_link'><a href="Abstract/Vector.html#reverse_each-instance_method" title="Farce::Abstract::Vector#reverse_each (method)">#reverse_each</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rfind-instance_method" title="Farce::Abstract::Vector#rfind (method)">#rfind</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rindex-instance_method" title="Farce::Abstract::Vector#rindex (method)">#rindex</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rotate-instance_method" title="Farce::Abstract::Vector#rotate (method)">#rotate</a></span>, <span class='object_link'><a href="Abstract/Vector.html#sample-instance_method" title="Farce::Abstract::Vector#sample (method)">#sample</a></span>, <span class='object_link'><a href="Abstract/Vector.html#select-instance_method" title="Farce::Abstract::Vector#select (method)">#select</a></span>, <span class='object_link'><a href="Abstract/Vector.html#shuffle-instance_method" title="Farce::Abstract::Vector#shuffle (method)">#shuffle</a></span>, <span class='object_link'><a href="Abstract/Vector.html#size-instance_method" title="Farce::Abstract::Vector#size (method)">#size</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice-instance_method" title="Farce::Abstract::Vector#slice (method)">#slice</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice_after-instance_method" title="Farce::Abstract::Vector#slice_after (method)">#slice_after</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice_before-instance_method" title="Farce::Abstract::Vector#slice_before (method)">#slice_before</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice_when-instance_method" title="Farce::Abstract::Vector#slice_when (method)">#slice_when</a></span>, <span class='object_link'><a href="Abstract/Vector.html#sort-instance_method" title="Farce::Abstract::Vector#sort (method)">#sort</a></span>, <span class='object_link'><a href="Abstract/Vector.html#sort_by-instance_method" title="Farce::Abstract::Vector#sort_by (method)">#sort_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#take-instance_method" title="Farce::Abstract::Vector#take (method)">#take</a></span>, <span class='object_link'><a href="Abstract/Vector.html#take_while-instance_method" title="Farce::Abstract::Vector#take_while (method)">#take_while</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_a-instance_method" title="Farce::Abstract::Vector#to_a (method)">#to_a</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_h-instance_method" title="Farce::Abstract::Vector#to_h (method)">#to_h</a></span>, <span class='object_link'><a href="Abstract/Vector.html#union-instance_method" title="Farce::Abstract::Vector#union (method)">#union</a></span>, <span class='object_link'><a href="Abstract/Vector.html#uniq-instance_method" title="Farce::Abstract::Vector#uniq (method)">#uniq</a></span>, <span class='object_link'><a href="Abstract/Vector.html#values_at-instance_method" title="Farce::Abstract::Vector#values_at (method)">#values_at</a></span>, <span class='object_link'><a href="Abstract/Vector.html#zip-instance_method" title="Farce::Abstract::Vector#zip (method)">#zip</a></span>, <span class='object_link'><a href="Abstract/Vector.html#%7C-instance_method" title="Farce::Abstract::Vector#| (method)">#|</a></span></p>
 
+  
   <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
@@ -693,20 +717,20 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-19
-20
-21
-22
-23
-24
-25
 26
 27
 28
-29</pre>
+29
+30
+31
+32
+33
+34
+35
+36</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 19</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 26</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_source'>source</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='comma'>,</span> <span class='label'>compare_by_identity:</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>TypeError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>source must be an Array</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_source'>source</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>||</span> <span class='id identifier rubyid_source'>source</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Array</span><span class='rparen'>)</span>
@@ -748,7 +772,26 @@ get an error. Useful for usage contained within a single Ractor.</li>
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -773,10 +816,10 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-41</pre>
+48</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 48</span>
 
 <span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span><span class='rparen'>)</span></pre>
     </td>
@@ -801,7 +844,41 @@ get an error. Useful for usage contained within a single Ractor.</li>
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to store.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -826,19 +903,499 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-44
-45
-46
-47
-48</pre>
+51
+52
+53
+54
+55</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 44</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 51</span>
 
 <span class='kw'>def</span> <span class='op'>[]=</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
   <span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_value'>value</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="append-instance_method">
+  
+    #<strong>append</strong>(value, mode: nil, timeout: nil)  &#x21d2; <tt>self</tt>, <tt>false</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Append one value using the same options as <span class='object_link'><a href="#push-instance_method" title="Farce::Vector#push (method)">#push</a></span>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to append.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>mode</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The transfer mode, or nil to use the default.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>, <tt>false</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Self on success, or false on timeout.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 19</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Vector (class)">Vector</a></span></span> <span class='op'>&lt;</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/Vector.html" title="Farce::Abstract::Vector (class)">Vector</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Delegated.html" title="Farce::Shareable::Delegated (module)">Delegated</a></span></span>
+
+  <span class='comment'># @!macro modes
+</span>  <span class='comment'># @param source [Array, nil] Initial values. The source array is not retained.
+</span>  <span class='comment'># @param mode [Symbol] The default value transfer mode.
+</span>  <span class='comment'># @param compare_by_identity [Boolean] Whether values are compared by identity.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_source'>source</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='comma'>,</span> <span class='label'>compare_by_identity:</span> <span class='kw'>false</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='const'>TypeError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>source must be an Array</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_source'>source</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>||</span> <span class='id identifier rubyid_source'>source</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Array</span><span class='rparen'>)</span>
+    <span class='kw'>unless</span> <span class='kw'>true</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_compare_by_identity'>compare_by_identity</span><span class='rparen'>)</span> <span class='op'>||</span> <span class='kw'>false</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_compare_by_identity'>compare_by_identity</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_by_identity must be true or false</span><span class='tstring_end'>&quot;</span></span>
+    <span class='kw'>end</span>
+
+    <span class='ivar'>@compare_by_identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_by_identity'>compare_by_identity</span>
+    <span class='ivar'>@manager</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ModeManager.html#initialize-instance_method" title="Farce::ModeManager#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span><span class='rparen'>)</span>
+    <span class='ivar'>@vector</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Vector</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_source'>source</span><span class='op'>&amp;.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='rparen'>)</span> <span class='rbrace'>}</span><span class='comma'>,</span> <span class='label'>compare_by_identity:</span> <span class='kw'>true</span><span class='rparen'>)</span>
+    <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @return [Symbol] The default transfer mode.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_mode'>mode</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#compare_by_identity?)
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='ivar'>@compare_by_identity</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#shareable_values?)
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>true</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#[])
+</span>  <span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span><span class='rparen'>)</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#[]=)
+</span>  <span class='kw'>def</span> <span class='op'>[]=</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+    <span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#get)
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#store)
+</span>  <span class='comment'># @param mode [Symbol, nil] The transfer mode, or nil to use the default.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+    <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#push)
+</span>  <span class='comment'># @param mode [Symbol, nil] The transfer mode, or nil to use the default.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+    <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='kw'>self</span> <span class='op'>:</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#pop)
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#swap)
+</span>  <span class='comment'># @!macro modes
+</span>  <span class='comment'># @param mode [Symbol, nil] The replacement&#39;s transfer mode, or nil to use the default.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+    <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#store_if_absent)
+</span>  <span class='comment'># @param mode [Symbol, nil] The result&#39;s transfer mode, or nil to use the default.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+    <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+    <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='kw'>do</span>
+      <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>yield</span>
+      <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+      <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span>
+    <span class='kw'>end</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#update)
+</span>  <span class='comment'># @!macro modes
+</span>  <span class='comment'># @param mode [Symbol, nil] The result&#39;s transfer mode, or nil to use the default.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+    <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+    <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_current'>current</span><span class='op'>|</span>
+      <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>yield</span><span class='lparen'>(</span><span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+      <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span>
+    <span class='kw'>end</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#upsert)
+</span>  <span class='comment'># @!macro modes
+</span>  <span class='comment'># @param mode [Symbol, nil] The value transfer mode, or nil to use the default.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_initial'>initial</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+    <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+    <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_current'>current</span><span class='op'>|</span>
+      <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='kw'>nil</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
+                <span class='id identifier rubyid_initial'>initial</span>
+              <span class='kw'>else</span>
+                <span class='id identifier rubyid_yielded'>yielded</span> <span class='op'>=</span> <span class='kw'>yield</span><span class='lparen'>(</span><span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span><span class='rparen'>)</span>
+                <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+                <span class='id identifier rubyid_yielded'>yielded</span>
+              <span class='kw'>end</span>
+      <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span>
+    <span class='kw'>end</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#compare_and_set)
+</span>  <span class='comment'># @!macro modes
+</span>  <span class='comment'># @param mode [Symbol, nil] The replacement&#39;s transfer mode, or nil to use the default.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+    <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_timeout_deadline'>timeout_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_expected'>expected</span> <span class='op'>=</span> <span class='id identifier rubyid_wrap_comparison'>wrap_comparison</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_wrapped'>wrapped</span> <span class='op'>=</span> <span class='kw'>false</span>
+    <span class='id identifier rubyid_loop'>loop</span> <span class='kw'>do</span>
+      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span>
+      <span class='id identifier rubyid_equal'>equal</span>   <span class='op'>=</span> <span class='id identifier rubyid_values_equal?'>values_equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+      <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>unless</span> <span class='id identifier rubyid_equal'>equal</span>
+      <span class='kw'>unless</span> <span class='id identifier rubyid_wrapped'>wrapped</span>
+        <span class='id identifier rubyid_replacement'>replacement</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_wrapped'>wrapped</span> <span class='op'>=</span> <span class='kw'>true</span>
+      <span class='kw'>end</span>
+      <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span>
+      <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='kw'>nil</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span> <span class='op'>||</span> <span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>&amp;&amp;</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#wait_until_changed)
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_timeout_deadline'>timeout_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_expected'>expected</span> <span class='op'>=</span> <span class='id identifier rubyid_wrap_comparison'>wrap_comparison</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_loop'>loop</span> <span class='kw'>do</span>
+      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span>
+      <span class='kw'>return</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_values_equal?'>values_equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span>
+      <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>&amp;&amp;</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_deadline'>deadline</span>
+      <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># (see Farce::Abstract::Vector#wait_until_non_nil)
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_protected'>protected</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_logical_value'>logical_value</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_build_derived_vector'>build_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_values'>values</span><span class='rparen'>)</span>
+    <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_allocate'>allocate</span><span class='period'>.</span><span class='id identifier rubyid_initialize_derived_vector'>initialize_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_values'>values</span><span class='comma'>,</span> <span class='ivar'>@manager</span><span class='comma'>,</span> <span class='ivar'>@compare_by_identity</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_initialize_derived_vector'>initialize_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_values'>values</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span><span class='comma'>,</span> <span class='id identifier rubyid_compare_by_identity'>compare_by_identity</span><span class='rparen'>)</span>
+    <span class='ivar'>@manager</span> <span class='op'>=</span> <span class='id identifier rubyid_manager'>manager</span>
+    <span class='ivar'>@compare_by_identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_by_identity'>compare_by_identity</span>
+    <span class='ivar'>@vector</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Vector</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_values'>values</span><span class='comma'>,</span> <span class='label'>compare_by_identity:</span> <span class='kw'>true</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_publish_shareable'>publish_shareable</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_attr_reader'>attr_reader</span> <span class='symbol'>:manager</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_reusable_operand_snapshot'>reusable_operand_snapshot</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="" title="Farce::Vector (class)">Vector</a></span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_manager'>manager</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='ivar'>@manager</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_derived_storage'>derived_storage</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>     <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_freeze_backend'>freeze_backend</span>             <span class='op'>=</span> <span class='ivar'>@vector</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_wrap_comparison'>wrap_comparison</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>     <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>?</span> <span class='symbol'>:local</span> <span class='op'>:</span> <span class='symbol'>:copy</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_values_equal?'>values_equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_left'>left</span><span class='comma'>,</span> <span class='id identifier rubyid_right'>right</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_same_value?'>same_value?</span><span class='lparen'>(</span><span class='id identifier rubyid_left'>left</span><span class='comma'>,</span> <span class='id identifier rubyid_right'>right</span><span class='comma'>,</span> <span class='label'>identity:</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span><span class='rparen'>)</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_timeout_deadline'>timeout_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_timeout'>timeout</span> <span class='op'>=</span> <span class='const'>Float</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>timeout must be finite and non-negative</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_finite?'>finite?</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_negative?'>negative?</span>
+    <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span> <span class='op'>+</span> <span class='id identifier rubyid_timeout'>timeout</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_deadline'>deadline</span>
+    <span class='lbracket'>[</span><span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>-</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span><span class='comma'>,</span> <span class='int'>0</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_max'>max</span>
+  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -877,6 +1434,68 @@ get an error. Useful for usage contained within a single Ractor.</li>
 <div class="tags">
   <p class="tag_title">Parameters:</p>
 <ul class="param">
+  
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>expected</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value that must match the current entry.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>replacement</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to store on a match.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
   
     <li>
       
@@ -921,13 +1540,6 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-124
-125
-126
-127
-128
-129
-130
 131
 132
 133
@@ -938,10 +1550,17 @@ get an error. Useful for usage contained within a single Ractor.</li>
 138
 139
 140
-141</pre>
+141
+142
+143
+144
+145
+146
+147
+148</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 124</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 131</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -1008,10 +1627,10 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-35</pre>
+42</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 35</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 42</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='ivar'>@compare_by_identity</span></pre>
     </td>
@@ -1036,7 +1655,43 @@ get an error. Useful for usage contained within a single Ractor.</li>
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -1061,10 +1716,10 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-51</pre>
+58</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 51</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 58</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -1114,10 +1769,10 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-32</pre>
+39</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 32</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 39</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_mode'>mode</span></pre>
     </td>
@@ -1143,7 +1798,28 @@ This does not wait for an empty vector to become nonempty.</p>
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -1168,10 +1844,10 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-68</pre>
+75</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 68</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 75</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -1198,6 +1874,38 @@ This does not wait for an empty vector to become nonempty.</p>
 <div class="tags">
   <p class="tag_title">Parameters:</p>
 <ul class="param">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to append.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
   
     <li>
       
@@ -1242,13 +1950,13 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-62
-63
-64
-65</pre>
+69
+70
+71
+72</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 62</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 69</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -1301,10 +2009,10 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-38</pre>
+45</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 38</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 45</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -1331,6 +2039,53 @@ This does not wait for an empty vector to become nonempty.</p>
 <div class="tags">
   <p class="tag_title">Parameters:</p>
 <ul class="param">
+  
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to store.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
   
     <li>
       
@@ -1375,13 +2130,13 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-55
-56
-57
-58</pre>
+62
+63
+64
+65</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 55</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 62</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -1395,7 +2150,7 @@ This does not wait for an empty vector to become nonempty.</p>
       <div class="method_details ">
   <h3 class="signature " id="store_if_absent-instance_method">
   
-    #<strong>store_if_absent</strong>(index, mode: nil, timeout: nil)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+    #<strong>store_if_absent</strong>(index, mode: nil, timeout: nil) { ... } &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
   
 
   
@@ -1411,6 +2166,38 @@ This does not wait for an empty vector to become nonempty.</p>
 <div class="tags">
   <p class="tag_title">Parameters:</p>
 <ul class="param">
+  
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
   
     <li>
       
@@ -1431,6 +2218,23 @@ This does not wait for an empty vector to become nonempty.</p>
   
 </ul>
 
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'></span>
+      
+      
+      
+        
+        <div class='inline'><p>Called without arguments to compute a value when the slot is absent or nil.</p>
+</div>
+      
+    </li>
+  
+</ul>
 <p class="tag_title">Yield Returns:</p>
 <ul class="yieldreturn">
   
@@ -1472,18 +2276,18 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-80
-81
-82
-83
-84
-85
-86
 87
-88</pre>
+88
+89
+90
+91
+92
+93
+94
+95</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 80</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 87</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1533,6 +2337,53 @@ get an error. Useful for usage contained within a single Ractor.</li>
   
     <li>
       
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>replacement</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The new value.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
         <span class='name'>mode</span>
       
       
@@ -1574,13 +2425,13 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-73
-74
-75
-76</pre>
+80
+81
+82
+83</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 73</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 80</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -1625,6 +2476,38 @@ get an error. Useful for usage contained within a single Ractor.</li>
   
     <li>
       
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
         <span class='name'>mode</span>
       
       
@@ -1642,6 +2525,23 @@ get an error. Useful for usage contained within a single Ractor.</li>
   
 </ul>
 
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>value</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Compute the replacement while holding atomic-update access.</p>
+</div>
+      
+    </li>
+  
+</ul>
 <p class="tag_title">Yield Parameters:</p>
 <ul class="yieldparam">
   
@@ -1702,18 +2602,18 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-93
-94
-95
-96
-97
-98
-99
 100
-101</pre>
+101
+102
+103
+104
+105
+106
+107
+108</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 93</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 100</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1763,6 +2663,53 @@ get an error. Useful for usage contained within a single Ractor.</li>
   
     <li>
       
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>initial</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to store when the slot is absent or nil.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
         <span class='name'>mode</span>
       
       
@@ -1780,6 +2727,23 @@ get an error. Useful for usage contained within a single Ractor.</li>
   
 </ul>
 
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>value</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Compute a replacement for an existing non-nil entry.</p>
+</div>
+      
+    </li>
+  
+</ul>
 <p class="tag_title">Yield Parameters:</p>
 <ul class="yieldparam">
   
@@ -1840,23 +2804,23 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-106
-107
-108
-109
-110
-111
-112
 113
 114
 115
 116
 117
 118
-119</pre>
+119
+120
+121
+122
+123
+124
+125
+126</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 106</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 113</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_initial'>initial</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1894,7 +2858,58 @@ get an error. Useful for usage contained within a single Ractor.</li>
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>expected</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to wait for the entry to stop matching.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -1919,19 +2934,19 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-144
-145
-146
-147
-148
-149
-150
 151
 152
-153</pre>
+153
+154
+155
+156
+157
+158
+159
+160</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 144</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 151</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_timeout_deadline'>timeout_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
@@ -1965,7 +2980,43 @@ get an error. Useful for usage contained within a single Ractor.</li>
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -1990,10 +3041,10 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-156</pre>
+163</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 156</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 163</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -2006,7 +3057,7 @@ get an error. Useful for usage contained within a single Ractor.</li>
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 11:38:30 2026 by
+  Generated on Mon Sep 21 13:04:02 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
