@@ -6,6 +6,4 @@ require "farce"
 require "active_support"
 require "active_support/core_ext"
 
-require "farce/integrations/active_support/map"
-require "farce/integrations/active_support/set"
-require "farce/integrations/active_support/vector"
+Dir.glob("active_support/*.rb", base: __dir__) { require_relative it }

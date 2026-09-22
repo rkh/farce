@@ -15,61 +15,88 @@ module Farce
 
         def run = (run_once while true)
 
+        def move(key, _value, port)
+          respond(port, [true, @data.delete(key)].freeze, move: true)
+        end
+
+        def copy(key, _value, port)
+          respond(port, [true, @data[key]].freeze, move: false)
+        end
+
+        def same_value(key, value, port)
+          right, identity, right_stored = value
+          left   = @data[key]
+          right  = @data[right] if right_stored
+          result = identity ?
+            BasicObject.instance_method(:equal?).bind_call(left, right) :
+            !!(left == right) # rubocop:disable Style/DoubleNegation
+          respond(port, [true, result].freeze)
+        end
+
+        def delete(key, _value, port)
+          @data.delete(key)
+          respond(port, true)
+        end
+
+        def set(key, value, port)
+          @data[key] = value
+          respond(port, true)
+        end
+
+        def weak_atom(key, value, port)
+          command, *arguments = value
+          if command == :create
+            @weak_atoms[key] = VaultWeakAtomSlot.new(*arguments)
+            return respond(port, [true, nil].freeze)
+          end
+          slot = @weak_atoms[key]
+          raise ArgumentError, "unknown weak atom" unless slot
+          result = case command
+                   when :read then slot.value
+                   when :store then slot.store(arguments.first)
+                   else raise ArgumentError, "unknown weak-atom action: #{command.inspect}"
+                   end
+          respond(port, [true, result].freeze)
+        end
+
+        def weak_map(key, value, port)
+          command, *arguments = value
+          if command == :create
+            options = arguments.first
+            @weak_maps[key] = VaultWeakMapState.new(**options)
+            return respond(port, [true, [:ok].freeze].freeze)
+          end
+          map = @weak_maps[key]
+          raise ArgumentError, "unknown weak map" unless map
+          respond(port, [true, map.dispatch(command, *arguments)].freeze)
+        end
+
         private
 
         def run_once
           action, key, value, port = receive_request
-          case action
-          when :move   then return respond(port, [true, @data.delete(key)].freeze, move: true)
-          when :copy   then return respond(port, [true, @data[key]].freeze, move: false)
-          when :same_value
-            right, identity, right_stored = value
-            left   = @data[key]
-            right  = @data[right] if right_stored
-            result = identity ?
-              BasicObject.instance_method(:equal?).bind_call(left, right) :
-              !!(left == right) # rubocop:disable Style/DoubleNegation
-            return respond(port, [true, result].freeze)
-          when :delete then @data.delete(key)
-          when :set    then @data[key] = value
-          when :weak_atom
-            command, *arguments = value
-            if command == :create
-              @weak_atoms[key] = VaultWeakAtomSlot.new(*arguments)
-              return respond(port, [true, nil].freeze)
-            end
-            slot = @weak_atoms[key]
-            raise ArgumentError, "unknown weak atom" unless slot
-            result = case command
-                     when :read then slot.value
-                     when :store then slot.store(arguments.first)
-                     else raise ArgumentError, "unknown weak-atom action: #{command.inspect}"
-                     end
-            return respond(port, [true, result].freeze)
-          when :weak_map
-            command, *arguments = value
-            if command == :create
-              options = arguments.first
-              @weak_maps[key] = VaultWeakMapState.new(**options)
-              return respond(port, [true, [:ok].freeze].freeze)
-            end
-            map = @weak_maps[key]
-            raise ArgumentError, "unknown weak map" unless map
-            return respond(port, [true, map.dispatch(command, *arguments)].freeze)
-          else warn "Unknown vault action: #{action.inspect}"
-          end
-          respond(port, true)
+          public_send(action, key, value, port)
         rescue StandardError => e
           begin
-            error = if port.is_a?(Atom)
-                      [e.class, e.message.freeze, e.backtrace&.map(&:freeze)&.freeze].freeze
-                    else
-                      e
-                    end
-            respond(port, [false, error].freeze)
+            respond_error(port, e)
           rescue StandardError => e
             warn "Vault error: #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
           end
+        end
+
+        def respond_error(port, error)
+          payload = if port.is_a?(Atom)
+                      [error.class, error.message.freeze, error.backtrace&.map(&:freeze)&.freeze].freeze
+                    else
+                      error
+                    end
+          respond(port, [false, payload].freeze)
+        rescue StandardError
+          # Preserve diagnostics when the exception or its cause cannot cross Ractors.
+          remote = ::Ractor::RemoteError.new("#{error.class}: #{error.message}")
+          remote.instance_variable_set(:@ractor, ::Ractor.current)
+          remote.set_backtrace(error.backtrace&.map { |line| String.new(line) })
+          respond(port, ::Ractor.make_shareable([false, remote].freeze))
         end
       end
 
@@ -98,6 +125,8 @@ module Farce
         @ractor.send([kind, key, [action, *arguments].freeze, reply].freeze)
         success, payload = reply.wait_until_changed(pending)
         return payload if success
+
+        raise payload if payload.is_a?(Exception)
 
         error_class, message, backtrace = payload
         error_class = RuntimeError unless error_class.is_a?(Class) && error_class <= StandardError

@@ -37,3 +37,6 @@
 #     * If a `Symbol` is provided, it will be used as a method name to call on each key.
 #     * If a `Proc` is provided, it will be called with each key and should return the normalized key.
 #     * If a `Hash` or {Farce::Abstract::Map Map} is provided, it will be used to look up the normalized key for each incoming key.
+
+# @!macro active_support
+#   @note This methods is only available if the ActiveSupport integration has been loaded.

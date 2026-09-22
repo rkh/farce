@@ -2,13 +2,13 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
-require "farce"
-require "active_support"
-require "active_support/core_ext"
+# @!group ActiveSupport Integration
+require "farce/integrations/active_support"
 
 module Farce
   module Abstract
     class Vector
+      # @!macro active_support
       # Return entries starting at position from one snapshot.
       # @param position [Integer] The starting index. Negative indexes count from the end.
       # @return [Vector] The tail, or an empty Vector for an out-of-range position.
@@ -17,52 +17,65 @@ module Farce
         build_derived_vector(snapshot.from(position))
       end
 
+      # @!macro active_support
       # Return entries through position from one snapshot.
       # @param position [Integer] The final index. Negative indexes count from the end.
       # @return [Vector] The prefix, or an empty Vector for an out-of-range negative position.
       def to(position) = build_derived_vector(internal_vector.snapshot.to(position))
 
+      # @!macro active_support
       # Append entries to a new Vector, flattening argument Arrays by one level.
       # New entries follow the receiver's storage rules and transfer mode.
       # @param elements [Array<BasicObject>] The entries or Arrays of entries to append.
       # @return [Vector] The combined entries.
       def including(*elements) = self + elements.flatten(1)
 
+      # @!macro active_support
       # Exclude entries using Array's hash-based difference semantics.
       # @param elements [Array<BasicObject>] Entries to exclude, with Arrays flattened by one level.
       # @return [Vector] The remaining entries.
       def excluding(*elements) = self - elements.flatten(1)
       alias without excluding
 
+      # @!macro active_support
       # @return [BasicObject, nil] The second entry, or nil if absent.
       def second = self[1]
 
+      # @!macro active_support
       # @return [BasicObject, nil] The third entry, or nil if absent.
       def third = self[2]
 
+      # @!macro active_support
       # @return [BasicObject, nil] The fourth entry, or nil if absent.
       def fourth = self[3]
 
+      # @!macro active_support
       # @return [BasicObject, nil] The fifth entry, or nil if absent.
       def fifth = self[4]
 
+      # @!macro active_support
       # @return [BasicObject, nil] The forty-second entry, or nil if absent.
       def forty_two = self[41]
 
+      # @!macro active_support
       # @return [BasicObject, nil] The third entry from the end, or nil if absent.
       def third_to_last = self[-3]
 
+      # @!macro active_support
       # @return [BasicObject, nil] The second entry from the end, or nil if absent.
       def second_to_last = self[-2]
 
+      # @!macro active_support
       # Copy entries using ActiveSupport's deep-copy rules and the Vector's storage rules.
       # Strict Vectors reject deep copies that are not shareable.
       # @return [Vector] An independent same-kind Vector with deeply copied entries.
       def deep_dup = map(&:deep_dup)
 
+      # @!macro active_support
       # @return [Vector] Entries for which `blank?` is false, excluding nil and false.
       def compact_blank = reject(&:blank?)
 
+      # @!macro active_support
       # Extract keys from each entry in a snapshot.
       # Extracted values follow the receiver's storage rules and transfer mode.
       # @param keys [Array<BasicObject>] Keys passed to each entry's `[]` method.
@@ -72,6 +85,7 @@ module Farce
         map { |entry| build_derived_values(keys.map { |key| entry[key] }) }
       end
 
+      # @!macro active_support
       # Extract keys from the first entry in a snapshot.
       # @param keys [Array<BasicObject>] Keys passed to the first entry's `[]` method.
       # @return [BasicObject, Vector, nil] One value, a Vector for multiple keys, or nil if empty.
@@ -83,6 +97,7 @@ module Farce
         build_derived_values(keys.map { |key| entry[key] })
       end
 
+      # @!macro active_support
       # Order a snapshot by the keys in series, preserving retained entries.
       # @param key [Symbol, #to_proc] The method or callable used to extract ordering keys.
       # @param series [Array] The desired order of keys.
@@ -95,16 +110,19 @@ module Farce
         build_derived_from_logical(result, snapshot, logical)
       end
 
+      # @!macro active_support
       # Find the minimum extracted value without storing intermediate results in a Vector.
       # @param key [Symbol, #to_proc] The method or callable used to extract comparison values.
       # @return [BasicObject, nil] The minimum, or nil if empty.
       def minimum(key) = to_a.minimum(key)
 
+      # @!macro active_support
       # Find the maximum extracted value without storing intermediate results in a Vector.
       # @param key [Symbol, #to_proc] The method or callable used to extract comparison values.
       # @return [BasicObject, nil] The maximum, or nil if empty.
       def maximum(key) = to_a.maximum(key)
 
+      # @!macro active_support
       # Divide a snapshot into a requested number of Vector groups.
       # @param number [Integer] The number of groups, following ActiveSupport's validation rules.
       # @param fill_with [BasicObject] The padding value. False disables padding.
@@ -119,6 +137,7 @@ module Farce
         result
       end
 
+      # @!macro active_support
       # Divide a snapshot into Vector groups with a maximum size.
       # @param number [Integer] The positive group size.
       # @param fill_with [BasicObject] The padding value. False disables padding.
@@ -134,6 +153,7 @@ module Farce
         padding ? build_derived_vector(groups.flatten(1)) : self
       end
 
+      # @!macro active_support
       # Split a snapshot at matching entries, omitting the separators.
       # @param value [BasicObject] The separator compared with `==`, ignored when a block is supplied.
       # @yield [entry] Optionally identify separator entries.
@@ -148,29 +168,35 @@ module Farce
         build_derived_values(groups.map { build_derived_vector(it) })
       end
 
+      # @!macro active_support
       # Convert a snapshot to ActiveSupport's explicit JSON representation.
       # @param options [Hash, nil] Options passed to each entry's JSON conversion.
       # @return [Array] The JSON-compatible values.
       def as_json(options = nil) = to_a.as_json(options)
 
+      # @!macro active_support
       # @return [String] The snapshot's URL parameter representation, joined with slashes.
       def to_param = to_a.to_param
 
+      # @!macro active_support
       # @param key [String] The query parameter name.
       # @return [String] The encoded query string for the snapshot.
       def to_query(key) = to_a.to_query(key)
 
+      # @!macro active_support
       # Format a snapshot as a sentence using ActiveSupport's connectors and locale.
       # @param options [Hash] Connector and locale options accepted by Array#to_sentence.
       # @return [String] The formatted sentence.
       def to_sentence(options = {}) = to_a.to_sentence(options)
 
+      # @!macro active_support
       # Format a snapshot, optionally as a database ID list.
       # @param format [Symbol] Use :db for comma-separated IDs, or :default for Array formatting.
       # @return [String] The formatted snapshot.
       def to_fs(format = :default) = to_a.to_fs(format)
       alias to_formatted_s to_fs
 
+      # @!macro active_support
       # Serialize a logical snapshot with ActiveSupport's Array XML conversion.
       # Requires ActiveSupport's optional Builder dependency, as Array#to_xml does.
       # @param options [Hash] XML options, including root, children, builder, and indentation.
@@ -180,6 +206,7 @@ module Farce
       # @return [String] The generated XML.
       def to_xml(options = {}, &) = to_a.to_xml(options, &)
 
+      # @!macro active_support
       # Create ActiveSupport's specialized query wrapper from a logical snapshot.
       # @return [ActiveSupport::ArrayInquirer] An Array wrapper supporting predicate methods.
       def inquiry = to_a.inquiry

@@ -212,7 +212,6 @@ module Farce
       end
 
       def test_copy_and_marshal_are_rejected
-        refute_predicate @scheduler, :duplicable?
         assert_raises(TypeError) { @scheduler.dup }
         assert_raises(TypeError) { @scheduler.clone }
         assert_raises(TypeError) { @scheduler.clone(freeze: false) }

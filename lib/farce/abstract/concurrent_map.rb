@@ -289,10 +289,6 @@ module Farce
 
       private
 
-      def indifferent_access_options
-        super.merge(compare_keys_by_identity: false, compare_values_by_identity: compare_values_by_identity?)
-      end
-
       def modify_entry(key, canonical: false)
         map = internal_map
         map = map.instance_variable_get(:@map) if canonical && map.is_a?(Internal::KeyNormalizer::ConcurrentMap)

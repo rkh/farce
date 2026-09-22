@@ -15,14 +15,12 @@ module Farce
                   Unshared::WeakKeyMap, Unshared::WeakValueMap, Unshared::WeakMap,
                   Local::WeakKeyMap, Local::WeakValueMap, Local::WeakMap].freeze
 
-    def test_duplicable_matches_copy_support
+    def test_maps_support_copying
       (TREE_TYPES + BOUNDED_TYPES + WEAK_TYPES + [Map, Strict::Map, Unshared::Map, Local::Map]).each do |type|
         options = type < Abstract::BoundedMap ? { max_size: 4 } : {}
         source = type.new({ 1 => :value }, **options)
 
-        assert_predicate source, :duplicable?, type.name
         assert_instance_of type, source.dup
-        assert_predicate source.dup, :duplicable?, type.name
       end
     end
 
@@ -241,7 +239,6 @@ module Farce
       [LeaseMap, Unshared::LeaseMap, Local::LeaseMap].each do |type|
         source = type.new { { 1 => [] } }
 
-        refute_predicate source, :duplicable?, type.name
         handle = source.lease_for(1)
         source.checkout(1) do |resource|
           assert_raises(TypeError) { source.dup }

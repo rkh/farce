@@ -213,10 +213,6 @@ module Farce
         @key_locks = new_key_locks(compare_keys_by_identity: map.compare_keys_by_identity?)
       end
 
-      def indifferent_access_options
-        super.merge(max_size:, compare_keys_by_identity: false, compare_values_by_identity: compare_values_by_identity?)
-      end
-
       def each_for_inspect(&)    = each(&)
       def prepare_key(key)       = key
       def prepare_store_key(key) = internal_map.prepare_key(prepare_key(key))

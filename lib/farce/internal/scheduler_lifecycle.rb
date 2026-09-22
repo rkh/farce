@@ -161,7 +161,6 @@ module Farce
 
       def idle?       = @fibers.empty? && !pending? && @timers.empty? && @mailbox.empty?
       def closed?     = @closed
-      def duplicable? = false
 
       # Return a lower bound for fibers that can resume immediately.
       def farce_runnable_count = scheduler_ready_count + @mailbox.size

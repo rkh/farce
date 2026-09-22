@@ -2,22 +2,24 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
-require "farce"
-require "active_support"
-require "active_support/core_ext"
+# @!group ActiveSupport Integration
+require "farce/integrations/active_support"
 
 module Farce
   module Abstract
     class Map
+      # @!macro active_support
       # Convert entries using ActiveSupport's Hash JSON conversion.
       # @return [Hash] The entries converted using Hash#as_json.
       def as_json(...) = to_h.as_json(...)
 
+      # @!macro active_support
       # Encode public entries as a query string, optionally under a namespace.
       # @return [String]
       def to_query(...) = to_h.to_query(...)
       alias to_param to_query
 
+      # @!macro active_support
       # Validate observed keys without normalizing the allowed keys.
       # Concurrent changes may invalidate the result immediately.
       # @return [self]
@@ -34,6 +36,19 @@ module Farce
     end
 
     module DuplicableMap
+      # @!macro active_support
+      # Return a new map of the same class with interchangeable Symbol and String keys.
+      # Other key types and nested hashes are not normalized. Existing normalization is replaced.
+      # The copy preserves its value mode, value comparison, capacity, and Local scope where supported.
+      # Keys use equality. Entries from the current scope seed a Local copy.
+      # Values in move mode are copied to preserve the source.
+      # @return [Map] An independent map with indifferent key access.
+      def with_indifferent_access
+        normalizer = Ractor.shareable_proc { |key| Symbol === key ? key.name : key }
+        build_indifferent_access(**indifferent_access_options, normalize_keys: normalizer)
+      end
+
+      # @!macro active_support
       # Deeply copy entries into a map of the same kind with the same settings.
       # String and Symbol keys retain their identity, as with ActiveSupport's Hash#deep_dup.
       # Copied keys and values must satisfy the map's normal storage rules.
@@ -50,10 +65,12 @@ module Farce
         end
       end
 
+      # @!macro active_support
       # Return a same-kind map with string keys, subject to its key normalizer.
       # @return [Map]
       def stringify_keys = transform_keys { |key| Symbol === key ? key.name : key.to_s }
 
+      # @!macro active_support
       # Return a same-kind map with symbol keys where conversion succeeds.
       # @return [Map]
       def symbolize_keys
@@ -65,10 +82,12 @@ module Farce
       end
       alias to_options symbolize_keys
 
+      # @!macro active_support
       # Return a same-kind map without blank values, including false.
       # @return [Map]
       def compact_blank = reject { |_, value| value.blank? }
 
+      # @!macro active_support
       # Return a same-kind map with defaults applied before the receiver's entries.
       # Existing entries win. Bounded copies rebuild eviction history and enforce their capacity.
       # Move-mode defaults are copied so the input remains usable.
@@ -89,14 +108,29 @@ module Farce
         end
       end
       alias with_defaults reverse_merge
+
+      private
+
+      def indifferent_access_options = respond_to?(:mode) ? { mode: mode } : {}
+
+      def build_indifferent_access(**options)
+        entries = self
+        if options[:mode] == :move
+          copier  = ModeManager.new(mode: :copy)
+          entries = each_pair.map { |key, value| [key, copier.unwrap(copier.wrap(value))] }
+        end
+        self.class.new(entries, **options)
+      end
     end
 
     class ConcurrentMap
+      # @!macro active_support
       # Remove blank values using per-key coordination. Always return self.
       # The operation is not atomic across keys.
       # @return [self]
       def compact_blank! = delete_if { |_, value| value.blank? }
 
+      # @!macro active_support
       # Store each default only if its key is absent, preserving existing nil and false values.
       # Each decision is atomic for its key. Earlier changes survive exceptions.
       # Inserted values use the map's transfer mode, including move semantics.
@@ -110,6 +144,28 @@ module Farce
         self
       end
       alias with_defaults! reverse_merge!
+
+      private
+
+      def indifferent_access_options
+        super.merge(compare_keys_by_identity: false, compare_values_by_identity: compare_values_by_identity?)
+      end
+    end
+
+    class BoundedMap
+      private
+
+      def indifferent_access_options
+        super.merge(max_size:, compare_keys_by_identity: false, compare_values_by_identity: compare_values_by_identity?)
+      end
+    end
+  end
+
+  module Local
+    module Scoped
+      module Map
+        private def indifferent_access_options = super.merge(scope:)
+      end
     end
   end
 end

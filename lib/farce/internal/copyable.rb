@@ -6,8 +6,6 @@ module Farce
   module Internal
     # Preserve the publication guarantees of public shareable wrappers.
     module Copyable
-      def duplicable? = true
-
       private
 
       def initialize_dup(other)

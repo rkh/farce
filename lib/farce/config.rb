@@ -39,9 +39,6 @@ module Farce
       self.additional_thread_pool_size ||= ENV.fetch("FARCE_ADDITIONAL_THREAD_POOL_SIZE", 2)
     end
 
-    # Configuration copies retain the same immutable settings.
-    def duplicable? = true
-
     # Default fiber scheduler for Pool and Scheduler.
     # Explicit constructor blocks override it.
     #

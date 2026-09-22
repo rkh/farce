@@ -32,9 +32,6 @@ module Farce
     # @return [Boolean] true if the referenced object is still alive and reachable
     def weakref_alive? = @value.alive?
 
-    # Copies retain the same weak reference without duplicating its target.
-    def duplicable? = true
-
     private
 
     def initialize_dup(other)       = initialize_copy(other)

@@ -209,10 +209,6 @@ module Farce
         "#<#{self.class.name} {#{states}}>"
       end
 
-      # Compatibility method for ActiveSupport
-      # @return [Boolean] false
-      def duplicable? = false
-
       private
 
       def prepare_initial_resources(entries, normalizer)

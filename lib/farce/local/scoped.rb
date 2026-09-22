@@ -70,7 +70,6 @@ module Farce
 
         private
 
-        def indifferent_access_options   = super.merge(scope:)
         def install_copied_map(map)      = Internal::Storage.scope(scope)[self] = new_copied_scoped_value(map)
         def new_copied_scoped_value(map) = map
       end

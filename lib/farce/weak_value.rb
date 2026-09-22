@@ -70,10 +70,6 @@ module Farce
       end
     end
 
-    # Copies share the weak reference without copying its target.
-    # @return [Boolean] true
-    def duplicable? = true
-
     # Checks whether the referenced object has avoided garbage collection and has not been moved.
     # @return [Boolean] true if the weak value is still alive, false otherwise
     def alive?

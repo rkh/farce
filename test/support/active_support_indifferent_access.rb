@@ -3,6 +3,7 @@
 # warn_indent: true
 
 require_relative "../setup"
+require "farce/integrations/active_support"
 
 module Farce
   class TestIndifferentAccess < Test

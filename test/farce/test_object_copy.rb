@@ -75,7 +75,6 @@ module Farce
         objects << type.new(max_size: 1) { Object.new }
       end
       objects.each do |object|
-        refute_predicate object, :duplicable?
         assert_raises(TypeError) { object.dup }
         assert_raises(TypeError) { object.clone }
         assert_raises(TypeError) { object.clone(freeze: false) }
@@ -216,7 +215,6 @@ module Farce
         source = type.new { [].freeze }
         copy = source.dup
 
-        assert_predicate copy, :duplicable?
         assert Ractor.shareable?(copy)
         assert_same source.value, copy.value
         assert Fiber.new { source.value.equal?(copy.value) }.resume
@@ -231,7 +229,6 @@ module Farce
       [WeakValue, WeakRef].each do |type|
         source = type.new(target)
 
-        assert_predicate source, :duplicable?
         [source.dup, source.clone, source.clone(freeze: false)].each do |copy|
           assert_same target, type == WeakRef ? copy.__getobj__ : copy.value
         end
@@ -348,7 +345,6 @@ module Farce
     def test_move_envelopes_still_reject_copies_without_claiming_payloads
       source = Envelope::Move.new([])
 
-      refute_predicate source, :duplicable?
       assert_raises(TypeError) { source.dup }
       assert_raises(TypeError) { source.clone }
       assert_raises(TypeError) { source.clone(freeze: false) }
@@ -568,12 +564,10 @@ module Farce
 
     def test_other_public_copy_policies
       [ModeManager.new, Config.new].each do |source|
-        assert_predicate source, :duplicable?
         assert_instance_of source.class, source.dup
       end
       source = Resolv::DNS.new
 
-      refute_predicate source, :duplicable?
       assert_raises(TypeError) { source.dup }
       assert_raises(TypeError) { source.clone }
     ensure
@@ -607,7 +601,6 @@ module Farce
     private
 
     def copies(source)
-      assert_predicate source, :duplicable?
       [source.dup, source.clone].each do |copy|
         assert_instance_of source.class, copy
         assert Ractor.shareable?(copy) if source.is_a?(Shareable)

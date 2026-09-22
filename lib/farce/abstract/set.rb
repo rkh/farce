@@ -501,10 +501,6 @@ module Farce
       # @return [Boolean] Whether the set retains elements weakly.
       def weak? = @map.weak_keys?
 
-      # Compatibility method for ActiveSupport.
-      # @return [Boolean] Always true.
-      def duplicable? = true
-
       # Return whether this set has the same members as another set.
       # @param other [BasicObject] The object to compare against.
       # @return [Boolean] Whether other is a Farce set with compatible comparison settings and equal members.

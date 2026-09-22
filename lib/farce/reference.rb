@@ -111,9 +111,6 @@ module Farce
     #   @param deep [Boolean] whether to resolve nested values (like an {Envelope} inside of an {Atom})
     def initialize(value) = @value = value
 
-    # @return [Boolean] true
-    def duplicable? = true
-
     # Replacing the holder's value can make this false again.
     # @return [Boolean] whether this proxy and its current target are frozen
     def frozen? = super && method_missing(:frozen?)

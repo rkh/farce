@@ -255,10 +255,6 @@ module Farce
 
       def wait_push(timeout: nil) = internal_queue.wait_push(timeout:)
 
-      # Compatibility method for ActiveSupport
-      # @return [Boolean] false
-      def duplicable? = false
-
       private
 
       def initialize_copy(_other)
