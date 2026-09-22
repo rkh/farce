@@ -2,6 +2,20 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
+begin
+  # We don't actually use Zeitwerk, but this works around a Zeitwerk bug.
+  # Zeitwerk might break if a Ractor starts before it is loaded.
+  #
+  #   Ractor.new {}
+  #   require "zeitwerk"
+  #   require "zeitwerk" # NoMethodError: super: no superclass method 'require' for main
+  #
+  # This has absolutely nothing to do with Farce, except that Farce might create a Ractor.
+  require "zeitwerk"
+rescue LoadError => e
+  raise unless e.path == "zeitwerk"
+end
+
 require "farce/config"
 require "farce/internal"
 require "farce/engine/#{RUBY_ENGINE}"
