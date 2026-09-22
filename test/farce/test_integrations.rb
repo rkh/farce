@@ -170,7 +170,7 @@ module Farce
     def test_load_available_loads_integrations_without_freezing_configuration
       assert_integration_process(<<~RUBY)
         require "farce"
-        expected = [:active_support, :dry_types]
+        expected = [:active_support, :dry_types, :msgpack]
         raise "wrong available integrations" unless Farce::Integrations.load_available == expected
         raise "dry-types integration missing" unless Farce.respond_to?(:DryTypes)
         raise "ActiveSupport integration missing" unless Farce::Vector.method_defined?(:in_groups)
@@ -182,10 +182,10 @@ module Farce
 
     def test_load_available_skips_missing_optional_dependencies
       {
-        ["active_support"]               => [:dry_types],
-        ["dry/types"]                    => [:active_support],
-        ["active_support", "dry/types"]  => [],
-        ["farce/integrations/dry_types"] => [:active_support],
+        ["active_support"]               => %i[dry_types msgpack],
+        ["dry/types"]                    => %i[active_support msgpack],
+        ["active_support", "dry/types"]  => %i[msgpack],
+        ["farce/integrations/dry_types"] => %i[active_support msgpack],
       }.each do |missing, expected|
         assert_integration_process(<<~RUBY)
           require "farce"

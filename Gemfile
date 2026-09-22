@@ -50,6 +50,7 @@ group :test do
   gem "dry-types"
   gem "minitest"
   gem "minitest-reporters"
+  gem "msgpack", "~> 1.8"
 
   platforms :mri do
     gem "rubocop"

@@ -667,7 +667,7 @@ module Farce
     end
   end
 
-  # @note This methods is only available if the dry-types has been loaded.
+  # @note This methods is only available if dry-types has been loaded.
   #
   # Build a dry-types import for Farce types.
   #

@@ -11,7 +11,8 @@ or Farce-backed application state.
 Add `dry-types` to your application and include both type imports:
 
 ```ruby
-require "farce/integrations/dry_types"
+require "dry-types"
+require "farce"
 
 module Types
   include Dry.Types()

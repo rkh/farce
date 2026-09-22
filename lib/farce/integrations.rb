@@ -9,6 +9,7 @@ module Farce
     INTEGRATIONS = {
       active_support: %w[active_support active_support/core_ext].freeze,
       dry_types:      %w[dry/types].freeze,
+      msgpack:        %w[msgpack].freeze,
     }.freeze
 
     PATHS = INTEGRATIONS.to_h { [_2.last, _1] }.freeze

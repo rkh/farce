@@ -7,7 +7,7 @@ require_relative "../setup"
 module Farce
   class TestDryTypes < Test
     def test_dry_types_integration
-      output, error, status = ruby_subprocess('require "support/dry_types"', timeout: 60)
+      output, error, status = ruby_subprocess('require "subprocess/dry_types"', timeout: 60)
 
       assert_predicate status, :success?, "#{output}\n#{error}"
     end
