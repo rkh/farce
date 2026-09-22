@@ -111,7 +111,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/vector.rb<span class="defines">,<br>
-  lib/farce/integrations/active_support/vector.rb</span>
+  lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/active_support/vector.rb</span>
 
 </dd>
   </dl>
@@ -705,6 +705,29 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Format a snapshot, optionally as a database ID list.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_msgpack-instance_method" title="#to_msgpack (instance method)">#<strong>to_msgpack</strong>(*arguments)  &#x21d2; String, ::MessagePack::Packer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize a snapshot as a MessagePack array.</p>
 </div></span>
   
 </li>
@@ -3573,7 +3596,7 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -4414,7 +4437,7 @@ contract.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -4849,7 +4872,7 @@ This never grows the vector. Matching uses the configured comparison mode.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -5905,7 +5928,7 @@ Changes made while the block runs are visible to later enumerations.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -6337,7 +6360,7 @@ Changes made while the block runs are visible to later enumerations.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -6747,7 +6770,7 @@ Changes made while the block runs are visible to later enumerations.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -6807,7 +6830,7 @@ Changes made while the block runs are visible to later enumerations.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -6867,7 +6890,7 @@ Changes made while the block runs are visible to later enumerations.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -7427,7 +7450,7 @@ Changes made while the block runs are visible to later enumerations.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -7586,7 +7609,7 @@ Changes made while the block runs are visible to later enumerations.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -7747,7 +7770,7 @@ Changes made while the block runs are visible to later enumerations.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -7944,7 +7967,7 @@ Changes made while the block runs are visible to later enumerations.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -8171,7 +8194,7 @@ New entries follow the receiver's storage rules and transfer mode.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -8971,7 +8994,7 @@ Enumerator.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -9360,7 +9383,7 @@ Enumerator.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -9903,7 +9926,7 @@ Enumerator.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -9994,7 +10017,7 @@ Enumerator.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -11049,7 +11072,7 @@ block.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -11109,7 +11132,7 @@ block.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -12222,7 +12245,7 @@ Range and start-length results are Vectors.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -12879,7 +12902,7 @@ Range and start-length results are Vectors.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -12939,7 +12962,7 @@ Range and start-length results are Vectors.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -12999,7 +13022,7 @@ Range and start-length results are Vectors.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -13135,7 +13158,7 @@ Range and start-length results are Vectors.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -13309,6 +13332,96 @@ Range and start-length results are Vectors.</p>
 </div>
     
       <div class="method_details ">
+  <h3 class="signature " id="to_msgpack-instance_method">
+  
+    #<strong>to_msgpack</strong>(*arguments)  &#x21d2; <tt>String</tt>, <tt>::MessagePack::Packer</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This method is only available if MessagePack has been loaded.</p>
+</div>
+  </div>
+
+<p>Serialize a snapshot as a MessagePack array.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>arguments</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;Object&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Arguments forwarded to Array#to_msgpack.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>, <tt>::MessagePack::Packer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The encoded bytes or supplied packer.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+16</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/msgpack.rb', line 16</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_to_msgpack'>to_msgpack</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_msgpack'>to_msgpack</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
   <h3 class="signature " id="to_param-instance_method">
   
     #<strong>to_param</strong>  &#x21d2; <tt>String</tt> 
@@ -13322,7 +13435,7 @@ Range and start-length results are Vectors.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -13382,7 +13495,7 @@ Range and start-length results are Vectors.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -13461,7 +13574,7 @@ Range and start-length results are Vectors.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -13542,7 +13655,7 @@ Range and start-length results are Vectors.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -14676,7 +14789,7 @@ directly.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 22 16:32:14 2026 by
+  Generated on Tue Sep 22 22:16:51 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

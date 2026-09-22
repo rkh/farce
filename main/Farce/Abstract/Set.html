@@ -111,7 +111,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/set.rb<span class="defines">,<br>
-  lib/farce/integrations/active_support/set.rb,<br> lib/farce/integrations/active_support/duplicable.rb</span>
+  lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/active_support/set.rb,<br> lib/farce/integrations/active_support/duplicable.rb</span>
 
 </dd>
   </dl>
@@ -314,6 +314,29 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Return a same-kind set with elements added.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_msgpack-instance_method" title="#to_msgpack (instance method)">#<strong>to_msgpack</strong>(*arguments)  &#x21d2; String, ::MessagePack::Packer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize current members as a MessagePack array.</p>
 </div></span>
   
 </li>
@@ -2234,7 +2257,7 @@ Farce::Set and Farce::SortedSet accept this option. Nil uses the set's default.<
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -2509,7 +2532,7 @@ to same-kind subsets, or an Enumerator without a block.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -2565,7 +2588,7 @@ to same-kind subsets, or an Enumerator without a block.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -2674,7 +2697,7 @@ to same-kind subsets, or an Enumerator without a block.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -3485,7 +3508,7 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -3796,7 +3819,7 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -4110,7 +4133,7 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -5892,6 +5915,96 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
 </div>
     
       <div class="method_details ">
+  <h3 class="signature " id="to_msgpack-instance_method">
+  
+    #<strong>to_msgpack</strong>(*arguments)  &#x21d2; <tt>String</tt>, <tt>::MessagePack::Packer</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This method is only available if MessagePack has been loaded.</p>
+</div>
+  </div>
+
+<p>Serialize current members as a MessagePack array.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>arguments</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;Object&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Arguments forwarded to Array#to_msgpack.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>, <tt>::MessagePack::Packer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The encoded bytes or supplied packer.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+34</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/msgpack.rb', line 34</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_to_msgpack'>to_msgpack</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_msgpack'>to_msgpack</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
   <h3 class="signature " id="to_param-instance_method">
   
     #<strong>to_param</strong>  &#x21d2; <tt>String</tt> 
@@ -5905,7 +6018,7 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -5961,7 +6074,7 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -6325,7 +6438,7 @@ are supplied. Otherwise, returns a new instance of klass.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 22 16:32:12 2026 by
+  Generated on Tue Sep 22 22:16:49 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

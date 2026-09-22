@@ -111,7 +111,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/map.rb<span class="defines">,<br>
-  lib/farce/integrations/active_support/map.rb</span>
+  lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/active_support/map.rb</span>
 
 </dd>
   </dl>
@@ -213,6 +213,29 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Validate observed keys without normalizing the allowed keys.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_msgpack-instance_method" title="#to_msgpack (instance method)">#<strong>to_msgpack</strong>(*arguments)  &#x21d2; String, ::MessagePack::Packer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize current entries as a MessagePack map.</p>
 </div></span>
   
 </li>
@@ -2250,7 +2273,7 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -2310,7 +2333,7 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -11427,6 +11450,96 @@ Preserves identity comparison for keys, including when a block transforms entrie
 </div>
     
       <div class="method_details ">
+  <h3 class="signature " id="to_msgpack-instance_method">
+  
+    #<strong>to_msgpack</strong>(*arguments)  &#x21d2; <tt>String</tt>, <tt>::MessagePack::Packer</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This method is only available if MessagePack has been loaded.</p>
+</div>
+  </div>
+
+<p>Serialize current entries as a MessagePack map.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>arguments</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;Object&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Arguments forwarded to Hash#to_msgpack.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>, <tt>::MessagePack::Packer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The encoded bytes or supplied packer.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+25</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/msgpack.rb', line 25</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_to_msgpack'>to_msgpack</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_msgpack'>to_msgpack</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
   <h3 class="signature " id="to_query-instance_method">
   
     #<strong>to_query</strong>  &#x21d2; <tt>String</tt> 
@@ -11444,7 +11557,7 @@ Preserves identity comparison for keys, including when a block transforms entrie
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
 </div>
   </div>
 
@@ -11801,7 +11914,7 @@ Values are unwrapped before comparison. Concurrent changes may make the result s
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 22 16:32:12 2026 by
+  Generated on Tue Sep 22 22:16:49 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
