@@ -95,7 +95,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/duplicable_map.rb<span class="defines">,<br>
-  lib/farce/integrations/active_support/map.rb</span>
+  lib/farce/integrations/active_support/map.rb,<br> lib/farce/integrations/active_support/duplicable.rb</span>
 
 </dd>
   </dl>
@@ -124,34 +124,11 @@ Local copies transform the current scope and retain constructor defaults for oth
 
   
     <h2>
-      Instance Method Summary
+      ActiveSupport Integration
       <small><a href="#" class="summary_toggle">collapse</a></small>
     </h2>
 
     <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#compact-instance_method" title="#compact (instance method)">#<strong>compact</strong>  &#x21d2; Map </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return an independent map without entries whose value is nil.</p>
-</div></span>
-  
-</li>
-
       
         <li class="public ">
   <span class="summary_signature">
@@ -216,7 +193,136 @@ Local copies transform the current scope and retain constructor defaults for oth
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Compatibility method for ActiveSupport.</p>
+    <span class="summary_desc"><div class='inline'><p>True.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#reverse_merge-instance_method" title="#reverse_merge (instance method)">#<strong>reverse_merge</strong>(other)  &#x21d2; Map </a>
+    
+
+    
+      (also: #with_defaults)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return a same-kind map with defaults applied before the receiver's entries.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#stringify_keys-instance_method" title="#stringify_keys (instance method)">#<strong>stringify_keys</strong>  &#x21d2; Map </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return a same-kind map with string keys, subject to its key normalizer.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#symbolize_keys-instance_method" title="#symbolize_keys (instance method)">#<strong>symbolize_keys</strong>  &#x21d2; Map </a>
+    
+
+    
+      (also: #to_options)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return a same-kind map with symbol keys where conversion succeeds.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#with_indifferent_access-instance_method" title="#with_indifferent_access (instance method)">#<strong>with_indifferent_access</strong>  &#x21d2; Map </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return a new map of the same class with interchangeable Symbol and String keys.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#compact-instance_method" title="#compact (instance method)">#<strong>compact</strong>  &#x21d2; Map </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return an independent map without entries whose value is nil.</p>
 </div></span>
   
 </li>
@@ -340,31 +446,6 @@ Local copies transform the current scope and retain constructor defaults for oth
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#reverse_merge-instance_method" title="#reverse_merge (instance method)">#<strong>reverse_merge</strong>(other)  &#x21d2; Map </a>
-    
-
-    
-      (also: #with_defaults)
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return a same-kind map with defaults applied before the receiver's entries.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#select-instance_method" title="#select (instance method)">#<strong>select</strong> {|key, value| ... } &#x21d2; Map, Enumerator </a>
     
 
@@ -405,54 +486,6 @@ Local copies transform the current scope and retain constructor defaults for oth
 
   
     <span class="summary_desc"><div class='inline'><p>Return an independent map containing only the requested keys that exist.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#stringify_keys-instance_method" title="#stringify_keys (instance method)">#<strong>stringify_keys</strong>  &#x21d2; Map </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return a same-kind map with string keys, subject to its key normalizer.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#symbolize_keys-instance_method" title="#symbolize_keys (instance method)">#<strong>symbolize_keys</strong>  &#x21d2; Map </a>
-    
-
-    
-      (also: #to_options)
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return a same-kind map with symbol keys where conversion succeeds.</p>
 </div></span>
   
 </li>
@@ -522,29 +555,6 @@ Local copies transform the current scope and retain constructor defaults for oth
 
   
     <span class="summary_desc"><div class='inline'><p>Return an independent map with transformed values and unchanged keys.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#with_indifferent_access-instance_method" title="#with_indifferent_access (instance method)">#<strong>with_indifferent_access</strong>  &#x21d2; Map </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return a new map of the same class with interchangeable Symbol and String keys.</p>
 </div></span>
   
 </li>
@@ -634,7 +644,14 @@ Local copies transform the current scope and retain constructor defaults for oth
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Return a same-kind map without blank values, including false.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Return a same-kind map without blank values, including false.</p>
 
 
   </div>
@@ -661,10 +678,10 @@ Local copies transform the current scope and retain constructor defaults for oth
       <pre class="lines">
 
 
-70</pre>
+88</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 70</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 88</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compact_blank'>compact_blank</span> <span class='op'>=</span> <span class='id identifier rubyid_reject'>reject</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid__'>_</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_blank?'>blank?</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -683,7 +700,14 @@ Local copies transform the current scope and retain constructor defaults for oth
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Deeply copy entries into a map of the same kind with the same settings.
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Deeply copy entries into a map of the same kind with the same settings.
 String and Symbol keys retain their identity, as with ActiveSupport's Hash#deep_dup.
 Copied keys and values must satisfy the map's normal storage rules.</p>
 
@@ -712,20 +736,20 @@ Copied keys and values must satisfy the map's normal storage rules.</p>
       <pre class="lines">
 
 
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51</pre>
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 56</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_deep_dup'>deep_dup</span>
   <span class='id identifier rubyid_copier'>copier</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../ModeManager.html#initialize-instance_method" title="Farce::ModeManager#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:mode</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:move</span>
@@ -754,7 +778,14 @@ Copied keys and values must satisfy the map's normal storage rules.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Compatibility method for ActiveSupport.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns true.</p>
 
 
   </div>
@@ -785,10 +816,10 @@ Copied keys and values must satisfy the map's normal storage rules.</p>
       <pre class="lines">
 
 
-188</pre>
+55</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/duplicable_map.rb', line 188</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/duplicable.rb', line 55</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -1329,7 +1360,14 @@ The block receives public values from the copy. Stored values and map settings a
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Return a same-kind map with defaults applied before the receiver's entries.
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Return a same-kind map with defaults applied before the receiver's entries.
 Existing entries win. Bounded copies rebuild eviction history and enforce their capacity.
 Move-mode defaults are copied so the input remains usable.</p>
 
@@ -1377,23 +1415,23 @@ Move-mode defaults are copied so the input remains usable.</p>
       <pre class="lines">
 
 
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90</pre>
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 77</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 96</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_reverse_merge'>reverse_merge</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="Map.html" title="Farce::Abstract::Map (class)">Map</a></span></span> <span class='op'>===</span> <span class='id identifier rubyid_other'>other</span>
@@ -1619,7 +1657,14 @@ The block receives public values from the copy. Stored values and map settings a
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Return a same-kind map with string keys, subject to its key normalizer.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Return a same-kind map with string keys, subject to its key normalizer.</p>
 
 
   </div>
@@ -1646,10 +1691,10 @@ The block receives public values from the copy. Stored values and map settings a
       <pre class="lines">
 
 
-55</pre>
+71</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 55</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 71</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_stringify_keys'>stringify_keys</span> <span class='op'>=</span> <span class='id identifier rubyid_transform_keys'>transform_keys</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='op'>|</span> <span class='const'>Symbol</span> <span class='op'>===</span> <span class='id identifier rubyid_key'>key</span> <span class='op'>?</span> <span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span> <span class='op'>:</span> <span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -1672,7 +1717,14 @@ The block receives public values from the copy. Stored values and map settings a
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Return a same-kind map with symbol keys where conversion succeeds.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Return a same-kind map with symbol keys where conversion succeeds.</p>
 
 
   </div>
@@ -1699,16 +1751,16 @@ The block receives public values from the copy. Stored values and map settings a
       <pre class="lines">
 
 
-59
-60
-61
-62
-63
-64
-65</pre>
+76
+77
+78
+79
+80
+81
+82</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 59</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 76</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_symbolize_keys'>symbolize_keys</span>
   <span class='id identifier rubyid_transform_keys'>transform_keys</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='op'>|</span>
@@ -2053,7 +2105,14 @@ Bounded copies count replacements as writes. The source's eviction history is un
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Return a new map of the same class with interchangeable Symbol and String keys.
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Return a new map of the same class with interchangeable Symbol and String keys.
 Other key types and nested hashes are not normalized. Existing normalization is replaced.
 The copy preserves its value mode, value comparison, capacity, and Local scope where supported.
 Keys use equality. Entries from the current scope seed a Local copy.
@@ -2088,13 +2147,13 @@ Values in move mode are copied to preserve the source.</p>
       <pre class="lines">
 
 
-181
-182
-183
-184</pre>
+46
+47
+48
+49</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/duplicable_map.rb', line 181</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 46</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_with_indifferent_access'>with_indifferent_access</span>
   <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable_proc'><span class='object_link'><a href="../Ractor.html#shareable_proc-class_method" title="Farce::Ractor.shareable_proc (method)">shareable_proc</a></span></span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='op'>|</span> <span class='const'>Symbol</span> <span class='op'>===</span> <span class='id identifier rubyid_key'>key</span> <span class='op'>?</span> <span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span> <span class='op'>:</span> <span class='id identifier rubyid_key'>key</span> <span class='rbrace'>}</span>
@@ -2110,7 +2169,7 @@ Values in move mode are copied to preserve the source.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:32 2026 by
+  Generated on Tue Sep 22 14:43:39 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

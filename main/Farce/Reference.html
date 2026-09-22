@@ -97,7 +97,9 @@
   
   <dl>
     <dt>Defined in:</dt>
-    <dd>lib/farce/reference.rb
+    <dd>lib/farce/reference.rb<span class="defines">,<br>
+  lib/farce/integrations/active_support/duplicable.rb</span>
+
 </dd>
   </dl>
   
@@ -139,6 +141,39 @@
 
 
 
+  
+    <h2>
+      ActiveSupport Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#duplicable%3F-instance_method" title="#duplicable? (instance method)">#<strong>duplicable?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>True.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
   
     <h2>
       Class Method Summary
@@ -290,29 +325,6 @@
 
   
     <span class="summary_desc"><div class='inline'><p>Delegates equality check to the referenced value.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#duplicable%3F-instance_method" title="#duplicable? (instance method)">#<strong>duplicable?</strong>  &#x21d2; Boolean </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>True.</p>
 </div></span>
   
 </li>
@@ -565,10 +577,10 @@
       <pre class="lines">
 
 
-174</pre>
+171</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 174</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 171</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@value</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Style/MissingRespondToMissing</span></pre>
     </td>
@@ -940,10 +952,10 @@ automatically.</p>
       <pre class="lines">
 
 
-142</pre>
+139</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 142</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 139</span>
 
 <span class='kw'>def</span> <span class='op'>!</span> <span class='op'>=</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:!</span><span class='rparen'>)</span></pre>
     </td>
@@ -976,7 +988,7 @@ automatically.</p>
         <span class='name'>other</span>
       
       
-        <span class='type'>(<tt>Object</tt>)</span>
+        <span class='type'>(<tt><span class='object_link'><a href="../Object.html" title="Object (class)">Object</a></span></tt>)</span>
       
       
       
@@ -1012,12 +1024,12 @@ automatically.</p>
       <pre class="lines">
 
 
-136
-137
-138</pre>
+133
+134
+135</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 136</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 133</span>
 
 <span class='kw'>def</span> <span class='op'>!=</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:!=</span><span class='comma'>,</span> <span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
@@ -1052,7 +1064,7 @@ automatically.</p>
         <span class='name'>other</span>
       
       
-        <span class='type'>(<tt>Object</tt>)</span>
+        <span class='type'>(<tt><span class='object_link'><a href="../Object.html" title="Object (class)">Object</a></span></tt>)</span>
       
       
       
@@ -1088,10 +1100,10 @@ automatically.</p>
       <pre class="lines">
 
 
-131</pre>
+128</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 131</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 128</span>
 
 <span class='kw'>def</span> <span class='op'>==</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:==</span><span class='comma'>,</span> <span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span></pre>
     </td>
@@ -1110,7 +1122,14 @@ automatically.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns true.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns true.</p>
 
 
   </div>
@@ -1141,10 +1160,10 @@ automatically.</p>
       <pre class="lines">
 
 
-115</pre>
+30</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 115</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/duplicable.rb', line 30</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -1194,13 +1213,13 @@ automatically.</p>
       <pre class="lines">
 
 
-123
-124
-125
-126</pre>
+120
+121
+122
+123</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 123</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 120</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_freeze'>freeze</span>
   <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:freeze</span><span class='rparen'>)</span>
@@ -1253,10 +1272,10 @@ automatically.</p>
       <pre class="lines">
 
 
-119</pre>
+116</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 119</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 116</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_frozen?'>frozen?</span> <span class='op'>=</span> <span class='kw'>super</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:frozen?</span><span class='rparen'>)</span></pre>
     </td>
@@ -1357,10 +1376,10 @@ automatically.</p>
       <pre class="lines">
 
 
-149</pre>
+146</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 146</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_instance_eval'>instance_eval</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:instance_eval</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -1510,10 +1529,10 @@ automatically.</p>
       <pre class="lines">
 
 
-159</pre>
+156</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 159</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 156</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_instance_exec'>instance_exec</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:instance_exec</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -1526,7 +1545,7 @@ automatically.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:35 2026 by
+  Generated on Tue Sep 22 14:43:41 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

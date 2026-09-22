@@ -80,10 +80,10 @@
   <dl>
     <dt>Inherits:</dt>
     <dd>
-      <span class="inheritName">Object</span>
+      <span class="inheritName"><span class='object_link'><a href="../Object.html" title="Object (class)">Object</a></span></span>
       
         <ul class="fullTree">
-          <li>Object</li>
+          <li><span class='object_link'><a href="../Object.html" title="Object (class)">Object</a></span></li>
           
             <li class="next">Farce::Config</li>
           
@@ -105,7 +105,9 @@
   
   <dl>
     <dt>Defined in:</dt>
-    <dd>lib/farce/config.rb
+    <dd>lib/farce/config.rb<span class="defines">,<br>
+  lib/farce/integrations/active_support/duplicable.rb</span>
+
 </dd>
   </dl>
   
@@ -194,7 +196,7 @@ shareable across Ractors.</p>
 
   
     <h2>
-      Instance Method Summary
+      ActiveSupport Integration
       <small><a href="#" class="summary_toggle">collapse</a></small>
     </h2>
 
@@ -217,11 +219,21 @@ shareable across Ractors.</p>
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Configuration copies retain the same immutable settings.</p>
+    <span class="summary_desc"><div class='inline'><p>True.</p>
 </div></span>
   
 </li>
 
+      
+    </ul>
+    
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
       
         <li class="public ">
   <span class="summary_signature">
@@ -561,7 +573,14 @@ Can also be set via <code>FARCE_MAIN_THREAD_POOL_SIZE</code>. Defaults to 4.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Configuration copies retain the same immutable settings.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns true.</p>
 
 
   </div>
@@ -578,6 +597,10 @@ Can also be set via <code>FARCE_MAIN_THREAD_POOL_SIZE</code>. Defaults to 4.</p>
       
       
       
+        &mdash;
+        <div class='inline'><p>true</p>
+</div>
+      
     </li>
   
 </ul>
@@ -588,10 +611,10 @@ Can also be set via <code>FARCE_MAIN_THREAD_POOL_SIZE</code>. Defaults to 4.</p>
       <pre class="lines">
 
 
-43</pre>
+12</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 43</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/duplicable.rb', line 12</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -650,13 +673,13 @@ Custom schedulers must support the executor used by the Pool or Scheduler.</p>
       <pre class="lines">
 
 
-61
-62
-63
-64</pre>
+58
+59
+60
+61</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 61</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 58</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_constructor'>constructor</span><span class='rparen'>)</span>
   <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span> <span class='op'>=</span> <span class='id identifier rubyid_constructor'>constructor</span> <span class='kw'>if</span> <span class='id identifier rubyid_constructor'>constructor</span>
@@ -706,13 +729,13 @@ or assign a proc to configure construction. Invalid assignments preserve the old
       <pre class="lines">
 
 
-68
-69
-70
-71</pre>
+65
+66
+67
+68</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 68</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 65</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fiber_scheduler='>fiber_scheduler=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>FrozenError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>can&#39;t modify frozen Config</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
@@ -765,17 +788,17 @@ or assign a proc to configure construction. Invalid assignments preserve the old
       <pre class="lines">
 
 
+72
+73
+74
 75
 76
 77
 78
-79
-80
-81
-82</pre>
+79</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 75</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 72</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fiber_scheduler_implementation'>fiber_scheduler_implementation</span>
   <span class='kw'>case</span> <span class='ivar'>@fiber_scheduler</span>
@@ -815,15 +838,15 @@ or assign a proc to configure construction. Invalid assignments preserve the old
       <pre class="lines">
 
 
+113
+114
+115
 116
 117
-118
-119
-120
-121</pre>
+118</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 116</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 113</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_freeze'>freeze</span>
   <span class='kw'>return</span> <span class='kw'>self</span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
@@ -879,15 +902,15 @@ Availability is checked when a scheduler is created.</p>
       <pre class="lines">
 
 
+84
+85
+86
 87
 88
-89
-90
-91
-92</pre>
+89</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 87</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 84</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_io_backend'>io_backend</span>
   <span class='kw'>case</span> <span class='ivar'>@fiber_scheduler</span>
@@ -905,7 +928,7 @@ Availability is checked when a scheduler is created.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:34 2026 by
+  Generated on Tue Sep 22 14:43:40 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

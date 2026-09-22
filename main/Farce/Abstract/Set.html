@@ -80,10 +80,10 @@
   <dl>
     <dt>Inherits:</dt>
     <dd>
-      <span class="inheritName">Object</span>
+      <span class="inheritName"><span class='object_link'><a href="../../Object.html" title="Object (class)">Object</a></span></span>
       
         <ul class="fullTree">
-          <li>Object</li>
+          <li><span class='object_link'><a href="../../Object.html" title="Object (class)">Object</a></span></li>
           
             <li class="next">Farce::Abstract::Set</li>
           
@@ -100,7 +100,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd>Enumerable, Internal::Copyable</dd>
+      <dd>Enumerable, <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></dd>
   </dl>
   
   
@@ -111,7 +111,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/set.rb<span class="defines">,<br>
-  lib/farce/integrations/active_support/set.rb</span>
+  lib/farce/integrations/active_support/set.rb,<br> lib/farce/integrations/active_support/duplicable.rb</span>
 
 </dd>
   </dl>
@@ -148,6 +148,225 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
 
 
+  
+    <h2>
+      ActiveSupport Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#as_json-instance_method" title="#as_json (instance method)">#<strong>as_json</strong>(options = nil)  &#x21d2; Array </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Convert the elements through ActiveSupport's Array JSON conversion.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#compact_blank-instance_method" title="#compact_blank (instance method)">#<strong>compact_blank</strong>  &#x21d2; Farce::Abstract::Set </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return a same-kind set without blank elements.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#compact_blank!-instance_method" title="#compact_blank! (instance method)">#<strong>compact_blank!</strong>  &#x21d2; self </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Remove blank elements and return self.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#deep_dup-instance_method" title="#deep_dup (instance method)">#<strong>deep_dup</strong>  &#x21d2; Farce::Abstract::Set </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Deeply copy elements into a set of the same kind with the same settings.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#duplicable%3F-instance_method" title="#duplicable? (instance method)">#<strong>duplicable?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>True.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#excluding-instance_method" title="#excluding (instance method)">#<strong>excluding</strong>(*elements)  &#x21d2; Farce::Abstract::Set </a>
+    
+
+    
+      (also: #without)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return a same-kind set without the supplied elements.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#including-instance_method" title="#including (instance method)">#<strong>including</strong>(*elements)  &#x21d2; Farce::Abstract::Set </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return a same-kind set with elements added.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_param-instance_method" title="#to_param (instance method)">#<strong>to_param</strong>  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return the elements' ActiveSupport parameter representation.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_query-instance_method" title="#to_query (instance method)">#<strong>to_query</strong>(key)  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Encode the elements as repeated query parameters under a key.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
   
     <h2>
       Class Method Summary
@@ -309,29 +528,6 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#as_json-instance_method" title="#as_json (instance method)">#<strong>as_json</strong>(options = nil)  &#x21d2; Array </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Convert the elements through ActiveSupport's Array JSON conversion.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#classify-instance_method" title="#classify (instance method)">#<strong>classify</strong> {|element| ... } &#x21d2; Hash{BasicObject =&gt; Farce::Abstract::Set}, Enumerator </a>
     
 
@@ -378,52 +574,6 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#compact_blank-instance_method" title="#compact_blank (instance method)">#<strong>compact_blank</strong>  &#x21d2; Farce::Abstract::Set </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return a same-kind set without blank elements.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#compact_blank!-instance_method" title="#compact_blank! (instance method)">#<strong>compact_blank!</strong>  &#x21d2; self </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Remove blank elements and return self.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#compare_by_identity%3F-instance_method" title="#compare_by_identity? (instance method)">#<strong>compare_by_identity?</strong>  &#x21d2; Boolean </a>
     
 
@@ -439,29 +589,6 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Return whether membership uses object identity.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#deep_dup-instance_method" title="#deep_dup (instance method)">#<strong>deep_dup</strong>  &#x21d2; Farce::Abstract::Set </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Deeply copy elements into a set of the same kind with the same settings.</p>
 </div></span>
   
 </li>
@@ -610,29 +737,6 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#duplicable%3F-instance_method" title="#duplicable? (instance method)">#<strong>duplicable?</strong>  &#x21d2; Boolean </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Compatibility method for ActiveSupport.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#each-instance_method" title="#each (instance method)">#<strong>each</strong> {|element| ... } &#x21d2; self, Enumerator </a>
     
 
@@ -694,31 +798,6 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Compare membership using eql?.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#excluding-instance_method" title="#excluding (instance method)">#<strong>excluding</strong>(*elements)  &#x21d2; Farce::Abstract::Set </a>
-    
-
-    
-      (also: #without)
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return a same-kind set without the supplied elements.</p>
 </div></span>
   
 </li>
@@ -790,29 +869,6 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Return whether an element is present.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#including-instance_method" title="#including (instance method)">#<strong>including</strong>(*elements)  &#x21d2; Farce::Abstract::Set </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return a same-kind set with elements added.</p>
 </div></span>
   
 </li>
@@ -1278,52 +1334,6 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#to_param-instance_method" title="#to_param (instance method)">#<strong>to_param</strong>  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return the elements' ActiveSupport parameter representation.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_query-instance_method" title="#to_query (instance method)">#<strong>to_query</strong>(key)  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Encode the elements as repeated query parameters under a key.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#to_set-instance_method" title="#to_set (instance method)">#<strong>to_set</strong>(klass = ::Set, *arguments, **options) {|element| ... } &#x21d2; ::Set, Farce::Abstract::Set </a>
     
 
@@ -1397,6 +1407,12 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
   
 
 
+  
+  
+  
+  
+  
+  
   
   <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
@@ -1903,16 +1919,16 @@ superset, or nil when neither relation holds or other is not a set.</p>
       <pre class="lines">
 
 
+507
+508
+509
+510
 511
 512
-513
-514
-515
-516
-517</pre>
+513</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 511</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 507</span>
 
 <span class='kw'>def</span> <span class='op'>==</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
@@ -2215,7 +2231,14 @@ Farce::Set and Farce::SortedSet accept this option. Nil uses the set's default.<
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Convert the elements through ActiveSupport's Array JSON conversion.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Convert the elements through ActiveSupport's Array JSON conversion.</p>
 
 
   </div>
@@ -2279,10 +2302,10 @@ Farce::Set and Farce::SortedSet accept this option. Nil uses the set's default.<
       <pre class="lines">
 
 
-41</pre>
+46</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 46</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_as_json'>as_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_as_json'>as_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -2483,7 +2506,14 @@ to same-kind subsets, or an Enumerator without a block.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Return a same-kind set without blank elements.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Return a same-kind set without blank elements.</p>
 
 
   </div>
@@ -2510,10 +2540,10 @@ to same-kind subsets, or an Enumerator without a block.</p>
       <pre class="lines">
 
 
-20</pre>
+21</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 20</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 21</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compact_blank'>compact_blank</span> <span class='op'>=</span> <span class='id identifier rubyid_reject'>reject</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:blank?</span><span class='rparen'>)</span></pre>
     </td>
@@ -2532,7 +2562,14 @@ to same-kind subsets, or an Enumerator without a block.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Remove blank elements and return self.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Remove blank elements and return self.</p>
 
 
   </div>
@@ -2559,10 +2596,10 @@ to same-kind subsets, or an Enumerator without a block.</p>
       <pre class="lines">
 
 
-24</pre>
+26</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 24</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 26</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compact_blank!'>compact_blank!</span> <span class='op'>=</span> <span class='id identifier rubyid_delete_if'>delete_if</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:blank?</span><span class='rparen'>)</span></pre>
     </td>
@@ -2634,7 +2671,14 @@ to same-kind subsets, or an Enumerator without a block.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Deeply copy elements into a set of the same kind with the same settings.
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Deeply copy elements into a set of the same kind with the same settings.
 Copied elements pass through the set's normal storage rules.
 Weak results do not keep copied heap elements alive by themselves.</p>
 
@@ -3438,7 +3482,14 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Compatibility method for ActiveSupport.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns true.</p>
 
 
   </div>
@@ -3456,7 +3507,7 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       
       
         &mdash;
-        <div class='inline'><p>Always true.</p>
+        <div class='inline'><p>true</p>
 </div>
       
     </li>
@@ -3469,10 +3520,10 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       <pre class="lines">
 
 
-506</pre>
+43</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 506</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/duplicable.rb', line 43</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -3704,16 +3755,16 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       <pre class="lines">
 
 
+518
+519
+520
+521
 522
 523
-524
-525
-526
-527
-528</pre>
+524</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 522</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 518</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_eql?'>eql?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
@@ -3742,7 +3793,14 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Return a same-kind set without the supplied elements. Array arguments are flattened by one level.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Return a same-kind set without the supplied elements. Array arguments are flattened by one level.</p>
 
 
   </div>
@@ -3792,10 +3850,10 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       <pre class="lines">
 
 
-34</pre>
+38</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 34</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 38</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_excluding'>excluding</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_difference'>difference</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='period'>.</span><span class='id identifier rubyid_flatten'>flatten</span><span class='lparen'>(</span><span class='int'>1</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -3923,19 +3981,19 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       <pre class="lines">
 
 
+528
+529
+530
+531
 532
 533
 534
 535
 536
-537
-538
-539
-540
-541</pre>
+537</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 532</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 528</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_hash'>hash</span>
   <span class='id identifier rubyid_guard'>guard</span> <span class='op'>=</span> <span class='id identifier rubyid_recursion_guard'>recursion_guard</span><span class='lparen'>(</span><span class='symbol'>:farce_set_hash_guard</span><span class='rparen'>)</span>
@@ -4049,7 +4107,14 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Return a same-kind set with elements added. Array arguments are flattened by one level.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Return a same-kind set with elements added. Array arguments are flattened by one level.</p>
 
 
   </div>
@@ -4099,10 +4164,10 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       <pre class="lines">
 
 
-29</pre>
+32</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 29</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 32</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_including'>including</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_union'>union</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='period'>.</span><span class='id identifier rubyid_flatten'>flatten</span><span class='lparen'>(</span><span class='int'>1</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -4156,18 +4221,18 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       <pre class="lines">
 
 
+541
+542
+543
+544
 545
 546
 547
 548
-549
-550
-551
-552
-553</pre>
+549</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 545</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 541</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span>
   <span class='id identifier rubyid_guard'>guard</span> <span class='op'>=</span> <span class='id identifier rubyid_recursion_guard'>recursion_guard</span><span class='lparen'>(</span><span class='symbol'>:farce_set_inspect_guard</span><span class='rparen'>)</span>
@@ -4433,10 +4498,10 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       <pre class="lines">
 
 
-559</pre>
+555</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 559</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 555</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span></pre>
     </td>
@@ -5815,10 +5880,10 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       <pre class="lines">
 
 
-565</pre>
+561</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 565</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 561</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -5837,7 +5902,14 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Return the elements' ActiveSupport parameter representation.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Return the elements' ActiveSupport parameter representation.</p>
 
 
   </div>
@@ -5864,10 +5936,10 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       <pre class="lines">
 
 
-45</pre>
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 45</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 51</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_param'>to_param</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_param'>to_param</span></pre>
     </td>
@@ -5886,7 +5958,14 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Encode the elements as repeated query parameters under a key.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Encode the elements as repeated query parameters under a key.</p>
 
 
   </div>
@@ -5936,10 +6015,10 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       <pre class="lines">
 
 
-50</pre>
+57</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 50</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 57</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_query'>to_query</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_query'>to_query</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -6246,7 +6325,7 @@ are supplied. Otherwise, returns a new instance of klass.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:37 2026 by
+  Generated on Tue Sep 22 14:43:42 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

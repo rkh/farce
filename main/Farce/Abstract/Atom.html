@@ -80,10 +80,10 @@
   <dl>
     <dt>Inherits:</dt>
     <dd>
-      <span class="inheritName">Object</span>
+      <span class="inheritName"><span class='object_link'><a href="../../Object.html" title="Object (class)">Object</a></span></span>
       
         <ul class="fullTree">
-          <li>Object</li>
+          <li><span class='object_link'><a href="../../Object.html" title="Object (class)">Object</a></span></li>
           
             <li class="next">Farce::Abstract::Atom</li>
           
@@ -100,7 +100,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span>, <span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span>, Internal::Copyable</dd>
+      <dd><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span>, <span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span>, <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></dd>
   </dl>
   
   
@@ -110,7 +110,9 @@
   
   <dl>
     <dt>Defined in:</dt>
-    <dd>lib/farce/abstract/atom.rb
+    <dd>lib/farce/abstract/atom.rb<span class="defines">,<br>
+  lib/farce/integrations/active_support/blank.rb</span>
+
 </dd>
   </dl>
   
@@ -144,6 +146,42 @@ retains it weakly.</p>
 
 
 
+  
+    <h2>
+      ActiveSupport Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#blank%3F-instance_method" title="#blank? (instance method)">#<strong>blank?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>True if the atom's value is blank, false otherwise.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+      <h3 class="inherited">Methods included from <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></h3>
+      <p class="inherited"><span class='object_link'><a href="../Internal/Copyable.html#duplicable%3F-instance_method" title="Farce::Internal::Copyable#duplicable? (method)">#duplicable?</a></span></p>
+    
   
     <h2>
       Instance Method Summary
@@ -458,13 +496,79 @@ retains it weakly.</p>
   <p class="inherited"><span class='object_link'><a href="Value.html#unwrap-instance_method" title="Farce::Abstract::Value#unwrap (method)">#unwrap</a></span></p>
 
   
+  
+  
+  
+  
+  
+  
 
   <div id="instance_method_details" class="method_details_list">
     <h2>Instance Method Details</h2>
 
     
       <div class="method_details first">
-  <h3 class="signature first" id="compare_and_set-instance_method">
+  <h3 class="signature first" id="blank?-instance_method">
+  
+    #<strong>blank?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns true if the atom's value is blank, false otherwise.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>true if the atom's value is blank, false otherwise.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+34</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/blank.rb', line 34</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_blank?'>blank?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_atom'>internal_atom</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_blank?'>blank?</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="compare_and_set-instance_method">
   
     #<strong>compare_and_set</strong>(expected, new_value, timeout: nil)  &#x21d2; <tt>Boolean</tt> 
   
@@ -1635,7 +1739,7 @@ retains it weakly.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:37 2026 by
+  Generated on Tue Sep 22 14:43:42 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

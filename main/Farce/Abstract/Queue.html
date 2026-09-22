@@ -80,10 +80,10 @@
   <dl>
     <dt>Inherits:</dt>
     <dd>
-      <span class="inheritName">Object</span>
+      <span class="inheritName"><span class='object_link'><a href="../../Object.html" title="Object (class)">Object</a></span></span>
       
         <ul class="fullTree">
-          <li>Object</li>
+          <li><span class='object_link'><a href="../../Object.html" title="Object (class)">Object</a></span></li>
           
             <li class="next">Farce::Abstract::Queue</li>
           
@@ -105,7 +105,9 @@
   
   <dl>
     <dt>Defined in:</dt>
-    <dd>lib/farce/abstract/queue.rb
+    <dd>lib/farce/abstract/queue.rb<span class="defines">,<br>
+  lib/farce/integrations/active_support/duplicable.rb</span>
+
 </dd>
   </dl>
   
@@ -258,6 +260,39 @@ The order is typically FIFO (first-in, first-out), but other orderings may be ap
 
   
     <h2>
+      ActiveSupport Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#duplicable%3F-instance_method" title="#duplicable? (instance method)">#<strong>duplicable?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>False.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+    <h2>
       Instance Method Summary
       <small><a href="#" class="summary_toggle">collapse</a></small>
     </h2>
@@ -376,29 +411,6 @@ The order is typically FIFO (first-in, first-out), but other orderings may be ap
 
   
     <span class="summary_desc"><div class='inline'><p>Alias for <span class='object_link'><a href="#pop-instance_method" title="Farce::Abstract::Queue#pop (method)">#pop</a></span> to match the interface of Ruby's Queue class.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#duplicable%3F-instance_method" title="#duplicable? (instance method)">#<strong>duplicable?</strong>  &#x21d2; Boolean </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Compatibility method for ActiveSupport.</p>
 </div></span>
   
 </li>
@@ -1022,11 +1034,7 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -1141,10 +1149,6 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -1342,11 +1346,7 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -1461,10 +1461,6 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -1649,11 +1645,7 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -1768,10 +1760,6 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -1966,11 +1954,7 @@ without modifying the queue.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -2085,10 +2069,6 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -2281,11 +2261,7 @@ without modifying the queue.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -2400,10 +2376,6 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -2650,11 +2622,7 @@ without modifying the queue.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -2769,10 +2737,6 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -2959,11 +2923,7 @@ without modifying the queue.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -3078,10 +3038,6 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -3272,11 +3228,7 @@ without modifying the queue.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -3392,10 +3344,6 @@ without modifying the queue.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
-
   <span class='id identifier rubyid_private'>private</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid__other'>_other</span><span class='rparen'>)</span>
@@ -3466,7 +3414,14 @@ without modifying the queue.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Compatibility method for ActiveSupport</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns false.</p>
 
 
   </div>
@@ -3497,10 +3452,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-260</pre>
+37</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 260</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/duplicable.rb', line 37</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -3678,11 +3633,7 @@ without modifying the queue.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -3797,10 +3748,6 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -4381,11 +4328,7 @@ without modifying the queue.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -4500,10 +4443,6 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -4673,11 +4612,7 @@ without modifying the queue.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -4792,10 +4727,6 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -4978,11 +4909,7 @@ without modifying the queue.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -5097,10 +5024,6 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -5287,11 +5210,7 @@ without modifying the queue.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -5406,10 +5325,6 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -5619,11 +5534,7 @@ If no item is available, the method will call the block if given, or return <cod
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -5738,10 +5649,6 @@ If no item is available, the method will call the block if given, or return <cod
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -6000,11 +5907,7 @@ If the queue is at capacity, the method will call the block if given, or return 
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -6119,10 +6022,6 @@ If the queue is at capacity, the method will call the block if given, or return 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -6357,11 +6256,7 @@ If <code>0</code>, the method will not wait at all.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -6476,10 +6371,6 @@ If <code>0</code>, the method will not wait at all.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
-
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -6726,11 +6617,7 @@ If <code>0</code>, the method will not wait at all.</p>
 268
 269
 270
-271
-272
-273
-274
-275</pre>
+271</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
@@ -6846,10 +6733,6 @@ If <code>0</code>, the method will not wait at all.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
-  <span class='comment'># Compatibility method for ActiveSupport
-</span>  <span class='comment'># @return [Boolean] false
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>false</span>
-
   <span class='id identifier rubyid_private'>private</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid__other'>_other</span><span class='rparen'>)</span>
@@ -6874,7 +6757,7 @@ If <code>0</code>, the method will not wait at all.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:38 2026 by
+  Generated on Tue Sep 22 14:43:43 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

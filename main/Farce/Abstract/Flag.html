@@ -84,7 +84,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span>, <span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span>, Internal::Copyable</dd>
+      <dd><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span>, <span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span>, <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></dd>
   </dl>
   
   
@@ -330,9 +330,20 @@ directly from the native flag and avoid delegation overhead.</p>
   
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Value.html#unwrap-instance_method" title="Farce::Abstract::Value#unwrap (method)">#unwrap</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Value.html#blank%3F-instance_method" title="Farce::Abstract::Value#blank? (method)">#blank?</a></span>, <span class='object_link'><a href="Value.html#unwrap-instance_method" title="Farce::Abstract::Value#unwrap (method)">#unwrap</a></span></p>
 
   
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Internal/Copyable.html#duplicable%3F-instance_method" title="Farce::Internal::Copyable#duplicable? (method)">#duplicable?</a></span></p>
+
 
   <div id="instance_method_details" class="method_details_list">
     <h2>Instance Method Details</h2>
@@ -441,7 +452,7 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Copyable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span></span>
 <span class='kw'>end</span></pre>
@@ -498,7 +509,7 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Copyable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span></span>
 <span class='kw'>end</span></pre>
@@ -595,7 +606,7 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Copyable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span></span>
 <span class='kw'>end</span></pre>
@@ -692,7 +703,7 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Copyable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span></span>
 <span class='kw'>end</span></pre>
@@ -753,7 +764,7 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Copyable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span></span>
 <span class='kw'>end</span></pre>
@@ -814,7 +825,7 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Copyable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span></span>
 <span class='kw'>end</span></pre>
@@ -858,7 +869,7 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
-  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Copyable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="ValueSerialization.html" title="Farce::Abstract::ValueSerialization (module)">ValueSerialization</a></span></span>
 <span class='kw'>end</span></pre>
@@ -872,7 +883,7 @@ directly from the native flag and avoid delegation overhead.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:32 2026 by
+  Generated on Tue Sep 22 14:43:39 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

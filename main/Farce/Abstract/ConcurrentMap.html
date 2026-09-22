@@ -83,7 +83,7 @@
       <span class="inheritName"><span class='object_link'><a href="Map.html" title="Farce::Abstract::Map (class)">Map</a></span></span>
       
         <ul class="fullTree">
-          <li>Object</li>
+          <li><span class='object_link'><a href="../../Object.html" title="Object (class)">Object</a></span></li>
           
             <li class="next"><span class='object_link'><a href="Map.html" title="Farce::Abstract::Map (class)">Map</a></span></li>
           
@@ -145,6 +145,70 @@
 
 
 
+  
+    <h2>
+      ActiveSupport Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#compact_blank!-instance_method" title="#compact_blank! (instance method)">#<strong>compact_blank!</strong>  &#x21d2; self </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Remove blank values using per-key coordination.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#reverse_merge!-instance_method" title="#reverse_merge! (instance method)">#<strong>reverse_merge!</strong>(other)  &#x21d2; self </a>
+    
+
+    
+      (also: #with_defaults!)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Store each default only if its key is absent, preserving existing nil and false values.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+      <h3 class="inherited">Methods included from <span class='object_link'><a href="DuplicableMap.html" title="Farce::Abstract::DuplicableMap (module)">DuplicableMap</a></span></h3>
+      <p class="inherited"><span class='object_link'><a href="DuplicableMap.html#compact_blank-instance_method" title="Farce::Abstract::DuplicableMap#compact_blank (method)">#compact_blank</a></span>, <span class='object_link'><a href="DuplicableMap.html#deep_dup-instance_method" title="Farce::Abstract::DuplicableMap#deep_dup (method)">#deep_dup</a></span>, <span class='object_link'><a href="DuplicableMap.html#duplicable%3F-instance_method" title="Farce::Abstract::DuplicableMap#duplicable? (method)">#duplicable?</a></span>, <span class='object_link'><a href="DuplicableMap.html#reverse_merge-instance_method" title="Farce::Abstract::DuplicableMap#reverse_merge (method)">#reverse_merge</a></span>, <span class='object_link'><a href="DuplicableMap.html#stringify_keys-instance_method" title="Farce::Abstract::DuplicableMap#stringify_keys (method)">#stringify_keys</a></span>, <span class='object_link'><a href="DuplicableMap.html#symbolize_keys-instance_method" title="Farce::Abstract::DuplicableMap#symbolize_keys (method)">#symbolize_keys</a></span>, <span class='object_link'><a href="DuplicableMap.html#with_indifferent_access-instance_method" title="Farce::Abstract::DuplicableMap#with_indifferent_access (method)">#with_indifferent_access</a></span></p>
+    
+      <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Map.html" title="Farce::Abstract::Map (class)">Map</a></span></h3>
+      <p class="inherited"><span class='object_link'><a href="Map.html#as_json-instance_method" title="Farce::Abstract::Map#as_json (method)">#as_json</a></span>, <span class='object_link'><a href="Map.html#assert_valid_keys-instance_method" title="Farce::Abstract::Map#assert_valid_keys (method)">#assert_valid_keys</a></span>, <span class='object_link'><a href="Map.html#to_query-instance_method" title="Farce::Abstract::Map#to_query (method)">#to_query</a></span></p>
+    
   
     <h2>
       Instance Method Summary
@@ -240,29 +304,6 @@
 
   
     <span class="summary_desc"><div class='inline'><p>Remove nil values using per-key update coordination.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#compact_blank!-instance_method" title="#compact_blank! (instance method)">#<strong>compact_blank!</strong>  &#x21d2; self </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Remove blank values using per-key coordination.</p>
 </div></span>
   
 </li>
@@ -641,31 +682,6 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#reverse_merge!-instance_method" title="#reverse_merge! (instance method)">#<strong>reverse_merge!</strong>(other)  &#x21d2; self </a>
-    
-
-    
-      (also: #with_defaults!)
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Store each default only if its key is absent, preserving existing nil and false values.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#select!-instance_method" title="#select! (instance method)">#<strong>select!</strong>  &#x21d2; self, ... </a>
     
 
@@ -933,7 +949,7 @@
   
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="DuplicableMap.html" title="Farce::Abstract::DuplicableMap (module)">DuplicableMap</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="DuplicableMap.html#compact-instance_method" title="Farce::Abstract::DuplicableMap#compact (method)">#compact</a></span>, <span class='object_link'><a href="DuplicableMap.html#compact_blank-instance_method" title="Farce::Abstract::DuplicableMap#compact_blank (method)">#compact_blank</a></span>, <span class='object_link'><a href="DuplicableMap.html#deep_dup-instance_method" title="Farce::Abstract::DuplicableMap#deep_dup (method)">#deep_dup</a></span>, <span class='object_link'><a href="DuplicableMap.html#duplicable%3F-instance_method" title="Farce::Abstract::DuplicableMap#duplicable? (method)">#duplicable?</a></span>, <span class='object_link'><a href="DuplicableMap.html#except-instance_method" title="Farce::Abstract::DuplicableMap#except (method)">#except</a></span>, <span class='object_link'><a href="DuplicableMap.html#flatten-instance_method" title="Farce::Abstract::DuplicableMap#flatten (method)">#flatten</a></span>, <span class='object_link'><a href="DuplicableMap.html#invert-instance_method" title="Farce::Abstract::DuplicableMap#invert (method)">#invert</a></span>, <span class='object_link'><a href="DuplicableMap.html#merge-instance_method" title="Farce::Abstract::DuplicableMap#merge (method)">#merge</a></span>, <span class='object_link'><a href="DuplicableMap.html#reject-instance_method" title="Farce::Abstract::DuplicableMap#reject (method)">#reject</a></span>, <span class='object_link'><a href="DuplicableMap.html#reverse_merge-instance_method" title="Farce::Abstract::DuplicableMap#reverse_merge (method)">#reverse_merge</a></span>, <span class='object_link'><a href="DuplicableMap.html#select-instance_method" title="Farce::Abstract::DuplicableMap#select (method)">#select</a></span>, <span class='object_link'><a href="DuplicableMap.html#slice-instance_method" title="Farce::Abstract::DuplicableMap#slice (method)">#slice</a></span>, <span class='object_link'><a href="DuplicableMap.html#stringify_keys-instance_method" title="Farce::Abstract::DuplicableMap#stringify_keys (method)">#stringify_keys</a></span>, <span class='object_link'><a href="DuplicableMap.html#symbolize_keys-instance_method" title="Farce::Abstract::DuplicableMap#symbolize_keys (method)">#symbolize_keys</a></span>, <span class='object_link'><a href="DuplicableMap.html#to_proc-instance_method" title="Farce::Abstract::DuplicableMap#to_proc (method)">#to_proc</a></span>, <span class='object_link'><a href="DuplicableMap.html#transform_keys-instance_method" title="Farce::Abstract::DuplicableMap#transform_keys (method)">#transform_keys</a></span>, <span class='object_link'><a href="DuplicableMap.html#transform_values-instance_method" title="Farce::Abstract::DuplicableMap#transform_values (method)">#transform_values</a></span>, <span class='object_link'><a href="DuplicableMap.html#with_indifferent_access-instance_method" title="Farce::Abstract::DuplicableMap#with_indifferent_access (method)">#with_indifferent_access</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="DuplicableMap.html#compact-instance_method" title="Farce::Abstract::DuplicableMap#compact (method)">#compact</a></span>, <span class='object_link'><a href="DuplicableMap.html#except-instance_method" title="Farce::Abstract::DuplicableMap#except (method)">#except</a></span>, <span class='object_link'><a href="DuplicableMap.html#flatten-instance_method" title="Farce::Abstract::DuplicableMap#flatten (method)">#flatten</a></span>, <span class='object_link'><a href="DuplicableMap.html#invert-instance_method" title="Farce::Abstract::DuplicableMap#invert (method)">#invert</a></span>, <span class='object_link'><a href="DuplicableMap.html#merge-instance_method" title="Farce::Abstract::DuplicableMap#merge (method)">#merge</a></span>, <span class='object_link'><a href="DuplicableMap.html#reject-instance_method" title="Farce::Abstract::DuplicableMap#reject (method)">#reject</a></span>, <span class='object_link'><a href="DuplicableMap.html#select-instance_method" title="Farce::Abstract::DuplicableMap#select (method)">#select</a></span>, <span class='object_link'><a href="DuplicableMap.html#slice-instance_method" title="Farce::Abstract::DuplicableMap#slice (method)">#slice</a></span>, <span class='object_link'><a href="DuplicableMap.html#to_proc-instance_method" title="Farce::Abstract::DuplicableMap#to_proc (method)">#to_proc</a></span>, <span class='object_link'><a href="DuplicableMap.html#transform_keys-instance_method" title="Farce::Abstract::DuplicableMap#transform_keys (method)">#transform_keys</a></span>, <span class='object_link'><a href="DuplicableMap.html#transform_values-instance_method" title="Farce::Abstract::DuplicableMap#transform_values (method)">#transform_values</a></span></p>
 
   
   
@@ -945,7 +961,7 @@
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Map.html" title="Farce::Abstract::Map (class)">Map</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Map.html#as_json-instance_method" title="Farce::Abstract::Map#as_json (method)">#as_json</a></span>, <span class='object_link'><a href="Map.html#assert_valid_keys-instance_method" title="Farce::Abstract::Map#assert_valid_keys (method)">#assert_valid_keys</a></span>, <span class='object_link'><a href="Map.html#assoc-instance_method" title="Farce::Abstract::Map#assoc (method)">#assoc</a></span>, <span class='object_link'><a href="Map.html#compare_by_identity%3F-instance_method" title="Farce::Abstract::Map#compare_by_identity? (method)">#compare_by_identity?</a></span>, <span class='object_link'><a href="Map.html#deconstruct_keys-instance_method" title="Farce::Abstract::Map#deconstruct_keys (method)">#deconstruct_keys</a></span>, <span class='object_link'><a href="Map.html#dig-instance_method" title="Farce::Abstract::Map#dig (method)">#dig</a></span>, <span class='object_link'><a href="Map.html#empty%3F-instance_method" title="Farce::Abstract::Map#empty? (method)">#empty?</a></span>, <span class='object_link'><a href="Map.html#fetch_values-instance_method" title="Farce::Abstract::Map#fetch_values (method)">#fetch_values</a></span>, <span class='object_link'><a href="Map.html#has_key%3F-instance_method" title="Farce::Abstract::Map#has_key? (method)">#has_key?</a></span>, <span class='object_link'><a href="Map.html#inspect-instance_method" title="Farce::Abstract::Map#inspect (method)">#inspect</a></span>, <span class='object_link'><a href="Map.html#key-instance_method" title="Farce::Abstract::Map#key (method)">#key</a></span>, <span class='object_link'><a href="Map.html#length-instance_method" title="Farce::Abstract::Map#length (method)">#length</a></span>, <span class='object_link'><a href="Map.html#rassoc-instance_method" title="Farce::Abstract::Map#rassoc (method)">#rassoc</a></span>, <span class='object_link'><a href="Map.html#shareable_keys%3F-instance_method" title="Farce::Abstract::Map#shareable_keys? (method)">#shareable_keys?</a></span>, <span class='object_link'><a href="Map.html#shareable_values%3F-instance_method" title="Farce::Abstract::Map#shareable_values? (method)">#shareable_values?</a></span>, <span class='object_link'><a href="Map.html#to_a-instance_method" title="Farce::Abstract::Map#to_a (method)">#to_a</a></span>, <span class='object_link'><a href="Map.html#to_h-instance_method" title="Farce::Abstract::Map#to_h (method)">#to_h</a></span>, <span class='object_link'><a href="Map.html#to_hash-instance_method" title="Farce::Abstract::Map#to_hash (method)">#to_hash</a></span>, <span class='object_link'><a href="Map.html#to_json-instance_method" title="Farce::Abstract::Map#to_json (method)">#to_json</a></span>, <span class='object_link'><a href="Map.html#to_query-instance_method" title="Farce::Abstract::Map#to_query (method)">#to_query</a></span>, <span class='object_link'><a href="Map.html#to_s-instance_method" title="Farce::Abstract::Map#to_s (method)">#to_s</a></span>, <span class='object_link'><a href="Map.html#value%3F-instance_method" title="Farce::Abstract::Map#value? (method)">#value?</a></span>, <span class='object_link'><a href="Map.html#values_at-instance_method" title="Farce::Abstract::Map#values_at (method)">#values_at</a></span>, <span class='object_link'><a href="Map.html#weak_keys%3F-instance_method" title="Farce::Abstract::Map#weak_keys? (method)">#weak_keys?</a></span>, <span class='object_link'><a href="Map.html#weak_values%3F-instance_method" title="Farce::Abstract::Map#weak_values? (method)">#weak_values?</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Map.html#assoc-instance_method" title="Farce::Abstract::Map#assoc (method)">#assoc</a></span>, <span class='object_link'><a href="Map.html#compare_by_identity%3F-instance_method" title="Farce::Abstract::Map#compare_by_identity? (method)">#compare_by_identity?</a></span>, <span class='object_link'><a href="Map.html#deconstruct_keys-instance_method" title="Farce::Abstract::Map#deconstruct_keys (method)">#deconstruct_keys</a></span>, <span class='object_link'><a href="Map.html#dig-instance_method" title="Farce::Abstract::Map#dig (method)">#dig</a></span>, <span class='object_link'><a href="Map.html#empty%3F-instance_method" title="Farce::Abstract::Map#empty? (method)">#empty?</a></span>, <span class='object_link'><a href="Map.html#fetch_values-instance_method" title="Farce::Abstract::Map#fetch_values (method)">#fetch_values</a></span>, <span class='object_link'><a href="Map.html#has_key%3F-instance_method" title="Farce::Abstract::Map#has_key? (method)">#has_key?</a></span>, <span class='object_link'><a href="Map.html#inspect-instance_method" title="Farce::Abstract::Map#inspect (method)">#inspect</a></span>, <span class='object_link'><a href="Map.html#key-instance_method" title="Farce::Abstract::Map#key (method)">#key</a></span>, <span class='object_link'><a href="Map.html#length-instance_method" title="Farce::Abstract::Map#length (method)">#length</a></span>, <span class='object_link'><a href="Map.html#rassoc-instance_method" title="Farce::Abstract::Map#rassoc (method)">#rassoc</a></span>, <span class='object_link'><a href="Map.html#shareable_keys%3F-instance_method" title="Farce::Abstract::Map#shareable_keys? (method)">#shareable_keys?</a></span>, <span class='object_link'><a href="Map.html#shareable_values%3F-instance_method" title="Farce::Abstract::Map#shareable_values? (method)">#shareable_values?</a></span>, <span class='object_link'><a href="Map.html#to_a-instance_method" title="Farce::Abstract::Map#to_a (method)">#to_a</a></span>, <span class='object_link'><a href="Map.html#to_h-instance_method" title="Farce::Abstract::Map#to_h (method)">#to_h</a></span>, <span class='object_link'><a href="Map.html#to_hash-instance_method" title="Farce::Abstract::Map#to_hash (method)">#to_hash</a></span>, <span class='object_link'><a href="Map.html#to_json-instance_method" title="Farce::Abstract::Map#to_json (method)">#to_json</a></span>, <span class='object_link'><a href="Map.html#to_s-instance_method" title="Farce::Abstract::Map#to_s (method)">#to_s</a></span>, <span class='object_link'><a href="Map.html#value%3F-instance_method" title="Farce::Abstract::Map#value? (method)">#value?</a></span>, <span class='object_link'><a href="Map.html#values_at-instance_method" title="Farce::Abstract::Map#values_at (method)">#values_at</a></span>, <span class='object_link'><a href="Map.html#weak_keys%3F-instance_method" title="Farce::Abstract::Map#weak_keys? (method)">#weak_keys?</a></span>, <span class='object_link'><a href="Map.html#weak_values%3F-instance_method" title="Farce::Abstract::Map#weak_values? (method)">#weak_values?</a></span></p>
 
   
 
@@ -1248,7 +1264,14 @@ The whole operation is not atomic, as with <span class='object_link'><a href="#d
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Remove blank values using per-key coordination. Always return self.
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Remove blank values using per-key coordination. Always return self.
 The operation is not atomic across keys.</p>
 
 
@@ -1276,10 +1299,10 @@ The operation is not atomic across keys.</p>
       <pre class="lines">
 
 
-98</pre>
+131</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 98</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 131</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compact_blank!'>compact_blank!</span> <span class='op'>=</span> <span class='id identifier rubyid_delete_if'>delete_if</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid__'>_</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_blank?'>blank?</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -2994,7 +3017,14 @@ The operation is not atomic across keys. Exceptions leave earlier changes in pla
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Store each default only if its key is absent, preserving existing nil and false values.
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Store each default only if its key is absent, preserving existing nil and false values.
 Each decision is atomic for its key. Earlier changes survive exceptions.
 Inserted values use the map's transfer mode, including move semantics.</p>
 
@@ -3042,16 +3072,16 @@ Inserted values use the map's transfer mode, including move semantics.</p>
       <pre class="lines">
 
 
-105
-106
-107
-108
-109
-110
-111</pre>
+139
+140
+141
+142
+143
+144
+145</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 105</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 139</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_reverse_merge!'>reverse_merge!</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="Map.html" title="Farce::Abstract::Map (class)">Map</a></span></span> <span class='op'>===</span> <span class='id identifier rubyid_other'>other</span>
@@ -4346,7 +4376,7 @@ An absent key is observed as nil. The configured value-comparison mode determine
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:42 2026 by
+  Generated on Tue Sep 22 14:43:45 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

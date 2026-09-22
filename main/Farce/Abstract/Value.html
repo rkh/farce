@@ -94,7 +94,9 @@
   
   <dl>
     <dt>Defined in:</dt>
-    <dd>lib/farce/abstract/value.rb
+    <dd>lib/farce/abstract/value.rb<span class="defines">,<br>
+  lib/farce/integrations/active_support/blank.rb</span>
+
 </dd>
   </dl>
   
@@ -121,6 +123,39 @@
 
 
 
+  
+    <h2>
+      ActiveSupport Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#blank%3F-instance_method" title="#blank? (instance method)">#<strong>blank?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>True if the value is blank, false otherwise.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
   
     <h2>
       Instance Method Summary
@@ -186,7 +221,67 @@
 
     
       <div class="method_details first">
-  <h3 class="signature first" id="unwrap-instance_method">
+  <h3 class="signature first" id="blank?-instance_method">
+  
+    #<strong>blank?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns true if the value is blank, false otherwise.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>true if the value is blank, false otherwise.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+40</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/blank.rb', line 40</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_blank?'>blank?</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_blank?'>blank?</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="unwrap-instance_method">
   
     
       <span class="overload">#<strong>unwrap</strong>(default = nil)  &#x21d2; <tt>BasicObject</tt> </span>
@@ -572,7 +667,7 @@ This method may block.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:32 2026 by
+  Generated on Tue Sep 22 14:43:39 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

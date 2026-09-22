@@ -83,7 +83,7 @@
       <span class="inheritName">Delegator</span>
       
         <ul class="fullTree">
-          <li>Object</li>
+          <li><span class='object_link'><a href="../Object.html" title="Object (class)">Object</a></span></li>
           
             <li class="next">Delegator</li>
           
@@ -107,7 +107,9 @@
   
   <dl>
     <dt>Defined in:</dt>
-    <dd>lib/farce/weak_ref.rb
+    <dd>lib/farce/weak_ref.rb<span class="defines">,<br>
+  lib/farce/integrations/active_support/duplicable.rb</span>
+
 </dd>
   </dl>
   
@@ -126,7 +128,7 @@
     <h4 class="tag_title">Examples:</h4>
     
       
-      <pre class="example code"><code><span class='id identifier rubyid_foo'>foo</span> <span class='op'>=</span> <span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>               <span class='comment'># create a new object instance
+      <pre class="example code"><code><span class='id identifier rubyid_foo'>foo</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Object.html" title="Object (class)">Object</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>               <span class='comment'># create a new object instance
 </span><span class='id identifier rubyid_p'>p</span> <span class='id identifier rubyid_foo'>foo</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span>                     <span class='comment'># original&#39;s class
 </span><span class='id identifier rubyid_foo'>foo</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>WeakRef</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="Farce::WeakRef#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_foo'>foo</span><span class='rparen'>)</span>  <span class='comment'># reassign foo with WeakRef instance
 </span><span class='id identifier rubyid_p'>p</span> <span class='id identifier rubyid_foo'>foo</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span>                     <span class='comment'># should be same class
@@ -171,7 +173,7 @@
 
   
     <h2>
-      Instance Method Summary
+      ActiveSupport Integration
       <small><a href="#" class="summary_toggle">collapse</a></small>
     </h2>
 
@@ -194,11 +196,21 @@
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Copies retain the same weak reference without duplicating its target.</p>
+    <span class="summary_desc"><div class='inline'><p>True.</p>
 </div></span>
   
 </li>
 
+      
+    </ul>
+    
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
       
         <li class="public ">
   <span class="summary_signature">
@@ -316,7 +328,14 @@
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Copies retain the same weak reference without duplicating its target.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns true.</p>
 
 
   </div>
@@ -333,6 +352,10 @@
       
       
       
+        &mdash;
+        <div class='inline'><p>true</p>
+</div>
+      
     </li>
   
 </ul>
@@ -343,10 +366,10 @@
       <pre class="lines">
 
 
-36</pre>
+24</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/weak_ref.rb', line 36</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/duplicable.rb', line 24</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -412,7 +435,7 @@
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:35 2026 by
+  Generated on Tue Sep 22 14:43:41 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

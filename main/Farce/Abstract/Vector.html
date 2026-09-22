@@ -80,10 +80,10 @@
   <dl>
     <dt>Inherits:</dt>
     <dd>
-      <span class="inheritName">Object</span>
+      <span class="inheritName"><span class='object_link'><a href="../../Object.html" title="Object (class)">Object</a></span></span>
       
         <ul class="fullTree">
-          <li>Object</li>
+          <li><span class='object_link'><a href="../../Object.html" title="Object (class)">Object</a></span></li>
           
             <li class="next">Farce::Abstract::Vector</li>
           
@@ -100,7 +100,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd>Enumerable, Internal::Copyable</dd>
+      <dd>Enumerable, <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></dd>
   </dl>
   
   
@@ -146,6 +146,667 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
 
 
+  
+    <h2>
+      ActiveSupport Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#as_json-instance_method" title="#as_json (instance method)">#<strong>as_json</strong>(options = nil)  &#x21d2; Array </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Convert a snapshot to ActiveSupport's explicit JSON representation.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#compact_blank-instance_method" title="#compact_blank (instance method)">#<strong>compact_blank</strong>  &#x21d2; Vector </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Entries for which <code>blank?</code> is false, excluding nil and false.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#deep_dup-instance_method" title="#deep_dup (instance method)">#<strong>deep_dup</strong>  &#x21d2; Vector </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Copy entries using ActiveSupport's deep-copy rules and the Vector's storage rules.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#excluding-instance_method" title="#excluding (instance method)">#<strong>excluding</strong>(*elements)  &#x21d2; Vector </a>
+    
+
+    
+      (also: #without)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Exclude entries using Array's hash-based difference semantics.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#fifth-instance_method" title="#fifth (instance method)">#<strong>fifth</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The fifth entry, or nil if absent.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#forty_two-instance_method" title="#forty_two (instance method)">#<strong>forty_two</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The forty-second entry, or nil if absent.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#fourth-instance_method" title="#fourth (instance method)">#<strong>fourth</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The fourth entry, or nil if absent.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#from-instance_method" title="#from (instance method)">#<strong>from</strong>(position)  &#x21d2; Vector </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return entries starting at position from one snapshot.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#in_groups-instance_method" title="#in_groups (instance method)">#<strong>in_groups</strong>(number, fill_with = nil) {|group| ... } &#x21d2; Vector </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Divide a snapshot into a requested number of Vector groups.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#in_groups_of-instance_method" title="#in_groups_of (instance method)">#<strong>in_groups_of</strong>(number, fill_with = nil) {|group| ... } &#x21d2; Vector, self </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Divide a snapshot into Vector groups with a maximum size.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#in_order_of-instance_method" title="#in_order_of (instance method)">#<strong>in_order_of</strong>(key, series, filter: true)  &#x21d2; Vector </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Order a snapshot by the keys in series, preserving retained entries.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#including-instance_method" title="#including (instance method)">#<strong>including</strong>(*elements)  &#x21d2; Vector </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Append entries to a new Vector, flattening argument Arrays by one level.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#inquiry-instance_method" title="#inquiry (instance method)">#<strong>inquiry</strong>  &#x21d2; ActiveSupport::ArrayInquirer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Create ActiveSupport's specialized query wrapper from a logical snapshot.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#maximum-instance_method" title="#maximum (instance method)">#<strong>maximum</strong>(key)  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Find the maximum extracted value without storing intermediate results in a Vector.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#minimum-instance_method" title="#minimum (instance method)">#<strong>minimum</strong>(key)  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Find the minimum extracted value without storing intermediate results in a Vector.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#pick-instance_method" title="#pick (instance method)">#<strong>pick</strong>(*keys)  &#x21d2; BasicObject, ... </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Extract keys from the first entry in a snapshot.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#pluck-instance_method" title="#pluck (instance method)">#<strong>pluck</strong>(*keys)  &#x21d2; Vector </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Extract keys from each entry in a snapshot.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#second-instance_method" title="#second (instance method)">#<strong>second</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The second entry, or nil if absent.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#second_to_last-instance_method" title="#second_to_last (instance method)">#<strong>second_to_last</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The second entry from the end, or nil if absent.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#split-instance_method" title="#split (instance method)">#<strong>split</strong>(value = nil) {|entry| ... } &#x21d2; Vector </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Split a snapshot at matching entries, omitting the separators.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#third-instance_method" title="#third (instance method)">#<strong>third</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The third entry, or nil if absent.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#third_to_last-instance_method" title="#third_to_last (instance method)">#<strong>third_to_last</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The third entry from the end, or nil if absent.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to-instance_method" title="#to (instance method)">#<strong>to</strong>(position)  &#x21d2; Vector </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return entries through position from one snapshot.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_fs-instance_method" title="#to_fs (instance method)">#<strong>to_fs</strong>(format = :default)  &#x21d2; String </a>
+    
+
+    
+      (also: #to_formatted_s)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Format a snapshot, optionally as a database ID list.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_param-instance_method" title="#to_param (instance method)">#<strong>to_param</strong>  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The snapshot's URL parameter representation, joined with slashes.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_query-instance_method" title="#to_query (instance method)">#<strong>to_query</strong>(key)  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The encoded query string for the snapshot.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_sentence-instance_method" title="#to_sentence (instance method)">#<strong>to_sentence</strong>(options = {})  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Format a snapshot as a sentence using ActiveSupport's connectors and locale.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_xml-instance_method" title="#to_xml (instance method)">#<strong>to_xml</strong>(options = {}) {|builder| ... } &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize a logical snapshot with ActiveSupport's Array XML conversion.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+      <h3 class="inherited">Methods included from <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></h3>
+      <p class="inherited"><span class='object_link'><a href="../Internal/Copyable.html#duplicable%3F-instance_method" title="Farce::Internal::Copyable#duplicable? (method)">#duplicable?</a></span></p>
+    
   
     <h2>
       Instance Method Summary
@@ -341,29 +1002,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#as_json-instance_method" title="#as_json (instance method)">#<strong>as_json</strong>(options = nil)  &#x21d2; Array </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Convert a snapshot to ActiveSupport's explicit JSON representation.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#assoc-instance_method" title="#assoc (instance method)">#<strong>assoc</strong>(key)  &#x21d2; Array, ... </a>
     
 
@@ -548,29 +1186,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#compact_blank-instance_method" title="#compact_blank (instance method)">#<strong>compact_blank</strong>  &#x21d2; Vector </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Entries for which <code>blank?</code> is false, excluding nil and false.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#compare_and_set-instance_method" title="#compare_and_set (instance method)">#<strong>compare_and_set</strong>(index, expected, replacement, timeout: nil)  &#x21d2; Boolean </a>
     
 
@@ -655,29 +1270,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Return a new Array containing a logical snapshot of the values.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#deep_dup-instance_method" title="#deep_dup (instance method)">#<strong>deep_dup</strong>  &#x21d2; Vector </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Copy entries using ActiveSupport's deep-copy rules and the Vector's storage rules.</p>
 </div></span>
   
 </li>
@@ -916,31 +1508,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#excluding-instance_method" title="#excluding (instance method)">#<strong>excluding</strong>(*elements)  &#x21d2; Vector </a>
-    
-
-    
-      (also: #without)
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Exclude entries using Array's hash-based difference semantics.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#fetch-instance_method" title="#fetch (instance method)">#<strong>fetch</strong>(index, *fallback) {|index| ... } &#x21d2; BasicObject </a>
     
 
@@ -979,29 +1546,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Fetch several values.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#fifth-instance_method" title="#fifth (instance method)">#<strong>fifth</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>The fifth entry, or nil if absent.</p>
 </div></span>
   
 </li>
@@ -1073,75 +1617,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Transform and flatten one Array or Vector level.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#forty_two-instance_method" title="#forty_two (instance method)">#<strong>forty_two</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>The forty-second entry, or nil if absent.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#fourth-instance_method" title="#fourth (instance method)">#<strong>fourth</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>The fourth entry, or nil if absent.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#from-instance_method" title="#from (instance method)">#<strong>from</strong>(position)  &#x21d2; Vector </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return entries starting at position from one snapshot.</p>
 </div></span>
   
 </li>
@@ -1242,75 +1717,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#in_groups-instance_method" title="#in_groups (instance method)">#<strong>in_groups</strong>(number, fill_with = nil) {|group| ... } &#x21d2; Vector </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Divide a snapshot into a requested number of Vector groups.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#in_groups_of-instance_method" title="#in_groups_of (instance method)">#<strong>in_groups_of</strong>(number, fill_with = nil) {|group| ... } &#x21d2; Vector, self </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Divide a snapshot into Vector groups with a maximum size.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#in_order_of-instance_method" title="#in_order_of (instance method)">#<strong>in_order_of</strong>(key, series, filter: true)  &#x21d2; Vector </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Order a snapshot by the keys in series, preserving retained entries.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#include%3F-instance_method" title="#include? (instance method)">#<strong>include?</strong>(value)  &#x21d2; Boolean </a>
     
 
@@ -1336,29 +1742,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#including-instance_method" title="#including (instance method)">#<strong>including</strong>(*elements)  &#x21d2; Vector </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Append entries to a new Vector, flattening argument Arrays by one level.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#index-instance_method" title="#index (instance method)">#<strong>index</strong>(value = UNDEFINED) {|entry| ... } &#x21d2; Integer, ... </a>
     
 
@@ -1376,29 +1759,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Return the first matching index.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#inquiry-instance_method" title="#inquiry (instance method)">#<strong>inquiry</strong>  &#x21d2; ActiveSupport::ArrayInquirer </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Create ActiveSupport's specialized query wrapper from a logical snapshot.</p>
 </div></span>
   
 </li>
@@ -1570,29 +1930,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#maximum-instance_method" title="#maximum (instance method)">#<strong>maximum</strong>(key)  &#x21d2; BasicObject<sup>?</sup> </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Find the maximum extracted value without storing intermediate results in a Vector.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#min-instance_method" title="#min (instance method)">#<strong>min</strong>(count = UNDEFINED) {|left, right| ... } &#x21d2; BasicObject, ... </a>
     
 
@@ -1631,29 +1968,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Return one block minimum, or a Vector when count is supplied.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#minimum-instance_method" title="#minimum (instance method)">#<strong>minimum</strong>(key)  &#x21d2; BasicObject<sup>?</sup> </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Find the minimum extracted value without storing intermediate results in a Vector.</p>
 </div></span>
   
 </li>
@@ -1746,52 +2060,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Split a snapshot into accepted and rejected Vectors, wrapped in a Vector.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#pick-instance_method" title="#pick (instance method)">#<strong>pick</strong>(*keys)  &#x21d2; BasicObject, ... </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Extract keys from the first entry in a snapshot.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#pluck-instance_method" title="#pluck (instance method)">#<strong>pluck</strong>(*keys)  &#x21d2; Vector </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Extract keys from each entry in a snapshot.</p>
 </div></span>
   
 </li>
@@ -2022,52 +2290,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Return one sample, or a Vector when count is supplied.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#second-instance_method" title="#second (instance method)">#<strong>second</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>The second entry, or nil if absent.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#second_to_last-instance_method" title="#second_to_last (instance method)">#<strong>second_to_last</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>The second entry from the end, or nil if absent.</p>
 </div></span>
   
 </li>
@@ -2310,29 +2532,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#split-instance_method" title="#split (instance method)">#<strong>split</strong>(value = nil) {|entry| ... } &#x21d2; Vector </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Split a snapshot at matching entries, omitting the separators.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#store-instance_method" title="#store (instance method)">#<strong>store</strong>(index, value, timeout: nil)  &#x21d2; BasicObject, false </a>
     
 
@@ -2448,75 +2647,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#third-instance_method" title="#third (instance method)">#<strong>third</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>The third entry, or nil if absent.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#third_to_last-instance_method" title="#third_to_last (instance method)">#<strong>third_to_last</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>The third entry from the end, or nil if absent.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to-instance_method" title="#to (instance method)">#<strong>to</strong>(position)  &#x21d2; Vector </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return entries through position from one snapshot.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#to_a-instance_method" title="#to_a (instance method)">#<strong>to_a</strong>  &#x21d2; Array&lt;BasicObject&gt; </a>
     
 
@@ -2540,31 +2670,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#to_fs-instance_method" title="#to_fs (instance method)">#<strong>to_fs</strong>(format = :default)  &#x21d2; String </a>
-    
-
-    
-      (also: #to_formatted_s)
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Format a snapshot, optionally as a database ID list.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#to_h-instance_method" title="#to_h (instance method)">#<strong>to_h</strong> {|value| ... } &#x21d2; Hash </a>
     
 
@@ -2580,98 +2685,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Convert pair-like entries to a Hash.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_param-instance_method" title="#to_param (instance method)">#<strong>to_param</strong>  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>The snapshot's URL parameter representation, joined with slashes.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_query-instance_method" title="#to_query (instance method)">#<strong>to_query</strong>(key)  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>The encoded query string for the snapshot.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_sentence-instance_method" title="#to_sentence (instance method)">#<strong>to_sentence</strong>(options = {})  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Format a snapshot as a sentence using ActiveSupport's connectors and locale.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_xml-instance_method" title="#to_xml (instance method)">#<strong>to_xml</strong>(options = {}) {|builder| ... } &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize a logical snapshot with ActiveSupport's Array XML conversion.</p>
 </div></span>
   
 </li>
@@ -2889,6 +2902,12 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
   
 
 
+  
+  
+  
+  
+  
+  
   
   
 
@@ -3551,7 +3570,14 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Convert a snapshot to ActiveSupport's explicit JSON representation.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Convert a snapshot to ActiveSupport's explicit JSON representation.</p>
 
 
   </div>
@@ -3603,10 +3629,10 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
       <pre class="lines">
 
 
-154</pre>
+175</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 154</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 175</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_as_json'>as_json</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_as_json'>as_json</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span></pre>
     </td>
@@ -4385,7 +4411,14 @@ contract.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns Entries for which <code>blank?</code> is false, excluding nil and false.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns Entries for which <code>blank?</code> is false, excluding nil and false.</p>
 
 
   </div>
@@ -4416,10 +4449,10 @@ contract.</p>
       <pre class="lines">
 
 
-64</pre>
+76</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 64</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 76</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compact_blank'>compact_blank</span> <span class='op'>=</span> <span class='id identifier rubyid_reject'>reject</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:blank?</span><span class='rparen'>)</span></pre>
     </td>
@@ -4813,7 +4846,14 @@ This never grows the vector. Matching uses the configured comparison mode.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Copy entries using ActiveSupport's deep-copy rules and the Vector's storage rules.
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Copy entries using ActiveSupport's deep-copy rules and the Vector's storage rules.
 Strict Vectors reject deep copies that are not shareable.</p>
 
 
@@ -4845,10 +4885,10 @@ Strict Vectors reject deep copies that are not shareable.</p>
       <pre class="lines">
 
 
-61</pre>
+72</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 61</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 72</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_deep_dup'>deep_dup</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:deep_dup</span><span class='rparen'>)</span></pre>
     </td>
@@ -5862,7 +5902,14 @@ Changes made while the block runs are visible to later enumerations.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Exclude entries using Array's hash-based difference semantics.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Exclude entries using Array's hash-based difference semantics.</p>
 
 
   </div>
@@ -5912,10 +5959,10 @@ Changes made while the block runs are visible to later enumerations.</p>
       <pre class="lines">
 
 
-34</pre>
+37</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 34</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 37</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_excluding'>excluding</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span> <span class='op'>-</span> <span class='id identifier rubyid_elements'>elements</span><span class='period'>.</span><span class='id identifier rubyid_flatten'>flatten</span><span class='lparen'>(</span><span class='int'>1</span><span class='rparen'>)</span></pre>
     </td>
@@ -6287,7 +6334,14 @@ Changes made while the block runs are visible to later enumerations.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns The fifth entry, or nil if absent.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns The fifth entry, or nil if absent.</p>
 
 
   </div>
@@ -6318,10 +6372,10 @@ Changes made while the block runs are visible to later enumerations.</p>
       <pre class="lines">
 
 
-47</pre>
+54</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 47</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 54</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fifth'>fifth</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='int'>4</span><span class='rbracket'>]</span></pre>
     </td>
@@ -6690,7 +6744,14 @@ Changes made while the block runs are visible to later enumerations.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns The forty-second entry, or nil if absent.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns The forty-second entry, or nil if absent.</p>
 
 
   </div>
@@ -6721,10 +6782,10 @@ Changes made while the block runs are visible to later enumerations.</p>
       <pre class="lines">
 
 
-50</pre>
+58</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 50</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 58</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_forty_two'>forty_two</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='int'>41</span><span class='rbracket'>]</span></pre>
     </td>
@@ -6743,7 +6804,14 @@ Changes made while the block runs are visible to later enumerations.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns The fourth entry, or nil if absent.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns The fourth entry, or nil if absent.</p>
 
 
   </div>
@@ -6774,10 +6842,10 @@ Changes made while the block runs are visible to later enumerations.</p>
       <pre class="lines">
 
 
-44</pre>
+50</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 44</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 50</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fourth'>fourth</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='int'>3</span><span class='rbracket'>]</span></pre>
     </td>
@@ -6796,7 +6864,14 @@ Changes made while the block runs are visible to later enumerations.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Return entries starting at position from one snapshot.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Return entries starting at position from one snapshot.</p>
 
 
   </div>
@@ -7349,7 +7424,14 @@ Changes made while the block runs are visible to later enumerations.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Divide a snapshot into a requested number of Vector groups.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Divide a snapshot into a requested number of Vector groups.</p>
 
 
   </div>
@@ -7469,15 +7551,15 @@ Changes made while the block runs are visible to later enumerations.</p>
       <pre class="lines">
 
 
-115
-116
-117
-118
-119
-120</pre>
+133
+134
+135
+136
+137
+138</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 115</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 133</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_in_groups'>in_groups</span><span class='lparen'>(</span><span class='id identifier rubyid_number'>number</span><span class='comma'>,</span> <span class='id identifier rubyid_fill_with'>fill_with</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_groups'>groups</span> <span class='op'>=</span> <span class='id identifier rubyid_active_support_groups'>active_support_groups</span><span class='lparen'>(</span><span class='symbol'>:in_groups</span><span class='comma'>,</span> <span class='id identifier rubyid_number'>number</span><span class='comma'>,</span> <span class='id identifier rubyid_fill_with'>fill_with</span><span class='rparen'>)</span>
@@ -7501,7 +7583,14 @@ Changes made while the block runs are visible to later enumerations.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Divide a snapshot into Vector groups with a maximum size.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Divide a snapshot into Vector groups with a maximum size.</p>
 
 
   </div>
@@ -7621,16 +7710,16 @@ Changes made while the block runs are visible to later enumerations.</p>
       <pre class="lines">
 
 
-129
-130
-131
-132
-133
-134
-135</pre>
+148
+149
+150
+151
+152
+153
+154</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 129</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 148</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_in_groups_of'>in_groups_of</span><span class='lparen'>(</span><span class='id identifier rubyid_number'>number</span><span class='comma'>,</span> <span class='id identifier rubyid_fill_with'>fill_with</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_padding'>padding</span> <span class='op'>=</span> <span class='id identifier rubyid_fill_with'>fill_with</span> <span class='op'>!=</span> <span class='kw'>false</span>
@@ -7655,7 +7744,14 @@ Changes made while the block runs are visible to later enumerations.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Order a snapshot by the keys in series, preserving retained entries.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Order a snapshot by the keys in series, preserving retained entries.</p>
 
 
   </div>
@@ -7737,15 +7833,15 @@ Changes made while the block runs are visible to later enumerations.</p>
       <pre class="lines">
 
 
-91
-92
-93
-94
-95
-96</pre>
+106
+107
+108
+109
+110
+111</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 91</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 106</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_in_order_of'>in_order_of</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_series'>series</span><span class='comma'>,</span> <span class='label'>filter:</span> <span class='kw'>true</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_snapshot'>snapshot</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span>
@@ -7845,7 +7941,14 @@ Changes made while the block runs are visible to later enumerations.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Append entries to a new Vector, flattening argument Arrays by one level.
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Append entries to a new Vector, flattening argument Arrays by one level.
 New entries follow the receiver's storage rules and transfer mode.</p>
 
 
@@ -7896,10 +7999,10 @@ New entries follow the receiver's storage rules and transfer mode.</p>
       <pre class="lines">
 
 
-29</pre>
+31</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 29</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 31</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_including'>including</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span> <span class='op'>+</span> <span class='id identifier rubyid_elements'>elements</span><span class='period'>.</span><span class='id identifier rubyid_flatten'>flatten</span><span class='lparen'>(</span><span class='int'>1</span><span class='rparen'>)</span></pre>
     </td>
@@ -8065,7 +8168,14 @@ New entries follow the receiver's storage rules and transfer mode.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Create ActiveSupport's specialized query wrapper from a logical snapshot.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Create ActiveSupport's specialized query wrapper from a logical snapshot.</p>
 
 
   </div>
@@ -8096,10 +8206,10 @@ New entries follow the receiver's storage rules and transfer mode.</p>
       <pre class="lines">
 
 
-185</pre>
+212</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 185</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 212</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_inquiry'>inquiry</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_inquiry'>inquiry</span></pre>
     </td>
@@ -8858,7 +8968,14 @@ Enumerator.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Find the maximum extracted value without storing intermediate results in a Vector.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Find the maximum extracted value without storing intermediate results in a Vector.</p>
 
 
   </div>
@@ -8908,10 +9025,10 @@ Enumerator.</p>
       <pre class="lines">
 
 
-106</pre>
+123</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 106</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 123</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_maximum'>maximum</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_maximum'>maximum</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -9240,7 +9357,14 @@ Enumerator.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Find the minimum extracted value without storing intermediate results in a Vector.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Find the minimum extracted value without storing intermediate results in a Vector.</p>
 
 
   </div>
@@ -9290,10 +9414,10 @@ Enumerator.</p>
       <pre class="lines">
 
 
-101</pre>
+117</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 101</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 117</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_minimum'>minimum</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_minimum'>minimum</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -9776,7 +9900,14 @@ Enumerator.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Extract keys from the first entry in a snapshot.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Extract keys from the first entry in a snapshot.</p>
 
 
   </div>
@@ -9826,16 +9957,16 @@ Enumerator.</p>
       <pre class="lines">
 
 
-78
-79
-80
-81
-82
-83
-84</pre>
+92
+93
+94
+95
+96
+97
+98</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 78</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 92</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_pick'>pick</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_keys'>keys</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_snapshot'>snapshot</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span>
@@ -9860,7 +9991,14 @@ Enumerator.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Extract keys from each entry in a snapshot.
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Extract keys from each entry in a snapshot.
 Extracted values follow the receiver's storage rules and transfer mode.</p>
 
 
@@ -9911,13 +10049,13 @@ Extracted values follow the receiver's storage rules and transfer mode.</p>
       <pre class="lines">
 
 
-70
-71
-72
-73</pre>
+83
+84
+85
+86</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 70</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 83</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_pluck'>pluck</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_keys'>keys</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_entry'>entry</span><span class='op'>|</span> <span class='id identifier rubyid_entry'>entry</span><span class='lbracket'>[</span><span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_first'>first</span><span class='rbracket'>]</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span> <span class='op'>&gt;</span> <span class='int'>1</span>
@@ -10908,7 +11046,14 @@ block.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns The second entry, or nil if absent.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns The second entry, or nil if absent.</p>
 
 
   </div>
@@ -10939,10 +11084,10 @@ block.</p>
       <pre class="lines">
 
 
-38</pre>
+42</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 38</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 42</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_second'>second</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span></pre>
     </td>
@@ -10961,7 +11106,14 @@ block.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns The second entry from the end, or nil if absent.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns The second entry from the end, or nil if absent.</p>
 
 
   </div>
@@ -10992,10 +11144,10 @@ block.</p>
       <pre class="lines">
 
 
-56</pre>
+66</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 56</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 66</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_second_to_last'>second_to_last</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='op'>-</span><span class='int'>2</span><span class='rbracket'>]</span></pre>
     </td>
@@ -12067,7 +12219,14 @@ Range and start-length results are Vectors.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Split a snapshot at matching entries, omitting the separators.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Split a snapshot at matching entries, omitting the separators.</p>
 
 
   </div>
@@ -12172,16 +12331,16 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-143
-144
-145
-146
-147
-148
-149</pre>
+163
+164
+165
+166
+167
+168
+169</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 143</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 163</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_split'>split</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_groups'>groups</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span><span class='period'>.</span><span class='id identifier rubyid_split'>split</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_stored'>stored</span><span class='op'>|</span>
@@ -12717,7 +12876,14 @@ Range and start-length results are Vectors.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns The third entry, or nil if absent.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns The third entry, or nil if absent.</p>
 
 
   </div>
@@ -12748,10 +12914,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-41</pre>
+46</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 46</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_third'>third</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='int'>2</span><span class='rbracket'>]</span></pre>
     </td>
@@ -12770,7 +12936,14 @@ Range and start-length results are Vectors.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns The third entry from the end, or nil if absent.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns The third entry from the end, or nil if absent.</p>
 
 
   </div>
@@ -12801,10 +12974,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-53</pre>
+62</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 53</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 62</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_third_to_last'>third_to_last</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='op'>-</span><span class='int'>3</span><span class='rbracket'>]</span></pre>
     </td>
@@ -12823,7 +12996,14 @@ Range and start-length results are Vectors.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Return entries through position from one snapshot.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Return entries through position from one snapshot.</p>
 
 
   </div>
@@ -12873,10 +13053,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-23</pre>
+24</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 23</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 24</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to'>to</span><span class='lparen'>(</span><span class='id identifier rubyid_position'>position</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_build_derived_vector'>build_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span><span class='period'>.</span><span class='id identifier rubyid_to'>to</span><span class='lparen'>(</span><span class='id identifier rubyid_position'>position</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -12952,7 +13132,14 @@ Range and start-length results are Vectors.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Format a snapshot, optionally as a database ID list.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Format a snapshot, optionally as a database ID list.</p>
 
 
   </div>
@@ -13004,10 +13191,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-171</pre>
+196</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 171</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 196</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_fs'>to_fs</span><span class='lparen'>(</span><span class='id identifier rubyid_format'>format</span> <span class='op'>=</span> <span class='symbol'>:default</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_fs'>to_fs</span><span class='lparen'>(</span><span class='id identifier rubyid_format'>format</span><span class='rparen'>)</span></pre>
     </td>
@@ -13132,7 +13319,14 @@ Range and start-length results are Vectors.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns The snapshot's URL parameter representation, joined with slashes.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns The snapshot's URL parameter representation, joined with slashes.</p>
 
 
   </div>
@@ -13163,10 +13357,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-157</pre>
+179</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 157</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 179</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_param'>to_param</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_param'>to_param</span></pre>
     </td>
@@ -13185,7 +13379,14 @@ Range and start-length results are Vectors.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns The encoded query string for the snapshot.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns The encoded query string for the snapshot.</p>
 
 
   </div>
@@ -13235,10 +13436,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-161</pre>
+184</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 161</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 184</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_query'>to_query</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_query'>to_query</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -13257,7 +13458,14 @@ Range and start-length results are Vectors.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Format a snapshot as a sentence using ActiveSupport's connectors and locale.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Format a snapshot as a sentence using ActiveSupport's connectors and locale.</p>
 
 
   </div>
@@ -13309,10 +13517,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-166</pre>
+190</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 166</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 190</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_sentence'>to_sentence</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_sentence'>to_sentence</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span></pre>
     </td>
@@ -13331,7 +13539,14 @@ Range and start-length results are Vectors.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Serialize a logical snapshot with ActiveSupport's Array XML conversion.
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Serialize a logical snapshot with ActiveSupport's Array XML conversion.
 Requires ActiveSupport's optional Builder dependency, as Array#to_xml does.</p>
 
 
@@ -13437,10 +13652,10 @@ Requires ActiveSupport's optional Builder dependency, as Array#to_xml does.</p>
       <pre class="lines">
 
 
-181</pre>
+207</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 181</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/vector.rb', line 207</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_xml'>to_xml</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_xml'>to_xml</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -14461,7 +14676,7 @@ directly.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:39 2026 by
+  Generated on Tue Sep 22 14:43:44 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

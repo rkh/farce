@@ -80,10 +80,10 @@
   <dl>
     <dt>Inherits:</dt>
     <dd>
-      <span class="inheritName">Object</span>
+      <span class="inheritName"><span class='object_link'><a href="../Object.html" title="Object (class)">Object</a></span></span>
       
         <ul class="fullTree">
-          <li>Object</li>
+          <li><span class='object_link'><a href="../Object.html" title="Object (class)">Object</a></span></li>
           
             <li class="next">Farce::WeakValue</li>
           
@@ -110,7 +110,9 @@
   
   <dl>
     <dt>Defined in:</dt>
-    <dd>lib/farce/weak_value.rb
+    <dd>lib/farce/weak_value.rb<span class="defines">,<br>
+  lib/farce/integrations/active_support/duplicable.rb</span>
+
 </dd>
   </dl>
   
@@ -131,7 +133,7 @@ If <span class='object_link'><a href="#freeze-instance_method" title="Farce::Wea
     <h4 class="tag_title">Examples:</h4>
     
       
-      <pre class="example code"><code><span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
+      <pre class="example code"><code><span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Object.html" title="Object (class)">Object</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
 <span class='id identifier rubyid_weak'>weak</span>   <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>WeakValue</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#new-class_method" title="Farce::WeakValue.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_weak'>weak</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>==</span> <span class='id identifier rubyid_object'>object</span> <span class='comment'># =&gt; true
 </span><span class='id identifier rubyid_weak'>weak</span><span class='period'>.</span><span class='id identifier rubyid_alive?'>alive?</span>          <span class='comment'># =&gt; true
@@ -161,6 +163,42 @@ If <span class='object_link'><a href="#freeze-instance_method" title="Farce::Wea
 
 
 
+  
+    <h2>
+      ActiveSupport Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#duplicable%3F-instance_method" title="#duplicable? (instance method)">#<strong>duplicable?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>True.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+      <h3 class="inherited">Methods included from <span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Abstract::Value</a></span></h3>
+      <p class="inherited"><span class='object_link'><a href="Abstract/Value.html#blank%3F-instance_method" title="Farce::Abstract::Value#blank? (method)">#blank?</a></span></p>
+    
   
     <h2>
       Class Method Summary
@@ -220,29 +258,6 @@ If <span class='object_link'><a href="#freeze-instance_method" title="Farce::Wea
 
   
     <span class="summary_desc"><div class='inline'><p>Checks whether the referenced object has avoided garbage collection and has not been moved.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#duplicable%3F-instance_method" title="#duplicable? (instance method)">#<strong>duplicable?</strong>  &#x21d2; Boolean </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Copies share the weak reference without copying its target.</p>
 </div></span>
   
 </li>
@@ -432,7 +447,7 @@ If <span class='object_link'><a href="#freeze-instance_method" title="Farce::Wea
         <span class='name'>value</span>
       
       
-        <span class='type'>(<tt>Object</tt>)</span>
+        <span class='type'>(<tt><span class='object_link'><a href="../Object.html" title="Object (class)">Object</a></span></tt>)</span>
       
       
       
@@ -510,7 +525,7 @@ If <span class='object_link'><a href="#freeze-instance_method" title="Farce::Wea
         <span class='name'>value</span>
       
       
-        <span class='type'>(<tt>Object</tt>)</span>
+        <span class='type'>(<tt><span class='object_link'><a href="../Object.html" title="Object (class)">Object</a></span></tt>)</span>
       
       
       
@@ -612,14 +627,14 @@ If <span class='object_link'><a href="#freeze-instance_method" title="Farce::Wea
       <pre class="lines">
 
 
-79
-80
-81
-82
-83</pre>
+75
+76
+77
+78
+79</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 79</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 75</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_alive?'>alive?</span>
   <span class='op'>!</span><span class='id identifier rubyid__value'>_value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
@@ -642,7 +657,14 @@ If <span class='object_link'><a href="#freeze-instance_method" title="Farce::Wea
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Copies share the weak reference without copying its target.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Returns true.</p>
 
 
   </div>
@@ -673,10 +695,10 @@ If <span class='object_link'><a href="#freeze-instance_method" title="Farce::Wea
       <pre class="lines">
 
 
-75</pre>
+18</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 75</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/duplicable.rb', line 18</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_duplicable?'>duplicable?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -728,6 +750,10 @@ Will raise however if the referenced object is still alive and cannot be made sh
       <pre class="lines">
 
 
+85
+86
+87
+88
 89
 90
 91
@@ -736,14 +762,10 @@ Will raise however if the referenced object is still alive and cannot be made sh
 94
 95
 96
-97
-98
-99
-100
-101</pre>
+97</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 89</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 85</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_freeze'>freeze</span>
   <span class='ivar'>@mutex</span><span class='op'>&amp;.</span><span class='id identifier rubyid_synchronize'>synchronize</span> <span class='kw'>do</span>
@@ -805,13 +827,13 @@ Will raise however if the referenced object is still alive and cannot be made sh
       <pre class="lines">
 
 
-132
-133
-134
-135</pre>
+128
+129
+130
+131</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 128</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span>
   <span class='id identifier rubyid_state'>state</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_state_and_value'>state_and_value</span>
@@ -864,14 +886,14 @@ Will raise however if the referenced object is still alive and cannot be made sh
       <pre class="lines">
 
 
-105
-106
-107
-108
-109</pre>
+101
+102
+103
+104
+105</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 105</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 101</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_moved?'>moved?</span>
   <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Ractor.html#MovedObject-constant" title="Farce::Ractor::MovedObject (constant)">MovedObject</a></span></span> <span class='op'>===</span> <span class='id identifier rubyid__value'>_value</span>
@@ -925,15 +947,15 @@ Will raise however if the referenced object is still alive and cannot be made sh
       <pre class="lines">
 
 
+108
+109
+110
+111
 112
-113
-114
-115
-116
-117</pre>
+113</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 112</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 108</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_ractor_shareable?'>ractor_shareable?</span>
   <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid__value'>_value</span><span class='rparen'>)</span>
@@ -1006,16 +1028,16 @@ Raises if it is no longer reachable.</p>
       <pre class="lines">
 
 
+119
+120
+121
+122
 123
 124
-125
-126
-127
-128
-129</pre>
+125</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 123</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/weak_value.rb', line 119</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span>
   <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid__value'>_value</span>
@@ -1034,7 +1056,7 @@ Raises if it is no longer reachable.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:36 2026 by
+  Generated on Tue Sep 22 14:43:41 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

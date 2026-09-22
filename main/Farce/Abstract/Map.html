@@ -80,10 +80,10 @@
   <dl>
     <dt>Inherits:</dt>
     <dd>
-      <span class="inheritName">Object</span>
+      <span class="inheritName"><span class='object_link'><a href="../../Object.html" title="Object (class)">Object</a></span></span>
       
         <ul class="fullTree">
-          <li>Object</li>
+          <li><span class='object_link'><a href="../../Object.html" title="Object (class)">Object</a></span></li>
           
             <li class="next">Farce::Abstract::Map</li>
           
@@ -166,6 +166,87 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
   
     <h2>
+      ActiveSupport Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#as_json-instance_method" title="#as_json (instance method)">#<strong>as_json</strong>  &#x21d2; Hash </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Convert entries using ActiveSupport's Hash JSON conversion.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#assert_valid_keys-instance_method" title="#assert_valid_keys (instance method)">#<strong>assert_valid_keys</strong>(*valid_keys)  &#x21d2; self </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Validate observed keys without normalizing the allowed keys.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_query-instance_method" title="#to_query (instance method)">#<strong>to_query</strong>  &#x21d2; String </a>
+    
+
+    
+      (also: #to_param)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Encode public entries as a query string, optionally under a namespace.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+    <h2>
       Instance Method Summary
       <small><a href="#" class="summary_toggle">collapse</a></small>
     </h2>
@@ -213,52 +294,6 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Associate a value with a key without a timeout.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#as_json-instance_method" title="#as_json (instance method)">#<strong>as_json</strong>  &#x21d2; Hash </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Convert entries using ActiveSupport's Hash JSON conversion.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#assert_valid_keys-instance_method" title="#assert_valid_keys (instance method)">#<strong>assert_valid_keys</strong>(*valid_keys)  &#x21d2; self </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Validate observed keys without normalizing the allowed keys.</p>
 </div></span>
   
 </li>
@@ -997,31 +1032,6 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>JSON representation of the map.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_query-instance_method" title="#to_query (instance method)">#<strong>to_query</strong>  &#x21d2; String </a>
-    
-
-    
-      (also: #to_param)
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Encode public entries as a query string, optionally under a namespace.</p>
 </div></span>
   
 </li>
@@ -2237,7 +2247,14 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Convert entries using ActiveSupport's Hash JSON conversion.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Convert entries using ActiveSupport's Hash JSON conversion.</p>
 
 
   </div>
@@ -2290,7 +2307,14 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Validate observed keys without normalizing the allowed keys.
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Validate observed keys without normalizing the allowed keys.
 Concurrent changes may invalidate the result immediately.</p>
 
 
@@ -2335,18 +2359,18 @@ Concurrent changes may invalidate the result immediately.</p>
       <pre class="lines">
 
 
-25
-26
 27
 28
 29
 30
 31
 32
-33</pre>
+33
+34
+35</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 25</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 27</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_assert_valid_keys'>assert_valid_keys</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_valid_keys'>valid_keys</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_valid_keys'>valid_keys</span><span class='period'>.</span><span class='id identifier rubyid_flatten!'>flatten!</span>
@@ -11417,7 +11441,14 @@ Preserves identity comparison for keys, including when a block transforms entrie
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Encode public entries as a query string, optionally under a namespace.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if the ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Encode public entries as a query string, optionally under a namespace.</p>
 
 
   </div>
@@ -11444,10 +11475,10 @@ Preserves identity comparison for keys, including when a block transforms entrie
       <pre class="lines">
 
 
-18</pre>
+19</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 18</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/map.rb', line 19</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_query'>to_query</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_query'>to_query</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -11770,7 +11801,7 @@ Values are unwrapped before comparison. Concurrent changes may make the result s
 </div>
 
       <div id="footer">
-  Generated on Mon Sep 21 19:59:37 2026 by
+  Generated on Tue Sep 22 14:43:42 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
