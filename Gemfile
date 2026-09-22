@@ -47,6 +47,7 @@ end
 
 group :test do
   gem "activesupport"
+  gem "dry-types"
   gem "minitest"
   gem "minitest-reporters"
 

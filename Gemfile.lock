@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     farce (0.1.0)
+    farce (0.1.0-java)
 
 GEM
   remote: https://gem.coop/
@@ -29,6 +30,7 @@ GEM
     benchmark (0.5.0)
     benchmark-ips (2.15.1)
     bigdecimal (4.1.2)
+    bigdecimal (4.1.2-java)
     builder (3.3.0)
     carbon_fiber (0.2.0-arm64-darwin)
     carbon_fiber (0.2.0-x86_64-linux)
@@ -43,7 +45,25 @@ GEM
       fiber-local (~> 1.1)
       json
     drb (2.2.3)
+    dry-core (1.2.0)
+      concurrent-ruby (~> 1.0)
+      logger
+      zeitwerk (~> 2.6)
+    dry-inflector (1.3.1)
+    dry-logic (1.6.0)
+      bigdecimal
+      concurrent-ruby (~> 1.0)
+      dry-core (~> 1.1)
+      zeitwerk (~> 2.6)
+    dry-types (1.9.1)
+      bigdecimal (>= 3.0)
+      concurrent-ruby (~> 1.0)
+      dry-core (~> 1.0)
+      dry-inflector (~> 1.0)
+      dry-logic (~> 1.4)
+      zeitwerk (~> 2.6)
     erb (6.0.7)
+    erb (6.0.7-java)
     fiber-annotation (0.2.0)
     fiber-local (1.1.0)
       fiber-storage
@@ -51,13 +71,16 @@ GEM
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     io-console (0.9.2)
+    io-console (0.9.2-java)
     io-event (1.21.1)
     irb (1.18.0)
       pp (>= 0.6.0)
       prism (>= 1.3.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
+    jar-dependencies (0.6.1-java)
     json (3.0.1)
+    json (3.0.1-java)
     language_server-protocol (3.17.0.6)
     lazy_priority_queue (0.1.1)
     lint_roller (1.1.0)
@@ -83,6 +106,7 @@ GEM
     priority_queue_cxx (0.3.7)
     prism (1.9.0)
     racc (1.8.1)
+    racc (1.8.1-java)
     ractor_queue (0.2.1)
       rice (~> 4.0)
     rainbow (3.1.1)
@@ -93,6 +117,11 @@ GEM
     ratomic (0.4.3-arm64-darwin)
     ratomic (0.4.3-x86_64-linux)
     rbs (4.2.0)
+      logger
+      prism (>= 1.6.0)
+      tsort
+    rbs (4.2.0-java)
+      jar-dependencies (>= 0.1.7)
       logger
       prism (>= 1.6.0)
       tsort
@@ -150,10 +179,12 @@ GEM
     yard (0.9.45)
     yard-markdown-relative-links (0.3.0)
       yard (>= 0.9, < 1)
+    zeitwerk (2.8.3)
 
 PLATFORMS
   arm64-darwin-23
   arm64-darwin-25
+  universal-java
   x86_64-linux
 
 DEPENDENCIES
@@ -165,6 +196,7 @@ DEPENDENCIES
   commonmarker
   concurrent-ruby
   concurrent-ruby-ext
+  dry-types
   farce!
   io-event
   irb
@@ -199,6 +231,7 @@ CHECKSUMS
   benchmark (0.5.0) sha256=465df122341aedcb81a2a24b4d3bd19b6c67c1530713fd533f3ff034e419236c
   benchmark-ips (2.15.1) sha256=07a1a9f3c6105ecaf68c174fc3fbcddd71a0e9ada6236ae03093a0dcfd812d59
   bigdecimal (4.1.2) sha256=53d217666027eab4280346fba98e7d5b66baaae1b9c3c1c0ffe89d48188a3fbd
+  bigdecimal (4.1.2-java) sha256=ccc836eab720a525529f70ed0de26a206fdbc9a9e8ac67b3b4ac7318b03e114d
   builder (3.3.0) sha256=497918d2f9dca528fdca4b88d84e4ef4387256d984b8154e9d5d3fe5a9c8835f
   bundler (4.0.20) sha256=7978a8ac648767f5e635bc522445b79e80a52b907a39a36c2d8085ed6bc762ae
   carbon_fiber (0.2.0-arm64-darwin) sha256=5501b087fb6337445705ad7ffb160ca68c8b7f4a9b7b6bbb977a811c4df869e7
@@ -210,16 +243,25 @@ CHECKSUMS
   connection_pool (3.0.2) sha256=33fff5ba71a12d2aa26cb72b1db8bba2a1a01823559fb01d29eb74c286e62e0a
   console (1.37.0) sha256=8093b286c2595a063849c098594fee5155ecc7967d36f3aa8cbe7569c8f3efd7
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
+  dry-core (1.2.0) sha256=0cc5a7da88df397f153947eeeae42e876e999c1e30900f3c536fb173854e96a1
+  dry-inflector (1.3.1) sha256=7fb0c2bb04f67638f25c52e7ba39ab435d922a3a5c3cd196120f63accb682dcc
+  dry-logic (1.6.0) sha256=da6fedbc0f90fc41f9b0cc7e6f05f5d529d1efaef6c8dcc8e0733f685745cea2
+  dry-types (1.9.1) sha256=baebeecdb9f8395d6c9d227b62011279440943e3ef2468fe8ccc1ba11467f178
   erb (6.0.7) sha256=c5ca6dc25b0ef974a44dc8f59fe847577122483b1968a38dec305c60bf91ee92
+  erb (6.0.7-java) sha256=ef8339f928aa33be9205534be19e9c0daf310c4cc4eb85fd409141c094c57d61
   farce (0.1.0)
+  farce (0.1.0-java)
   fiber-annotation (0.2.0) sha256=7abfadf1d119f508867d4103bf231c0354d019cc39a5738945dec2edadaf6c03
   fiber-local (1.1.0) sha256=c885f94f210fb9b05737de65d511136ea602e00c5105953748aa0f8793489f06
   fiber-storage (1.0.1) sha256=f48e5b6d8b0be96dac486332b55cee82240057065dc761c1ea692b2e719240e1
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
   io-console (0.9.2) sha256=efa74f891dd03c0939a931dfc6e74c2813d904763d456ea9762b0525e748db08
+  io-console (0.9.2-java) sha256=929c09163ad227cda17f5dc57861b995dbecf69c7ca2ce7b0c5f941f1f3da7d3
   io-event (1.21.1) sha256=b3088f89ad67edf9be9fc2f48a5fae0790e92862487551eeb337b49098eb99e6
   irb (1.18.0) sha256=de9454a0703a54704b9811a5ef31a60c86949fbf4013fcf244fabc7c775248e3
+  jar-dependencies (0.6.1-java) sha256=2746643482d139fd9cecb524b57df63b71d9b5d734c7275171701201e3164f23
   json (3.0.1) sha256=c80f74a3570c3a310cd41c526904e7ef8363abdece4432f31fe97d812bc4a39e
+  json (3.0.1-java) sha256=1c27f7763a1085b4c7d015265bc95f638a6682db29a9b3dbcea490b9988e8521
   language_server-protocol (3.17.0.6) sha256=5ef2c0c138f8267e1bc631d3328347d354f96724b0af22f2c79516120443b7f0
   lazy_priority_queue (0.1.1) sha256=e5d4ea8d037e8743afc91019fc23f5f6858372fea73e05e8244f8964f0634337
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
@@ -236,6 +278,7 @@ CHECKSUMS
   priority_queue_cxx (0.3.7) sha256=44c87de5dfe867d3415eac9a6b2a533722c0144606c6a02664ec754099f8c023
   prism (1.9.0) sha256=7b530c6a9f92c24300014919c9dcbc055bf4cdf51ec30aed099b06cd6674ef85
   racc (1.8.1) sha256=4a7f6929691dbec8b5209a0b373bc2614882b55fc5d2e447a21aaa691303d62f
+  racc (1.8.1-java) sha256=54f2e6d1e1b91c154013277d986f52a90e5ececbe91465d29172e49342732b98
   ractor_queue (0.2.1) sha256=834ba7d0ee580c5cae260a8db879b4352981a929874de080e996d5fc31b33086
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
@@ -244,6 +287,7 @@ CHECKSUMS
   ratomic (0.4.3-arm64-darwin) sha256=ca59674dadf654e85b3edc33c2dd2e1428f05bc24dcb605fa98f50c87285922b
   ratomic (0.4.3-x86_64-linux) sha256=459496b942f6a606e343c291331931991e62ba1a0a5c793fe1e9830017005c88
   rbs (4.2.0) sha256=51f7b886dcc05bc09e10b901daa6a81829f6adc03101d6ca9ea4aac6103e0674
+  rbs (4.2.0-java) sha256=a19282d89c307dd6d33c6a72cc60f75b10d6d35a5996796e864789c903cddb3c
   rbtree (0.4.7) sha256=1efabbcb3fd5f12249c9c8a610a765074868164eed0c50c9db2531c00ed161cb
   rdoc (8.0.0) sha256=03bf8c08a9639658855a0cfd77c0abca8325c227693f7f33f82957811348c469
   regexp_parser (2.12.0) sha256=35a916a1d63190ab5c9009457136ae5f3c0c7512d60291d0d1378ba18ce08ebb
@@ -266,6 +310,7 @@ CHECKSUMS
   uri (1.1.1) sha256=379fa58d27ffb1387eaada68c749d1426738bd0f654d812fcc07e7568f5c57c6
   yard (0.9.45) sha256=52e211493f7cb8a3ebf7e104a25a1e73937a3103092545d34cb88fafebb3dc51
   yard-markdown-relative-links (0.3.0) sha256=44abbc8dae94a9387d4f4a23aac76b553d9d1539690c9da065387c0869cf6507
+  zeitwerk (2.8.3) sha256=2c85125a8467ce069e20123d1e709a08955c9d29c118c25b46b7b7fafdbb92e5
 
 BUNDLED WITH
   4.0.20

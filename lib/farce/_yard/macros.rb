@@ -39,4 +39,4 @@
 #     * If a `Hash` or {Farce::Abstract::Map Map} is provided, it will be used to look up the normalized key for each incoming key.
 
 # @!macro active_support
-#   @note This methods is only available if the ActiveSupport integration has been loaded.
+#   @note This methods is only available if the ActiveSupport has been loaded.
