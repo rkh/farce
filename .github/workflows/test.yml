@@ -26,11 +26,12 @@ jobs:
             verify_gems: true
             # Avoid virtual-thread starvation during pool growth on Java 21.
             jruby_opts: --debug -Xfiber.vthread=false
-            test_timeout: 600
+            # Integration load-order probes each start a fresh JVM.
+            test_timeout: 1200
           - name: jruby-dev
             version: jruby-head
             jruby_opts: --debug -Xfiber.vthread=false
-            test_timeout: 600
+            test_timeout: 1200
           - name: truffleruby
             version: truffleruby
             test_timeout: 600
@@ -41,7 +42,7 @@ jobs:
             version: truffleruby+graalvm
             # Each subprocess starts a fresh JVM, which can exceed 15 seconds on CI.
             subprocess_timeout: 60
-            test_timeout: 600
+            test_timeout: 1200
 
     steps:
       - uses: actions/checkout@v6

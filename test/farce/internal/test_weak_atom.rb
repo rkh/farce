@@ -49,6 +49,18 @@ module Farce
         assert_collects_value(atom)
       end
 
+      def test_last_read_does_not_retain_the_value
+        atom = Thread.new do
+          value = Object.new
+          value.freeze if shareable_atom?
+          weak = atom_class.new(value)
+          weak.value
+          weak
+        end.value
+
+        assert_collects_value(atom)
+      end
+
       def test_can_store_a_new_value_after_collection
         atom = build_weak_atom
 

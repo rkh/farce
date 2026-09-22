@@ -74,7 +74,11 @@ module Farce
         private
 
         def run_once
-          action, key, value, port = receive_request
+          request = receive_request
+          action, key, value, port = request
+          # Ractor.receive can retain its last result while waiting for another
+          # message. Clear the copied request shell before it becomes idle.
+          request.clear unless request.frozen?
           public_send(action, key, value, port)
         rescue StandardError => e
           begin
@@ -122,7 +126,7 @@ module Farce
 
         pending = Object.new.freeze
         reply = Atom.new(pending, compare_by_identity: true)
-        @ractor.send([kind, key, [action, *arguments].freeze, reply].freeze)
+        @ractor.send([kind, key, [action, *arguments].freeze, reply])
         success, payload = reply.wait_until_changed(pending)
         return payload if success
 

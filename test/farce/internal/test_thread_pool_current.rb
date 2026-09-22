@@ -33,10 +33,13 @@ module Farce
               explicit = ThreadPool.new(max_threads: 5)
               raise "explicit limit ignored" unless explicit.max_threads == 5
               explicit.close
-              tasks = 2.times.map do
+              # Concurrent Ractors starting nested threads can stall CRuby 3.4.
+              # Check each Ractor's pool separately. The threads above still
+              # exercise concurrent initialization of the shared current pool.
+              ids = 2.times.map do
                 # This subprocess does not load test/setup's Windows Ractor-start barrier.
                 GC.start if Farce::System.windows?
-                Ractor.new do
+                task = Ractor.new do
                   current = ThreadPool.current
                   raise "wrong secondary limit" unless current.max_threads == 1 && current.capacity == 2
                   other = Thread.new { ThreadPool.current }.value
@@ -50,8 +53,8 @@ module Farce
                   raise "closed pool replaced" unless ThreadPool.current.equal?(current)
                   id
                 end
+                task.respond_to?(:value) ? task.value : task.take
               end
-              ids = tasks.map { |task| task.respond_to?(:value) ? task.value : task.take }
               raise "ractors share pool" unless (ids + [pool.object_id]).uniq.size == 3
               pool.close
               raise "closed pool replaced" unless ThreadPool.current.equal?(pool)

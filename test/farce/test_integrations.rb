@@ -6,12 +6,64 @@ require_relative "../setup"
 
 module Farce
   class TestIntegrations < Test
-    def test_core_does_not_load_optional_dependencies
+    def test_core_does_not_load_integration_dependencies
       assert_integration_process(<<~RUBY)
         require "farce"
         raise "loaded dry-types" if defined?(Dry::Types)
         raise "loaded ActiveSupport" if defined?(ActiveSupport)
         raise "unexpected active integrations" unless Farce::Integrations.load_active.empty?
+      RUBY
+    end
+
+    def test_zeitwerk_loads_before_ractor_activation_without_warnings
+      return unless RUBY_ENGINE == "ruby"
+
+      output, error, status = ruby_subprocess(<<~RUBY)
+        Warning[:experimental] = true
+        $ractor_starts = 0
+        module ObserveRactorStartup
+          def new(...)
+            $ractor_starts += 1
+            raise "Zeitwerk was not loaded before Ractor startup" unless defined?(Zeitwerk::Loader)
+            super
+          end
+        end
+        Ractor.singleton_class.prepend(ObserveRactorStartup)
+        require "farce"
+        raise "startup Ractor was deferred" unless $ractor_starts.positive?
+        raise "warning setting changed" unless Warning[:experimental]
+        Farce.const_get(:Internal)::Vault.new
+        require "dry/types"
+        types = Module.new { include Dry.Types(); include Farce.DryTypes() }
+        raise "integration is not usable" unless types::Vector[[1]].to_a == [1]
+      RUBY
+
+      assert_predicate status, :success?, "#{output}\n#{error}"
+      assert_empty error
+    end
+
+    def test_core_loads_when_zeitwerk_is_unavailable
+      return unless RUBY_ENGINE == "ruby"
+
+      assert_integration_process(<<~RUBY)
+        #{missing_dependencies(["zeitwerk"])}
+        require "farce"
+        raise "Zeitwerk was loaded" if defined?(Zeitwerk)
+        raise "core is not usable" unless Farce::Vector.new([1]).to_a == [1]
+      RUBY
+    end
+
+    def test_core_does_not_hide_errors_inside_zeitwerk
+      return unless RUBY_ENGINE == "ruby"
+
+      assert_integration_process(<<~RUBY)
+        #{missing_dependencies(["zeitwerk"], error_path: "zeitwerk/missing_dependency")}
+        begin
+          require "farce"
+          raise "Zeitwerk dependency failure was swallowed"
+        rescue LoadError => error
+          raise "wrong missing dependency" unless error.path == "zeitwerk/missing_dependency"
+        end
       RUBY
     end
 
@@ -82,6 +134,27 @@ module Farce
         def path.to_path = "dry/types.rb"
         require path
         raise "dry-types integration missing" unless Farce.respond_to?(:DryTypes)
+      RUBY
+    end
+
+    def test_existing_object_require_wrapper_is_preserved
+      assert_integration_process(<<~RUBY)
+        require "zeitwerk"
+        # Ruby 4.1 installs its own Object#require during Ractor activation.
+        Ractor.new {} if RUBY_ENGINE == "ruby"
+        class Object
+          alias original_test_require require
+          private :original_test_require
+
+          def require(path)
+            $observed_require = path
+            original_test_require(path)
+          end
+          private :require
+        end
+        require "farce"
+        require "shellwords"
+        raise "Object require wrapper was bypassed" unless $observed_require == "shellwords"
       RUBY
     end
 
@@ -156,13 +229,13 @@ module Farce
       assert_predicate status, :success?, "#{output}\n#{error}"
     end
 
-    def missing_dependencies(paths)
+    def missing_dependencies(paths, error_path: nil)
       <<~RUBY
         module MissingIntegrationDependencies
           def require(path, ...)
             if #{paths.inspect}.include?(path)
               error = LoadError.new("optional dependency unavailable")
-              error.define_singleton_method(:path) { path }
+              error.define_singleton_method(:path) { #{error_path ? error_path.inspect : "path"} }
               raise error
             end
             super

@@ -15,8 +15,9 @@ module Farce
 
     # Zeitwerk aliases Kernel#require. Prepending there can leave the aliased
     # wrapper without a valid super target on TruffleRuby. Define the instance
-    # hook on Object so Kernel#require remains available for those aliases.
-    class ::Object
+    # hook above Object so Kernel#require remains available for those aliases
+    # and Ruby's Ractor-aware Object#require stays in the lookup chain.
+    module RequireHook
       private
 
       # Load a feature and its integration while preserving require's result.
@@ -30,6 +31,9 @@ module Farce
         result
       end
     end
+
+    Object.prepend(RequireHook)
+    private_constant :RequireHook
 
     # A prepended singleton hook can recurse when Zeitwerk aliases it. Preserve
     # the original method explicitly instead of relying on super here.
