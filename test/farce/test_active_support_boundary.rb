@@ -6,6 +6,18 @@ require_relative "../setup"
 
 module Farce
   class TestActiveSupportBoundary < Test
+    def test_loading_active_support_does_not_freeze_config
+      output, error, status = ruby_subprocess(<<~RUBY)
+        require "farce"
+        raise "config is already frozen" if Farce.config.frozen?
+
+        require "farce/integrations/active_support"
+        raise "loading ActiveSupport froze config" if Farce.config.frozen?
+      RUBY
+
+      assert_predicate status, :success?, "#{output}\n#{error}"
+    end
+
     def test_blank_extensions_are_not_defined_by_core
       [Atom, Abstract::Atom, Abstract::Value, Envelope].each do |owner|
         refute_includes owner.public_instance_methods(false), :blank?, owner.name
