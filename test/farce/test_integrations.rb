@@ -171,6 +171,8 @@ module Farce
       assert_integration_process(<<~RUBY)
         require "farce"
         expected = [:active_support, :dry_types, :json, :msgpack, :psych]
+        expected << :oj unless Gem::Specification.find_all_by_name("oj").empty?
+        expected << :yajl unless Gem::Specification.find_all_by_name("yajl-ruby").empty?
         raise "wrong available integrations" unless Farce::Integrations.load_available == expected
         raise "dry-types integration missing" unless Farce.respond_to?(:DryTypes)
         raise "ActiveSupport integration missing" unless Farce::Vector.method_defined?(:in_groups)
@@ -191,7 +193,10 @@ module Farce
           require "farce"
           #{missing_dependencies(missing)}
           result = Farce::Integrations.load_available
-          raise "wrong available integrations: \#{result.inspect}" unless result == #{expected.inspect}
+          expected = #{expected.inspect}
+          expected << :oj unless Gem::Specification.find_all_by_name("oj").empty?
+          expected << :yajl unless Gem::Specification.find_all_by_name("yajl-ruby").empty?
+          raise "wrong available integrations: \#{result.inspect}" unless result == expected
         RUBY
       end
     end

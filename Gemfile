@@ -51,6 +51,9 @@ group :test do
   gem "minitest"
   gem "minitest-reporters"
   gem "msgpack", "~> 1.8"
+  gem "oj", platforms: %i[mri truffleruby]
+  # yajl-ruby 1.4.3 uses untyped C data APIs removed in Ruby 4.1.
+  gem "yajl-ruby", platforms: %i[mri_34 mri_40 truffleruby] # rubocop:disable Naming/VariableNumber
 
   platforms :mri do
     gem "rubocop"

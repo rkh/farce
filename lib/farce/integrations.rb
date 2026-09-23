@@ -12,9 +12,11 @@ module Farce
       json:           %w[json].freeze,
       msgpack:        %w[msgpack].freeze,
       psych:          %w[psych].freeze,
+      oj:             %w[oj].freeze,
+      yajl:           %w[yajl].freeze,
     }.freeze
 
-    PATHS = INTEGRATIONS.to_h { [_2.last, _1] }.freeze
+    PATHS = INTEGRATIONS.to_h { [_2.last, _1] }.merge("oj/json" => :oj, "yajl/json_gem" => :yajl).freeze
 
     # Zeitwerk aliases Kernel#require. Prepending there can leave the aliased
     # wrapper without a valid super target on TruffleRuby. Define the instance
@@ -66,8 +68,8 @@ module Farce
     # @!scope class
     def load_active
       result = []
-      INTEGRATIONS.each do |integration, require_paths|
-        next unless loaded?(require_paths.last)
+      INTEGRATIONS.each_key do |integration|
+        next unless PATHS.any? { |path, target| target == integration && loaded?(path) }
         require "farce/integrations/#{integration}"
         result << integration
       end

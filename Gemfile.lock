@@ -96,6 +96,10 @@ GEM
     msgpack (1.8.5)
     msgpack (1.8.5-java)
     nio4r (2.7.5)
+    oj (3.17.6)
+      bigdecimal (>= 3.0)
+      ostruct (>= 0.2)
+    ostruct (0.6.3)
     parallel (2.2.0)
     parser (3.3.12.0)
       ast (~> 2.4.1)
@@ -178,6 +182,7 @@ GEM
       unicode-emoji (~> 4.1)
     unicode-emoji (4.2.0)
     uri (1.1.1)
+    yajl-ruby (1.4.3)
     yard (0.9.45)
     yard-markdown-relative-links (0.3.0)
       yard (>= 0.9, < 1)
@@ -207,6 +212,7 @@ DEPENDENCIES
   minitest-reporters
   msgpack (~> 1.8)
   nio4r
+  oj
   philiprehberger-priority_queue
   pqueue
   priority_queue_cxx
@@ -222,6 +228,7 @@ DEPENDENCIES
   ruby-lsp
   simplecov
   simplecov-console
+  yajl-ruby
   yard
   yard-markdown-relative-links
 
@@ -274,6 +281,8 @@ CHECKSUMS
   msgpack (1.8.5) sha256=97419eaa7b35dfe3e462c0e6c1a3dfdcbfc8756605c09e46e4c6daef127517ba
   msgpack (1.8.5-java) sha256=8a29860a77f6530a130a6e0ffa23608e0e091e1377b0d50f1c4b56827d599fe3
   nio4r (2.7.5) sha256=6c90168e48fb5f8e768419c93abb94ba2b892a1d0602cb06eef16d8b7df1dca1
+  oj (3.17.6) sha256=f511257e01a12030c3ceb8023cd2e96fca924ea9c741f57ea366816f1fd8e68c
+  ostruct (0.6.3) sha256=95a2ed4a4bd1d190784e666b47b2d3f078e4a9efda2fccf18f84ddc6538ed912
   parallel (2.2.0) sha256=e1059c5fd7b649558a0aec38a769f06a42942bdb40503d005a59c352fe011cd8
   parser (3.3.12.0) sha256=21a6d7f755d5a24dfbdc6e6b772e4e879a52e7631a88bc5a3a134606052c9828
   philiprehberger-priority_queue (0.5.0) sha256=78d8b745a588045b9910b30183b6458821819fdfdb75978007a57439e781798b
@@ -313,6 +322,7 @@ CHECKSUMS
   unicode-display_width (3.2.0) sha256=0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42
   unicode-emoji (4.2.0) sha256=519e69150f75652e40bf736106cfbc8f0f73aa3fb6a65afe62fefa7f80b0f80f
   uri (1.1.1) sha256=379fa58d27ffb1387eaada68c749d1426738bd0f654d812fcc07e7568f5c57c6
+  yajl-ruby (1.4.3) sha256=8c974d9c11ae07b0a3b6d26efea8407269b02e4138118fbe3ef0d2ec9724d1d2
   yard (0.9.45) sha256=52e211493f7cb8a3ebf7e104a25a1e73937a3103092545d34cb88fafebb3dc51
   yard-markdown-relative-links (0.3.0) sha256=44abbc8dae94a9387d4f4a23aac76b553d9d1539690c9da065387c0869cf6507
   zeitwerk (2.8.3) sha256=2c85125a8467ce069e20123d1e709a08955c9d29c118c25b46b7b7fafdbb92e5
