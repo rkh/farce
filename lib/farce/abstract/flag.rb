@@ -43,7 +43,7 @@ module Farce
     module Flag
       include Internal::Copyable
       include Value
-      include ValueSerialization
+      include Internal::ValueSerialization
     end
   end
 end

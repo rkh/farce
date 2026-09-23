@@ -34,7 +34,7 @@ module Farce
     def to_json(...) = to_a.to_json(...)
   end
 
-  module Abstract::ValueSerialization
+  module Internal::ValueSerialization
     # Serialize the current value as its primitive JSON equivalent.
     # @note This method is only available if JSON has been loaded.
     # @overload to_json(*arguments)

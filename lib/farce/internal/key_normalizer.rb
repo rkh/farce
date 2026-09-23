@@ -256,16 +256,6 @@ module Farce
 
       def restoration?(value) = value.is_a?(Restoration)
 
-      def restore(value) = Restoration.new(value)
-
-      def dump(normalizer)
-        case normalizer
-        when SymbolNormalizer then normalizer.value
-        when LookupNormalizer then normalizer.source
-        else raise TypeError, "Proc key normalizers cannot be serialized"
-        end
-      end
-
       def operations_for(target)
         case target
         when Farce::Abstract::LeaseMap   then LeaseOperations

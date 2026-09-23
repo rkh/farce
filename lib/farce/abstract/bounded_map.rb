@@ -193,10 +193,6 @@ module Farce
       # @return [Array<BasicObject>]
       def values = each_value.to_a.freeze
 
-      # @api private
-      # Called by Psych for generating YAML
-      def encode_with(coder) = super.tap { it["max_size"] = max_size }
-
       private
 
       def copy_map_backend(source, empty: false)

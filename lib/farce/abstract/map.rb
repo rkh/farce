@@ -315,28 +315,6 @@ module Farce
         end
       end
 
-      # @api private
-      # Called by Psych for generating YAML
-      def encode_with(coder)
-        coder["entries"]                    = to_h
-        coder["compare_values_by_identity"] = compare_values_by_identity?
-        coder["compare_keys_by_identity"]   = compare_keys_by_identity?
-        normalizer = instance_variable_get(:@key_normalizer)
-        coder["normalize_keys"] = Internal::KeyNormalizer.dump(normalizer) if normalizer
-        coder
-      end
-
-      # @api private
-      # Called by Psych when parsing YAML
-      def init_with(coder)
-        options = coder.map.except("entries").transform_keys(&:to_sym)
-        if options.key?(:normalize_keys)
-          options[:normalize_keys] =
-            Internal::KeyNormalizer.restore(options[:normalize_keys])
-        end
-        initialize(coder["entries"], **options)
-      end
-
       protected
 
       # Convert a public value to its stored representation.

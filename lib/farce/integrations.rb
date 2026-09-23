@@ -11,6 +11,7 @@ module Farce
       dry_types:      %w[dry/types].freeze,
       json:           %w[json].freeze,
       msgpack:        %w[msgpack].freeze,
+      psych:          %w[psych].freeze,
     }.freeze
 
     PATHS = INTEGRATIONS.to_h { [_2.last, _1] }.freeze

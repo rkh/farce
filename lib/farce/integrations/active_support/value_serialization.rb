@@ -6,7 +6,7 @@
 require "farce/integrations/active_support"
 
 module Farce
-  module Abstract::ValueSerialization
+  module Internal::ValueSerialization
     # @!macro active_support
     # Convert the current value using ActiveSupport's JSON conversion.
     # @overload as_json(options = nil)

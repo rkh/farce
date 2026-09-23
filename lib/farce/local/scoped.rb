@@ -35,12 +35,6 @@ module Farce
         end
       end
 
-      module EncodeWith
-        # @api private
-        # Called by Psych for generating YAML
-        def encode_with(coder) = super.tap { it["scope"] = scope }
-      end
-
       module Map
         def initialize(*arguments, normalize_keys: nil, **)
           restoring  = Internal::KeyNormalizer.restoration?(normalize_keys)
@@ -75,12 +69,11 @@ module Farce
       end
 
       MANAGER = ModeManager.new
-      private_constant :MANAGER, :EncodeWith, :Map
+      private_constant :MANAGER, :Map
 
       # @!visibility private
       def self.included(base)
-        base.include EncodeWith if base.method_defined?(:encode_with)
-        base.include Map        if base < Abstract::Map
+        base.include Map if base < Abstract::Map
         super
       end
 

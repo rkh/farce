@@ -34,7 +34,7 @@ module Farce
     def to_msgpack(...) = to_a.to_msgpack(...)
   end
 
-  module Abstract::ValueSerialization
+  module Internal::ValueSerialization
     # Serialize the current value as its primitive MessagePack equivalent.
     # @note This method is only available if MessagePack has been loaded.
     # @overload to_msgpack(*arguments)

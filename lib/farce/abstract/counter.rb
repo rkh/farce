@@ -20,23 +20,7 @@ module Farce
       define_method(:clone, Kernel.instance_method(:clone))
 
       include Value
-      include ValueSerialization
-
-      # @api private
-      # Called by Psych for generating YAML.
-      def encode_with(coder)
-        super
-        coder["initial"] = initial
-        coder
-      end
-
-      # @api private
-      # Called by Psych when parsing YAML.
-      def init_with(coder)
-        options = coder.map.except("value", "initial").transform_keys(&:to_sym)
-        initialize(coder["initial"], **options)
-        self.value = coder["value"]
-      end
+      include Internal::ValueSerialization
 
       # Reset the counter to its initial value.
       # @return [self] Returns self for chaining.

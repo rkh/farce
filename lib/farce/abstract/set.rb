@@ -554,55 +554,6 @@ module Farce
       # @return [String] The joined elements.
       def join(separator = nil) = to_a.join(separator)
 
-      # @api private
-      # Called by Psych for generating YAML.
-      # @param coder [Psych::Coder] The YAML representation.
-      # @return [Psych::Coder] The coder containing the set representation.
-      def encode_with(coder)
-        coder["entries"] = each_stored.map do |key, stored|
-          element        = public_stored(key, stored)
-          entry          = {
-            "value"     => element,
-            "shareable" => Ractor.shareable?(element),
-          }
-          if value_modes?
-            entry["identity"] = identity_storage_key?(key)
-            entry["snapshot"] = key unless entry["identity"]
-            entry["mode"]     = stored_mode(stored)
-          end
-          entry
-        end
-        coder["compare_by_identity"] = compare_by_identity?
-        coder["frozen"]              = frozen?
-        coder["mode"]                = @manager.mode if value_modes?
-        coder["scope"]               = scope if respond_to?(:scope)
-        coder["normalize"]           = Internal::KeyNormalizer.dump(@normalizer) if @normalizer
-        coder
-      end
-
-      # @api private
-      # Called by Psych when parsing YAML.
-      # @param coder [Psych::Coder] The YAML representation.
-      # @return [self] The restored set.
-      def init_with(coder)
-        options             = { compare_by_identity: coder["compare_by_identity"] }
-        options[:mode]      = coder["mode"].to_sym                                if coder["mode"]
-        options[:scope]     = coder["scope"].to_sym                               if coder["scope"]
-        options[:normalize] = Internal::KeyNormalizer.restore(coder["normalize"]) if coder.map.key?("normalize")
-        entries             = coder["entries"]
-
-        if coder["mode"]
-          initialize(nil, **options)
-          entries.each { restore_yaml_entry(it) }
-        else
-          values = entries.map { restore_yaml_value(it) }
-          initialize(values, **options)
-        end
-
-        freeze if coder["frozen"]
-        self
-      end
-
       protected
 
       def initialize_empty_copy(other)
@@ -836,19 +787,6 @@ module Farce
         when Envelope::Move  then :move
         else @manager.mode
         end
-      end
-
-      def restore_yaml_entry(entry)
-        value   = restore_yaml_value(entry)
-        key     = entry["identity"] ? comparison_key_for_canonical(value) : Ractor.make_shareable(entry["snapshot"])
-        mode    = entry["mode"]&.to_sym
-        payload = @manager.wrap(value, mode:)
-        add_stored(key, StoredEntry.new(@manager, payload))
-      end
-
-      def restore_yaml_value(entry)
-        value = entry["value"]
-        entry["shareable"] ? Ractor.make_shareable(value) : value
       end
 
       def identity_storage_key?(key)
