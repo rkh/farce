@@ -14,6 +14,24 @@ module Farce
       Local::Set, Local::SortedSet, Local::WeakSet
     ].freeze
 
+    def test_mutable_sorted_sets_can_be_the_first_tree_collection_loaded
+      %w[Unshared Local].each do |namespace|
+        output, error, status = ruby_subprocess(<<~RUBY, timeout: 60)
+          require "farce"
+          set = Farce::#{namespace}::SortedSet.new([3, 1, 2])
+          raise "incorrect ordering" unless set.to_a == [1, 2, 3]
+          raise "duplicate inserted" if set.add?(2)
+          set.delete(1)
+          set.add(4)
+          raise "incorrect contents" unless set.to_a == [2, 3, 4]
+          puts "ok"
+        RUBY
+
+        assert_predicate status, :success?, "#{namespace}: #{output}\n#{error}"
+        assert_equal "ok\n", output
+      end
+    end
+
     def test_relation_divide_first_used_in_another_ractor
       output, error, status = ruby_subprocess(<<~RUBY, coverage: false)
         require "farce"

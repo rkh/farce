@@ -32,6 +32,7 @@ module Farce
       autoload :PriorityQueue,    "#{path}/priority_queue"
       autoload :ShareableTreeMap, "#{path}/tree_map"
       autoload :TreeMap,          "#{path}/tree_map"
+      autoload :MutableTreeMap,   "#{path}/tree_map"
       autoload :Counter,          "#{path}/counter"
       autoload :Flag,             "#{path}/flag"
     end
