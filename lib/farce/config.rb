@@ -22,6 +22,12 @@ module Farce
   # end
   # ```
   class Config
+    # Automatically load integrations when their dependencies are loaded. Defaults to true.
+    # Can also be set via `FARCE_AUTOLOAD_INTEGRATIONS` (`true`/`false` or `1`/`0`).
+    # Set before requiring Farce to also disable startup integration loading.
+    # @return [Boolean]
+    attr_reader :autoload_integrations
+
     # Maximum workers in a pool created on the main Ractor. Workers start lazily.
     # Can also be set via `FARCE_MAIN_THREAD_POOL_SIZE`. Defaults to 4.
     attr_reader :main_thread_pool_size
@@ -34,9 +40,21 @@ module Farce
     # @yieldparam config [Config] the configuration object to configure
     def initialize
       yield self if block_given?
-      self.fiber_scheduler = ENV["FARCE_FIBER_SCHEDULER"] unless instance_variable_defined?(:@fiber_scheduler)
+      self.autoload_integrations = ENV.fetch("FARCE_AUTOLOAD_INTEGRATIONS", true) if autoload_integrations.nil?
+      self.fiber_scheduler       = ENV["FARCE_FIBER_SCHEDULER"] unless instance_variable_defined?(:@fiber_scheduler)
       self.main_thread_pool_size       ||= ENV.fetch("FARCE_MAIN_THREAD_POOL_SIZE", 4)
       self.additional_thread_pool_size ||= ENV.fetch("FARCE_ADDITIONAL_THREAD_POOL_SIZE", 2)
+    end
+
+    # Enable or disable automatic integration loading. Already loaded integrations remain active.
+    # @param value [Boolean, String] true, false, or their environment variable representations.
+    # @raise [ArgumentError] If the value is not a supported boolean.
+    def autoload_integrations=(value)
+      @autoload_integrations = case value
+                               when true, "true",   "1" then true
+                               when false, "false", "0" then false
+                               else raise ArgumentError, "autoload_integrations must be a boolean"
+                               end
     end
 
     # Default fiber scheduler for Pool and Scheduler.

@@ -4,6 +4,48 @@
 require_relative "../setup"
 
 class TestConfig < Test
+  def test_autoload_integrations_defaults_environment_and_explicit_precedence
+    output, error, status = ruby_subprocess(<<~RUBY)
+      ENV.delete("FARCE_AUTOLOAD_INTEGRATIONS")
+      require "farce/config"
+      raise "loaded core" if Farce.const_defined?(:Vector, false)
+      raise "wrong default" unless Farce.config.autoload_integrations == true
+      { "true" => true, "1" => true, "false" => false, "0" => false }.each do |value, expected|
+        ENV["FARCE_AUTOLOAD_INTEGRATIONS"] = value
+        raise "wrong environment value" unless Farce::Config.new.autoload_integrations == expected
+      end
+      ENV["FARCE_AUTOLOAD_INTEGRATIONS"] = "invalid"
+      [true, false].each do |value|
+        config = Farce::Config.new { |c| c.autoload_integrations = value }
+        raise "explicit value ignored" unless config.autoload_integrations == value
+        raise "configuration frozen" if config.frozen?
+      end
+      begin
+        Farce::Config.new
+        raise "invalid environment accepted"
+      rescue ArgumentError
+      end
+      puts "ok"
+    RUBY
+
+    assert_predicate status, :success?, error
+    assert_equal "ok\n", output
+  end
+
+  def test_autoload_integrations_validation_and_freezing
+    config = Farce::Config.new { |c| c.autoload_integrations = false }
+    [nil, 0, 1, :invalid, "", "invalid", Object.new].each do |value|
+      assert_raises(ArgumentError) { config.autoload_integrations = value }
+      refute config.autoload_integrations
+    end
+    config.autoload_integrations = true
+
+    assert config.autoload_integrations
+    config.freeze
+
+    assert_raises(FrozenError) { config.autoload_integrations = false }
+  end
+
   def test_global_config_returns_and_yields_the_same_instance
     config = Farce.config
     yielded = nil

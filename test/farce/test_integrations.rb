@@ -6,6 +6,54 @@ require_relative "../setup"
 
 module Farce
   class TestIntegrations < Test
+    def test_disabling_autoload_before_farce_skips_startup_and_require_hooks
+      ["require", "Kernel.require"].product(%i[environment config]).each do |loader, setting|
+        setup = if setting == :environment
+                  'ENV["FARCE_AUTOLOAD_INTEGRATIONS"] = "false"'
+                else
+                  'require "farce/config"; Farce.config.autoload_integrations = false'
+                end
+
+        assert_integration_process(<<~RUBY)
+          #{setup}
+          require "json"
+          require "farce"
+          raise "startup loaded integration" if $LOADED_FEATURES.any? { |path| path.end_with?("/farce/integrations/json.rb") }
+          raise "configuration frozen at startup" if Farce.config.frozen?
+          raise "dependency not loaded" unless #{loader}("dry/types")
+          raise "hook loaded integration" if Farce.respond_to?(:DryTypes)
+          raise "require result changed" if #{loader}("dry/types")
+          raise "configuration frozen by hook" if Farce.config.frozen?
+          require "farce/integrations/json"
+          raise "explicit integration disabled" unless $LOADED_FEATURES.any? { |path| path.end_with?("/farce/integrations/json.rb") }
+          Farce.config.autoload_integrations = true
+          raise "require result changed after enabling" if #{loader}("dry/types")
+          raise "hook did not observe new setting" unless Farce.respond_to?(:DryTypes)
+          raise "configuration frozen after enabling" if Farce.config.frozen?
+        RUBY
+      end
+    end
+
+    def test_autoload_can_be_disabled_after_startup_without_freezing_configuration
+      ["require", "Kernel.require"].each do |loader|
+        assert_integration_process(<<~RUBY)
+          ENV.delete("FARCE_AUTOLOAD_INTEGRATIONS")
+          require "json"
+          require "farce"
+          raise "default disabled" unless Farce.config.autoload_integrations == true
+          raise "startup integration missing" unless $LOADED_FEATURES.any? { |path| path.end_with?("/farce/integrations/json.rb") }
+          raise "startup froze configuration" if Farce.config.frozen?
+          #{loader}("psych")
+          raise "hook integration missing" unless $LOADED_FEATURES.any? { |path| path.end_with?("/farce/integrations/psych.rb") }
+          raise "hook froze configuration" if Farce.config.frozen?
+          Farce.config.autoload_integrations = false
+          #{loader}("dry/types")
+          raise "hook ignored disabled setting" if Farce.respond_to?(:DryTypes)
+          raise "configuration frozen" if Farce.config.frozen?
+        RUBY
+      end
+    end
+
     def test_core_does_not_load_integration_dependencies
       assert_integration_process(<<~RUBY)
         require "farce"

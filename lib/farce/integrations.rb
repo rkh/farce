@@ -32,7 +32,7 @@ module Farce
         path        = File.path(path)
         result      = super
         integration = PATHS[path.delete_suffix(".rb")]
-        super("farce/integrations/#{integration}") if integration
+        super("farce/integrations/#{integration}") if integration && Farce.config.autoload_integrations
         result
       end
     end
@@ -54,7 +54,7 @@ module Farce
         path        = File.path(path)
         result      = farce_original_require(path, ...)
         integration = PATHS[path.delete_suffix(".rb")]
-        farce_original_require("farce/integrations/#{integration}") if integration
+        farce_original_require("farce/integrations/#{integration}") if integration && Farce.config.autoload_integrations
         result
       end
     end
@@ -62,6 +62,12 @@ module Farce
     private_constant :INTEGRATIONS, :PATHS
 
     extend self
+
+    # Activate integrations at startup when automatic loading is enabled.
+    # @api private
+    def setup
+      load_active if Farce.config.autoload_integrations
+    end
 
     # Loads all integrations for gems that have already been loaded.
     # @return [Array<Symbol>] the list of integrations that were loaded

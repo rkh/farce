@@ -190,5 +190,5 @@ module Farce
   def self.included(mod)        = Internal::Mixin.__send__(:included, mod)
   private_class_method :append_features, :included
 
-  Integrations.load_active
+  Integrations.setup
 end
