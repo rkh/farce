@@ -14,5 +14,6 @@ module Farce
     autoload :PriorityQueue,          "farce/engine/jvm/priority_queue"
     autoload :ShareableTreeMap,       "farce/engine/jvm/tree_map"
     autoload :TreeMap,                "farce/engine/jvm/tree_map"
+    autoload :MutableTreeMap,         "farce/engine/jvm/tree_map"
   end
 end

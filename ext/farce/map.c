@@ -14,12 +14,21 @@
 #define MAP_INITIAL_CAPACITY 16
 
 static VALUE cMap;
+static VALUE cUnsharedMap;
 static VALUE map_keep;
 static VALUE map_delete_token;
 static VALUE cUnsharedKeyLockMap;
 static VALUE cSharedKeyLockMap;
+static VALUE cStrictMapFacade;
+static VALUE cUnsharedMapFacade;
+static VALUE cModeMapFacade;
+static VALUE cMapEnvelope;
+static VALUE map_nil_value;
 static VALUE eIsolationError;
 static const rb_data_type_t map_type;
+static ID id_map;
+static ID id_unwrap_value;
+static ID id_wrap_value;
 
 
 typedef enum { MAP_EMPTY = 0, MAP_OCCUPIED = 1, MAP_TOMBSTONE = 2 } map_slot_state_t;
@@ -58,6 +67,7 @@ typedef struct {
     map_waiter_t *waiters;
     bool compare_keys_by_identity;
     bool compare_values_by_identity;
+    bool shareable;
     bool comparing;
     VALUE comparing_owner;
     VALUE comparing_thread;
@@ -257,6 +267,18 @@ static const rb_data_type_t map_type = {
     .flags = RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
+static const rb_data_type_t unshared_map_type = {
+    .wrap_struct_name = "Farce::Internal::UnsharedMap",
+    .function = {
+        .dmark = map_mark,
+        .dfree = map_free,
+        .dsize = map_memsize,
+        .dcompact = map_compact,
+    },
+    .parent = &map_type,
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY,
+};
+
 static size_t
 key_lock_memsize(const void *pointer)
 {
@@ -320,6 +342,7 @@ map_initialize_storage(map_t *map)
     map->waiters = NULL;
     map->compare_keys_by_identity = false;
     map->compare_values_by_identity = false;
+    map->shareable = false;
     map->comparing = false;
     map->comparing_owner = Qnil;
     map->comparing_thread = Qnil;
@@ -334,6 +357,18 @@ map_allocate(VALUE klass)
     map_t *map;
     VALUE object = TypedData_Make_Struct(klass, map_t, &map_type, map);
     map_initialize_storage(map);
+    map->shareable = true;
+    return object;
+}
+
+static VALUE
+unshared_map_allocate(VALUE klass)
+{
+    map_t *map;
+    VALUE object = TypedData_Make_Struct(klass, map_t, &unshared_map_type, map);
+    map_initialize_storage(map);
+    VALUE guard = rb_path2class("Farce::Internal::Unshareable");
+    rb_funcall(guard, rb_intern("pin_to_current_ractor"), 1, object);
     return object;
 }
 
@@ -503,6 +538,7 @@ map_keys_equal(
     const map_execution_context_t *context
 )
 {
+    if (left == right) return true;
     if (map->compare_keys_by_identity) return left == right;
 
     map_eql_arguments_t arguments = {.left = left, .right = right};
@@ -559,6 +595,59 @@ map_find_slot(
 
     *found = false;
     return first_tombstone;
+}
+
+/* Resolve lookups that cannot call user equality code. This lets the common
+ * same-object hit avoid capturing Fiber and Thread state. Return false when
+ * an equal-hash key requires the full callback-safe comparison protocol. */
+static bool
+map_find_slot_without_equality(
+    map_t *map,
+    VALUE key,
+    st_index_t hash,
+    size_t *index,
+    bool *found
+)
+{
+    size_t mask = map->capacity - 1;
+    size_t first_tombstone = SIZE_MAX;
+
+    for (size_t offset = 0; offset < map->capacity; offset++) {
+        size_t candidate = ((size_t)hash + offset) & mask;
+        map_slot_t *slot = &map->slots[candidate];
+
+        if (slot->state == MAP_EMPTY) {
+            *index = first_tombstone == SIZE_MAX ? candidate : first_tombstone;
+            *found = false;
+            return true;
+        }
+        if (slot->state == MAP_TOMBSTONE) {
+            if (first_tombstone == SIZE_MAX) first_tombstone = candidate;
+            continue;
+        }
+        if (slot->hash != hash) continue;
+        if (slot->key == key) {
+            *index = candidate;
+            *found = true;
+            return true;
+        }
+        if (map->compare_keys_by_identity) continue;
+        /* CRuby's rb_eql uses built-in comparison for exact Strings. Keep
+         * subclasses and singleton classes on the callback-safe path. */
+        if (CLASS_OF(slot->key) == rb_cString && RB_TYPE_P(key, T_STRING)) {
+            if (RTEST(rb_str_equal(slot->key, key))) {
+                *index = candidate;
+                *found = true;
+                return true;
+            }
+            continue;
+        }
+        return false;
+    }
+
+    *index = first_tombstone;
+    *found = false;
+    return true;
 }
 
 /* Reservations use the same hash and equality rules as stored entries. They
@@ -760,8 +849,14 @@ static VALUE
 map_prepare_key(map_t *map, VALUE key)
 {
     key = map_normalize_key(map, key);
-    containers_check_shareable(key);
+    if (map->shareable) containers_check_shareable(key);
     return key;
+}
+
+static void
+map_check_value(map_t *map, VALUE value)
+{
+    if (map->shareable) containers_check_shareable(value);
 }
 
 typedef struct {
@@ -775,7 +870,7 @@ map_initialize_entry(VALUE key, VALUE value, VALUE opaque)
 {
     map_init_context_t *context = (map_init_context_t *)opaque;
     key = map_prepare_key(context->map, key);
-    containers_check_shareable(value);
+    map_check_value(context->map, value);
     st_index_t hash = map_key_hash(context->map, key);
     map_lock_state(context->map, &context->execution);
     map_store_locked(context->self, context->map, key, value, hash, &context->execution);
@@ -823,7 +918,7 @@ map_initialize(int argc, VALUE *argv, VALUE self)
         rb_hash_foreach(mapping, map_initialize_entry, (VALUE)&context);
     }
     map->initialized = true;
-    containers_publish_native_with_references(self, map_validate_references);
+    if (map->shareable) containers_publish_native_with_references(self, map_validate_references);
     return self;
 }
 
@@ -835,9 +930,19 @@ map_get(VALUE self, VALUE key)
     st_index_t hash = map_key_hash(map, key);
     bool found;
     VALUE result = Qnil;
+    size_t index;
+
+    pthread_mutex_lock(&map->lock);
+    if (!map->comparing && map_find_slot_without_equality(map, key, hash, &index, &found)) {
+        if (found) result = map->slots[index].value;
+        pthread_mutex_unlock(&map->lock);
+        return result;
+    }
+    pthread_mutex_unlock(&map->lock);
+
     map_execution_context_t execution = map_current_execution_context();
     map_lock_state(map, &execution);
-    size_t index = map_find_slot(map, key, hash, &found, &execution);
+    index = map_find_slot(map, key, hash, &found, &execution);
     if (found) result = map->slots[index].value;
     pthread_mutex_unlock(&map->lock);
     return result;
@@ -854,8 +959,9 @@ static VALUE
 map_prepare_mutation_key(VALUE self, VALUE key)
 {
     rb_check_frozen(self);
-    key = map_normalize_key(get_map(self), key);
-    if (!rb_ractor_shareable_p(key)) {
+    map_t *map = get_map(self);
+    key = map_normalize_key(map, key);
+    if (map->shareable && !rb_ractor_shareable_p(key)) {
         rb_raise(eIsolationError, "key must be Ractor-shareable");
     }
     return key;
@@ -899,14 +1005,136 @@ map_set(VALUE self, VALUE key, VALUE value)
     rb_check_frozen(self);
     map_t *map = get_map(self);
     key = map_prepare_key(map, key);
-    containers_check_shareable(value);
+    map_check_value(map, value);
     st_index_t hash = map_key_hash(map, key);
     rb_check_frozen(self);
+
+    /* Replacing an existing entry needs neither allocation nor execution
+     * context when no callback or atomic update owns the map. Keep the
+     * callback/reservation path below for all other cases. */
+    bool found;
+    size_t index;
+    pthread_mutex_lock(&map->lock);
+    if (!map->comparing && !map->reservations &&
+        map_find_slot_without_equality(map, key, hash, &index, &found) && found) {
+        if (RB_OBJ_FROZEN(self)) {
+            pthread_mutex_unlock(&map->lock);
+            rb_check_frozen(self);
+        }
+        map->slots[index].value = value;
+        map_notify_waiters_locked(map);
+        pthread_mutex_unlock(&map->lock);
+        return value;
+    }
+    pthread_mutex_unlock(&map->lock);
+
     map_execution_context_t execution = map_current_execution_context();
     map_lock_for_key(map, key, hash, &execution);
     map_store_locked(self, map, key, value, hash, &execution);
     pthread_mutex_unlock(&map->lock);
     return value;
+}
+
+static bool
+map_is_backend(VALUE backend, const rb_data_type_t *type)
+{
+    return RB_TYPE_P(backend, T_DATA) && RTYPEDDATA_P(backend) &&
+        RTYPEDDATA_TYPE(backend) == type;
+}
+
+/* The public direct maps retain Ruby fallbacks for subclasses and normalized
+ * adapters. Ordinary access reaches the native backend without Ruby forwarding. */
+static const rb_data_type_t *
+map_facade_type(VALUE self)
+{
+    VALUE klass = rb_obj_class(self);
+    if (klass == cStrictMapFacade) return &map_type;
+    if (klass == cUnsharedMapFacade) return &unshared_map_type;
+    return NULL;
+}
+
+static VALUE
+plain_map_get(VALUE self, VALUE key)
+{
+    const rb_data_type_t *type = map_facade_type(self);
+    if (!type) return rb_call_super(1, &key);
+    VALUE backend = rb_ivar_get(self, id_map);
+    if (map_is_backend(backend, type)) return map_get(backend, key);
+    return rb_funcall(backend, rb_intern("[]"), 1, key);
+}
+
+static VALUE
+plain_map_set(VALUE self, VALUE key, VALUE value)
+{
+    const rb_data_type_t *type = map_facade_type(self);
+    if (!type) {
+        VALUE arguments[] = {key, value};
+        return rb_call_super(2, arguments);
+    }
+    VALUE backend = rb_ivar_get(self, id_map);
+    if (map_is_backend(backend, type)) return map_set(backend, key, value);
+    return rb_funcall(backend, rb_intern("[]="), 2, key, value);
+}
+
+/* Values already shareable need no mode conversion. Envelopes, normalized
+ * backends, and subclasses retain the Ruby hooks that implement their policy. */
+static VALUE
+mode_map_get(VALUE self, VALUE key)
+{
+    if (rb_obj_class(self) != cModeMapFacade) return rb_call_super(1, &key);
+    VALUE backend = rb_ivar_get(self, id_map);
+    if (!map_is_backend(backend, &map_type)) return rb_call_super(1, &key);
+    VALUE result = map_get(backend, key);
+    if (result == map_nil_value) return Qnil;
+    if (rb_obj_is_kind_of(result, cMapEnvelope)) {
+        return rb_funcall(self, id_unwrap_value, 1, result);
+    }
+    return result;
+}
+
+static VALUE
+mode_map_set(VALUE self, VALUE key, VALUE value)
+{
+    VALUE backend = rb_ivar_get(self, id_map);
+    if (rb_obj_class(self) != cModeMapFacade || !map_is_backend(backend, &map_type)) {
+        VALUE arguments[] = {key, value};
+        return rb_call_super(2, arguments);
+    }
+    /* Preserve the key-specific error and validate before any value transfer. */
+    key = map_prepare_mutation_key(backend, key);
+    /* These are the positive fast checks from rb_ractor_shareable_p. A missing
+     * flag means unknown, so let wrap_value classify and transfer it once.
+     * Preclassifying here would traverse partly frozen graphs twice. */
+    VALUE stored = RB_SPECIAL_CONST_P(value) || RB_OBJ_SHAREABLE_P(value)
+        ? (NIL_P(value) ? map_nil_value : value)
+        : rb_funcall(self, id_wrap_value, 1, value);
+    map_set(backend, key, stored);
+    return value;
+}
+
+static VALUE
+map_prepare_access(VALUE namespace, VALUE klass, VALUE kind)
+{
+    (void)namespace;
+    Check_Type(klass, T_CLASS);
+    Check_Type(kind, T_SYMBOL);
+    ID policy_id = SYM2ID(kind);
+    if (policy_id == rb_intern("modes")) {
+        cModeMapFacade = klass;
+        cMapEnvelope = rb_path2class("Farce::Envelope");
+        VALUE policy = rb_path2class("Farce::Internal::MapValueModes");
+        map_nil_value = rb_const_get(policy, rb_intern("NIL_VALUE"));
+        rb_define_method(klass, "[]", mode_map_get, 1);
+        rb_define_method(klass, "[]=", mode_map_set, 2);
+    }
+    else {
+        if (policy_id == rb_intern("strict")) cStrictMapFacade = klass;
+        else if (policy_id == rb_intern("unshared")) cUnsharedMapFacade = klass;
+        else rb_raise(rb_eArgError, "unknown native map policy");
+        rb_define_method(klass, "[]", plain_map_get, 1);
+        rb_define_method(klass, "[]=", plain_map_set, 2);
+    }
+    return klass;
 }
 
 static VALUE
@@ -1025,7 +1253,7 @@ map_store_body(VALUE opaque)
 {
     map_operation_t *operation = (map_operation_t *)opaque;
     VALUE result = rb_yield_values(0);
-    containers_check_shareable(result);
+    map_check_value(operation->map, result);
     rb_check_frozen(operation->self);
     map_lock_state(operation->map, &operation->execution);
     bool stored = !operation->reservation->invalidated;
@@ -1149,8 +1377,8 @@ map_compare_and_set(int argc, VALUE *argv, VALUE self)
         .identity = map->compare_values_by_identity,
         .complete = false,
     };
-    containers_check_shareable(expected);
-    containers_check_shareable(replacement);
+    map_check_value(map, expected);
+    map_check_value(map, replacement);
     operation.hash = map_key_hash(map, key);
     rb_check_frozen(self);
     map_timeout_t timeout = map_parse_timeout(
@@ -1186,7 +1414,7 @@ map_modify_body(VALUE opaque)
     VALUE value = rb_yield_values(2, operation->present ? Qtrue : Qfalse, operation->current);
     bool remove = value == map_delete_token;
     bool store = !remove && value != map_keep;
-    if (store) containers_check_shareable(value);
+    if (store) map_check_value(operation->map, value);
     rb_check_frozen(operation->self);
     map_lock_state(operation->map, &operation->execution);
     bool changed = false;
@@ -1254,7 +1482,7 @@ map_upsert_body(VALUE opaque)
 {
     map_operation_t *operation = (map_operation_t *)opaque;
     VALUE result = rb_yield(operation->current);
-    containers_check_shareable(result);
+    map_check_value(operation->map, result);
     rb_check_frozen(operation->self);
     map_lock_state(operation->map, &operation->execution);
     bool stored = !operation->reservation->invalidated;
@@ -1295,7 +1523,7 @@ map_upsert(int argc, VALUE *argv, VALUE self)
         .key = key,
         .complete = false,
     };
-    containers_check_shareable(initial);
+    map_check_value(map, initial);
     rb_need_block();
     operation.hash = map_key_hash(map, key);
     rb_check_frozen(self);
@@ -1526,7 +1754,7 @@ map_store_with_timeout(int argc, VALUE *argv, VALUE self)
 
     map_t *map = get_map(self);
     key = map_prepare_key(map, key);
-    containers_check_shareable(value);
+    map_check_value(map, value);
     st_index_t hash = map_key_hash(map, key);
     rb_check_frozen(self);
     map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
@@ -1553,7 +1781,7 @@ map_swap(int argc, VALUE *argv, VALUE self)
 
     map_t *map = get_map(self);
     key = map_prepare_key(map, key);
-    containers_check_shareable(replacement);
+    map_check_value(map, replacement);
     st_index_t hash = map_key_hash(map, key);
     rb_check_frozen(self);
     map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
@@ -1594,7 +1822,7 @@ map_wait_for_value(int argc, VALUE *argv, VALUE self, bool non_nil)
 
     map_t *map = get_map(self);
     key = map_prepare_key(map, key);
-    if (!non_nil) containers_check_shareable(expected);
+    if (!non_nil) map_check_value(map, expected);
     st_index_t hash = map_key_hash(map, key);
     map_timeout_t timeout = map_parse_timeout(keyword_values[0] == Qundef ? Qnil : keyword_values[0]);
     map_execution_context_t execution = map_current_execution_context();
@@ -1798,10 +2026,52 @@ key_lock_initialize_copy(VALUE self, VALUE other)
     rb_raise(rb_eTypeError, "key lock maps cannot be copied");
 }
 
+static void
+map_define_methods(VALUE klass)
+{
+    rb_define_method(klass, "initialize", map_initialize, -1);
+    rb_define_method(klass, "[]", map_get, 1);
+    rb_define_method(klass, "[]=", map_set, 2);
+    rb_define_method(klass, "check_mutation", map_check_mutation, 0);
+    rb_define_method(klass, "prepare_mutation_key", map_prepare_mutation_key, 1);
+    rb_define_method(klass, "fetch", map_fetch, -1);
+    rb_define_method(klass, "get", map_get_with_timeout, -1);
+    rb_define_method(klass, "store", map_store_with_timeout, -1);
+    rb_define_method(klass, "swap", map_swap, -1);
+    rb_define_method(klass, "update", map_update, -1);
+    rb_define_method(klass, "modify", map_modify, 1);
+    rb_define_method(klass, "wait_until_changed", map_wait_until_changed, -1);
+    rb_define_method(klass, "wait_until_non_nil", map_wait_until_non_nil, -1);
+    rb_define_method(klass, "store_if_absent", map_store_if_absent, -1);
+    rb_define_method(klass, "key?", map_key_p, 1);
+    rb_define_method(klass, "delete", map_delete, 1);
+    rb_define_method(klass, "clear", map_clear, 0);
+    rb_define_method(klass, "compare_and_set", map_compare_and_set, -1);
+    rb_define_method(klass, "upsert", map_upsert, -1);
+    rb_define_method(klass, "compare_keys_by_identity?", map_compare_keys_by_identity_p, 0);
+    rb_define_method(klass, "compare_values_by_identity?", map_compare_values_by_identity_p, 0);
+    rb_define_method(klass, "getkey", map_getkey, 1);
+    rb_define_method(klass, "size", map_size, 0);
+    rb_define_method(klass, "keys", map_keys, 0);
+    rb_define_method(klass, "each", map_each, 0);
+    rb_define_method(klass, "each_live", map_each_live, 0);
+    rb_define_method(klass, "each_pair", map_each, 0);
+    rb_define_method(klass, "each_key", map_each_key, 0);
+    rb_define_method(klass, "each_value", map_each_value, 0);
+}
+
 
 void
 containers_init_map(VALUE namespace)
 {
+    rb_global_variable(&cStrictMapFacade);
+    rb_global_variable(&cUnsharedMapFacade);
+    id_map = rb_intern("@map");
+    id_unwrap_value = rb_intern("unwrap_value");
+    id_wrap_value = rb_intern("wrap_value");
+    rb_global_variable(&cModeMapFacade);
+    rb_global_variable(&cMapEnvelope);
+    rb_global_variable(&map_nil_value);
     eIsolationError = rb_const_get(rb_cRactor, rb_intern("IsolationError"));
     map_keep = rb_const_get(namespace, rb_intern("MAP_KEEP"));
     map_delete_token = rb_const_get(namespace, rb_intern("MAP_DELETE"));
@@ -1822,33 +2092,12 @@ containers_init_map(VALUE namespace)
 
     cMap = rb_define_class_under(namespace, "Map", rb_cObject);
     rb_define_alloc_func(cMap, map_allocate);
-    rb_define_method(cMap, "initialize", map_initialize, -1);
-    rb_define_method(cMap, "[]", map_get, 1);
-    rb_define_method(cMap, "[]=", map_set, 2);
-    rb_define_method(cMap, "check_mutation", map_check_mutation, 0);
-    rb_define_method(cMap, "prepare_mutation_key", map_prepare_mutation_key, 1);
-    rb_define_method(cMap, "fetch", map_fetch, -1);
-    rb_define_method(cMap, "get", map_get_with_timeout, -1);
-    rb_define_method(cMap, "store", map_store_with_timeout, -1);
-    rb_define_method(cMap, "swap", map_swap, -1);
-    rb_define_method(cMap, "update", map_update, -1);
-    rb_define_method(cMap, "modify", map_modify, 1);
-    rb_define_method(cMap, "wait_until_changed", map_wait_until_changed, -1);
-    rb_define_method(cMap, "wait_until_non_nil", map_wait_until_non_nil, -1);
-    rb_define_method(cMap, "store_if_absent", map_store_if_absent, -1);
-    rb_define_method(cMap, "key?", map_key_p, 1);
-    rb_define_method(cMap, "delete", map_delete, 1);
-    rb_define_method(cMap, "clear", map_clear, 0);
-    rb_define_method(cMap, "compare_and_set", map_compare_and_set, -1);
-    rb_define_method(cMap, "upsert", map_upsert, -1);
-    rb_define_method(cMap, "compare_keys_by_identity?", map_compare_keys_by_identity_p, 0);
-    rb_define_method(cMap, "compare_values_by_identity?", map_compare_values_by_identity_p, 0);
-    rb_define_method(cMap, "getkey", map_getkey, 1);
-    rb_define_method(cMap, "size", map_size, 0);
-    rb_define_method(cMap, "keys", map_keys, 0);
-    rb_define_method(cMap, "each", map_each, 0);
-    rb_define_method(cMap, "each_live", map_each_live, 0);
-    rb_define_method(cMap, "each_pair", map_each, 0);
-    rb_define_method(cMap, "each_key", map_each_key, 0);
-    rb_define_method(cMap, "each_value", map_each_value, 0);
+    map_define_methods(cMap);
+
+    cUnsharedMap = rb_define_class_under(namespace, "UnsharedMap", rb_cObject);
+    rb_define_alloc_func(cUnsharedMap, unshared_map_allocate);
+    map_define_methods(cUnsharedMap);
+    rb_define_singleton_method(
+        namespace, "prepare_map_access", map_prepare_access, 2
+    );
 }

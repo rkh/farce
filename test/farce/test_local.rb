@@ -89,7 +89,7 @@ module Farce
       result = Fiber.new { [map.keys, map.compare_values_by_identity?] }.resume
 
       assert_equal [[:key], true], result
-      assert_equal %i[key extra], map.keys
+      assert_equal %i[extra key], map.keys.sort
       vector = Local::Vector.new([:first], compare_by_identity: true)
 
       assert_equal :first, vector[0]

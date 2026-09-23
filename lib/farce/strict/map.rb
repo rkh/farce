@@ -46,6 +46,8 @@ module Farce
       def shareable_values? = true
 
       private def freeze_backend = internal_map
+
+      Internal.prepare_map_access(self, :strict)
     end
   end
 end

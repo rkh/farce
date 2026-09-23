@@ -33,6 +33,8 @@ module Farce
 
     def new_map(**)    = Internal::StrictMap.new(**)
     def freeze_backend = @map
+
+    Internal.prepare_map_access(self, :modes)
   end
 
   Internal::KeyNormalizer.prepare_concurrent_class(Internal::StrictMap)

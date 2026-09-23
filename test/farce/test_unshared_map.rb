@@ -24,6 +24,68 @@ module Farce
       assert_raises(NoMethodError) { map.freeze }
     end
 
+    def test_native_backend_remains_unshareable_when_weak_maps_load
+      return unless Internal.native_ractors?
+
+      backend_class = Internal::UnsharedMap
+      backend = Unshared::Map.new.instance_variable_get(:@map)
+
+      assert_instance_of backend_class, backend
+      assert_nil backend_class.instance_method(:[]).source_location
+      require "farce/engine/shared/unshared_weak_map"
+
+      assert_same backend_class, Internal::UnsharedMap
+
+      backend.freeze
+
+      refute Ractor.shareable?(backend)
+      assert_raises(Ractor::Error) do
+        Ractor.make_shareable(Unshared::Map.new.instance_variable_get(:@map))
+      end
+      movable = Unshared::Map.new.instance_variable_get(:@map)
+      value = []
+      movable[:key] = value
+      worker = Ractor.new { Ractor.receive }
+
+      assert_raises(TypeError, Ractor::Error) { worker.send(movable, move: true) }
+      worker.send(:done)
+
+      assert_equal :done, ractor_value(worker)
+      assert_same value, movable[:key]
+    end
+
+    def test_native_backend_compacts_mutable_references_during_an_update
+      return unless Internal.native_ractors? && GC.respond_to?(:verify_compaction_references)
+
+      key = Object.new
+      value = []
+      map = Unshared::Map.new({ key => value })
+      entered = Thread::Queue.new
+      release = Thread::Queue.new
+      worker = Thread.new do
+        map.update(key) do |current|
+          entered << true
+          release.pop
+          current << :updated
+        end
+      end
+      Timeout.timeout(5) { entered.pop }
+
+      GC.verify_compaction_references(double_heap: true, toward: :empty)
+
+      assert_same key, map.getkey(key)
+      assert_same value, map[key]
+      release << true
+
+      assert worker.join(5), "update did not finish after compaction"
+      assert_same value, worker.value
+      assert_equal [:updated], map[key]
+    ensure
+      release << true if release
+      worker&.kill if worker&.alive?
+      worker&.join
+    end
+
     def test_rejects_value_transfer_modes
       assert_raises(ArgumentError) { Unshared::Map.new(mode: :copy) }
 

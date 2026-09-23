@@ -116,6 +116,28 @@ module Farce
       end
     end
 
+    def test_native_facade_subclasses_can_override_internal_map
+      [Strict::Map, Unshared::Map].each do |type|
+        alternate = type.new
+        subclass = Class.new(type) do
+          define_method(:initialize) do
+            @alternate = alternate
+            super()
+          end
+
+          protected
+
+          def internal_map = @alternate
+        end
+        map = subclass.new
+
+        assert_equal :value, map[:key] = :value
+        assert_equal :value, map[:key]
+        assert_equal :value, alternate[:key]
+        assert_nil map.instance_variable_get(:@map)[:key]
+      end
+    end
+
     def test_direct_variants_reject_transfer_modes
       DIRECT_VARIANTS.each do |klass|
         assert_raises(ArgumentError) { klass.new(mode: :copy) }

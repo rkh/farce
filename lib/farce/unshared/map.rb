@@ -46,6 +46,8 @@ module Farce
         Internal::KeyNormalizer.install_concurrent(self, normalizer) if restoring
         super()
       end
+
+      Internal.prepare_map_access(self, :unshared)
     end
   end
 end

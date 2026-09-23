@@ -410,7 +410,9 @@ module Farce
     end
     private_constant :UnsharedMapBase
 
-    class UnsharedMap < UnsharedMapBase
+    unless const_defined?(:UnsharedMap, false)
+      class UnsharedMap < UnsharedMapBase
+      end
     end
 
     class UnsharedWeakKeyMap < UnsharedMapBase
