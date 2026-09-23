@@ -95,7 +95,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/value_serialization.rb<span class="defines">,<br>
-  lib/farce/integrations/msgpack.rb</span>
+  lib/farce/integrations/json.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/active_support/value_serialization.rb</span>
 
 </dd>
   </dl>
@@ -121,11 +121,67 @@
 
   
     <h2>
+      JSON Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize the current value as its primitive JSON equivalent.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+    <h2>
       ActiveSupport Integration
       <small><a href="#" class="summary_toggle">collapse</a></small>
     </h2>
 
     <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#as_json-instance_method" title="#as_json (instance method)">#<strong>as_json</strong>(options = nil)  &#x21d2; Object<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Convert the current value using ActiveSupport's JSON conversion.</p>
+</div></span>
+  
+</li>
+
       
         <li class="public ">
   <span class="summary_signature">
@@ -153,39 +209,6 @@
     </ul>
     
   
-    <h2>
-      Instance Method Summary
-      <small><a href="#" class="summary_toggle">collapse</a></small>
-    </h2>
-
-    <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize the current value as JSON.</p>
-</div></span>
-  
-</li>
-
-      
-    </ul>
-    
-  
 
 
 
@@ -194,9 +217,9 @@
 
     
       <div class="method_details first">
-  <h3 class="signature first" id="to_json-instance_method">
+  <h3 class="signature first" id="as_json-instance_method">
   
-    #<strong>to_json</strong>  &#x21d2; <tt>String</tt> 
+    #<strong>as_json</strong>(options = nil)  &#x21d2; <tt>Object</tt><sup>?</sup> 
   
 
   
@@ -204,13 +227,141 @@
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Serialize the current value as JSON.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Convert the current value using ActiveSupport's JSON conversion.</p>
 
 
   </div>
 </div>
 <div class="tags">
   
+  <div class="docstring">
+  <div class="discussion">
+    <p>Returns The JSON-compatible value.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>options</span>
+      
+      
+        <span class='type'>(<tt>Hash</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Options forwarded to the current value's as_json.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Object</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The JSON-compatible value.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+15</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/value_serialization.rb', line 15</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_as_json'>as_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_as_json'>as_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="to_json-instance_method">
+  
+    #<strong>to_json</strong>(*arguments)  &#x21d2; <tt>String</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This method is only available if JSON has been loaded.</p>
+</div>
+  </div>
+
+<p>Serialize the current value as its primitive JSON equivalent.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="docstring">
+  <div class="discussion">
+    <p>Returns The generated JSON.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>arguments</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;Object&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Arguments forwarded to the current value's to_json.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -221,9 +372,16 @@
       
       
       
+        &mdash;
+        <div class='inline'><p>The generated JSON.</p>
+</div>
+      
     </li>
   
 </ul>
+
+</div>
+
 
 </div><table class="source_code">
   <tr>
@@ -231,10 +389,10 @@
       <pre class="lines">
 
 
-25</pre>
+43</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/value_serialization.rb', line 25</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/json.rb', line 43</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -337,7 +495,7 @@
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 22 22:16:47 2026 by
+  Generated on Wed Sep 23 08:08:18 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

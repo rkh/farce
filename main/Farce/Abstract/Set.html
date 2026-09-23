@@ -111,7 +111,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/set.rb<span class="defines">,<br>
-  lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/active_support/set.rb,<br> lib/farce/integrations/active_support/duplicable.rb</span>
+  lib/farce/integrations/json.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/active_support/set.rb,<br> lib/farce/integrations/active_support/duplicable.rb</span>
 
 </dd>
   </dl>
@@ -148,6 +148,39 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
 
 
+  
+    <h2>
+      JSON Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize current members as a JSON Array.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
   
     <h2>
       ActiveSupport Integration
@@ -1326,29 +1359,6 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Return the elements in an Array.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize the members as a JSON Array.</p>
 </div></span>
   
 </li>
@@ -5841,7 +5851,14 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Serialize the members as a JSON Array.</p>
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This method is only available if JSON has been loaded.</p>
+</div>
+  </div>
+
+<p>Serialize current members as a JSON Array.</p>
 
 
   </div>
@@ -5864,12 +5881,12 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
         <span class='name'>arguments</span>
       
       
-        <span class='type'>(<tt>Array&lt;BasicObject&gt;</tt>)</span>
+        <span class='type'>(<tt>Array&lt;Object&gt;</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'><p>Serialization arguments forwarded to Array#to_json.</p>
+        <div class='inline'><p>Arguments forwarded to Array#to_json.</p>
 </div>
       
     </li>
@@ -5903,10 +5920,10 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       <pre class="lines">
 
 
-561</pre>
+34</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/set.rb', line 561</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/json.rb', line 34</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -6438,7 +6455,7 @@ are supplied. Otherwise, returns a new instance of klass.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 22 22:16:49 2026 by
+  Generated on Wed Sep 23 08:08:22 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

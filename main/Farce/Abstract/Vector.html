@@ -111,7 +111,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/vector.rb<span class="defines">,<br>
-  lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/active_support/vector.rb</span>
+  lib/farce/integrations/json.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/active_support/vector.rb</span>
 
 </dd>
   </dl>
@@ -146,6 +146,39 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
 
 
+  
+    <h2>
+      JSON Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize a logical snapshot as a JSON Array.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
   
     <h2>
       ActiveSupport Integration
@@ -13332,6 +13365,97 @@ Range and start-length results are Vectors.</p>
 </div>
     
       <div class="method_details ">
+  <h3 class="signature " id="to_json-instance_method">
+  
+    #<strong>to_json</strong>(*arguments)  &#x21d2; <tt>String</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This method is only available if JSON has been loaded.</p>
+</div>
+  </div>
+
+<p>Serialize a logical snapshot as a JSON Array.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="docstring">
+  <div class="discussion">
+    <p>Returns The generated JSON.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>arguments</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;Object&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Arguments forwarded to Array#to_json.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The generated JSON.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+16</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/json.rb', line 16</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
   <h3 class="signature " id="to_msgpack-instance_method">
   
     #<strong>to_msgpack</strong>(*arguments)  &#x21d2; <tt>String</tt>, <tt>::MessagePack::Packer</tt> 
@@ -14789,7 +14913,7 @@ directly.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 22 22:16:51 2026 by
+  Generated on Wed Sep 23 08:08:24 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
