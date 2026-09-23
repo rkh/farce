@@ -19,10 +19,6 @@ module Farce
         options = coder.map.except("value").transform_keys(&:to_sym)
         initialize(coder["value"], **options)
       end
-
-      # Serialize the current value as JSON.
-      # @return [String]
-      def to_json(...) = value.to_json(...)
     end
   end
 end

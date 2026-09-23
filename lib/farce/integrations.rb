@@ -9,6 +9,7 @@ module Farce
     INTEGRATIONS = {
       active_support: %w[active_support active_support/core_ext].freeze,
       dry_types:      %w[dry/types].freeze,
+      json:           %w[json].freeze,
       msgpack:        %w[msgpack].freeze,
     }.freeze
 

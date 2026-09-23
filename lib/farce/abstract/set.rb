@@ -554,12 +554,6 @@ module Farce
       # @return [String] The joined elements.
       def join(separator = nil) = to_a.join(separator)
 
-      # Serialize the members as a JSON Array.
-      # @overload to_json(*arguments)
-      #   @param arguments [Array<BasicObject>] Serialization arguments forwarded to Array#to_json.
-      #   @return [String] The generated JSON.
-      def to_json(...) = to_a.to_json(...)
-
       # @api private
       # Called by Psych for generating YAML.
       # @param coder [Psych::Coder] The YAML representation.

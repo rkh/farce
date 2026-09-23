@@ -337,9 +337,6 @@ module Farce
         initialize(coder["entries"], **options)
       end
 
-      # @return [String] JSON representation of the map.
-      def to_json(...) = to_h.to_json(...)
-
       protected
 
       # Convert a public value to its stored representation.
