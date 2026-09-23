@@ -48,12 +48,15 @@ class Test < Minitest::Test
   include Helpers::Subprocess
 end
 
-# Including Farce loads MainScheduler through the mixin's eager autoloads.
+# Only stop the main scheduler if a test started it.
 # Stop its dispatcher before JRuby tears down the remaining fiber threads.
 Minitest.after_run do
-  next if Farce.autoload?(:MainScheduler)
+  next if Farce.const_get(:Internal).autoload?(:MainScheduler)
 
   require "timeout"
-  Farce::MainScheduler.close
-  Timeout.timeout(5) { sleep 0.001 until Farce::MainScheduler.state == :closed }
+  scheduler = Farce.on_main
+  next if scheduler.is_a?(Farce::ThreadScheduler)
+
+  scheduler.close
+  Timeout.timeout(5) { sleep 0.001 until scheduler.state == :closed }
 end

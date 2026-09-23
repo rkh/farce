@@ -7,17 +7,18 @@ require_relative "../setup"
 module Farce
   class TestMainScheduler < Test
     def test_suite_teardown_stops_the_main_scheduler
+      return unless Ractor.builtin?
       output, error, status = ruby_subprocess(<<~RUBY)
         require "minitest"
         # Minitest runs after_run callbacks in reverse registration order.
         Minitest.after_run do
-          abort "main scheduler still running" unless Farce::MainScheduler.state == :closed
+          abort "main scheduler still running" unless Farce.on_main.state == :closed
           puts "main scheduler stopped"
         end
         require "setup"
         class MainSchedulerProbe < Test
           def test_main_scheduler_is_running
-            assert_equal :running, Farce::MainScheduler.state
+            assert_equal :running, Farce.on_main.state
           end
         end
       RUBY

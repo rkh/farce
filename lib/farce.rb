@@ -186,9 +186,88 @@ module Farce
     raise ArgumentError, "invalid bindable: #{bindable.inspect}"
   end
 
+  # Allows executing code on the main ractor from other ractors.
+  # This allows modifying objects and calling methods only accessible from the main ractor.
+  #
+  # If a block is given, executes it on the main ractor, passing any given arguments to it.
+  # Blocks the current thread until the block has finished executing.
+  # Calls from the main ractor execute directly, preserving the block and arguments.
+  #
+  # If no block is given, it returns a scheduler to execute tasks on the main ractor.
+  # This allows scheduling without blocking the current thread.
+  #
+  # On JRuby and TruffleRuby, blocks run inline because there is no native Ractor isolation.
+  # The returned {ThreadScheduler} starts a new thread for each scheduled task.
+  #
+  # @example
+  #   $results = []
+  #
+  #   Farce::Ractor.new do
+  #     # maybe computing this string on the main ractor is too expensive?
+  #     my_string = "foo bar baz"
+  #
+  #     # can't access $results on the current ractor directly, as it isn't shareable
+  #     Farce.on_main(my_string) { $results << it }
+  #   end.join
+  #
+  #   $results # => ["foo bar baz"]
+  #
+  # @example Blocking vs non-blocking
+  #   Farce::Ractor.new do
+  #     # This blocks the current thread until the block has finished executing.
+  #     Farce.on_main do
+  #       sleep 1
+  #       puts "Hi from the main ractor!"
+  #     end
+  #
+  #     # This does not block the current thread.
+  #     Farce.on_main.schedule do
+  #       sleep 1
+  #       puts "Hi again from the main ractor!"
+  #     end
+  #
+  #     puts "Hi from the current ractor!"
+  #   end
+  #
+  #   sleep 3 # Wait for all scheduled tasks to complete.
+  #
+  #   # Expected output:
+  #   # Hi from the main ractor!
+  #   # Hi from the current ractor!
+  #   # Hi again from the main ractor!
+  #
+  # @overload on_main(*args, mode: :copy)
+  #   @param args [Array] The arguments to be passed to the block.
+  #   @param mode [Symbol] The argument transfer mode when called from another ractor.
+  #   @yield [*args] The block to be executed on the main ractor.
+  #   @yieldparam [*args] The arguments passed to the block.
+  #   @return [nil]
+  #
+  # @overload on_main
+  #   Returns a scheduler that executes tasks on the main ractor.
+  #   @return [Scheduler, ThreadScheduler]
+  #
+  # @return [Scheduler, ThreadScheduler, nil]
+  def self.on_main(*args, mode: UNDEFINED, &)
+    unless block_given?
+      raise LocalJumpError, "no block given" unless args.empty? && UNDEFINED.equal?(mode)
+      return Internal::MainScheduler
+    end
+
+    if Ractor.main?
+      yield(*args)
+    else
+      mode = :copy if UNDEFINED.equal?(mode)
+      Internal::MainScheduler.execute(*args, mode:, auto_local: false, &)
+    end
+
+    nil
+  end
+
   def self.append_features(mod) = Internal::Mixin.__send__(:append_features, mod)
   def self.included(mod)        = Internal::Mixin.__send__(:included, mod)
   private_class_method :append_features, :included
 
   Integrations.setup
+  Internal.const_get(:MainScheduler) unless Internal.native_ractors?
 end

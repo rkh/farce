@@ -298,7 +298,11 @@ module Farce
         assert_freeze_rejected(object)
       end
 
-      assert_freeze_rejected(MainScheduler)
+      if Ractor.builtin?
+        assert_freeze_rejected(Farce.on_main)
+      else
+        assert_same Farce.on_main, Farce.on_main.freeze
+      end
     ensure
       objects&.each { close_service(it) }
     end
