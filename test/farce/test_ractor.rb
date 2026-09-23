@@ -138,7 +138,6 @@ module Farce
 
     def test_ractor_unmonitor_stops_exit_notification
       return if RUBY_ENGINE == "ruby" && RUBY_VERSION < "4"
-      skip "TODO: timeout not implemented" if RUBY_ENGINE == "ruby" && RUBY_VERSION < "4.1"
       ractor = Ractor.new { Ractor.receive }
       port = Port.new
 

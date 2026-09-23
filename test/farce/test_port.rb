@@ -178,9 +178,6 @@ module Farce
     end
 
     def test_receive_forwards_timeouts_and_preserves_local_values
-      if RUBY_ENGINE == "ruby" && RUBY_VERSION.start_with?("4.0.")
-        skip "CRuby 4.0's timeout selector is not implemented"
-      end
       port = Port.new(mode: :local)
 
       assert_nil port.receive(timeout: 0)

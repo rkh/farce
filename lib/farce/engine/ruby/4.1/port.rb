@@ -5,6 +5,17 @@
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    BasePort = Port = ::Ractor::Port
+    BasePort = ::Ractor::Port
+    class Port < BasePort
+      include Freeze::Unfreezable
+
+      def receive(timeout: nil)
+        if selector = RactorSelector.for_call(self)
+          selector.ractor_receive(self, timeout:)
+        else
+          timeout.nil? ? super() : super
+        end
+      end
+    end
   end
 end

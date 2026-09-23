@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 module Farce
   module Internal
@@ -19,6 +21,12 @@ module Farce
       end
     end
 
+    class FiberScheduler
+      # Opt into native wait hooks when a Ractor operation needs the shared selector.
+      def ractor_selector = RactorSelector.current
+    end
+
     FiberScheduler.prepend(SchedulerLifecycle)
+    require "farce/engine/ruby/3.4/fiber_scheduler" unless Internal.native_ports?
   end
 end

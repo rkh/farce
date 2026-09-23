@@ -10,8 +10,9 @@ module Farce
       include Freeze::Unfreezable
 
       def receive(timeout: nil)
-        return super() unless timeout
-        Selector.ractor_receive(self, timeout:)
+        selector = RactorSelector.for_call(self)
+        selector ||= RactorSelector.current unless timeout.nil?
+        selector ? selector.ractor_receive(self, timeout:) : super()
       end
     end
   end

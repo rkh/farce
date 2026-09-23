@@ -15,8 +15,9 @@ module Farce
         FROM_RACTOR = Object.new.freeze
 
         def initialize
-          @queue = Queue.new(capacity: nil)
-          @atom  = Atom.new
+          @queue    = Queue.new(capacity: nil)
+          @atom     = Atom.new
+          @selector = Atom.new
           Freeze.publish(self)
         end
 
@@ -27,10 +28,39 @@ module Farce
           @queue.push(FROM_RACTOR)
         rescue ClosedQueueError
           raise ::Ractor::ClosedError, "The port was already closed"
+        ensure
+          wake_selector
         end
 
         def closed? = @queue.closed?
-        def close   = @queue.close
+
+        def close
+          @queue.close
+          wake_selector
+        end
+
+        # Senders may be in another Ractor. Publish only the selectable control
+        # endpoint and shared wake flag, leaving requests and replies local.
+        def selector_watch(control, wakeup) = @selector.value = [control, wakeup].freeze
+
+        def selector_poll
+          # The empty-queue callback distinguishes no message from a nil payload.
+          result = @queue.try_pop { return }
+          result = @atom.value.take if FROM_RACTOR.equal?(result)
+          yield result
+        rescue ClosedQueueError
+          raise ::Ractor::ClosedError, "The port was already closed"
+        end
+
+        def wake_selector
+          return unless target = @selector.value
+          control, wakeup = target
+          Thread.handle_interrupt(INTERRUPT_MASK) do
+            control.send(nil) if wakeup.compare_and_set(false, true)
+          end
+        rescue ::Ractor::ClosedError
+          nil
+        end
 
         def receive(timeout: nil)
           result = @queue.pop(timeout:)
@@ -61,11 +91,11 @@ module Farce
         end
 
         def receive(timeout: nil)
-          return ::Ractor.receive unless timeout
-          Timeout.timeout(timeout) { ::Ractor.receive }
-        rescue Timeout::Error
-          nil
+          return ::Ractor.receive if timeout.nil?
+          RactorSelector.current.ractor_receive(::Ractor.current, timeout:)
         end
+
+        def selector_source = ::Ractor.current
 
         def closed?   = @closed.value
         def close     = @closed.value = true
@@ -110,8 +140,20 @@ module Farce
       def receive(timeout: nil)
         check_owner!
         raise ::Ractor::ClosedError, "The port was already closed" if @reader.closed?
-        @reader.receive(timeout:)
+        if selector = RactorSelector.for_call(self)
+          selector.ractor_receive(self, timeout:)
+        else
+          @reader.receive(timeout:)
+        end
       end
+
+      def selector_source
+        check_owner!
+        @reader.selector_source if @reader.is_a?(RactorReader)
+      end
+
+      def selector_watch(...) = @reader.selector_watch(...)
+      def selector_poll(&) = @reader.selector_poll(&)
 
       def inspect
         class_name = instance_of?(Port) ? "Farce::Ractor::Port" : self.class.name

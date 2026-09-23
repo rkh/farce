@@ -8,7 +8,15 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     module RactorMethods
-      Internal.delegate(self, ::Ractor, :shareable_proc, :shareable_lambda, :select, :current, :main, :new)
+      def select(*sources, timeout: nil)
+        if selector = RactorSelector.for_call(sources)
+          selector.ractor_select(*sources, timeout:)
+        else
+          timeout.nil? ? ::Ractor.select(*sources) : ::Ractor.select(*sources, timeout:)
+        end
+      end
+
+      Internal.delegate(self, ::Ractor, :shareable_proc, :shareable_lambda, :current, :main, :new)
     end
   end
 end
