@@ -111,7 +111,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/set.rb<span class="defines">,<br>
-  lib/farce/integrations/json.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/active_support/set.rb,<br> lib/farce/integrations/active_support/duplicable.rb</span>
+  lib/farce/integrations/psych.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/shared/to_json.rb,<br> lib/farce/integrations/active_support/set.rb,<br> lib/farce/integrations/active_support/duplicable.rb</span>
 
 </dd>
   </dl>
@@ -148,39 +148,6 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
 
 
-  
-    <h2>
-      JSON Integration
-      <small><a href="#" class="summary_toggle">collapse</a></small>
-    </h2>
-
-    <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize current members as a JSON Array.</p>
-</div></span>
-  
-</li>
-
-      
-    </ul>
-    
   
     <h2>
       ActiveSupport Integration
@@ -416,6 +383,39 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Encode the elements as repeated query parameters under a key.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+    <h2>
+      JSON Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize current members as a JSON Array.</p>
 </div></span>
   
 </li>
@@ -1700,8 +1700,8 @@ accept this option. Defaults to :copy for those classes.</p>
   <span class='id identifier rubyid_validate_boolean!'>validate_boolean!</span><span class='lparen'>(</span><span class='symbol'>:compare_by_identity</span><span class='comma'>,</span> <span class='id identifier rubyid_compare_by_identity'>compare_by_identity</span><span class='rparen'>)</span>
 
   <span class='ivar'>@compare_by_identity</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_by_identity'>compare_by_identity</span>
-  <span class='ivar'>@normalizer</span>          <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_build'>build</span><span class='lparen'>(</span><span class='id identifier rubyid_normalize'>normalize</span><span class='comma'>,</span> <span class='label'>shareable:</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_restoring'>restoring</span>            <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restoration?'>restoration?</span><span class='lparen'>(</span><span class='id identifier rubyid_normalize'>normalize</span><span class='rparen'>)</span>
+  <span class='ivar'>@normalizer</span>          <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/KeyNormalizer.html" title="Farce::Internal::KeyNormalizer (module)">KeyNormalizer</a></span></span><span class='period'>.</span><span class='id identifier rubyid_build'>build</span><span class='lparen'>(</span><span class='id identifier rubyid_normalize'>normalize</span><span class='comma'>,</span> <span class='label'>shareable:</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_restoring'>restoring</span>            <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/KeyNormalizer.html" title="Farce::Internal::KeyNormalizer (module)">KeyNormalizer</a></span></span><span class='period'>.</span><span class='id identifier rubyid_restoration?'>restoration?</span><span class='lparen'>(</span><span class='id identifier rubyid_normalize'>normalize</span><span class='rparen'>)</span>
 
   <span class='id identifier rubyid_initialize_value_mode'>initialize_value_mode</span><span class='lparen'>(</span><span class='id identifier rubyid_mode'>mode</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_elements'>elements</span> <span class='op'>=</span> <span class='id identifier rubyid_input_elements'>input_elements</span><span class='lparen'>(</span><span class='id identifier rubyid_enumerable'>enumerable</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_enumerable'>enumerable</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
@@ -5854,7 +5854,7 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This method is only available if JSON has been loaded.</p>
+    <div class='inline'><p>This method is only available if a supported JSON library has been loaded.</p>
 </div>
   </div>
 
@@ -5920,10 +5920,10 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
       <pre class="lines">
 
 
-34</pre>
+31</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/json.rb', line 34</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/shared/to_json.rb', line 31</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -6455,7 +6455,7 @@ are supplied. Otherwise, returns a new instance of klass.</p>
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 23 08:08:22 2026 by
+  Generated on Wed Sep 23 09:02:38 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

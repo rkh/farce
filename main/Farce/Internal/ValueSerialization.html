@@ -4,7 +4,7 @@
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>
-  Module: Farce::Abstract::ValueSerialization
+  Module: Farce::Internal::ValueSerialization
   
     &mdash; Documentation by YARD 0.9.45
   
@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="../../css/gfm-alerts.css" type="text/css">
 
 <script type="text/javascript">
-  pathId = "Farce::Abstract::ValueSerialization";
+  pathId = "Farce::Internal::ValueSerialization";
   relpath = '../../';
 </script>
 
@@ -48,7 +48,7 @@
         <div id="menu">
   
     <a href="../../_index.html">Index (V)</a> &raquo;
-    <span class='title'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span>
+    <span class='title'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span> &raquo; <span class='title'><span class='object_link'>Internal</span></span>
      &raquo; 
     <span class="title">ValueSerialization</span>
   
@@ -70,7 +70,7 @@
         <div class="clear"></div>
       </div>
 
-      <div id="content"><h1>Module: Farce::Abstract::ValueSerialization
+      <div id="content"><h1>Module: Farce::Internal::ValueSerialization
   
   
   
@@ -87,71 +87,28 @@
   
   <dl>
     <dt>Included in:</dt>
-    <dd><span class='object_link'><a href="Atom.html" title="Farce::Abstract::Atom (class)">Atom</a></span>, <span class='object_link'><a href="Counter.html" title="Farce::Abstract::Counter (module)">Counter</a></span>, <span class='object_link'><a href="Flag.html" title="Farce::Abstract::Flag (module)">Flag</a></span></dd>
+    <dd><span class='object_link'><a href="../Abstract/Atom.html" title="Farce::Abstract::Atom (class)">Abstract::Atom</a></span>, <span class='object_link'><a href="../Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Abstract::Counter</a></span>, <span class='object_link'><a href="../Abstract/Flag.html" title="Farce::Abstract::Flag (module)">Abstract::Flag</a></span></dd>
   </dl>
   
 
   
   <dl>
     <dt>Defined in:</dt>
-    <dd>lib/farce/abstract/value_serialization.rb<span class="defines">,<br>
-  lib/farce/integrations/json.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/active_support/value_serialization.rb</span>
+    <dd>lib/farce/integrations/psych.rb<span class="defines">,<br>
+  lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/shared/to_json.rb,<br> lib/farce/integrations/active_support/value_serialization.rb</span>
 
 </dd>
   </dl>
   
 </div>
 
-<h2>Overview</h2><div class="docstring">
-  <div class="discussion">
-    <p>Serialization of a container's current value.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-
-</div>
 
 
 
 
 
 
-  
-    <h2>
-      JSON Integration
-      <small><a href="#" class="summary_toggle">collapse</a></small>
-    </h2>
 
-    <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize the current value as its primitive JSON equivalent.</p>
-</div></span>
-  
-</li>
-
-      
-    </ul>
-    
   
     <h2>
       ActiveSupport Integration
@@ -201,6 +158,39 @@
 
   
     <span class="summary_desc"><div class='inline'><p>Serialize the current value as its primitive MessagePack equivalent.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+    <h2>
+      JSON Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize the current value as its primitive JSON equivalent.</p>
 </div></span>
   
 </li>
@@ -323,7 +313,7 @@
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This method is only available if JSON has been loaded.</p>
+    <div class='inline'><p>This method is only available if a supported JSON library has been loaded.</p>
 </div>
   </div>
 
@@ -389,10 +379,10 @@
       <pre class="lines">
 
 
-43</pre>
+40</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/json.rb', line 43</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/shared/to_json.rb', line 40</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -495,7 +485,7 @@
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 23 08:08:18 2026 by
+  Generated on Wed Sep 23 09:02:34 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

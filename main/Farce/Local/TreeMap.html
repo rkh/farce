@@ -382,7 +382,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
   <span class='kw'>def</span> <span class='id identifier rubyid_with_key_lock'>with_key_lock</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_key_locks'>key_locks</span><span class='period'>.</span><span class='id identifier rubyid_synchronize'>synchronize</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_new_scoped_value'>new_scoped_value</span><span class='lparen'>(</span><span class='id identifier rubyid_entries'>entries</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
-    <span class='kw'>unless</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_canonical_entries?'>canonical_entries?</span><span class='lparen'>(</span><span class='id identifier rubyid_entries'>entries</span><span class='rparen'>)</span>
+    <span class='kw'>unless</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/KeyNormalizer.html" title="Farce::Internal::KeyNormalizer (module)">KeyNormalizer</a></span></span><span class='period'>.</span><span class='id identifier rubyid_canonical_entries?'>canonical_entries?</span><span class='lparen'>(</span><span class='id identifier rubyid_entries'>entries</span><span class='rparen'>)</span>
       <span class='kw'>return</span> <span class='const'>State</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='const'>Internal</span><span class='op'>::</span><span class='const'>TreeMap</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_entries'>entries</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>OrderedKeyLockMap</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='rparen'>)</span>
     <span class='kw'>end</span>
 
@@ -402,7 +402,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 23 08:08:23 2026 by
+  Generated on Wed Sep 23 09:02:40 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

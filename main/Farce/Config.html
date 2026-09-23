@@ -166,6 +166,32 @@ shareable across Ractors.</p>
       <li class="public ">
   <span class="summary_signature">
     
+      <a href="#autoload_integrations-instance_method" title="#autoload_integrations (instance method)">#<strong>autoload_integrations</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Automatically load integrations when their dependencies are loaded.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#main_thread_pool_size-instance_method" title="#main_thread_pool_size (instance method)">#<strong>main_thread_pool_size</strong>  &#x21d2; BasicObject </a>
     
 
@@ -443,19 +469,21 @@ shareable across Ractors.</p>
       <pre class="lines">
 
 
-35
-36
-37
-38
-39
-40</pre>
+41
+42
+43
+44
+45
+46
+47</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 35</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 41</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span>
   <span class='kw'>yield</span> <span class='kw'>self</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
-  <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span> <span class='op'>=</span> <span class='const'>ENV</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>FARCE_FIBER_SCHEDULER</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='kw'>unless</span> <span class='id identifier rubyid_instance_variable_defined?'>instance_variable_defined?</span><span class='lparen'>(</span><span class='symbol'>:@fiber_scheduler</span><span class='rparen'>)</span>
+  <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_autoload_integrations'>autoload_integrations</span> <span class='op'>=</span> <span class='const'>ENV</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>FARCE_AUTOLOAD_INTEGRATIONS</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_autoload_integrations'>autoload_integrations</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+  <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span>       <span class='op'>=</span> <span class='const'>ENV</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>FARCE_FIBER_SCHEDULER</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='kw'>unless</span> <span class='id identifier rubyid_instance_variable_defined?'>instance_variable_defined?</span><span class='lparen'>(</span><span class='symbol'>:@fiber_scheduler</span><span class='rparen'>)</span>
   <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_main_thread_pool_size'>main_thread_pool_size</span>       <span class='op'>||=</span> <span class='const'>ENV</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>FARCE_MAIN_THREAD_POOL_SIZE</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='int'>4</span><span class='rparen'>)</span>
   <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_additional_thread_pool_size'>additional_thread_pool_size</span> <span class='op'>||=</span> <span class='const'>ENV</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>FARCE_ADDITIONAL_THREAD_POOL_SIZE</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
@@ -497,15 +525,72 @@ Can also be set via <code>FARCE_ADDITIONAL_THREAD_POOL_SIZE</code>. Defaults to 
       <pre class="lines">
 
 
-31
-32
-33</pre>
+37
+38
+39</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 31</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 37</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_additional_thread_pool_size'>additional_thread_pool_size</span>
   <span class='ivar'>@additional_thread_pool_size</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id="autoload_integrations=-instance_method"></span>
+      <div class="method_details ">
+  <h3 class="signature " id="autoload_integrations-instance_method">
+  
+    #<strong>autoload_integrations</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Automatically load integrations when their dependencies are loaded. Defaults to true.
+Can also be set via <code>FARCE_AUTOLOAD_INTEGRATIONS</code> (<code>true</code>/<code>false</code> or <code>1</code>/<code>0</code>).
+Set before requiring Farce to also disable startup integration loading.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+29
+30
+31</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 29</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_autoload_integrations'>autoload_integrations</span>
+  <span class='ivar'>@autoload_integrations</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -540,12 +625,12 @@ Can also be set via <code>FARCE_MAIN_THREAD_POOL_SIZE</code>. Defaults to 4.</p>
       <pre class="lines">
 
 
-27
-28
-29</pre>
+33
+34
+35</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 27</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 33</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_main_thread_pool_size'>main_thread_pool_size</span>
   <span class='ivar'>@main_thread_pool_size</span>
@@ -673,13 +758,13 @@ Custom schedulers must support the executor used by the Pool or Scheduler.</p>
       <pre class="lines">
 
 
-58
-59
-60
-61</pre>
+76
+77
+78
+79</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 58</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 76</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_constructor'>constructor</span><span class='rparen'>)</span>
   <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span> <span class='op'>=</span> <span class='id identifier rubyid_constructor'>constructor</span> <span class='kw'>if</span> <span class='id identifier rubyid_constructor'>constructor</span>
@@ -729,13 +814,13 @@ or assign a proc to configure construction. Invalid assignments preserve the old
       <pre class="lines">
 
 
-65
-66
-67
-68</pre>
+83
+84
+85
+86</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 65</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 83</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fiber_scheduler='>fiber_scheduler=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>FrozenError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>can&#39;t modify frozen Config</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
@@ -788,17 +873,17 @@ or assign a proc to configure construction. Invalid assignments preserve the old
       <pre class="lines">
 
 
-72
-73
-74
-75
-76
-77
-78
-79</pre>
+90
+91
+92
+93
+94
+95
+96
+97</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 72</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 90</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fiber_scheduler_implementation'>fiber_scheduler_implementation</span>
   <span class='kw'>case</span> <span class='ivar'>@fiber_scheduler</span>
@@ -838,15 +923,15 @@ or assign a proc to configure construction. Invalid assignments preserve the old
       <pre class="lines">
 
 
-113
-114
-115
-116
-117
-118</pre>
+131
+132
+133
+134
+135
+136</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 113</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 131</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_freeze'>freeze</span>
   <span class='kw'>return</span> <span class='kw'>self</span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
@@ -902,15 +987,15 @@ Availability is checked when a scheduler is created.</p>
       <pre class="lines">
 
 
-84
-85
-86
-87
-88
-89</pre>
+102
+103
+104
+105
+106
+107</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 84</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 102</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_io_backend'>io_backend</span>
   <span class='kw'>case</span> <span class='ivar'>@fiber_scheduler</span>
@@ -928,7 +1013,7 @@ Availability is checked when a scheduler is created.</p>
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 23 08:08:19 2026 by
+  Generated on Wed Sep 23 09:02:35 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

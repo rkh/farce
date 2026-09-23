@@ -111,7 +111,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/map.rb<span class="defines">,<br>
-  lib/farce/integrations/json.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/active_support/map.rb</span>
+  lib/farce/integrations/psych.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/shared/to_json.rb,<br> lib/farce/integrations/active_support/map.rb</span>
 
 </dd>
   </dl>
@@ -164,39 +164,6 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
 
 
-  
-    <h2>
-      JSON Integration
-      <small><a href="#" class="summary_toggle">collapse</a></small>
-    </h2>
-
-    <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize current entries as a JSON object.</p>
-</div></span>
-  
-</li>
-
-      
-    </ul>
-    
   
     <h2>
       ActiveSupport Integration
@@ -294,6 +261,39 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Encode public entries as a query string, optionally under a namespace.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+    <h2>
+      JSON Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize current entries as a JSON object.</p>
 </div></span>
   
 </li>
@@ -1464,29 +1464,7 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -1652,28 +1630,6 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -2001,29 +1957,7 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -2189,28 +2123,6 @@ finite, non-negative number; <code>nil</code> waits indefinitely.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -2729,29 +2641,7 @@ or nil if the key is absent.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -2917,28 +2807,6 @@ or nil if the key is absent.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -3289,29 +3157,7 @@ or nil if the key is absent.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -3477,28 +3323,6 @@ or nil if the key is absent.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -3792,29 +3616,7 @@ or nil if the key is absent.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -3980,28 +3782,6 @@ or nil if the key is absent.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -4387,29 +4167,7 @@ Like Hash, this returns all entries regardless of the requested keys.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -4575,28 +4333,6 @@ Like Hash, this returns all entries regardless of the requested keys.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -5076,29 +4812,7 @@ to match insertion order.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -5264,28 +4978,6 @@ to match insertion order.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -5669,29 +5361,7 @@ Keys are not guaranteed to be yielded in insertion order.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -5857,28 +5527,6 @@ Keys are not guaranteed to be yielded in insertion order.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -6162,29 +5810,7 @@ Keys are not guaranteed to be yielded in insertion order.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -6350,28 +5976,6 @@ Keys are not guaranteed to be yielded in insertion order.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -6755,29 +6359,7 @@ Values are not guaranteed to be yielded in insertion order.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -6943,28 +6525,6 @@ Values are not guaranteed to be yielded in insertion order.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -7547,29 +7107,7 @@ If both a default and a block are provided, the block takes precedence and a war
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -7735,28 +7273,6 @@ If both a default and a block are provided, the block takes precedence and a war
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -8194,29 +7710,7 @@ If both a default and a block are provided, the block takes precedence and a war
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -8382,28 +7876,6 @@ If both a default and a block are provided, the block takes precedence and a war
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -8927,29 +8399,7 @@ The first observed match is returned. No insertion order is guaranteed.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -9115,28 +8565,6 @@ The first observed match is returned. No insertion order is guaranteed.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -9431,29 +8859,7 @@ The returned keys are not guaranteed to be in insertion order.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -9619,28 +9025,6 @@ The returned keys are not guaranteed to be in insertion order.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -10178,29 +9562,7 @@ This method will still return <code>true</code> for such maps.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -10366,28 +9728,6 @@ This method will still return <code>true</code> for such maps.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -10843,29 +10183,7 @@ A later removal or eviction can cause another call to construct a new value.</p>
 353
 354
 355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378</pre>
+356</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/map.rb', line 155</span>
@@ -11031,28 +10349,6 @@ A later removal or eviction can cause another call to construct a new value.</p>
         <span class='kw'>end</span>
       <span class='kw'>end</span>
     <span class='kw'>end</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych for generating YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_encode_with'>encode_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>                    <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_values_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>compare_keys_by_identity</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span>
-    <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='id identifier rubyid_instance_variable_get'>instance_variable_get</span><span class='lparen'>(</span><span class='symbol'>:@key_normalizer</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>normalize_keys</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_normalizer'>normalizer</span>
-    <span class='id identifier rubyid_coder'>coder</span>
-  <span class='kw'>end</span>
-
-  <span class='comment'># @api private
-</span>  <span class='comment'># Called by Psych when parsing YAML
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_init_with'>init_with</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_coder'>coder</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_transform_keys'>transform_keys</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span>
-    <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='symbol'>:normalize_keys</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span> <span class='op'>=</span>
-        <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restore'>restore</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:normalize_keys</span><span class='rbracket'>]</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_coder'>coder</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>entries</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_protected'>protected</span>
@@ -11324,7 +10620,7 @@ Preserves identity comparison for keys, including when a block transforms entrie
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This method is only available if JSON has been loaded.</p>
+    <div class='inline'><p>This method is only available if a supported JSON library has been loaded.</p>
 </div>
   </div>
 
@@ -11390,10 +10686,10 @@ Preserves identity comparison for keys, including when a block transforms entrie
       <pre class="lines">
 
 
-25</pre>
+22</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/json.rb', line 25</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/shared/to_json.rb', line 22</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -11866,7 +11162,7 @@ Values are unwrapped before comparison. Concurrent changes may make the result s
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 23 08:08:22 2026 by
+  Generated on Wed Sep 23 09:02:38 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -111,7 +111,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/vector.rb<span class="defines">,<br>
-  lib/farce/integrations/json.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/active_support/vector.rb</span>
+  lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/shared/to_json.rb,<br> lib/farce/integrations/active_support/vector.rb</span>
 
 </dd>
   </dl>
@@ -146,39 +146,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
 
 
-  
-    <h2>
-      JSON Integration
-      <small><a href="#" class="summary_toggle">collapse</a></small>
-    </h2>
-
-    <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize a logical snapshot as a JSON Array.</p>
-</div></span>
-  
-</li>
-
-      
-    </ul>
-    
   
     <h2>
       ActiveSupport Integration
@@ -862,6 +829,39 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
     
       <h3 class="inherited">Methods included from <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></h3>
       <p class="inherited"><span class='object_link'><a href="../Internal/Copyable.html#duplicable%3F-instance_method" title="Farce::Internal::Copyable#duplicable? (method)">#duplicable?</a></span></p>
+    
+  
+    <h2>
+      JSON Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize a logical snapshot as a JSON Array.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
     
   
     <h2>
@@ -13378,7 +13378,7 @@ Range and start-length results are Vectors.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'><p>This method is only available if JSON has been loaded.</p>
+    <div class='inline'><p>This method is only available if a supported JSON library has been loaded.</p>
 </div>
   </div>
 
@@ -13444,10 +13444,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-16</pre>
+13</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/json.rb', line 16</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/shared/to_json.rb', line 13</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -14913,7 +14913,7 @@ directly.</p>
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 23 08:08:24 2026 by
+  Generated on Wed Sep 23 09:02:41 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -432,13 +432,13 @@ but not for non-blocking fibers (such as those created by <span class='object_li
   <span class='id identifier rubyid_private'>private</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_new_scoped_value'>new_scoped_value</span><span class='lparen'>(</span><span class='id identifier rubyid_entries'>entries</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
-    <span class='kw'>unless</span> <span class='ivar'>@key_normalizer</span> <span class='op'>||</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_canonical_entries?'>canonical_entries?</span><span class='lparen'>(</span><span class='id identifier rubyid_entries'>entries</span><span class='rparen'>)</span>
+    <span class='kw'>unless</span> <span class='ivar'>@key_normalizer</span> <span class='op'>||</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/KeyNormalizer.html" title="Farce::Internal::KeyNormalizer (module)">KeyNormalizer</a></span></span><span class='period'>.</span><span class='id identifier rubyid_canonical_entries?'>canonical_entries?</span><span class='lparen'>(</span><span class='id identifier rubyid_entries'>entries</span><span class='rparen'>)</span>
       <span class='kw'>return</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>UnsharedWeakKeyMap</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_entries'>entries</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
     <span class='kw'>end</span>
 
     <span class='id identifier rubyid_map'>map</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>UnsharedWeakKeyMap</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_entries'>entries</span><span class='op'>&amp;.</span><span class='id identifier rubyid_each'>each</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='id identifier rubyid__1'>_1</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid__2'>_2</span> <span class='rbrace'>}</span>
-    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_wrap_concurrent'>wrap_concurrent</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='comma'>,</span> <span class='ivar'>@key_normalizer</span><span class='rparen'>)</span>
+    <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/KeyNormalizer.html" title="Farce::Internal::KeyNormalizer (module)">KeyNormalizer</a></span></span><span class='period'>.</span><span class='id identifier rubyid_wrap_concurrent'>wrap_concurrent</span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='comma'>,</span> <span class='ivar'>@key_normalizer</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -452,7 +452,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 23 08:08:25 2026 by
+  Generated on Wed Sep 23 09:02:42 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
