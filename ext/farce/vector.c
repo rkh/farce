@@ -433,6 +433,67 @@ vector_size(VALUE self)
     return SIZET2NUM(size);
 }
 
+/* Never retain a backing-buffer pointer or hold the lock across a Ruby yield. */
+static VALUE
+vector_each(VALUE self)
+{
+    RETURN_ENUMERATOR(self, 0, NULL);
+    vector_t *vector = get_vector(self);
+    pthread_mutex_lock(&vector->lock);
+    size_t limit = vector->size;
+    pthread_mutex_unlock(&vector->lock);
+
+    for (size_t index = 0; index < limit; index++) {
+        pthread_mutex_lock(&vector->lock);
+        if (index >= vector->size) {
+            pthread_mutex_unlock(&vector->lock);
+            break;
+        }
+        VALUE value = vector->values[index];
+        pthread_mutex_unlock(&vector->lock);
+        rb_yield(value);
+    }
+    return self;
+}
+
+static VALUE
+vector_reverse_each(VALUE self)
+{
+    RETURN_ENUMERATOR(self, 0, NULL);
+    vector_t *vector = get_vector(self);
+    pthread_mutex_lock(&vector->lock);
+    size_t index = vector->size;
+    pthread_mutex_unlock(&vector->lock);
+
+    while (index > 0) {
+        pthread_mutex_lock(&vector->lock);
+        if (index > vector->size) index = vector->size;
+        if (index == 0) {
+            pthread_mutex_unlock(&vector->lock);
+            break;
+        }
+        VALUE value = vector->values[--index];
+        pthread_mutex_unlock(&vector->lock);
+        rb_yield(value);
+    }
+    return self;
+}
+
+static VALUE
+vector_fetch(VALUE self, VALUE index_value)
+{
+    vector_t *vector = get_vector(self);
+    long long raw = vector_convert_index(index_value);
+    size_t index;
+    pthread_mutex_lock(&vector->lock);
+    bool found = vector_lookup_index(vector, raw, &index);
+    VALUE result = found ? vector->values[index] : Qnil;
+    pthread_mutex_unlock(&vector->lock);
+    if (found) return result;
+    if (rb_block_given_p()) return rb_yield(index_value);
+    rb_raise(rb_eIndexError, "index %lld outside of vector bounds", raw);
+}
+
 static VALUE
 vector_compare_by_identity_p(VALUE self)
 {
@@ -902,14 +963,53 @@ vector_wait_until_non_nil(int argc, VALUE *argv, VALUE self)
     }
 }
 
+/* An unshared Array is confined to one Ractor. Its reads run under that
+ * Ractor's GVL, so no Ruby mutex is needed between yields on CRuby. */
+static VALUE
+unshared_vector_each(VALUE self)
+{
+    RETURN_ENUMERATOR(self, 0, NULL);
+    VALUE values = rb_ivar_get(self, rb_intern("@values"));
+    Check_Type(values, T_ARRAY);
+    long limit = RARRAY_LEN(values);
+    for (long index = 0; index < limit && index < RARRAY_LEN(values); index++) {
+        rb_yield(RARRAY_AREF(values, index));
+    }
+    RB_GC_GUARD(values);
+    return self;
+}
+
+static VALUE
+unshared_vector_reverse_each(VALUE self)
+{
+    RETURN_ENUMERATOR(self, 0, NULL);
+    VALUE values = rb_ivar_get(self, rb_intern("@values"));
+    Check_Type(values, T_ARRAY);
+    long index = RARRAY_LEN(values);
+    while (index > 0) {
+        if (index > RARRAY_LEN(values)) index = RARRAY_LEN(values);
+        if (index == 0) break;
+        rb_yield(RARRAY_AREF(values, --index));
+    }
+    RB_GC_GUARD(values);
+    return self;
+}
+
 void
 containers_init_vector(VALUE namespace)
 {
+    VALUE iteration = rb_define_module_under(namespace, "UnsharedVectorIteration");
+    rb_define_method(iteration, "each", unshared_vector_each, 0);
+    rb_define_method(iteration, "reverse_each", unshared_vector_reverse_each, 0);
+
     cVector = rb_define_class_under(namespace, "Vector", rb_cObject);
     rb_define_alloc_func(cVector, vector_allocate);
     rb_define_method(cVector, "initialize", vector_initialize, -1);
     rb_define_method(cVector, "size", vector_size, 0);
     rb_define_method(cVector, "snapshot", vector_snapshot, 0);
+    rb_define_method(cVector, "each", vector_each, 0);
+    rb_define_method(cVector, "reverse_each", vector_reverse_each, 0);
+    rb_define_method(cVector, "fetch", vector_fetch, 1);
     rb_define_method(cVector, "clear", vector_clear, 0);
     rb_define_method(cVector, "[]", vector_get_fast, 1);
     rb_define_method(cVector, "[]=", vector_set_fast, 2);

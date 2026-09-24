@@ -12,8 +12,9 @@ module Farce
       include Enumerable
       include Internal::Copyable
 
-      # Iterate over a snapshot captured when enumeration starts.
-      # Changes made while the block runs are visible to later enumerations.
+      # Iterate over live entries, up to the length when enumeration starts.
+      # Changes can affect entries not yet visited. Indexes beyond the starting length are not visited.
+      # Each entry is read separately. The block runs without holding a collection lock.
       # @yield [value] Called for each entry. Returns an Enumerator without a block.
       # @yieldparam value [BasicObject] The current value.
       # @yieldreturn [void] The result is ignored.
@@ -21,11 +22,11 @@ module Farce
       def each
         return enum_for(__method__) { size } unless block_given?
 
-        internal_vector.snapshot.each { yield logical_value(it) }
+        internal_vector.each { yield logical_value(it) }
         self
       end
 
-      # Iterate over the indexes in a snapshot captured when enumeration starts.
+      # Iterate over indexes up to the length when enumeration starts.
       # @yield [index] Called for each index. Returns an Enumerator without a block.
       # @yieldparam index [Integer] The current index.
       # @yieldreturn [void] The result is ignored.
@@ -37,15 +38,16 @@ module Farce
         self
       end
 
-      # Iterate in reverse over a snapshot captured when enumeration starts.
+      # Iterate over live entries from the last index when enumeration starts.
+      # Replacements and removals can affect entries not yet visited. The block runs without a collection lock.
       # @yield [value] Called for each entry. Returns an Enumerator without a block.
       # @yieldparam value [BasicObject] The current value.
       # @yieldreturn [void] The result is ignored.
       # @return [self, Enumerator]
-      def reverse_each(&)
+      def reverse_each
         return enum_for(__method__) { size } unless block_given?
 
-        internal_vector.snapshot.reverse_each(&)
+        internal_vector.reverse_each { yield logical_value(it) }
         self
       end
 
@@ -111,10 +113,9 @@ module Farce
 
         warn("block supersedes default value argument") if !fallback.empty? && block_given?
 
-        snapshot = internal_vector.snapshot
-        return logical_value(snapshot.fetch(index)) if fallback.empty? && !block_given?
+        return logical_value(internal_vector.fetch(index)) if fallback.empty? && !block_given?
 
-        stored = snapshot.fetch(index) do
+        stored = internal_vector.fetch(index) do
           return yield(original_index) if block_given?
           return fallback.first
         end
@@ -130,12 +131,11 @@ module Farce
       # @return [Vector] The requested entries and fallback values.
       # @raise [IndexError] If an index is absent and no block is supplied.
       def fetch_values(*indexes)
-        snapshot = internal_vector.snapshot
-        values   = if block_given?
-                     indexes.map { |index| snapshot.fetch(index) { derived_storage(yield(index)) } }
-                   else
-                     indexes.map { snapshot.fetch(it) }
-                   end
+        values = if block_given?
+                   indexes.map { |index| internal_vector.fetch(index) { derived_storage(yield(index)) } }
+                 else
+                   indexes.map { internal_vector.fetch(it) }
+                 end
         build_derived_vector(values)
       end
 
@@ -193,17 +193,20 @@ module Farce
         return size if item.equal?(UNDEFINED) && !block_given?
 
         if item.equal?(UNDEFINED)
-          to_a.count { yield it }
+          super() { yield it }
         else
           warn("given block not used") if block_given?
-          to_a.count(item)
+          super(item, &nil)
         end
       end
 
-      # Return whether a snapshot contains value.
+      # Return whether a live entry equals value.
       # @param value [BasicObject] The value to find using `==`.
       # @return [Boolean] Whether a matching entry exists.
-      def include?(value) = internal_vector.snapshot.any? { array_value_equal?(logical_value(it), value) }
+      def include?(value)
+        each { return true if array_value_equal?(it, value) }
+        false
+      end
       alias member? include?
 
       # Return the first matching index.
@@ -215,11 +218,11 @@ module Farce
       def index(value = UNDEFINED)
         return enum_for(__method__) { size } if value.equal?(UNDEFINED) && !block_given? # rubocop:disable Lint/ToEnumArguments
 
-        snapshot = internal_vector.snapshot
-        return snapshot.index { yield logical_value(it) } if value.equal?(UNDEFINED)
-
-        warn("given block not used") if block_given?
-        snapshot.index { array_value_equal?(logical_value(it), value) }
+        warn("given block not used") if !value.equal?(UNDEFINED) && block_given?
+        each_with_index do |entry, index|
+          return index if value.equal?(UNDEFINED) ? yield(entry) : array_value_equal?(entry, value)
+        end
+        nil
       end
       alias find_index index
 
@@ -232,11 +235,18 @@ module Farce
       def rindex(value = UNDEFINED)
         return enum_for(__method__) { size } if value.equal?(UNDEFINED) && !block_given? # rubocop:disable Lint/ToEnumArguments
 
-        snapshot = internal_vector.snapshot
-        return snapshot.rindex { yield logical_value(it) } if value.equal?(UNDEFINED)
-
-        warn("given block not used") if block_given?
-        snapshot.rindex { array_value_equal?(logical_value(it), value) }
+        warn("given block not used") if !value.equal?(UNDEFINED) && block_given?
+        backend = internal_vector
+        index = backend.size
+        while index.positive?
+          index -= 1
+          found = true
+          stored = backend.fetch(index) { found = false }
+          next unless found
+          entry = logical_value(stored)
+          return index if value.equal?(UNDEFINED) ? yield(entry) : array_value_equal?(entry, value)
+        end
+        nil
       end
 
       # Find a value by searching from the end.
@@ -280,7 +290,7 @@ module Farce
       def select
         return enum_for(__method__) { size } unless block_given?
 
-        build_derived_vector(internal_vector.snapshot.select { yield logical_value(it) })
+        build_derived_vector(internal_vector.each.select { yield logical_value(it) })
       end
       alias filter select
       alias find_all select
@@ -293,7 +303,7 @@ module Farce
       def reject
         return enum_for(__method__) { size } unless block_given?
 
-        build_derived_vector(internal_vector.snapshot.reject { yield logical_value(it) })
+        build_derived_vector(internal_vector.each.reject { yield logical_value(it) })
       end
 
       # Transform accepted values into a Vector.
@@ -342,7 +352,7 @@ module Farce
 
       # Remove nil values.
       # @return [Vector] A new same-kind Vector containing the result.
-      def compact = build_derived_vector(internal_vector.snapshot.compact)
+      def compact = build_derived_vector(internal_vector.each.compact)
 
       # Remove duplicate values, retaining the first stored entry.
       # @yield [value] Optionally compute a comparison key for each entry.
@@ -398,12 +408,12 @@ module Farce
       # Return the first count entries.
       # @param count [Integer] The non-negative number of entries to take.
       # @return [Vector] The resulting entries.
-      def take(count) = build_derived_vector(internal_vector.snapshot.take(count))
+      def take(count) = build_derived_vector(internal_vector.each.take(count))
 
       # Return all entries after count entries.
       # @param count [Integer] The non-negative number of entries to drop.
       # @return [Vector] The resulting entries.
-      def drop(count) = build_derived_vector(internal_vector.snapshot.drop(count))
+      def drop(count) = build_derived_vector(internal_vector.each.drop(count))
 
       # Return entries before the first rejected value.
       # @yield [value] Test each entry. Returns an Enumerator without a block.
@@ -412,7 +422,7 @@ module Farce
       # @return [Vector, Enumerator]
       def take_while
         return enum_for(__method__) { size } unless block_given?
-        build_derived_vector(internal_vector.snapshot.take_while { yield logical_value(it) })
+        build_derived_vector(internal_vector.each.take_while { yield logical_value(it) })
       end
 
       # Drop entries before the first rejected value.
@@ -422,7 +432,7 @@ module Farce
       # @return [Vector, Enumerator]
       def drop_while
         return enum_for(__method__) { size } unless block_given?
-        build_derived_vector(internal_vector.snapshot.drop_while { yield logical_value(it) })
+        build_derived_vector(internal_vector.each.drop_while { yield logical_value(it) })
       end
 
       # Return a shuffled snapshot.
@@ -497,8 +507,9 @@ module Farce
       # @return [Boolean] Whether the sequences have an entry in common.
       def intersect?(other) = to_a.intersect?(vector_operand(other))
 
-      # Binary-search a snapshot and return its matching value.
-      # @yield [value] Test an entry in an already sorted snapshot. Returns an Enumerator without a block.
+      # Binary-search the live entries and return the matching value.
+      # The entries must remain sorted. Concurrent writes can change the result.
+      # @yield [value] Test an entry in an already sorted vector. Returns an Enumerator without a block.
       # @yieldparam value [BasicObject] The entry being tested.
       # @yieldreturn [Boolean, Numeric, nil] A monotonic predicate or comparison result, following Array's binary-search
       #   contract.
@@ -506,13 +517,19 @@ module Farce
       def bsearch
         return enum_for(__method__) { size } unless block_given?
 
-        snapshot = internal_vector.snapshot
-        index    = snapshot.bsearch_index { yield logical_value(it) }
-        logical_value(snapshot[index]) if index
+        candidate = nil
+        index = (0...size).bsearch do |position|
+          value = self[position]
+          result = yield(value)
+          candidate = value if result.equal?(true) || (result.is_a?(Numeric) && result.zero?)
+          result
+        end
+        candidate if index
       end
 
-      # Binary-search a snapshot and return its matching index.
-      # @yield [value] Test an entry in an already sorted snapshot. Returns an Enumerator without a block.
+      # Binary-search the live entries and return the matching index.
+      # The entries must remain sorted. Concurrent writes can change the result.
+      # @yield [value] Test an entry in an already sorted vector. Returns an Enumerator without a block.
       # @yieldparam value [BasicObject] The entry being tested.
       # @yieldreturn [Boolean, Numeric, nil] A monotonic predicate or comparison result, following Array's binary-search
       #   contract.
@@ -520,7 +537,7 @@ module Farce
       def bsearch_index
         return enum_for(__method__) { size } unless block_given?
 
-        internal_vector.snapshot.bsearch_index { yield logical_value(it) }
+        (0...size).bsearch { yield self[it] }
       end
 
       # Pack a logical snapshot according to format.
@@ -556,7 +573,7 @@ module Farce
         build_derived_from_logical(result, snapshot, logical)
       end
 
-      # Split a snapshot into accepted and rejected Vectors, wrapped in a Vector.
+      # Split live entries into accepted and rejected Vectors, wrapped in a Vector.
       # @yield [value] Classify each entry. Returns an Enumerator without a block.
       # @yieldparam value [BasicObject] The current value.
       # @yieldreturn [BasicObject] A truthy value for the accepted group, or a falsy value for the rejected group.
@@ -564,11 +581,11 @@ module Farce
       def partition
         return enum_for(__method__) { size } unless block_given?
 
-        accepted, rejected = internal_vector.snapshot.partition { yield logical_value(it) }
+        accepted, rejected = internal_vector.each.partition { yield logical_value(it) }
         build_derived_values([build_derived_vector(accepted), build_derived_vector(rejected)])
       end
 
-      # Group a snapshot into same-kind Vectors.
+      # Group live entries into same-kind Vectors.
       # @yield [value] Compute a grouping key. Returns an Enumerator without a block.
       # @yieldparam value [BasicObject] The current value.
       # @yieldreturn [BasicObject] The key for the entry's group.
@@ -576,7 +593,7 @@ module Farce
       def group_by
         return enum_for(__method__) { size } unless block_given?
 
-        internal_vector.snapshot.group_by { yield logical_value(it) }
+        internal_vector.each.group_by { yield logical_value(it) }
           .transform_values { build_derived_vector(it) }
       end
 
@@ -601,11 +618,11 @@ module Farce
       # @return [BasicObject, Vector, nil] One extreme entry, nil if empty, or a Vector when count is supplied.
       def min(count = UNDEFINED, &)
         count = normalized_extreme_count(count)
-        return build_derived_vector([]) if count&.zero?
+        return super(&) if count.nil?
+        return build_derived_vector([]) if count.zero?
 
         snapshot = internal_vector.snapshot
         logical  = snapshot.map { logical_value(it) }
-        return logical.min(&) if count.nil?
         build_derived_from_logical(logical.min(count, &), snapshot, logical)
       end
 
@@ -618,11 +635,11 @@ module Farce
       # @return [BasicObject, Vector, nil] One extreme entry, nil if empty, or a Vector when count is supplied.
       def max(count = UNDEFINED, &)
         count = normalized_extreme_count(count)
-        return build_derived_vector([]) if count&.zero?
+        return super(&) if count.nil?
+        return build_derived_vector([]) if count.zero?
 
         snapshot = internal_vector.snapshot
         logical  = snapshot.map { logical_value(it) }
-        return logical.max(&) if count.nil?
         build_derived_from_logical(logical.max(count, &), snapshot, logical)
       end
 
@@ -639,11 +656,11 @@ module Farce
           return enum_for(__method__) { size } if count.nil? # rubocop:disable Lint/ToEnumArguments
           return enum_for(__method__, count) { size }
         end
-        return build_derived_vector([]) if count&.zero?
+        return super() { yield it } if count.nil?
+        return build_derived_vector([]) if count.zero?
 
         snapshot = internal_vector.snapshot
         logical  = snapshot.map { logical_value(it) }
-        return logical.min_by { yield it } if count.nil?
         build_derived_from_logical(logical.min_by(count) { yield it }, snapshot, logical)
       end
 
@@ -660,11 +677,11 @@ module Farce
           return enum_for(__method__) { size } if count.nil? # rubocop:disable Lint/ToEnumArguments
           return enum_for(__method__, count) { size }
         end
-        return build_derived_vector([]) if count&.zero?
+        return super() { yield it } if count.nil?
+        return build_derived_vector([]) if count.zero?
 
         snapshot = internal_vector.snapshot
         logical  = snapshot.map { logical_value(it) }
-        return logical.max_by { yield it } if count.nil?
         build_derived_from_logical(logical.max_by(count) { yield it }, snapshot, logical)
       end
 
@@ -681,7 +698,7 @@ module Farce
         build_derived_from_logical(logical.minmax_by { yield it }, snapshot, logical)
       end
 
-      # Yield same-kind snapshot windows.
+      # Yield same-kind windows from live iteration.
       # @param count [Integer] The positive window size.
       # @yield [window] Visit each window. Returns an Enumerator without a block.
       # @yieldparam window [Vector] The current window.
@@ -692,11 +709,11 @@ module Farce
         raise ArgumentError, "invalid slice size" unless count.positive?
         return enum_for(__method__, count) { (size + count - 1) / count } unless block_given?
 
-        internal_vector.snapshot.each_slice(count) { yield build_derived_vector(it) }
+        internal_vector.each.each_slice(count) { yield build_derived_vector(it) }
         self
       end
 
-      # Yield same-kind overlapping snapshot windows.
+      # Yield same-kind overlapping windows from live iteration.
       # @param count [Integer] The positive window size.
       # @yield [window] Visit each window. Returns an Enumerator without a block.
       # @yieldparam window [Vector] The current window.
@@ -707,7 +724,7 @@ module Farce
         raise ArgumentError, "invalid size" unless count.positive?
         return enum_for(__method__, count) { [size - count + 1, 0].max } unless block_given?
 
-        internal_vector.snapshot.each_cons(count) { yield build_derived_vector(it) }
+        internal_vector.each.each_cons(count) { yield build_derived_vector(it) }
         self
       end
 

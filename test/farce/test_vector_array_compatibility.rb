@@ -10,7 +10,7 @@ module Farce
 
     def run(...) = Timeout.timeout(15) { super }
 
-    def test_snapshot_iteration_and_explicit_array_conversion
+    def test_bounded_iteration_and_explicit_array_conversion
       each_vector([1, 2, 3]) do |vector|
         enumerator = vector.each
 

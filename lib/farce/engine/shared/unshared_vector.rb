@@ -29,6 +29,48 @@ module Farce
 
       def snapshot = @mutex.synchronize { @values.dup }
 
+      def each
+        return enum_for(__method__) { size } unless block_given?
+
+        limit = size
+        index = 0
+        while index < limit
+          value = @mutex.synchronize do
+            return self if index >= @values.size
+            @values[index]
+          end
+          yield value
+          index += 1
+        end
+        self
+      end
+
+      def reverse_each
+        return enum_for(__method__) { size } unless block_given?
+
+        index = size
+        while index.positive?
+          value = @mutex.synchronize do
+            index = @values.size if index > @values.size
+            index -= 1
+            return self if index.negative?
+            @values[index]
+          end
+          yield value
+        end
+        self
+      end
+
+      def fetch(index)
+        index = convert_index(index)
+        found = true
+        value = @mutex.synchronize { @values.fetch(index) { found = false } }
+        return value if found
+        return yield(index) if block_given?
+
+        raise IndexError, "index #{index} outside of vector bounds"
+      end
+
       def [](index)
         index = convert_index(index)
         @mutex.synchronize { @values[index] }
