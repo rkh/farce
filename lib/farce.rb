@@ -305,6 +305,55 @@ module Farce
     nil
   end
 
+  # @overload schedule(*args, mode: :copy, auto_local: true, **kwargs)
+  #   Schedules work to be executed out of band.
+  #
+  #   If the `mode` is set to `:local`, it will use the current thread's fiber scheduler to schedule the task.
+  #   If no fiber scheduler is available, it will create or reuse a Ractor-local scheduler (on the main Ractor,
+  #   this is the same scheduler as {.on_main} uses).
+  #
+  #   If `auto_local` is set to `true` (but with a different `mode`), the same logic is used as in local mode, except
+  #   it will not create a new ractor-local scheduler if one is not already available.
+  #
+  #   @example Scheduling work
+  #     # just run this asynchronously, don't care how
+  #     Farce.schedule("hello") { |message| puts message.upcase }
+  #
+  #   @example Using a fiber scheduler
+  #     Async do
+  #       # this is basically the same as calling Async { do_something }
+  #       Farce.schedule { do_something }
+  #     end
+  #
+  #   @param args [Array<Object>] Arguments passed to the block.
+  #   @param mode [Symbol] Argument transfer mode. Ignored on JRuby and TruffleRuby.
+  #   @param auto_local [Boolean] Whether to automatically use the local scheduler if available.
+  #   @param kwargs [Hash] Additional keyword arguments passed to the scheduler.
+  #   @yield [*args] The task to schedule.
+  #   @return [nil]
+  def self.schedule(*, mode: :copy, auto_local: true, **, &)
+    raise LocalJumpError, "no block given" unless block_given?
+
+    if auto_local || mode == :local
+      if Fiber.respond_to?(:scheduler) && fiber_scheduler = Fiber.scheduler
+        fiber_scheduler.fiber(**) { yield(*) }
+        return
+      end
+      scheduler = Ractor.main? ? Internal::MainScheduler : Internal::Storage[:local_scheduler]
+    end
+
+    scheduler ||= if mode == :local
+                    Internal::Storage.store_if_absent(:local_scheduler) do
+                      Internal.native_ractors? ? Scheduler.create(Thread) : ThreadScheduler.new
+                    end
+                  else
+                    Internal::ParallelScheduler
+                  end
+
+    scheduler.schedule(*, mode:, auto_local:, **, &)
+    nil
+  end
+
   def self.append_features(mod) = Internal::Mixin.__send__(:append_features, mod)
   def self.included(mod)        = Internal::Mixin.__send__(:included, mod)
   private_class_method :append_features, :included
