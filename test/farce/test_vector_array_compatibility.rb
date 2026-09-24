@@ -219,6 +219,55 @@ module Farce
       assert_same original, result[0]
     end
 
+    def test_concat_appends_arrays_and_vectors_and_returns_self
+      each_vector([1]) do |vector|
+        assert_same vector, vector.concat([2, 3], Unshared::Vector[4])
+        assert_equal [1, 2, 3, 4], vector.to_a
+        assert_same vector, vector.concat
+      end
+    end
+
+    def test_concat_snapshots_self_before_appending
+      each_vector([1, 2]) do |vector|
+        assert_same vector, vector.concat(vector, vector)
+        assert_equal [1, 2, 1, 2, 1, 2], vector.to_a
+      end
+    end
+
+    def test_concat_accepts_array_conversion_and_rejects_invalid_sources
+      source = Object.new
+      def source.to_ary = [2]
+      each_vector([1]) do |vector|
+        assert_same vector, vector.concat(source)
+        assert_equal [1, 2], vector.to_a
+        assert_raises(TypeError) { vector.concat([3], Object.new) }
+        assert_equal [1, 2], vector.to_a
+      end
+    end
+
+    def test_concat_rejects_frozen_receivers_even_without_values
+      each_vector([1]) do |vector|
+        next unless vector.respond_to?(:freeze)
+        vector.freeze
+
+        assert_raises(FrozenError) { vector.concat }
+        assert_raises(FrozenError) { vector.concat([]) } # rubocop:disable Style/ConcatArrayLiterals
+        assert_raises(FrozenError) { vector.concat([2]) } # rubocop:disable Style/ConcatArrayLiterals
+      end
+    end
+
+    def test_concat_reuses_its_own_managed_values
+      %i[copy local move].each do |mode|
+        vector = Vector.new([Object.new], mode:)
+        stored = vector.send(:internal_vector).snapshot.first
+        vector.concat(vector)
+
+        refute_predicate stored, :claimed? if mode == :move && Internal.native_ractors?
+
+        assert_same vector[0], vector[1]
+      end
+    end
+
     def test_self_concatenation_and_zip_reuse_managed_storage
       %i[copy local move].each do |mode|
         vector = Vector.new([Object.new, Object.new], mode:)

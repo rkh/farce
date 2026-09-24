@@ -18,6 +18,30 @@ module Farce
       refute_same original, rebound
     end
 
+    def test_rebinding_preserves_the_original_receiver
+      receiver = Object.new
+      original = receiver.instance_eval { proc { self } }
+      replacement = Object.new
+
+      [nil, true, false].each do |lambda|
+        rebound = Farce.rebind(original, self: replacement, lambda:)
+
+        assert_same replacement, rebound.call
+        assert_same receiver, original.call
+        assert_same receiver, original.binding.receiver
+      end
+    end
+
+    def test_rebound_procs_keep_sharing_captured_local_variables
+      value = 0
+      original = proc { |increment| value += increment }
+      rebound = Farce.rebind(original, self: Object.new)
+
+      assert_equal 1, rebound.call(1)
+      assert_equal 3, original.call(2)
+      assert_equal 3, value
+    end
+
     def test_rebound_proc_preserves_parameters_and_forwards_blocks
       original = proc { |key, default = nil, *rest, required:, optional: nil, **kwargs, &fallback|
         [fetch(key, default || fallback.call), rest, required, optional, kwargs]

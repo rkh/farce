@@ -12,6 +12,13 @@ module Farce
       include Enumerable
       include Internal::Copyable
 
+      # @overload [](*source, **options)
+      #   Create a new vector from the given source values.
+      #   @param source [Array] The initial values.
+      #   @param **options [Hash] Additional options passed to the constructor.
+      #   @return [Vector] A new vector containing the source values.
+      def self.[](*source, **) = new(source, **)
+
       # Iterate over live entries, up to the length when enumeration starts.
       # Changes can affect entries not yet visited. Indexes beyond the starting length are not visited.
       # Each entry is read separately. The block runs without holding a collection lock.
@@ -855,6 +862,26 @@ module Farce
       # @return [self, false] Self on success, or false on timeout.
       def push(value, timeout: nil)
         internal_vector.push(value, timeout:) ? self : false
+      end
+
+      # Append snapshots of one or more sequences and return this vector.
+      # Each append is synchronized separately. Other writers may interleave.
+      # Values use the vector's default transfer mode. Self-concatenation reuses
+      # existing storage and captures the original contents only once.
+      # @param sources [Array<Vector, #to_ary>] sequences to append
+      # @return [self]
+      def concat(*sources)
+        Internal::Freeze.check(self)
+        own_snapshot = internal_vector.snapshot if sources.any? { it.equal?(self) }
+        snapshots = sources.map do |source|
+          if source.equal?(self)
+            own_snapshot
+          else
+            reusable_operand_snapshot(source) || vector_operand(source).map { derived_storage(it) }
+          end
+        end
+        snapshots.each { |values| values.each { internal_vector.push(it) } }
+        self
       end
 
       # Append a single value without a timeout.

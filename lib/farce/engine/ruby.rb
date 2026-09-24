@@ -63,6 +63,8 @@ module Farce
 
     def native_ractors? = true
 
+    def prepare_method_definition(&) = Ractor.shareable_proc(&)
+
     if ::Ractor.const_defined?(:Port, false)
       def native_ports? = true
     else

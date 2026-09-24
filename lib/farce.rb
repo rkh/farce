@@ -50,7 +50,9 @@ module Farce
 
   MAYBE     = Internal::ConstMissing.new(Object, ignore: %i[NativeException RubyLex])
   UNDEFINED = Internal::Undefined.new("UNDEFINED")
-  private_constant :Internal, :MAYBE, :UNDEFINED
+
+  autoload :DEDUPER, "farce/deduper"
+  private_constant :Internal, :MAYBE, :UNDEFINED, :DEDUPER
 
   # @overload clock
   #   The current clock time
@@ -90,6 +92,34 @@ module Farce
   #
   # @return [Float] monotonic clock time in seconds, from when clock was called the first time
   def self.clock(...) = Clock.parse(...)
+
+  # Deduplicate values using the default {Deduper}.
+  # Cached values are held weakly, so retaining only an object_id does not keep
+  # its canonical object alive. Keep the returned object to preserve its identity.
+  #
+  # @overload dedup(object, copy: false, skip: nil)
+  #   Reuse equal strings and frozen containers throughout an object graph.
+  #   @example Preserve the input
+  #     first = Farce.dedup(["foo"], copy: true)
+  #     Farce.dedup(["foo"]).equal?(first) # => true
+  #   @param object [Object] the root object
+  #   @param copy [Boolean, Symbol] false to update the input, true to copy it,
+  #     or a copy method such as :clone
+  #   @param skip [Module, Array<Module>, nil] additional classes or modules to skip
+  #   @return [Object] the deduplicated result
+  #
+  # @overload dedup
+  #   Return the default deduper to configure subsequent calls.
+  #   @example Exclude a class and its children
+  #     Farce.dedup.skip(SomeClass)
+  #   @example Cache another value class
+  #     Farce.dedup.store(MyValue)
+  #   @return [Deduper]
+  # @see Deduper#dedup
+  def self.dedup(object = UNDEFINED, **)
+    return DEDUPER if UNDEFINED.equal?(object)
+    DEDUPER.dedup(object, **)
+  end
 
   # Binds a proc, lambda, block, bound or unbound method to a new self.
   #
@@ -342,13 +372,14 @@ module Farce
       scheduler = Ractor.main? ? Internal::MainScheduler : Internal::Storage[:local_scheduler]
     end
 
-    scheduler ||= if mode == :local
-                    Internal::Storage.store_if_absent(:local_scheduler) do
-                      Internal.native_ractors? ? Scheduler.create(Thread) : ThreadScheduler.new
-                    end
-                  else
-                    Internal::ParallelScheduler
-                  end
+    scheduler ||=
+      if mode == :local
+        Internal::Storage.store_if_absent(:local_scheduler) do
+          Internal.native_ractors? ? Scheduler.create(Thread) : ThreadScheduler.new
+        end
+      else
+        Internal::ParallelScheduler
+      end
 
     scheduler.schedule(*, mode:, auto_local:, **, &)
     nil

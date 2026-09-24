@@ -12,6 +12,10 @@ module Farce
   module Internal # :nodoc: all
     include Autoloads["#{__dir__}/shared"]
 
+    # define_method supplies the receiver. Rebinding first is unnecessary without
+    # native Ractor isolation and can change the method context used by super.
+    def prepare_method_definition(&definition) = definition
+
     autoload :BasePort,             "farce/engine/shared/port"
     autoload :StrictMap,            "farce/engine/shared/strict_map"
     autoload :StrictWeakKeyMap,     "farce/engine/shared/strict_map"
