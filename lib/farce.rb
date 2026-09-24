@@ -191,6 +191,11 @@ module Farce
   #
   # If a block is given, executes it on the main ractor, passing any given arguments to it.
   # Blocks the current thread until the block has finished executing.
+  #
+  # Arguments are transferred based on the given mode.
+  #
+  # @!macro modes
+  #
   # Calls from the main ractor execute directly, preserving the block and arguments.
   #
   # If no block is given, it returns a scheduler to execute tasks on the main ractor.
@@ -245,9 +250,10 @@ module Farce
   #
   # @overload on_main
   #   Returns a scheduler that executes tasks on the main ractor.
-  #   @return [Scheduler, ThreadScheduler]
+  #   @return [Abstract::Scheduler]
   #
-  # @return [Scheduler, ThreadScheduler, nil]
+  # @return [Abstract::Scheduler, nil]
+  # @see .in_parallel
   def self.on_main(*args, mode: UNDEFINED, &)
     unless block_given?
       raise LocalJumpError, "no block given" unless args.empty? && UNDEFINED.equal?(mode)
@@ -261,6 +267,41 @@ module Farce
       Internal::MainScheduler.execute(*args, mode:, auto_local: false, &)
     end
 
+    nil
+  end
+
+  # Schedules work without waiting for the block to finish.
+  # On CRuby, uses a shared Ractor pool with at most {System.cpu_count} workers.
+  # On JRuby and TruffleRuby, starts a new thread for each task.
+  #
+  # Without a block, returns the shared scheduler. The CRuby pool starts workers
+  # when tasks arrive. Pass mutable task data as arguments so it can be transferred based on the given mode.
+  #
+  # @!macro modes
+  #
+  # @example
+  #   Farce.in_parallel("hello") { |message| puts message.upcase }
+  #   Farce.in_parallel.schedule { puts "another task" }
+  #
+  # @overload in_parallel(*args, mode: :copy)
+  #   @param args [Array<Object>] Arguments passed to the block.
+  #   @param mode [Symbol] Argument transfer mode. Ignored on JRuby and TruffleRuby.
+  #   @yield [*args] The task to schedule.
+  #   @return [nil]
+  #
+  # @overload in_parallel
+  #   @return [Abstract::Scheduler] The shared scheduler.
+  #
+  # @return [Abstract::Scheduler, nil]
+  # @see .on_main
+  def self.in_parallel(*args, mode: UNDEFINED, &)
+    unless block_given?
+      raise LocalJumpError, "no block given" unless args.empty? && UNDEFINED.equal?(mode)
+      return Internal::ParallelScheduler
+    end
+
+    mode = :copy if UNDEFINED.equal?(mode)
+    Internal::ParallelScheduler.schedule(*args, mode:, &)
     nil
   end
 

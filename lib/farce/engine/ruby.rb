@@ -37,6 +37,7 @@ module Farce
     StrictLRUMap  = ShareableLRUMap
     StrictTreeMap = ShareableTreeMap
 
+    autoload :ParallelScheduler,    "farce/engine/ruby/shared/parallel_scheduler"
     autoload :MainScheduler,        "farce/engine/ruby/shared/main_scheduler"
     autoload :Lease,                "farce/engine/ruby/shared/lease"
     autoload :LeasePool,            "farce/engine/ruby/shared/lease_pool"

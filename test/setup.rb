@@ -48,15 +48,16 @@ class Test < Minitest::Test
   include Helpers::Subprocess
 end
 
-# Only stop the main scheduler if a test started it.
-# Stop its dispatcher before JRuby tears down the remaining fiber threads.
+# Only stop shared schedulers that a test started.
 Minitest.after_run do
-  next if Farce.const_get(:Internal).autoload?(:MainScheduler)
+  internal = Farce.const_get(:Internal)
+  %i[ParallelScheduler MainScheduler].each do |name|
+    next if internal.autoload?(name)
+    scheduler = internal.const_get(name)
+    next if scheduler.is_a?(Farce::ThreadScheduler)
 
-  require "timeout"
-  scheduler = Farce.on_main
-  next if scheduler.is_a?(Farce::ThreadScheduler)
-
-  scheduler.close
-  Timeout.timeout(5) { sleep 0.001 until scheduler.state == :closed }
+    require "timeout"
+    scheduler.close
+    Timeout.timeout(5) { sleep 0.001 until scheduler.state == :closed }
+  end
 end
