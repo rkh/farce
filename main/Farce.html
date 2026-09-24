@@ -461,6 +461,29 @@ namespace.</p>
 </li>
 
       
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#schedule-class_method" title="schedule (class method)">.<strong>schedule</strong>(*args, mode: :copy, auto_local: true, **kwargs) {|*args| ... } &#x21d2; nil </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Schedules work to be executed out of band.</p>
+</div></span>
+  
+</li>
+
+      
     </ul>
     
   
@@ -1975,12 +1998,238 @@ A method is returned if the argument was a Method or UnboundMethod, otherwise a 
 </table>
 </div>
     
+      <div class="method_details ">
+  <h3 class="signature " id="schedule-class_method">
+  
+    .<strong>schedule</strong>(*args, mode: :copy, auto_local: true, **kwargs) {|*args| ... } &#x21d2; <tt>nil</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="docstring">
+  <div class="discussion">
+    <p>Schedules work to be executed out of band.</p>
+<p>If the <code>mode</code> is set to <code>:local</code>, it will use the current thread's fiber scheduler to schedule the task.
+If no fiber scheduler is available, it will create or reuse a Ractor-local scheduler (on the main Ractor,
+this is the same scheduler as <span class='object_link'><a href="#on_main-class_method" title="Farce.on_main (method)">on_main</a></span> uses).</p>
+<p>If <code>auto_local</code> is set to <code>true</code> (but with a different <code>mode</code>), the same logic is used as in local mode, except
+it will not create a new ractor-local scheduler if one is not already available.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Scheduling work</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='comment'># just run this asynchronously, don&#39;t care how
+</span><span class='const'><span class='object_link'><a href="" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>hello</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_message'>message</span><span class='op'>|</span> <span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_message'>message</span><span class='period'>.</span><span class='id identifier rubyid_upcase'>upcase</span> <span class='rbrace'>}</span></code></pre>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Using a fiber scheduler</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='const'>Async</span> <span class='kw'>do</span>
+  <span class='comment'># this is basically the same as calling Async { do_something }
+</span>  <span class='const'><span class='object_link'><a href="" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_do_something'>do_something</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span></code></pre>
+    
+  </div>
+<p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>args</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;Object&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Arguments passed to the block.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>mode</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>:copy</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Argument transfer mode. Ignored on JRuby and TruffleRuby.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>auto_local</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>true</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether to automatically use the local scheduler if available.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>kwargs</span>
+      
+      
+        <span class='type'>(<tt>Hash</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Additional keyword arguments passed to the scheduler.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>*args</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The task to schedule.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div>
+
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>LocalJumpError</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce.rb', line 334</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+
+  <span class='kw'>if</span> <span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span>
+    <span class='kw'>if</span> <span class='const'>Fiber</span><span class='period'>.</span><span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:scheduler</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span> <span class='op'>=</span> <span class='const'>Fiber</span><span class='period'>.</span><span class='id identifier rubyid_scheduler'>scheduler</span>
+      <span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span><span class='period'>.</span><span class='id identifier rubyid_fiber'>fiber</span><span class='lparen'>(</span><span class='op'>**</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span><span class='lparen'>(</span><span class='op'>*</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+      <span class='kw'>return</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_scheduler'>scheduler</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_main?'><span class='object_link'><a href="Farce/Ractor.html#main%3F-class_method" title="Farce::Ractor.main? (method)">main?</a></span></span> <span class='op'>?</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MainScheduler</span> <span class='op'>:</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='lbracket'>[</span><span class='symbol'>:local_scheduler</span><span class='rbracket'>]</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_scheduler'>scheduler</span> <span class='op'>||=</span> <span class='kw'>if</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span>
+                  <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='symbol'>:local_scheduler</span><span class='rparen'>)</span> <span class='kw'>do</span>
+                    <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span> <span class='op'>?</span> <span class='const'><span class='object_link'><a href="Farce/Scheduler.html" title="Farce::Scheduler (class)">Scheduler</a></span></span><span class='period'>.</span><span class='id identifier rubyid_create'><span class='object_link'><a href="Farce/Scheduler.html#create-class_method" title="Farce::Scheduler.create (method)">create</a></span></span><span class='lparen'>(</span><span class='const'>Thread</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='const'><span class='object_link'><a href="Farce/ThreadScheduler.html" title="Farce::ThreadScheduler (class)">ThreadScheduler</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span>
+                  <span class='kw'>end</span>
+                <span class='kw'>else</span>
+                  <span class='const'>Internal</span><span class='op'>::</span><span class='const'>ParallelScheduler</span>
+                <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_scheduler'>scheduler</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>nil</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
   </div>
 
 </div>
 
       <div id="footer">
-  Generated on Thu Sep 24 11:26:58 2026 by
+  Generated on Thu Sep 24 12:28:52 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

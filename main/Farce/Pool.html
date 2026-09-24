@@ -444,7 +444,7 @@ By default, the pool starts with no workers and can shrink back to zero.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(min_size: 0, max_size: 4, max_inflight: 64, grow_after: 0.005, shrink_after: 30, capacity: 1024, backend: CONFIG.freeze.io_backend, &amp;constructor)  &#x21d2; Pool </a>
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(min_size: 0, max_size: 4, max_inflight: 64, grow_after: 0.005, shrink_after: 30, capacity: 1024, backend: Internal::FROZEN_CONFIG.io_backend, &amp;constructor)  &#x21d2; Pool </a>
     
 
     
@@ -566,7 +566,7 @@ By default, the pool starts with no workers and can shrink back to zero.</p>
     <div class="method_details first">
   <h3 class="signature first" id="initialize-instance_method">
   
-    #<strong>initialize</strong>(min_size: 0, max_size: 4, max_inflight: 64, grow_after: 0.005, shrink_after: 30, capacity: 1024, backend: CONFIG.freeze.io_backend, &amp;constructor)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Pool (class)">Pool</a></span></tt> 
+    #<strong>initialize</strong>(min_size: 0, max_size: 4, max_inflight: 64, grow_after: 0.005, shrink_after: 30, capacity: 1024, backend: Internal::FROZEN_CONFIG.io_backend, &amp;constructor)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Pool (class)">Pool</a></span></tt> 
   
 
   
@@ -696,7 +696,7 @@ has no runnable fibers or when the pool has reached <code>max_size</code>.</p>
         <span class='type'>(<tt>Symbol</tt>)</span>
       
       
-        <em class="default">(defaults to: <tt>CONFIG.freeze.io_backend</tt>)</em>
+        <em class="default">(defaults to: <tt>Internal::FROZEN_CONFIG.io_backend</tt>)</em>
       
       
         &mdash;
@@ -765,8 +765,8 @@ has no runnable fibers or when the pool has reached <code>max_size</code>.</p>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>min_size:</span> <span class='int'>0</span><span class='comma'>,</span> <span class='label'>max_size:</span> <span class='int'>4</span><span class='comma'>,</span> <span class='label'>max_inflight:</span> <span class='int'>64</span><span class='comma'>,</span>
                <span class='label'>grow_after:</span> <span class='float'>0.005</span><span class='comma'>,</span> <span class='label'>shrink_after:</span> <span class='int'>30</span><span class='comma'>,</span> <span class='label'>capacity:</span> <span class='int'>1024</span><span class='comma'>,</span>
-               <span class='label'>backend:</span> <span class='const'>CONFIG</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span><span class='period'>.</span><span class='id identifier rubyid_io_backend'>io_backend</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_constructor'>constructor</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_constructor'>constructor</span> <span class='op'>||=</span> <span class='const'>CONFIG</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span><span class='period'>.</span><span class='id identifier rubyid_fiber_scheduler_constructor'>fiber_scheduler_constructor</span>
+               <span class='label'>backend:</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>FROZEN_CONFIG</span><span class='period'>.</span><span class='id identifier rubyid_io_backend'>io_backend</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_constructor'>constructor</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_constructor'>constructor</span> <span class='op'>||=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>FROZEN_CONFIG</span><span class='period'>.</span><span class='id identifier rubyid_fiber_scheduler_constructor'>fiber_scheduler_constructor</span>
   <span class='ivar'>@min_size</span>     <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_min_size'>min_size</span><span class='rparen'>)</span>
   <span class='ivar'>@max_size</span>     <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_max_size'>max_size</span><span class='rparen'>)</span>
   <span class='ivar'>@max_inflight</span> <span class='op'>=</span> <span class='id identifier rubyid_max_inflight'>max_inflight</span> <span class='op'>&amp;&amp;</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_max_inflight'>max_inflight</span><span class='rparen'>)</span>
@@ -1616,7 +1616,7 @@ get an error. Useful for usage contained within a single Ractor.</li>
 </div>
 
       <div id="footer">
-  Generated on Thu Sep 24 11:26:59 2026 by
+  Generated on Thu Sep 24 12:28:53 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
