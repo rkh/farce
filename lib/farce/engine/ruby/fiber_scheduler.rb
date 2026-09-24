@@ -4,7 +4,7 @@
 
 module Farce
   module Internal
-    case CONFIG.freeze.fiber_scheduler_implementation
+    case FROZEN_CONFIG.fiber_scheduler_implementation
     when :native
       load_native_fiber_scheduler
     when :select

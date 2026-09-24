@@ -25,6 +25,14 @@ module Farce
     MAP_KEEP       = Object.new.freeze
     MAP_DELETE     = Object.new.freeze
 
+    # A non-main Ractor cannot call CONFIG.frozen if the main Ractor didn't do so before,
+    # as CONFIG is not shareable yet. We don't want to eagerly freeze it, otherwise a user can't change
+    # any configuration options after loading Farce.
+    #
+    # We can't do so via `Farce.on_main`, as creating the MainScheduler already needs the configuration.
+    # So we rely on the fact that autoloads run on the main Ractor.
+    autoload :FROZEN_CONFIG, "farce/internal/_frozen_config"
+
     include Autoloads
     extend self
 

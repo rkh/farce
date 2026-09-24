@@ -21,8 +21,7 @@ module Farce
 
       # Read the configured worker limit for the current Ractor.
       def self.default_max_threads
-        config = CONFIG.freeze
-        Ractor.main? ? config.main_thread_pool_size : config.additional_thread_pool_size
+        Ractor.main? ? FROZEN_CONFIG.main_thread_pool_size : FROZEN_CONFIG.additional_thread_pool_size
       end
 
       class Job

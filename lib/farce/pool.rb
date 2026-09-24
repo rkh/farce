@@ -70,8 +70,8 @@ module Farce
     # @yieldreturn [Object] Fiber scheduler constructed in each worker.
     def initialize(min_size: 0, max_size: 4, max_inflight: 64,
                    grow_after: 0.005, shrink_after: 30, capacity: 1024,
-                   backend: CONFIG.freeze.io_backend, &constructor)
-      constructor ||= CONFIG.freeze.fiber_scheduler_constructor
+                   backend: Internal::FROZEN_CONFIG.io_backend, &constructor)
+      constructor ||= Internal::FROZEN_CONFIG.fiber_scheduler_constructor
       @min_size     = Integer(min_size)
       @max_size     = Integer(max_size)
       @max_inflight = max_inflight && Integer(max_inflight)

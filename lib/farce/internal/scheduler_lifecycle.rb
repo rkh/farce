@@ -28,7 +28,7 @@ module Farce
       SLOT_COUNT = 64
       private_constant :Timer, :Cancelled, :Completion, :SLOT_COUNT
 
-      def initialize(backend: CONFIG.freeze.io_backend, thread_pool: ThreadPool.current)
+      def initialize(backend: FROZEN_CONFIG.io_backend, thread_pool: ThreadPool.current)
         super(backend: backend)
         @owner           = owner_thread
         @root            = Fiber.current

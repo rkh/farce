@@ -234,7 +234,7 @@ module Farce
     def test_local_scheduling_in_a_native_ractor
       return unless Ractor.builtin?
 
-      assert_ractor_local_scheduling("::Ractor")
+      assert_ractor_local_scheduling("::Ractor", freeze_config: false)
     end
 
     private

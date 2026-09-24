@@ -266,6 +266,9 @@ class TestConfig < Test
       require "farce"
       config = Farce.config
       abort "configuration frozen by require" if config.frozen?
+      Farce::Scheduler
+      Farce::Pool
+      abort "configuration frozen by class loading" if config.frozen?
       Farce.config do |c|
         c.fiber_scheduler = :select
         c.main_thread_pool_size = 3
@@ -281,6 +284,46 @@ class TestConfig < Test
 
     assert_predicate status, :success?, error
     assert_equal "ok", output.strip
+  end
+
+  def test_frozen_config_is_initialized_from_another_ractor
+    output, error, status = ruby_subprocess(<<~RUBY)
+      require "farce"
+      Farce.config.additional_thread_pool_size = 3
+      caller = Farce::Ractor.new do
+        internal = Farce.const_get(:Internal)
+        internal::FROZEN_CONFIG
+      end
+      config = caller.respond_to?(:value) ? caller.value : caller.take
+      abort "configuration replaced" unless config.equal?(Farce.config)
+      abort "configuration not frozen" unless config.frozen?
+      abort "configuration not shareable" unless Farce::Ractor.shareable?(config)
+      abort "configuration lost" unless config.additional_thread_pool_size == 3
+      puts "ok"
+    RUBY
+
+    assert_predicate status, :success?, error
+    assert_equal "ok\n", output
+    assert_empty error
+  end
+
+  def test_scheduler_with_explicit_backend_reads_configuration_from_another_ractor
+    output, error, status = ruby_subprocess(<<~RUBY)
+      require "farce"
+      caller = Farce::Ractor.new do
+        scheduler = Farce::Scheduler.new(backend: :auto)
+        scheduler.close
+        :done
+      end
+      result = caller.respond_to?(:value) ? caller.value : caller.take
+      abort "scheduler construction failed" unless result == :done
+      abort "configuration not frozen" unless Farce.config.frozen?
+      puts "ok"
+    RUBY
+
+    assert_predicate status, :success?, error
+    assert_equal "ok\n", output
+    assert_empty error
   end
 
   def test_config_can_be_loaded_and_configured_before_farce

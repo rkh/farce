@@ -169,9 +169,9 @@ module Farce
     #
     #   @param capacity [Integer, nil] Pending-task capacity; nil creates an unbounded queue.
     #   @yieldreturn [Object] The fiber scheduler to install when launched or installed.
-    def initialize(capacity: 1024, backend: CONFIG.freeze.io_backend, queue: nil, external: false,
+    def initialize(capacity: 1024, backend: Internal::FROZEN_CONFIG.io_backend, queue: nil, external: false,
                    pool_worker: nil, queue_owner: true, &constructor)
-      constructor ||= CONFIG.freeze.fiber_scheduler_constructor
+      constructor ||= Internal::FROZEN_CONFIG.fiber_scheduler_constructor
       @capacity    = capacity ? Integer(capacity) : nil
       @backend     = backend
       @constructor = Ractor.shareable?(constructor) ? constructor : Ractor.shareable_proc(&constructor) if constructor
