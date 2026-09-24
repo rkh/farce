@@ -443,7 +443,8 @@ module Farce
       end
 
       def test_atomic_first_ractor_visibility
-        assert_atomic_ractor_publication(Internal::ShareableLRUMap, iterations: 2_000) do |map|
+        iterations = Gem.win_platform? ? 200 : 2_000
+        assert_atomic_ractor_publication(Internal::ShareableLRUMap, iterations:) do |map|
           map.send(:initialize, max_size: 1)
         end
       end

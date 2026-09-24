@@ -5,6 +5,8 @@
 require_relative "setup"
 
 class TestSubprocess < Test
+  def setup = require_subprocess_support
+
   def test_captures_output_and_preserves_failure_status
     output, error, status = ruby_subprocess('puts "output"; warn "error"; exit 23')
 

@@ -393,6 +393,8 @@ module Farce
       end
 
       def test_native_waits_do_not_opt_in_with_async
+        skip "Async is unavailable on Windows" if Gem.win_platform?
+
         output, error, status = ruby_subprocess(<<~RUBY)
           require "async"
           require "farce"
@@ -428,6 +430,8 @@ module Farce
       end
 
       def test_farce_apis_opt_in_with_async
+        skip "Async is unavailable on Windows" if Gem.win_platform?
+
         output, error, status = ruby_subprocess(<<~RUBY)
           require "async"
           require "farce"
@@ -452,6 +456,8 @@ module Farce
       end
 
       def test_wrapping_async_does_not_opt_in_native_waits
+        skip "Async is unavailable on Windows" if Gem.win_platform?
+
         output, error, status = ruby_subprocess(<<~RUBY)
           require "async"
           require "farce"
@@ -479,6 +485,8 @@ module Farce
       end
 
       def test_an_external_scheduler_can_explicitly_provide_a_selector
+        skip "Async is unavailable on Windows" if Gem.win_platform?
+
         output, error, status = ruby_subprocess(<<~RUBY)
           require "async"
           require "farce"

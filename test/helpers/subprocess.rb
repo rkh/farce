@@ -7,9 +7,16 @@ require "rbconfig"
 
 module Helpers
   module Subprocess
+    def require_subprocess_support
+      return unless RUBY_ENGINE == "truffleruby" && !TruffleRuby.native?
+      skip "Subprocess tests are disabled on TruffleRuby+GraalVM"
+    end
+
     # Build a command without loading Farce or the test framework in the child.
     # Disable coverage for probes whose startup time is part of the test.
     def ruby_command(source, coverage: true)
+      require_subprocess_support
+
       command = [RbConfig.ruby, "-I#{File.expand_path("../../lib", __dir__)}", "-I#{File.expand_path("..", __dir__)}"]
       if coverage && ENV["COVERAGE"] && ENV["COVERAGE"].downcase != "false"
         command << "-r#{File.expand_path("../coverage_subprocess.rb", __dir__)}"

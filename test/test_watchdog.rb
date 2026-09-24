@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require "stringio"
 require "tempfile"
@@ -57,6 +59,7 @@ class TestWatchdogTest < Minitest::Test
   end
 
   def test_timeout_terminates_descendant_processes
+    require_subprocess_support
     skip if Gem.win_platform?
 
     Tempfile.create do |pid_file|
@@ -76,6 +79,8 @@ class TestWatchdogTest < Minitest::Test
   private
 
   def run_watchdog(source)
+    require_subprocess_support
+
     command = Gem.win_platform? ? ruby_command(source, coverage: false) : ["/bin/sh", "-c", source]
     TestWatchdog.new(command, seed: 1, timeout: 2, diagnostics: false, output: StringIO.new).run
   end
