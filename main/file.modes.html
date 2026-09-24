@@ -375,6 +375,11 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <td>Task arguments, with automatic local transfer enabled by default.</td>
 </tr>
 <tr>
+<td><code>Farce::ThreadScheduler</code></td>
+<td><code>schedule</code>, <code>execute</code></td>
+<td>Accepts scheduler options but always keeps arguments local.</td>
+</tr>
+<tr>
 <td><code>Farce::Pool</code></td>
 <td><code>schedule</code></td>
 <td>Task arguments. <code>:local</code> is rejected.</td>
@@ -587,7 +592,7 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </div></div>
 
       <div id="footer">
-  Generated on Wed Sep 23 14:29:58 2026 by
+  Generated on Thu Sep 24 07:32:32 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
