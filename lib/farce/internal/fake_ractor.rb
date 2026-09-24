@@ -148,11 +148,27 @@ module Farce
         undef clone
       end
 
-      def self.current     = GROUPS.fetch(Thread.current.group) { Main::INSTANCE }
+      def self.current
+        # JRuby fibers expose a backing thread with a different thread group.
+        thread   = Internal.storage_thread(Thread.current)
+        override = Storage.thread(thread)[:current_ractor]
+        override || GROUPS.fetch(thread.group) { Main::INSTANCE }
+      end
+
       def self.main_thread = STATES[current]&.main_thread || Thread.main
 
+      # Fibers on this Ruby thread share the override. New threads do not inherit it.
+      def self.with_current(ractor)
+        storage  = Storage.thread
+        previous = storage[:current_ractor]
+        storage[:current_ractor] = ractor
+        yield
+      ensure
+        storage[:current_ractor] = previous
+      end
+
       def self.threads
-        group = Thread.current.group
+        group = Internal.storage_thread(Thread.current).group
         return group.list if GROUPS.key?(group)
         list = ThreadGroup::Default.list
         list += group.list if group != ThreadGroup::Default

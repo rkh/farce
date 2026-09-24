@@ -18,6 +18,8 @@ module Helpers
       require_subprocess_support
 
       command = [RbConfig.ruby, "-I#{File.expand_path("../../lib", __dir__)}", "-I#{File.expand_path("..", __dir__)}"]
+      # Enable accurate coverage even when the child starts SimpleCov itself.
+      command << "--debug" if RUBY_ENGINE == "jruby"
       if coverage && ENV["COVERAGE"] && ENV["COVERAGE"].downcase != "false"
         command << "-r#{File.expand_path("../coverage_subprocess.rb", __dir__)}"
       end

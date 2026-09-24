@@ -9,6 +9,11 @@ module Farce
   class ThreadScheduler < Farce::Abstract::Scheduler
     include Shareable::Immutable
 
+    def initialize(&factory)
+      @factory = factory
+      super()
+    end
+
     # Starts a thread in the caller's Ractor, preserving the block and arguments.
     #
     # @overload schedule(*args, **options)
@@ -17,7 +22,8 @@ module Farce
     #   @yield [*args] The task to run.
     #   @return [self]
     def schedule(*, **, &)
-      Thread.new(*, &)
+      raise LocalJumpError, "Cannot schedule without a block" unless block_given?
+      @factory ? @factory.call(*, &) : Thread.new(*, &)
       self
     end
 

@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../../setup"
 
@@ -149,6 +151,32 @@ module Farce
         end.resume
 
         inherited.each { assert_same storage, it }
+      end
+
+      def test_thread_storage_does_not_depend_on_the_emulated_ractor_accessing_it
+        return if Internal.native_ractors?
+        storage = Storage.thread
+        remote = Ractor.new(Thread.current) { |thread| Storage.thread(thread).object_id }
+
+        assert_equal storage.object_id, remote.value
+      end
+
+      def test_thread_storage_is_preserved_while_entering_the_emulated_main_ractor
+        return if Internal.native_ractors?
+        completed = Farce::Queue.new
+        remote = Ractor.new(completed) do |output|
+          storage = Storage.thread
+          storage[:on_main_test] = :value
+          Farce.on_main do
+            output << [Storage.thread.equal?(storage), Storage.thread[:on_main_test]]
+          end
+          output << Storage.thread.equal?(storage)
+        end
+
+        assert_equal [true, :value], completed.pop(timeout: 5)
+        assert completed.pop(timeout: 5)
+      ensure
+        remote&.value
       end
 
       def test_invalid_mode_raises

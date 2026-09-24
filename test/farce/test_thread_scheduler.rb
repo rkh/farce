@@ -84,7 +84,7 @@ module Farce
     end
 
     def test_schedule_requires_a_block
-      assert_raises(ThreadError) { @scheduler.schedule }
+      assert_raises(LocalJumpError) { @scheduler.schedule }
     end
 
     def test_stateless_scheduler_is_shareable_and_close_is_a_noop

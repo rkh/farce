@@ -70,7 +70,8 @@ class TestSubprocess < Test
   end
 
   def test_coverage_bootstrap_uses_bundled_dependencies_without_rubyopt
-    output, error, status = ruby_subprocess(<<~RUBY, env: { "COVERAGE" => "true", "RUBYOPT" => nil }, coverage: false)
+    env = { "COVERAGE" => "true", "RUBYOPT" => nil, "JRUBY_OPTS" => nil }
+    output, error, status = ruby_subprocess(<<~RUBY, env:, coverage: false)
       require "coverage_subprocess"
       require "bundler/setup"
       abort "Farce loaded too early" if defined?(Farce::Clock)

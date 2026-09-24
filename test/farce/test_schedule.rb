@@ -80,7 +80,10 @@ module Farce
       end
 
       assert_nil returned
-      assert_equal !Ractor.builtin?, completed.pop(timeout: 5)
+      ran_on_main = completed.pop(timeout: 5)
+
+      refute_nil ran_on_main, "parallel task did not finish"
+      refute ran_on_main
       assert_equal Ractor.builtin? ? [:original] : %i[original changed], source
     end
 
@@ -212,12 +215,8 @@ module Farce
       task_owner = completed.pop(timeout: 5)
 
       refute_nil task_owner
-      if Ractor.builtin?
-        refute_same caller, task_owner
-        refute_same Ractor.main, task_owner
-      else
-        assert_same caller, task_owner
-      end
+      refute_same caller, task_owner
+      refute_same Ractor.main, task_owner
       caller.send(:stop)
 
       assert ractor_value(caller)

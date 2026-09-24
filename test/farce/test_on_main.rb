@@ -55,7 +55,7 @@ module Farce
       if Ractor.builtin?
         assert_same Ractor.main, Farce.on_main.owner
       else
-        assert_instance_of ThreadScheduler, Farce.on_main
+        assert_kind_of ThreadScheduler, Farce.on_main
       end
     end
 
@@ -112,6 +112,114 @@ module Farce
       assert worker.value
     end
 
+    def test_remote_execution_runs_on_the_main_ractor
+      completed = Queue.new
+      remote = Ractor.new(completed) do |output|
+        Farce.on_main(output) { |queue| queue << Farce::Ractor.main? }
+      end
+
+      assert completed.pop(timeout: 5)
+    ensure
+      ractor_value(remote) if remote
+    end
+
+    def test_emulated_remote_execution_preserves_thread_and_restores_context
+      return if Ractor.builtin?
+      key = :on_main_context_test
+      Ractor[key] = :main
+      completed = Queue.new
+      remote = Ractor.new(completed, key) do |output, storage_key|
+        caller = Ractor.current
+        thread = Thread.current
+        fiber = Fiber.current
+        Ractor[storage_key] = :remote
+        Farce.on_main do
+          output << [Ractor.main?, Thread.current.equal?(thread), Fiber.current.equal?(fiber), Ractor[storage_key]]
+        end
+        output << [Ractor.current.equal?(caller), Ractor[storage_key]]
+      end
+
+      assert_equal [true, true, true, :main], completed.pop(timeout: 5)
+      assert_equal [true, :remote], completed.pop(timeout: 5)
+    ensure
+      ractor_value(remote) if remote
+      Ractor[key] = nil if key
+    end
+
+    def test_emulated_main_context_is_shared_by_fibers_on_the_thread
+      return if Ractor.builtin?
+      remote = Ractor.new do
+        caller = Ractor.current
+        fiber = Fiber.new do
+          Farce.on_main { Fiber.yield Ractor.main? }
+          Ractor.current.equal?(caller)
+        end
+        inside = fiber.resume
+        outside = Ractor.main?
+        [inside, outside, fiber.resume]
+      end
+
+      assert_equal [true, true, true], ractor_value(remote)
+    end
+
+    def test_emulated_main_context_is_shared_by_new_fibers_but_not_new_threads
+      return if Ractor.builtin?
+      completed = Queue.new
+      remote = Ractor.new(completed) do |output|
+        caller = Ractor.current
+        Farce.on_main do
+          fiber_result = Fiber.new { Ractor.main? }.resume
+          thread_result = Thread.new { Ractor.current.equal?(caller) }.value
+          output << [fiber_result, thread_result]
+        end
+      end
+
+      assert_equal [true, true], completed.pop(timeout: 5)
+    ensure
+      ractor_value(remote) if remote
+    end
+
+    def test_ractor_created_in_emulated_main_context_has_its_own_identity
+      return if Ractor.builtin?
+      completed = Queue.new
+      remote = Ractor.new(completed) do |output|
+        Farce.on_main do
+          child = Ractor.new { Ractor.main? }
+          output << child.value
+        end
+      end
+
+      ran_on_main = completed.pop(timeout: 5)
+
+      refute_nil ran_on_main, "child Ractor did not finish"
+      refute ran_on_main
+    ensure
+      ractor_value(remote) if remote
+    end
+
+    def test_emulated_remote_exception_restores_context
+      return if Ractor.builtin?
+      completed = Queue.new
+      remote = Ractor.new(completed) do |output|
+        caller = Ractor.current
+        group = Thread.current.group
+        failure = ArgumentError.new("task failed")
+        begin
+          Farce.on_main do
+            output << Ractor.main?
+            raise failure
+          end
+        rescue ArgumentError => e
+          output << [e.equal?(failure), Ractor.current.equal?(caller), Thread.current.group.equal?(group)]
+        end
+      end
+
+      assert completed.pop(timeout: 5)
+      assert_equal [true, true, true], completed.pop(timeout: 5)
+    ensure
+      ractor_value(remote) if remote
+    end
+
     def test_remote_execution_waits_for_completion
       Farce.on_main
       events = Queue.new
@@ -125,7 +233,7 @@ module Farce
         output << [:returned, returned]
       end
 
-      assert_equal [:started, Ractor.builtin?], events.pop(timeout: 5)
+      assert_equal [:started, true], events.pop(timeout: 5)
       assert_nil events.try_pop
       release << :continue
 

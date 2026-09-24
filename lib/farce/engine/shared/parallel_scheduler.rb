@@ -4,6 +4,6 @@
 
 module Farce
   module Internal # :nodoc: all
-    ParallelScheduler = MainScheduler
+    ParallelScheduler = ThreadScheduler.new(&Ractor.method(:new))
   end
 end

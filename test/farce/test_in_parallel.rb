@@ -6,25 +6,21 @@ require_relative "../setup"
 
 module Farce
   class TestInParallel < Test
-    def test_returns_one_shared_scheduler
-      scheduler = Farce.in_parallel
-
-      assert_same scheduler, Farce.in_parallel
-      assert Ractor.shareable?(scheduler)
-      if Ractor.builtin?
-        assert_instance_of Pool, scheduler
-        assert_equal System.cpu_count, scheduler.max_size
-      else
-        assert_instance_of ThreadScheduler, scheduler
-        assert_same Farce.on_main, scheduler
-      end
-    end
-
     def test_arguments_without_a_block_are_rejected
       [[:argument], [nil], [false], [nil, false]].each do |args|
         assert_raises(LocalJumpError) { Farce.in_parallel(*args) }
       end
       assert_raises(LocalJumpError) { Farce.in_parallel(mode: :copy) }
+    end
+
+    def test_tasks_run_outside_the_main_ractor
+      completed = Queue.new
+      Farce.in_parallel(completed) { |queue| queue << Farce::Ractor.main? }
+
+      ran_on_main = completed.pop(timeout: 5)
+
+      refute_nil ran_on_main, "parallel task did not finish"
+      refute ran_on_main
     end
 
     def test_returns_before_the_task_finishes

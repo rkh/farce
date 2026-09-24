@@ -5,6 +5,8 @@ require_relative "test_watchdog"
 
 test_runner = Rake::TestTask.new("test:run") do |t|
   t.test_files = FileList["test/**/test_*.rb"]
+  # Coverage probes also run when coverage is disabled for the outer suite.
+  t.ruby_opts << "--debug" if RUBY_ENGINE == "jruby"
 end
 
 desc "Run tests with an external process watchdog"

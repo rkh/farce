@@ -8,7 +8,8 @@ module Farce
   class TestPsychIntegration < Test
     def test_psych_and_yaml_activate_before_or_after_farce
       %w[psych yaml].product([true, false]).each do |feature, before|
-        output, error, status = ruby_isolated(<<~RUBY, timeout: 60)
+        # SimpleCov loads Psych, so load-order probes need an uninstrumented runtime.
+        output, error, status = ruby_isolated(<<~RUBY, timeout: 60, coverage: false)
           require #{feature.inspect} if #{before}
           require "farce"
           sources = [
@@ -63,7 +64,7 @@ module Farce
     end
 
     def test_kernel_require_activates_psych_and_preserves_return_values
-      output, error, status = ruby_isolated(<<~RUBY, timeout: 60)
+      output, error, status = ruby_isolated(<<~RUBY, timeout: 60, coverage: false)
         require "farce"
         raise "first require returned false" unless Kernel.require("psych")
         raise "second require returned true" if Kernel.require("psych")
