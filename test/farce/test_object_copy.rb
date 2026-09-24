@@ -545,7 +545,7 @@ module Farce
         20.times do
           2_000.times { Object.new }
           RUBY_ENGINE == "jruby" ? java.lang.System.gc : GC.start
-          break if source.value.nil? && copy.value.nil?
+          break if Thread.new { source.value.nil? && copy.value.nil? }.value
           sleep 0.01
         end
 
