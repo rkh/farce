@@ -395,7 +395,30 @@ namespace.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#on_main-class_method" title="on_main (class method)">.<strong>on_main</strong>(*args, mode: UNDEFINED)  &#x21d2; Scheduler, ... </a>
+      <a href="#in_parallel-class_method" title="in_parallel (class method)">.<strong>in_parallel</strong>(*args, mode: UNDEFINED)  &#x21d2; Abstract::Scheduler<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Schedules work without waiting for the block to finish.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#on_main-class_method" title="on_main (class method)">.<strong>on_main</strong>(*args, mode: UNDEFINED)  &#x21d2; Abstract::Scheduler<sup>?</sup> </a>
     
 
     
@@ -1065,12 +1088,234 @@ and aliases select an independent source import using Dry.Types() rules.</p>
 </div>
     
       <div class="method_details ">
+  <h3 class="signature " id="in_parallel-class_method">
+  
+    
+      <span class="overload">.<strong>in_parallel</strong>(*args, mode: :copy) {|*args| ... } &#x21d2; <tt>nil</tt> </span>
+    
+      <span class="overload">.<strong>in_parallel</strong>  &#x21d2; <tt><span class='object_link'><a href="Farce/Abstract/Scheduler.html" title="Farce::Abstract::Scheduler (class)">Abstract::Scheduler</a></span></tt> </span>
+    
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Schedules work without waiting for the block to finish.
+On CRuby, uses a shared Ractor pool with at most <span class='object_link'><a href="Farce/System.html#cpu_count-class_method" title="Farce::System.cpu_count (method)">Farce::System.cpu_count</a></span> workers.
+On JRuby and TruffleRuby, starts a new thread for each task.</p>
+<p>Without a block, returns the shared scheduler. The CRuby pool starts workers
+when tasks arrive. Pass mutable task data as arguments so it can be transferred based on the given mode.</p>
+<p>Valid modes are:</p>
+<ul>
+<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Farce/Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Farce::Ractor.make_shareable</a></span>.</li>
+<li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
+that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
+that pushed it.</li>
+<li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
+get an error. Useful for usage contained within a single Ractor.</li>
+<li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
+<li><code>:shareable_copy</code> - The value will be copied and the copy will be made Ractor-shareable.</li>
+</ul>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+      <pre class="example code"><code><span class='const'><span class='object_link'><a href="" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_in_parallel'>in_parallel</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>hello</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_message'>message</span><span class='op'>|</span> <span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_message'>message</span><span class='period'>.</span><span class='id identifier rubyid_upcase'>upcase</span> <span class='rbrace'>}</span>
+<span class='const'><span class='object_link'><a href="" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_in_parallel'>in_parallel</span><span class='period'>.</span><span class='id identifier rubyid_schedule'><span class='object_link'><a href="Farce/Abstract/Scheduler.html#schedule-instance_method" title="Farce::Abstract::Scheduler#schedule (method)">schedule</a></span></span> <span class='lbrace'>{</span> <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>another task</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span></code></pre>
+    
+  </div>
+
+  <p class="tag_title">Overloads:</p>
+  <ul class="overload">
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>in_parallel</strong>(*args, mode: :copy) {|*args| ... } &#x21d2; <tt>nil</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>args</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;Object&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Arguments passed to the block.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>mode</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>:copy</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Argument transfer mode. Ignored on JRuby and TruffleRuby.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>*args</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The task to schedule.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">.<strong>in_parallel</strong>  &#x21d2; <tt><span class='object_link'><a href="Farce/Abstract/Scheduler.html" title="Farce::Abstract::Scheduler (class)">Abstract::Scheduler</a></span></tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Returns The shared scheduler.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Farce/Abstract/Scheduler.html" title="Farce::Abstract::Scheduler (class)">Abstract::Scheduler</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The shared scheduler.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+      </li>
+    
+  </ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Farce/Abstract/Scheduler.html" title="Farce::Abstract::Scheduler (class)">Abstract::Scheduler</a></span></tt>, <tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+  <p class="tag_title">See Also:</p>
+  <ul class="see">
+    
+      <li><span class='object_link'><a href="#on_main-class_method" title="Farce.on_main (method)">on_main</a></span></li>
+    
+  </ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce.rb', line 297</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_in_parallel'>in_parallel</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='const'>UNDEFINED</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_args'>args</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>&amp;&amp;</span> <span class='const'>UNDEFINED</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_mode'>mode</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>ParallelScheduler</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:copy</span> <span class='kw'>if</span> <span class='const'>UNDEFINED</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_mode'>mode</span><span class='rparen'>)</span>
+  <span class='const'>Internal</span><span class='op'>::</span><span class='const'>ParallelScheduler</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>nil</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
   <h3 class="signature " id="on_main-class_method">
   
     
       <span class="overload">.<strong>on_main</strong>(*args, mode: :copy) {|*args| ... } &#x21d2; <tt>nil</tt> </span>
     
-      <span class="overload">.<strong>on_main</strong>  &#x21d2; <tt><span class='object_link'><a href="Farce/Scheduler.html" title="Farce::Scheduler (class)">Scheduler</a></span></tt>, <tt><span class='object_link'><a href="Farce/ThreadScheduler.html" title="Farce::ThreadScheduler (class)">ThreadScheduler</a></span></tt> </span>
+      <span class="overload">.<strong>on_main</strong>  &#x21d2; <tt><span class='object_link'><a href="Farce/Abstract/Scheduler.html" title="Farce::Abstract::Scheduler (class)">Abstract::Scheduler</a></span></tt> </span>
     
   
 
@@ -1082,8 +1327,21 @@ and aliases select an independent source import using Dry.Types() rules.</p>
     <p>Allows executing code on the main ractor from other ractors.
 This allows modifying objects and calling methods only accessible from the main ractor.</p>
 <p>If a block is given, executes it on the main ractor, passing any given arguments to it.
-Blocks the current thread until the block has finished executing.
-Calls from the main ractor execute directly, preserving the block and arguments.</p>
+Blocks the current thread until the block has finished executing.</p>
+<p>Arguments are transferred based on the given mode.</p>
+<p>Valid modes are:</p>
+<ul>
+<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Farce/Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Farce::Ractor.make_shareable</a></span>.</li>
+<li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
+that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
+that pushed it.</li>
+<li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
+get an error. Useful for usage contained within a single Ractor.</li>
+<li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
+<li><code>:shareable_copy</code> - The value will be copied and the copy will be made Ractor-shareable.
+Calls from the main ractor execute directly, preserving the block and arguments.</li>
+</ul>
 <p>If no block is given, it returns a scheduler to execute tasks on the main ractor.
 This allows scheduling without blocking the current thread.</p>
 <p>On JRuby and TruffleRuby, blocks run inline because there is no native Ractor isolation.
@@ -1122,7 +1380,7 @@ The returned <span class='object_link'><a href="Farce/ThreadScheduler.html" titl
   <span class='kw'>end</span>
 
   <span class='comment'># This does not block the current thread.
-</span>  <span class='const'><span class='object_link'><a href="" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_on_main'>on_main</span><span class='period'>.</span><span class='id identifier rubyid_schedule'><span class='object_link'><a href="Farce/Scheduler.html#schedule-instance_method" title="Farce::Scheduler#schedule (method)">schedule</a></span></span> <span class='kw'>do</span>
+</span>  <span class='const'><span class='object_link'><a href="" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_on_main'>on_main</span><span class='period'>.</span><span class='id identifier rubyid_schedule'><span class='object_link'><a href="Farce/Abstract/Scheduler.html#schedule-instance_method" title="Farce::Abstract::Scheduler#schedule (method)">schedule</a></span></span> <span class='kw'>do</span>
     <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span>
     <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Hi again from the main ractor!</span><span class='tstring_end'>&quot;</span></span>
   <span class='kw'>end</span>
@@ -1244,7 +1502,7 @@ The returned <span class='object_link'><a href="Farce/ThreadScheduler.html" titl
     
       
       <li class="overload_item">
-        <span class="signature">.<strong>on_main</strong>  &#x21d2; <tt><span class='object_link'><a href="Farce/Scheduler.html" title="Farce::Scheduler (class)">Scheduler</a></span></tt>, <tt><span class='object_link'><a href="Farce/ThreadScheduler.html" title="Farce::ThreadScheduler (class)">ThreadScheduler</a></span></tt> </span>
+        <span class="signature">.<strong>on_main</strong>  &#x21d2; <tt><span class='object_link'><a href="Farce/Abstract/Scheduler.html" title="Farce::Abstract::Scheduler (class)">Abstract::Scheduler</a></span></tt> </span>
         <div class="docstring">
   <div class="discussion">
     <p>Returns a scheduler that executes tasks on the main ractor.</p>
@@ -1260,7 +1518,7 @@ The returned <span class='object_link'><a href="Farce/ThreadScheduler.html" titl
     <li>
       
       
-        <span class='type'>(<tt><span class='object_link'><a href="Farce/Scheduler.html" title="Farce::Scheduler (class)">Scheduler</a></span></tt>, <tt><span class='object_link'><a href="Farce/ThreadScheduler.html" title="Farce::ThreadScheduler (class)">ThreadScheduler</a></span></tt>)</span>
+        <span class='type'>(<tt><span class='object_link'><a href="Farce/Abstract/Scheduler.html" title="Farce::Abstract::Scheduler (class)">Abstract::Scheduler</a></span></tt>)</span>
       
       
       
@@ -1279,7 +1537,7 @@ The returned <span class='object_link'><a href="Farce/ThreadScheduler.html" titl
     <li>
       
       
-        <span class='type'>(<tt><span class='object_link'><a href="Farce/Scheduler.html" title="Farce::Scheduler (class)">Scheduler</a></span></tt>, <tt><span class='object_link'><a href="Farce/ThreadScheduler.html" title="Farce::ThreadScheduler (class)">ThreadScheduler</a></span></tt>, <tt>nil</tt>)</span>
+        <span class='type'>(<tt><span class='object_link'><a href="Farce/Abstract/Scheduler.html" title="Farce::Abstract::Scheduler (class)">Abstract::Scheduler</a></span></tt>, <tt>nil</tt>)</span>
       
       
       
@@ -1287,18 +1545,19 @@ The returned <span class='object_link'><a href="Farce/ThreadScheduler.html" titl
   
 </ul>
 
+  <p class="tag_title">See Also:</p>
+  <ul class="see">
+    
+      <li><span class='object_link'><a href="#in_parallel-class_method" title="Farce.in_parallel (method)">in_parallel</a></span></li>
+    
+  </ul>
+
 </div><table class="source_code">
   <tr>
     <td>
       <pre class="lines">
 
 
-251
-252
-253
-254
-255
-256
 257
 258
 259
@@ -1307,10 +1566,16 @@ The returned <span class='object_link'><a href="Farce/ThreadScheduler.html" titl
 262
 263
 264
-265</pre>
+265
+266
+267
+268
+269
+270
+271</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce.rb', line 251</span>
+      <pre class="code"><span class="info file"># File 'lib/farce.rb', line 257</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_on_main'>on_main</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='const'>UNDEFINED</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1715,7 +1980,7 @@ A method is returned if the argument was a Method or UnboundMethod, otherwise a 
 </div>
 
       <div id="footer">
-  Generated on Thu Sep 24 07:54:21 2026 by
+  Generated on Thu Sep 24 08:11:49 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
