@@ -18,7 +18,7 @@ module Farce
 
       def check_non_main_ractors(implementation)
         env = { "FARCE_FIBER_SCHEDULER" => implementation }
-        output, error, status = ruby_subprocess(<<~RUBY, env: env)
+        output, error, status = ruby_isolated(<<~RUBY, env: env)
           require "farce"
           require "helpers/dns_server"
           module Farce

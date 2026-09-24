@@ -5,7 +5,7 @@ module Farce
   module Internal
     class TestThreadPoolCurrent < Test
       def test_current_is_atomic_ractor_local_and_configured
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           require "farce/config"
           Farce.config do |config|
             config.main_thread_pool_size = 3

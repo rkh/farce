@@ -45,7 +45,7 @@ end
 
 class Test < Minitest::Test
   include Helpers
-  include Helpers::Subprocess
+  include Helpers::IsolatedRuby
 end
 
 # Only stop shared schedulers that a test started.

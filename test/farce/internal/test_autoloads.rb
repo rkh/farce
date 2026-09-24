@@ -3,7 +3,7 @@ require_relative "../../setup"
 
 class TestInternalAutoloads < Test
   def test_reservation_waits_during_concurrent_first_use
-    output, error, status = ruby_subprocess(<<~RUBY)
+    output, error, status = ruby_isolated(<<~RUBY)
       require "farce"
       waiting = Farce.const_get(:Internal)::ReservationWaiting
       signal = Object.new
@@ -24,7 +24,7 @@ class TestInternalAutoloads < Test
   end
 
   def test_thread_pool_and_scheduler_helpers_load_independently
-    output, error, status = ruby_subprocess(<<~'RUBY')
+    output, error, status = ruby_isolated(<<~'RUBY')
       require "farce"
       internal = Farce.const_get(:Internal)
       paths = {

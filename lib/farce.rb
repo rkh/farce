@@ -390,5 +390,4 @@ module Farce
   private_class_method :append_features, :included
 
   Integrations.setup
-  Internal.const_get(:MainScheduler) unless Internal.native_ractors?
 end

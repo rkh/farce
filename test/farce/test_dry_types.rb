@@ -7,13 +7,13 @@ require_relative "../setup"
 module Farce
   class TestDryTypes < Test
     def test_dry_types_integration
-      output, error, status = ruby_subprocess('require "subprocess/dry_types"', timeout: 60)
+      output, error, status = ruby_isolated('require "subprocess/dry_types"', timeout: 60)
 
       assert_predicate status, :success?, "#{output}\n#{error}"
     end
 
     def test_loading_dry_types_does_not_freeze_config
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         raise "config is already frozen" if Farce.config.frozen?
 
@@ -25,7 +25,7 @@ module Farce
     end
 
     def test_loading_farce_does_not_load_dry_types
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         raise "dry-types was loaded by core" if defined?(Dry::Types)
       RUBY
@@ -72,7 +72,7 @@ module Farce
       ]
 
       sources.each do |source|
-        output, error, status = ruby_subprocess(source)
+        output, error, status = ruby_isolated(source)
 
         assert_predicate status, :success?, "#{output}\n#{error}"
       end

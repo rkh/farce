@@ -32,7 +32,7 @@ module Farce
 
     def test_active_support_conversion_and_json_options
       [[], %w[farce active_support/json], %w[active_support/json farce]].each do |preload|
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           #{preload.map { "require #{it.inspect}" }.join("\n")}
           require "farce/integrations/active_support"
 
@@ -69,7 +69,7 @@ module Farce
     end
 
     def test_integration_extends_existing_map_variants
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         types = [Farce::Map, Farce::Strict::Map, Farce::Unshared::Map, Farce::Local::Map,
                  Farce::WeakKeyMap, Farce::Strict::WeakValueMap, Farce::Strict::WeakMap,

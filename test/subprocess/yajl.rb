@@ -45,7 +45,7 @@ module Farce
         'require "json"; require "farce"; require "yajl"',
         'require "farce"; require "yajl"; require "json"'
       ].each do |setup|
-        output, error, status = ruby_subprocess(<<~RUBY, timeout: 60)
+        output, error, status = ruby_isolated(<<~RUBY, timeout: 60)
           #{setup}
           value = Farce::Vector.new([Farce::Counter.new(3), Farce::Flag.new(true), Farce::Atom.new(nil)])
           expected = [3, true, nil]

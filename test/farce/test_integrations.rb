@@ -55,7 +55,8 @@ module Farce
     end
 
     def test_core_does_not_load_integration_dependencies
-      assert_integration_process(<<~RUBY)
+      # Coverage loads JSON and Psych before the script can inspect dependencies.
+      assert_integration_process(<<~RUBY, coverage: false)
         require "farce"
         raise "loaded dry-types" if defined?(Dry::Types)
         raise "loaded ActiveSupport" if defined?(ActiveSupport)
@@ -66,7 +67,7 @@ module Farce
     def test_zeitwerk_loads_before_ractor_activation_without_warnings
       return unless RUBY_ENGINE == "ruby"
 
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         Warning[:experimental] = true
         $ractor_starts = 0
         module ObserveRactorStartup
@@ -131,14 +132,14 @@ module Farce
     end
 
     def test_dependencies_loaded_before_farce_activate_integrations
-      assert_integration_process(<<~RUBY)
+      assert_integration_process(<<~RUBY, coverage: false)
         require "dry/types"
         require "farce"
         raise "dry-types integration missing" unless Farce.respond_to?(:DryTypes)
         raise "wrong active integrations" unless Farce::Integrations.load_active == [:dry_types]
         Kernel.require "shellwords"
       RUBY
-      assert_integration_process(<<~RUBY)
+      assert_integration_process(<<~RUBY, coverage: false)
         require "active_support"
         require "active_support/core_ext"
         require "farce"
@@ -148,7 +149,7 @@ module Farce
     end
 
     def test_dependencies_loaded_after_farce_activate_integrations
-      assert_integration_process(<<~RUBY)
+      assert_integration_process(<<~RUBY, coverage: false)
         require "farce"
         raise "first require should return true" unless require("dry/types")
         raise "dry-types integration missing" unless Farce.respond_to?(:DryTypes)
@@ -156,7 +157,7 @@ module Farce
         vector = Module.new { include Dry.Types(); include Farce.DryTypes() }::Vector[[1]]
         raise "integration is not usable" unless vector.to_a == [1]
       RUBY
-      assert_integration_process(<<~RUBY)
+      assert_integration_process(<<~RUBY, coverage: false)
         require "farce"
         require "active_support"
         raise "integration loaded too early" if Farce::Vector.method_defined?(:in_groups)
@@ -276,8 +277,8 @@ module Farce
 
     private
 
-    def assert_integration_process(source)
-      output, error, status = ruby_subprocess(source, timeout: 60)
+    def assert_integration_process(source, coverage: true)
+      output, error, status = ruby_isolated(source, timeout: 60, coverage:)
 
       assert_predicate status, :success?, "#{output}\n#{error}"
     end

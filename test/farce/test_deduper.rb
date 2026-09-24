@@ -68,7 +68,7 @@ module Farce
     end
 
     def test_facade_skip_configuration_in_a_fresh_process
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         Farce.dedup.skip(Array)
         input = [+"unchanged"]

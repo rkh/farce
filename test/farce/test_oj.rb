@@ -11,7 +11,7 @@ module Farce
       if RUBY_ENGINE == "jruby" || Gem::Specification.find_all_by_name("oj").empty?
         skip "Oj is unavailable on this engine"
       end
-      output, error, status = ruby_subprocess('require "subprocess/oj"', timeout: 180)
+      output, error, status = ruby_isolated('require "subprocess/oj"', timeout: 180)
 
       assert_predicate status, :success?, "#{output}\n#{error}"
     end

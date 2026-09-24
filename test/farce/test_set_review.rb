@@ -16,7 +16,7 @@ module Farce
 
     def test_mutable_sorted_sets_can_be_the_first_tree_collection_loaded
       %w[Unshared Local].each do |namespace|
-        output, error, status = ruby_subprocess(<<~RUBY, timeout: 60)
+        output, error, status = ruby_isolated(<<~RUBY, timeout: 60)
           require "farce"
           set = Farce::#{namespace}::SortedSet.new([3, 1, 2])
           raise "incorrect ordering" unless set.to_a == [1, 2, 3]
@@ -33,7 +33,7 @@ module Farce
     end
 
     def test_relation_divide_first_used_in_another_ractor
-      output, error, status = ruby_subprocess(<<~RUBY, coverage: false)
+      output, error, status = ruby_isolated(<<~RUBY, coverage: false)
         require "farce"
         set = Farce::Strict::Set[1, 2, 4]
         abort "TSort was preloaded" if defined?(::TSort)

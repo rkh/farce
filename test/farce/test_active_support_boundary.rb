@@ -7,7 +7,7 @@ require_relative "../setup"
 module Farce
   class TestActiveSupportBoundary < Test
     def test_loading_active_support_does_not_freeze_config
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         raise "config is already frozen" if Farce.config.frozen?
 

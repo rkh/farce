@@ -8,7 +8,7 @@ module Farce
   class TestPsychIntegration < Test
     def test_psych_and_yaml_activate_before_or_after_farce
       %w[psych yaml].product([true, false]).each do |feature, before|
-        output, error, status = ruby_subprocess(<<~RUBY, timeout: 60)
+        output, error, status = ruby_isolated(<<~RUBY, timeout: 60)
           require #{feature.inspect} if #{before}
           require "farce"
           sources = [
@@ -63,7 +63,7 @@ module Farce
     end
 
     def test_kernel_require_activates_psych_and_preserves_return_values
-      output, error, status = ruby_subprocess(<<~RUBY, timeout: 60)
+      output, error, status = ruby_isolated(<<~RUBY, timeout: 60)
         require "farce"
         raise "first require returned false" unless Kernel.require("psych")
         raise "second require returned true" if Kernel.require("psych")
@@ -76,7 +76,7 @@ module Farce
     end
 
     def test_explicit_psych_integration_loads_its_dependency
-      output, error, status = ruby_subprocess(<<~RUBY, timeout: 60)
+      output, error, status = ruby_isolated(<<~RUBY, timeout: 60)
         require "farce/integrations/psych"
         counter = Psych.unsafe_load(Psych.dump(Farce::Counter.new(3)))
         raise "incorrect value" unless counter.value == 3

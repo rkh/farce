@@ -96,7 +96,7 @@ module Farce
         'require "json"; require "farce"; require "oj"',
         'require "farce"; require "oj"; require "json"'
       ].each do |setup|
-        output, error, status = ruby_subprocess(<<~RUBY, timeout: 60)
+        output, error, status = ruby_isolated(<<~RUBY, timeout: 60)
           #{setup}
           source = Farce::Vector.new([Farce::Counter.new(3), Farce::Flag.new(true), Farce::Atom.new(nil)])
           raise "wrong encoding" unless Oj.strict_load(source.to_json) == [3, true, nil]
@@ -113,7 +113,7 @@ module Farce
     end
 
     def test_compat_and_custom_modes_with_oj_as_json_replacement
-      output, error, status = ruby_subprocess(<<~RUBY, timeout: 60)
+      output, error, status = ruby_isolated(<<~RUBY, timeout: 60)
         require "farce"
         require "oj"
         Oj.mimic_JSON
@@ -130,7 +130,7 @@ module Farce
     end
 
     def test_loading_preserves_oj_defaults_and_require_results
-      output, error, status = ruby_subprocess(<<~RUBY, timeout: 60)
+      output, error, status = ruby_isolated(<<~RUBY, timeout: 60)
         require "oj"
         original = Oj.default_options
         require "farce"

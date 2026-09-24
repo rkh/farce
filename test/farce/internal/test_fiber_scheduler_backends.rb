@@ -13,7 +13,7 @@ module Farce
                           end
         implementations.each do |implementation|
           env = { "FARCE_FIBER_SCHEDULER" => implementation }
-          output, error, status = ruby_subprocess(<<~RUBY, env: env)
+          output, error, status = ruby_isolated(<<~RUBY, env: env)
             require "farce"
             module Farce
               module Internal
@@ -57,7 +57,7 @@ module Farce
       end
 
       def test_programmatic_config_overrides_environment_and_freezes_on_use
-        output, error, status = ruby_subprocess(<<~RUBY, env: { "FARCE_FIBER_SCHEDULER" => "native" })
+        output, error, status = ruby_isolated(<<~RUBY, env: { "FARCE_FIBER_SCHEDULER" => "native" })
           require "farce/config"
           module Farce
             module Internal
@@ -88,7 +88,7 @@ module Farce
       end
 
       def test_unknown_implementation_fails_clearly
-        _, error, status = ruby_subprocess('require "farce"',
+        _, error, status = ruby_isolated('require "farce"',
           env: { "FARCE_FIBER_SCHEDULER" => "unknown" })
 
         refute_predicate status, :success?
@@ -100,7 +100,7 @@ module Farce
         implementations << "native" if RUBY_ENGINE == "ruby" && Gem.win_platform?
         implementations.each do |implementation|
           env = { "FARCE_FIBER_SCHEDULER" => implementation }
-          output, error, status = ruby_subprocess(<<~RUBY, env: env)
+          output, error, status = ruby_isolated(<<~RUBY, env: env)
             require "farce"
             module Farce
               module Internal
@@ -121,7 +121,7 @@ module Farce
 
       def test_configured_backend_and_constructor_override
         backend = RUBY_ENGINE == "ruby" ? "select" : "nio"
-        output, error, status = ruby_subprocess(<<~RUBY, env: { "FARCE_FIBER_SCHEDULER" => backend })
+        output, error, status = ruby_isolated(<<~RUBY, env: { "FARCE_FIBER_SCHEDULER" => backend })
           require "farce"
           module Farce
             module Internal

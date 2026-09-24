@@ -9,7 +9,8 @@ module Farce
   class TestJsonSerialization < Test
     def test_json_methods_activate_only_after_json_is_loaded
       ["require", "Kernel.require"].each do |loader|
-        output, error, status = ruby_subprocess(<<~RUBY)
+        # Coverage itself requires JSON before the probe starts.
+        output, error, status = ruby_isolated(<<~RUBY, coverage: false)
           require "farce"
           values = [Farce::Map.new, Farce::Vector.new, Farce::Set.new,
                     Farce::Counter.new, Farce::Flag.new, Farce::Atom.new]
@@ -27,7 +28,7 @@ module Farce
     end
 
     def test_explicit_json_integration_loads_its_dependency
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce/integrations/json"
         puts Farce::Vector.new([Farce::Flag.new(true)]).to_json
       RUBY
@@ -70,7 +71,7 @@ module Farce
     def test_json_encoding_in_another_ractor
       return unless Internal.native_ractors?
 
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         require "json"
         vector = Farce::Vector.new([Farce::Counter.new(3), Farce::Flag.new(false), Farce::Atom.new(nil)])
@@ -84,7 +85,7 @@ module Farce
 
     def test_json_load_order_and_active_support_encoding
       [%w[json farce], %w[farce json], %w[active_support/core_ext farce]].each do |order|
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY, coverage: false)
           require "active_support" if #{order.include?("active_support/core_ext")}
           #{order.map { "require #{it.inspect}" }.join("\n")}
           require "json"

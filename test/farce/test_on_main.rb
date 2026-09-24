@@ -10,7 +10,7 @@ module Farce
 
     def test_ractor_creation_and_local_calls_leave_the_main_scheduler_unloaded
       return unless Ractor.builtin?
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         abort "loaded on require" unless Farce.const_get(:Internal).autoload?(:MainScheduler)
         Farce.on_main { :local }
@@ -32,7 +32,7 @@ module Farce
     end
 
     def test_including_farce_does_not_expose_or_start_the_main_scheduler
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         namespace = Module.new { include Farce }
         abort "public scheduler constant" if Farce.const_defined?(:MainScheduler, false)
@@ -210,7 +210,7 @@ module Farce
     private
 
     def assert_cold_remote_call(source, constructor: "Farce::Ractor")
-      output, error, status = ruby_subprocess(<<~RUBY, timeout: 30)
+      output, error, status = ruby_isolated(<<~RUBY, timeout: 30)
         require "farce"
         require "timeout"
         $on_main_results = []

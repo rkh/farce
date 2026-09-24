@@ -177,7 +177,7 @@ module Farce
     end
 
     def test_missing_block_does_not_start_background_schedulers
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         internal = Farce.const_get(:Internal)
         [ {}, { auto_local: false }, { mode: :local } ].each do |options|
@@ -240,7 +240,7 @@ module Farce
     private
 
     def assert_ractor_local_scheduling(constructor, freeze_config: true)
-      output, error, status = ruby_subprocess(<<~RUBY, timeout: 30)
+      output, error, status = ruby_isolated(<<~RUBY, timeout: 30)
         require "farce"
         #{"Farce.config.freeze" if freeze_config}
         caller = #{constructor}.new do

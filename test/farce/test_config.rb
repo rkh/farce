@@ -5,7 +5,7 @@ require_relative "../setup"
 
 class TestConfig < Test
   def test_autoload_integrations_defaults_environment_and_explicit_precedence
-    output, error, status = ruby_subprocess(<<~RUBY)
+    output, error, status = ruby_isolated(<<~RUBY)
       ENV.delete("FARCE_AUTOLOAD_INTEGRATIONS")
       require "farce/config"
       raise "loaded core" if Farce.const_defined?(:Vector, false)
@@ -262,7 +262,7 @@ class TestConfig < Test
   end
 
   def test_config_remains_editable_after_requiring_farce
-    output, error, status = ruby_subprocess(<<~CODE)
+    output, error, status = ruby_isolated(<<~CODE)
       require "farce"
       config = Farce.config
       abort "configuration frozen by require" if config.frozen?
@@ -287,7 +287,7 @@ class TestConfig < Test
   end
 
   def test_frozen_config_is_initialized_from_another_ractor
-    output, error, status = ruby_subprocess(<<~RUBY)
+    output, error, status = ruby_isolated(<<~RUBY)
       require "farce"
       Farce.config.additional_thread_pool_size = 3
       caller = Farce::Ractor.new do
@@ -308,7 +308,7 @@ class TestConfig < Test
   end
 
   def test_scheduler_with_explicit_backend_reads_configuration_from_another_ractor
-    output, error, status = ruby_subprocess(<<~RUBY)
+    output, error, status = ruby_isolated(<<~RUBY)
       require "farce"
       caller = Farce::Ractor.new do
         scheduler = Farce::Scheduler.new(backend: :auto)
@@ -327,7 +327,7 @@ class TestConfig < Test
   end
 
   def test_config_can_be_loaded_and_configured_before_farce
-    output, error, status = ruby_subprocess(<<~CODE, env: { "FARCE_FIBER_SCHEDULER" => "native" })
+    output, error, status = ruby_isolated(<<~CODE, env: { "FARCE_FIBER_SCHEDULER" => "native" })
       require "farce/config"
       config = Farce.config do |c|
         c.fiber_scheduler = :select
@@ -347,7 +347,7 @@ class TestConfig < Test
   private
 
   def assert_configured_constructor(setting, executor, override)
-    output, error, status = ruby_subprocess(<<~CODE)
+    output, error, status = ruby_isolated(<<~CODE)
       require "farce"
       class CustomScheduler
         def self.new
@@ -392,7 +392,7 @@ class TestConfig < Test
 
   def assert_copied_worker_results
     ["c.fiber_scheduler = CustomScheduler", "c.fiber_scheduler { CustomScheduler.new }"].each do |setting|
-      output, error, status = ruby_subprocess(<<~CODE)
+      output, error, status = ruby_isolated(<<~CODE)
         require "farce"
         class CustomScheduler
           def self.new

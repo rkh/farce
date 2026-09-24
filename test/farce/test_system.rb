@@ -31,7 +31,7 @@ module Farce
     end
 
     def test_cpu_count_without_platform_support
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         internal = Farce.const_get(:Internal, false)
         internal.send(:remove_const, :Darwin) if internal.const_defined?(:Darwin, false)

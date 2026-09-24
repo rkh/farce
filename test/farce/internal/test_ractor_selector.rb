@@ -215,7 +215,7 @@ module Farce
       end
 
       def test_closing_selector_wakes_its_waiters
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           require "farce"
           internal = Farce.const_get(:Internal)
           selector = internal::RactorSelector.current
@@ -241,7 +241,7 @@ module Farce
       end
 
       def test_selector_inside_another_ractor_and_control_cleanup
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           require "farce"
           require "timeout"
           internal = Farce.const_get(:Internal)
@@ -273,7 +273,7 @@ module Farce
 
       def test_legacy_select_can_yield_without_blocking_other_fibers
         return unless RUBY_VERSION < "4"
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           require "farce"
           Farce.const_get(:Internal)::FiberScheduler
           Farce::Scheduler
@@ -302,7 +302,7 @@ module Farce
 
       def test_legacy_selector_progresses_during_gc_and_nested_thread_completion
         return unless RUBY_VERSION < "4"
-        output, error, status = ruby_subprocess(<<~RUBY, timeout: 30)
+        output, error, status = ruby_isolated(<<~RUBY, timeout: 30)
           require "farce"
           handle = Farce::Scheduler.new
           Fiber.set_scheduler(handle)
@@ -325,7 +325,7 @@ module Farce
       end
 
       def test_native_timeout_support_and_visibility_are_preserved
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           methods = [[Ractor.singleton_class, :select], [Ractor.singleton_class, :receive]]
           %i[receive recv join value take].each do |method|
             methods << [Ractor, method] if Ractor.method_defined?(method) || Ractor.private_method_defined?(method)
@@ -372,7 +372,7 @@ module Farce
       end
 
       def test_synchronous_native_operations_do_not_start_a_selector
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           require "farce"
           internal = Farce.const_get(:Internal)
           worker = Ractor.new { :ready }
@@ -395,7 +395,7 @@ module Farce
       def test_native_waits_do_not_opt_in_with_async
         skip "Async is unavailable on Windows" if Gem.win_platform?
 
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           require "async"
           require "farce"
           internal = Farce.const_get(:Internal)
@@ -432,7 +432,7 @@ module Farce
       def test_farce_apis_opt_in_with_async
         skip "Async is unavailable on Windows" if Gem.win_platform?
 
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           require "async"
           require "farce"
           input = Farce::Port.new
@@ -458,7 +458,7 @@ module Farce
       def test_wrapping_async_does_not_opt_in_native_waits
         skip "Async is unavailable on Windows" if Gem.win_platform?
 
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           require "async"
           require "farce"
           internal = Farce.const_get(:Internal)
@@ -487,7 +487,7 @@ module Farce
       def test_an_external_scheduler_can_explicitly_provide_a_selector
         skip "Async is unavailable on Windows" if Gem.win_platform?
 
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           require "async"
           require "farce"
           internal = Farce.const_get(:Internal)
@@ -507,7 +507,7 @@ module Farce
       end
 
       def test_builtin_scheduler_initializes_selector_only_when_needed
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           require "farce"
           internal = Farce.const_get(:Internal)
           handle = Farce::Scheduler.new

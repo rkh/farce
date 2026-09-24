@@ -78,7 +78,7 @@ module Farce
     end
 
     def test_require_and_include_leave_the_scheduler_internal_and_unloaded
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         internal = Farce.const_get(:Internal)
         abort "loaded during require" unless internal.autoload?(:ParallelScheduler)
@@ -113,7 +113,7 @@ module Farce
     private
 
     def assert_remote_first_use(constructor)
-      output, error, status = ruby_subprocess(<<~RUBY, timeout: 30)
+      output, error, status = ruby_isolated(<<~RUBY, timeout: 30)
         require "farce"
         require "timeout"
         events = Farce::Queue.new

@@ -11,14 +11,13 @@ module Farce
     end
 
     def test_construction_starts_no_threads_or_freezes_configuration
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         threads = Thread.list
         scheduler = Farce::ThreadScheduler.new
         abort "started a thread" unless Thread.list == threads
         abort "configuration frozen" if Farce.config.frozen?
         unless Farce::Ractor.builtin?
-          abort "main scheduler still lazy" if Farce.const_get(:Internal).autoload?(:MainScheduler)
           abort "wrong main scheduler" unless Farce.on_main.is_a?(Farce::ThreadScheduler)
         end
         puts "idle"

@@ -8,7 +8,7 @@ module Farce
   class TestMainScheduler < Test
     def test_suite_teardown_stops_the_main_scheduler
       return unless Ractor.builtin?
-      output, error, status = ruby_subprocess(<<~RUBY)
+      output, error, status = ruby_isolated(<<~RUBY)
         require "minitest"
         # Minitest runs after_run callbacks in reverse registration order.
         Minitest.after_run do

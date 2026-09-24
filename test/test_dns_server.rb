@@ -21,7 +21,7 @@ class TestDnsServer < Test
   private
 
   def check_binding(error_class, failures:, attempts:)
-    output, error, status = ruby_subprocess(<<~RUBY)
+    output, error, status = ruby_isolated(<<~RUBY)
       require "helpers/dns_server"
       $sockets = []
       $attempts = 0

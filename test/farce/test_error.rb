@@ -21,7 +21,7 @@ module Farce
     end
 
     def test_internal_queue_errors_do_not_load_the_public_queue
-      output, error, status = ruby_subprocess(<<~RUBY,
+      output, error, status = ruby_isolated(<<~RUBY,
         require "farce"
         path = Farce.autoload?(:Queue)
         abort "public queue already loaded" unless path
@@ -42,7 +42,7 @@ module Farce
         abort "public queue was loaded" unless Farce.autoload?(:Queue) == path
         puts "ok"
       RUBY
-                                             )
+                                           )
 
       assert_predicate status, :success?, error
       assert_equal "ok\n", output

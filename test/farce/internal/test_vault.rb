@@ -30,7 +30,7 @@ module Farce
 
       def test_commands_can_be_added_after_the_vault_starts
         return unless Internal.native_ractors?
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           require "farce"
           vault = Farce.const_get(:Internal)::Vault.new
           key = Object.new.freeze
@@ -92,7 +92,7 @@ module Farce
 
       def test_untransferable_errors_do_not_strand_callers
         return unless Internal.native_ractors?
-        output, error, status = ruby_subprocess(<<~RUBY)
+        output, error, status = ruby_isolated(<<~RUBY)
           require "farce"
           module Farce
             module Internal
