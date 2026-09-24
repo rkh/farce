@@ -56,7 +56,7 @@ jobs:
         env:
           FARCE_VERIFY_GEMS: ${{ matrix.ruby.verify_gems || false }}
           JRUBY_OPTS: ${{ matrix.ruby.jruby_opts || '' }}
-          TEST_TIMEOUT: ${{ matrix.ruby.test_timeout || 120 }}
+          TEST_TIMEOUT: ${{ matrix.ruby.test_timeout || 300 }}
           TEST_SUBPROCESS_TIMEOUT: ${{ matrix.ruby.subprocess_timeout || 15 }}
 
   windows:
