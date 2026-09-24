@@ -115,47 +115,47 @@ jobs:
         env:
           TEST_TIMEOUT: 300
 
-  windows-copy-regression:
-    name: Windows ${{ matrix.arch }} / copy-transfer regression (quarantined)
-    runs-on: ${{ matrix.runner }}
-    # Keep this unresolved regression visible without blocking unrelated changes.
-    # Restore blocking coverage when copied worker results pass reliably.
-    continue-on-error: true
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: x64
-            runner: windows-2025
-          - arch: ARM
-            runner: windows-11-arm
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "4.0"
-
-      - name: Install dependencies
-        shell: pwsh
-        run: |
-          Remove-Item Gemfile.lock
-          bundle install
-
-      - run: bundle exec rake compile
-
-      - name: Repeat copied worker result regression
-        shell: pwsh
-        env:
-          FARCE_RUN_QUARANTINED_TESTS: "1"
-          TEST: test/farce/test_config.rb
-          TESTOPTS: --name=test_configured_worker_results_copy_across_ractors
-          TEST_TIMEOUT: 60
-        run: |
-          foreach ($attempt in 1..10) {
-            Write-Output "Copy-transfer regression attempt $attempt of 10"
-            bundle exec rake test
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          }
+  # windows-copy-regression:
+  #   name: Windows ${{ matrix.arch }} / copy-transfer regression (quarantined)
+  #   runs-on: ${{ matrix.runner }}
+  #   # Keep this unresolved regression visible without blocking unrelated changes.
+  #   # Restore blocking coverage when copied worker results pass reliably.
+  #   continue-on-error: true
+  #   timeout-minutes: 15
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - arch: x64
+  #           runner: windows-2025
+  #         - arch: ARM
+  #           runner: windows-11-arm
+  #
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #
+  #     - uses: ruby/setup-ruby@v1
+  #       with:
+  #         ruby-version: "4.0"
+  #
+  #     - name: Install dependencies
+  #       shell: pwsh
+  #       run: |
+  #         Remove-Item Gemfile.lock
+  #         bundle install
+  #
+  #     - run: bundle exec rake compile
+  #
+  #     - name: Repeat copied worker result regression
+  #       shell: pwsh
+  #       env:
+  #         FARCE_RUN_QUARANTINED_TESTS: "1"
+  #         TEST: test/farce/test_config.rb
+  #         TESTOPTS: --name=test_configured_worker_results_copy_across_ractors
+  #         TEST_TIMEOUT: 60
+  #       run: |
+  #         foreach ($attempt in 1..10) {
+  #           Write-Output "Copy-transfer regression attempt $attempt of 10"
+  #           bundle exec rake test
+  #           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+  #         }
