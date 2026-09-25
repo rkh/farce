@@ -217,6 +217,31 @@ Tasks are not tracked, and closing this stateless scheduler has no effect.</p>
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(&amp;factory)  &#x21d2; ThreadScheduler </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>A new instance of ThreadScheduler.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#local%3F-instance_method" title="#local? (instance method)">#<strong>local?</strong>(wait: true)  &#x21d2; true </a>
     
 
@@ -305,9 +330,55 @@ Tasks are not tracked, and closing this stateless scheduler has no effect.</p>
   
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">#initialize</a></span>, <span class='object_link'><a href="Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+
+  <div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    #<strong>initialize</strong>(&amp;factory)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::ThreadScheduler (class)">ThreadScheduler</a></span></tt> 
+  
 
   
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns a new instance of ThreadScheduler.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+12
+13
+14
+15</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 12</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_factory'>factory</span><span class='rparen'>)</span>
+  <span class='ivar'>@factory</span> <span class='op'>=</span> <span class='id identifier rubyid_factory'>factory</span>
+  <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
 
   <div id="instance_method_details" class="method_details_list">
     <h2>Instance Method Details</h2>
@@ -355,10 +426,10 @@ Tasks are not tracked, and closing this stateless scheduler has no effect.</p>
       <pre class="lines">
 
 
-38</pre>
+44</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 38</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 44</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_close'>close</span> <span class='op'>=</span> <span class='kw'>self</span></pre>
     </td>
@@ -408,10 +479,10 @@ Tasks are not tracked, and closing this stateless scheduler has no effect.</p>
       <pre class="lines">
 
 
-41</pre>
+47</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 47</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -532,14 +603,14 @@ Tasks are not tracked, and closing this stateless scheduler has no effect.</p>
       <pre class="lines">
 
 
-31
-32
-33
-34
-35</pre>
+37
+38
+39
+40
+41</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 31</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 37</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Cannot yield without a block</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -609,10 +680,10 @@ Tasks are not tracked, and closing this stateless scheduler has no effect.</p>
       <pre class="lines">
 
 
-48</pre>
+54</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 48</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 54</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_local?'>local?</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='kw'>true</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>true</span> <span class='comment'># rubocop:disable Lint/UnusedMethodArgument</span></pre>
     </td>
@@ -713,6 +784,19 @@ Tasks are not tracked, and closing this stateless scheduler has no effect.</p>
 
 </div>
 
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>LocalJumpError</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
 
 </div><table class="source_code">
   <tr>
@@ -720,16 +804,18 @@ Tasks are not tracked, and closing this stateless scheduler has no effect.</p>
       <pre class="lines">
 
 
-19
-20
-21
-22</pre>
+24
+25
+26
+27
+28</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 19</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 24</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
-  <span class='const'>Thread</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Cannot schedule without a block</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+  <span class='ivar'>@factory</span> <span class='op'>?</span> <span class='ivar'>@factory</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='const'>Thread</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='kw'>self</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -779,10 +865,10 @@ Tasks are not tracked, and closing this stateless scheduler has no effect.</p>
       <pre class="lines">
 
 
-44</pre>
+50</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 44</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/thread_scheduler.rb', line 50</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_state'>state</span> <span class='op'>=</span> <span class='symbol'>:running</span></pre>
     </td>
@@ -795,7 +881,7 @@ Tasks are not tracked, and closing this stateless scheduler has no effect.</p>
 </div>
 
       <div id="footer">
-  Generated on Thu Sep 24 12:28:58 2026 by
+  Generated on Fri Sep 25 00:07:33 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
