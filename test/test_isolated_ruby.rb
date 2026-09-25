@@ -5,6 +5,8 @@
 require_relative "setup"
 
 class TestIsolatedRuby < Test
+  def setup = require_subprocess_support
+
   def test_jruby_reuses_the_process
     return unless RUBY_ENGINE == "jruby"
     output, error, status = ruby_isolated("puts Process.pid", coverage: false)
