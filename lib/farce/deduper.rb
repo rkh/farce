@@ -11,8 +11,9 @@ module Farce
   # Cached objects are held weakly. Keep a reference to a returned object if its
   # identity matters. Shareable results can be reused across Ractors. Other
   # results are cached within the current Ractor.
-  # Containers that refer back to a Data value under construction are frozen
-  # without being cached, because their hash is not stable yet.
+  #
+  # Cyclic containers are frozen after their references are connected and are
+  # not cached. This keeps canonical replacements from breaking back references.
   #
   # @example Use an independent cache
   #   deduper = Farce::Deduper.new
@@ -81,15 +82,18 @@ module Farce
         return canonical if canonical
       end
 
-      canonical = walker ? walker.traverse :
-        Walker.modify(object, copy:, freeze: false) { dedup!(_1, skip, store, copy, _2) }
+      return Walker.modify(object, copy:, freeze: false) { dedup!(_1, skip, store, copy, _2) } unless walker
 
+      canonical = walker.traverse
       return canonical unless store.any? { canonical.is_a?(it) }
 
-      canonical = canonical.dup if copy && !canonical.frozen? && canonical.equal?(object)
-      canonical.freeze
-      return canonical if walker && !walker.hashable?(canonical)
+      walker.freeze_result
+      walker.finalize do |result, cyclic|
+        cyclic ? result : intern(result)
+      end
+    end
 
+    def intern(canonical)
       if Ractor.shareable?(canonical)
         @shared.store_if_absent(canonical) { true }
         canonical = @shared.getkey(canonical) || canonical

@@ -3,7 +3,8 @@
 # warn_indent: true
 
 module Farce
-  # Visit or transform an object graph without revisiting the same object.
+  # Visit an object graph or transform it with copies only where needed.
+  #
   # Traversal follows container elements, hash keys and values, and ordinary
   # instance variables. Farce containers expose their contents, not their storage.
   # Proc traversal follows the receiver, not captured local variables.
@@ -48,28 +49,7 @@ module Farce
         super()
       end
 
-      def call(object, walker)
-        prepared = walker.modify ? prepare_modification(object, walker) : object
-        # Publish the copy before descending so back references find the copy.
-        walker.remember(object, prepared)
-        traverse(prepared, walker)
-      end
-
-      private
-
-      def prepare_modification(object, walker)
-        return object unless Internal.garbage_collectable?(object)
-        # Data traversal allocates its replacement before visiting members and
-        # initializes it afterward. A normal dup is already frozen.
-        return object if Data === object
-        return object if Internal::Noncopyable === object || Abstract::LeaseMap === object
-        case walker.modify
-        when true   then send_to(object, :frozen?) ? object.clone(freeze: false) : object
-        when :dup   then send_to(object, :dup)
-        when :clone then send_to(object, :clone, freeze: false)
-        else             send_to(object, walker.modify)
-        end
-      end
+      def call(object, walker) = traverse(object, walker)
     end
 
     include SendTo
@@ -84,18 +64,19 @@ module Farce
     # Register traversal for classes from the main Ractor.
     #
     # Subclasses inherit the nearest definition. Definitions can call `super`.
-    # The object is already prepared for modification. Visit each child with
-    # {#visit} and assign its result only when {#modify} is truthy.
+    # Use {#update} to visit children and record assignments. Its block receives
+    # a writable target and transformed children. Return that target from the
+    # assignment block and return the update result from the definition.
     #
     # Should only be necessary for classes using storage defined outside of Ruby (like a C struct).
     #
     # @example
     #   # Lets assume NativeClass has a natively stored value
     #   Farce::Walker.define(NativeClass) do |object, walker|
-    #     value        = object.value
-    #     result       = walker.visit(value)
-    #     object.value = result if walker.modify && !value.equal?(result)
-    #     object
+    #     walker.update(object, [object.value]) do |target, values|
+    #       target.value = values.first
+    #       target
+    #     end
     #   end
     #
     # @param classes [Array<Class>] classes to handle
@@ -131,9 +112,9 @@ module Farce
     # @!macro walker_module_options
     # @yieldparam object [BasicObject] a reachable object
     # @return [BasicObject, Enumerator] the root object, or an enumerator without a block
-    def self.each(object, **)
-      return enum_for(:each, object, **) unless block_given?
-      visit(object, **) do |object, walker|
+    def self.each(object, constants: true, class_variables: true)
+      return enum_for(:each, object, constants:, class_variables:) unless block_given?
+      visit(object, constants:, class_variables:) do |object, walker|
         walker.traverse(object)
         yield(object)
         object
@@ -144,19 +125,27 @@ module Farce
     # Without a block, test the objects themselves.
     # @!macro walker_module_options
     # @return [Boolean]
-    def self.any?(object, **, &) = each(object, **).any?(&)
+    def self.any?(object, constants: true, class_variables: true, &)
+      each(object, constants:, class_variables:).any?(&)
+    end
 
     # Stop at the first object for which the block is falsey.
     # Without a block, test the objects themselves.
     # @!macro walker_module_options
     # @return [Boolean]
-    def self.all?(object, **, &) = each(object, **).all?(&)
+    def self.all?(object, constants: true, class_variables: true, &)
+      each(object, constants:, class_variables:).all?(&)
+    end
 
     # Transform a graph using the callback's return values.
     # Call {#traverse} to transform an object's children. Returning another value
     # replaces the object without automatically visiting that replacement.
-    # Copies are recorded before their children are visited to preserve cycles.
-    # Data values are rebuilt through allocation and their normal initializer.
+    # Unchanged branches retain their identity, including when copy is enabled.
+    # Changed cycles are connected before results are frozen or finalized.
+    # A cyclic callback may run again as child replacements become known. Keep
+    # callbacks repeatable and put publication or caching in {#finalize}.
+    # Use {#freeze_result} instead of freezing a preliminary traversal result.
+    # Data values are rebuilt only when members change, using their normal initializer.
     # Noncopyable coordination objects, such as leases, are updated in place.
     # Constants and class variables are assigned only when their value
     # changes identity. Constant replacement can emit Ruby redefinition warnings.
@@ -167,8 +156,9 @@ module Farce
     # when transforming container structure, especially map keys.
     # @param object [BasicObject] the root object
     # @!macro walker_module_options
-    # @param copy [Boolean, Symbol] false to edit mutable objects in place, true for dup,
-    #   or a copy method such as :clone. Frozen objects are cloned before in-place edits.
+    # @param copy [Boolean, Symbol] false to edit mutable objects in place, true to
+    #   duplicate changed objects, or a copy method such as :clone. Unchanged objects
+    #   may be shared with the input. Frozen objects are cloned only when changed.
     # @param freeze [Boolean, nil] true to freeze results, false to avoid freezing them,
     #   or nil to preserve each original object's frozen state
     # @yieldparam object [BasicObject] the original object
@@ -177,6 +167,8 @@ module Farce
     # @return [BasicObject] the transformed root, or the value passed to {#return}
     # @raise [LocalJumpError] if no block is given
     # @raise [ArgumentError] if copy is neither a boolean nor a Symbol
+    # @raise [ArgumentError] if cyclic callbacks do not converge within 32 passes,
+    #   or a cyclic finalizer replaces its result
     # @raise [ArgumentError] if a hash key or set element refers to a Data value
     #   still being constructed. Identity-based containers do not hash their keys.
     def self.modify(object, copy: false, freeze: nil, constants: true, class_variables: true, &callback)
@@ -190,7 +182,7 @@ module Farce
         else raise ArgumentError, "invalid value for copy: #{copy.inspect}"
         end
 
-      catch(RETURN) { new(callback, modify, freeze, constants, class_variables).visit(object) }
+      catch(RETURN) { Modification.new(callback, modify, freeze, constants, class_variables).visit(object) }
     end
 
     # @return [false, true, Symbol] false for a read-only walk, true for in-place edits,
@@ -217,6 +209,7 @@ module Farce
       @freeze          = freeze
       @constants       = constants
       @class_variables = class_variables
+      @visitors        = {}.compare_by_identity
       @seen            = {}.compare_by_identity
       @seen[UNDEFINED] = UNDEFINED
       @current_object  = UNDEFINED
@@ -258,45 +251,67 @@ module Farce
     # Traverse an object's children using its registered class definition.
     # @param object [BasicObject] the object to descend into, defaulting to the current object
     # @return [BasicObject] the object with transformed children when modifying
-    def traverse(object = current_object) = REGISTER[send_to(object, :class)].call(object, self)
+    def traverse(object = current_object)
+      klass = send_to(object, :class)
+      visitor = @visitors[klass] ||= REGISTER[klass]
+      visitor.call(object, self)
+    end
 
     # @api private
     def remember(object, result) = @seen[object] = result
 
+    # Visit child values and describe how to assign their replacements.
+    # The assignment block only runs during modification and may run again for cycles.
+    # It receives a writable target and the resolved children. Do not mutate object
+    # outside this block. Return the result of update from a traversal definition.
+    # @param object [BasicObject] the object being traversed
+    # @param values [Array] child references in assignment order
+    # @param hash_keys [Boolean] rebuild when key descendants change in place
+    # @param key_stride [Integer] spacing between keys in values, starting at zero
+    # @yieldparam target [BasicObject] the writable destination
+    # @yieldparam results [Array] transformed child references
+    # @return [BasicObject] the traversal result
+    def update(object, values, hash_keys: false, key_stride: 1) # rubocop:disable Lint/UnusedMethodArgument
+      values.each { visit(it) }
+      object
+    end
+
+    # Request freezing after the current result is settled.
+    # With copying enabled, mutable inputs are copied before freezing.
+    # @return [BasicObject] the current destination
+    # @raise [ArgumentError] outside a modifying walk
+    def freeze_result = raise(ArgumentError, "freeze_result requires a modifying walk")
+
+    # Register a finalizer for the current node. It runs once after resolution
+    # and requested freezing. Registering another finalizer replaces the first.
+    # Cyclic finalizers must preserve identity. Acyclic finalizers may return a
+    # canonical replacement, which is propagated to the parent.
+    # @yieldparam result [BasicObject] the settled result
+    # @yieldparam cyclic [Boolean] whether the node belongs to a cycle
+    # @yieldreturn [BasicObject] the final result
+    # @return [BasicObject] the current destination
+    # @raise [ArgumentError] outside a modifying walk
+    # @raise [LocalJumpError] if no block is given
+    def finalize(&) = raise(ArgumentError, "finalize requires a modifying walk")
+
     # @api private
     def rebuild_data(object)
-      result = object.class.allocate
-      remember(object, result)
-      unfinished = @unfinished_data ||= {}.compare_by_identity
-      unfinished[object] = unfinished[result] = true
-      begin
-        result.__send__(:initialize, **yield)
-        result
-      ensure
-        unfinished.delete(object)
-        unfinished.delete(result)
-      end
+      object.class.members.each { visit(object.__send__(it)) }
+      object
     end
+
+    # Whether a visited object or its traversed descendants changed.
+    # @param object [BasicObject] the object to inspect
+    # @return [Boolean] false for a read-only walk
+    def changed?(object = current_object) = false # rubocop:disable Lint/UnusedMethodArgument
 
     # @api private
-    def hashable?(object)
-      return true unless @unfinished_data && !@unfinished_data.empty?
-
-      # Check identities before descending. Some engines cannot even read the
-      # members of an allocated Data value until its initializer has run.
-      !self.class.visit(object, constants:, class_variables:) do |value, traversal|
-        traversal.return(true) if @unfinished_data.key?(value)
-        traversal.traverse
-        false
-      end
-    end
+    def hashable?(_object) = true
 
     # @api private
-    def check_hash_key(object)
-      return object if hashable?(object)
-      raise ArgumentError, "hash key or set element refers to an unfinished Data value"
-    end
+    def check_hash_key(object) = object
 
     require "farce/walker/definitions"
+    require "farce/walker/modification"
   end
 end

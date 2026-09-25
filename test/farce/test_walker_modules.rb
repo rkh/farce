@@ -138,16 +138,19 @@ module Farce
       [Module, Class].each do |type|
         owner = type.new
         owner.const_set(:SELF, owner)
+        owner.const_set(:NUMBER, 1)
         owner.class_variable_set(:@@self, owner)
         result = nil
-        capture_io { result = Walker.modify(owner, copy: true) { |_, walker| walker.traverse } }
+        capture_io do
+          result = Walker.modify(owner, copy: true) { |value, walker| Integer === value ? value + 1 : walker.traverse }
+        end
 
         refute_same owner, result
         assert_same result, result.const_get(:SELF)
         assert_same result, result.class_variable_get(:@@self)
         assert_same owner, owner.const_get(:SELF)
         assert_same owner, owner.class_variable_get(:@@self)
-        assert_equal [owner], Walker.each(owner).to_a
+        assert_equal [1, owner], Walker.each(owner).to_a
       end
     end
 

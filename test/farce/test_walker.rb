@@ -160,6 +160,7 @@ module Farce
     def test_copy_preserves_instance_variable_cycles
       box = Box.new(nil)
       box.value = box
+      box.instance_variable_set(:@number, 1)
       result = increment(box, copy: true)
 
       refute_same box, result
@@ -177,6 +178,7 @@ module Farce
     def test_copy_preserves_hash_cycles_and_defaults
       input = Hash.new(:missing)
       input[:self] = input
+      input[:number] = 1
       result = increment(input, copy: true)
 
       refute_same input, result
@@ -215,7 +217,7 @@ module Farce
     def test_data_cycles_use_the_initialized_replacement
       children = []
       original = Record.new(children)
-      children << original
+      children.push(original, 1)
       result = increment(original, copy: true)
 
       refute_same original, result
@@ -241,7 +243,7 @@ module Farce
     def test_data_custom_initializers_support_cycles
       children = []
       original = ValidatedRecord.new(value: children)
-      children << original
+      children.push(original, 1)
       result = increment(original, copy: true)
 
       assert_same result, result.value.first
@@ -260,6 +262,7 @@ module Farce
       members = {}
       original = Record.new(members)
       members[original] = :value
+      members[:number] = 1
       members.rehash
 
       error = assert_raises(ArgumentError) { increment(original, copy: true) }
@@ -272,6 +275,7 @@ module Farce
       members = {}
       original = Record.new(members)
       members[[original]] = :value
+      members[:number] = 1
       members.rehash
 
       assert_raises(ArgumentError) { increment(original, copy: true) }
@@ -281,6 +285,7 @@ module Farce
       members = ::Set.new
       original = Record.new(members)
       members.add(original)
+      members.add(1)
 
       assert_raises(ArgumentError) { increment(original, copy: true) }
     end

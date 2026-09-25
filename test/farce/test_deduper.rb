@@ -118,6 +118,16 @@ module Farce
       [input, key, input[key], child, child.first].each { refute_predicate it, :frozen? }
     end
 
+    def test_unchanged_frozen_containers_are_not_copied
+      leaf = Object.new.freeze
+      child = [leaf].freeze
+      root = [child].freeze
+
+      assert_same root, @deduper.dedup(root, copy: true)
+      assert_same child, root.first
+      assert_same leaf, child.first
+    end
+
     def test_empty_containers_are_copied_before_freezing
       [[], {}, ::Set.new].each do |value|
         result = @deduper.dedup(value, copy: true)
