@@ -167,6 +167,8 @@ that pushed it.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
+<li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="../Farce.html#dedup-class_method" title="Farce.dedup (method)">dedup</a></span>, then made Ractor-shareable.
+This may update and freeze the original. Already-shareable values pass through unchanged.</li>
 <li><code>:shareable_copy</code> - The value will be copied and the copy will be made Ractor-shareable.</li>
 </ul>
 
@@ -198,7 +200,7 @@ get an error. Useful for usage contained within a single Ractor.</li>
 
 </div>
         </dt>
-        <dd><pre class="code"><span class='op'>::</span><span class='const'>Set</span><span class='lbracket'>[</span><span class='symbol'>:copy</span><span class='comma'>,</span> <span class='symbol'>:move</span><span class='comma'>,</span> <span class='symbol'>:local</span><span class='comma'>,</span> <span class='symbol'>:make_shareable</span><span class='comma'>,</span> <span class='symbol'>:raise</span><span class='comma'>,</span> <span class='symbol'>:shareable_copy</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+        <dd><pre class="code"><span class='op'>::</span><span class='const'>Set</span><span class='lbracket'>[</span><span class='symbol'>:copy</span><span class='comma'>,</span> <span class='symbol'>:move</span><span class='comma'>,</span> <span class='symbol'>:local</span><span class='comma'>,</span> <span class='symbol'>:make_shareable</span><span class='comma'>,</span> <span class='symbol'>:raise</span><span class='comma'>,</span> <span class='symbol'>:shareable_copy</span><span class='comma'>,</span> <span class='symbol'>:dedup</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
       
     </dl>
   
@@ -427,6 +429,8 @@ that pushed it.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
+<li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="../Farce.html#dedup-class_method" title="Farce.dedup (method)">Farce.dedup</a></span>, then made Ractor-shareable.
+This may update and freeze the original. Already-shareable values pass through unchanged.</li>
 <li><code>:shareable_copy</code> - The value will be copied and the copy will be made Ractor-shareable.</li>
 </ul>
 
@@ -608,10 +612,10 @@ get an error. Useful for usage contained within a single Ractor.</li>
       <pre class="lines">
 
 
-126</pre>
+127</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 126</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 127</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_managed_envelope?'>managed_envelope?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Envelope.html" title="Farce::Envelope (class)">Envelope</a></span></span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span></pre>
     </td>
@@ -713,7 +717,6 @@ compared without claiming or opening them.</p>
       <pre class="lines">
 
 
-106
 107
 108
 109
@@ -730,10 +733,11 @@ compared without claiming or opening them.</p>
 120
 121
 122
-123</pre>
+123
+124</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 106</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 107</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_same_value?'>same_value?</span><span class='lparen'>(</span><span class='id identifier rubyid_left'>left</span><span class='comma'>,</span> <span class='id identifier rubyid_right'>right</span><span class='comma'>,</span> <span class='label'>identity:</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_left_managed'>left_managed</span>  <span class='op'>=</span> <span class='id identifier rubyid_managed_envelope?'>managed_envelope?</span><span class='lparen'>(</span><span class='id identifier rubyid_left'>left</span><span class='rparen'>)</span>
@@ -820,13 +824,13 @@ Other options, including other envelopes, will be returned as-is.</p>
       <pre class="lines">
 
 
-95
 96
 97
-98</pre>
+98
+99</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 95</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 96</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_value'>value</span> <span class='kw'>unless</span> <span class='id identifier rubyid_managed_envelope?'>managed_envelope?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
@@ -859,6 +863,8 @@ that pushed it.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
+<li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="../Farce.html#dedup-class_method" title="Farce.dedup (method)">Farce.dedup</a></span>, then made Ractor-shareable.
+This may update and freeze the original. Already-shareable values pass through unchanged.</li>
 <li><code>:shareable_copy</code> - The value will be copied and the copy will be made Ractor-shareable.</li>
 </ul>
 
@@ -914,7 +920,7 @@ get an error. Useful for usage contained within a single Ractor.</li>
       
       
         &mdash;
-        <div class='inline'><p>The value wrapped in an envelope if it is not Ractor-shareable, or the value itself if it is.</p>
+        <div class='inline'><p>The prepared value, or a managed envelope containing it.</p>
 </div>
       
     </li>
@@ -939,7 +945,8 @@ get an error. Useful for usage contained within a single Ractor.</li>
 85
 86
 87
-88</pre>
+88
+89</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 76</span>
@@ -949,6 +956,7 @@ get an error. Useful for usage contained within a single Ractor.</li>
 
   <span class='kw'>case</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>||</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mode'>mode</span>
   <span class='kw'>when</span> <span class='symbol'>:copy</span>           <span class='kw'>then</span> <span class='const'><span class='object_link'><a href="Envelope.html" title="Farce::Envelope (class)">Envelope</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Envelope/Copy.html" title="Farce::Envelope::Copy (class)">Copy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Envelope/Copy.html#new-class_method" title="Farce::Envelope::Copy.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='kw'>self</span><span class='rparen'>)</span>
+  <span class='kw'>when</span> <span class='symbol'>:dedup</span>          <span class='kw'>then</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_dedup'><span class='object_link'><a href="../Farce.html#dedup-class_method" title="Farce.dedup (method)">dedup</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>when</span> <span class='symbol'>:local</span>          <span class='kw'>then</span> <span class='const'><span class='object_link'><a href="Envelope.html" title="Farce::Envelope (class)">Envelope</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Envelope/Local.html" title="Farce::Envelope::Local (class)">Local</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Envelope/Local.html#new-class_method" title="Farce::Envelope::Local.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='kw'>self</span><span class='rparen'>)</span>
   <span class='kw'>when</span> <span class='symbol'>:make_shareable</span> <span class='kw'>then</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='kw'>when</span> <span class='symbol'>:move</span>           <span class='kw'>then</span> <span class='const'><span class='object_link'><a href="Envelope.html" title="Farce::Envelope (class)">Envelope</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Envelope/Move.html" title="Farce::Envelope::Move (class)">Move</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Envelope/Move.html#new-class_method" title="Farce::Envelope::Move.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='kw'>self</span><span class='rparen'>)</span>
@@ -967,7 +975,7 @@ get an error. Useful for usage contained within a single Ractor.</li>
 </div>
 
       <div id="footer">
-  Generated on Fri Sep 25 00:33:33 2026 by
+  Generated on Fri Sep 25 00:44:42 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

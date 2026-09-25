@@ -1368,6 +1368,8 @@ that pushed it.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
+<li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="#dedup-class_method" title="Farce.dedup (method)">dedup</a></span>, then made Ractor-shareable.
+This may update and freeze the original. Already-shareable values pass through unchanged.</li>
 <li><code>:shareable_copy</code> - The value will be copied and the copy will be made Ractor-shareable.</li>
 </ul>
 
@@ -1590,6 +1592,8 @@ that pushed it.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
+<li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="#dedup-class_method" title="Farce.dedup (method)">dedup</a></span>, then made Ractor-shareable.
+This may update and freeze the original. Already-shareable values pass through unchanged.</li>
 <li><code>:shareable_copy</code> - The value will be copied and the copy will be made Ractor-shareable.
 Calls from the main ractor execute directly, preserving the block and arguments.</li>
 </ul>
@@ -2459,7 +2463,7 @@ it will not create a new ractor-local scheduler if one is not already available.
 </div>
 
       <div id="footer">
-  Generated on Fri Sep 25 00:33:28 2026 by
+  Generated on Fri Sep 25 00:44:35 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
