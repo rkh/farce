@@ -79,7 +79,10 @@ module Helpers
         # Let TCP choose a usable port, then check that UDP can share it.
         # Ephemeral ports can be reserved or occupied for only one protocol.
         @socket = UDPSocket.new
-        @tcp_socket = TCPServer.new("127.0.0.1", 0) if tcp
+        # Windows can choose consecutive TCP ports that are all reserved for UDP.
+        # Retry below the default ephemeral range instead of repeating that choice.
+        tcp_port = attempt.zero? ? 0 : rand(1024...49_152)
+        @tcp_socket = TCPServer.new("127.0.0.1", tcp_port) if tcp
         @socket.bind("127.0.0.1", @tcp_socket ? @tcp_socket.addr[1] : 0)
         @port = @socket.addr[1]
         return

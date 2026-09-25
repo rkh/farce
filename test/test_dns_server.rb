@@ -10,6 +10,10 @@ class TestDnsServer < Test
     check_binding("Errno::EADDRINUSE", failures: 2, attempts: 3)
   end
 
+  def test_retries_outside_unavailable_ephemeral_ports
+    check_binding("Errno::EACCES", failures: 1, attempts: 2, reject_ephemeral: true)
+  end
+
   def test_stops_after_ten_unavailable_ports
     check_binding("Errno::EACCES", failures: 10, attempts: 10)
   end
@@ -20,7 +24,9 @@ class TestDnsServer < Test
 
   private
 
-  def check_binding(error_class, failures:, attempts:)
+  def check_binding(error_class, failures:, attempts:, reject_ephemeral: false)
+    # Real port conflicts may add retries after the injected failures.
+    comparison = failures < attempts ? ">=" : "=="
     output, error, status = ruby_isolated(<<~RUBY)
       require "helpers/dns_server"
       $sockets = []
@@ -31,12 +37,13 @@ class TestDnsServer < Test
           return super unless $tracking
           $sockets << self
           $attempts += 1
-          raise #{error_class} if $attempts <= #{failures}
+          raise #{error_class} if $attempts <= #{failures} || (#{reject_ephemeral} && $tcp_port.zero?)
           super
         end
       end)
       TCPServer.singleton_class.prepend(Module.new do
-        def new(*)
+        def new(host, port)
+          $tcp_port = port
           super.tap { |socket| $sockets << socket }
         end
       end)
@@ -57,7 +64,7 @@ class TestDnsServer < Test
         dns&.close
         server&.close
       end
-      abort "wrong number of attempts" unless $attempts == #{attempts}
+      abort "wrong number of attempts" unless $attempts #{comparison} #{attempts}
       abort "sockets leaked" unless $sockets.all?(&:closed?)
       puts "ok"
     RUBY
