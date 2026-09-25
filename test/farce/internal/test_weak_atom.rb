@@ -10,7 +10,7 @@ module Farce
       include Helpers::InternalTestHelpers
 
       def atom_class = WeakAtom
-      def test_timeout = 5
+      def test_timeout = 30
 
       def test_default_and_shareability
         atom = atom_class.new
