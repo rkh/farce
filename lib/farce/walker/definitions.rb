@@ -16,6 +16,28 @@ module Farce
       object
     end
 
+    define(Module) do |object, walker|
+      if walker.constants
+        Internal.walker_constants(object, walker.constants == :inherited).each do |name|
+          next if object.autoload?(name, walker.constants == :inherited)
+
+          value  = object.const_get(name, walker.constants == :inherited)
+          result = walker.visit(value)
+          object.const_set(name, result) if walker.modify && !value.equal?(result)
+        end
+      end
+
+      if walker.class_variables
+        object.class_variables(walker.class_variables == :inherited).each do |name|
+          value  = object.class_variable_get(name)
+          result = walker.visit(value)
+          object.class_variable_set(name, result) if walker.modify && !value.equal?(result)
+        end
+      end
+
+      super(object, walker)
+    end
+
     define(Internal::Atom, Abstract::Atom) do |object, walker|
       value  = object.value
       result = walker.visit(value)

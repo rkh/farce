@@ -120,6 +120,58 @@ module Farce
     DEDUPER.dedup(object, **)
   end
 
+  # Recursively freeze an object graph using {Walker} traversal.
+  #
+  # Visits container elements, hash keys and values, and instance variables.
+  # Shared children and cycles are preserved.
+  #
+  # Classes and modules are skipped by default. If it is enabled, then traversal visits
+  # instance variables, directly defined public constants, and directly defined class variables.
+  # Autoloads are skipped.
+  #
+  # Freezes objects in place and returns the original root. Already frozen
+  # objects are still traversed so their mutable children are frozen too.
+  #
+  # @example Freeze nested values in place
+  #   values = { tags: [+"ruby"] }
+  #   Farce.deep_freeze(values).equal?(values)        # => true
+  #   values[:tags].frozen?                           # => true
+  #   values[:tags].first.frozen?                     # => true
+  #
+  # @example Freeze children of an already frozen container
+  #   values = [+"ruby"].freeze
+  #   Farce.deep_freeze(values).equal?(values)        # => true
+  #   values.first.frozen?                            # => true
+  #
+  # @example Freeze module state while allowing new methods
+  #   mod = Module.new
+  #   mod.instance_variable_set(:@tags, [+"ruby"])
+  #   Farce.deep_freeze(mod, traverse_modules: true)
+  #   mod.instance_variable_get(:@tags).first.frozen? # => true
+  #   mod.frozen?                                     # => false
+  #
+  # @param object [Object] the root object
+  # @param freeze_modules [Boolean] whether to freeze classes and modules
+  # @param traverse_modules [Boolean] whether to visit class and module instance
+  #   variables. Defaults to `freeze_modules`, but can be set independently.
+  # @return [Object] the original root. Skipped modules retain their frozen state.
+  # @see Walker
+  def self.deep_freeze(object, freeze_modules: false, traverse_modules: freeze_modules)
+    Walker.visit(object) do |node, walker|
+      if Module === node
+        traverse = traverse_modules
+        freeze   = freeze_modules
+      else
+        traverse = true
+        freeze   = true
+      end
+
+      walker.traverse if traverse
+      node.freeze if freeze
+      node
+    end
+  end
+
   # Binds a proc, lambda, block, bound or unbound method to a new self.
   #
   # This is similar to the following common approaches:

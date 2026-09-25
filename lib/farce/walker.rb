@@ -7,10 +7,19 @@ module Farce
   # Traversal follows container elements, hash keys and values, and ordinary
   # instance variables. Farce containers expose their contents, not their storage.
   # Proc traversal follows the receiver, not captured local variables.
+  # Module and class traversal includes directly defined public constants and
+  # class variables. Set constants: :inherited or class_variables: :inherited
+  # to include ancestors, or false to skip either kind. Autoloads are not loaded.
   #
   # {.visit} and {.modify} let the callback choose when to descend with {#traverse}.
   # {.each} descends automatically and yields children before their parent.
   # Shared children and cycles are tracked by identity.
+  #
+  # @example Scan a namespace without changing it
+  #   namespace = Module.new
+  #   namespace.const_set(:VALUE, [42])
+  #   Farce::Walker.any?(namespace) { Integer === it } # => true
+  #   Farce::Walker.any?(namespace, constants: false) { Integer === it } # => false
   #
   # @example Replace integers in a copy
   #   Farce::Walker.modify([1, [2]], copy: true) do |object, walker|
@@ -102,23 +111,29 @@ module Farce
 
     # Visit an object without automatically descending or assigning replacements.
     # @param object [BasicObject] the root object
+    # @!macro walker_module_options
+    #   @param constants [Boolean, Symbol] true for directly defined public constants,
+    #     :inherited to include ancestors, or false to skip. Autoloads are not loaded.
+    #   @param class_variables [Boolean, Symbol] true for directly defined class variables,
+    #     :inherited to include ancestors, or false to skip
     # @yieldparam object [BasicObject] the current object
     # @yieldparam walker [Walker] call {#traverse}, {#skip}, or {#return} to control the walk
     # @yieldreturn [BasicObject] the result for the current object
     # @return [BasicObject] the root callback's result, or the value passed to {#return}
     # @raise [LocalJumpError] if no block is given
-    def self.visit(object, &callback)
+    def self.visit(object, constants: true, class_variables: true, &callback)
       raise LocalJumpError, "no block given" unless callback
-      catch(RETURN) { new(callback, false, false).visit(object) }
+      catch(RETURN) { new(callback, false, false, constants, class_variables).visit(object) }
     end
 
     # Yield each reachable object once, after its children.
     # @param object [BasicObject] the root object
+    # @!macro walker_module_options
     # @yieldparam object [BasicObject] a reachable object
     # @return [BasicObject, Enumerator] the root object, or an enumerator without a block
-    def self.each(object)
-      return enum_for(:each, object) unless block_given?
-      visit(object) do |object, walker|
+    def self.each(object, **)
+      return enum_for(:each, object, **) unless block_given?
+      visit(object, **) do |object, walker|
         walker.traverse(object)
         yield(object)
         object
@@ -127,13 +142,15 @@ module Farce
 
     # Stop at the first object for which the block is truthy.
     # Without a block, test the objects themselves.
+    # @!macro walker_module_options
     # @return [Boolean]
-    def self.any?(object, &) = each(object).any?(&)
+    def self.any?(object, **, &) = each(object, **).any?(&)
 
     # Stop at the first object for which the block is falsey.
     # Without a block, test the objects themselves.
+    # @!macro walker_module_options
     # @return [Boolean]
-    def self.all?(object, &) = each(object).all?(&)
+    def self.all?(object, **, &) = each(object, **).all?(&)
 
     # Transform a graph using the callback's return values.
     # Call {#traverse} to transform an object's children. Returning another value
@@ -141,10 +158,15 @@ module Farce
     # Copies are recorded before their children are visited to preserve cycles.
     # Data values are rebuilt through allocation and their normal initializer.
     # Noncopyable coordination objects, such as leases, are updated in place.
+    # Constants and class variables are assigned only when their value
+    # changes identity. Constant replacement can emit Ruby redefinition warnings.
+    # Replacing an inherited constant defines a local constant. Replacing an
+    # inherited class variable updates storage shared with its owner and siblings.
     #
     # A walk is not an atomic snapshot or update. Coordinate concurrent writers
     # when transforming container structure, especially map keys.
     # @param object [BasicObject] the root object
+    # @!macro walker_module_options
     # @param copy [Boolean, Symbol] false to edit mutable objects in place, true for dup,
     #   or a copy method such as :clone. Frozen objects are cloned before in-place edits.
     # @param freeze [Boolean, nil] true to freeze results, false to avoid freezing them,
@@ -157,7 +179,7 @@ module Farce
     # @raise [ArgumentError] if copy is neither a boolean nor a Symbol
     # @raise [ArgumentError] if a hash key or set element refers to a Data value
     #   still being constructed. Identity-based containers do not hash their keys.
-    def self.modify(object, copy: false, freeze: nil, &callback)
+    def self.modify(object, copy: false, freeze: nil, constants: true, class_variables: true, &callback)
       raise LocalJumpError, "no block given" unless callback
 
       modify =
@@ -168,21 +190,33 @@ module Farce
         else raise ArgumentError, "invalid value for copy: #{copy.inspect}"
         end
 
-      catch(RETURN) { new(callback, modify, freeze).visit(object) }
+      catch(RETURN) { new(callback, modify, freeze, constants, class_variables).visit(object) }
     end
 
     # @return [false, true, Symbol] false for a read-only walk, true for in-place edits,
     #   or the selected copy method
     attr_reader :modify
 
+    # @return [Boolean, Symbol] the constant traversal policy
+    attr_reader :constants
+
+    # @return [Boolean, Symbol] the class variable traversal policy
+    attr_reader :class_variables
+
     # @return [BasicObject] the original object currently passed to the callback
     attr_reader :current_object
 
     # @!visibility private
-    def initialize(callback, modify, freeze)
+    def initialize(callback, modify, freeze, constants, class_variables)
+      { constants:, class_variables: }.each do |name, policy|
+        next if [true, false, :inherited].include?(policy)
+        raise ArgumentError, "invalid value for #{name}: #{policy.inspect}"
+      end
       @callback        = callback
       @modify          = modify
       @freeze          = freeze
+      @constants       = constants
+      @class_variables = class_variables
       @seen            = {}.compare_by_identity
       @seen[UNDEFINED] = UNDEFINED
       @current_object  = UNDEFINED
@@ -250,7 +284,7 @@ module Farce
 
       # Check identities before descending. Some engines cannot even read the
       # members of an allocated Data value until its initializer has run.
-      !self.class.visit(object) do |value, traversal|
+      !self.class.visit(object, constants:, class_variables:) do |value, traversal|
         traversal.return(true) if @unfinished_data.key?(value)
         traversal.traverse
         false
