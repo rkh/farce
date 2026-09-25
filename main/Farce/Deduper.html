@@ -124,9 +124,9 @@ and cached by default. Other objects are traversed but are not cached unless
 their class matches <span class='object_link'><a href="#store-instance_method" title="Farce::Deduper#store (method)">#store</a></span>. Modules and classes are skipped by default.</p>
 <p>Cached objects are held weakly. Keep a reference to a returned object if its
 identity matters. Shareable results can be reused across Ractors. Other
-results are cached within the current Ractor.
-Containers that refer back to a Data value under construction are frozen
-without being cached, because their hash is not stable yet.</p>
+results are cached within the current Ractor.</p>
+<p>Cyclic containers are frozen after their references are connected and are
+not cached. This keeps canonical replacements from breaking back references.</p>
 
 
   </div>
@@ -367,13 +367,13 @@ Noncopyable coordination objects follow <span class='object_link'><a href="Walke
       <pre class="lines">
 
 
-62
 63
 64
-65</pre>
+65
+66</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 62</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 63</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_dedup'>dedup</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>copy:</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='label'>skip:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_skip'>skip</span> <span class='op'>=</span> <span class='id identifier rubyid_skip'>skip</span> <span class='op'>?</span> <span class='lbracket'>[</span><span class='op'>*</span><span class='ivar'>@skip</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_skip'>skip</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='ivar'>@skip</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span>
@@ -441,13 +441,13 @@ Noncopyable coordination objects follow <span class='object_link'><a href="Walke
       <pre class="lines">
 
 
-37
 38
 39
-40</pre>
+40
+41</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 37</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 38</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_skip'>skip</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_modules'>modules</span><span class='rparen'>)</span>
   <span class='ivar'>@skip</span><span class='period'>.</span><span class='id identifier rubyid_concat'>concat</span><span class='lparen'>(</span><span class='id identifier rubyid_modules'>modules</span><span class='rparen'>)</span>
@@ -517,13 +517,13 @@ These methods must remain stable after deduplication.</p>
       <pre class="lines">
 
 
-47
 48
 49
-50</pre>
+50
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 47</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 48</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_modules'>modules</span><span class='rparen'>)</span>
   <span class='ivar'>@store</span><span class='period'>.</span><span class='id identifier rubyid_concat'>concat</span><span class='lparen'>(</span><span class='id identifier rubyid_modules'>modules</span><span class='rparen'>)</span>
@@ -539,7 +539,7 @@ These methods must remain stable after deduplication.</p>
 </div>
 
       <div id="footer">
-  Generated on Fri Sep 25 08:41:16 2026 by
+  Generated on Fri Sep 25 09:45:07 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

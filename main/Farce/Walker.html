@@ -106,7 +106,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/walker.rb<span class="defines">,<br>
-  lib/farce/walker/definitions.rb</span>
+  lib/farce/walker/definitions.rb,<br> lib/farce/walker/modification.rb</span>
 
 </dd>
   </dl>
@@ -115,8 +115,8 @@
 
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
-    <p>Visit or transform an object graph without revisiting the same object.
-Traversal follows container elements, hash keys and values, and ordinary
+    <p>Visit an object graph or transform it with copies only where needed.</p>
+<p>Traversal follows container elements, hash keys and values, and ordinary
 instance variables. Farce containers expose their contents, not their storage.
 Proc traversal follows the receiver, not captured local variables.
 Module and class traversal includes directly defined public constants and
@@ -289,7 +289,7 @@ Shared children and cycles are tracked by identity.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#all%3F-class_method" title="all? (class method)">.<strong>all?</strong>(object)  &#x21d2; Boolean </a>
+      <a href="#all%3F-class_method" title="all? (class method)">.<strong>all?</strong>(object, constants: true, class_variables: true)  &#x21d2; Boolean </a>
     
 
     
@@ -312,7 +312,7 @@ Shared children and cycles are tracked by identity.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#any%3F-class_method" title="any? (class method)">.<strong>any?</strong>(object)  &#x21d2; Boolean </a>
+      <a href="#any%3F-class_method" title="any? (class method)">.<strong>any?</strong>(object, constants: true, class_variables: true)  &#x21d2; Boolean </a>
     
 
     
@@ -358,7 +358,7 @@ Shared children and cycles are tracked by identity.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#each-class_method" title="each (class method)">.<strong>each</strong>(object) {|object| ... } &#x21d2; BasicObject, Enumerator </a>
+      <a href="#each-class_method" title="each (class method)">.<strong>each</strong>(object, constants: true, class_variables: true) {|object| ... } &#x21d2; BasicObject, Enumerator </a>
     
 
     
@@ -437,6 +437,75 @@ Shared children and cycles are tracked by identity.</p>
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#changed%3F-instance_method" title="#changed? (instance method)">#<strong>changed?</strong>(object = current_object)  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether a visited object or its traversed descendants changed.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#finalize-instance_method" title="#finalize (instance method)">#<strong>finalize</strong> {|result, cyclic| ... } &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Register a finalizer for the current node.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#freeze_result-instance_method" title="#freeze_result (instance method)">#<strong>freeze_result</strong>  &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Request freezing after the current result is settled.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#return-instance_method" title="#return (instance method)">#<strong>return</strong>(object = current_object)  </a>
     
 
@@ -498,6 +567,29 @@ Shared children and cycles are tracked by identity.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Traverse an object's children using its registered class definition.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#update-instance_method" title="#update (instance method)">#<strong>update</strong>(object, values, hash_keys: false, key_stride: 1) {|target, results| ... } &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Visit child values and describe how to assign their replacements.</p>
 </div></span>
   
 </li>
@@ -585,12 +677,12 @@ Shared children and cycles are tracked by identity.</p>
       <pre class="lines">
 
 
-204
-205
-206</pre>
+196
+197
+198</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 204</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 196</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_class_variables'>class_variables</span>
   <span class='ivar'>@class_variables</span>
@@ -644,12 +736,12 @@ Shared children and cycles are tracked by identity.</p>
       <pre class="lines">
 
 
-201
-202
-203</pre>
+193
+194
+195</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 201</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 193</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_constants'>constants</span>
   <span class='ivar'>@constants</span>
@@ -703,12 +795,12 @@ Shared children and cycles are tracked by identity.</p>
       <pre class="lines">
 
 
-207
-208
-209</pre>
+199
+200
+201</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 207</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 199</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_current_object'>current_object</span>
   <span class='ivar'>@current_object</span>
@@ -764,12 +856,12 @@ or the selected copy method</p>
       <pre class="lines">
 
 
-198
-199
-200</pre>
+190
+191
+192</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 198</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 190</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_modify'>modify</span>
   <span class='ivar'>@modify</span>
@@ -789,7 +881,7 @@ or the selected copy method</p>
       <div class="method_details first">
   <h3 class="signature first" id="all?-class_method">
   
-    .<strong>all?</strong>(object)  &#x21d2; <tt>Boolean</tt> 
+    .<strong>all?</strong>(object, constants: true, class_variables: true)  &#x21d2; <tt>Boolean</tt> 
   
 
   
@@ -815,6 +907,8 @@ Without a block, test the objects themselves.</p>
         <span class='type'>(<tt>Boolean</tt>, <tt>Symbol</tt>)</span>
       
       
+        <em class="default">(defaults to: <tt>true</tt>)</em>
+      
       
         &mdash;
         <div class='inline'><p>true for directly defined public constants,
@@ -830,6 +924,8 @@ Without a block, test the objects themselves.</p>
       
         <span class='type'>(<tt>Boolean</tt>, <tt>Symbol</tt>)</span>
       
+      
+        <em class="default">(defaults to: <tt>true</tt>)</em>
       
       
         &mdash;
@@ -861,12 +957,16 @@ Without a block, test the objects themselves.</p>
       <pre class="lines">
 
 
-153</pre>
+136
+137
+138</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 153</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 136</span>
 
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_all?'>all?</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_all?'>all?</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span></pre>
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_all?'>all?</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>constants:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>class_variables:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>constants:</span><span class='comma'>,</span> <span class='label'>class_variables:</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_all?'>all?</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -875,7 +975,7 @@ Without a block, test the objects themselves.</p>
       <div class="method_details ">
   <h3 class="signature " id="any?-class_method">
   
-    .<strong>any?</strong>(object)  &#x21d2; <tt>Boolean</tt> 
+    .<strong>any?</strong>(object, constants: true, class_variables: true)  &#x21d2; <tt>Boolean</tt> 
   
 
   
@@ -901,6 +1001,8 @@ Without a block, test the objects themselves.</p>
         <span class='type'>(<tt>Boolean</tt>, <tt>Symbol</tt>)</span>
       
       
+        <em class="default">(defaults to: <tt>true</tt>)</em>
+      
       
         &mdash;
         <div class='inline'><p>true for directly defined public constants,
@@ -916,6 +1018,8 @@ Without a block, test the objects themselves.</p>
       
         <span class='type'>(<tt>Boolean</tt>, <tt>Symbol</tt>)</span>
       
+      
+        <em class="default">(defaults to: <tt>true</tt>)</em>
       
       
         &mdash;
@@ -947,12 +1051,16 @@ Without a block, test the objects themselves.</p>
       <pre class="lines">
 
 
-147</pre>
+128
+129
+130</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 128</span>
 
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span></pre>
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>constants:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>class_variables:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>constants:</span><span class='comma'>,</span> <span class='label'>class_variables:</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -978,8 +1086,9 @@ Without a block, test the objects themselves.</p>
 
 <p>Register traversal for classes from the main Ractor.</p>
 <p>Subclasses inherit the nearest definition. Definitions can call <code>super</code>.
-The object is already prepared for modification. Visit each child with
-<span class='object_link'><a href="#visit-instance_method" title="Farce::Walker#visit (method)">#visit</a></span> and assign its result only when <span class='object_link'><a href="#modify-instance_method" title="Farce::Walker#modify (method)">#modify</a></span> is truthy.</p>
+Use <span class='object_link'><a href="#update-instance_method" title="Farce::Walker#update (method)">#update</a></span> to visit children and record assignments. Its block receives
+a writable target and transformed children. Return that target from the
+assignment block and return the update result from the definition.</p>
 <p>Should only be necessary for classes using storage defined outside of Ruby (like a C struct).</p>
 
 
@@ -993,10 +1102,10 @@ The object is already prepared for modification. Visit each child with
       
       <pre class="example code"><code><span class='comment'># Lets assume NativeClass has a natively stored value
 </span><span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="" title="Farce::Walker (class)">Walker</a></span></span><span class='period'>.</span><span class='id identifier rubyid_define'>define</span><span class='lparen'>(</span><span class='const'>NativeClass</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_walker'>walker</span><span class='op'>|</span>
-  <span class='id identifier rubyid_value'>value</span>        <span class='op'>=</span> <span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
-  <span class='id identifier rubyid_result'>result</span>       <span class='op'>=</span> <span class='id identifier rubyid_walker'>walker</span><span class='period'>.</span><span class='id identifier rubyid_visit'>visit</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_result'>result</span> <span class='kw'>if</span> <span class='id identifier rubyid_walker'>walker</span><span class='period'>.</span><span class='id identifier rubyid_modify'>modify</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_result'>result</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_object'>object</span>
+  <span class='id identifier rubyid_walker'>walker</span><span class='period'>.</span><span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='lbracket'>[</span><span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='rbracket'>]</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_target'>target</span><span class='comma'>,</span> <span class='id identifier rubyid_values'>values</span><span class='op'>|</span>
+    <span class='id identifier rubyid_target'>target</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_values'>values</span><span class='period'>.</span><span class='id identifier rubyid_first'>first</span>
+    <span class='id identifier rubyid_target'>target</span>
+  <span class='kw'>end</span>
 <span class='kw'>end</span></code></pre>
     
   </div>
@@ -1091,14 +1200,14 @@ The object is already prepared for modification. Visit each child with
       <pre class="lines">
 
 
-106
-107
-108
-109
-110</pre>
+87
+88
+89
+90
+91</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 106</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 87</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_define'>define</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_classes'>classes</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_definition'>definition</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_prepare_method_definition'>prepare_method_definition</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
@@ -1113,7 +1222,7 @@ The object is already prepared for modification. Visit each child with
       <div class="method_details ">
   <h3 class="signature " id="each-class_method">
   
-    .<strong>each</strong>(object) {|object| ... } &#x21d2; <tt>BasicObject</tt>, <tt>Enumerator</tt> 
+    .<strong>each</strong>(object, constants: true, class_variables: true) {|object| ... } &#x21d2; <tt>BasicObject</tt>, <tt>Enumerator</tt> 
   
 
   
@@ -1153,6 +1262,8 @@ The object is already prepared for modification. Visit each child with
         <span class='type'>(<tt>Boolean</tt>, <tt>Symbol</tt>)</span>
       
       
+        <em class="default">(defaults to: <tt>true</tt>)</em>
+      
       
         &mdash;
         <div class='inline'><p>true for directly defined public constants,
@@ -1168,6 +1279,8 @@ The object is already prepared for modification. Visit each child with
       
         <span class='type'>(<tt>Boolean</tt>, <tt>Symbol</tt>)</span>
       
+      
+        <em class="default">(defaults to: <tt>true</tt>)</em>
       
       
         &mdash;
@@ -1222,21 +1335,21 @@ The object is already prepared for modification. Visit each child with
       <pre class="lines">
 
 
-134
-135
-136
-137
-138
-139
-140
-141</pre>
+115
+116
+117
+118
+119
+120
+121
+122</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 134</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 115</span>
 
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
-  <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='symbol'>:each</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
-  <span class='id identifier rubyid_visit'>visit</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_walker'>walker</span><span class='op'>|</span>
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>constants:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>class_variables:</span> <span class='kw'>true</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='symbol'>:each</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>constants:</span><span class='comma'>,</span> <span class='label'>class_variables:</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+  <span class='id identifier rubyid_visit'>visit</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>constants:</span><span class='comma'>,</span> <span class='label'>class_variables:</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_walker'>walker</span><span class='op'>|</span>
     <span class='id identifier rubyid_walker'>walker</span><span class='period'>.</span><span class='id identifier rubyid_traverse'>traverse</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
     <span class='kw'>yield</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_object'>object</span>
@@ -1261,8 +1374,12 @@ The object is already prepared for modification. Visit each child with
     <p>Transform a graph using the callback's return values.
 Call <span class='object_link'><a href="#traverse-instance_method" title="Farce::Walker#traverse (method)">#traverse</a></span> to transform an object's children. Returning another value
 replaces the object without automatically visiting that replacement.
-Copies are recorded before their children are visited to preserve cycles.
-Data values are rebuilt through allocation and their normal initializer.
+Unchanged branches retain their identity, including when copy is enabled.
+Changed cycles are connected before results are frozen or finalized.
+A cyclic callback may run again as child replacements become known. Keep
+callbacks repeatable and put publication or caching in <span class='object_link'><a href="#finalize-instance_method" title="Farce::Walker#finalize (method)">#finalize</a></span>.
+Use <span class='object_link'><a href="#freeze_result-instance_method" title="Farce::Walker#freeze_result (method)">#freeze_result</a></span> instead of freezing a preliminary traversal result.
+Data values are rebuilt only when members change, using their normal initializer.
 Noncopyable coordination objects, such as leases, are updated in place.
 Constants and class variables are assigned only when their value
 changes identity. Constant replacement can emit Ruby redefinition warnings.
@@ -1341,8 +1458,9 @@ when transforming container structure, especially map keys.</p>
       
       
         &mdash;
-        <div class='inline'><p>false to edit mutable objects in place, true for dup,
-or a copy method such as :clone. Frozen objects are cloned before in-place edits.</p>
+        <div class='inline'><p>false to edit mutable objects in place, true to
+duplicate changed objects, or a copy method such as :clone. Unchanged objects
+may be shared with the input. Frozen objects are cloned only when changed.</p>
 </div>
       
     </li>
@@ -1472,6 +1590,20 @@ or nil to preserve each original object's frozen state</p>
       
       
         &mdash;
+        <div class='inline'><p>if cyclic callbacks do not converge within 32 passes,
+or a cyclic finalizer replaces its result</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>ArgumentError</tt>)</span>
+      
+      
+      
+        &mdash;
         <div class='inline'><p>if a hash key or set element refers to a Data value
 still being constructed. Identity-based containers do not hash their keys.</p>
 </div>
@@ -1486,22 +1618,22 @@ still being constructed. Identity-based containers do not hash their keys.</p>
       <pre class="lines">
 
 
+174
+175
+176
+177
+178
+179
+180
+181
 182
 183
 184
 185
-186
-187
-188
-189
-190
-191
-192
-193
-194</pre>
+186</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 182</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 174</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_modify'>modify</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>copy:</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>constants:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>class_variables:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_callback'>callback</span>
@@ -1514,7 +1646,7 @@ still being constructed. Identity-based containers do not hash their keys.</p>
     <span class='kw'>else</span> <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>invalid value for copy: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_copy'>copy</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
     <span class='kw'>end</span>
 
-  <span class='id identifier rubyid_catch'>catch</span><span class='lparen'>(</span><span class='const'>RETURN</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_modify'>modify</span><span class='comma'>,</span> <span class='id identifier rubyid_freeze'>freeze</span><span class='comma'>,</span> <span class='id identifier rubyid_constants'>constants</span><span class='comma'>,</span> <span class='id identifier rubyid_class_variables'>class_variables</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_visit'>visit</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+  <span class='id identifier rubyid_catch'>catch</span><span class='lparen'>(</span><span class='const'>RETURN</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='const'>Modification</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_modify'>modify</span><span class='comma'>,</span> <span class='id identifier rubyid_freeze'>freeze</span><span class='comma'>,</span> <span class='id identifier rubyid_constants'>constants</span><span class='comma'>,</span> <span class='id identifier rubyid_class_variables'>class_variables</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_visit'>visit</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -1650,13 +1782,13 @@ still being constructed. Identity-based containers do not hash their keys.</p>
       <pre class="lines">
 
 
-124
-125
-126
-127</pre>
+105
+106
+107
+108</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 124</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 105</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_visit'>visit</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>constants:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>class_variables:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_callback'>callback</span>
@@ -1674,7 +1806,289 @@ still being constructed. Identity-based containers do not hash their keys.</p>
 
     
       <div class="method_details first">
-  <h3 class="signature first" id="return-instance_method">
+  <h3 class="signature first" id="changed?-instance_method">
+  
+    #<strong>changed?</strong>(object = current_object)  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Whether a visited object or its traversed descendants changed.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>object</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>current_object</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the object to inspect</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>false for a read-only walk</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+306</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 306</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_changed?'>changed?</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='id identifier rubyid_current_object'>current_object</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>false</span> <span class='comment'># rubocop:disable Lint/UnusedMethodArgument</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="finalize-instance_method">
+  
+    #<strong>finalize</strong> {|result, cyclic| ... } &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Register a finalizer for the current node. It runs once after resolution
+and requested freezing. Registering another finalizer replaces the first.
+Cyclic finalizers must preserve identity. Acyclic finalizers may return a
+canonical replacement, which is propagated to the parent.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>result</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the settled result</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>cyclic</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>whether the node belongs to a cycle</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the final result</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the current destination</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>ArgumentError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>outside a modifying walk</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>LocalJumpError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>if no block is given</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+295</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 295</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_finalize'>finalize</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_raise'>raise</span><span class='lparen'>(</span><span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>finalize requires a modifying walk</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="freeze_result-instance_method">
+  
+    #<strong>freeze_result</strong>  &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Request freezing after the current result is settled.
+With copying enabled, mutable inputs are copied before freezing.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the current destination</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>ArgumentError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>outside a modifying walk</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+283</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 283</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_freeze_result'>freeze_result</span> <span class='op'>=</span> <span class='id identifier rubyid_raise'>raise</span><span class='lparen'>(</span><span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>freeze_result requires a modifying walk</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="return-instance_method">
   
     #<strong>return</strong>(object = current_object)  
   
@@ -1719,10 +2133,10 @@ still being constructed. Identity-based containers do not hash their keys.</p>
       <pre class="lines">
 
 
-256</pre>
+249</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 256</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 249</span>
 
 <span class='kw'>def</span> <span class='kw'>return</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='id identifier rubyid_current_object'>current_object</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_throw'>throw</span><span class='lparen'>(</span><span class='const'>RETURN</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span></pre>
     </td>
@@ -1776,10 +2190,10 @@ still being constructed. Identity-based containers do not hash their keys.</p>
       <pre class="lines">
 
 
-251</pre>
+244</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 251</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 244</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_skip'>skip</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='id identifier rubyid_current_object'>current_object</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_throw'>throw</span><span class='lparen'>(</span><span class='const'>SKIP</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span></pre>
     </td>
@@ -1850,12 +2264,184 @@ still being constructed. Identity-based containers do not hash their keys.</p>
       <pre class="lines">
 
 
-261</pre>
+254
+255
+256
+257
+258</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 261</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 254</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_traverse'>traverse</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='id identifier rubyid_current_object'>current_object</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'>REGISTER</span><span class='lbracket'>[</span><span class='id identifier rubyid_send_to'>send_to</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='symbol'>:class</span><span class='rparen'>)</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='kw'>self</span><span class='rparen'>)</span></pre>
+<span class='kw'>def</span> <span class='id identifier rubyid_traverse'>traverse</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='id identifier rubyid_current_object'>current_object</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_klass'>klass</span> <span class='op'>=</span> <span class='id identifier rubyid_send_to'>send_to</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='symbol'>:class</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_visitor'>visitor</span> <span class='op'>=</span> <span class='ivar'>@visitors</span><span class='lbracket'>[</span><span class='id identifier rubyid_klass'>klass</span><span class='rbracket'>]</span> <span class='op'>||=</span> <span class='const'>REGISTER</span><span class='lbracket'>[</span><span class='id identifier rubyid_klass'>klass</span><span class='rbracket'>]</span>
+  <span class='id identifier rubyid_visitor'>visitor</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="update-instance_method">
+  
+    #<strong>update</strong>(object, values, hash_keys: false, key_stride: 1) {|target, results| ... } &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Visit child values and describe how to assign their replacements.
+The assignment block only runs during modification and may run again for cycles.
+It receives a writable target and the resolved children. Do not mutate object
+outside this block. Return the result of update from a traversal definition.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>object</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the object being traversed</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>values</span>
+      
+      
+        <span class='type'>(<tt>Array</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>child references in assignment order</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>hash_keys</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>false</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>rebuild when key descendants change in place</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>key_stride</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>1</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>spacing between keys in values, starting at zero</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>target</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the writable destination</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>results</span>
+      
+      
+        <span class='type'>(<tt>Array</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>transformed child references</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the traversal result</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+274
+275
+276
+277</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 274</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_values'>values</span><span class='comma'>,</span> <span class='label'>hash_keys:</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='label'>key_stride:</span> <span class='int'>1</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Lint/UnusedMethodArgument
+</span>  <span class='id identifier rubyid_values'>values</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_visit'>visit</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+  <span class='id identifier rubyid_object'>object</span>
+<span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -1922,6 +2508,13 @@ still being constructed. Identity-based containers do not hash their keys.</p>
       <pre class="lines">
 
 
+221
+222
+223
+224
+225
+226
+227
 228
 229
 230
@@ -1933,17 +2526,10 @@ still being constructed. Identity-based containers do not hash their keys.</p>
 236
 237
 238
-239
-240
-241
-242
-243
-244
-245
-246</pre>
+239</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 228</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 221</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_visit'>visit</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
   <span class='ivar'>@seen</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span> <span class='kw'>do</span>
@@ -1974,7 +2560,7 @@ still being constructed. Identity-based containers do not hash their keys.</p>
 </div>
 
       <div id="footer">
-  Generated on Fri Sep 25 08:41:16 2026 by
+  Generated on Fri Sep 25 09:45:07 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
