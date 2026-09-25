@@ -45,7 +45,6 @@ module Farce
         namespace = Module.new { include Farce }
 
         refute namespace.const_defined?(:Internal)
-        refute namespace.const_defined?(:MAYBE)
         refute namespace.const_defined?(:UNDEFINED)
         refute namespace.const_defined?(:VERSION)
         refute namespace.const_defined?(:TestMixin)

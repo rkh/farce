@@ -38,7 +38,9 @@ module Farce
     #
     #   If the value is `nil`, it is treated as the current time.
     #
-    #   Numeric values that aren't an ActiveSupport::Duration use the following cutoffs:
+    #   ActiveSupport durations are relative offsets when the ActiveSupport integration is loaded.
+    #
+    #   Other numeric values use the following cutoffs:
     #   * Up to 600 (10 minutes): Offsets from the current time.
     #   * Greater than 600, up to one billion: Clock times (like the value returned by {#current}).
     #   * Greater than one billion: UNIX timestamps (like the value returned by `Time.now.to_f`).
@@ -64,7 +66,6 @@ module Farce
           value.each_pair { |key, option| method, argument = key, option }
           return public_send(method, argument)
         end
-      when MAYBE::ActiveSupport::Duration then return offset(value)
       else
         return at(value.to_time) if value.respond_to?(:to_time)
         return parse(value.to_f) if value.is_a?(Numeric)

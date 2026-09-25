@@ -2,19 +2,6 @@
 
 require_relative "../setup"
 
-unless defined?(ActiveSupport::Duration)
-  module ActiveSupport
-    class Duration < Numeric
-      def initialize(value)
-        super()
-        @value = value
-      end
-
-      def to_f = @value
-    end
-  end
-end
-
 module Farce
   class TestClock < Test
     class TestNumeric < Numeric
@@ -96,10 +83,6 @@ module Farce
     def test_parse_accepts_non_float_numeric_values
       assert_current_offset(0.1) { Clock.parse(TestNumeric.new(0.1)) }
       assert_in_delta 600.1, Clock.parse(TestNumeric.new(600.1))
-    end
-
-    def test_parse_treats_active_support_duration_as_offset
-      assert_current_offset(0.1) { Clock.parse(ActiveSupport::Duration.new(0.1)) }
     end
 
     def test_parse_accepts_empty_hash_as_current_time

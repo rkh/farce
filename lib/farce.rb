@@ -48,11 +48,10 @@ require "farce/system"
 module Farce
   include Internal::Autoloads
 
-  MAYBE     = Internal::ConstMissing.new(Object, ignore: %i[NativeException RubyLex])
   UNDEFINED = Internal::Undefined.new("UNDEFINED")
 
   autoload :DEDUPER, "farce/deduper"
-  private_constant :Internal, :MAYBE, :UNDEFINED, :DEDUPER
+  private_constant :Internal, :UNDEFINED, :DEDUPER
 
   # @overload clock
   #   The current clock time
