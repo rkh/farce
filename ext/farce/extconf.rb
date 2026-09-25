@@ -40,7 +40,7 @@ epoll = have_header("sys/epoll.h")
 kqueue = have_header("sys/event.h")
 $srcs = %w[
   atom.c bounded_map.c counter.c darwin.c dict.c exchanger.c farce.c flag.c lock.c map.c priority_queue.c
-  queue.c signal.c tree_map.c unshareable.c unshared_signal.c vector.c weak_map.c
+  queue.c signal.c tree_map.c trie.c unshareable.c unshared_signal.c vector.c weak_map.c
 ]
 $srcs.concat(epoll || kqueue ? %w[drivers.c io.c reactor.c] : ["unsupported.c"])
 
@@ -73,6 +73,7 @@ weak_alive   = have_func("rb_gc_handle_weak_references_alive_p")
 # Enable them only while debugging the priority queue.
 $defs << "-DNDEBUG" unless ENV["FARCE_PRIORITY_QUEUE_ASSERTIONS"] == "1"
 $defs << "-DRC_HAVE_NATIVE_WEAK_REFERENCES=1" if weak_callback && weak_declare && weak_alive
+$defs << "-DFARCE_TRIE_FAILURE_INJECTION" if ENV["FARCE_TRIE_FAILURE_INJECTION"] == "1"
 $CFLAGS  = "#{$CFLAGS} -std=c11 -fvisibility=hidden -Wall -Wextra -Wno-unused-parameter -Wno-unused-function"
 $LDFLAGS = "#{$LDFLAGS} -pthread" unless /mswin|mingw/ =~ RUBY_PLATFORM
 

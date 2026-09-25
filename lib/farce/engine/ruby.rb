@@ -5,6 +5,7 @@
 # Load the scheduler dependency before native initialization.
 # Late Resolv loading can crash RubyGems for some reason
 require "resolv"
+require "farce/strict"
 
 module Farce
   # @!visibility private
@@ -101,3 +102,4 @@ module Farce
 end
 
 require "farce/engine/ruby/key_lock_map"
+require "farce/engine/shared/trie_builder"

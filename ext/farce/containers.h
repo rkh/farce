@@ -65,5 +65,6 @@ void containers_init_unshareable(VALUE namespace);
 void containers_init_vector(VALUE namespace);
 void containers_init_weak_maps(VALUE namespace);
 void containers_init_tree_maps(VALUE namespace);
+void containers_init_trie(VALUE namespace);
 
 #endif

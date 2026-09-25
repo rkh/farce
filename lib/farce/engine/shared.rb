@@ -6,6 +6,7 @@
 #-
 
 require "farce/engine/shared/rebindable"
+require "farce/engine/shared/trie"
 
 module Farce
   # @!visibility private

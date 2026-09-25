@@ -323,4 +323,5 @@ Init_farce(void)
     containers_init_vector(mInternal);
     containers_init_weak_maps(mInternal);
     containers_init_tree_maps(mInternal);
+    containers_init_trie(mInternal);
 }
