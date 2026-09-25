@@ -20,6 +20,24 @@ module Farce
       assert Ractor.shareable?(port)
     end
 
+    def test_dedup_mode_prepares_messages
+      port = Port.new(mode: :dedup)
+      port.send([+"dedup port value"])
+      first = port.receive
+      port.send([+"dedup port value"])
+
+      if Internal.native_ractors?
+        assert_same first, port.receive
+      else
+        refute_same first, port.receive
+        refute_predicate first, :frozen?
+      end
+
+      assert Ractor.shareable?(first)
+    ensure
+      port&.close
+    end
+
     def test_mode_and_auto_local_specializations
       ModeManager::MODES.each do |mode|
         normal = Port[mode]

@@ -33,7 +33,7 @@ module Farce
     end
 
     def test_accepts_every_documented_mode
-      expected = ::Set[:copy, :move, :local, :make_shareable, :raise, :shareable_copy]
+      expected = ::Set[:copy, :move, :local, :make_shareable, :raise, :shareable_copy, :dedup]
 
       assert_equal expected, ModeManager::MODES
       expected.each do |mode|
@@ -130,6 +130,73 @@ module Farce
       else
         assert_same value, result
       end
+    end
+
+    def test_dedup_mode_reuses_equal_values_and_nested_values
+      skip "requires native Ractors" unless Internal.native_ractors?
+
+      manager = ModeManager.new(mode: :dedup)
+      first = manager.wrap([[+"dedup mode value"]])
+      second = manager.wrap([[+"dedup mode value"]])
+
+      assert_same first, second
+      assert_same Farce.dedup([+"dedup mode value"]), first.first
+      assert_same first, manager.unwrap(first)
+      assert Ractor.shareable?(first)
+      assert_predicate first, :frozen?
+      assert_predicate first.first, :frozen?
+    end
+
+    def test_dedup_mode_override_uses_the_default_deduper
+      skip "requires native Ractors" unless Internal.native_ractors?
+
+      manager = ModeManager.new(mode: :raise)
+      canonical = Farce.dedup([+"dedup override value"])
+
+      assert_same canonical, manager.wrap([+"dedup override value"], mode: :dedup)
+      assert_equal :raise, manager.mode
+    end
+
+    def test_dedup_mode_preserves_values_on_emulated_ractors
+      skip "requires emulated Ractors" if Internal.native_ractors?
+
+      value = [+"dedup emulated value"]
+
+      assert_same value, ModeManager.new(mode: :dedup).wrap(value)
+      refute_predicate value, :frozen?
+    end
+
+    def test_dedup_mode_keeps_already_shareable_values_unchanged
+      manager = ModeManager.new(mode: :dedup)
+      canonical = Farce.dedup([:dedup_shareable])
+      value = Ractor.make_shareable([:dedup_shareable].freeze)
+
+      refute_same canonical, value
+      assert_same value, manager.wrap(value)
+    end
+
+    def test_dedup_mode_makes_uncached_objects_shareable
+      skip "requires native Ractors" unless Internal.native_ractors?
+
+      manager = ModeManager.new(mode: :dedup)
+      value = Struct.new(:contents).new([+"dedup custom value"])
+      result = manager.wrap(value)
+
+      assert Ractor.shareable?(result)
+      assert_predicate result.contents, :frozen?
+      assert_predicate result, :frozen?
+    end
+
+    def test_dedup_mode_reuses_values_across_ractors
+      skip "requires native Ractors" unless Internal.native_ractors?
+
+      manager = ModeManager.new(mode: :dedup)
+      canonical = manager.wrap([+"dedup ractor value"])
+      worker = Ractor.new(manager, canonical) do |shared_manager, value|
+        shared_manager.wrap([+"dedup ractor value"]).equal?(value)
+      end
+
+      assert ractor_value(worker)
     end
 
     def test_an_explicit_mode_overrides_the_default_without_changing_it

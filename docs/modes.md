@@ -19,6 +19,7 @@ This improves over the default control via `Ractor::Port`'s `move:` option.
     - [`:local`: preserve object identity](#local-preserve-object-identity)
     - [`:make_shareable`: publish the original](#make_shareable-publish-the-original)
     - [`:shareable_copy`: publish without freezing your draft](#shareable_copy-publish-without-freezing-your-draft)
+    - [`:dedup`: reuse equal values](#dedup-reuse-equal-values)
     - [`:raise`: require prepared data](#raise-require-prepared-data)
     - [Set a default, then override individual sends](#set-a-default-then-override-individual-sends)
     - [Let local sends keep their identity](#let-local-sends-keep-their-identity)
@@ -73,7 +74,7 @@ port.receive # => [4, 5]
 port.close
 ```
 
-Farce extends this choice with six named modes.
+Farce extends this choice with seven named modes.
 
 ## Farce's Modes
 
@@ -86,6 +87,7 @@ The following modes are accepted by `Farce::Port`. They apply to non-shareable v
 | `:local` | Keeps the same object in its originating Ractor. | Pass work between local threads or fibers. |
 | `:make_shareable` | Calls `Ractor.make_shareable` on the original. | Publish finished configuration. |
 | `:shareable_copy` | Makes a shareable copy and leaves the original alone. | Publish a snapshot of an editable document. |
+| `:dedup` | Deduplicates the value, then makes it shareable. May update and freeze the original. | Reuse repeated message contents. |
 | `:raise` | Raises `Ractor::IsolationError`. | Enforce a shareable-data boundary. |
 
 ### `:copy`: keep working with the original
@@ -183,6 +185,24 @@ draft[:tags]                         # => [:ruby, :concurrency]
 draft.frozen?                        # => false
 port.close
 ```
+
+### `:dedup`: reuse equal values
+
+Use `:dedup` when messages contain repeated values. Farce calls `Farce.dedup(value)`, then makes the result Ractor-shareable. Equal strings, arrays, hashes, and Ruby Sets can reuse cached instances, including nested values.
+
+```ruby
+port = Farce::Port.new(mode: :dedup)
+port.send([String.new("ready")])
+first = port.receive
+port.send([String.new("ready")])
+second = port.receive
+
+second.equal?(first)                 # => true
+Farce::Ractor.shareable?(second)     # => true
+port.close
+```
+
+Deduplication may update and freeze the original. The cache holds values weakly, so keep a reference to a result when its identity matters. Already-shareable inputs pass through unchanged. On JRuby and TruffleRuby, ordinary values are already shareable and skip deduplication. Values that cannot be made shareable raise an error.
 
 ### `:raise`: require prepared data
 
@@ -440,7 +460,7 @@ Both queues accept the envelope in `:raise` mode because the wrapper is shareabl
 
 ### Mode managers prepare values and open their own envelopes
 
-`Farce::ModeManager` provides two core operations: `wrap` prepares a value for shared storage, and `unwrap` retrieves values from envelopes that this manager created. It passes already-shareable values through unchanged. For non-shareable values, `:copy`, `:move`, and `:local` create managed envelopes. The remaining modes call `Ractor.make_shareable`, make a shareable copy, or raise.
+`Farce::ModeManager` provides two core operations: `wrap` prepares a value for shared storage, and `unwrap` retrieves values from envelopes that this manager created. It passes already-shareable values through unchanged. For non-shareable values, `:copy`, `:move`, and `:local` create managed envelopes. The remaining modes call `Ractor.make_shareable`, make a shareable copy, deduplicate and make the result shareable, or raise.
 
 ```ruby
 manager = Farce::ModeManager.new(mode: :copy)

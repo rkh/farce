@@ -53,7 +53,7 @@ module Farce
     include Shareable::Immutable
 
     # The set of valid modes for wrapping values.
-    MODES = ::Set[:copy, :move, :local, :make_shareable, :raise, :shareable_copy].freeze
+    MODES = ::Set[:copy, :move, :local, :make_shareable, :raise, :shareable_copy, :dedup].freeze
 
     # @return [Symbol] The default mode to use when wrapping values.
     attr_reader :mode
@@ -72,12 +72,13 @@ module Farce
     # @param value [BasicObject] The value to wrap.
     # @param mode [Symbol, nil] The mode to use when wrapping the value. If `nil`, the default mode will be used.
     # @return [BasicObject, Envelope]
-    #   The value wrapped in an envelope if it is not Ractor-shareable, or the value itself if it is.
+    #   The prepared value, or a managed envelope containing it.
     def wrap(value, mode: nil)
       return value if Ractor.shareable?(value)
 
       case mode || self.mode
       when :copy           then Envelope::Copy.new(value, self)
+      when :dedup          then Ractor.make_shareable(Farce.dedup(value))
       when :local          then Envelope::Local.new(value, self)
       when :make_shareable then Ractor.make_shareable(value)
       when :move           then Envelope::Move.new(value, self)
