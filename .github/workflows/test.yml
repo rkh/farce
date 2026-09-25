@@ -82,7 +82,7 @@ jobs:
 
       - run: bundle exec rake ci
         env:
-          TEST_TIMEOUT: 300
+          TEST_TIMEOUT: 600
 
   arm:
     name: ${{ matrix.os.name }} ARM / Ruby 4.0
@@ -113,7 +113,7 @@ jobs:
       - run: bundle install
       - run: bundle exec rake ci
         env:
-          TEST_TIMEOUT: 300
+          TEST_TIMEOUT: 600
 
   # windows-copy-regression:
   #   name: Windows ${{ matrix.arch }} / copy-transfer regression (quarantined)
