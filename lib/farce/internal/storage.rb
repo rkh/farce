@@ -8,6 +8,8 @@ module Farce
     class Storage
       SCOPES = %i[ractor thread_group thread fiber_storage fiber].freeze
 
+      # Protect shared map access, including reads on engines with unsafe weak maps.
+      # Per-key locks let initializers for unrelated keys run independently.
       class ThreadSafe < Storage
         def initialize
           @strong_locks = {}
@@ -15,17 +17,31 @@ module Farce
           super
         end
 
+        def [](key, positional_mode = nil, mode: :auto)
+          map = map_for(key, positional_mode || mode, create: false)
+          @mutex.synchronize { map[key] } if map
+        end
+
+        def []=(key, mode = :auto, value) # rubocop:disable Style/OptionalArguments
+          map = map_for(key, mode)
+          @mutex.synchronize { map[key] = value }
+        end
+
+        def key?(key, mode = :auto)
+          map = map_for(key, mode, create: false)
+          map ? @mutex.synchronize { map.key?(key) } : false
+        end
+
         def store_if_absent(key, mode: :auto)
-          map   = map_for(key, mode)
-          value = map[key]
+          value = self[key, mode]
           return value unless value.nil?
 
           mutex_map = Internal.garbage_collectable?(key) ? @weak_locks : @strong_locks
-          mutex     = mutex_map[key] || @mutex.synchronize { mutex_map[key] ||= Mutex.new }
+          mutex     = @mutex.synchronize { mutex_map[key] ||= Mutex.new }
 
           mutex.synchronize do
-            map[key] = yield unless map.key?(key)
-            map[key]
+            self[key, mode] = yield unless key?(key, mode)
+            self[key, mode]
           end
         end
       end
@@ -73,15 +89,15 @@ module Farce
       def self.thread(thread = Thread.current)
         thread    = Internal.storage_thread(thread)
         root      = Internal.native_ractors? ? ractor : MAIN_STORAGE
-        by_thread = root.store_if_absent(:threads) { Storage.new }
-        by_thread[thread] ||= Storage.new
+        by_thread = root.store_if_absent(:threads) { ThreadSafe.new }
+        by_thread.store_if_absent(thread) { Storage.new }
       end
 
       def self.fiber_storage = Fiber[name] ||= Storage.new
 
       def self.fiber(fiber = Fiber.current)
-        by_fiber = ractor.store_if_absent(:fibers) { Storage.new }
-        by_fiber[fiber] ||= Storage.new
+        by_fiber = ractor.store_if_absent(:fibers) { ThreadSafe.new }
+        by_fiber.store_if_absent(fiber) { Storage.new }
       end
 
       def initialize

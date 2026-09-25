@@ -204,6 +204,72 @@ module Farce
         assert_equal Array.new(10, :value), threads.map(&:value)
         assert_equal 1, calls
       end
+
+      def test_thread_safe_storage_preserves_concurrent_weak_key_writes
+        # A corrupted JVM weak map can spin without responding to Thread#kill.
+        output, error, status = ruby_subprocess(<<~RUBY, coverage: false, timeout: 30)
+          require "farce"
+          10.times do
+            storage = Farce.const_get(:Internal)::Storage::ThreadSafe.new
+            keys = Array.new(16) { Array.new(128) { Object.new } }
+            ready = Queue.new
+            start = Queue.new
+            workers = keys.each_with_index.map do |batch, index|
+              Thread.new do
+                ready << true
+                start.pop
+                batch.each do |key|
+                  storage[key] = index
+                  raise "lost write" unless storage[key] == index
+                  raise "missing key" unless storage.key?(key)
+                  raise "replaced value" unless storage.store_if_absent(key) { :unexpected } == index
+                end
+              end
+            end
+            workers.size.times { ready.pop }
+            workers.size.times { start << true }
+            workers.each(&:value)
+            keys.each_with_index do |batch, index|
+              batch.each { |key| raise "lost entry" unless storage[key] == index }
+            end
+          end
+          puts "done"
+        RUBY
+
+        assert_predicate status, :success?, error
+        assert_equal "done\n", output
+        assert_empty error
+      end
+
+      def test_thread_safe_initializers_for_different_keys_run_independently
+        storage = Storage::ThreadSafe.new
+        entered = Farce::Queue.new
+        release = Farce::Queue.new
+        first = Thread.new do
+          storage.store_if_absent(:first) do
+            entered << true
+            release.pop
+            :first
+          end
+        end
+
+        assert entered.pop(timeout: 5)
+        second = Thread.new do
+          storage.store_if_absent(:second) do
+            release << true
+            :second
+          end
+        end
+
+        assert second.join(5), "another key's initializer blocked this key"
+        assert first.join(5), "the first initializer did not finish"
+        assert_equal :first, first.value
+        assert_equal :second, second.value
+      ensure
+        release&.close
+        first&.kill&.join
+        second&.kill&.join
+      end
     end
   end
 end
