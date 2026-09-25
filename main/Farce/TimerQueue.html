@@ -699,7 +699,7 @@ get an error. Useful for usage contained within a single Ractor.</li>
       
       
         &mdash;
-        <div class='inline'><p>a scheduling option accepted by <span class='object_link'><a href="Clock.html#parse-instance_method" title="Farce::Clock#parse (method)">Clock#parse</a></span>:
+        <div class='inline'><p>a scheduling option accepted by <span class='object_link'><a href="Clock.html#parse-class_method" title="Farce::Clock.parse (method)">Clock.parse</a></span>:
 <code>at:</code>, <code>time:</code>, <code>timeout_at:</code>, <code>delay:</code>, <code>in:</code>, <code>offset:</code>, <code>wait:</code>, or <code>clock:</code>.
 With no scheduling option, the value is available immediately. Since <code>timeout:</code> controls the capacity wait,
 use <code>delay:</code> or <code>wait:</code> to schedule a relative offset.</p>
@@ -776,7 +776,7 @@ use <code>delay:</code> or <code>wait:</code> to schedule a relative offset.</p>
       <pre class="code"><span class="info file"># File 'lib/farce/timer_queue.rb', line 22</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_non_block'>non_block</span> <span class='op'>=</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_time_options'>time_options</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Style/OptionalBooleanParameter
-</span>  <span class='id identifier rubyid_at'>at</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_parse'><span class='object_link'><a href="Clock.html#parse-instance_method" title="Farce::Clock#parse (method)">parse</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_time_options'>time_options</span><span class='rparen'>)</span>
+</span>  <span class='id identifier rubyid_at'>at</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_parse'><span class='object_link'><a href="Clock.html#parse-class_method" title="Farce::Clock.parse (method)">parse</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_time_options'>time_options</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_push_to_storage'>push_to_storage</span><span class='lparen'>(</span><span class='id identifier rubyid_at'>at</span><span class='comma'>,</span> <span class='id identifier rubyid_non_block'>non_block</span><span class='comma'>,</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -921,7 +921,7 @@ get an error. Useful for usage contained within a single Ractor.</li>
       
       
         &mdash;
-        <div class='inline'><p>a scheduling option accepted by <span class='object_link'><a href="Clock.html#parse-instance_method" title="Farce::Clock#parse (method)">Clock#parse</a></span>:
+        <div class='inline'><p>a scheduling option accepted by <span class='object_link'><a href="Clock.html#parse-class_method" title="Farce::Clock.parse (method)">Clock.parse</a></span>:
 <code>at:</code>, <code>time:</code>, <code>timeout_at:</code>, <code>delay:</code>, <code>in:</code>, <code>offset:</code>, <code>timeout:</code>, <code>wait:</code>, or <code>clock:</code>.
 With no scheduling option, the value is available immediately.</p>
 </div>
@@ -998,7 +998,7 @@ With no scheduling option, the value is available immediately.</p>
       <pre class="code"><span class="info file"># File 'lib/farce/timer_queue.rb', line 30</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_try_push'>try_push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_time_options'>time_options</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_at'>at</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_parse'><span class='object_link'><a href="Clock.html#parse-instance_method" title="Farce::Clock#parse (method)">parse</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_time_options'>time_options</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_at'>at</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_parse'><span class='object_link'><a href="Clock.html#parse-class_method" title="Farce::Clock.parse (method)">parse</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_time_options'>time_options</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='ivar'>@queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_at'>at</span><span class='comma'>,</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_block_given?'>block_given?</span> <span class='op'>?</span> <span class='kw'>yield</span> <span class='op'>:</span> <span class='kw'>false</span>
 <span class='kw'>end</span></pre>
@@ -1012,7 +1012,7 @@ With no scheduling option, the value is available immediately.</p>
 </div>
 
       <div id="footer">
-  Generated on Fri Sep 25 00:24:04 2026 by
+  Generated on Fri Sep 25 00:33:32 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

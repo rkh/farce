@@ -99,7 +99,9 @@
   
   <dl>
     <dt>Defined in:</dt>
-    <dd>lib/farce/clock.rb
+    <dd>lib/farce/clock.rb<span class="defines">,<br>
+  lib/farce/integrations/active_support/clock.rb</span>
+
 </dd>
   </dl>
   
@@ -130,6 +132,39 @@ Converts everything to a monotonic clock time in seconds, from when <code>farce/
 
 
 
+  
+    <h2>
+      ActiveSupport Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#parse-class_method" title="parse (class method)">.<strong>parse</strong>(value)  &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Treat ActiveSupport durations as relative offsets.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
   
     <h2>
       Instance Method Summary
@@ -264,6 +299,61 @@ Converts everything to a monotonic clock time in seconds, from when <code>farce/
   
 
 
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="parse-class_method">
+  
+    .<strong>parse</strong>(value)  &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This methods is only available if ActiveSupport has been loaded.</p>
+</div>
+  </div>
+
+<p>Treat ActiveSupport durations as relative offsets.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+12
+13
+14
+15</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/clock.rb', line 12</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_offset'>offset</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>ActiveSupport</span><span class='op'>::</span><span class='const'>Duration</span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>super</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
 
   <div id="instance_method_details" class="method_details_list">
     <h2>Instance Method Details</h2>
@@ -500,13 +590,13 @@ The value is assumed to be a relative offset from the current time.</p>
       <pre class="lines">
 
 
-100
 101
 102
-103</pre>
+103
+104</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/clock.rb', line 100</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/clock.rb', line 101</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_offset'>offset</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_validate_timestamp'>validate_timestamp</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span> <span class='op'>+</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Numeric</span><span class='rparen'>)</span>
@@ -549,7 +639,8 @@ The value is assumed to be a relative offset from the current time.</p>
         &mdash;
         <div class='inline'><p>The value to convert to clock time</p>
 <p>If the value is <code>nil</code>, it is treated as the current time.</p>
-<p>Numeric values that aren't an ActiveSupport::Duration use the following cutoffs:</p>
+<p>ActiveSupport durations are relative offsets when the ActiveSupport integration is loaded.</p>
+<p>Other numeric values use the following cutoffs:</p>
 <ul>
 <li>Up to 600 (10 minutes): Offsets from the current time.</li>
 <li>Greater than 600, up to one billion: Clock times (like the value returned by <span class='object_link'><a href="#current-instance_method" title="Farce::Clock#current (method)">#current</a></span>).</li>
@@ -608,8 +699,6 @@ The value is assumed to be a relative offset from the current time.</p>
       <pre class="lines">
 
 
-53
-54
 55
 56
 57
@@ -628,10 +717,11 @@ The value is assumed to be a relative offset from the current time.</p>
 70
 71
 72
-73</pre>
+73
+74</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/clock.rb', line 53</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/clock.rb', line 55</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='kw'>case</span> <span class='id identifier rubyid_value'>value</span>
@@ -647,7 +737,6 @@ The value is assumed to be a relative offset from the current time.</p>
       <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_each_pair'>each_pair</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_option'>option</span><span class='op'>|</span> <span class='id identifier rubyid_method'>method</span><span class='comma'>,</span> <span class='id identifier rubyid_argument'>argument</span> <span class='op'>=</span> <span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_option'>option</span> <span class='rbrace'>}</span>
       <span class='kw'>return</span> <span class='id identifier rubyid_public_send'>public_send</span><span class='lparen'>(</span><span class='id identifier rubyid_method'>method</span><span class='comma'>,</span> <span class='id identifier rubyid_argument'>argument</span><span class='rparen'>)</span>
     <span class='kw'>end</span>
-  <span class='kw'>when</span> <span class='const'>MAYBE</span><span class='op'>::</span><span class='const'>ActiveSupport</span><span class='op'>::</span><span class='const'>Duration</span> <span class='kw'>then</span> <span class='kw'>return</span> <span class='id identifier rubyid_offset'>offset</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='kw'>else</span>
     <span class='kw'>return</span> <span class='id identifier rubyid_at'>at</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_to_time'>to_time</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:to_time</span><span class='rparen'>)</span>
     <span class='kw'>return</span> <span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Numeric</span><span class='rparen'>)</span>
@@ -744,7 +833,6 @@ Meaning that you can't pass a clock time greater than 31 years, or a timestamp b
       <pre class="lines">
 
 
-84
 85
 86
 87
@@ -752,10 +840,11 @@ Meaning that you can't pass a clock time greater than 31 years, or a timestamp b
 89
 90
 91
-92</pre>
+92
+93</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/clock.rb', line 84</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/clock.rb', line 85</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_time'>time</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='kw'>case</span> <span class='id identifier rubyid_value'>value</span>
@@ -776,7 +865,7 @@ Meaning that you can't pass a clock time greater than 31 years, or a timestamp b
 </div>
 
       <div id="footer">
-  Generated on Fri Sep 25 00:24:00 2026 by
+  Generated on Fri Sep 25 00:33:28 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
