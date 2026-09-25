@@ -105,7 +105,9 @@ class TestIsolatedRuby < Test
   end
 
   def test_exit_status_uses_the_process_status_byte_range
-    [300, -1].each do |value|
+    # Windows treats negative process exit codes as abnormal termination.
+    values = Gem.win_platform? ? [300] : [300, -1]
+    values.each do |value|
       _, error, status = ruby_isolated("exit #{value}", coverage: false)
 
       assert_equal value & 0xff, status.exitstatus, error
