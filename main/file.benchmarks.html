@@ -78,6 +78,124 @@ so these numbers may not be accurate in the future.</li>
 <li>Concrete numbers are largely measured on a local machine, which may not reflect your deployment environment.</li>
 </ul>
 <p>You should measure the performance of your own application under realistic conditions.</p>
+<h2 id="map-performance">Map performance<a href="#map-performance" aria-label="Link to heading 'Map performance'" data-heading-content="Map performance" class="anchor"></a></h2>
+<p>A shared map is a very common data structure for tracking state. While the read and write performance is hopefully not the bottleneck for your application.</p>
+<table>
+<thead>
+<tr>
+<th>Map implementation</th>
+<th>Read</th>
+<th>Write</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Hash</code></td>
+<td>fastest</td>
+<td>fastest</td>
+<td>Not ractor-shareable (when mutable), not thread-safe</td>
+</tr>
+<tr>
+<td><code>Concurrent::Hash</code></td>
+<td>1.1x slower</td>
+<td>1.1x slower</td>
+<td>Not ractor-shareable</td>
+</tr>
+<tr>
+<td><code>Farce::Strict::Map</code></td>
+<td>1.2x slower</td>
+<td>1.1x slower</td>
+<td></td>
+</tr>
+<tr>
+<td><code>Farce::Unshared::Map</code></td>
+<td>1.2x slower</td>
+<td>1.1x slower</td>
+<td>Not ractor-shareable</td>
+</tr>
+<tr>
+<td><code>Farce::Map</code></td>
+<td>1.3x slower</td>
+<td>1.1x slower</td>
+<td></td>
+</tr>
+<tr>
+<td><code>Concurrent::Map</code></td>
+<td>1.4x slower</td>
+<td>3.2x slower</td>
+<td>Not ractor-shareable</td>
+</tr>
+<tr>
+<td><code>Hash</code> + <code>Mutex</code></td>
+<td>2.9x slower</td>
+<td>2.9x slower</td>
+<td>Not ractor-shareable</td>
+</tr>
+<tr>
+<td><code>Ractor::LockHash</code></td>
+<td>2.9x slower</td>
+<td>3.4x slower</td>
+<td>Not fiber-friendly</td>
+</tr>
+<tr>
+<td><code>Ratomic::Map</code></td>
+<td>3.1x slower</td>
+<td>2.7x slower</td>
+<td>Breaks isolation, not fiber-friendly</td>
+</tr>
+<tr>
+<td><code>Ractor::KeyLockHash</code></td>
+<td>3.2x slower</td>
+<td>2.5x slower</td>
+<td>Not fiber-friendly</td>
+</tr>
+<tr>
+<td><code>Farce::LRUMap</code></td>
+<td>3.4x slower</td>
+<td>7.6x slower</td>
+<td>Automatic eviction</td>
+</tr>
+<tr>
+<td><code>Farce::LFUMap</code></td>
+<td>3.5x slower</td>
+<td>7.6x slower</td>
+<td>Automatic eviction</td>
+</tr>
+<tr>
+<td><code>Farce::Unsafe::TreeMap</code></td>
+<td>3.7x slower</td>
+<td>4.1x slower</td>
+<td>Ordered entries, not thread-safe, not ractor-shareable</td>
+</tr>
+<tr>
+<td><code>HashWithIndifferentAccess</code></td>
+<td>4.5x slower</td>
+<td>5.3x slower</td>
+<td>Not ractor-shareable</td>
+</tr>
+<tr>
+<td><code>Farce::TreeMap</code></td>
+<td>5.5x slower</td>
+<td>40x slower</td>
+<td>Ordered entries</td>
+</tr>
+<tr>
+<td><code>Farce::LeaseMap</code></td>
+<td>30x slower</td>
+<td>40x slower</td>
+<td>Shared ractor for all lease maps</td>
+</tr>
+<tr>
+<td><code>Ractor::ActorHash</code></td>
+<td>400x slower</td>
+<td>280x slower</td>
+<td>Additional ractor per map</td>
+</tr>
+</tbody>
+</table>
+<p>The map implementations namespaced under <code>Ractor</code> are from the <a href="https://github.com/ko1/ractor-sharing">ractor-sharing</a> gem.</p>
+<p>Also note that <code>Ratomic::Map</code> has a significant performance benefit over all other implementations when repeatedly writing to different keys in very large maps concurrently on a very high number of Ractors due to the underlying <a href="https://github.com/xacrimon/dashmap">DashMap</a> implementing data sharding. This benefit does not materializes if different Ractors share the keys they use, so its usefulness is slightly hampered by the fact that you cannot iterate over Ratomic's maps at all.</p>
 <h2 id="counter-performance">Counter performance<a href="#counter-performance" aria-label="Link to heading 'Counter performance'" data-heading-content="Counter performance" class="anchor"></a></h2>
 <div class="markdown-alert markdown-alert-caution">
 <p class="markdown-alert-title">Caution</p>
@@ -317,7 +435,7 @@ The below numbers compare non-blocking APIs, as only Farce implements a blocking
 </div></div>
 
       <div id="footer">
-  Generated on Fri Sep 25 20:27:45 2026 by
+  Generated on Sat Sep 26 11:51:02 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
