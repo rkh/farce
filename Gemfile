@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# rubocop:disable Naming/VariableNumber, Lint/MissingCopEnableDirective
 
 source "https://rubygems.org"
 
@@ -7,7 +8,7 @@ gemspec
 group :compatibility do
   gem "concurrent-ruby"
   gem "concurrent-ruby-ext"
-  gem "ratomic", platforms: %i[mri_34 mri_40] # rubocop:disable Naming/VariableNumber
+  gem "ratomic", platforms: %i[mri_34 mri_40]
   platform :mri do
     gem "async", "~> 2.45"
     gem "ractor_queue"
@@ -28,7 +29,8 @@ group :benchmark do
   gem "lazy_priority_queue"
   gem "philiprehberger-priority_queue"
   gem "pqueue"
-  platforms :mri_34, :mri_40 do # rubocop:disable Naming/VariableNumber
+  gem "ractor-sharing", platforms: %i[mri_40 mri_41]
+  platforms :mri_34, :mri_40 do
     gem "carbon_fiber"
     gem "io-event"
     gem "nio4r"
@@ -37,7 +39,7 @@ group :benchmark do
   end
 end
 
-platform :mri_40 do # rubocop:disable Naming/VariableNumber
+platform :mri_40 do
   group :docs do
     gem "commonmarker"
     gem "yard"
@@ -53,7 +55,7 @@ group :test do
   gem "msgpack", "~> 1.8"
   gem "oj", platforms: %i[mri truffleruby]
   # yajl-ruby 1.4.3 uses untyped C data APIs removed in Ruby 4.1.
-  gem "yajl-ruby", platforms: %i[mri_34 mri_40 truffleruby] # rubocop:disable Naming/VariableNumber
+  gem "yajl-ruby", platforms: %i[mri_34 mri_40 truffleruby]
 
   platforms :mri do
     gem "rubocop"

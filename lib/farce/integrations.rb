@@ -14,6 +14,15 @@ module Farce
       psych:          %w[psych].freeze,
       oj:             %w[oj].freeze,
       yajl:           %w[yajl].freeze,
+      ractor_sharing: %w[
+        ractor/tvar
+        ractor/lockvar
+        ractor/lockhash
+        ractor/keylockhash
+        ractor/active_object
+        ractor/actor_hash
+        ractor/sharing
+      ].freeze,
     }.freeze
 
     PATHS = INTEGRATIONS.to_h { [_2.last, _1] }.merge("oj/json" => :oj, "yajl/json_gem" => :yajl).freeze
@@ -75,7 +84,8 @@ module Farce
     def load_active
       result = []
       INTEGRATIONS.each_key do |integration|
-        next unless PATHS.any? { |path, target| target == integration && loaded?(path) }
+        next unless loaded?("farce/integrations/#{integration}") ||
+          PATHS.any? { |path, target| target == integration && loaded?(path) }
         require "farce/integrations/#{integration}"
         result << integration
       end

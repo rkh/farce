@@ -2,9 +2,9 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
-# Run with ruby benchmark/map.rb. Requires benchmark-ips, concurrent-ruby,
-# and ratomic (optional on unsupported Rubies). Override TIME, WARMUP, SIZE,
-# FILTER, or JSON (an output filename prefix) through the environment.
+# Run with ruby benchmark/map.rb. Requires benchmark-ips and concurrent-ruby.
+# Ratomic and ractor-sharing are optional on unsupported Rubies. Override TIME,
+# WARMUP, SIZE, FILTER, or JSON (an output filename prefix) through the environment.
 require "bundler/setup"
 require "benchmark/ips"
 require "concurrent/map"
@@ -14,6 +14,12 @@ begin
   require "ratomic"
 rescue LoadError => e
   warn "Skipping Ratomic::Map: #{e.message}"
+end
+
+begin
+  require "ractor/sharing"
+rescue LoadError => e
+  warn "Skipping ractor-sharing hashes: #{e.message}"
 end
 
 class MutexHash
@@ -52,6 +58,11 @@ factories = {
   "ObjectSpace::WeakKeyMap" => -> { ObjectSpace::WeakKeyMap.new },
 }
 factories["Ratomic::Map"] = -> { Ratomic::Map.new } if defined?(Ratomic::Map)
+if defined?(Ractor::LockHash)
+  factories["Ractor::LockHash"]    = -> { Ractor::LockHash.new }
+  factories["Ractor::KeyLockHash"] = -> { Ractor::KeyLockHash.new }
+  factories["Ractor::ActorHash"]   = -> { Ractor::ActorHash.new }
+end
 
 [Farce, Farce::Strict, Farce::Unshared, Farce::Local, Farce::Unsafe].each do |namespace|
   %i[Map TreeMap LRUMap LFUMap WeakKeyMap WeakValueMap WeakMap LeaseMap].each do |name|
@@ -73,16 +84,24 @@ puts RUBY_DESCRIPTION
 puts "Farce #{Farce::VERSION}; benchmark-ips #{Benchmark::IPS::VERSION}"
 puts "concurrent-ruby #{Gem.loaded_specs.fetch("concurrent-ruby").version}; " \
      "ratomic #{Gem.loaded_specs["ratomic"]&.version || "unavailable"}"
+puts "ractor-sharing #{Gem.loaded_specs["ractor-sharing"]&.version || "unavailable"}"
 puts "#{size} entries; frozen String keys/values; defaults; one thread; GC enabled."
 puts "Hot-key reads and repeated overwrites. One iteration is one map access."
 puts "LeaseMap reads hold a checkout acquired before timing; writes are unowned."
+puts "ActorHash writes use synchronous dispatch so each iteration observes a completed write."
 puts "Hash/Unsafe lack synchronization. No contention, insertion, eviction, or copying measured."
 
 %i[read write].each do |operation|
   puts "\n#{operation == :read ? "READ (hit)" : "WRITE (existing key)"}"
   maps = factories.to_h do |label, factory|
     map = factory.call
-    entries.each { |entry_key, entry_value| map[entry_key] = entry_value }
+    if label == "Ractor::LockHash"
+      map.synchronize { |target| entries.each { |entry_key, entry_value| target[entry_key] = entry_value } }
+    elsif label == "Ractor::ActorHash"
+      entries.each { |entry_key, entry_value| map.set(entry_key, entry_value) }
+    else
+      entries.each { |entry_key, entry_value| map[entry_key] = entry_value }
+    end
     lease = map.is_a?(Farce::Abstract::LeaseMap)
     map.checkout(key) if lease
     raise "Incorrect setup: #{label}" unless map[key] == entries.fetch(key)
@@ -95,6 +114,10 @@ puts "Hash/Unsafe lack synchronization. No contention, insertion, eviction, or c
     maps.each do |label, map|
       if operation == :read
         benchmark.report(label) { map[key] }
+      elsif label == "Ractor::LockHash"
+        benchmark.report(label) { map.synchronize { |target| target[key] = value } }
+      elsif label == "Ractor::ActorHash"
+        benchmark.report(label) { map.sync_send(:set, key, value) }
       else
         benchmark.report(label) { map[key] = value }
       end
@@ -108,6 +131,7 @@ puts "Hash/Unsafe lack synchronization. No contention, insertion, eviction, or c
     expected = operation == :read ? entries.fetch(key) : value
     raise "Incorrect result" unless map[key] == expected
     map.checkin(key, expected) if map.is_a?(Farce::Abstract::LeaseMap)
-    raise "Map size changed" if map.respond_to?(:size) && map.size != size
+    actual_size = map.respond_to?(:size) ? map.size : map.to_h.size if map.respond_to?(:size) || map.respond_to?(:to_h)
+    raise "Map size changed" if actual_size && actual_size != size
   end
 end

@@ -113,6 +113,7 @@ GEM
     prism (1.9.0)
     racc (1.8.1)
     racc (1.8.1-java)
+    ractor-sharing (0.3.0)
     ractor_queue (0.2.1)
       rice (~> 4.0)
     rainbow (3.1.1)
@@ -216,6 +217,7 @@ DEPENDENCIES
   philiprehberger-priority_queue
   pqueue
   priority_queue_cxx
+  ractor-sharing
   ractor_queue
   rake
   rake-compiler
@@ -293,6 +295,7 @@ CHECKSUMS
   prism (1.9.0) sha256=7b530c6a9f92c24300014919c9dcbc055bf4cdf51ec30aed099b06cd6674ef85
   racc (1.8.1) sha256=4a7f6929691dbec8b5209a0b373bc2614882b55fc5d2e447a21aaa691303d62f
   racc (1.8.1-java) sha256=54f2e6d1e1b91c154013277d986f52a90e5ececbe91465d29172e49342732b98
+  ractor-sharing (0.3.0) sha256=9adb2f899e4e38f477a2d3c02368e8ff40be96b119172312253338ee1e22f63f
   ractor_queue (0.2.1) sha256=834ba7d0ee580c5cae260a8db879b4352981a929874de080e996d5fc31b33086
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
