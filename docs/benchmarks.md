@@ -15,6 +15,35 @@ Any numbers quoted here are to be taken with a grain of salt:
 
 You should measure the performance of your own application under realistic conditions.
 
+## Map performance
+
+A shared map is a very common data structure for tracking state. While the read and write performance is hopefully not the bottleneck for your application.
+
+ Map implementation          | Read        | Write       | Notes
+-----------------------------|-------------|-------------|-----
+ `Hash`                      | fastest     | fastest     | Not ractor-shareable (when mutable), not thread-safe
+ `Concurrent::Hash`          | 1.1x slower | 1.1x slower | Not ractor-shareable
+ `Farce::Strict::Map`        | 1.2x slower | 1.1x slower |
+ `Farce::Unshared::Map`      | 1.2x slower | 1.1x slower | Not ractor-shareable
+ `Farce::Map`                | 1.3x slower | 1.1x slower |
+ `Concurrent::Map`           | 1.4x slower | 3.2x slower | Not ractor-shareable
+ `Hash` + `Mutex`            | 2.9x slower | 2.9x slower | Not ractor-shareable
+ `Ractor::LockHash`          | 2.9x slower | 3.4x slower | Not fiber-friendly
+ `Ratomic::Map`              | 3.1x slower | 2.7x slower | Breaks isolation, not fiber-friendly
+ `Ractor::KeyLockHash`       | 3.2x slower | 2.5x slower | Not fiber-friendly
+ `Farce::LRUMap`             | 3.4x slower | 7.6x slower | Automatic eviction
+ `Farce::LFUMap`             | 3.5x slower | 7.6x slower | Automatic eviction
+ `Farce::Unsafe::TreeMap`    | 3.7x slower | 4.1x slower | Ordered entries, not thread-safe, not ractor-shareable
+ `HashWithIndifferentAccess` | 4.5x slower | 5.3x slower | Not ractor-shareable
+ `Farce::TreeMap`            | 5.5x slower | 40x slower  | Ordered entries
+ `Farce::LeaseMap`           | 30x slower  | 40x slower  | Shared ractor for all lease maps
+ `Ractor::ActorHash`         | 400x slower | 280x slower | Additional ractor per map
+
+The map implementations namespaced under `Ractor` are from the [ractor-sharing](https://github.com/ko1/ractor-sharing) gem.
+
+Also note that `Ratomic::Map` has a significant performance benefit over all other implementations when repeatedly writing to different keys in very large maps concurrently on a very high number of Ractors due to the underlying [DashMap](https://github.com/xacrimon/dashmap) implementing data sharding. This benefit does not materializes if different Ractors share the keys they use, so its usefulness is slightly hampered by the fact that you cannot iterate over Ratomic's maps at all.
+
+
 ## Counter performance
 
 > [!CAUTION] 

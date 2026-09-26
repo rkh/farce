@@ -2,12 +2,23 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
-# Run with ruby benchmark/map.rb. Requires benchmark-ips and concurrent-ruby.
+if RUBY_ENGINE == "ruby"
+  case ENV["JIT"].to_s.downcase
+  when "", "yjit" then RubyVM::YJIT.enable
+  when "zjit"     then RubyVM::ZJIT.enable
+  when "false" # no-op
+  else abort "Unknown JIT: #{ENV["JIT"].inspect}"
+  end
+end
+
+# Run with ruby benchmark/map.rb. Requires benchmark-ips, concurrent-ruby, and ActiveSupport.
 # Ratomic and ractor-sharing are optional on unsupported Rubies. Override TIME,
 # WARMUP, SIZE, FILTER, or JSON (an output filename prefix) through the environment.
 require "bundler/setup"
 require "benchmark/ips"
+require "concurrent/hash"
 require "concurrent/map"
+require "active_support/hash_with_indifferent_access"
 require "farce"
 
 begin
@@ -23,8 +34,8 @@ rescue LoadError => e
 end
 
 class MutexHash
-  def initialize
-    @hash = {}
+  def initialize(hash = {})
+    @hash  = hash
     @mutex = Mutex.new
   end
 
@@ -37,8 +48,8 @@ class MutexHash
   def size = @mutex.synchronize { @hash.size }
 end
 
-size = Integer(ENV.fetch("SIZE", "1024"))
-time = Float(ENV.fetch("TIME", "3"))
+size   = Integer(ENV.fetch("SIZE", "1024"))
+time   = Float(ENV.fetch("TIME", "3"))
 warmup = Float(ENV.fetch("WARMUP", "1"))
 filter = Regexp.new(ENV.fetch("FILTER", "."))
 raise ArgumentError, "SIZE and TIME must be positive; WARMUP must be nonnegative" unless
@@ -46,17 +57,24 @@ raise ArgumentError, "SIZE and TIME must be positive; WARMUP must be nonnegative
 
 # Retain the frozen strings so weak maps keep their entries throughout the run.
 # Shareable values avoid measuring value copying as part of map access.
-entries = Ractor.make_shareable(Array.new(size) { |i| ["key-#{i}", "value-#{i}"] }.to_h)
+entries = begin
+  values = Array.new(size) { |i| ["key-#{i}".freeze, "value-#{i}".freeze] }.to_h.freeze
+  defined?(Ractor) && Ractor.respond_to?(:make_shareable) ? Ractor.make_shareable(values) : values
+end
 key = entries.keys[size / 2]
 value = "replacement"
 
 factories = {
-  "Hash"                    => -> { {} },
-  "Hash + Mutex"            => -> { MutexHash.new },
-  "Concurrent::Map"         => -> { Concurrent::Map.new },
-  "ObjectSpace::WeakMap"    => -> { ObjectSpace::WeakMap.new },
-  "ObjectSpace::WeakKeyMap" => -> { ObjectSpace::WeakKeyMap.new },
+  "Hash"                                     => -> { {} },
+  "Hash + Mutex"                             => -> { MutexHash.new },
+  "Concurrent::Hash"                         => -> { Concurrent::Hash.new },
+  "Concurrent::Map"                          => -> { Concurrent::Map.new },
+  "ActiveSupport::HashWithIndifferentAccess" => -> { MutexHash.new(ActiveSupport::HashWithIndifferentAccess.new) },
 }
+factories["ObjectSpace::WeakMap"] = -> { ObjectSpace::WeakMap.new } if ObjectSpace.const_defined?(:WeakMap, false)
+if ObjectSpace.const_defined?(:WeakKeyMap, false)
+  factories["ObjectSpace::WeakKeyMap"] = -> { ObjectSpace::WeakKeyMap.new }
+end
 factories["Ratomic::Map"] = -> { Ratomic::Map.new } if defined?(Ratomic::Map)
 if defined?(Ractor::LockHash)
   factories["Ractor::LockHash"]    = -> { Ractor::LockHash.new }
