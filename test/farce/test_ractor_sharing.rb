@@ -2,7 +2,7 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
-return unless RUBY_ENGINE == "ruby" && RUBY_VERSION >= "4"
+return unless RUBY_ENGINE == "ruby" && RUBY_VERSION >= "4" && !Gem.win_platform?
 
 require_relative "../setup"
 require "ractor/sharing"
