@@ -80,10 +80,12 @@ module Farce
         assert_nil trie.match("/slash/#{index}/a/b")
       end
 
-      fallback = Strict::Trie.build do |builder|
-        builder.add([Regexp.new("(?<id>[^/?]+)")], :missing_delimiter)
-        builder.add([Regexp.new("(?<id>[^//]+)")], :duplicate_delimiter)
-        builder.add([Regexp.new("(?<id>[^/a-z]+)")], :range)
+      fallback = without_warnings do
+        Strict::Trie.build do |builder|
+          builder.add([Regexp.new("(?<id>[^/?]+)")], :missing_delimiter)
+          builder.add([Regexp.new("(?<id>[^//]+)")], :duplicate_delimiter)
+          builder.add([Regexp.new("(?<id>[^/a-z]+)")], :range)
+        end
       end
 
       assert_equal 0, fallback.stats.fetch(:native_programs)
@@ -493,6 +495,14 @@ module Farce
     end
 
     private
+
+    def without_warnings
+      verbose = $VERBOSE
+      $VERBOSE = nil
+      yield
+    ensure
+      $VERBOSE = verbose
+    end
 
     def abandon_native_enumerator(matcher, input)
       enumerator = matcher.each_match(input)
