@@ -49,7 +49,7 @@ module Farce
         namespace.constants(false).each do |const|
           next if skip.include?(const)
           result = namespace.const_get(const, false)
-          next unless result.is_a?(Module) && !seen.include?(result)
+          next unless Module === result && !seen.include?(result)
           seen << result
           autoload[result]
         end
