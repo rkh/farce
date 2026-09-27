@@ -37,6 +37,7 @@ module Farce
         @routing_lock = Thread::Mutex.new
         @routed       = {}.compare_by_identity
         @sequence     = 0
+        @failure      = nil
         @closed       = @selecting = false
         @owner        = ::Ractor.current
         @control      = build_control
@@ -56,11 +57,14 @@ module Farce
       def closed? = @closed
 
       def close
-        return if @closed
+        return if @closed && !@failure
         @closed = true
-        acknowledge(:close)
-        @thread.join
-        close_control
+        begin
+          acknowledge(:close) unless @failure
+          @thread.join
+        ensure
+          close_control
+        end
         nil
       end
 
@@ -82,6 +86,7 @@ module Farce
 
       def wait(sources, timeout, options = nil)
         raise ::Ractor::IsolationError, "selector belongs to another Ractor" unless @owner == ::Ractor.current
+        raise @failure if @failure
         raise IOError, "Ractor selector is closed" if @closed
 
         timeout  = duration(timeout)
@@ -147,6 +152,10 @@ module Farce
           @commands << [action, payload, ack]
           wake if @selecting
         end
+      rescue ::ClosedQueueError
+        # A caller may have passed the closed check before the helper stopped.
+        fail_request(payload, @failure || IOError.new("Ractor selector is closed")) if action == :add
+        ack << true if ack
       end
 
       # Coalesce command and shim-port notifications into one control message.
@@ -213,9 +222,14 @@ module Farce
           # Isolate a closed or foreign port instead of failing unrelated waits.
           sources.each { |source| poll(source) }
         end
+      rescue Exception => e # rubocop:disable Lint/RescueException -- Preserve helper failures for callers and close.
+        @failure = e
+        raise
       ensure
+        # Stop accepting commands before draining them, including late registrations.
+        @commands.close
         @closed = true
-        error = IOError.new("Ractor selector stopped")
+        error = @failure || IOError.new("Ractor selector stopped")
         @pending.each { |request| fail_request(request, error) }
         until @commands.empty?
           action, payload, ack = @commands.pop(true)
