@@ -26,6 +26,10 @@ else
   abort "Native unfrozen publication requires CRuby 3.4 or newer"
 end
 
+if ruby_api == 304
+  have_func("rb_thread_lock_native_thread", "ruby/thread.h") or abort "rb_thread_lock_native_thread is required"
+end
+
 have_func("clock_gettime", "time.h")
 
 if have_header("pthread/qos.h")

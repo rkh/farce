@@ -293,6 +293,15 @@ farce_load_native_fiber_scheduler(VALUE namespace)
     return Qnil;
 }
 
+#if RUBY_API_VERSION_CODE == 30400
+static VALUE
+farce_lock_native_thread(VALUE namespace)
+{
+    rb_thread_lock_native_thread();
+    return Qnil;
+}
+#endif
+
 RUBY_FUNC_EXPORTED void
 Init_farce(void)
 {
@@ -301,6 +310,9 @@ Init_farce(void)
     VALUE mInternal = rb_const_get(mFarce, rb_intern("Internal"));
     VALUE singleton = rb_singleton_class(mInternal);
     eIsolationError = rb_const_get(rb_cRactor, rb_intern("IsolationError"));
+#if RUBY_API_VERSION_CODE == 30400
+    rb_define_singleton_method(mInternal, "lock_native_thread", farce_lock_native_thread, 0);
+#endif
     rb_define_private_method(
         singleton,
         "load_native_fiber_scheduler",

@@ -7,6 +7,19 @@ require "farce/engine/ruby/shared/ractor_selector"
 module Farce
   module Internal
     class RactorSelector
+      # Ruby 3.4's M:N scheduler can strand the helper during Ractor teardown.
+      # Keep this helper on a dedicated native thread.
+      module DedicatedNativeThread
+        private
+
+        def run
+          Internal.lock_native_thread
+          super
+        end
+      end
+      private_constant :DedicatedNativeThread
+      prepend DedicatedNativeThread
+
       # Native timeout: must retain Ruby's own error even with a scheduler hook.
       # Only Farce's APIs backport that keyword.
       def self.install_hooks(patch)

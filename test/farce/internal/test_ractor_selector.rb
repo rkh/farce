@@ -271,6 +271,30 @@ module Farce
         assert_equal "ok\n", output
       end
 
+      def test_native_thread_pinning_is_only_available_on_ruby34
+        assert_equal RUBY_VERSION.start_with?("3.4."), Internal.respond_to?(:lock_native_thread)
+      end
+
+      def test_legacy_selector_closes_inside_another_ractor
+        return unless RUBY_VERSION.start_with?("3.4.")
+
+        output, error, status = ruby_isolated(<<~RUBY, timeout: 10)
+          require "farce"
+          5.times do
+            worker = ::Ractor.new do
+              selector = Farce.const_get(:Internal)::RactorSelector.new
+              selector.close
+              :closed
+            end
+            raise "selector did not close" unless worker.take == :closed
+          end
+          puts "ok"
+        RUBY
+
+        assert_predicate status, :success?, error
+        assert_equal "ok\n", output
+      end
+
       def test_legacy_select_can_yield_without_blocking_other_fibers
         return unless RUBY_VERSION < "4"
         output, error, status = ruby_isolated(<<~RUBY)
