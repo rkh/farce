@@ -46,9 +46,8 @@ module Farce
     autoload :StrictWeakKeyMap,     "farce/engine/ruby/shared/strict_map"
     autoload :StrictWeakMap,        "farce/engine/ruby/shared/strict_map"
     autoload :StrictWeakValueMap,   "farce/engine/ruby/shared/strict_map"
-    autoload :WeakAtom,             "farce/engine/ruby/shared/weak_atom"     unless const_defined?(:WeakAtom, false)
-    autoload :UnsharedWeakAtom,     "farce/engine/shared/unshared_weak_atom" unless const_defined?(:UnsharedWeakAtom,
-      false)
+    autoload :WeakAtom,             "farce/engine/ruby/shared/weak_atom"     unless const_defined?(:WeakAtom)
+    autoload :UnsharedWeakAtom,     "farce/engine/shared/unshared_weak_atom" unless const_defined?(:UnsharedWeakAtom)
     autoload :UnsharedAtom,         "farce/engine/shared/unshared_atom"
     autoload :UnsharedVector,       "farce/engine/ruby/shared/unshared_vector"
     autoload :UnsharedMap,          "farce/engine/shared/unshared_weak_map"
