@@ -441,4 +441,5 @@ module Farce
   private_class_method :append_features, :included
 
   Integrations.setup
+  Internal.finalize_engine
 end

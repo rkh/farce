@@ -5,7 +5,7 @@ require "rbconfig"
 require "shellwords"
 
 class TestWatchdog
-  DEFAULT_TIMEOUT        = 300
+  DEFAULT_TIMEOUT        = RUBY_ENGINE == "truffleruby" ? 600 : 300
   DEFAULT_SHUTDOWN_GRACE = 5
   TIMEOUT_EXIT_STATUS    = 124
   POLL_INTERVAL          = 0.05

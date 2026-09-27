@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+
+return if RUBY_ENGINE == "truffleruby"
 require_relative "../../setup"
 
 class TestInternalAutoloads < Test

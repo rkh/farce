@@ -39,6 +39,26 @@ module Farce
 
     def native_ractors? = false
 
+    # Autoload on TruffleRuby is not thread-safe: A thread can see the module before its methods are defined.
+    # So lets eager load all autoloaded constants, except the ones that would trigger a configuration freeze.
+    # These use constant assignment anyway, so they are safe to load lazily.
+    def finalize_engine
+      skip     = %i[FROZEN_CONFIG MainScheduler ParallelScheduler]
+      seen     = ::Set.new.compare_by_identity
+      autoload = lambda do |namespace|
+        namespace.constants(false).each do |const|
+          next if skip.include?(const)
+          result = namespace.const_get(const, false)
+          next unless result.is_a?(Module) && !seen.include?(result)
+          seen << result
+          autoload[result]
+        end
+      end
+
+      autoload[Farce]
+      autoload[Internal]
+    end
+
     def rebind(proc, new_self, lambda)
       binding          = new_self.instance_eval { binding() }
       prefix           = "__rebind_#{proc.object_id}"

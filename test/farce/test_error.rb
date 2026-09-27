@@ -21,6 +21,7 @@ module Farce
     end
 
     def test_internal_queue_errors_do_not_load_the_public_queue
+      return if RUBY_ENGINE == "truffleruby"
       output, error, status = ruby_isolated(<<~RUBY,
         require "farce"
         path = Farce.autoload?(:Queue)
