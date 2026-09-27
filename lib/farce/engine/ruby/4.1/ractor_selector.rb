@@ -9,6 +9,7 @@ module Farce
     class RactorSelector
       # Ruby 4.1 can crash while formatting a dying helper's exception after
       # Ractor teardown has freed its ports. Callers and close observe failures.
+      # See https://bugs.ruby-lang.org/issues/22386
       module ExplicitFailureReporting
         private
 
