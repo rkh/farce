@@ -173,6 +173,7 @@ module Farce
       end
 
       def run
+        Internal.prepare_thread
         loop do
           # A data source may win select while a control notification is pending.
           # Consume that notification before parking or starting another select.

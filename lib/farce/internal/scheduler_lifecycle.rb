@@ -137,9 +137,13 @@ module Farce
 
       def run
         check_root
-        raise IOError, "scheduler is closed" if @closed || @stopping
+
+        raise IOError,    "scheduler is closed"     if @closed || @stopping
         raise FiberError, "recursive scheduler run" if @running
         entered = @running = true
+
+        Internal.prepare_thread if defined?(Internal.prepare_thread)
+
         until idle?
           service_policy
           break if idle?
@@ -148,6 +152,7 @@ module Farce
           timeout = 0 if ready? || !@mailbox.empty?
           dispatch(timeout, @timers.empty? ? @dispatch_budget : 256)
         end
+
         true
       rescue Exception # rubocop:disable Lint/RescueException
         shutdown if entered

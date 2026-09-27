@@ -97,6 +97,14 @@ module Farce
     RactorSelector.install_hooks(patch)
     ::Ractor.singleton_class.alias_method :recv, :receive
     ::Ractor.alias_method :recv, :receive
+
+    if defined?(Darwin.main_qos_class) && defined?(Darwin.get_qos_class)
+      def prepare_thread
+        main_qos_class      = Darwin.main_qos_class
+        qos_class, priority = Darwin.get_qos_class
+        Darwin.set_qos_class(main_qos_class, priority) if main_qos_class > qos_class
+      end
+    end
   end
 end
 
