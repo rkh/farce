@@ -277,6 +277,23 @@ module Farce
       worker&.join(5)
     end
 
+    def test_thread_worker_closes_when_its_ractor_exits
+      return unless Internal.native_ractors?
+
+      output, error, status = ruby_subprocess(<<~RUBY)
+        require "farce"
+        ractor = ::Ractor.new { Farce::Scheduler.create(Thread) }
+        scheduler = ractor.respond_to?(:value) ? ractor.value : ractor.take
+        sleep 0.001 until scheduler.closed?
+        raise "scheduler did not close" unless scheduler.state == :closed
+        raise "unexpected scheduler error" unless scheduler.error.nil?
+        puts "ok"
+      RUBY
+
+      assert_predicate status, :success?, error
+      assert_equal "ok\n", output
+    end
+
     def test_launch_records_and_reraises_setup_failure
       return unless Fiber.respond_to?(:set_scheduler)
       scheduler = Scheduler.new { raise ArgumentError, "setup failed" }

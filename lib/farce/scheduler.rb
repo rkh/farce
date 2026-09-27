@@ -476,6 +476,10 @@ module Farce
         end
       end
       @queue.close if @queue_owner
+    rescue Internal::SchedulerLifecycle::Cancelled => e
+      # Shutdown cancellation must not create envelope ports in a terminating Ractor.
+      failure = e
+      raise
     rescue ClosedQueueError
       raise unless @pool_worker
     rescue Exception => e # rubocop:disable Lint/RescueException

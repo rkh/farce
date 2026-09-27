@@ -26,7 +26,7 @@ module Farce
       Timer      = Struct.new(:deadline, :token, :fiber, :error, :active)
       Completion = Struct.new(:token, :value, :error)
       SLOT_COUNT = 64
-      private_constant :Timer, :Cancelled, :Completion, :SLOT_COUNT
+      private_constant :Timer, :Completion, :SLOT_COUNT
 
       def initialize(backend: FROZEN_CONFIG.io_backend, thread_pool: ThreadPool.current)
         super(backend: backend)
