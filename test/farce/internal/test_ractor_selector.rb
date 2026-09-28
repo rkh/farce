@@ -275,6 +275,31 @@ module Farce
         assert_equal RUBY_VERSION.start_with?("3.4."), Internal.respond_to?(:lock_native_thread)
       end
 
+      def test_legacy_control_closes_without_publishing_a_final_value
+        return unless RUBY_VERSION.start_with?("3.4.")
+
+        output, error, status = ruby_isolated(<<~RUBY, timeout: 10)
+          require "farce"
+          require "timeout"
+          selector = Farce.const_get(:Internal)::RactorSelector.new
+          control = selector.instance_variable_get(:@control)
+          baseline = ::Ractor.count
+          control.close_incoming
+          Timeout.timeout(5) { Thread.pass until ::Ractor.count < baseline }
+          begin
+            control.take
+            abort "control published a final value"
+          rescue ::Ractor::ClosedError
+          end
+          selector.close
+          puts "ok"
+        RUBY
+
+        assert_predicate status, :success?, error
+        assert_equal "ok\n", output
+        assert_empty error
+      end
+
       def test_legacy_selector_closes_inside_another_ractor
         return unless RUBY_VERSION.start_with?("3.4.")
 

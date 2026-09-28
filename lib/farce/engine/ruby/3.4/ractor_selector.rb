@@ -77,6 +77,10 @@ module Farce
             end
           rescue ::Ractor::ClosedError
             nil
+          ensure
+            # No final value is consumed. Close before Ruby publishes it so
+            # publication cannot race with the selector closing this port.
+            ::Ractor.current.close_outgoing
           end
           # Complete startup before the first command can send a wakeup.
           control.take
