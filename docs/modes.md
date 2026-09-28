@@ -74,7 +74,7 @@ port.receive # => [4, 5]
 port.close
 ```
 
-Farce extends this choice with seven named modes.
+Farce extends this choice with eight named modes.
 
 ## Farce's Modes
 
@@ -88,6 +88,7 @@ The following modes are accepted by `Farce::Port`. They apply to non-shareable v
 | `:make_shareable` | Calls `Ractor.make_shareable` on the original. | Publish finished configuration. |
 | `:shareable_copy` | Makes a shareable copy and leaves the original alone. | Publish a snapshot of an editable document. |
 | `:dedup` | Deduplicates the value, then makes it shareable. May update and freeze the original. | Reuse repeated message contents. |
+| `:proxy` | Creates a `Farce::Proxy` that executes calls in the original Ractor. | Share access to a mutable object. |
 | `:raise` | Raises `Ractor::IsolationError`. | Enforce a shareable-data boundary. |
 
 ### `:copy`: keep working with the original

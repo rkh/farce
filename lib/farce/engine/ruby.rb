@@ -38,6 +38,7 @@ module Farce
     StrictLRUMap  = ShareableLRUMap
     StrictTreeMap = ShareableTreeMap
 
+    autoload :ProxyOwner,           "farce/engine/ruby/shared/proxy_owner"
     autoload :ParallelScheduler,    "farce/engine/ruby/shared/parallel_scheduler"
     autoload :MainScheduler,        "farce/engine/ruby/shared/main_scheduler"
     autoload :Lease,                "farce/engine/ruby/shared/lease"

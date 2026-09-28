@@ -33,6 +33,7 @@ module Farce
 
     private_constant :Deep, :Inherited
     include Inherited
+    include Internal::Delegation
 
     # Creates a subclass of {Farce::Reference} that uses the given factory to create new values to reference
     # automatically.
@@ -121,39 +122,6 @@ module Farce
       method_missing(:freeze)
       super
     end
-
-    # Delegates equality check to the referenced value
-    # @param other [Object] the object to compare with the referenced value
-    # @return [Boolean] whether the referenced value is equal to the other object
-    def ==(other) = method_missing(:==, other)
-
-    # Delegates inequality check to the referenced value
-    # @param other [Object] the object to compare with the referenced value
-    # @return [Boolean] whether the referenced value is not equal to the other object
-    def !=(other)
-      method_missing(:!=, other)
-    end
-
-    # Delegates logical negation to the referenced value
-    # @return [Boolean] the negated value of the referenced value
-    def ! = method_missing(:!)
-
-    # Delegates instance_eval to the referenced value
-    # @yield the block to be evaluated in the context of the referenced value
-    # @yieldreceiver [BasicObject] the referenced value
-    # @yieldreturn [BasicObject] the result of the block evaluation
-    # @return [BasicObject] the result of evaluating the block in the context of the referenced value
-    def instance_eval(...) = method_missing(:instance_eval, ...)
-
-    # @overload instance_exec(*args)
-    #   Delegates instance_exec to the referenced value
-    #   @param args [Array] the arguments to be passed to the block
-    #   @yield [*args] the block to be evaluated in the context of the referenced value
-    #   @yieldreceiver [BasicObject] the referenced value
-    #   @yieldparam args [Array] the arguments passed to the block
-    #   @yieldreturn [BasicObject] the result of the block evaluation
-    #   @return [BasicObject] the result of evaluating the block in the context of the referenced value
-    def instance_exec(...) = method_missing(:instance_exec, ...)
 
     private
 

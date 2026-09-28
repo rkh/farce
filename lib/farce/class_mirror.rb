@@ -13,7 +13,7 @@ module Farce
   #   mirror.define(Array) { def label = "array of #{super}" }
   #   mirror[Array].new.label # => "array of object"
   class ClassMirror
-    include Shareable::Immutable
+    include Farce::Shareable::Tracked
 
     # @param base_class [Class] the mirror for BasicObject
     # @yieldparam mirror [Class] the nearest defined mirror class
@@ -50,6 +50,7 @@ module Farce
     # @raise [Ractor::IsolationError] outside the main Ractor
     # @raise [TypeError] if klass is not a Class
     def define(klass, &)
+      check_frozen!
       raise Ractor::IsolationError, "must be called from main Ractor" unless Ractor.main?
       raise TypeError, "Class expected, got #{klass.class}" unless klass.is_a?(Class)
       mixin  = Module.new(&) if block_given?

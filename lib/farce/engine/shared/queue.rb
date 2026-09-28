@@ -32,7 +32,7 @@ module Farce
         while true
           begin
             result = tracked_pop
-            raise ThreadError if result.nil? && @queue.closed?
+            raise ThreadError if nil.equal?(result) && @queue.closed?
             broadcast
             return NIL_VALUE.equal?(result) ? nil : result
           rescue ThreadError
@@ -44,7 +44,7 @@ module Farce
 
       def push(item, timeout: nil)
         check_value(item)
-        item = NIL_VALUE if item.nil?
+        item = NIL_VALUE if nil.equal?(item)
 
         unless capacity
           tracked_push(item)
@@ -166,7 +166,7 @@ module Farce
         return @queue.pop(true) unless @tracking
         @tracking[:lock].synchronize do
           result = @queue.pop(true)
-          unless result.nil? && @queue.closed?
+          unless nil.equal?(result) && @queue.closed?
             @tracking[:timestamps].shift
             @tracking[:generation] += 1
           end

@@ -53,16 +53,18 @@ module Farce
     include Shareable::Immutable
 
     # The set of valid modes for wrapping values.
-    MODES = ::Set[:copy, :move, :local, :make_shareable, :raise, :shareable_copy, :dedup].freeze
+    MODES = ::Set[:copy, :move, :local, :make_shareable, :raise, :shareable_copy, :dedup, :proxy].freeze
 
     # @return [Symbol] The default mode to use when wrapping values.
     attr_reader :mode
 
     # @!macro modes
     # @param mode [Symbol] The default mode to use when wrapping values. Must be one of the valid modes.
-    def initialize(mode: :copy)
+    # @param register [Proxy::Register, nil] The register to use for generating Farce::Proxy instances.
+    def initialize(mode: :copy, register: nil)
       raise ArgumentError, "invalid mode: #{mode.inspect}" unless MODES.include?(mode)
-      @mode = mode
+      @mode     = mode
+      @register = register
       super()
     end
 
@@ -84,6 +86,7 @@ module Farce
       when :move           then Envelope::Move.new(value, self)
       when :raise          then raise Ractor::IsolationError, "value is not Ractor-shareable: #{value.inspect}"
       when :shareable_copy then Ractor.make_shareable(value, copy: true)
+      when :proxy          then Proxy.new(value, register: @register)
       else raise ArgumentError, "invalid mode: #{mode.inspect}"
       end
     end

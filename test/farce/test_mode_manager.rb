@@ -33,7 +33,7 @@ module Farce
     end
 
     def test_accepts_every_documented_mode
-      expected = ::Set[:copy, :move, :local, :make_shareable, :raise, :shareable_copy, :dedup]
+      expected = ::Set[:copy, :move, :local, :make_shareable, :raise, :shareable_copy, :dedup, :proxy]
 
       assert_equal expected, ModeManager::MODES
       expected.each do |mode|
