@@ -107,7 +107,8 @@ module Farce
 
       pool.schedule(started, gate, mode: :raise) do |queue, wait|
         queue << Ractor.current
-        nil until wait.value
+        # Hold this worker's scheduler without competing for CPU with pool startup.
+        Fiber.new(blocking: true) { wait.wait_until_changed(false) }.resume
       end
       first = started.pop(timeout: 2)
 
@@ -152,7 +153,7 @@ module Farce
 
       pool.schedule(started, gate, mode: :raise) do |queue, wait|
         queue << true
-        nil until wait.value
+        Fiber.new(blocking: true) { wait.wait_until_changed(false) }.resume
       end
       started.pop(timeout: 2)
       # Keep the extra worker busy until its growth has been observed.
@@ -193,7 +194,7 @@ module Farce
       gate = Atom.new(false, mode: :raise)
       pool.schedule(started, gate, mode: :raise) do |queue, wait|
         queue << true
-        nil until wait.value
+        Fiber.new(blocking: true) { wait.wait_until_changed(false) }.resume
       end
 
       assert started.pop(timeout: 2)
