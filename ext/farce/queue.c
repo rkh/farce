@@ -114,7 +114,14 @@ readiness_set(readiness_signal_t *signal, bool desired)
     unsigned char byte = 1;
     ssize_t result;
     if (signal->read_fd < 0) return;
-    if (desired == signal->set) return;
+    if (desired == signal->set) {
+#ifdef _WIN32
+        /* The unblock callback can set the event without a readiness byte.
+         * Clear that interrupt wakeup when the queue is still not ready. */
+        if (!desired) ResetEvent(signal->event);
+#endif
+        return;
+    }
     if (desired) {
         do {
             result = write(signal->write_fd, &byte, 1);
@@ -433,7 +440,7 @@ queue_wait_for_descriptor(int fd, queue_timeout_t *timeout)
         if (remaining <= 0) return false;
         wait_timeout = DBL2NUM(remaining);
     }
-    return containers_wait_for_readable_level(fd, wait_timeout);
+    return containers_wait_for_readable(fd, wait_timeout);
 }
 
 typedef struct {
@@ -477,27 +484,34 @@ static VALUE
 queue_event_wait_body(VALUE opaque)
 {
     queue_wait_context_t *context = (queue_wait_context_t *)opaque;
-    DWORD timeout = INFINITE;
-    if (context->timeout->finite) {
-        double remaining = context->timeout->deadline - monotonic_now();
-        if (remaining <= 0) return Qfalse;
-        timeout = (DWORD)ceil(remaining * 1000);
+    /* Bound event waits so we can join VM barriers even when Ruby's Windows
+     * interrupt does not invoke the unblock callback. */
+    for (;;) {
+        DWORD timeout = 10;
+        if (context->timeout->finite) {
+            double remaining = context->timeout->deadline - monotonic_now();
+            if (remaining <= 0) return Qfalse;
+            if (remaining < 0.01) timeout = (DWORD)ceil(remaining * 1000);
+        }
+        queue_event_wait_t wait = {
+            .event = context->signal->event,
+            .timeout = timeout,
+            .result = WAIT_FAILED,
+        };
+        rb_thread_call_without_gvl(
+            queue_event_wait_without_gvl,
+            &wait,
+            queue_event_wait_interrupt,
+            &wait
+        );
+        if (wait.result == WAIT_TIMEOUT) {
+            containers_wait_safepoint();
+            continue;
+        }
+        if (wait.result == WAIT_OBJECT_0) return Qtrue;
+        errno = EIO;
+        rb_sys_fail("WaitForSingleObject");
     }
-    queue_event_wait_t wait = {
-        .event = context->signal->event,
-        .timeout = timeout,
-        .result = WAIT_FAILED,
-    };
-    rb_thread_call_without_gvl(
-        queue_event_wait_without_gvl,
-        &wait,
-        queue_event_wait_interrupt,
-        &wait
-    );
-    if (wait.result == WAIT_TIMEOUT) return Qfalse;
-    if (wait.result == WAIT_OBJECT_0) return Qtrue;
-    errno = EIO;
-    rb_sys_fail("WaitForSingleObject");
 }
 #endif
 

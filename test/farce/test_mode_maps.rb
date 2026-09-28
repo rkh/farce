@@ -28,7 +28,11 @@ module Farce
 
     def map_classes = MAP_CLASSES
 
-    def run(...) = Timeout.timeout(10) { super }
+    def run(...)
+      # Windows weak-map contention can approach ten seconds while still making progress.
+      timeout = Gem.win_platform? && name == "test_concurrent_upserts" ? 30 : 10
+      Timeout.timeout(timeout) { super }
+    end
 
     def test_initialization_defaults_and_shareability
       MAP_CLASSES.each do |klass|

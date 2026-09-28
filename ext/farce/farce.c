@@ -115,51 +115,46 @@ containers_normalize_string_key(VALUE key)
     return stored_key;
 }
 
+#ifdef _WIN32
 typedef struct {
     int fd;
-    ssize_t result;
+    bool readable;
     int error;
-#ifdef _WIN32
-    bool consume;
-#endif
 } containers_read_context_t;
 
 static void *
 containers_poll_without_gvl(void *opaque)
 {
     containers_read_context_t *context = opaque;
-#ifdef _WIN32
     intptr_t descriptor = _get_osfhandle(context->fd);
     if (descriptor == -1) {
         context->error = EBADF;
         return NULL;
     }
 
-    HANDLE handle = (HANDLE)descriptor;
     DWORD available = 0;
-    if (!PeekNamedPipe(handle, NULL, 0, NULL, &available, NULL)) {
+    if (!PeekNamedPipe((HANDLE)descriptor, NULL, 0, NULL, &available, NULL)) {
         context->error = EIO;
         return NULL;
     }
-    if (available == 0) return NULL;
-    if (!context->consume) {
-        context->result = 1;
-        return NULL;
-    }
-    do {
-        context->result = read(context->fd, &(unsigned char){0}, 1);
-    } while (context->result < 0 && errno == EINTR);
-    context->error = errno;
-#else
-    do {
-        context->result = read(context->fd, &(unsigned char){0}, 1);
-    } while (context->result < 0 && errno == EINTR);
-    context->error = errno;
-#endif
+    /* Match rb_io_wait: observe readiness without consuming the notification.
+     * The caller owns its notification's lifetime and cleanup. */
+    context->readable = available > 0;
     return NULL;
 }
 
-#ifdef _WIN32
+RUBY_EXTERN void rb_objspace_reachable_objects_from(VALUE, void (*)(VALUE, void *), void *);
+
+void
+containers_wait_safepoint(void)
+{
+    /* A Windows VM-barrier interrupt can target a sleeping sibling thread.
+     * Checking only this thread's interrupts then misses the pending barrier.
+     * The exported reachability API acquires the VM lock and joins that barrier.
+     * nil has no children, so this does not traverse, allocate, or collect. */
+    rb_objspace_reachable_objects_from(Qnil, NULL, NULL);
+}
+
 static void *
 containers_sleep_without_gvl(void *opaque)
 {
@@ -198,8 +193,8 @@ containers_io_close(VALUE opaque)
     return rb_io_close(arguments[0]);
 }
 
-static bool
-containers_wait_for_readable_mode(int fd, VALUE timeout, bool consume)
+bool
+containers_wait_for_readable(int fd, VALUE timeout)
 {
 #ifdef _WIN32
     /* Blocking CRT pipe reads do not reliably unblock on Thread#kill.
@@ -212,12 +207,11 @@ containers_wait_for_readable_mode(int fd, VALUE timeout, bool consume)
         ULONGLONG deadline = GetTickCount64() + (ULONGLONG)ceil(seconds * 1000);
         containers_read_context_t context = {
             .fd = fd,
-            .result = -1,
+            .readable = false,
             .error = 0,
-            .consume = consume,
         };
         for (;;) {
-            context.result = 0;
+            context.readable = false;
             context.error = 0;
             rb_thread_call_without_gvl(
                 containers_poll_without_gvl,
@@ -227,10 +221,11 @@ containers_wait_for_readable_mode(int fd, VALUE timeout, bool consume)
             );
             if (context.error) {
                 errno = context.error;
-                rb_sys_fail("read");
+                rb_sys_fail("PeekNamedPipe");
             }
-            if (context.result > 0) return true;
+            if (context.readable) return true;
             if (finite && GetTickCount64() >= deadline) return false;
+            containers_wait_safepoint();
             rb_thread_call_without_gvl(
                 containers_sleep_without_gvl,
                 NULL,
@@ -260,18 +255,6 @@ containers_wait_for_readable_mode(int fd, VALUE timeout, bool consume)
     );
     RB_GC_GUARD(arguments[0]);
     return RTEST(result);
-}
-
-bool
-containers_wait_for_readable(int fd, VALUE timeout)
-{
-    return containers_wait_for_readable_mode(fd, timeout, true);
-}
-
-bool
-containers_wait_for_readable_level(int fd, VALUE timeout)
-{
-    return containers_wait_for_readable_mode(fd, timeout, false);
 }
 
 void

@@ -387,6 +387,55 @@ module Farce
         end
       end
 
+      def test_native_wait_allows_gc_and_tracepoints_in_another_ractor
+        return unless Internal.native_ractors?
+
+        %i[queue atom].each do |kind|
+          output, error, status = ruby_subprocess(<<~RUBY)
+            require "farce"
+
+            kind = :#{kind}
+            # Keep the same idle Vault and main-Ractor thread as a running application.
+            map = Farce::Strict::WeakKeyMap.new({ Object => :ok })
+            sleeper = Thread.new { sleep }
+            %i[gc tracepoint].each do |operation|
+              GC.start
+              signal = kind == :queue ? Farce::Strict::Queue.new : Farce::Strict::Atom.new
+              release = Farce::Strict::Queue.new
+              worker = ::Ractor.new(signal, release, operation, kind) do |shared, gate, action, type|
+                if action == :gc
+                  GC.start
+                else
+                  trace = TracePoint.new(:thread_end) {}
+                  trace.enable(target_thread: Thread.current)
+                  trace.disable
+                end
+                if type == :queue
+                  shared << :ready
+                else
+                  shared.value = :ready
+                end
+                gate.pop
+              end
+              result = if kind == :queue
+                         signal.pop(timeout: 5)
+                       else
+                         signal.wait_until_changed(nil, timeout: 5)
+                       end
+              release << true
+              worker.respond_to?(:value) ? worker.value : worker.take
+              abort "\#{kind} wait blocked \#{operation} in another Ractor" unless result == :ready
+            end
+            sleeper.kill.join
+            abort "lost weak-map entry" unless map[Object] == :ok
+            puts "ok"
+          RUBY
+
+          assert_predicate status, :success?, "#{kind}: #{error}"
+          assert_equal "ok\n", output
+        end
+      end
+
       def test_close_wakes_all_data_and_readiness_waiters
         %i[pop push].each do |operation|
           queue = Queue.new(capacity: 1)

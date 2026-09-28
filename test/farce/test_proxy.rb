@@ -258,6 +258,8 @@ module Farce
       release << true
       ractor_value(owner)
 
+      refute_same nil, proxy, "proxy owner did not publish within 5 seconds"
+
       Timeout.timeout(5) do
         assert_raises(Ractor::RemoteError) { proxy.nothing }
       end
@@ -271,6 +273,8 @@ module Farce
       end
       proxy = output.pop(timeout: 5)
       ractor_value(owner)
+
+      refute_same nil, proxy, "proxy owner did not publish within 5 seconds"
 
       Timeout.timeout(5) do
         assert_raises(Ractor::RemoteError) { proxy.nothing }
@@ -318,6 +322,37 @@ module Farce
 
       assert_predicate status, :success?, error
       assert_equal "ok\n", output
+    end
+
+    def test_fresh_process_can_construct_proxy_in_another_ractor
+      return unless Internal.native_ractors?
+
+      output, error, status = ruby_isolated(<<~RUBY)
+        require "farce"
+
+        class Target
+          def nothing = nil
+        end
+        sleeper = Thread.new { sleep }
+        output = Farce::Strict::Queue.new
+        release = Farce::Strict::Queue.new
+        GC.start
+        owner = Farce::Ractor.new(output, release) do |out, gate|
+          proxy = Farce::Proxy.new(Target.new, scheduler: Farce::ThreadScheduler.new)
+          proxy.nothing
+          out << proxy
+          gate.pop
+        end
+        proxy = output.pop(timeout: 5)
+        release << true
+        owner.respond_to?(:value) ? owner.value : owner.take
+        sleeper.kill.join
+        abort "proxy startup blocked by the queue wait" if nil.equal?(proxy)
+        puts "ok"
+      RUBY
+
+      assert_predicate status, :success?, error
+      assert_equal "ok", output.strip
     end
 
     def test_owned_ractor_stops_when_proxy_is_collected

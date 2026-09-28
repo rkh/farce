@@ -32,6 +32,10 @@ end
 
 have_func("clock_gettime", "time.h")
 
+if /mswin|mingw/ =~ RUBY_PLATFORM
+  have_func("rb_objspace_reachable_objects_from") or abort "Windows waits require rb_objspace_reachable_objects_from"
+end
+
 if have_header("pthread/qos.h")
   have_func("pthread_set_qos_class_self_np", "pthread/qos.h")
   have_func("pthread_get_qos_class_np", "pthread/qos.h")

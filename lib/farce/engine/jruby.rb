@@ -5,6 +5,8 @@
 require "jruby"
 require "java"
 
+# Load reservation waits before worker threads can contend or be canceled.
+require "farce/internal/reservation_waiting"
 require "farce/engine/shared"
 require "farce/engine/jvm"
 
