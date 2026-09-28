@@ -3,7 +3,6 @@
 return unless RUBY_ENGINE == "ruby"
 
 require_relative "../../setup"
-require "weakref"
 
 class TestUnsharedSignalPool < Test
   Signal = Farce.const_get(:Internal)::UnsharedIOSignal
@@ -257,23 +256,40 @@ class TestUnsharedSignalPool < Test
 
   def test_pool_collection_releases_idle_descriptors
     return unless File.directory?("/dev/fd")
-    3.times { GC.start }
-    before = Dir.children("/dev/fd").size
-    references = 20.times.map { make_idle_pool }
-    @scheduler.handles.clear
-    3.times { GC.start }
+    # Other tests can leave descriptors that a later collection closes.
+    output, error, status = ruby_subprocess(<<~'RUBY')
+      require "farce"
+      require "weakref"
+      require "helpers/queue_test_scheduler"
 
-    assert references.none?(&:weakref_alive?)
-    assert_equal before, Dir.children("/dev/fd").size
-  end
+      UnsharedIOSignal = Farce.const_get(:Internal)::UnsharedIOSignal
+      class Scheduler < Helpers::QueueTestScheduler
+        def tick = run
+      end
 
-  private
+      def make_idle_pool(scheduler)
+        signal = UnsharedIOSignal.new
+        Fiber.schedule { signal.wait }
+        signal.broadcast
+        scheduler.tick
+        WeakRef.new(signal)
+      end
 
-  def make_idle_pool
-    signal = Signal.new
-    Fiber.schedule { signal.wait }
-    signal.broadcast
-    @scheduler.tick
-    ::WeakRef.new(signal)
+      scheduler = Scheduler.new
+      Fiber.set_scheduler(scheduler)
+      3.times { GC.start }
+      before = Dir.children("/dev/fd").size
+      references = 20.times.map { make_idle_pool(scheduler) }
+      3.times { GC.start }
+
+      raise "idle pools were not collected" unless references.none?(&:weakref_alive?)
+      after = Dir.children("/dev/fd").size
+      raise "descriptor count changed from #{before} to #{after}" unless before == after
+      Fiber.set_scheduler(nil)
+      puts "ok"
+    RUBY
+
+    assert_predicate status, :success?, error
+    assert_equal "ok\n", output
   end
 end
