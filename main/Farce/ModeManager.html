@@ -200,7 +200,7 @@ This may update and freeze the original. Already-shareable values pass through u
 
 </div>
         </dt>
-        <dd><pre class="code"><span class='op'>::</span><span class='const'>Set</span><span class='lbracket'>[</span><span class='symbol'>:copy</span><span class='comma'>,</span> <span class='symbol'>:move</span><span class='comma'>,</span> <span class='symbol'>:local</span><span class='comma'>,</span> <span class='symbol'>:make_shareable</span><span class='comma'>,</span> <span class='symbol'>:raise</span><span class='comma'>,</span> <span class='symbol'>:shareable_copy</span><span class='comma'>,</span> <span class='symbol'>:dedup</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+        <dd><pre class="code"><span class='op'>::</span><span class='const'>Set</span><span class='lbracket'>[</span><span class='symbol'>:copy</span><span class='comma'>,</span> <span class='symbol'>:move</span><span class='comma'>,</span> <span class='symbol'>:local</span><span class='comma'>,</span> <span class='symbol'>:make_shareable</span><span class='comma'>,</span> <span class='symbol'>:raise</span><span class='comma'>,</span> <span class='symbol'>:shareable_copy</span><span class='comma'>,</span> <span class='symbol'>:dedup</span><span class='comma'>,</span> <span class='symbol'>:proxy</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
       
     </dl>
   
@@ -255,7 +255,7 @@ This may update and freeze the original. Already-shareable values pass through u
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(mode: :copy)  &#x21d2; ModeManager </a>
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(mode: :copy, register: nil)  &#x21d2; ModeManager </a>
     
 
     
@@ -411,7 +411,7 @@ This may update and freeze the original. Already-shareable values pass through u
     <div class="method_details first">
   <h3 class="signature first" id="initialize-instance_method">
   
-    #<strong>initialize</strong>(mode: :copy)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::ModeManager (class)">ModeManager</a></span></tt> 
+    #<strong>initialize</strong>(mode: :copy, register: nil)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::ModeManager (class)">ModeManager</a></span></tt> 
   
 
   
@@ -458,6 +458,23 @@ This may update and freeze the original. Already-shareable values pass through u
       
     </li>
   
+    <li>
+      
+        <span class='name'>register</span>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Proxy/Register.html" title="Farce::Proxy::Register (class)">Proxy::Register</a></span></tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The register to use for generating Farce::Proxy instances.</p>
+</div>
+      
+    </li>
+  
 </ul>
 
 <p class="tag_title">Raises:</p>
@@ -480,18 +497,20 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-63
 64
 65
 66
-67</pre>
+67
+68
+69</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 63</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 64</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='rparen'>)</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='comma'>,</span> <span class='label'>register:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>invalid mode: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_mode'>mode</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="#MODES-constant" title="Farce::ModeManager::MODES (constant)">MODES</a></span></span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_mode'>mode</span><span class='rparen'>)</span>
-  <span class='ivar'>@mode</span> <span class='op'>=</span> <span class='id identifier rubyid_mode'>mode</span>
+  <span class='ivar'>@mode</span>     <span class='op'>=</span> <span class='id identifier rubyid_mode'>mode</span>
+  <span class='ivar'>@register</span> <span class='op'>=</span> <span class='id identifier rubyid_register'>register</span>
   <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -612,10 +631,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-127</pre>
+130</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 127</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 130</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_managed_envelope?'>managed_envelope?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Envelope.html" title="Farce::Envelope (class)">Envelope</a></span></span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span></pre>
     </td>
@@ -717,9 +736,6 @@ compared without claiming or opening them.</p>
       <pre class="lines">
 
 
-107
-108
-109
 110
 111
 112
@@ -734,10 +750,13 @@ compared without claiming or opening them.</p>
 121
 122
 123
-124</pre>
+124
+125
+126
+127</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 107</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 110</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_same_value?'>same_value?</span><span class='lparen'>(</span><span class='id identifier rubyid_left'>left</span><span class='comma'>,</span> <span class='id identifier rubyid_right'>right</span><span class='comma'>,</span> <span class='label'>identity:</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_left_managed'>left_managed</span>  <span class='op'>=</span> <span class='id identifier rubyid_managed_envelope?'>managed_envelope?</span><span class='lparen'>(</span><span class='id identifier rubyid_left'>left</span><span class='rparen'>)</span>
@@ -824,13 +843,13 @@ Other options, including other envelopes, will be returned as-is.</p>
       <pre class="lines">
 
 
-96
-97
-98
-99</pre>
+99
+100
+101
+102</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 96</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 99</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_value'>value</span> <span class='kw'>unless</span> <span class='id identifier rubyid_managed_envelope?'>managed_envelope?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
@@ -933,8 +952,6 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-76
-77
 78
 79
 80
@@ -946,10 +963,13 @@ This may update and freeze the original. Already-shareable values pass through u
 86
 87
 88
-89</pre>
+89
+90
+91
+92</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 76</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mode_manager.rb', line 78</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_value'>value</span> <span class='kw'>if</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
@@ -962,6 +982,7 @@ This may update and freeze the original. Already-shareable values pass through u
   <span class='kw'>when</span> <span class='symbol'>:move</span>           <span class='kw'>then</span> <span class='const'><span class='object_link'><a href="Envelope.html" title="Farce::Envelope (class)">Envelope</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Envelope/Move.html" title="Farce::Envelope::Move (class)">Move</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Envelope/Move.html#new-class_method" title="Farce::Envelope::Move.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='kw'>self</span><span class='rparen'>)</span>
   <span class='kw'>when</span> <span class='symbol'>:raise</span>          <span class='kw'>then</span> <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Ractor.html#IsolationError-constant" title="Farce::Ractor::IsolationError (constant)">IsolationError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>value is not Ractor-shareable: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
   <span class='kw'>when</span> <span class='symbol'>:shareable_copy</span> <span class='kw'>then</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>copy:</span> <span class='kw'>true</span><span class='rparen'>)</span>
+  <span class='kw'>when</span> <span class='symbol'>:proxy</span>          <span class='kw'>then</span> <span class='const'><span class='object_link'><a href="Proxy.html" title="Farce::Proxy (class)">Proxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Proxy.html#initialize-instance_method" title="Farce::Proxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>register:</span> <span class='ivar'>@register</span><span class='rparen'>)</span>
   <span class='kw'>else</span> <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>invalid mode: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_mode'>mode</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
   <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
@@ -975,7 +996,7 @@ This may update and freeze the original. Already-shareable values pass through u
 </div>
 
       <div id="footer">
-  Generated on Sun Sep 27 22:26:40 2026 by
+  Generated on Mon Sep 28 16:01:39 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

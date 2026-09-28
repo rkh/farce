@@ -100,7 +100,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Shareable/Immutable.html" title="Farce::Shareable::Immutable (module)">Shareable::Immutable</a></span></dd>
+      <dd><span class='object_link'><a href="Shareable/Tracked.html" title="Farce::Shareable::Tracked (module)">Shareable::Tracked</a></span></dd>
   </dl>
   
   
@@ -622,12 +622,14 @@ Existing lookup results are invalidated after each definition.</p>
 57
 58
 59
-60</pre>
+60
+61</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/class_mirror.rb', line 52</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_define'>define</span><span class='lparen'>(</span><span class='id identifier rubyid_klass'>klass</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Ractor.html#IsolationError-constant" title="Farce::Ractor::IsolationError (constant)">IsolationError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>must be called from main Ractor</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_main?'><span class='object_link'><a href="Ractor.html#main%3F-class_method" title="Farce::Ractor.main? (method)">main?</a></span></span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>TypeError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Class expected, got </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_klass'>klass</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_klass'>klass</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Class</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_mixin'>mixin</span>  <span class='op'>=</span> <span class='const'>Module</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -646,7 +648,7 @@ Existing lookup results are invalidated after each definition.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Sep 27 22:26:40 2026 by
+  Generated on Mon Sep 28 16:01:39 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -143,7 +143,7 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_receive'>receive</span> <span class='comment'># =&gt; [4, 5]
 </span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
 </code></pre>
-<p>Farce extends this choice with seven named modes.</p>
+<p>Farce extends this choice with eight named modes.</p>
 <h2 id="farces-modes">Farce's Modes<a href="#farces-modes" aria-label="Link to heading 'Farce's Modes'" data-heading-content="Farce's Modes" class="anchor"></a></h2>
 <p>The following modes are accepted by <code>Farce::Port</code>. They apply to non-shareable values. Already-shareable values pass through unchanged, including when you select <code>:move</code> or <code>:raise</code>.</p>
 <table>
@@ -184,6 +184,11 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <td><code>:dedup</code></td>
 <td>Deduplicates the value, then makes it shareable. May update and freeze the original.</td>
 <td>Reuse repeated message contents.</td>
+</tr>
+<tr>
+<td><code>:proxy</code></td>
+<td>Creates a <code>Farce::Proxy</code> that executes calls in the original Ractor.</td>
+<td>Share access to a mutable object.</td>
 </tr>
 <tr>
 <td><code>:raise</code></td>
@@ -611,7 +616,7 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </div></div>
 
       <div id="footer">
-  Generated on Sun Sep 27 22:26:35 2026 by
+  Generated on Mon Sep 28 16:01:34 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
