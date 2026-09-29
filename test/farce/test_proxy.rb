@@ -338,10 +338,17 @@ module Farce
         release = Farce::Strict::Queue.new
         GC.start
         owner = Farce::Ractor.new(output, release) do |out, gate|
-          proxy = Farce::Proxy.new(Target.new, scheduler: Farce::ThreadScheduler.new)
+          scheduler = Farce::ThreadScheduler.new do |*args, &task|
+            Farce::Ractor[:proxy_worker] = Thread.new(*args, &task)
+          end
+          proxy = Farce::Proxy.new(Target.new, scheduler:)
           proxy.nothing
           out << proxy
           gate.pop
+        ensure
+          # Ruby can report Ractor completion before terminating its child threads.
+          # Join our worker before process shutdown can race that teardown.
+          Farce::Ractor[:proxy_worker]&.kill&.join
         end
         proxy = output.pop(timeout: 5)
         release << true
