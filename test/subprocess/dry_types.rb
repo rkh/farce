@@ -302,7 +302,7 @@ module Farce
       assert_instance_of Strict::Atom, strict::Atom[1]
       refute strict.const_defined?(:Counter, false)
       refute strict.const_defined?(:Flag, false)
-      refute unshared.const_defined?(:Atom, false)
+      assert_instance_of Unshared::Atom, unshared::Atom[1]
       refute unshared.const_defined?(:Counter, false)
       refute unshared.const_defined?(:Flag, false)
 
