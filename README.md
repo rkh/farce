@@ -36,6 +36,9 @@ All three of these need some form of **concurrency coordination** for shared sta
 
 ### The Problem
 
+> [!NOTE]
+> Please keep in mind that many of these libraries may gain better Ractor support in the future, and that the table might already be outdated. Feel free to open an issue if you find any inaccuracies. This is also in no way meant as a criticism of any of the libraries mentioned. They all have their own scopes, goals and priorities, and largely rely on volunteer contributions.
+
 Both the Ruby core library, and other libraries, like the very popular [concurrent-ruby](https://github.com/ruby-concurrency/concurrent-ruby) gem, provide plenty of primitives to solve this. However, most of them are not compatible with Ractors. And those that are, are then in turn usually not compatible with Fiber schedulers. Due to this, most of the popular frameworks and libraries out there do not support Ractors at all:
 
 <table>
@@ -103,28 +106,28 @@ Both the Ruby core library, and other libraries, like the very popular [concurre
     <tr>
       <td rowspan="3"><a href="https://github.com/mperham/ratomic">ratomic</a></td>
       <td>Pool</td>
-      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only<b>¹</b></td>
       <td>❌ <b>not supported</b></td>
-      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only<b>¹</b></td>
     </tr>
     <tr>
       <td>LocalPool</td>
-      <td>⚠️ CRuby only</td>
-      <td>⚠️ CRuby only</td>
-      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
     </tr>
     <tr>
       <td>Queue, Map</td>
-      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only<b>¹</b></td>
       <td>❌ <b>not supported</b></td>
-      <td>💣 <b>breaks isolation</b></td>
+      <td>💣 <b>breaks isolation¹²</b></td>
     </tr>
     <tr>
       <td><a href="https://github.com/MadBomber/ractor_queue">ractor_queue</a></td>
       <td>RactorQueue</td>
-      <td>⚠️ CRuby only</td>
-      <td>⚠️ CRuby only</td>
-      <td>💣 <b>breaks isolation</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>💣 <b>breaks isolation¹²</b></td>
     </tr>
     <tr>
       <td>
@@ -136,12 +139,19 @@ Both the Ruby core library, and other libraries, like the very popular [concurre
       <td>⚠️ Main Ractor only</td>
       <td>❌ <b>not supported</b></td>
     </tr>
+    <tr>
+      <td><a href="https://github.com/ko1/ractor-sharing">ractor-sharing</a></td>
+      <td>TVar, LockVar, LockHash, …</td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>❌ <b>not supported</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+    </tr>
   </tbody>
 </table>
 
-💣 Breaking Ractor isolation introduces concurrency issues not just in application code, but in Ruby itself, possibly leading to segmentation faults or undefined behavior.
-
-Please keep in mind that many of these libraries may gain better Ractor support in the future, and that the table might already be outdated. Feel free to open an issue if you find any inaccuracies. This is also in no way meant as a criticism of any of the libraries mentioned. They all have their own scopes, goals and priorities, and largely rely on volunteer contributions.
+Notes:
+1. Incorrectly flags mutable objects as frozen.
+2. Breaking Ractor isolation introduces concurrency issues not just in application code, but in Ruby itself, possibly leading to segmentation faults or undefined behavior. Note that `ractor_queue` has the ability to enforce shareability, but this feature is opt-in.
 
 ### The Solution
 
