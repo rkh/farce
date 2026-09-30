@@ -5,7 +5,7 @@
 require_relative "../setup"
 
 module Farce
-  class TestDeepFreeze < Test
+  class TestFreezeGraph < Test
     Record = Data.define(:value)
 
     def test_freezes_nested_arrays_and_hash_keys_and_values_in_place
@@ -13,7 +13,7 @@ module Farce
       value = [+"value"]
       root = { key => value }
 
-      assert_same root, Farce.deep_freeze(root)
+      assert_same root, Farce.freeze_graph(root)
       [root, key, key.first, value, value.first].each { assert_predicate it, :frozen? }
 
       assert_same value, root[key]
@@ -26,7 +26,7 @@ module Farce
       root = Object.new
       root.instance_variable_set(:@child, child)
 
-      assert_same root, Farce.deep_freeze(root)
+      assert_same root, Farce.freeze_graph(root)
       [root, child, child.first].each { assert_predicate it, :frozen? }
     end
 
@@ -34,7 +34,7 @@ module Farce
       child = []
       root = [child, child]
       child << root
-      result = Farce.deep_freeze(root)
+      result = Farce.freeze_graph(root)
 
       assert_same root, result
       assert_same child, result.first
@@ -51,7 +51,7 @@ module Farce
       child.freeze
       root.freeze
 
-      assert_same root, Farce.deep_freeze(root)
+      assert_same root, Farce.freeze_graph(root)
       assert_same child, root.first
       assert_same child, root.last
       assert_same root, child.first
@@ -62,7 +62,7 @@ module Farce
       root = Record.new(child)
       child << root
 
-      assert_same root, Farce.deep_freeze(root)
+      assert_same root, Farce.freeze_graph(root)
       assert_same child, root.value
       assert_same root, child.first
       assert_predicate child, :frozen?
@@ -76,7 +76,7 @@ module Farce
       set = ::Set[element].freeze
       root = [hash, set].freeze
 
-      assert_same root, Farce.deep_freeze(root)
+      assert_same root, Farce.freeze_graph(root)
       assert_same hash, root.first
       assert_same set, root.last
       assert_same key, hash.keys.first
@@ -88,7 +88,7 @@ module Farce
     def test_traverses_already_frozen_containers
       child = [+"value"]
       root = [child].freeze
-      result = Farce.deep_freeze(root)
+      result = Farce.freeze_graph(root)
 
       assert_same root, result
       assert_same child, result.first
@@ -96,9 +96,9 @@ module Farce
     end
 
     def test_accepts_immediate_values
-      assert_nil Farce.deep_freeze(nil)
+      assert_nil Farce.freeze_graph(nil)
       [true, false, 42, :value].each do |value|
-        assert_same value, Farce.deep_freeze(value)
+        assert_same value, Farce.freeze_graph(value)
       end
     end
 
@@ -107,7 +107,7 @@ module Farce
         mod = type.new
         child = [+"value"]
         mod.instance_variable_set(:@child, child)
-        result = Farce.deep_freeze([mod])
+        result = Farce.freeze_graph([mod])
 
         assert_predicate result, :frozen?
         assert_same mod, result.first
@@ -123,7 +123,7 @@ module Farce
         mod.instance_variable_set(:@child, child)
         mod.const_set(:VALUE, constant)
 
-        assert_same mod, Farce.deep_freeze(mod, freeze_modules: true)
+        assert_same mod, Farce.freeze_graph(mod, freeze_modules: true)
         [mod, child, child.first].each { assert_predicate it, :frozen? }
         [constant, constant.first].each { assert_predicate it, :frozen? }
       end
@@ -135,7 +135,7 @@ module Farce
         child = [+"value"]
         mod.instance_variable_set(:@child, child)
 
-        assert_same mod, Farce.deep_freeze(mod, traverse_modules: true)
+        assert_same mod, Farce.freeze_graph(mod, traverse_modules: true)
         refute_predicate mod, :frozen?
         [child, child.first].each { assert_predicate it, :frozen? }
       end
@@ -147,14 +147,14 @@ module Farce
         child = [+"value"]
         mod.instance_variable_set(:@child, child)
 
-        assert_same mod, Farce.deep_freeze(mod, freeze_modules: true, traverse_modules: false)
+        assert_same mod, Farce.freeze_graph(mod, freeze_modules: true, traverse_modules: false)
         assert_predicate mod, :frozen?
         [child, child.first].each { refute_predicate it, :frozen? }
       end
     end
 
     def test_rejects_copy_option
-      assert_raises(ArgumentError) { Farce.deep_freeze([], copy: true) }
+      assert_raises(ArgumentError) { Farce.freeze_graph([], copy: true) }
     end
   end
 end

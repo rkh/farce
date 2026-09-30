@@ -134,19 +134,19 @@ module Farce
   #
   # @example Freeze nested values in place
   #   values = { tags: [+"ruby"] }
-  #   Farce.deep_freeze(values).equal?(values)        # => true
+  #   Farce.freeze_graph(values).equal?(values)        # => true
   #   values[:tags].frozen?                           # => true
   #   values[:tags].first.frozen?                     # => true
   #
   # @example Freeze children of an already frozen container
   #   values = [+"ruby"].freeze
-  #   Farce.deep_freeze(values).equal?(values)        # => true
+  #   Farce.freeze_graph(values).equal?(values)        # => true
   #   values.first.frozen?                            # => true
   #
   # @example Freeze module state while allowing new methods
   #   mod = Module.new
   #   mod.instance_variable_set(:@tags, [+"ruby"])
-  #   Farce.deep_freeze(mod, traverse_modules: true)
+  #   Farce.freeze_graph(mod, traverse_modules: true)
   #   mod.instance_variable_get(:@tags).first.frozen? # => true
   #   mod.frozen?                                     # => false
   #
@@ -156,7 +156,7 @@ module Farce
   #   variables. Defaults to `freeze_modules`, but can be set independently.
   # @return [Object] the original root. Skipped modules retain their frozen state.
   # @see Walker
-  def self.deep_freeze(object, freeze_modules: false, traverse_modules: freeze_modules)
+  def self.freeze_graph(object, freeze_modules: false, traverse_modules: freeze_modules)
     Walker.visit(object) do |node, walker|
       if Module === node
         traverse = traverse_modules
