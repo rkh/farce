@@ -21,6 +21,7 @@ module Farce
       protected
 
       def internal_map = scoped_value.map
+      def transaction_key_locks = scoped_value.key_locks
 
       private
 

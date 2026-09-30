@@ -8,6 +8,11 @@ module Farce
     class ConcurrentMap < Map
       include DuplicableMap
 
+      # Build an explicit transaction wrapper. Override this hook to compose
+      # higher-level operations from wrappers in the same transaction.
+      # @param transaction [Transaction] the current attempt
+      def transaction_wrapper(transaction) = Transaction::Map.new(transaction, self, internal_map)
+
       # (see Map#[])
       def [](key) = internal_map[key]
 

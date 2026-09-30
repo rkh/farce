@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "transaction.h"
 
 #include <stdatomic.h>
 
@@ -269,4 +270,19 @@ containers_init_flag(VALUE namespace)
     rb_define_method(cFlag, "swap", flag_swap, 1);
     rb_define_method(cFlag, "compare_and_set", flag_compare_and_set, 2);
     rb_define_method(cFlag, "toggle", flag_toggle, 0);
+}
+
+/* Called only by transaction validation. Ordinary flag operations are unchanged. */
+bool
+farce_transaction_flag_set(VALUE self)
+{
+    flag_t *flag = get_flag(self);
+#if CONTAINERS_FLAG_LOCK_FREE
+    return atomic_load_explicit(&flag->value, memory_order_relaxed);
+#else
+    pthread_mutex_lock(&flag->lock);
+    bool value = flag->value;
+    pthread_mutex_unlock(&flag->lock);
+    return value;
+#endif
 }

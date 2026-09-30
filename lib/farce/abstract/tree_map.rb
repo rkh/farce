@@ -38,6 +38,14 @@ module Farce
         super()
       end
 
+      # Stage ordered entries in an explicit transaction.
+      # @return [Farce::Transaction::TreeMap]
+      def transaction_wrapper(transaction)
+        transaction.enlist(transaction_key_locks)
+        manager = @manager if defined?(@manager)
+        Transaction::TreeMap.new(transaction, self, internal_map, manager:)
+      end
+
       # (see Map#[])
       def [](key) = unwrap_value(internal_map[prepare_key(key)])
 
@@ -223,6 +231,10 @@ module Farce
       # TreeMap values are compared by equality, never by identity.
       # @return [false]
       def compare_values_by_identity? = false
+
+      protected
+
+      def transaction_key_locks = @key_locks
 
       private
 

@@ -55,6 +55,11 @@ module Farce
       super()
     end
 
+    # Build a wrapper that preserves this object's value modes.
+    def transaction_wrapper(transaction)
+      Transaction::Atom.new(transaction, self, @atom, manager: @manager, nil_value: NIL_VALUE)
+    end
+
     # The default mode used to transfer values between Ractors.
     # @return [Symbol]
     def mode = @manager.mode

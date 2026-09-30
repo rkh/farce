@@ -42,6 +42,11 @@ module Farce
         super()
       end
 
+      # Build a wrapper that preserves this object's value modes.
+      def transaction_wrapper(transaction)
+        Transaction::Map.new(transaction, self, @map, manager: @manager, nil_value: NIL_VALUE)
+      end
+
       # The default transfer mode for values.
       # @return [Symbol]
       def mode                        = @manager.mode

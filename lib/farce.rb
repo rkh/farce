@@ -53,6 +53,9 @@ module Farce
   autoload :DEDUPER, "farce/deduper"
   private_constant :Internal, :UNDEFINED, :DEDUPER
 
+  # Run an explicit transaction. See {Transaction.run} for retry options.
+  def self.transaction(...) = Transaction.run(...)
+
   # @overload clock
   #   The current clock time
   #

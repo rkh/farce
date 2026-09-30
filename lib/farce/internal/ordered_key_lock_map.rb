@@ -45,6 +45,8 @@ module Farce
         end
       end
 
+      def transaction_snapshot = PortableTransaction::ReservationEntry.new(self)
+
       private
 
       def release(key, gate)

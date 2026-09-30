@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "transaction.h"
 #include "ruby/fiber/scheduler.h"
 #include "ruby/io.h"
 
@@ -2026,6 +2027,70 @@ key_lock_initialize_copy(VALUE self, VALUE other)
     rb_raise(rb_eTypeError, "key lock maps cannot be copied");
 }
 
+static bool
+map_transaction_valid(farce_transaction_entry_t *entry)
+{
+    map_t *map = entry->source_data;
+    return map->generation == entry->version && !map->comparing && !map->reservations;
+}
+
+static void
+map_transaction_apply(farce_transaction_entry_t *entry)
+{
+    map_t *map = entry->source_data;
+    map_t *copy = entry->working_data;
+    map_slot_t *slots = map->slots;
+    size_t capacity = map->capacity, size = map->size, tombstones = map->tombstones;
+    map->slots = copy->slots;
+    map->capacity = copy->capacity;
+    map->size = copy->size;
+    map->tombstones = copy->tombstones;
+    map->iteration_epoch++;
+    copy->slots = slots;
+    copy->capacity = capacity;
+    copy->size = size;
+    copy->tombstones = tombstones;
+}
+
+static void
+map_transaction_notify(farce_transaction_entry_t *entry)
+{
+    map_notify_waiters_locked(entry->source_data);
+}
+
+static const farce_transaction_ops_t map_transaction_ops = {
+    map_transaction_valid, map_transaction_apply, map_transaction_notify,
+};
+
+static VALUE
+map_transaction_snapshot(VALUE self)
+{
+    map_t *source = get_map(self);
+    VALUE working = source->shareable ? map_allocate(cMap) : unshared_map_allocate(cUnsharedMap);
+    map_t *copy;
+    TypedData_Get_Struct(working, map_t, &map_type, copy);
+    farce_transaction_entry_t *entry;
+    VALUE result = farce_transaction_entry_new(
+        self, working, source, copy, &source->lock, &map_transaction_ops, &entry
+    );
+    pthread_mutex_lock(&source->lock);
+    copy->slots = malloc(source->capacity * sizeof(map_slot_t));
+    if (!copy->slots) {
+        pthread_mutex_unlock(&source->lock);
+        rb_memerror();
+    }
+    memcpy(copy->slots, source->slots, source->capacity * sizeof(map_slot_t));
+    copy->capacity = source->capacity;
+    copy->size = source->size;
+    copy->tombstones = source->tombstones;
+    copy->compare_keys_by_identity = source->compare_keys_by_identity;
+    copy->compare_values_by_identity = source->compare_values_by_identity;
+    copy->initialized = true;
+    entry->version = source->generation;
+    pthread_mutex_unlock(&source->lock);
+    return result;
+}
+
 static void
 map_define_methods(VALUE klass)
 {
@@ -2046,6 +2111,7 @@ map_define_methods(VALUE klass)
     rb_define_method(klass, "key?", map_key_p, 1);
     rb_define_method(klass, "delete", map_delete, 1);
     rb_define_method(klass, "clear", map_clear, 0);
+    rb_define_method(klass, "transaction_snapshot", map_transaction_snapshot, 0);
     rb_define_method(klass, "compare_and_set", map_compare_and_set, -1);
     rb_define_method(klass, "upsert", map_upsert, -1);
     rb_define_method(klass, "compare_keys_by_identity?", map_compare_keys_by_identity_p, 0);

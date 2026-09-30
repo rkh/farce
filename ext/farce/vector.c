@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "transaction.h"
 #include "ruby/io.h"
 
 #include <errno.h>
@@ -995,6 +996,66 @@ unshared_vector_reverse_each(VALUE self)
     return self;
 }
 
+static bool
+vector_transaction_valid(farce_transaction_entry_t *entry)
+{
+    vector_t *vector = entry->source_data;
+    return vector->generation == entry->version && !vector->updating;
+}
+
+static void
+vector_transaction_apply(farce_transaction_entry_t *entry)
+{
+    vector_t *vector = entry->source_data;
+    vector_t *copy = entry->working_data;
+    VALUE *values = vector->values;
+    size_t capacity = vector->capacity, size = vector->size;
+    vector->values = copy->values;
+    vector->capacity = copy->capacity;
+    vector->size = copy->size;
+    copy->values = values;
+    copy->capacity = capacity;
+    copy->size = size;
+}
+
+static void
+vector_transaction_notify(farce_transaction_entry_t *entry)
+{
+    vector_notify_waiters_locked(entry->source_data);
+}
+
+static const farce_transaction_ops_t vector_transaction_ops = {
+    vector_transaction_valid, vector_transaction_apply, vector_transaction_notify,
+};
+
+static VALUE
+vector_transaction_snapshot(VALUE self)
+{
+    vector_t *source = get_vector(self);
+    VALUE working = vector_allocate(cVector);
+    vector_t *copy;
+    TypedData_Get_Struct(working, vector_t, &vector_type, copy);
+    farce_transaction_entry_t *entry;
+    VALUE result = farce_transaction_entry_new(
+        self, working, source, copy, &source->lock, &vector_transaction_ops, &entry
+    );
+    pthread_mutex_lock(&source->lock);
+    copy->values = malloc(source->capacity * sizeof(VALUE));
+    if (!copy->values) {
+        pthread_mutex_unlock(&source->lock);
+        rb_memerror();
+    }
+    memcpy(copy->values, source->values, source->size * sizeof(VALUE));
+    for (size_t i = source->size; i < source->capacity; i++) copy->values[i] = Qnil;
+    copy->capacity = source->capacity;
+    copy->size = source->size;
+    copy->compare_by_identity = source->compare_by_identity;
+    copy->initialized = true;
+    entry->version = source->generation;
+    pthread_mutex_unlock(&source->lock);
+    return result;
+}
+
 void
 containers_init_vector(VALUE namespace)
 {
@@ -1019,6 +1080,7 @@ containers_init_vector(VALUE namespace)
     rb_define_method(cVector, "pop", vector_pop, -1);
     rb_define_method(cVector, "swap", vector_swap, -1);
     rb_define_method(cVector, "store_if_absent", vector_store_if_absent, -1);
+    rb_define_method(cVector, "transaction_snapshot", vector_transaction_snapshot, 0);
     rb_define_method(cVector, "compare_and_set", vector_compare_and_set, -1);
     rb_define_method(cVector, "upsert", vector_upsert, -1);
     rb_define_method(cVector, "update", vector_update, -1);

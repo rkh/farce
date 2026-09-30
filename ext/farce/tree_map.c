@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "transaction.h"
 #include <ruby/atomic.h>
 #include <ruby/fiber/scheduler.h>
 #include <ruby/io.h>
@@ -1775,9 +1776,81 @@ tc_core_map_clear(VALUE self)
     return tc_core_map_call_locked(self, core, tc_core_map_clear_body, &arguments);
 }
 
+static bool
+tc_transaction_valid(farce_transaction_entry_t *entry)
+{
+    tc_core_map *source = entry->source_data;
+    return NIL_P(source->owner_fiber) &&
+        !tc_core_map_publication_busy(RUBY_ATOMIC_LOAD(source->publication_state)) &&
+        source->map.revision == entry->version;
+}
+
+static void
+tc_transaction_apply(farce_transaction_entry_t *entry)
+{
+    tc_core_map *source = entry->source_data;
+    tc_core_map *working = entry->working_data;
+    tc_link *root = source->map.root;
+    size_t size = source->map.size;
+    source->map.root = working->map.root;
+    source->map.size = working->map.size;
+    source->map.revision++;
+    working->map.root = root;
+    working->map.size = size;
+    working->map.revision++;
+}
+
+static void
+tc_transaction_notify(farce_transaction_entry_t *entry)
+{
+    tc_core_map_notify_one_locked(entry->source_data);
+}
+
+static const farce_transaction_ops_t tc_transaction_ops = {
+    tc_transaction_valid, tc_transaction_apply, tc_transaction_notify,
+};
+
+typedef struct {
+    tc_core_map_arguments arguments;
+    farce_transaction_entry_t *entry;
+} tc_transaction_snapshot_arguments;
+
+static VALUE
+tc_transaction_snapshot_body(VALUE opaque)
+{
+    tc_transaction_snapshot_arguments *snapshot = (void *)opaque;
+    snapshot->entry->version = snapshot->arguments.core->map.revision;
+    return tc_core_map_snapshot_body((VALUE)&snapshot->arguments);
+}
+
+static VALUE
+tc_transaction_snapshot(VALUE self)
+{
+    tc_core_map *source = tc_core_map_get(self);
+    if (!source->synchronized) {
+        rb_raise(rb_eTypeError, "unsafe tree maps do not support transactions");
+    }
+    VALUE working = rb_class_new_instance(0, NULL, rb_obj_class(self));
+    tc_core_map *copy = tc_core_map_get(working);
+    farce_transaction_entry_t *entry;
+    VALUE result = farce_transaction_entry_new(
+        self, working, source, copy, &source->lock, &tc_transaction_ops, &entry
+    );
+    tc_transaction_snapshot_arguments snapshot = {
+        .arguments = {.self = self, .core = source}, .entry = entry,
+    };
+    VALUE pairs = tc_core_map_call_locked(self, source, tc_transaction_snapshot_body, &snapshot);
+    for (long i = 0; i < RARRAY_LEN(pairs); i += 2) {
+        tc_core_map_store(working, RARRAY_AREF(pairs, i), RARRAY_AREF(pairs, i + 1));
+    }
+    RB_GC_GUARD(pairs);
+    return result;
+}
+
 static void
 tc_core_map_define_methods(VALUE klass)
 {
+    rb_define_method(klass, "transaction_snapshot", tc_transaction_snapshot, 0);
     rb_define_method(klass, "initialize", tc_core_map_initialize, -1);
     rb_define_method(klass, "initialize_copy", tc_core_map_initialize_copy, 1);
     rb_define_method(klass, "[]", tc_core_map_aref, 1);

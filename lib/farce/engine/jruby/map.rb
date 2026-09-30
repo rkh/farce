@@ -9,6 +9,7 @@ module Farce
   module Internal # :nodoc: all
     class Map
       include MapKeyCoordination
+      include TransactionMapBackend
 
       BASIC_OBJECT_EQUAL_METHOD = BasicObject.instance_method(:equal?)
       private_constant :BASIC_OBJECT_EQUAL_METHOD

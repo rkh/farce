@@ -412,6 +412,11 @@ module Farce
 
     unless const_defined?(:UnsharedMap, false)
       class UnsharedMap < UnsharedMapBase
+        def transaction_snapshot = PortableTransaction.snapshot(self, :strong_map)
+
+        def transaction_pairs
+          PortableTransaction::StrongMapEntry.pairs(@index)
+        end
       end
     end
 

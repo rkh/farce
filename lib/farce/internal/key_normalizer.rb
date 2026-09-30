@@ -78,6 +78,12 @@ module Farce
           Internal::Freeze.publish(self) if Ractor.shareable?(map)
         end
 
+        # @api private
+        def transaction_source = @map
+
+        # @api private
+        def transaction_key(key) = @normalizer.call(key)
+
         def freeze
           @map.freeze
           self

@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "transaction.h"
 #include "ruby/fiber/scheduler.h"
 #include "ruby/io.h"
 
@@ -819,6 +820,52 @@ atom_compare_by_identity_p(VALUE self)
     return get_atom(self)->compare_by_identity ? Qtrue : Qfalse;
 }
 
+static bool
+atom_transaction_valid(farce_transaction_entry_t *entry)
+{
+    atom_t *atom = entry->source_data;
+    return atom->version == entry->version && !atom->updating;
+}
+
+static void
+atom_transaction_apply(farce_transaction_entry_t *entry)
+{
+    atom_t *atom = entry->source_data;
+    atom_t *working = entry->working_data;
+    atom->value = working->value;
+}
+
+static void
+atom_transaction_notify(farce_transaction_entry_t *entry)
+{
+    atom_changed(entry->source_data);
+}
+
+static const farce_transaction_ops_t atom_transaction_ops = {
+    atom_transaction_valid, atom_transaction_apply, atom_transaction_notify,
+};
+
+static VALUE
+atom_transaction_snapshot(VALUE self)
+{
+    atom_t *source = get_atom(self);
+    if (source->weak) rb_raise(rb_eTypeError, "weak atoms do not support transactions");
+    VALUE working = atom_allocate(cAtom);
+    atom_t *copy;
+    TypedData_Get_Struct(working, atom_t, &atom_type, copy);
+    farce_transaction_entry_t *entry;
+    VALUE result = farce_transaction_entry_new(
+        self, working, source, copy, &source->lock, &atom_transaction_ops, &entry
+    );
+    pthread_mutex_lock(&source->lock);
+    copy->value = source->value;
+    copy->compare_by_identity = source->compare_by_identity;
+    copy->unshared = source->unshared;
+    copy->initialized = true;
+    entry->version = source->version;
+    pthread_mutex_unlock(&source->lock);
+    return result;
+}
 
 static void
 define_atom_methods(VALUE klass)
@@ -831,6 +878,7 @@ define_atom_methods(VALUE klass)
     rb_define_method(klass, "store", atom_store, -1);
     rb_define_method(klass, "swap", atom_swap, -1);
     rb_define_method(klass, "store_if_absent", atom_store_if_absent, -1);
+    rb_define_method(klass, "transaction_snapshot", atom_transaction_snapshot, 0);
     rb_define_method(klass, "compare_and_set", atom_compare_and_set, -1);
     rb_define_method(klass, "update", atom_update, -1);
     rb_define_method(klass, "upsert", atom_upsert, -1);
@@ -846,6 +894,7 @@ unshared_weak_atom_initialize_copy(VALUE self, VALUE other)
     rb_raise(rb_eTypeError, "cannot copy UnsharedWeakAtom");
 }
 #endif
+
 
 void
 containers_init_atom(VALUE namespace)

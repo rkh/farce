@@ -18,6 +18,11 @@ module Farce
         @farce_frozen        = false
       end
 
+      # @api private
+      def transaction_snapshot
+        PortableTransaction.snapshot(self, :vector)
+      end
+
       def freeze
         @mutex.synchronize { @farce_frozen = true }
         self

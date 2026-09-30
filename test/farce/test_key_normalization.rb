@@ -296,7 +296,8 @@ module Farce
       facade_protocol = Abstract::ConcurrentMap.public_instance_methods(false) |
         Internal.const_get(:MapValueModes).public_instance_methods(false)
       facade_helpers = %i[
-        each_pair mode shareable_keys? shareable_values? values wait_until wait_until_value wait_until_match
+        transaction_wrapper each_pair mode shareable_keys? shareable_values? values
+        wait_until wait_until_value wait_until_match
         wait_while wait_while_match wait_while_value
         delete_if reject! compact! keep_if select! filter! transform_values! merge!
       ]
@@ -326,7 +327,7 @@ module Farce
           keyed:      %i[[] []= delete fetch getkey key? store_if_absent],
           key_free:   %i[
             clear compare_keys_by_identity? compare_values_by_identity? each each_key each_live each_pair each_value
-            empty? first_key keys last_key length pop shareable_keys? shift size values
+            empty? first_key keys last_key length pop shareable_keys? shift size transaction_wrapper values
           ],
         },
         Abstract::BoundedMap => {

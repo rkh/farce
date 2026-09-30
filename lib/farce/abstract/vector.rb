@@ -19,6 +19,13 @@ module Farce
       #   @return [Vector] A new vector containing the source values.
       def self.[](*source, **) = new(source, **)
 
+      # Build an explicit transaction wrapper. Override this hook to compose
+      # higher-level operations from wrappers in the same transaction.
+      # @param transaction [Transaction] the current attempt
+      def transaction_wrapper(transaction)
+        Transaction::Vector.new(transaction, self, internal_vector)
+      end
+
       # Iterate over live entries, up to the length when enumeration starts.
       # Changes can affect entries not yet visited. Indexes beyond the starting length are not visited.
       # Each entry is read separately. The block runs without holding a collection lock.

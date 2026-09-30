@@ -9,6 +9,8 @@ module Farce
     class TreeMap < Abstract::TreeMap
       include Unshareable
 
+      undef_method :transaction_wrapper
+
       private
 
       def new_tree_map(...)   = Internal::UnsafeTreeMap.new(...)

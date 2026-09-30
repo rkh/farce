@@ -10,6 +10,16 @@ module Farce
     # Synchronized native-TruffleRuby map. Storage and ordered operations come
     # from UnsafeTreeMap; this subclass adds coordination and guarded mutability.
     class TreeMap < UnsafeTreeMap
+      def transaction_snapshot
+        state = initialized_state
+        entries, revision = with_map_operation(state, mutation: false) do
+          [state.entries.map { Entry.new(it.key, it.value) }, state.revision]
+        end
+        working = self.class.new
+        working.instance_variable_get(:@state).instance_variable_set(:@entries, entries)
+        PortableTransaction::TreeEntry.new(self, working, revision, state.lock, :@entries)
+      end
+
       private
 
       def synchronized?                  = true

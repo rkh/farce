@@ -38,6 +38,22 @@ module Farce
         end
       end
 
+      # Adapt the existing Java lock only for transaction participants.
+      TransactionLock = Struct.new(:lock) do
+        def try_lock = lock.tryLock
+        def unlock = lock.unlock
+      end
+      private_constant :TransactionLock
+
+      def transaction_snapshot
+        raise TypeError, "unsafe tree maps do not support transactions" unless synchronized?
+        tree, revision = access { [JVMContainers::TreeMap.new(@state.tree), @state.revision] }
+        working = self.class.new
+        working.instance_variable_get(:@state).tree = tree
+        lock = TransactionLock.new(@guard.instance_variable_get(:@lock))
+        PortableTransaction::TreeEntry.new(self, working, revision, lock, :tree)
+      end
+
       def prepare_key(key) = canonical_key(key)
 
       def freeze

@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "transaction.h"
 #include "shareable.h"
 #include "ruby/fiber/scheduler.h"
 #include "ruby/io.h"
@@ -302,6 +303,7 @@ Init_farce(void)
         farce_load_native_fiber_scheduler,
         0
     );
+    containers_init_transaction(mInternal);
     containers_init_atom(mInternal);
     containers_init_counter(mInternal);
     containers_init_exchanger(mInternal);

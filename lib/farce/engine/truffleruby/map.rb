@@ -9,6 +9,7 @@ module Farce
   module Internal # :nodoc: all
     class Map < TruffleRuby::ConcurrentMap
       include MapKeyCoordination
+      include TransactionMapBackend
 
       BASIC_OBJECT_EQUAL_METHOD = BasicObject.instance_method(:equal?)
       private_constant :BASIC_OBJECT_EQUAL_METHOD
@@ -37,23 +38,6 @@ module Farce
       end
       private_constant :Key
 
-      alias concurrent_get []
-      alias concurrent_store []=
-      alias concurrent_clear clear
-      alias concurrent_compute compute
-      alias concurrent_compute_if_absent compute_if_absent
-      alias concurrent_compute_if_present compute_if_present
-      alias concurrent_delete delete
-      alias concurrent_delete_pair delete_pair
-      alias concurrent_each_pair each_pair
-      alias concurrent_get_and_set get_and_set
-      alias concurrent_get_or_default get_or_default
-      alias concurrent_key? key?
-      alias concurrent_merge_pair merge_pair
-      alias concurrent_replace_if_exists replace_if_exists
-      alias concurrent_replace_pair replace_pair
-      alias concurrent_size size
-
       def initialize(
         initial_mapping = nil,
         compare_by_identity: false,
@@ -66,6 +50,9 @@ module Farce
         raise TypeError, "initial mapping must be a Hash" unless initial_mapping.nil? || initial_mapping.is_a?(Hash)
 
         super()
+        # Preserve the native superclass interface while keeping replaceable storage.
+        # Transactions can prepare a replacement without editing live entries.
+        @map = TruffleRuby::ConcurrentMap.new
         @compare_keys_by_identity   = compare_keys_by_identity
         @compare_values_by_identity = compare_values_by_identity
         @freeze_state = Flag.new(false)
@@ -641,6 +628,23 @@ module Farce
       end
 
       def identical?(left, right) = BASIC_OBJECT_EQUAL_METHOD.bind_call(left, right)
+
+      def concurrent_get(...) = @map.[](...)
+      def concurrent_store(...) = @map.[]=(...)
+      def concurrent_clear(...) = @map.clear(...)
+      def concurrent_compute(...) = @map.compute(...)
+      def concurrent_compute_if_absent(...) = @map.compute_if_absent(...)
+      def concurrent_compute_if_present(...) = @map.compute_if_present(...)
+      def concurrent_delete(...) = @map.delete(...)
+      def concurrent_delete_pair(...) = @map.delete_pair(...)
+      def concurrent_each_pair(...) = @map.each_pair(...)
+      def concurrent_get_and_set(...) = @map.get_and_set(...)
+      def concurrent_get_or_default(...) = @map.get_or_default(...)
+      def concurrent_key?(...) = @map.key?(...)
+      def concurrent_merge_pair(...) = @map.merge_pair(...)
+      def concurrent_replace_if_exists(...) = @map.replace_if_exists(...)
+      def concurrent_replace_pair(...) = @map.replace_pair(...)
+      def concurrent_size(...) = @map.size(...)
 
       private :concurrent_get, :concurrent_store, :concurrent_clear, :concurrent_compute,
         :concurrent_compute_if_absent, :concurrent_compute_if_present, :concurrent_delete,

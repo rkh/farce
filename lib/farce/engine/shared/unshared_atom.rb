@@ -25,6 +25,11 @@ module Farce
         @farce_frozen        = false
       end
 
+      # @api private
+      def transaction_snapshot
+        PortableTransaction.snapshot(self, :atom)
+      end
+
       def value = @mutex.synchronize { @value }
 
       def freeze

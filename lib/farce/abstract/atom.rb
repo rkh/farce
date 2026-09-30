@@ -14,6 +14,13 @@ module Farce
       include Value
       include Internal::ValueSerialization
 
+      # Build an explicit transaction wrapper. Override this hook to compose
+      # higher-level operations from wrappers in the same transaction.
+      # @param transaction [Transaction] the current attempt
+      def transaction_wrapper(transaction)
+        Transaction::Atom.new(transaction, self, internal_atom)
+      end
+
       # Whether comparisons use object identity instead of equality.
       # @return [Boolean]
       def compare_by_identity? = internal_atom.compare_by_identity?

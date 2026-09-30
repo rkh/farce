@@ -108,6 +108,10 @@ module Farce
         super()
       end
 
+      # Stage membership changes through the backing map.
+      # @return [Farce::Transaction::Set]
+      def transaction_wrapper(transaction) = Transaction::Set.new(transaction, self, @map)
+
       # Add an element and return self.
       # @param element [BasicObject] The element to normalize and store.
       # @param mode [Symbol, nil] Override the transfer mode for this insertion. Only

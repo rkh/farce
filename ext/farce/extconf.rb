@@ -48,7 +48,7 @@ epoll = have_header("sys/epoll.h")
 kqueue = have_header("sys/event.h")
 $srcs = %w[
   atom.c bounded_map.c counter.c darwin.c dict.c exchanger.c farce.c flag.c lock.c map.c priority_queue.c
-  queue.c signal.c tree_map.c trie.c unshareable.c unshared_signal.c vector.c weak_map.c
+  queue.c signal.c transaction.c tree_map.c trie.c unshareable.c unshared_signal.c vector.c weak_map.c
 ]
 $srcs.concat(epoll || kqueue ? %w[drivers.c io.c reactor.c] : ["unsupported.c"])
 
