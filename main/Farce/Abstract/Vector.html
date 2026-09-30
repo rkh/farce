@@ -2920,6 +2920,29 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#wait_until-instance_method" title="#wait_until (instance method)">#<strong>wait_until</strong>(index, timeout: nil) {|value| ... } &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Wait until a block condition matches the value at an index.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#wait_until_changed-instance_method" title="#wait_until_changed (instance method)">#<strong>wait_until_changed</strong>(index, expected, timeout: nil)  &#x21d2; BasicObject<sup>?</sup> </a>
     
 
@@ -2943,6 +2966,29 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#wait_until_match-instance_method" title="#wait_until_match (instance method)">#<strong>wait_until_match</strong>(index, object, timeout: nil)  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Wait until <code>object === value</code> is true.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#wait_until_non_nil-instance_method" title="#wait_until_non_nil (instance method)">#<strong>wait_until_non_nil</strong>(index, timeout: nil)  &#x21d2; BasicObject<sup>?</sup> </a>
     
 
@@ -2958,6 +3004,98 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Wait until an index contains a non-nil value.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#wait_until_value-instance_method" title="#wait_until_value (instance method)">#<strong>wait_until_value</strong>(index, object, timeout: nil)  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Wait until the current value equals an object using the configured comparison mode.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#wait_while-instance_method" title="#wait_while (instance method)">#<strong>wait_while</strong>(index, timeout: nil) {|value| ... } &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Wait while the block returns a truthy value.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#wait_while_match-instance_method" title="#wait_while_match (instance method)">#<strong>wait_while_match</strong>(index, object, timeout: nil)  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Wait while <code>object === value</code> is true.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#wait_while_value-instance_method" title="#wait_while_value (instance method)">#<strong>wait_while_value</strong>  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Wait until an index no longer matches expected.</p>
 </div></span>
   
 </li>
@@ -4558,13 +4696,13 @@ contract.</p>
       <pre class="lines">
 
 
-980
-981
-982
-983</pre>
+1033
+1034
+1035
+1036</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 980</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1033</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
   <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -4854,10 +4992,10 @@ This never grows the vector. Matching uses the configured comparison mode.</p>
       <pre class="lines">
 
 
-973</pre>
+1026</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 973</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1026</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span></pre>
     </td>
@@ -6147,10 +6285,10 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-970</pre>
+1023</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 970</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1023</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span></pre>
     </td>
@@ -11652,10 +11790,10 @@ block.</p>
       <pre class="lines">
 
 
-976</pre>
+1029</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 976</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1029</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -11783,10 +11921,10 @@ block.</p>
       <pre class="lines">
 
 
-966</pre>
+1019</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 966</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1019</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span></pre>
     </td>
@@ -14760,6 +14898,150 @@ directly.</p>
 </div>
     
       <div class="method_details ">
+  <h3 class="signature " id="wait_until-instance_method">
+  
+    #<strong>wait_until</strong>(index, timeout: nil) {|value| ... } &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Wait until a block condition matches the value at an index.
+Absent indexes are observed as nil.
+One timeout budget covers all checks and waits. The block is not interrupted.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the index to observe. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the total seconds available</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the current value</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>whether the value matches</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the matching value, or nil on timeout</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>LocalJumpError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>if no block is given</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+959</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 959</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
   <h3 class="signature " id="wait_until_changed-instance_method">
   
     #<strong>wait_until_changed</strong>(index, expected, timeout: nil)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
@@ -14852,16 +15134,124 @@ directly.</p>
       <pre class="lines">
 
 
-955
-956
-957</pre>
+1005
+1006
+1007</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 955</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1005</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="wait_until_match-instance_method">
+  
+    #<strong>wait_until_match</strong>(index, object, timeout: nil)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Wait until <code>object === value</code> is true.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>object</span>
+      
+      
+        <span class='type'>(<tt>#===</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the pattern to match</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the index to observe. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the total seconds available</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the matching value, or nil on timeout</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+996
+997
+998</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 996</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_wait_until_match'>wait_until_match</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span> <span class='comment'># rubocop:disable Style/CaseEquality
+</span><span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -14945,12 +15335,478 @@ directly.</p>
       <pre class="lines">
 
 
-963</pre>
+1016</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 963</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1016</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="wait_until_value-instance_method">
+  
+    #<strong>wait_until_value</strong>(index, object, timeout: nil)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Wait until the current value equals an object using the configured comparison mode.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>object</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to compare with the current value</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the index to observe. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the total seconds available</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the matching value, or nil on timeout</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+987
+988
+989</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 987</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_wait_until_value'>wait_until_value</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>?</span> <span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="wait_while-instance_method">
+  
+    #<strong>wait_while</strong>(index, timeout: nil) {|value| ... } &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Wait while the block returns a truthy value.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the index to observe. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the total seconds available</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the current value</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>a truthy value to keep waiting, or nil or false to stop</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value when the condition becomes false, or nil on timeout</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>LocalJumpError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>if no block is given</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+968
+969
+970
+971</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 968</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_wait_while'>wait_while</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+  <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='op'>!</span><span class='kw'>yield</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="wait_while_match-instance_method">
+  
+    #<strong>wait_while_match</strong>(index, object, timeout: nil)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Wait while <code>object === value</code> is true.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>object</span>
+      
+      
+        <span class='type'>(<tt>#===</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the pattern to stop matching</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the index to observe. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the total seconds available</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the first nonmatching value, or nil on timeout</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+978
+979
+980</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 978</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_wait_while_match'>wait_while_match</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_wait_while'>wait_while</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span> <span class='comment'># rubocop:disable Style/CaseEquality
+</span><span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="wait_while_value-instance_method">
+  
+    #<strong>wait_while_value</strong>  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Wait until an index no longer matches expected. Absent indexes are observed as nil.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>expected</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to wait for the entry to stop matching.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum wait in seconds. Nil waits indefinitely.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The changed value, or nil on timeout.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+1010</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1010</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_wait_while_value'>wait_while_value</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
   </tr>
 </table>
@@ -15198,7 +16054,7 @@ directly.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 29 07:00:48 2026 by
+  Generated on Wed Sep 30 07:37:44 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -584,6 +584,11 @@ the stored values without claiming or opening their envelopes when possible.</p>
   
   
   
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Abstract/Atom.html" title="Farce::Abstract::Atom (class)">Farce::Abstract::Atom</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Atom.html#wait_until-instance_method" title="Farce::Abstract::Atom#wait_until (method)">#wait_until</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_until_match-instance_method" title="Farce::Abstract::Atom#wait_until_match (method)">#wait_until_match</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_until_value-instance_method" title="Farce::Abstract::Atom#wait_until_value (method)">#wait_until_value</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_while-instance_method" title="Farce::Abstract::Atom#wait_while (method)">#wait_while</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_while_match-instance_method" title="Farce::Abstract::Atom#wait_while_match (method)">#wait_while_match</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_while_value-instance_method" title="Farce::Abstract::Atom#wait_while_value (method)">#wait_while_value</a></span></p>
+
+  
+  
   
   
   
@@ -2274,14 +2279,14 @@ This may update and freeze the original. Already-shareable values pass through u
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_expected'>expected</span> <span class='op'>=</span> <span class='id identifier rubyid_wrap_comparison'>wrap_comparison</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_timeout_deadline'>timeout_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_timeout_deadline'>timeout_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
 
   <span class='kw'>while</span> <span class='kw'>true</span>
-    <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='ivar'>@atom</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='const'>TIMED_OUT</span> <span class='rbrace'>}</span>
+    <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='ivar'>@atom</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='const'>TIMED_OUT</span> <span class='rbrace'>}</span>
     <span class='kw'>return</span> <span class='id identifier rubyid_unwrap_result'>unwrap_result</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>TIMED_OUT</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
     <span class='kw'>return</span> <span class='id identifier rubyid_unwrap_value'>unwrap_value</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_values_equal?'>values_equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span>
 
-    <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='ivar'>@atom</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='const'>TIMED_OUT</span> <span class='rbrace'>}</span>
+    <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='ivar'>@atom</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='const'>TIMED_OUT</span> <span class='rbrace'>}</span>
     <span class='kw'>return</span> <span class='id identifier rubyid_unwrap_result'>unwrap_result</span><span class='lparen'>(</span><span class='id identifier rubyid_result'>result</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>TIMED_OUT</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_result'>result</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
@@ -2386,7 +2391,7 @@ This may update and freeze the original. Already-shareable values pass through u
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 29 07:00:44 2026 by
+  Generated on Wed Sep 30 07:37:37 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

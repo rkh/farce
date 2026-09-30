@@ -339,7 +339,7 @@ resulting stored value must still fit.</p>
   
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Abstract/Counter.html" title="Farce::Abstract::Counter (module)">Abstract::Counter</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Abstract/Counter.html#add-instance_method" title="Farce::Abstract::Counter#add (method)">#add</a></span>, <span class='object_link'><a href="Abstract/Counter.html#decrement_if_above-instance_method" title="Farce::Abstract::Counter#decrement_if_above (method)">#decrement_if_above</a></span>, <span class='object_link'><a href="Abstract/Counter.html#included-class_method" title="Farce::Abstract::Counter.included (method)">included</a></span>, <span class='object_link'><a href="Abstract/Counter.html#increment_if_below-instance_method" title="Farce::Abstract::Counter#increment_if_below (method)">#increment_if_below</a></span>, <span class='object_link'><a href="Abstract/Counter.html#inspect-instance_method" title="Farce::Abstract::Counter#inspect (method)">#inspect</a></span>, <span class='object_link'><a href="Abstract/Counter.html#reset-instance_method" title="Farce::Abstract::Counter#reset (method)">#reset</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Counter.html#add-instance_method" title="Farce::Abstract::Counter#add (method)">#add</a></span>, <span class='object_link'><a href="Abstract/Counter.html#decrement_if_above-instance_method" title="Farce::Abstract::Counter#decrement_if_above (method)">#decrement_if_above</a></span>, <span class='object_link'><a href="Abstract/Counter.html#included-class_method" title="Farce::Abstract::Counter.included (method)">included</a></span>, <span class='object_link'><a href="Abstract/Counter.html#increment_if_below-instance_method" title="Farce::Abstract::Counter#increment_if_below (method)">#increment_if_below</a></span>, <span class='object_link'><a href="Abstract/Counter.html#inspect-instance_method" title="Farce::Abstract::Counter#inspect (method)">#inspect</a></span>, <span class='object_link'><a href="Abstract/Counter.html#reset-instance_method" title="Farce::Abstract::Counter#reset (method)">#reset</a></span>, <span class='object_link'><a href="Abstract/Counter.html#wait_until-instance_method" title="Farce::Abstract::Counter#wait_until (method)">#wait_until</a></span>, <span class='object_link'><a href="Abstract/Counter.html#wait_until_above-instance_method" title="Farce::Abstract::Counter#wait_until_above (method)">#wait_until_above</a></span>, <span class='object_link'><a href="Abstract/Counter.html#wait_until_below-instance_method" title="Farce::Abstract::Counter#wait_until_below (method)">#wait_until_below</a></span>, <span class='object_link'><a href="Abstract/Counter.html#wait_until_changed-instance_method" title="Farce::Abstract::Counter#wait_until_changed (method)">#wait_until_changed</a></span>, <span class='object_link'><a href="Abstract/Counter.html#wait_until_match-instance_method" title="Farce::Abstract::Counter#wait_until_match (method)">#wait_until_match</a></span>, <span class='object_link'><a href="Abstract/Counter.html#wait_until_value-instance_method" title="Farce::Abstract::Counter#wait_until_value (method)">#wait_until_value</a></span>, <span class='object_link'><a href="Abstract/Counter.html#wait_while-instance_method" title="Farce::Abstract::Counter#wait_while (method)">#wait_while</a></span>, <span class='object_link'><a href="Abstract/Counter.html#wait_while_above-instance_method" title="Farce::Abstract::Counter#wait_while_above (method)">#wait_while_above</a></span>, <span class='object_link'><a href="Abstract/Counter.html#wait_while_below-instance_method" title="Farce::Abstract::Counter#wait_while_below (method)">#wait_while_below</a></span>, <span class='object_link'><a href="Abstract/Counter.html#wait_while_match-instance_method" title="Farce::Abstract::Counter#wait_while_match (method)">#wait_while_match</a></span>, <span class='object_link'><a href="Abstract/Counter.html#wait_while_value-instance_method" title="Farce::Abstract::Counter#wait_while_value (method)">#wait_while_value</a></span></p>
 
   
   
@@ -552,7 +552,9 @@ resulting stored value must still fit.</p>
 65
 66
 67
-68</pre>
+68
+69
+70</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 56</span>
@@ -569,6 +571,8 @@ resulting stored value must still fit.</p>
 
   <span class='kw'>alias</span> <span class='id identifier rubyid_subtract'>subtract</span> <span class='id identifier rubyid_decrement'>decrement</span>
   <span class='kw'>alias</span> <span class='id identifier rubyid_remove'>remove</span>   <span class='id identifier rubyid_decrement'>decrement</span>
+
+  <span class='id identifier rubyid_private'>private</span> <span class='symbol'>:change_signal</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -650,7 +654,9 @@ resulting stored value must still fit.</p>
 65
 66
 67
-68</pre>
+68
+69
+70</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 56</span>
@@ -667,6 +673,8 @@ resulting stored value must still fit.</p>
 
   <span class='kw'>alias</span> <span class='id identifier rubyid_subtract'>subtract</span> <span class='id identifier rubyid_decrement'>decrement</span>
   <span class='kw'>alias</span> <span class='id identifier rubyid_remove'>remove</span>   <span class='id identifier rubyid_decrement'>decrement</span>
+
+  <span class='id identifier rubyid_private'>private</span> <span class='symbol'>:change_signal</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -727,7 +735,9 @@ resulting stored value must still fit.</p>
 65
 66
 67
-68</pre>
+68
+69
+70</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 56</span>
@@ -744,6 +754,8 @@ resulting stored value must still fit.</p>
 
   <span class='kw'>alias</span> <span class='id identifier rubyid_subtract'>subtract</span> <span class='id identifier rubyid_decrement'>decrement</span>
   <span class='kw'>alias</span> <span class='id identifier rubyid_remove'>remove</span>   <span class='id identifier rubyid_decrement'>decrement</span>
+
+  <span class='id identifier rubyid_private'>private</span> <span class='symbol'>:change_signal</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -804,7 +816,9 @@ resulting stored value must still fit.</p>
 65
 66
 67
-68</pre>
+68
+69
+70</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/counter.rb', line 56</span>
@@ -821,6 +835,8 @@ resulting stored value must still fit.</p>
 
   <span class='kw'>alias</span> <span class='id identifier rubyid_subtract'>subtract</span> <span class='id identifier rubyid_decrement'>decrement</span>
   <span class='kw'>alias</span> <span class='id identifier rubyid_remove'>remove</span>   <span class='id identifier rubyid_decrement'>decrement</span>
+
+  <span class='id identifier rubyid_private'>private</span> <span class='symbol'>:change_signal</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -832,7 +848,7 @@ resulting stored value must still fit.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Sep 29 07:00:45 2026 by
+  Generated on Wed Sep 30 07:37:38 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
