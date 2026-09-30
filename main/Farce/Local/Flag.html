@@ -292,6 +292,29 @@ Only true and false are accepted. Read <span class='object_link'><a href="#value
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#unset-instance_method" title="#unset (instance method)">#<strong>unset</strong>  &#x21d2; false </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Set the flag to false.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#value-instance_method" title="#value (instance method)">#<strong>value</strong>  &#x21d2; Boolean </a>
     
 
@@ -581,10 +604,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-45</pre>
+49</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 45</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 49</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='rparen'>)</span></pre>
     </td>
@@ -706,10 +729,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-32</pre>
+36</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 32</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 36</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span></pre>
     </td>
@@ -778,10 +801,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-39</pre>
+43</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 39</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 43</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span></pre>
     </td>
@@ -831,12 +854,61 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-49</pre>
+53</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 49</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 53</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_toggle'>toggle</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_toggle'>toggle</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="unset-instance_method">
+  
+    #<strong>unset</strong>  &#x21d2; <tt>false</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Set the flag to false.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>false</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+31</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 31</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_unset'>unset</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_unset'>unset</span></pre>
     </td>
   </tr>
 </table>
@@ -904,7 +976,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 30 07:37:40 2026 by
+  Generated on Wed Sep 30 07:46:12 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

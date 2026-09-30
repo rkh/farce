@@ -260,6 +260,29 @@ directly from the native flag and avoid delegation overhead.</p>
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#unset-instance_method" title="#unset (instance method)">#<strong>unset</strong>  &#x21d2; false </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Set the flag to false.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#value-instance_method" title="#value (instance method)">#<strong>value</strong>  &#x21d2; Boolean </a>
     
 
@@ -442,14 +465,14 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-43
-44
-45
-46
-47</pre>
+47
+48
+49
+50
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
@@ -499,14 +522,14 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-43
-44
-45
-46
-47</pre>
+47
+48
+49
+50
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
@@ -596,14 +619,14 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-43
-44
-45
-46
-47</pre>
+47
+48
+49
+50
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
@@ -693,14 +716,14 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-43
-44
-45
-46
-47</pre>
+47
+48
+49
+50
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
@@ -754,14 +777,71 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-43
-44
-45
-46
-47</pre>
+47
+48
+49
+50
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
+
+<span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/ValueSerialization.html" title="Farce::Internal::ValueSerialization (module)">ValueSerialization</a></span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="unset-instance_method">
+  
+    #<strong>unset</strong>  &#x21d2; <tt>false</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Set the flag to false.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>false</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+47
+48
+49
+50
+51</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
@@ -815,14 +895,14 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-43
-44
-45
-46
-47</pre>
+47
+48
+49
+50
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
@@ -859,14 +939,14 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-43
-44
-45
-46
-47</pre>
+47
+48
+49
+50
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 43</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Flag (module)">Flag</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
@@ -883,7 +963,7 @@ directly from the native flag and avoid delegation overhead.</p>
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 30 07:37:36 2026 by
+  Generated on Wed Sep 30 07:46:10 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
