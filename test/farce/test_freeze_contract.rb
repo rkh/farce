@@ -4,6 +4,7 @@
 
 require_relative "../setup"
 require "json"
+require "weakref"
 require "yaml"
 
 module Farce
@@ -365,9 +366,9 @@ module Farce
 
       assert_frozen_weak_atom_collects(atom)
 
-      map, retained_key = build_frozen_weak_value_map
+      map, retained_key, value_reference = build_frozen_weak_value_map
 
-      assert_frozen_weak_map_collects(map)
+      assert_frozen_weak_map_collects(map, value_reference)
       assert retained_key
     end
 
@@ -595,11 +596,13 @@ module Farce
     def build_frozen_weak_value_map
       map = Strict::WeakValueMap.new
       key = Object.new.freeze
-      Thread.new do
-        map[key] = Object.new.freeze
+      value_reference = Thread.new do
+        value = Object.new.freeze
+        map[key] = value
         map.freeze
-      end.join
-      [map, key]
+        ::WeakRef.new(value)
+      end.value
+      [map, key, value_reference]
     end
 
     def assert_frozen_weak_atom_collects(atom)
@@ -611,10 +614,11 @@ module Farce
       flunk "frozen weak atom retained its value"
     end
 
-    def assert_frozen_weak_map_collects(map)
+    def assert_frozen_weak_map_collects(map, value_reference)
       50.times do
         collect_weak_references
-        return assert_empty(map) if map.empty?
+        # Checking the map itself can temporarily retain the value in its owner.
+        return assert_empty(map) unless value_reference.weakref_alive?
       end
 
       flunk "frozen weak map retained its value"
