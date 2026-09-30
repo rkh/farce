@@ -15,6 +15,7 @@ module Farce
         check_frozen!
         raise TypeError, "initial value must be an Integer" unless value.is_a?(Integer)
 
+        @signal = Signal.new
         @initial = value
         @counter = JVMContainers::AtomicLong.new(value)
         super()
@@ -27,6 +28,7 @@ module Farce
         raise TypeError, "value must be an Integer" unless value.is_a?(Integer)
 
         @counter.set(value)
+        @signal.broadcast
         value
       end
 
@@ -34,14 +36,14 @@ module Farce
         check_frozen!
         raise TypeError, "value must be an Integer" unless value.is_a?(Integer)
 
-        @counter.getAndSet(value)
+        @counter.getAndSet(value).tap { @signal.broadcast }
       end
 
       def add(delta = 1)
         check_frozen!
         raise TypeError, "delta must be an Integer" unless delta.is_a?(Integer)
 
-        @counter.addAndGet(delta)
+        @counter.addAndGet(delta).tap { @signal.broadcast }
       end
 
       def compare_and_set(expected_value, new_value)
@@ -49,14 +51,14 @@ module Farce
         raise TypeError, "expected value must be an Integer" unless expected_value.is_a?(Integer)
         raise TypeError, "replacement value must be an Integer" unless new_value.is_a?(Integer)
 
-        @counter.compareAndSet(expected_value, new_value)
+        @counter.compareAndSet(expected_value, new_value).tap { @signal.broadcast }
       end
 
       def subtract(delta = 1)
         check_frozen!
         raise TypeError, "delta must be an Integer" unless delta.is_a?(Integer)
 
-        @counter.addAndGet(-delta)
+        @counter.addAndGet(-delta).tap { @signal.broadcast }
       end
 
       def increment(delta = 1)
@@ -65,7 +67,7 @@ module Farce
           delta = Integer(delta)
           check_frozen!
         end
-        @counter.addAndGet(delta)
+        @counter.addAndGet(delta).tap { @signal.broadcast }
         self
       end
 
@@ -75,12 +77,14 @@ module Farce
           delta = Integer(delta)
           check_frozen!
         end
-        @counter.addAndGet(-delta)
+        @counter.addAndGet(-delta).tap { @signal.broadcast }
         self
       end
 
       alias value get
       alias value= store
+
+      def change_signal = @signal
 
       private
 
@@ -89,6 +93,7 @@ module Farce
       end
 
       def initialize_copy(other)
+        @signal = Signal.new
         @initial = other.initial
         @counter = JVMContainers::AtomicLong.new(other.value)
       end

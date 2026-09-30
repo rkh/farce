@@ -947,6 +947,56 @@ module Farce
       # @return [BasicObject, nil] The stored value, or nil on timeout.
       def upsert(index, initial, timeout: nil, &) = internal_vector.upsert(index, initial, timeout:, &)
 
+      # Wait until a block condition matches the value at an index.
+      # Absent indexes are observed as nil.
+      # One timeout budget covers all checks and waits. The block is not interrupted.
+      # @yieldparam value [BasicObject, nil] the current value
+      # @yieldreturn [Boolean] whether the value matches
+      # @param index [Integer] the index to observe. Negative indexes count from the end.
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [BasicObject, nil] the matching value, or nil on timeout
+      # @raise [LocalJumpError] if no block is given
+      def wait_until(index, timeout: nil, &) = Internal.wait_until(self, index, timeout:, &)
+
+      # Wait while the block returns a truthy value.
+      # @yieldparam value [BasicObject, nil] the current value
+      # @yieldreturn [BasicObject] a truthy value to keep waiting, or nil or false to stop
+      # @param index [Integer] the index to observe. Negative indexes count from the end.
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [BasicObject, nil] the value when the condition becomes false, or nil on timeout
+      # @raise [LocalJumpError] if no block is given
+      def wait_while(index, timeout: nil)
+        raise LocalJumpError, "no block given" unless block_given?
+        wait_until(index, timeout:) { |value| !yield(value) }
+      end
+
+      # Wait while `object === value` is true.
+      # @param object [#===] the pattern to stop matching
+      # @param index [Integer] the index to observe. Negative indexes count from the end.
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [BasicObject, nil] the first nonmatching value, or nil on timeout
+      def wait_while_match(index, object, timeout: nil)
+        wait_while(index, timeout:) { |value| object === value } # rubocop:disable Style/CaseEquality
+      end
+
+      # Wait until the current value equals an object using the configured comparison mode.
+      # @param object [BasicObject, nil] the value to compare with the current value
+      # @param index [Integer] the index to observe. Negative indexes count from the end.
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [BasicObject, nil] the matching value, or nil on timeout
+      def wait_until_value(index, object, timeout: nil)
+        wait_until(index, timeout:) { |value| compare_by_identity? ? object.equal?(value) : object == value }
+      end
+
+      # Wait until `object === value` is true.
+      # @param object [#===] the pattern to match
+      # @param index [Integer] the index to observe. Negative indexes count from the end.
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [BasicObject, nil] the matching value, or nil on timeout
+      def wait_until_match(index, object, timeout: nil)
+        wait_until(index, timeout:) { |value| object === value } # rubocop:disable Style/CaseEquality
+      end
+
       # Wait until an index no longer matches expected. Absent indexes are observed as nil.
       # @param index [Integer] The index. Negative indexes count from the end.
       # @param expected [BasicObject] The value to wait for the entry to stop matching.
@@ -955,6 +1005,9 @@ module Farce
       def wait_until_changed(index, expected, timeout: nil)
         internal_vector.wait_until_changed(index, expected, timeout:)
       end
+
+      # (see #wait_until_changed)
+      def wait_while_value(...) = wait_until_changed(...)
 
       # Wait until an index contains a non-nil value.
       # @param index [Integer] The index. Negative indexes count from the end.

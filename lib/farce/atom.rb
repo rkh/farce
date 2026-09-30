@@ -201,14 +201,14 @@ module Farce
     # @return [BasicObject, nil] the changed value or the fallback result
     def wait_until_changed(expected, timeout: nil, &)
       expected = wrap_comparison(expected)
-      deadline = timeout_deadline(timeout)
+      deadline = Internal.timeout_deadline(timeout)
 
       while true
-        current = @atom.get(timeout: remaining_timeout(deadline)) { TIMED_OUT }
+        current = @atom.get(timeout: Internal.remaining_timeout(deadline)) { TIMED_OUT }
         return unwrap_result(current, &) if TIMED_OUT.equal?(current)
         return unwrap_value(current) unless values_equal?(current, expected)
 
-        result = @atom.wait_until_changed(current, timeout: remaining_timeout(deadline)) { TIMED_OUT }
+        result = @atom.wait_until_changed(current, timeout: Internal.remaining_timeout(deadline)) { TIMED_OUT }
         return unwrap_result(result, &) if TIMED_OUT.equal?(result)
       end
     end
@@ -245,23 +245,5 @@ module Farce
     end
 
     def values_equal?(left, right) = @manager.same_value?(left, right, identity: compare_by_identity?)
-
-    def timeout_deadline(timeout)
-      return unless timeout
-
-      timeout = Float(timeout)
-      raise ArgumentError, "timeout must be non-negative" if timeout.negative?
-      raise ArgumentError, "timeout must be finite"       if timeout.infinite?
-      raise ArgumentError, "timeout must be a number"     if timeout.nan?
-
-      Clock.now + timeout
-    end
-
-    def remaining_timeout(deadline)
-      return unless deadline
-
-      remaining = deadline - Clock.now
-      remaining.positive? ? remaining : 0
-    end
   end
 end

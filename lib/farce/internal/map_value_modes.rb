@@ -141,15 +141,15 @@ module Farce
       def wait_until_changed(key, expected, timeout: nil, &)
         prepared_key = @map.normalize_external_key(key)
         expected = wrap_comparison(expected)
-        deadline = timeout_deadline(timeout)
+        deadline = Internal.timeout_deadline(timeout)
         loop do
-          current = @map.get_prepared(prepared_key, timeout: remaining_timeout(deadline)) { TIMED_OUT }
+          current = @map.get_prepared(prepared_key, timeout: Internal.remaining_timeout(deadline)) { TIMED_OUT }
           return unwrap_result(current, &) if TIMED_OUT.equal?(current)
           return unwrap_value(current) unless values_equal?(nil.equal?(current) ? NIL_VALUE : current, expected)
           result = @map.wait_until_changed_prepared(
             prepared_key,
             current,
-            timeout: remaining_timeout(deadline),
+            timeout: Internal.remaining_timeout(deadline),
           ) { TIMED_OUT }
           return unwrap_result(result, &) if TIMED_OUT.equal?(result)
         end
@@ -197,18 +197,6 @@ module Farce
       end
 
       def values_equal?(left, right) = @manager.same_value?(left, right, identity: compare_values_by_identity?)
-
-      def timeout_deadline(timeout)
-        return if timeout.nil?
-        timeout = Float(timeout)
-        raise ArgumentError, "timeout must be finite and non-negative" unless timeout.finite? && !timeout.negative?
-        Clock.now + timeout
-      end
-
-      def remaining_timeout(deadline)
-        return unless deadline
-        [deadline - Clock.now, 0].max
-      end
     end
   end
 end

@@ -102,6 +102,58 @@ module Farce
       # @raise [LocalJumpError] If no block is given.
       def upsert(key, initial, timeout: nil, &) = internal_map.upsert(key, initial, timeout:, &)
 
+      # Wait until a block condition matches the current value.
+      # One timeout budget covers all checks and waits. The block is not interrupted.
+      # @yieldparam value [BasicObject, nil] the current value
+      # @yieldreturn [Boolean] whether the value matches
+      # An absent key is observed as nil.
+      # @param key [BasicObject] the key to observe
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [BasicObject, nil] the matching value, or nil on timeout
+      # @raise [LocalJumpError] if no block is given
+      def wait_until(key, timeout: nil, &) = Internal.wait_until(self, key, timeout:, &)
+
+      # Wait while the block returns a truthy value.
+      # @yieldparam value [BasicObject, nil] the current value
+      # @yieldreturn [BasicObject] a truthy value to keep waiting, or nil or false to stop
+      # @param key [BasicObject] the key to observe
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [BasicObject, nil] the value when the condition becomes false, or nil on timeout
+      # @raise [LocalJumpError] if no block is given
+      def wait_while(key, timeout: nil)
+        raise LocalJumpError, "no block given" unless block_given?
+        wait_until(key, timeout:) { |value| !yield(value) }
+      end
+
+      # Wait while `object === value` is true.
+      # @param key [BasicObject] the key to observe
+      # @param object [#===] the pattern to stop matching
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [BasicObject, nil] the first nonmatching value, or nil on timeout
+      def wait_while_match(key, object, timeout: nil)
+        wait_while(key, timeout:) { |value| object === value } # rubocop:disable Style/CaseEquality
+      end
+
+      # (see #wait_until_changed)
+      def wait_while_value(...) = wait_until_changed(...)
+
+      # Wait until the current value equals an object using the configured comparison mode.
+      # @param key [BasicObject] the key to observe
+      # @param object [BasicObject, nil] the value to compare with the current value
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [BasicObject, nil] the matching value, or nil on timeout
+      def wait_until_value(key, object, timeout: nil)
+        wait_until(key, timeout:) { |value| compare_values_by_identity? ? object.equal?(value) : object == value }
+      end
+
+      # Wait until `object === value` is true.
+      # @param object [#===] the pattern to match
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [BasicObject, nil] the matching value, or nil on timeout
+      def wait_until_match(key, object, timeout: nil)
+        wait_until(key, timeout:) { |value| object === value } # rubocop:disable Style/CaseEquality
+      end
+
       # Wait until the value associated with a key no longer matches `expected`.
       # An absent key is observed as nil. The configured value-comparison mode determines how values are matched.
       # @param key [BasicObject] The key to observe.

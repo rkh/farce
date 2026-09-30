@@ -65,5 +65,7 @@ module Farce
 
     alias subtract decrement
     alias remove   decrement
+
+    private :change_signal
   end
 end

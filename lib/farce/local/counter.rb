@@ -75,6 +75,7 @@ module Farce
         Internal::Storage.scope(scope)[self] = Internal::Counter.new(other.value)
       end
 
+      def change_signal         = internal_counter.change_signal
       def internal_counter      = scoped_value
       def new_scoped_value(...) = Internal::Counter.new(...)
     end

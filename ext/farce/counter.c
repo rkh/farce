@@ -23,6 +23,7 @@ typedef struct {
     pthread_mutex_t lock;
     long long value;
 #endif
+    VALUE signal;
     long long initial;
     bool initialized;
 } counter_t;
@@ -48,9 +49,25 @@ counter_memsize(const void *pointer)
     return pointer ? sizeof(counter_t) : 0;
 }
 
+static void
+counter_mark(void *pointer)
+{
+    counter_t *counter = pointer;
+    rb_gc_mark_movable(counter->signal);
+}
+
+static void
+counter_compact(void *pointer)
+{
+    counter_t *counter = pointer;
+    counter->signal = rb_gc_location(counter->signal);
+}
+
 static const rb_data_type_t counter_type = {
     .wrap_struct_name = "Ractor::Containers::Counter",
     .function = {
+        .dmark = counter_mark,
+        .dcompact = counter_compact,
         .dfree = counter_free,
         .dsize = counter_memsize,
     },
@@ -68,6 +85,7 @@ counter_allocate(VALUE klass)
     pthread_mutex_init(&counter->lock, NULL);
     counter->value = 0;
 #endif
+    counter->signal = Qnil;
     counter->initialized = false;
     return object;
 }
@@ -79,6 +97,18 @@ get_counter(VALUE self)
     TypedData_Get_Struct(self, counter_t, &counter_type, counter);
     if (!counter->initialized) rb_raise(rb_eRuntimeError, "uninitialized Counter");
     return counter;
+}
+
+static void
+counter_validate_references(VALUE self)
+{
+    containers_check_shareable(get_counter(self)->signal);
+}
+
+static VALUE
+counter_change_signal(VALUE self)
+{
+    return get_counter(self)->signal;
 }
 
 static long long
@@ -106,9 +136,10 @@ counter_initialize(int argc, VALUE *argv, VALUE self)
 #else
     counter->value = value;
 #endif
+    counter->signal = containers_signal_new();
     counter->initial = value;
     counter->initialized = true;
-    return containers_publish_native_reference_free(self);
+    return containers_publish_native_with_references(self, counter_validate_references);
 }
 
 static VALUE
@@ -152,9 +183,10 @@ counter_initialize_copy(VALUE self, VALUE other)
 #else
     copy->value = value;
 #endif
+    copy->signal = containers_signal_new();
     copy->initial = source->initial;
     copy->initialized = true;
-    return containers_publish_native_reference_free(self);
+    return containers_publish_native_with_references(self, counter_validate_references);
 }
 
 static VALUE
@@ -170,6 +202,7 @@ counter_store(VALUE self, VALUE input)
     counter->value = value;
     pthread_mutex_unlock(&counter->lock);
 #endif
+    containers_signal_broadcast(counter->signal);
     return input;
 }
 
@@ -191,6 +224,7 @@ counter_swap(VALUE self, VALUE input)
                 memory_order_relaxed,
                 memory_order_relaxed
             )) {
+            containers_signal_broadcast(counter->signal);
             return result;
         }
     }
@@ -199,6 +233,7 @@ counter_swap(VALUE self, VALUE input)
     long long current = counter->value;
     counter->value = replacement;
     pthread_mutex_unlock(&counter->lock);
+    containers_signal_broadcast(counter->signal);
     return LL2NUM(current);
 #endif
 }
@@ -238,6 +273,7 @@ counter_change(counter_t *counter, long long delta, bool subtract)
                 memory_order_relaxed,
                 memory_order_relaxed
             )) {
+            containers_signal_broadcast(counter->signal);
             return result;
         }
     }
@@ -255,6 +291,7 @@ counter_change(counter_t *counter, long long delta, bool subtract)
     long long replacement = subtract ? current - delta : current + delta;
     counter->value = replacement;
     pthread_mutex_unlock(&counter->lock);
+    containers_signal_broadcast(counter->signal);
     return LL2NUM(replacement);
 #endif
 }
@@ -302,6 +339,7 @@ counter_compare_and_set(VALUE self, VALUE expected_input, VALUE replacement_inpu
     if (exchanged) counter->value = replacement;
     pthread_mutex_unlock(&counter->lock);
 #endif
+    if (exchanged) containers_signal_broadcast(counter->signal);
     return exchanged ? Qtrue : Qfalse;
 }
 
@@ -348,6 +386,7 @@ containers_init_counter(VALUE namespace)
     rb_define_private_method(cCounter, "initialize_copy", counter_initialize_copy, 1);
     rb_define_method(cCounter, "value", counter_value, 0);
     rb_define_alias(cCounter, "get", "value");
+    rb_define_method(cCounter, "change_signal", counter_change_signal, 0);
     rb_define_method(cCounter, "initial", counter_initial, 0);
     rb_define_method(cCounter, "store", counter_store, 1);
     rb_define_alias(cCounter, "value=", "store");

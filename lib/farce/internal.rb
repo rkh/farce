@@ -48,6 +48,39 @@ module Farce
       new_self
     end
 
+    def timeout_deadline(timeout)
+      return if timeout.nil?
+
+      timeout = Float(timeout)
+      unless timeout.finite? && !timeout.negative?
+        raise ArgumentError, "timeout must be a finite, non-negative number or nil"
+      end
+      Clock.now + timeout
+    end
+
+    def remaining_timeout(deadline)
+      [deadline - Clock.now, 0].max if deadline
+    end
+
+    # Repeat with one timeout budget. Even a zero timeout permits the first check.
+    def with_timeout(timeout)
+      raise LocalJumpError, "no block given" unless block_given?
+      deadline = timeout_deadline(timeout)
+      loop do
+        yield remaining_timeout(deadline), deadline
+        return if deadline && Clock.now >= deadline
+      end
+    end
+
+    def wait_until(receiver, *keys, timeout: nil)
+      raise LocalJumpError, "no block given" unless block_given?
+      with_timeout(timeout) do |_, deadline|
+        current = keys.empty? ? receiver.value : receiver[*keys]
+        return current if yield(current)
+        receiver.wait_until_changed(*keys, current, timeout: remaining_timeout(deadline)) { return }
+      end
+    end
+
     def garbage_collectable?(object)
       case object
       when Integer, Float, Complex, Rational, Symbol, true, false, nil then false

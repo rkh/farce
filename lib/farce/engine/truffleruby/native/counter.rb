@@ -12,7 +12,8 @@ module Farce
         raise "Counter is already initialized" if defined?(@reference)
         check_frozen!
         raise TypeError, "initial value must be an Integer" unless value.is_a?(Integer)
-        @initial = value
+        @signal    = Signal.new
+        @initial   = value
         @reference = TruffleRuby::AtomicReference.new(value)
         super()
       end
@@ -23,20 +24,21 @@ module Farce
         check_frozen!
         raise TypeError, "value must be an Integer" unless value.is_a?(Integer)
         @reference.set(value)
+        @signal.broadcast
         value
       end
 
       def swap(value)
         check_frozen!
         raise TypeError, "value must be an Integer" unless value.is_a?(Integer)
-        @reference.get_and_set(value)
+        @reference.get_and_set(value).tap { @signal.broadcast }
       end
 
       def compare_and_set(expected_value, new_value)
         check_frozen!
         raise TypeError, "expected value must be an Integer" unless expected_value.is_a?(Integer)
         raise TypeError, "replacement value must be an Integer" unless new_value.is_a?(Integer)
-        @reference.compare_and_set(expected_value, new_value)
+        @reference.compare_and_set(expected_value, new_value).tap { @signal.broadcast }
       end
 
       def add(delta = 1)
@@ -74,6 +76,8 @@ module Farce
       alias value get
       alias value= store
 
+      def change_signal = @signal
+
       private
 
       def check_frozen!
@@ -84,11 +88,15 @@ module Farce
         loop do
           old_value = @reference.get
           new_value = old_value + delta
-          return new_value if @reference.compare_and_set(old_value, new_value)
+          if @reference.compare_and_set(old_value, new_value)
+            @signal.broadcast
+            return new_value
+          end
         end
       end
 
       def initialize_copy(other)
+        @signal = Signal.new
         @initial = other.initial
         @reference = TruffleRuby::AtomicReference.new(other.value)
       end

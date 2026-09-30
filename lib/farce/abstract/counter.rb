@@ -22,6 +22,106 @@ module Farce
       include Value
       include Internal::ValueSerialization
 
+      # Wait until the current value differs from the expected value.
+      # @param expected [Integer] the value to wait to change from
+      # @param timeout [Numeric, nil] the total seconds available
+      # @yield called when the timeout expires
+      # @return [Integer, BasicObject, nil] the changed value or timeout fallback
+      def wait_until_changed(expected, timeout: nil)
+        signal = change_signal
+        Internal.with_timeout(timeout) do |_, deadline|
+          observed = signal.generation
+          current = value
+          return current unless expected == current
+          break unless signal.wait(observed, timeout: Internal.remaining_timeout(deadline))
+        end
+        yield if block_given?
+      end
+
+      # Wait until a block condition matches the current value.
+      # One timeout budget covers all checks and waits. The block is not interrupted.
+      # @yieldparam value [Integer] the current value
+      # @yieldreturn [Boolean] whether the value matches
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Integer, nil] the matching value, or nil on timeout
+      # @raise [LocalJumpError] if no block is given
+      def wait_until(timeout: nil, &) = Internal.wait_until(self, timeout:, &)
+
+      # Wait while the block returns a truthy value.
+      # @yieldparam value [Integer] the current value
+      # @yieldreturn [BasicObject] a truthy value to keep waiting, or nil or false to stop
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Integer, nil] the value when the condition becomes false, or nil on timeout
+      # @raise [LocalJumpError] if no block is given
+      def wait_while(timeout: nil)
+        raise LocalJumpError, "no block given" unless block_given?
+        wait_until(timeout:) { |value| !yield(value) }
+      end
+
+      # Wait while `object === value` is true.
+      # @param object [#===] the pattern to stop matching
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Integer, nil] the first nonmatching value, or nil on timeout
+      def wait_while_match(object, timeout: nil)
+        wait_while(timeout:) { |value| object === value } # rubocop:disable Style/CaseEquality
+      end
+
+      # (see #wait_until_changed)
+      def wait_while_value(...) = wait_until_changed(...)
+
+      # Wait until `object == value` is true.
+      # Counters compare integer values by equality.
+      # @param object [BasicObject] the value to compare with the current value
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Integer, nil] the matching value, or nil on timeout
+      def wait_until_value(object, timeout: nil)
+        wait_until(timeout:) { |value| object == value }
+      end
+
+      # Wait until `object === value` is true.
+      # @param object [#===] the pattern to match
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Integer, nil] the matching value, or nil on timeout
+      def wait_until_match(object, timeout: nil)
+        wait_until(timeout:) { |value| object === value } # rubocop:disable Style/CaseEquality
+      end
+
+      # Wait until the value is strictly below the limit.
+      # @param limit [Numeric, String, #to_int] the upper bound, converted to an Integer
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Integer, nil] the matching value, or nil on timeout
+      def wait_until_below(limit, timeout: nil)
+        limit = Integer(limit)
+        wait_until(timeout:) { |value| value < limit }
+      end
+
+      # Wait until the value is strictly above the floor.
+      # @param floor [Numeric, String, #to_int] the lower bound, converted to an Integer
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Integer, nil] the matching value, or nil on timeout
+      def wait_until_above(floor, timeout: nil)
+        floor = Integer(floor)
+        wait_until(timeout:) { |value| value > floor }
+      end
+
+      # Wait while the value is strictly above the limit.
+      # @param limit [Numeric, String, #to_int] the upper bound, converted to an Integer
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Integer, nil] the first value at or below the limit, or nil on timeout
+      def wait_while_above(limit, timeout: nil)
+        limit = Integer(limit)
+        wait_until(timeout:) { |value| value <= limit }
+      end
+
+      # Wait while the value is strictly below the floor.
+      # @param floor [Numeric, String, #to_int] the lower bound, converted to an Integer
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Integer, nil] the first value at or above the floor, or nil on timeout
+      def wait_while_below(floor, timeout: nil)
+        floor = Integer(floor)
+        wait_until(timeout:) { |value| value >= floor }
+      end
+
       # Reset the counter to its initial value.
       # @return [self] Returns self for chaining.
       def reset

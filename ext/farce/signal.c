@@ -173,6 +173,13 @@ containers_signal_initialize(VALUE self)
     return self;
 }
 
+VALUE
+containers_signal_new(void)
+{
+    VALUE signal = containers_signal_allocate(cSignal);
+    return containers_signal_initialize(signal);
+}
+
 static bool
 containers_signal_wait_for_descriptor(int fd, containers_signal_timeout_t *timeout)
 {
@@ -281,7 +288,7 @@ containers_signal_num_waiting(VALUE self)
     return SIZET2NUM(count);
 }
 
-static VALUE
+VALUE
 containers_signal_broadcast(VALUE self)
 {
     containers_signal_t *signal = containers_signal_get(self);

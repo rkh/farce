@@ -296,7 +296,8 @@ module Farce
       facade_protocol = Abstract::ConcurrentMap.public_instance_methods(false) |
         Internal.const_get(:MapValueModes).public_instance_methods(false)
       facade_helpers = %i[
-        each_pair mode shareable_keys? shareable_values? values
+        each_pair mode shareable_keys? shareable_values? values wait_until wait_until_value wait_until_match
+        wait_while wait_while_match wait_while_value
         delete_if reject! compact! keep_if select! filter! transform_values! merge!
       ]
       backend_protocol = backend.class.public_instance_methods(false)

@@ -55,6 +55,8 @@ void containers_init_priority_queue(VALUE namespace);
 void containers_init_darwin(VALUE namespace);
 void containers_init_queue(VALUE namespace);
 void containers_init_signal(VALUE namespace);
+VALUE containers_signal_new(void);
+VALUE containers_signal_broadcast(VALUE self);
 
 typedef struct containers_unshared_signal containers_unshared_signal_t;
 containers_unshared_signal_t *containers_unshared_signal_get_if_exact(VALUE signal);

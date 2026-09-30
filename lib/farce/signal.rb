@@ -46,6 +46,18 @@ module Farce
     # @return [Integer, BasicObject, nil] the changed generation, or the fallback result or nil on timeout
     def wait(observed = nil, timeout: nil, &) = @signal.wait(observed, timeout:, &)
 
+    # Check a condition immediately, then after broadcasts while it remains truthy.
+    # Uses the same timeout budget and notification handling as {#wait_until}.
+    # @param timeout [Numeric, nil] the total seconds available, or nil to wait indefinitely
+    # @yield checks the condition
+    # @yieldreturn [BasicObject] a truthy value to keep waiting, or nil or false to stop
+    # @return [true, nil] true when the condition becomes false, or nil on timeout
+    # @raise [LocalJumpError] if no block is given
+    def wait_while(timeout: nil)
+      raise LocalJumpError, "no block given" unless block_given?
+      wait_until(timeout:) { !yield }
+    end
+
     # Check a condition immediately, then check again after broadcasts until it succeeds.
     # Take a generation snapshot before every check so a broadcast during the check is not missed.
     # The block runs in the caller without holding a signal lock. Synchronize access to shared state
@@ -62,9 +74,7 @@ module Farce
     # @raise [ArgumentError] if the timeout is negative or not finite
     def wait_until(timeout: nil)
       raise LocalJumpError, "no block given" unless block_given?
-      deadline = wait_until_deadline(timeout)
-
-      while true
+      Internal.with_timeout(timeout) do |_, deadline|
         observed = generation
         result   = yield
         return result if result
@@ -73,18 +83,6 @@ module Farce
         return if remaining && !remaining.positive?
         return unless wait(observed, timeout: remaining)
       end
-    end
-
-    private
-
-    def wait_until_deadline(timeout)
-      return if timeout.nil?
-
-      timeout = Float(timeout)
-      unless timeout.finite? && !timeout.negative?
-        raise ArgumentError, "timeout must be a finite, non-negative number or nil"
-      end
-      Clock.now + timeout
     end
   end
 end

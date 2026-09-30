@@ -12,19 +12,20 @@ module Farce
       private_constant :TIMED_OUT
 
       def initialize
-        @generation     = Counter.new
-        @num_waiting    = Counter.new
+        @generation     = TruffleRuby::AtomicReference.new(0)
+        @num_waiting    = TruffleRuby::AtomicReference.new(0)
         @condition      = ConditionVariable.new
         @broadcast_lock = Mutex.new
         Freeze.publish(self)
       end
 
-      def generation = @generation.value
-      def num_waiting = @num_waiting.value
+      def generation  = @generation.get
+      def num_waiting = @num_waiting.get
 
       def broadcast
         @broadcast_lock.synchronize do
-          generation = @generation.add
+          generation = @generation.get + 1
+          @generation.set(generation)
           @condition.broadcast
           generation
         end
@@ -44,12 +45,12 @@ module Farce
 
               remaining = deadline - Clock.now if deadline
               break TIMED_OUT if remaining && !remaining.positive?
-              @num_waiting.increment unless waiting
+              @num_waiting.set(@num_waiting.get + 1) unless waiting
               waiting = true
               @condition.wait(@broadcast_lock, remaining)
             end
           ensure
-            @num_waiting.decrement if waiting
+            @num_waiting.set(@num_waiting.get - 1) if waiting
           end
         end
 
