@@ -60,6 +60,27 @@ module Farce
         assert flag.value
       end
 
+      def test_unset_returns_false_and_clears_the_flag
+        flag = flag_class.new(true)
+
+        refute flag.unset
+        refute flag.value
+        refute flag.unset
+        refute flag.value
+        assert flag.set
+        refute flag.unset
+        refute flag.value
+      end
+
+      def test_unset_rejects_frozen_flags
+        [true, false].each do |value|
+          flag = flag_class.new(value).freeze
+
+          assert_raises(FrozenError) { flag.unset }
+          assert_equal value, flag.value
+        end
+      end
+
       def test_store_and_swap_validate_before_mutating
         flag = flag_class.new(true)
 

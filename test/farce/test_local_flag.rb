@@ -60,6 +60,17 @@ module Farce
       end
     end
 
+    def test_unset_only_changes_the_current_scope
+      %i[thread fiber].each do |scope|
+        flag = flag_class.new(true, scope:)
+        work = proc { [flag.unset, flag.value] }
+        result = scope == :thread ? Thread.new(&work).value : Fiber.new(&work).resume
+
+        assert_equal [false, false], result
+        assert flag.value
+      end
+    end
+
     def test_thread_group_isolation
       flag = flag_class.new(scope: :thread_group)
       flag.set

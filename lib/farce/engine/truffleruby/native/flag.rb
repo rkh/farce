@@ -20,6 +20,12 @@ module Farce
         true
       end
 
+      def unset # rubocop:disable Naming/PredicateMethod
+        check_frozen!
+        @reference.set(false)
+        false
+      end
+
       def store(value)
         check_frozen!
         value = validate_boolean(value, "value")

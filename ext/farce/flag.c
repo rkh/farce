@@ -150,6 +150,21 @@ flag_set(VALUE self)
 }
 
 static VALUE
+flag_unset(VALUE self)
+{
+    flag_t *flag = get_flag(self);
+    containers_check_typed_frozen(self);
+#if CONTAINERS_FLAG_LOCK_FREE
+    atomic_store_explicit(&flag->value, false, memory_order_relaxed);
+#else
+    pthread_mutex_lock(&flag->lock);
+    flag->value = false;
+    pthread_mutex_unlock(&flag->lock);
+#endif
+    return Qfalse;
+}
+
+static VALUE
 flag_store(VALUE self, VALUE input)
 {
     flag_t *flag = get_flag(self);
@@ -248,6 +263,7 @@ containers_init_flag(VALUE namespace)
     rb_define_method(cFlag, "value", flag_value, 0);
     rb_define_alias(cFlag, "get", "value");
     rb_define_method(cFlag, "set", flag_set, 0);
+    rb_define_method(cFlag, "unset", flag_unset, 0);
     rb_define_method(cFlag, "store", flag_store, 1);
     rb_define_alias(cFlag, "value=", "store");
     rb_define_method(cFlag, "swap", flag_swap, 1);

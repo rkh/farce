@@ -26,6 +26,10 @@ module Farce
       # @return [true]
       def set = scoped_value.set
 
+      # Set the flag to false.
+      # @return [false]
+      def unset = scoped_value.unset
+
       # Store a boolean value.
       # @param value [Boolean] the new value
       # @return [Boolean] the new value

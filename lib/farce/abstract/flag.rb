@@ -15,6 +15,10 @@ module Farce
     #   Set the flag to true.
     #   @return [true]
     #
+    # @!method unset
+    #   Set the flag to false.
+    #   @return [false]
+    #
     # @!method store(value)
     #   Set the flag to the given value.
     #   @param value [Boolean] the new value
