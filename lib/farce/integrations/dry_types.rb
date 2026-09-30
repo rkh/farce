@@ -382,8 +382,10 @@ module Farce
 
         private
 
-        def rebuild_map_source(method, ...)
-          typed = DryTypes.collection_source(source).public_send(method, ...)
+        # Explicit arguments avoid losing keyword calls inside JRuby forwarding methods.
+        # rubocop:disable-next Style/ArgumentsForwarding
+        def rebuild_map_source(method, *arguments, **options, &)
+          typed = DryTypes.collection_source(source).public_send(method, *arguments, **options, &)
           typed = DryTypes.restore_optional_source(source, typed)
           self.class.new(typed, kind:, configuration:)
         end
