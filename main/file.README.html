@@ -115,6 +115,10 @@
 </ul>
 <p>All three of these need some form of <strong>concurrency coordination</strong> for shared state. These are usually the most complicated for Threads, as state is shared between them freely, and an interrupt can happen at any time. Fibers on the other hand have explicit control transfer (only on blocking operations or when giving up control), so their behavior is much more predictable. Ractors disallow sharing mutable state between them (or have built-in locking for the few cases where they allow it).</p>
 <h3 id="the-problem">The Problem<a href="#the-problem" aria-label="Link to heading 'The Problem'" data-heading-content="The Problem" class="anchor"></a></h3>
+<div class="markdown-alert markdown-alert-note">
+<p class="markdown-alert-title">Note</p>
+<p>Please keep in mind that many of these libraries may gain better Ractor support in the future, and that the table might already be outdated. Feel free to open an issue if you find any inaccuracies. This is also in no way meant as a criticism of any of the libraries mentioned. They all have their own scopes, goals and priorities, and largely rely on volunteer contributions.</p>
+</div>
 <p>Both the Ruby core library, and other libraries, like the very popular <a href="https://github.com/ruby-concurrency/concurrent-ruby">concurrent-ruby</a> gem, provide plenty of primitives to solve this. However, most of them are not compatible with Ractors. And those that are, are then in turn usually not compatible with Fiber schedulers. Due to this, most of the popular frameworks and libraries out there do not support Ractors at all:</p>
 <table>
   <thead>
@@ -181,28 +185,28 @@
     <tr>
       <td rowspan="3"><a href="https://github.com/mperham/ratomic">ratomic</a></td>
       <td>Pool</td>
-      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only<b>¹</b></td>
       <td>❌ <b>not supported</b></td>
-      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only<b>¹</b></td>
     </tr>
     <tr>
       <td>LocalPool</td>
-      <td>⚠️ CRuby only</td>
-      <td>⚠️ CRuby only</td>
-      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
     </tr>
     <tr>
       <td>Queue, Map</td>
-      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only<b>¹</b></td>
       <td>❌ <b>not supported</b></td>
-      <td>💣 <b>breaks isolation</b></td>
+      <td>💣 <b>breaks isolation¹²</b></td>
     </tr>
     <tr>
       <td><a href="https://github.com/MadBomber/ractor_queue">ractor_queue</a></td>
       <td>RactorQueue</td>
-      <td>⚠️ CRuby only</td>
-      <td>⚠️ CRuby only</td>
-      <td>💣 <b>breaks isolation</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>💣 <b>breaks isolation¹²</b></td>
     </tr>
     <tr>
       <td>
@@ -214,10 +218,20 @@
       <td>⚠️ Main Ractor only</td>
       <td>❌ <b>not supported</b></td>
     </tr>
+    <tr>
+      <td><a href="https://github.com/ko1/ractor-sharing">ractor-sharing</a></td>
+      <td>TVar, LockVar, LockHash, …</td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>❌ <b>not supported</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+    </tr>
   </tbody>
 </table>
-<p>💣 Breaking Ractor isolation introduces concurrency issues not just in application code, but in Ruby itself, possibly leading to segmentation faults or undefined behavior.</p>
-<p>Please keep in mind that many of these libraries may gain better Ractor support in the future, and that the table might already be outdated. Feel free to open an issue if you find any inaccuracies. This is also in no way meant as a criticism of any of the libraries mentioned. They all have their own scopes, goals and priorities, and largely rely on volunteer contributions.</p>
+<p>Notes:</p>
+<ol>
+<li>Incorrectly flags mutable objects as frozen.</li>
+<li>Breaking Ractor isolation introduces concurrency issues not just in application code, but in Ruby itself, possibly leading to segmentation faults or undefined behavior. Note that <code>ractor_queue</code> has the ability to enforce shareability, but this feature is opt-in.</li>
+</ol>
 <h3 id="the-solution">The Solution<a href="#the-solution" aria-label="Link to heading 'The Solution'" data-heading-content="The Solution" class="anchor"></a></h3>
 <p><strong>Farce is an attempt to solve this.</strong> Code relying on Farce will work well with any concurrency primitive. Use an <strong>event loop with the <a href="https://github.com/socketry/async">async</a></strong> gem? Farce will fit right in. Running a <strong>pool of Ractors</strong> with <a href="https://github.com/yaroslav/kino">Kino</a>? Farce got you covered! You manually manage a single <strong>background thread</strong>? Farce solves that, too!</p>
 <p>And it does so in a non-invasive way. You should be able to use Farce alongside any other gem!</p>
@@ -345,7 +359,7 @@ need to specifically load any particular file.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Wed Sep 30 07:46:09 2026 by
+  Generated on Wed Sep 30 11:36:54 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
