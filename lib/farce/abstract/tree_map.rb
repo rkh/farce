@@ -38,8 +38,7 @@ module Farce
         super()
       end
 
-      # Stage ordered entries in an explicit transaction.
-      # @return [Farce::Transaction::TreeMap]
+      # @api private
       def transaction_wrapper(transaction)
         transaction.enlist(transaction_key_locks)
         manager = @manager if defined?(@manager)

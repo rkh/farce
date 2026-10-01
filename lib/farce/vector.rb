@@ -35,10 +35,8 @@ module Farce
       super()
     end
 
-    # Build a wrapper that preserves this object's value modes.
-    def transaction_wrapper(transaction)
-      Transaction::Vector.new(transaction, self, @vector, manager: @manager)
-    end
+    # @api private
+    def transaction_wrapper(transaction) = Transaction::Vector.new(transaction, self, @vector, manager: @manager)
 
     # @return [Symbol] The default transfer mode.
     def mode = @manager.mode

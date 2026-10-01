@@ -123,9 +123,7 @@ module Farce
         super()
       end
 
-      # Enroll every field in one explicit transaction.
-      # Field atom accessors return the same wrappers as transaction[atom].
-      # @return [Farce::Transaction::Molecule]
+      # @api private
       def transaction_wrapper(transaction) = Transaction::Molecule.new(transaction, self)
 
       # Whether newly created atoms compare by identity instead of equality.

@@ -32,6 +32,9 @@ module Farce
         super(enumerable, normalize:, compare_by_identity: false, mode:, **, &transform)
       end
 
+      # @api private
+      def transaction_wrapper(transaction) = Transaction::SortedSet.new(transaction, self, @map)
+
       # Return whether this set has comparator-equivalent members in the same order.
       # @param other [BasicObject] The object to compare against.
       # @return [Boolean] Whether other is a Farce sorted set with comparator-equivalent members.

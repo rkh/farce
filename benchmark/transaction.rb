@@ -6,6 +6,8 @@
 # Run this same file with -I pointing at each checkout's lib directory.
 # Transaction setup is outside the measured loops, but loads and exercises the
 # implementation so the comparison also covers programs that use transactions.
+# Both checkouts exercise ordinary methods after optional transaction setup.
+# This keeps setup effects on shared method caches comparable.
 require "farce"
 require "json"
 require "objspace"
@@ -29,6 +31,9 @@ memory = {}
     end
     raise "setup transaction failed" unless committed
   end
+  atom.store(1)
+  map[:key] = 1
+  vector[0] = 1
   prefix = namespace == Farce ? "mode" : "strict"
   operations["#{prefix}.atom.read"] = -> { atom.value }
   operations["#{prefix}.atom.store"] = -> { atom.store(1) }
@@ -58,6 +63,10 @@ end
       tx[tree][1] = 1
     end
   end
+  record.balance = 1
+  set.add(1)
+  sorted.add(1)
+  tree[1] = 1
   prefix = namespace == Farce ? "mode" : "strict"
   operations["#{prefix}.molecule.read"] = -> { record.balance }
   operations["#{prefix}.molecule.store"] = -> { record.balance = 1 }

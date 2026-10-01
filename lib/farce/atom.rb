@@ -55,7 +55,7 @@ module Farce
       super()
     end
 
-    # Build a wrapper that preserves this object's value modes.
+    # @api private
     def transaction_wrapper(transaction)
       Transaction::Atom.new(transaction, self, @atom, manager: @manager, nil_value: NIL_VALUE)
     end

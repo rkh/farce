@@ -108,8 +108,7 @@ module Farce
         super()
       end
 
-      # Stage membership changes through the backing map.
-      # @return [Farce::Transaction::Set]
+      # @api private
       def transaction_wrapper(transaction) = Transaction::Set.new(transaction, self, @map)
 
       # Add an element and return self.

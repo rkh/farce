@@ -27,6 +27,322 @@ module Farce
       end
     end
 
+    ForeignAccount = Struct.new(:balance, :ledger)
+
+    def test_wrapper_classes_load_only_when_used
+      skip "TruffleRuby eagerly loads Farce to avoid concurrent autoload issues" if RUBY_ENGINE == "truffleruby"
+      output, error, status = ruby_isolated(<<~RUBY)
+        require "farce"
+        Farce::Transaction
+        abort "wrappers loaded eagerly" unless $LOADED_FEATURES.grep(%r{farce/transaction/}).empty?
+        atom = Farce::Strict::Atom.new(1)
+        abort "commit failed" unless Farce.transaction { |tx| tx[atom].value = 2 }
+        abort "write missing" unless atom.value == 2
+        puts $LOADED_FEATURES.grep(%r{farce/transaction/}).map { |file| File.basename(file) }.sort
+      RUBY
+
+      assert_predicate status, :success?, error
+      assert_equal "atom.rb\nwrapper.rb\n", output
+    end
+
+    def test_wrapper_classes_first_load_from_another_ractor
+      return unless Internal.native_ractors?
+      output, error, status = ruby_isolated(<<~RUBY)
+        require "farce"
+        Farce::Transaction
+        atom = Farce::Strict::Atom.new(1)
+        map = Farce::Strict::Map.new({ one: 1 })
+        tree = Farce::Strict::TreeMap.new({ 1 => 1 })
+        molecule = Farce::Strict::Molecule.define(:one).new(1)
+        set = Farce::Strict::Set.new([1])
+        sorted = Farce::Strict::SortedSet.new([1])
+        vector = Farce::Strict::Vector.new([1])
+        abort "wrappers loaded eagerly" unless $LOADED_FEATURES.grep(%r{farce/transaction/}).empty?
+        worker = Ractor.new(atom, map, tree, molecule, set, sorted, vector) do |a, m, t, fields, s, ordered, v|
+          Farce.transaction do |tx|
+            tx[a].value = tx[m].fetch_values(:one).first + 1
+            tx[m].merge!({ two: 2 })
+            tx[t][2] = tx[t].fetch_values(1).first + 1
+            tx[fields].one = 2
+            tx[s].add(2)
+            raise "set helper failed" unless tx[s].join(",").split(",").sort == %w[1 2]
+            tx[ordered].add(2)
+            raise "sorted set helper failed" unless tx[ordered].join(",") == "1,2"
+            tx[v].push(2)
+            raise "vector helper failed" unless tx[v].each_index.to_a == [0, 1]
+          end
+        end
+        committed = worker.respond_to?(:value) ? worker.value : worker.take
+        puts [committed, atom.value, map[:two], tree[2], molecule.one, set.to_a.sort, sorted.to_a, vector.to_a].inspect
+      RUBY
+
+      assert_predicate status, :success?, error
+      assert_equal "[true, 2, 2, 2, 2, [1, 2], [1, 2], [1, 2]]\n", output
+    end
+
+    def test_wrappers_inherit_the_corresponding_abstract_types
+      [Farce, Strict, Unshared, Local].each do |namespace|
+        objects = [
+          [namespace::Atom.new(1), Abstract::Atom],
+          [namespace::Map.new({ value: 1 }), Abstract::ConcurrentMap],
+          [namespace::TreeMap.new({ 1 => 1 }), Abstract::TreeMap],
+          [namespace::Vector.new([1]), Abstract::Vector],
+          [namespace::Molecule.define(:value).new(1), Abstract::Molecule],
+          [namespace::Set.new([1]), Abstract::Set],
+          [namespace::SortedSet.new([1]), Abstract::SortedSet]
+        ]
+
+        assert(Farce.transaction do |tx|
+          objects.each do |object, abstract|
+            view = tx[object]
+
+            assert_kind_of abstract, view
+            refute_respond_to view, :freeze
+            refute Ractor.shareable?(view) if Internal.native_ractors?
+
+            assert_same view, tx[view]
+          end
+        end)
+      end
+    end
+
+    def test_registered_factories_compose_foreign_objects_without_a_hook
+      Transaction.define(ForeignAccount) do |object, transaction|
+        AccountWrapper.new(transaction[object.balance], transaction[object.ledger])
+      end
+      balance = Strict::Atom.new(10)
+      ledger = Strict::Map.new
+      account = ForeignAccount.new(balance, ledger)
+
+      refute_respond_to account, :transaction_wrapper
+      assert(Farce.transaction { |tx| tx[account].withdraw(3) })
+      assert_equal 7, balance.value
+      assert_equal 3, ledger[:withdrawal]
+      refute(Farce.transaction do |tx|
+        tx[account].withdraw(2)
+        tx[balance].compare_and_set(99, 0)
+      end)
+      assert_equal 7, balance.value
+      assert_equal 3, ledger[:withdrawal]
+    end
+
+    def test_factory_registration_invalidates_ancestor_lookup_and_supports_super
+      parent = Class.new(Struct.new(:balance))
+      child = Class.new(parent)
+      atom = Strict::Atom.new(1)
+      object = child.new(atom)
+
+      assert_raises(TypeError) { Farce.transaction { |tx| tx[object] } }
+      Transaction.define(parent) { |source, transaction| transaction[source.balance] }
+
+      assert(Farce.transaction { |tx| tx[object].value = 2 })
+      assert_equal 2, atom.value
+      Transaction.define(child) do |source, transaction|
+        super(source, transaction).tap { |view| view.update { |value| value + 1 } }
+      end
+
+      assert(Farce.transaction { |tx| assert_equal 3, tx[object].value })
+      assert_equal 3, atom.value
+    end
+
+    def test_registered_factory_takes_precedence_over_the_object_hook
+      source_class = Class.new(Account)
+      account = source_class.new(Strict::Atom.new(1), Strict::Map.new)
+      Transaction.define(source_class) do |object, transaction|
+        transaction[object.instance_variable_get(:@balance)]
+      end
+
+      assert(Farce.transaction do |tx|
+        assert_kind_of Abstract::Atom, tx[account]
+        tx[account].value = 2
+      end)
+      assert_equal 2, account.instance_variable_get(:@balance).value
+    end
+
+    def test_factory_errors_poison_rescued_attempts_without_retrying
+      source_class = Class.new
+      Transaction.define(source_class) { |_, _| raise ArgumentError, "factory failed" }
+      object = source_class.new
+      atom = Strict::Atom.new(0)
+      attempts = 0
+
+      refute(Transaction.run(retries: 2) do |tx|
+        attempts += 1
+        tx[atom].value = 1
+
+        assert_raises(ArgumentError) { tx[object] }
+      end)
+      assert_equal 1, attempts
+      assert_equal 0, atom.value
+      assert_raises(LocalJumpError) { Transaction.define(source_class) }
+      assert_raises(TypeError) { Transaction.define(Enumerable) { |source, _| source } }
+    end
+
+    def test_registered_factories_and_inherited_helpers_work_in_another_ractor
+      return unless Internal.native_ractors?
+      source_class = Class.new(Struct.new(:balance))
+      Transaction.define(source_class) { |source, transaction| transaction[source.balance] }
+      atom = Strict::Atom.new(1)
+      object = source_class.new(atom).freeze
+      map = Strict::Map.new({ value: 1 })
+      worker = Ractor.new(object, map) do |source, mapping|
+        Farce.transaction do |tx|
+          tx[source].value = tx[mapping].fetch_values(:value).first + 1
+          tx[mapping].merge!({ other: 3 })
+        end
+      end
+
+      assert ractor_value(worker)
+      assert_equal 2, atom.value
+      assert_equal 3, map[:other]
+      worker = Ractor.new do
+        Farce::Transaction.define(String) { |source, _| source }
+      rescue Ractor::IsolationError
+        true
+      end
+
+      assert ractor_value(worker)
+    end
+
+    def test_map_helpers_use_staged_entries_and_preserve_identity
+      map = Unshared::Map.new({ "one" => 1, "nested" => { value: 2 } }, normalize_keys: :to_sym)
+
+      assert(Farce.transaction do |tx|
+        view = tx[map]
+        view["one"] = 3
+
+        assert_equal 2, view.dig("nested", :value)
+        assert_equal [3], view.fetch_values("one")
+        assert_equal :one, view.getkey("one")
+        assert_equal ["one", 3], view.assoc("one")
+        assert_equal ::Set[3, { value: 2 }], view.each_value.to_set
+        assert_equal({ one: 3, nested: { value: 2 } }, Hash.try_convert(view))
+        copy = Unshared::Map.new(view)
+
+        assert_equal 3, copy[:one]
+        copy.merge!(view)
+
+        assert_equal 3, copy[:one]
+      end)
+      first = +"same"
+      second = +"same"
+      identity = Unshared::Map.new(compare_keys_by_identity: true)
+      identity[first] = 1
+      identity[second] = 2
+
+      assert(Farce.transaction do |tx|
+        hash = tx[identity].to_h
+
+        assert_predicate hash, :compare_by_identity?
+        assert_equal 2, hash.size
+        assert_equal 1, hash[first]
+        assert_equal 2, hash[second]
+      end)
+    end
+
+    def test_inherited_map_mutations_commit_and_poison_rescued_errors
+      [Farce, Strict, Unshared, Local].each do |namespace|
+        map = namespace::Map.new({ a: 1, b: nil, c: 3 })
+        atom = Strict::Atom.new(0)
+
+        assert(Farce.transaction do |tx|
+          view = tx[map]
+          view.compact!
+          view.transform_values! { |value| value * 2 }
+          view.merge!({ a: 4, d: 8 }) { |_, old, incoming| old + incoming }
+          view.delete_if { |key, _| key == :c }
+
+          assert_equal({ a: 6, d: 8 }, view.to_h)
+          assert_equal({ a: 1, b: nil, c: 3 }, map.to_h)
+        end)
+        assert_equal({ a: 6, d: 8 }, map.to_h)
+        refute(Farce.transaction do |tx|
+          tx[atom].value = 1
+          tx[map][:a] = 10
+
+          assert_raises(TypeError) { tx[map].merge!(Object.new) }
+        end)
+        assert_equal 0, atom.value
+        assert_equal 6, map[:a]
+      end
+    end
+
+    def test_vector_helpers_unwrap_staged_values_and_return_independent_slices
+      vector = Farce::Vector.new([{ value: 1 }, nil, 3])
+      slice = nil
+
+      assert(Farce.transaction do |tx|
+        view = tx[vector]
+        view[0] = { value: 2 }
+
+        assert_equal 2, view.dig(0, :value)
+        assert_equal({ value: 2 }, view.fetch(0))
+        assert_equal [3, nil, { value: 2 }], view.reverse_each.to_a
+        assert_equal [0, 1, 2], view.each_index.to_a
+        assert_instance_of(Array, view.map { |value| value })
+        slice = view.slice(0, 2)
+
+        assert_instance_of Unshared::Vector, slice
+        assert_equal [{ value: 2 }, nil], slice.to_a
+        assert_equal [3, :fallback], view.fetch_values(2, 9) { :fallback }.to_a
+        assert_equal [3, nil], view.values_at(2, 9).to_a
+        combined = Unshared::Vector.new([:prefix]).concat(view)
+
+        assert_equal [:prefix, { value: 2 }, nil, 3], combined.to_a
+      end)
+      slice[0] = :independent
+
+      assert_equal({ value: 2 }, vector[0])
+    end
+
+    def test_set_wrappers_are_accepted_by_set_comparisons
+      [Farce, Strict, Unshared, Local].each do |namespace|
+        [namespace::Set, namespace::SortedSet].each do |klass|
+          set = klass.new([1, 2])
+          larger = klass.new([1, 2, 3])
+
+          assert(Farce.transaction do |tx|
+            view = tx[set]
+
+            assert_equal set, view
+            assert_equal view, set
+            assert view.subset?(tx[larger])
+            assert larger.superset?(view)
+            assert_equal set.hash, view.hash
+            assert_instance_of(Array, view.select { |value| value > 1 })
+            assert_equal ::Set[1, 2], view.to_set
+          end)
+        end
+      end
+    end
+
+    def test_helpers_and_copies_obey_attempt_lifetime
+      map = Strict::Map.new
+      vector = Strict::Vector.new
+      atom = Strict::Atom.new(1)
+      wrappers = nil
+
+      assert(Farce.transaction { |tx| wrappers = [tx[map], tx[vector], tx[atom]] })
+      assert_raises(Transaction::ClosedError) { wrappers[0].fetch_values }
+      assert_raises(Transaction::ClosedError) { wrappers[0].weak_keys? }
+      assert_raises(Transaction::ClosedError) { wrappers[1].values_at }
+      assert_raises(Transaction::ClosedError) { wrappers[2].compare_by_identity? }
+      [atom, map, vector, Strict::Set.new, Strict::Molecule.define(:value).new(1)].each do |object|
+        refute(Farce.transaction do |tx|
+          tx[atom].value = 2
+
+          assert_raises(TypeError) { tx[object].dup }
+        end)
+        assert_equal 1, atom.value
+      end
+      refute(Farce.transaction do |tx|
+        tx[atom].value = 2
+
+        assert_raises(NoMethodError) { tx[map].wait_until_changed(:value, nil) }
+      end)
+      assert_equal 1, atom.value
+    end
+
     def test_molecule_fields_share_atom_wrappers
       [Farce, Strict, Unshared, Local].each do |namespace|
         record = namespace::Molecule.define(:balance, :"display name").new(10, "Alice")
@@ -111,6 +427,124 @@ module Farce
       assert_equal ["hello"], set.to_a
     end
 
+    def test_sets_and_their_backing_maps_share_staged_membership
+      [Farce, Strict, Unshared, Local].each do |namespace|
+        [namespace::Set, namespace::SortedSet].each do |klass|
+          set = klass.new([1])
+          map = set.instance_variable_get(:@map)
+
+          assert(Farce.transaction do |tx|
+            view = tx[set]
+            mapping = tx[map]
+            view.add(2)
+
+            assert_equal 2, mapping.size
+            mapping.clear
+
+            assert_empty view
+            assert_same view, view.merge([2, 3])
+            assert_equal 2, mapping.size
+            assert_equal [1], set.to_a
+          end)
+          assert_equal [2, 3], set.to_a.sort
+          refute(Farce.transaction do |tx|
+            tx[set].add(4)
+
+            refute tx[map].compare_and_set(tx[map].keys.first, nil, true)
+          end)
+          assert_equal [2, 3], set.to_a.sort
+        end
+      end
+    end
+
+    def test_set_bulk_operations_keep_canonical_members_without_normalizing_again
+      [Farce, Strict, Unshared, Local].each do |namespace|
+        [namespace::Set, namespace::SortedSet].each do |klass|
+          set = klass.new([1], normalize: :succ)
+          other = set.dup
+          other.add(2)
+
+          assert(Farce.transaction do |tx|
+            view = tx[set]
+            tx[other].add(3)
+
+            assert_same view, view.merge(tx[other])
+            assert_equal [2, 3, 4], view.to_a.sort
+            assert_same view, view.subtract(tx[other])
+            assert_empty view
+            view.merge(tx[other])
+
+            assert_equal [2], set.to_a
+            assert_equal [2, 3], other.to_a.sort
+          end)
+          assert_equal [2, 3, 4], set.to_a.sort
+          assert_equal [2, 3, 4], other.to_a.sort
+        end
+      end
+    end
+
+    def test_rescued_set_errors_before_map_access_discard_other_writes
+      [Farce, Strict, Unshared, Local].each do |namespace|
+        [namespace::Set, namespace::SortedSet].each do |klass|
+          %i[add include?].each do |operation|
+            set = klass.new([1], normalize: :succ)
+            atom = Strict::Atom.new(0)
+
+            refute(Farce.transaction do |tx|
+              tx[atom].value = 1
+              view = tx[set]
+              view.add(2)
+
+              assert_raises(NoMethodError) { view.public_send(operation, Object.new) }
+            end)
+            assert_equal [2], set.to_a
+            assert_equal 0, atom.value
+          end
+          set = klass.new([1])
+
+          refute(Farce.transaction do |tx|
+            assert_raises(ArgumentError) { tx[set].merge([2], Object.new) }
+          end)
+          assert_equal [1], set.to_a
+        end
+      end
+    end
+
+    def test_set_wrappers_reject_irreversible_transfers_before_changing_values
+      [Farce::Set, Farce::SortedSet].each do |klass|
+        %i[move make_shareable dedup proxy].each do |mode|
+          [[klass.new, { mode: }], [klass.new(mode:), {}]].each do |set, options|
+            input = []
+            atom = Strict::Atom.new(0)
+
+            refute(Farce.transaction do |tx|
+              tx[atom].value = 1
+
+              assert_raises(TypeError) { tx[set].add(input, **options) }
+            end)
+            assert_empty set
+            refute_predicate input, :frozen?
+            assert_empty input
+            assert_equal 0, atom.value
+          end
+        end
+      end
+    end
+
+    def test_set_metadata_and_empty_calls_reject_closed_attempts
+      [Farce, Strict, Unshared, Local].each do |namespace|
+        [namespace::Set, namespace::SortedSet].each do |klass|
+          set = klass.new
+          view = nil
+
+          assert(Farce.transaction { |tx| view = tx[set] })
+          %i[each compare_by_identity? weak? empty? hash merge].each do |method|
+            assert_raises(Transaction::ClosedError) { view.public_send(method) }
+          end
+        end
+      end
+    end
+
     def test_tree_map_ordered_operations_and_conflicts
       [Farce, Strict, Unshared, Local].each do |namespace|
         map = namespace::TreeMap.new({ 2 => :two, 1 => nil })
@@ -151,7 +585,7 @@ module Farce
         set = namespace::SortedSet.new([3, 1])
 
         assert(Farce.transaction do |tx|
-          assert_instance_of Transaction::Set, tx[set]
+          assert_instance_of Transaction::SortedSet, tx[set]
           tx[set].add(2)
           tx[set].delete(3)
 
@@ -319,7 +753,7 @@ module Farce
        Local::SortedSet.new(scope: :fiber)].each do |object|
         refute(Farce.transaction do |tx|
           view = tx[object]
-          view.is_a?(Transaction::Set) ? view.add(1) : view[1] = 1
+          view.is_a?(Abstract::Set) ? view.add(1) : view[1] = 1
           Fiber.new { object.freeze }.resume
         end)
         assert_empty object
