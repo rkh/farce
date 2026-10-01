@@ -82,4 +82,27 @@ class TestSubprocess < Test
     assert_empty error
     assert_equal "true\n", output
   end
+
+  def test_setup_accepts_farce_loaded_after_coverage_started
+    output, error, status = ruby_subprocess(<<~RUBY, env: { "COVERAGE" => "true" }, coverage: false)
+      require "coverage_subprocess"
+      require "farce"
+      require "setup"
+      abort "coverage stopped" unless Coverage.running?
+      puts "covered Farce accepted"
+    RUBY
+
+    assert_predicate status, :success?, error
+    assert_includes output, "covered Farce accepted"
+  end
+
+  def test_setup_rejects_farce_loaded_before_coverage_started
+    _, error, status = ruby_subprocess(<<~RUBY, env: { "COVERAGE" => "true" }, coverage: false)
+      require "farce"
+      require "setup"
+    RUBY
+
+    refute_predicate status, :success?
+    assert_includes error, "Farce has been loaded before coverage tracking was enabled."
+  end
 end
