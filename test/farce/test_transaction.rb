@@ -118,7 +118,7 @@ module Farce
       assert(Farce.transaction { |tx| tx[account].withdraw(3) })
       assert_equal 7, balance.value
       assert_equal 3, ledger[:withdrawal]
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[account].withdraw(2)
         tx[balance].compare_and_set(99, 0)
       end)
@@ -256,7 +256,7 @@ module Farce
           assert_equal({ a: 1, b: nil, c: 3 }, map.to_h)
         end)
         assert_equal({ a: 6, d: 8 }, map.to_h)
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           tx[atom].value = 1
           tx[map][:a] = 10
 
@@ -328,14 +328,14 @@ module Farce
       assert_raises(Transaction::ClosedError) { wrappers[1].values_at }
       assert_raises(Transaction::ClosedError) { wrappers[2].compare_by_identity? }
       [atom, map, vector, Strict::Set.new, Strict::Molecule.define(:value).new(1)].each do |object|
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           tx[atom].value = 2
 
           assert_raises(TypeError) { tx[object].dup }
         end)
         assert_equal 1, atom.value
       end
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[atom].value = 2
 
         assert_raises(NoMethodError) { tx[map].wait_until_changed(:value, nil) }
@@ -360,7 +360,7 @@ module Farce
           refute Ractor.shareable?(view) if Internal.native_ractors?
         end)
         assert_equal 20, record.balance
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           tx[record].balance = 30
           tx[record].balance_atom.compare_and_set(99, 40)
         end)
@@ -384,13 +384,13 @@ module Farce
           refute Ractor.shareable?(view) if Internal.native_ractors?
         end)
         assert_equal [2, 3], set.to_a.sort
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           tx[set].clear
           tx[set].merge([7, 8])
           tx.abort!
         end)
         assert_equal [2, 3], set.to_a.sort
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           tx[set].add(4)
           set.add(5)
         end)
@@ -447,7 +447,7 @@ module Farce
             assert_equal [1], set.to_a
           end)
           assert_equal [2, 3], set.to_a.sort
-          refute(Farce.transaction do |tx|
+          refute(Farce.transaction(retries: 0) do |tx|
             tx[set].add(4)
 
             refute tx[map].compare_and_set(tx[map].keys.first, nil, true)
@@ -490,7 +490,7 @@ module Farce
             set = klass.new([1], normalize: :succ)
             atom = Strict::Atom.new(0)
 
-            refute(Farce.transaction do |tx|
+            refute(Farce.transaction(retries: 0) do |tx|
               tx[atom].value = 1
               view = tx[set]
               view.add(2)
@@ -502,7 +502,7 @@ module Farce
           end
           set = klass.new([1])
 
-          refute(Farce.transaction do |tx|
+          refute(Farce.transaction(retries: 0) do |tx|
             assert_raises(ArgumentError) { tx[set].merge([2], Object.new) }
           end)
           assert_equal [1], set.to_a
@@ -517,7 +517,7 @@ module Farce
             input = []
             atom = Strict::Atom.new(0)
 
-            refute(Farce.transaction do |tx|
+            refute(Farce.transaction(retries: 0) do |tx|
               tx[atom].value = 1
 
               assert_raises(TypeError) { tx[set].add(input, **options) }
@@ -566,12 +566,12 @@ module Farce
           assert_equal :two, view.swap(2, :changed)
         end)
         assert_equal [[2, :changed]], map.to_a
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           tx[map][4] = :four
           map[5] = :five
         end)
         assert_equal [[2, :changed], [5, :five]], map.to_a
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           tx[map].clear
           tx[map].compare_and_set(99, nil, :absent)
         end)
@@ -592,7 +592,7 @@ module Farce
           assert_equal [1, 2], tx[set].to_a
         end)
         assert_equal [1, 2], set.to_a
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           tx[set].clear
           tx.abort!
         end)
@@ -615,7 +615,7 @@ module Farce
         end
         ready.pop
 
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           tx[map][2] = :staged
           tx[atom].value = 1
         end)
@@ -654,7 +654,7 @@ module Farce
         tx[tree][2] = 2
         tx[sorted].add(2)
       end)
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[molecule].value = 3
         tx[set].clear
         tx[tree].clear
@@ -670,7 +670,7 @@ module Farce
     def test_tree_freeze_and_compaction
       map = Strict::TreeMap.new({ 1 => :one })
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[map][2] = :two
         map.freeze
       end)
@@ -694,7 +694,7 @@ module Farce
         wrapper = nil
         atom = Strict::Atom.new(0)
 
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           wrapper = tx[object]
           tx[atom].value = 1
 
@@ -751,7 +751,7 @@ module Farce
     def test_tree_and_set_frozen_in_another_local_scope
       [Local::TreeMap.new(scope: :fiber), Local::Set.new(scope: :fiber),
        Local::SortedSet.new(scope: :fiber)].each do |object|
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           view = tx[object]
           view.is_a?(Abstract::Set) ? view.add(1) : view[1] = 1
           Fiber.new { object.freeze }.resume
@@ -784,7 +784,7 @@ module Farce
       tree = Strict::TreeMap.new({ 1 => 1 })
       atom = Strict::Atom.new(0)
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[atom].value = 1
 
         assert_raises(ArgumentError) { tx[tree]["incomparable"] = 2 }
@@ -941,11 +941,60 @@ module Farce
       assert_equal [3, 5], vector.to_a
     end
 
+    def test_run_enrolls_positional_objects_and_yields_their_wrappers
+      [Farce, Transaction, Transaction.new].each do |runner|
+        atom = Strict::Atom.new(1)
+        map = Local::Map.new({ value: 2 })
+        vector = Unshared::Vector.new([3])
+        objects = [atom, map, vector, atom]
+        method = runner.equal?(Farce) ? :transaction : :run
+
+        assert(runner.public_send(method, *objects) do |tx, reference, mapping, sequence, duplicate|
+          assert_instance_of Transaction, tx
+          assert_instance_of Transaction::Atom, reference
+          assert_instance_of Transaction::Map, mapping
+          assert_instance_of Transaction::Vector, sequence
+          assert_same reference, duplicate
+          assert_same reference, tx[atom]
+          assert_same mapping, tx[map]
+          assert_same sequence, tx[vector]
+          reference.value = mapping[:value] + sequence[0]
+          mapping[:value] = 4
+          sequence[0] = 6
+
+          assert_equal 1, atom.value
+          assert_equal 2, map[:value]
+          assert_equal [3], vector.to_a
+        end)
+        assert_equal 5, atom.value
+        assert_equal 4, map[:value]
+        assert_equal [6], vector.to_a
+        assert_same atom, objects[0]
+        assert_same map, objects[1]
+        assert_same vector, objects[2]
+      end
+    end
+
+    def test_run_rejects_unsupported_positional_objects_before_yielding
+      [Farce, Transaction, Transaction.new].each do |runner|
+        atom = Strict::Atom.new(0)
+        method = runner.equal?(Farce) ? :transaction : :run
+        yielded = false
+
+        assert_raises(TypeError) do
+          runner.public_send(method, atom, Counter.new) { yielded = true }
+        end
+        refute yielded
+        assert_equal 0, atom.value
+        assert_equal :failed, runner.state if runner.is_a?(Transaction)
+      end
+    end
+
     def test_failed_cas_discards_every_write
       atom = Strict::Atom.new(1)
       map = Strict::Map.new({ a: 2 })
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[map].clear
         tx[atom].compare_and_set(0, 3)
       end)
@@ -968,7 +1017,7 @@ module Farce
       atom = Strict::Atom.new(1)
       other = Strict::Atom.new(0)
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[atom].value = 2
         tx[other].value = 1
         Thread.new { atom.value = 3 }.join
@@ -981,9 +1030,11 @@ module Farce
       atom = Strict::Atom.new(0)
       attempts = 0
 
-      assert(Transaction.run(retries: 1) do |tx|
+      assert(Transaction.run(atom, retries: 1) do |tx, reference|
         attempts += 1
-        tx[atom].update { |value| value + 1 }
+
+        assert_same reference, tx[atom]
+        reference.update { |value| value + 1 }
         atom.value = 10 if attempts == 1
       end)
       assert_equal 2, attempts
@@ -1002,7 +1053,7 @@ module Farce
       assert_equal 15, balance.value
       assert_equal 5, ledger[:withdrawal]
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[account].withdraw(5)
         tx[balance].compare_and_set(99, 0)
       end)
@@ -1014,7 +1065,7 @@ module Farce
       first = Strict::Atom.new(1)
       second = Strict::Atom.new(2)
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         refute tx[first].compare_and_set(0, 4)
         tx[second].value = 3
         true
@@ -1067,10 +1118,80 @@ module Farce
     end
 
     def test_retry_option_validation
-      [-1, nil, true, 1.0].each do |retries|
-        assert_raises(ArgumentError) { Transaction.run(retries:) { true } }
+      [-1, nil, true, 1.0].each do |value|
+        assert_raises(ArgumentError) { Transaction.run(retries: value) { true } }
+        assert_raises(ArgumentError) { Transaction.run(backoff_after: value) { true } }
       end
       assert_raises(LocalJumpError) { Transaction.run }
+      assert_raises(LocalJumpError) { Transaction.new.run }
+    end
+
+    def test_zero_retries_still_runs_once
+      [Farce, Transaction].each do |runner|
+        atom = Strict::Atom.new(0)
+        attempts = 0
+        method = runner.equal?(Farce) ? :transaction : :run
+
+        assert(runner.public_send(method, atom, retries: 0) do |_, reference|
+          attempts += 1
+          reference.value = 1
+        end)
+        assert_equal 1, attempts
+        assert_equal 1, atom.value
+        attempts = 0
+
+        refute(runner.public_send(method, atom, retries: 0) do |_, reference|
+          attempts += 1
+          reference.compare_and_set(0, 2)
+        end)
+        assert_equal 1, attempts
+        assert_equal 1, atom.value
+      end
+    end
+
+    def test_positional_enrollment_validates_participants_not_used_by_the_block
+      atom = Strict::Atom.new(0)
+      map = Strict::Map.new({ value: 1 })
+
+      refute(Transaction.run(atom, map, retries: 0) do |_, reference|
+        reference.value = 1
+        map[:value] = 2
+      end)
+      assert_equal 0, atom.value
+      assert_equal 2, map[:value]
+    end
+
+    def test_retry_backoff_starts_after_the_configured_threshold
+      runner = Class.new(Transaction)
+      delays = []
+      runner.define_singleton_method(:sleep) { |delay| delays << delay }
+      atom = Strict::Atom.new(0)
+      attempts = 0
+
+      refute(runner.run(atom, retries: 3, backoff_after: 1) do |tx, reference|
+        attempts += 1
+        reference.value = 1
+        tx.fail!
+      end)
+      assert_equal 4, attempts
+      assert_equal [0.01, 0.02], delays
+      assert_equal 0, atom.value
+    end
+
+    def test_default_retry_limit_and_backoff
+      runner = Class.new(Transaction)
+      delays = []
+      runner.define_singleton_method(:sleep) { |delay| delays << delay }
+      attempts = 0
+
+      refute(runner.run do |tx|
+        attempts += 1
+        tx.fail!
+      end)
+      assert_equal 101, attempts
+      assert_equal 90, delays.size
+      assert_in_delta 0.01, delays.first
+      assert_in_delta 0.9, delays.last
     end
 
     def test_wrapper_lifetime_and_attempt_state
@@ -1141,7 +1262,7 @@ module Farce
       atom = Strict::Atom.new(0)
       vector = Strict::Vector.new([1])
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[atom].value = 1
         tx[vector][0] = 2
         vector.freeze
@@ -1154,7 +1275,7 @@ module Farce
       atom = Strict::Atom.new(0)
       vector = Strict::Vector.new([1])
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[atom].value = 1
         assert_raises(IndexError) { tx[vector][-5] = 2 }
       end)
@@ -1166,7 +1287,7 @@ module Farce
       atom = Strict::Atom.new(0)
       map = Strict::Map.new({ x: 1 })
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[map][:x] = 2
         tx[atom].value = 1
         Thread.new { map.clear }.join
@@ -1179,7 +1300,7 @@ module Farce
       atom = Strict::Atom.new(0)
       other = Strict::Atom.new(0)
       atom.update do |current|
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           tx[atom].value = 1
           tx[other].value = 1
         end)
@@ -1194,7 +1315,7 @@ module Farce
       map = Strict::Map.new({ x: 0 })
       atom = Strict::Atom.new(0)
       map.update(:x) do |value|
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           tx[map][:y] = 1
           tx[atom].value = 1
         end)
@@ -1216,7 +1337,7 @@ module Farce
         assert_equal 2, tx[map].fetch("new")
       end)
       assert_equal({ empty: 1, new: 2 }, map.to_h)
-      refute(Farce.transaction { |tx| tx[map].compare_and_set(:absent, nil, 3) })
+      refute(Farce.transaction(retries: 0) { |tx| tx[map].compare_and_set(:absent, nil, 3) })
       refute map.key?(:absent)
     end
 
@@ -1241,7 +1362,7 @@ module Farce
       other = first.dup.freeze
       atom = Strict::Atom.new(first, compare_by_identity: true)
 
-      refute(Farce.transaction { |tx| tx[atom].compare_and_set(other, :changed) })
+      refute(Farce.transaction(retries: 0) { |tx| tx[atom].compare_and_set(other, :changed) })
       assert_same first, atom.value
       assert(Farce.transaction { |tx| tx[atom].compare_and_set(first, :changed) })
       assert_equal :changed, atom.value
@@ -1420,7 +1541,7 @@ module Farce
     def test_unsupported_wrapper_method_invalidates_attempt
       atom = Strict::Atom.new(0)
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[atom].value = 1
         assert_raises(NoMethodError) { tx[atom].unsupported_operation }
       end)
@@ -1458,7 +1579,7 @@ module Farce
         assert_equal [2, 2, 2], [atom.value, map[:value], vector[0]]
       end
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         objects.each_slice(3) do |atom, map, vector|
           tx[atom].value = 3
           tx[map][:value] = 3
@@ -1475,7 +1596,7 @@ module Farce
       local = Local::Atom.new(1)
       strict = Strict::Map.new({ value: 1 })
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[local].value = 2
         tx[strict][:value] = 2
         strict[:other] = 3
@@ -1504,7 +1625,7 @@ module Farce
       map = Local::Map.new({ value: 1 }, scope: :fiber)
       strict = Strict::Atom.new(1)
 
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[map][:value] = 2
         tx[strict].value = 2
         Fiber.new { map.freeze }.resume
@@ -1545,7 +1666,7 @@ module Farce
         tx[strict].value = 2
       end)
       assert_same value, map[:other]
-      refute(Farce.transaction do |tx|
+      refute(Farce.transaction(retries: 0) do |tx|
         tx[map][:other] = []
         tx[strict].value = 3
         map[:external] = value
@@ -1559,7 +1680,7 @@ module Farce
       map = Unshared::Map.new({ value: 1 })
       strict = Strict::Map.new
       map.update(:value) do |value|
-        refute(Farce.transaction do |tx|
+        refute(Farce.transaction(retries: 0) do |tx|
           tx[map][:other] = 2
           tx[strict][:value] = 2
         end)

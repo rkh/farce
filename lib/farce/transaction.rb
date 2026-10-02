@@ -89,36 +89,39 @@ module Farce
     REGISTER = ClassMirror.new(Factory) { |mapped, _source| mapped.new }
     private_constant :Factory, :REGISTER
 
-    # Run an attempt and optionally retry unsuccessful comparisons or conflicts.
-    # An explicit abort or an exception is not retried.
-    # Each attempt gets a new Transaction and fresh wrappers. A retry executes
-    # the entire block, so effects outside wrappers must be safe to repeat.
-    # Separate run calls are independent, including calls nested in this block.
-    #
-    # @example Retry a conflicting increment up to three times
-    #   counter = Farce::Atom.new(0)
-    #   Farce.transaction(retries: 3) { |tx| tx[counter].update { |value| value + 1 } }
-    #
-    # @param retries [Integer] maximum additional attempts
-    # @yieldparam transaction [Transaction] the current attempt
-    # @return [Boolean] whether the changes committed
-    def self.run(retries: 0)
+    # @overload run(*objects, retries: 100, backoff_after: 10)
+    #   Creates and runs a new transaction attempt.
+    #   Automatically retries failed attempts up to the specified number of retries.
+    #   Starts backing off after the specified number of attempts.
+    #   @param objects [Array] list of objects to enroll in the transaction
+    #   @param retries [Integer] maximum additional attempts
+    #   @param backoff_after [Integer] number of attempts before starting to back off
+    #   @return [Boolean] whether the transaction committed successfully
+    #   @see Farce.transaction
+    def self.run(*, retries: 100, backoff_after: 10, &) # rubocop:disable Naming/PredicateMethod
       raise LocalJumpError, "no block given" unless block_given?
-      raise ArgumentError, "retries must be a non-negative Integer" unless retries.is_a?(Integer) && retries >= 0
+      raise ArgumentError, "retries must be a non-negative Integer" unless Integer === retries && retries >= 0
+      unless Integer === backoff_after && backoff_after >= 0
+        raise ArgumentError, "backoff_after must be a non-negative Integer"
+      end
 
       attempt = 0
-      loop do
+
+      while attempt <= retries
+        if attempt > backoff_after
+          delay = (attempt - backoff_after) * 0.01
+          scheduler = Fiber.scheduler if Fiber.respond_to?(:scheduler) && !Fiber.current.blocking?
+          scheduler ? scheduler.kernel_sleep(delay) : sleep(delay)
+        end
+
         transaction = new
-        return true if transaction.run { yield transaction }
-        return false unless transaction.retryable? && attempt < retries
+        return true if transaction.run(*, &)
+        return false unless transaction.retryable?
 
         attempt += 1
-        if Fiber.respond_to?(:scheduler) && Fiber.scheduler
-          Fiber.scheduler.kernel_sleep(0)
-        else
-          Thread.pass
-        end
       end
+
+      false
     end
 
     # Create an unused attempt bound to the current Fiber.
@@ -149,28 +152,37 @@ module Farce
     def retryable? = @retryable && !@aborted
 
     # Execute this attempt once. Use {.run} for automatic retries.
+    #
     # The block stages work through {#[]}. After it returns, commit validates
     # all enrolled snapshots and publishes their staged writes together.
     # Cancellation during commit is deferred until publication finishes. Once
     # committed, an interruption does not undo the changes.
+    #
+    # @param objects [Array] the objects to enroll in this transaction attempt
+    # @yield [transaction, *objects] the current transaction and the enrolled objects
     # @yieldparam transaction [Transaction] this active attempt
+    # @yieldparam objects [Array] the enrolled objects
     # @return [Boolean] whether the changes committed
     # @raise [ClosedError] if this attempt has already run
     # @raise [OwnershipError] if called from a different Fiber
-    def run
+    def run(*objects)
       started = false
       raise LocalJumpError, "no block given" unless block_given?
       check_owner!
       raise ClosedError, "transaction has already run" unless @state == :new
 
-      @state = :active
+      @state  = :active
       started = true
-      yield self
+
+      objects.map! { self[it] }
+      yield self, *objects
+
       check_open!
+
       Thread.handle_interrupt(Internal::INTERRUPT_MASK) do
-        entries = @entries.values
+        entries   = @entries.values
         committed = !@failed && Internal.commit_transaction(entries, @guards.values)
-        @state = committed ? :committed : :failed
+        @state    = committed ? :committed : :failed
         Internal.notify_transaction(entries) if committed && Internal.respond_to?(:notify_transaction)
         committed
       end

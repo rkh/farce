@@ -53,7 +53,45 @@ module Farce
   autoload :DEDUPER, "farce/deduper"
   private_constant :Internal, :UNDEFINED, :DEDUPER
 
-  # Run an explicit transaction. See {Transaction.run} for retry options.
+  # @overload transaction(*objects, retries: 100, backoff_after: 10)
+  #   Creates and runs a new transaction attempt.
+  #   Automatically retries failed attempts up to the specified number of retries.
+  #   Starts backing off after the specified number of attempts.
+  #
+  #   @example Modifying multiple entries in a map
+  #     accounts = Farce::Map.new({a: 100, b: 200})
+  #
+  #     # transfer 80 from :a to :b, but only if both succeed
+  #     success = Farce.transaction(accounts) do |tx, accounts|
+  #       tx.abort! if accounts[:b] < 80
+  #       accounts[:a] += 80
+  #       accounts[:b] -= 80
+  #     end
+  #
+  #     if success
+  #       puts "Transaction succeeded"
+  #     else
+  #       puts "Transaction failed"
+  #     end
+  #
+  #   @example Programmatically registering objects for transactions
+  #     map     = Farce::Map.new({a: 1, b: 2})
+  #     summary = Farce::Atom.new("size not calculated")
+  #
+  #     # make sure map[:size], map.size, and the summary all match
+  #     Farce.transaction do |tx|
+  #       tx_map            = tx[map]
+  #       tx_map[:size]     = size = tx_map.size
+  #       tx[summary].value = "size: #{size}"
+  #     end
+  #
+  #   @param objects [Array] list of objects to enroll in the transaction
+  #   @param retries [Integer] maximum additional attempts
+  #   @param backoff_after [Integer] number of attempts before starting to back off
+  #   @yield [transaction, *objects] the current transaction and the enrolled objects
+  #   @yieldparam transaction [Farce::Transaction] the current transaction
+  #   @yieldparam objects [Array] the enrolled objects
+  #   @return [Boolean] whether the transaction committed successfully
   def self.transaction(...) = Transaction.run(...)
 
   # @overload clock
