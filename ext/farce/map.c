@@ -2062,6 +2062,38 @@ static const farce_transaction_ops_t map_transaction_ops = {
     map_transaction_valid, map_transaction_apply, map_transaction_notify,
 };
 
+static bool
+map_transaction_size_valid(farce_transaction_entry_t *entry)
+{
+    map_t *map = entry->source_data;
+    return map->size == entry->version && !map->comparing && !map->reservations;
+}
+
+static void
+map_transaction_size_noop(farce_transaction_entry_t *entry)
+{
+    (void)entry;
+}
+
+static const farce_transaction_ops_t map_transaction_size_ops = {
+    map_transaction_size_valid, map_transaction_size_noop, map_transaction_size_noop,
+};
+
+/* Count-only participants use the same commit lock without copying slots or
+ * rejecting completed value replacements that leave cardinality unchanged. */
+static VALUE
+map_transaction_size_snapshot(VALUE self, VALUE size)
+{
+    uint64_t expected = NUM2ULL(size);
+    map_t *source = get_map(self);
+    farce_transaction_entry_t *entry;
+    VALUE result = farce_transaction_entry_new(
+        self, Qnil, source, NULL, &source->lock, &map_transaction_size_ops, &entry
+    );
+    entry->version = expected;
+    return result;
+}
+
 static VALUE
 map_transaction_snapshot(VALUE self)
 {
@@ -2112,6 +2144,7 @@ map_define_methods(VALUE klass)
     rb_define_method(klass, "delete", map_delete, 1);
     rb_define_method(klass, "clear", map_clear, 0);
     rb_define_method(klass, "transaction_snapshot", map_transaction_snapshot, 0);
+    rb_define_method(klass, "transaction_size_snapshot", map_transaction_size_snapshot, 1);
     rb_define_method(klass, "compare_and_set", map_compare_and_set, -1);
     rb_define_method(klass, "upsert", map_upsert, -1);
     rb_define_method(klass, "compare_keys_by_identity?", map_compare_keys_by_identity_p, 0);

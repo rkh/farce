@@ -5,6 +5,9 @@
 module Farce
   class Transaction
     # A {Abstract::Set Set} that is part of a transaction.
+    #
+    # Membership reads and changes validate the members they access.
+    # Size reads validate cardinality. Enumeration captures the full set.
     class Set < Abstract::Set
       include SetOperations
 

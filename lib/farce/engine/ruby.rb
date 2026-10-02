@@ -64,6 +64,20 @@ module Farce
 
     def native_ractors? = true
 
+    class << self
+      alias commit_native_transaction commit_transaction
+    end
+
+    def self.commit_transaction(entries, guards = [])
+      native, portable = entries.partition { NativeTransactionEntry === it }
+      return commit_native_transaction(native, guards) if portable.empty?
+      PortableTransaction.commit(portable, guards) { commit_native_transaction(native, guards) }
+    end
+
+    def self.notify_transaction(entries)
+      entries.each { it.notify unless NativeTransactionEntry === it }
+    end
+
     def prepare_method_definition(&) = Ractor.shareable_proc(&)
 
     if ::Ractor.const_defined?(:Port, false)

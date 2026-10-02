@@ -390,11 +390,11 @@ module Farce
           tx.abort!
         end)
         assert_equal [2, 3], set.to_a.sort
-        refute(Farce.transaction(retries: 0) do |tx|
+        assert(Farce.transaction(retries: 0) do |tx|
           tx[set].add(4)
           set.add(5)
         end)
-        assert_equal [2, 3, 5], set.to_a.sort
+        assert_equal [2, 3, 4, 5], set.to_a.sort
       end
     end
 
@@ -1149,15 +1149,15 @@ module Farce
       end
     end
 
-    def test_positional_enrollment_validates_participants_not_used_by_the_block
+    def test_positional_enrollment_ignores_unaccessed_map_content
       atom = Strict::Atom.new(0)
       map = Strict::Map.new({ value: 1 })
 
-      refute(Transaction.run(atom, map, retries: 0) do |_, reference|
+      assert(Transaction.run(atom, map, retries: 0) do |_, reference|
         reference.value = 1
         map[:value] = 2
       end)
-      assert_equal 0, atom.value
+      assert_equal 1, atom.value
       assert_equal 2, map[:value]
     end
 
@@ -1599,6 +1599,8 @@ module Farce
       refute(Farce.transaction(retries: 0) do |tx|
         tx[local].value = 2
         tx[strict][:value] = 2
+
+        refute tx[strict].key?(:other)
         strict[:other] = 3
       end)
       assert_equal 1, local.value
@@ -1655,7 +1657,7 @@ module Farce
       end)
     end
 
-    def test_unshared_map_conflicts_and_preserves_mutable_values
+    def test_unshared_map_merges_unobserved_changes_and_preserves_mutable_values
       value = []
       map = Unshared::Map.new({ value: value })
       strict = Strict::Atom.new(1)
@@ -1666,14 +1668,16 @@ module Farce
         tx[strict].value = 2
       end)
       assert_same value, map[:other]
-      refute(Farce.transaction(retries: 0) do |tx|
-        tx[map][:other] = []
+      replacement = []
+
+      assert(Farce.transaction(retries: 0) do |tx|
+        tx[map][:other] = replacement
         tx[strict].value = 3
         map[:external] = value
       end)
       assert_same value, map[:external]
-      assert_same value, map[:other]
-      assert_equal 2, strict.value
+      assert_same replacement, map[:other]
+      assert_equal 3, strict.value
     end
 
     def test_unshared_map_reservation_rejects_mixed_transaction

@@ -31,7 +31,7 @@ module Farce
           @backend     = backend
           @manager     = manager
           @nil_value   = nil_value
-          @entry       = transaction.enlist(backend) if backend
+          @entry       = enlist(backend) if backend
           @working     = @entry&.working
         end
       end
@@ -96,6 +96,8 @@ module Farce
 
       private
 
+      def enlist(backend) = @transaction.enlist(backend)
+
       # Initialize a composite wrapper after binding it to the participant.
       # Copy the named settings, then replace each storage field with its
       # wrapper from this attempt. Set uses this to retain membership settings
@@ -135,6 +137,9 @@ module Farce
       def access
         @transaction.check_open!
         yield
+      rescue Internal::TransactionConflict
+        @transaction.fail! if @transaction.state == :active
+        raise
       rescue Exception # rubocop:disable Lint/RescueException -- cancellation must poison the attempt too
         @transaction.fail!(retryable: false) if @transaction.state == :active
         raise

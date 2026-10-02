@@ -2,8 +2,6 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
-require "farce/engine/shared/portable_transaction"
-
 module Farce
   # A transaction groups multiple changes to Farce objects into a single atomic attempt.
   #
@@ -160,7 +158,7 @@ module Farce
     # Execute this attempt once. Use {.run} for automatic retries.
     #
     # The block stages work through {#[]}. After it returns, commit validates
-    # all enrolled snapshots and publishes their staged writes together.
+    # the attempt's reads and publishes its staged writes together.
     # Cancellation during commit is deferred until publication finishes. Once
     # committed, an interruption does not undo the changes.
     #
@@ -186,13 +184,16 @@ module Farce
       check_open!
 
       Thread.handle_interrupt(Internal::INTERRUPT_MASK) do
-        entries   = @entries.values
+        entries = @entries.values
+        unless @failed
+          entries = entries.filter_map { Internal::TransactionMapSnapshot === it ? it.prepare_commit : it }
+        end
         committed = !@failed && Internal.commit_transaction(entries, @guards.values)
         @state    = committed ? :committed : :failed
         Internal.notify_transaction(entries) if committed && Internal.respond_to?(:notify_transaction)
         committed
       end
-    rescue Aborted
+    rescue Aborted, Internal::TransactionConflict
       false
     ensure
       @state = :failed if started && @state == :active
@@ -209,6 +210,9 @@ module Farce
       @wrappers.fetch(object) do
         @wrappers[object] = REGISTER[object.class].call(object, self)
       end
+    rescue Internal::TransactionConflict
+      fail! if @state == :active && @owner.equal?(Fiber.current)
+      raise
     rescue Exception # rubocop:disable Lint/RescueException -- cancellation must poison the attempt too
       if @state == :active && @owner.equal?(Fiber.current)
         @failed = true
@@ -261,22 +265,23 @@ module Farce
       raise ClosedError, "transaction attempt is closed" unless @state == :active
     end
 
-    # Capture a backend's snapshot once and reuse it across wrappers.
+    # Enroll storage once and reuse its staged data across wrappers.
     #
     # Backends that expose transaction_source share enrollment with that source,
     # so wrappers of the same storage cannot stage conflicting independent copies.
     #
     # @param backend [Object] storage providing a snapshot or transaction_source
+    # @param per_key [Boolean] track map dependencies as keys are accessed
     # @return [#working] the enrolled entry containing this attempt's staged storage
     # @api private
-    def enlist(backend)
+    def enlist(backend, per_key: false)
       check_open!
       source = backend.respond_to?(:transaction_source) ? backend.transaction_source : backend
       @entries.fetch(source) do
         unless source.respond_to?(:transaction_snapshot)
           raise TypeError, "#{source.class} does not support transactions"
         end
-        @entries[source] = source.transaction_snapshot
+        @entries[source] = per_key ? Internal::TransactionMapSnapshot.new(source) : source.transaction_snapshot
       end
     end
 

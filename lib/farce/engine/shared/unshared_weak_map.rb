@@ -412,7 +412,10 @@ module Farce
 
     unless const_defined?(:UnsharedMap, false)
       class UnsharedMap < UnsharedMapBase
-        def transaction_snapshot = PortableTransaction.snapshot(self, :strong_map)
+        def transaction_snapshot            = PortableTransaction.snapshot(self, :strong_map)
+        def transaction_size_snapshot(size) = PortableTransaction::StrongMapSizeEntry.new(self, size)
+        def transaction_size                = PortableTransaction::StrongMapEntry.size(@index)
+        def transaction_read(key)           = read_unreserved(key)
 
         def transaction_pairs
           PortableTransaction::StrongMapEntry.pairs(@index)

@@ -5,26 +5,6 @@
 module Farce
   module Internal # :nodoc: all
     module PortableTransaction
-      # Stop new ordered-key reservations and reject initializers already active.
-      # Ordinary TreeMap operations already use this guard and participant count.
-      class ReservationEntry < Entry
-        def initialize(source) # rubocop:disable Lint/MissingSuper
-          @source = source
-          @locks = [source.instance_variable_get(:@guard)]
-        end
-
-        def prepare; end
-        def apply; end
-        def restore; end
-        def notify; end
-
-        def valid?
-          participants = @source.instance_variable_get(:@participants)
-          participants = participants.value unless Integer === participants
-          participants.zero?
-        end
-      end
-
       # Keep the state object and lock stable for ordinary operations already
       # waiting on them. Only replace storage under that existing lock.
       class TreeEntry < Entry

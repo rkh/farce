@@ -6,8 +6,9 @@ module Farce
   module Internal # :nodoc: all
     # Portable commits use existing mutexes. Validation compares original
     # storage by identity without invoking user equality or hash callbacks.
-    # Only the TruffleRuby map needs a replaceable native storage reference.
     module PortableTransaction
+      include Autoloads
+
       def self.same?(left, right) = BasicObject.instance_method(:equal?).bind_call(left, right)
 
       def self.snapshot(source, kind)
@@ -67,18 +68,18 @@ module Farce
         attr_reader :working, :locks
 
         def initialize(source, working, kind, baseline)
-          @source = source
-          @working = working
-          @kind = kind
+          @source   = source
+          @working  = working
+          @kind     = kind
           @baseline = baseline
-          @dirty = false
-          @applied = false
-          @field = { atom: :@value, vector: :@values, map: :@map }.fetch(kind)
-          @locks = if kind == :map
-                     %i[@reservation_mutex @state_mutex].map { source.instance_variable_get(it) }
-                   else
-                     [source.instance_variable_get(:@mutex)]
-                   end
+          @dirty    = false
+          @applied  = false
+          @field    = { atom: :@value, vector: :@values, map: :@map }.fetch(kind)
+          @locks    = if kind == :map
+                        %i[@reservation_mutex @state_mutex].map { source.instance_variable_get(it) }
+                      else
+                        [source.instance_variable_get(:@mutex)]
+                      end
         end
 
         def write!
@@ -102,10 +103,7 @@ module Farce
             !@source.instance_variable_get(:@updating) && @original.size == @baseline.size &&
               @baseline.each_index.all? { PortableTransaction.same?(@original[it], @baseline[it]) }
           when :map
-            return false if @source.instance_variable_get(:@active_owner_fiber) ||
-              @source.instance_variable_get(:@active_owners) ||
-              @source.instance_variable_get(:@clearing_reservations) ||
-              !@source.instance_variable_get(:@reservations).empty?
+            return false unless @source.transaction_idle?
             pairs = @source.transaction_pairs
             pairs.size == @baseline.size && pairs.all? do |key, value|
               @baseline.key?(key) && PortableTransaction.same?(@baseline[key], value)
@@ -136,33 +134,17 @@ module Farce
           end
         end
       end
-    end
 
-    require "farce/engine/shared/transaction_strong_map"
-    require "farce/engine/shared/transaction_tree_map"
+      # Validate only cardinality while ordinary map mutations are excluded by
+      # the existing reservation and state locks. This entry never publishes data.
+      class MapSizeEntry < Entry
+        def initialize(source, size)
+          super(source, nil, :map, size)
+        end
 
-    module TransactionMapBackend
-      def transaction_snapshot = PortableTransaction.snapshot(self, :map)
-      def transaction_pairs = entries_snapshot
-    end
-
-    if const_defined?(:NativeTransactionEntry, false)
-      class << self
-        alias commit_native_transaction commit_transaction
+        def prepare; end
+        def valid? = @source.transaction_idle? && @source.size == @baseline
       end
-
-      def self.commit_transaction(entries, guards = [])
-        portable, native = entries.partition { PortableTransaction::Entry === it }
-        return commit_native_transaction(native, guards) if portable.empty?
-        PortableTransaction.commit(portable, guards) { commit_native_transaction(native, guards) }
-      end
-
-      def self.notify_transaction(entries)
-        entries.each { it.notify if PortableTransaction::Entry === it }
-      end
-    else
-      def self.commit_transaction(entries, guards = []) = PortableTransaction.commit(entries, guards)
-      def self.notify_transaction(entries) = entries.each(&:notify)
     end
   end
 end

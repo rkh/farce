@@ -12,9 +12,25 @@ module Farce
         FIELDS = %i[@data @entries @registry_holes @sweep_cursor @iteration_epoch].freeze
         CELL_FIELDS = %i[@retired @present @key @value].freeze
 
-        # A transaction snapshot must not omit cells retired by a concurrent
-        # commit. Lock the registry and captured cells, then recheck membership.
         def self.pairs(index)
+          with_cells(index) do |cells|
+            cells.filter_map do |cell|
+              next if cell.instance_variable_get(:@retired) || !cell.instance_variable_get(:@present)
+              alive, key = cell.instance_variable_get(:@key).read
+              [key, cell.instance_variable_get(:@value)] if alive
+            end
+          end
+        end
+
+        def self.size(index)
+          with_cells(index) do |cells|
+            cells.count { !it.instance_variable_get(:@retired) && it.instance_variable_get(:@present) }
+          end
+        end
+
+        # Read the current registry and cells together, so a concurrent commit
+        # cannot retire cells between enumeration and reading their contents.
+        def self.with_cells(index)
           loop do
             cells = index.snapshot
             registry = index.instance_variable_get(:@registry_mutex)
@@ -28,11 +44,7 @@ module Farce
                 current = index.instance_variable_get(:@entries).compact
                 if current.size == cells.size &&
                     current.each_index.all? { PortableTransaction.same?(current[it], cells[it]) }
-                  return cells.filter_map do |cell|
-                    next if cell.instance_variable_get(:@retired) || !cell.instance_variable_get(:@present)
-                    alive, key = cell.instance_variable_get(:@key).read
-                    [key, cell.instance_variable_get(:@value)] if alive
-                  end
+                  return yield(cells)
                 end
               end
             ensure
@@ -45,6 +57,7 @@ module Farce
             end
           end
         end
+        private_class_method :with_cells
 
         # This entry coordinates index and cell locks rather than a single storage field.
         def initialize(source, working, _kind, baseline) # rubocop:disable Lint/MissingSuper
@@ -55,9 +68,7 @@ module Farce
         end
 
         def prepare
-          @cells = @index.snapshot
-          @locks = [@index_lock.instance_variable_get(:@mutex), @index.instance_variable_get(:@registry_mutex)]
-          @locks.concat(@cells.map { it.instance_variable_get(:@mutex) })
+          capture_cells
           replacement = @working.instance_variable_get(:@index)
           @replacement = FIELDS.map { replacement.instance_variable_get(it) }
         end
@@ -111,6 +122,14 @@ module Farce
             cell.instance_variable_get(:@changes)&.broadcast
             cell.instance_variable_get(:@signal)&.broadcast
           end
+        end
+
+        private
+
+        def capture_cells
+          @cells = @index.snapshot
+          @locks = [@index_lock.instance_variable_get(:@mutex), @index.instance_variable_get(:@registry_mutex)]
+          @locks.concat(@cells.map { it.instance_variable_get(:@mutex) })
         end
       end
     end
