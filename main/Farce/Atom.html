@@ -939,11 +939,6 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-137
-138
-139
-140
-141
 142
 143
 144
@@ -953,10 +948,15 @@ This may update and freeze the original. Already-shareable values pass through u
 148
 149
 150
-151</pre>
+151
+152
+153
+154
+155
+156</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 137</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 142</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_new_value'>new_value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -1016,10 +1016,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-64</pre>
+69</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 64</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 69</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='ivar'>@compare_by_identity</span></pre>
     </td>
@@ -1107,10 +1107,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-81</pre>
+86</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 81</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 86</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_unwrap_result'>unwrap_result</span><span class='lparen'>(</span><span class='ivar'>@atom</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='const'>TIMED_OUT</span> <span class='rbrace'>}</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -1156,10 +1156,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-60</pre>
+65</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 60</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 65</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_mode'>mode</span></pre>
     </td>
@@ -1293,14 +1293,14 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-90
-91
-92
-93
-94</pre>
+95
+96
+97
+98
+99</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 90</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 95</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_new_value'>new_value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -1453,11 +1453,6 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-116
-117
-118
-119
-120
 121
 122
 123
@@ -1465,10 +1460,15 @@ This may update and freeze the original. Already-shareable values pass through u
 125
 126
 127
-128</pre>
+128
+129
+130
+131
+132
+133</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 116</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 121</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1614,14 +1614,14 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-103
-104
-105
-106
-107</pre>
+108
+109
+110
+111
+112</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 103</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 108</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_new_value'>new_value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -1793,19 +1793,19 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-161
-162
-163
-164
-165
 166
 167
 168
 169
-170</pre>
+170
+171
+172
+173
+174
+175</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 161</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 166</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1997,11 +1997,6 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-181
-182
-183
-184
-185
 186
 187
 188
@@ -2011,10 +2006,15 @@ This may update and freeze the original. Already-shareable values pass through u
 192
 193
 194
-195</pre>
+195
+196
+197
+198
+199
+200</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 181</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 186</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='id identifier rubyid_initial_value'>initial_value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -2078,10 +2078,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-68</pre>
+73</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 68</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 73</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_unwrap_value'>unwrap_value</span><span class='lparen'>(</span><span class='ivar'>@atom</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span></pre>
     </td>
@@ -2150,12 +2150,12 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-73
-74
-75</pre>
+78
+79
+80</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 73</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 78</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value='>value=</span><span class='lparen'>(</span><span class='id identifier rubyid_new_value'>new_value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_new_value'>new_value</span><span class='rparen'>)</span>
@@ -2260,11 +2260,6 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-202
-203
-204
-205
-206
 207
 208
 209
@@ -2272,10 +2267,15 @@ This may update and freeze the original. Already-shareable values pass through u
 211
 212
 213
-214</pre>
+214
+215
+216
+217
+218
+219</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 202</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 207</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_expected'>expected</span> <span class='op'>=</span> <span class='id identifier rubyid_wrap_comparison'>wrap_comparison</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span>
@@ -2375,10 +2375,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-220</pre>
+225</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 220</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 225</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -2391,7 +2391,7 @@ This may update and freeze the original. Already-shareable values pass through u
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 30 21:52:39 2026 by
+  Generated on Fri Oct  2 10:09:31 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

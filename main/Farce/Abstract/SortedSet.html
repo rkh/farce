@@ -133,7 +133,7 @@ elements raise during insertion or lookup.</p>
 
 </div><div id="subclasses">
   <h2>Direct Known Subclasses</h2>
-  <p class="children"><span class='object_link'><a href="../Local/SortedSet.html" title="Farce::Local::SortedSet (class)">Local::SortedSet</a></span>, <span class='object_link'><a href="../SortedSet.html" title="Farce::SortedSet (class)">SortedSet</a></span>, <span class='object_link'><a href="../Strict/SortedSet.html" title="Farce::Strict::SortedSet (class)">Strict::SortedSet</a></span>, <span class='object_link'><a href="../Unshared/SortedSet.html" title="Farce::Unshared::SortedSet (class)">Unshared::SortedSet</a></span></p>
+  <p class="children"><span class='object_link'><a href="../Local/SortedSet.html" title="Farce::Local::SortedSet (class)">Local::SortedSet</a></span>, <span class='object_link'><a href="../SortedSet.html" title="Farce::SortedSet (class)">SortedSet</a></span>, <span class='object_link'><a href="../Strict/SortedSet.html" title="Farce::Strict::SortedSet (class)">Strict::SortedSet</a></span>, <span class='object_link'><a href="../Transaction/SortedSet.html" title="Farce::Transaction::SortedSet (class)">Transaction::SortedSet</a></span>, <span class='object_link'><a href="../Unshared/SortedSet.html" title="Farce::Unshared::SortedSet (class)">Unshared::SortedSet</a></span></p>
 </div>
 
 
@@ -783,14 +783,14 @@ this option, which defaults to :copy.</p>
       <pre class="lines">
 
 
-38
-39
-40
 41
-42</pre>
+42
+43
+44
+45</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 38</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 41</span>
 
 <span class='kw'>def</span> <span class='op'>==</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
@@ -863,13 +863,13 @@ this option, which defaults to :copy.</p>
       <pre class="lines">
 
 
-47
-48
-49
-50</pre>
+50
+51
+52
+53</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 47</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 50</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_eql?'>eql?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
@@ -922,10 +922,10 @@ this option, which defaults to :copy.</p>
       <pre class="lines">
 
 
-54</pre>
+57</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 54</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 57</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_hash'>hash</span> <span class='op'>=</span> <span class='id identifier rubyid_ordered_keys'>ordered_keys</span><span class='period'>.</span><span class='id identifier rubyid_hash'>hash</span></pre>
     </td>
@@ -1011,15 +1011,15 @@ this option, which defaults to :copy.</p>
       <pre class="lines">
 
 
-129
-130
-131
 132
 133
-134</pre>
+134
+135
+136
+137</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 129</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 132</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_intersect?'>intersect?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_validate_set_like'>validate_set_like</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
@@ -1097,13 +1097,13 @@ this option, which defaults to :copy.</p>
       <pre class="lines">
 
 
-75
-76
-77
-78</pre>
+78
+79
+80
+81</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 75</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 78</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_intersection'>intersection</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_enumerables'>enumerables</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_indexes'>indexes</span> <span class='op'>=</span> <span class='id identifier rubyid_enumerables'>enumerables</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_ordered_index'>ordered_index</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
@@ -1196,14 +1196,14 @@ this option, which defaults to :copy.</p>
       <pre class="lines">
 
 
-96
-97
-98
 99
-100</pre>
+100
+101
+102
+103</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 96</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 99</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_proper_subset?'>proper_subset?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_validate_set_like'>validate_set_like</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
@@ -1297,14 +1297,14 @@ this option, which defaults to :copy.</p>
       <pre class="lines">
 
 
-118
-119
-120
 121
-122</pre>
+122
+123
+124
+125</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 118</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 121</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_proper_superset?'>proper_superset?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_validate_set_like'>validate_set_like</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
@@ -1398,14 +1398,14 @@ this option, which defaults to :copy.</p>
       <pre class="lines">
 
 
-85
-86
-87
 88
-89</pre>
+89
+90
+91
+92</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 85</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 88</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_subset?'>subset?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_validate_set_like'>validate_set_like</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
@@ -1478,9 +1478,6 @@ this option, which defaults to :copy.</p>
       <pre class="lines">
 
 
-59
-60
-61
 62
 63
 64
@@ -1489,10 +1486,13 @@ this option, which defaults to :copy.</p>
 67
 68
 69
-70</pre>
+70
+71
+72
+73</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 59</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 62</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_subtract'>subtract</span><span class='lparen'>(</span><span class='id identifier rubyid_enumerable'>enumerable</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -1593,14 +1593,14 @@ this option, which defaults to :copy.</p>
       <pre class="lines">
 
 
-107
-108
-109
 110
-111</pre>
+111
+112
+113
+114</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 107</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/sorted_set.rb', line 110</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_superset?'>superset?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_validate_set_like'>validate_set_like</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
@@ -1617,7 +1617,7 @@ this option, which defaults to :copy.</p>
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 30 21:52:45 2026 by
+  Generated on Fri Oct  2 10:09:40 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -137,7 +137,7 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
 </div><div id="subclasses">
   <h2>Direct Known Subclasses</h2>
-  <p class="children"><span class='object_link'><a href="../Local/Vector.html" title="Farce::Local::Vector (class)">Local::Vector</a></span>, <span class='object_link'><a href="../Strict/Vector.html" title="Farce::Strict::Vector (class)">Strict::Vector</a></span>, <span class='object_link'><a href="../Unshared/Vector.html" title="Farce::Unshared::Vector (class)">Unshared::Vector</a></span>, <span class='object_link'><a href="../Vector.html" title="Farce::Vector (class)">Vector</a></span></p>
+  <p class="children"><span class='object_link'><a href="../Local/Vector.html" title="Farce::Local::Vector (class)">Local::Vector</a></span>, <span class='object_link'><a href="../Strict/Vector.html" title="Farce::Strict::Vector (class)">Strict::Vector</a></span>, <span class='object_link'><a href="../Transaction/Vector.html" title="Farce::Transaction::Vector (class)">Transaction::Vector</a></span>, <span class='object_link'><a href="../Unshared/Vector.html" title="Farce::Unshared::Vector (class)">Unshared::Vector</a></span>, <span class='object_link'><a href="../Vector.html" title="Farce::Vector (class)">Vector</a></span></p>
 </div>
 
 
@@ -3330,10 +3330,10 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
       <pre class="lines">
 
 
-490</pre>
+493</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 490</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 493</span>
 
 <span class='kw'>def</span> <span class='op'>&amp;</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_derive_array_operation'>derive_array_operation</span><span class='lparen'>(</span><span class='symbol'>:&amp;</span><span class='comma'>,</span> <span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span></pre>
     </td>
@@ -3402,14 +3402,14 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
       <pre class="lines">
 
 
-476
-477
-478
 479
-480</pre>
+480
+481
+482
+483</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 476</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 479</span>
 
 <span class='kw'>def</span> <span class='op'>*</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='const'>String</span><span class='period'>.</span><span class='id identifier rubyid_try_convert'>try_convert</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
@@ -3482,18 +3482,18 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
       <pre class="lines">
 
 
-463
-464
-465
 466
 467
 468
 469
 470
-471</pre>
+471
+472
+473
+474</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 463</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 466</span>
 
 <span class='kw'>def</span> <span class='op'>+</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_snapshot'>snapshot</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span>
@@ -3570,10 +3570,10 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
       <pre class="lines">
 
 
-485</pre>
+488</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 485</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 488</span>
 
 <span class='kw'>def</span> <span class='op'>-</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_derive_array_operation'>derive_array_operation</span><span class='lparen'>(</span><span class='symbol'>:-</span><span class='comma'>,</span> <span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span></pre>
     </td>
@@ -3638,10 +3638,10 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
       <pre class="lines">
 
 
-890</pre>
+893</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 890</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 893</span>
 
 <span class='kw'>def</span> <span class='op'>&lt;&lt;</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span></pre>
     </td>
@@ -3710,10 +3710,10 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
       <pre class="lines">
 
 
-836</pre>
+839</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 836</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 839</span>
 
 <span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span></pre>
     </td>
@@ -3797,12 +3797,12 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
       <pre class="lines">
 
 
-842
-843
-844</pre>
+845
+846
+847</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 842</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 845</span>
 
 <span class='kw'>def</span> <span class='op'>[]=</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
@@ -3902,10 +3902,10 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
       <pre class="lines">
 
 
-897</pre>
+900</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 897</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 900</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_append'>append</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -4055,10 +4055,10 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
       <pre class="lines">
 
 
-95</pre>
+98</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 95</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 98</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_assoc'>assoc</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_find_pair'>find_pair</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='int'>0</span><span class='rparen'>)</span></pre>
     </td>
@@ -4127,10 +4127,10 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
       <pre class="lines">
 
 
-103</pre>
+106</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 103</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 106</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_at'>at</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span></pre>
     </td>
@@ -4235,9 +4235,6 @@ contract.</p>
       <pre class="lines">
 
 
-524
-525
-526
 527
 528
 529
@@ -4246,10 +4243,13 @@ contract.</p>
 532
 533
 534
-535</pre>
+535
+536
+537
+538</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 524</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 527</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_bsearch'>bsearch</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -4365,14 +4365,14 @@ contract.</p>
       <pre class="lines">
 
 
-544
-545
-546
 547
-548</pre>
+548
+549
+550
+551</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 544</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 547</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_bsearch_index'>bsearch_index</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -4479,19 +4479,19 @@ contract.</p>
       <pre class="lines">
 
 
-743
-744
-745
 746
 747
 748
 749
 750
 751
-752</pre>
+752
+753
+754
+755</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 743</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 746</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_chunk'>chunk</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block'>block</span>
@@ -4631,18 +4631,18 @@ contract.</p>
       <pre class="lines">
 
 
-760
-761
-762
 763
 764
 765
 766
 767
-768</pre>
+768
+769
+770
+771</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 760</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 763</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_chunk_while'>chunk_while</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block'>block</span>
@@ -4696,13 +4696,13 @@ contract.</p>
       <pre class="lines">
 
 
-1033
-1034
-1035
-1036</pre>
+1036
+1037
+1038
+1039</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1033</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1036</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
   <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -4755,10 +4755,10 @@ contract.</p>
       <pre class="lines">
 
 
-362</pre>
+365</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 362</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 365</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compact'>compact</span> <span class='op'>=</span> <span class='id identifier rubyid_build_derived_vector'>build_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span><span class='period'>.</span><span class='id identifier rubyid_compact'>compact</span><span class='rparen'>)</span></pre>
     </td>
@@ -4935,12 +4935,12 @@ This never grows the vector. Matching uses the configured comparison mode.</p>
       <pre class="lines">
 
 
-927
-928
-929</pre>
+930
+931
+932</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 927</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 930</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
@@ -4992,10 +4992,10 @@ This never grows the vector. Matching uses the configured comparison mode.</p>
       <pre class="lines">
 
 
-1026</pre>
+1029</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1026</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1029</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span></pre>
     </td>
@@ -5063,9 +5063,6 @@ existing storage and captures the original contents only once.</p>
       <pre class="lines">
 
 
-873
-874
-875
 876
 877
 878
@@ -5075,10 +5072,13 @@ existing storage and captures the original contents only once.</p>
 882
 883
 884
-885</pre>
+885
+886
+887
+888</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 873</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 876</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_concat'>concat</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_sources'>sources</span><span class='rparen'>)</span>
   <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Freeze</span><span class='period'>.</span><span class='id identifier rubyid_check'>check</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
@@ -5214,19 +5214,19 @@ existing storage and captures the original contents only once.</p>
       <pre class="lines">
 
 
-199
-200
-201
 202
 203
 204
 205
 206
 207
-208</pre>
+208
+209
+210
+211</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 199</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 202</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -5285,10 +5285,10 @@ existing storage and captures the original contents only once.</p>
       <pre class="lines">
 
 
-66</pre>
+69</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 66</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 69</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_deconstruct'>deconstruct</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span></pre>
     </td>
@@ -5418,10 +5418,10 @@ Strict Vectors reject deep copies that are not shareable.</p>
       <pre class="lines">
 
 
-500</pre>
+503</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 500</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 503</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_difference'>difference</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_others'>others</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_derive_array_operation'>derive_array_operation</span><span class='lparen'>(</span><span class='symbol'>:difference</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_others'>others</span><span class='rparen'>)</span></pre>
     </td>
@@ -5518,16 +5518,16 @@ Strict Vectors reject deep copies that are not shareable.</p>
       <pre class="lines">
 
 
-84
-85
-86
 87
 88
 89
-90</pre>
+90
+91
+92
+93</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 84</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 87</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_dig'>dig</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_identifiers'>identifiers</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_at'>at</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='rparen'>)</span>
@@ -5602,10 +5602,10 @@ Strict Vectors reject deep copies that are not shareable.</p>
       <pre class="lines">
 
 
-423</pre>
+426</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 423</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 426</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_drop'>drop</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_build_derived_vector'>build_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span><span class='period'>.</span><span class='id identifier rubyid_drop'>drop</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -5704,13 +5704,13 @@ Strict Vectors reject deep copies that are not shareable.</p>
       <pre class="lines">
 
 
-440
-441
-442
-443</pre>
+443
+444
+445
+446</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 440</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 443</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_drop_while'>drop_while</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -5814,15 +5814,15 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-29
-30
-31
 32
 33
-34</pre>
+34
+35
+36
+37</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 29</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 32</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each'>each</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -5958,17 +5958,17 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-729
-730
-731
 732
 733
 734
 735
-736</pre>
+736
+737
+738
+739</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 729</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 732</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_cons'>each_cons</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='id identifier rubyid_convert_vector_count'>convert_vector_count</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span>
@@ -6074,15 +6074,15 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-41
-42
-43
 44
 45
-46</pre>
+46
+47
+48
+49</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 44</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_index'>each_index</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -6218,17 +6218,17 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-714
-715
-716
 717
 718
 719
 720
-721</pre>
+721
+722
+723
+724</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 714</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 717</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_slice'>each_slice</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='id identifier rubyid_convert_vector_count'>convert_vector_count</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span>
@@ -6285,10 +6285,10 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-1023</pre>
+1026</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1023</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1026</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span></pre>
     </td>
@@ -6338,10 +6338,10 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-831</pre>
+834</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 831</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 834</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_entries'>entries</span> <span class='op'>=</span> <span class='id identifier rubyid_build_derived_vector'>build_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span><span class='rparen'>)</span></pre>
     </td>
@@ -6578,9 +6578,6 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-113
-114
-115
 116
 117
 118
@@ -6596,10 +6593,13 @@ Each entry is read separately. The block runs without holding a collection lock.
 128
 129
 130
-131</pre>
+131
+132
+133
+134</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 113</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 116</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_fallback'>fallback</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_original_index'>original_index</span> <span class='op'>=</span> <span class='id identifier rubyid_index'>index</span>
@@ -6756,17 +6756,17 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-140
-141
-142
 143
 144
 145
 146
-147</pre>
+147
+148
+149
+150</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 140</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 143</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fetch_values'>fetch_values</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_indexes'>indexes</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_values'>values</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -6932,9 +6932,6 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-321
-322
-323
 324
 325
 326
@@ -6947,10 +6944,13 @@ Each entry is read separately. The block runs without holding a collection lock.
 333
 334
 335
-336</pre>
+336
+337
+338
+339</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 321</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 324</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_filter_map'>filter_map</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -7036,15 +7036,15 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-158
-159
-160
 161
 162
-163</pre>
+163
+164
+165
+166</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 158</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 161</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_first'>first</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_count'>count</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
@@ -7152,9 +7152,6 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-343
-344
-345
 346
 347
 348
@@ -7166,10 +7163,13 @@ Each entry is read separately. The block runs without holding a collection lock.
 354
 355
 356
-357</pre>
+357
+358
+359
+360</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 343</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 346</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_flat_map'>flat_map</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -7474,10 +7474,10 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-850</pre>
+853</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 850</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 853</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span></pre>
     </td>
@@ -7599,15 +7599,15 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-563
-564
-565
 566
 567
-568</pre>
+568
+569
+570
+571</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 563</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 566</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_grep'>grep</span><span class='lparen'>(</span><span class='id identifier rubyid_pattern'>pattern</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_snapshot'>snapshot</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span>
@@ -7734,15 +7734,15 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-576
-577
-578
 579
 580
-581</pre>
+581
+582
+583
+584</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 576</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 579</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_grep_v'>grep_v</span><span class='lparen'>(</span><span class='id identifier rubyid_pattern'>pattern</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_snapshot'>snapshot</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span>
@@ -7850,15 +7850,15 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-600
-601
-602
 603
 604
-605</pre>
+605
+606
+607
+608</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 600</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 603</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_group_by'>group_by</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -8377,13 +8377,13 @@ Each entry is read separately. The block runs without holding a collection lock.
       <pre class="lines">
 
 
-213
-214
-215
-216</pre>
+216
+217
+218
+219</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 213</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 216</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_each'>each</span> <span class='lbrace'>{</span> <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_array_value_equal?'>array_value_equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
@@ -8594,18 +8594,18 @@ New entries follow the receiver's storage rules and transfer mode.</p>
       <pre class="lines">
 
 
-225
-226
-227
 228
 229
 230
 231
 232
-233</pre>
+233
+234
+235
+236</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 225</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 228</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_index'>index</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>if</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span> <span class='comment'># rubocop:disable Lint/ToEnumArguments
@@ -8742,10 +8742,10 @@ New entries follow the receiver's storage rules and transfer mode.</p>
       <pre class="lines">
 
 
-515</pre>
+518</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 515</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 518</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_intersect?'>intersect?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_intersect?'>intersect?</span><span class='lparen'>(</span><span class='id identifier rubyid_vector_operand'>vector_operand</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -8814,10 +8814,10 @@ New entries follow the receiver's storage rules and transfer mode.</p>
       <pre class="lines">
 
 
-505</pre>
+508</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 505</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 508</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_intersection'>intersection</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_others'>others</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_derive_array_operation'>derive_array_operation</span><span class='lparen'>(</span><span class='symbol'>:intersection</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_others'>others</span><span class='rparen'>)</span></pre>
     </td>
@@ -8888,10 +8888,10 @@ New entries follow the receiver's storage rules and transfer mode.</p>
       <pre class="lines">
 
 
-78</pre>
+81</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 78</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 81</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span></pre>
     </td>
@@ -8962,15 +8962,15 @@ New entries follow the receiver's storage rules and transfer mode.</p>
       <pre class="lines">
 
 
-168
-169
-170
 171
 172
-173</pre>
+173
+174
+175
+176</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 168</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 171</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_last'>last</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='op'>-</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_count'>count</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
@@ -9078,9 +9078,6 @@ New entries follow the receiver's storage rules and transfer mode.</p>
       <pre class="lines">
 
 
-278
-279
-280
 281
 282
 283
@@ -9089,10 +9086,13 @@ New entries follow the receiver's storage rules and transfer mode.</p>
 286
 287
 288
-289</pre>
+289
+290
+291
+292</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 278</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 281</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_map'>map</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -9242,18 +9242,18 @@ New entries follow the receiver's storage rules and transfer mode.</p>
       <pre class="lines">
 
 
-643
-644
-645
 646
 647
 648
 649
 650
-651</pre>
+651
+652
+653
+654</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 643</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 646</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_max'>max</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='id identifier rubyid_normalized_extreme_count'>normalized_extreme_count</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span>
@@ -9386,9 +9386,6 @@ Enumerator.</p>
       <pre class="lines">
 
 
-681
-682
-683
 684
 685
 686
@@ -9398,10 +9395,13 @@ Enumerator.</p>
 690
 691
 692
-693</pre>
+693
+694
+695
+696</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 681</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 684</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_max_by'>max_by</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='id identifier rubyid_normalized_extreme_count'>normalized_extreme_count</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span>
@@ -9631,18 +9631,18 @@ Enumerator.</p>
       <pre class="lines">
 
 
-626
-627
-628
 629
 630
 631
 632
 633
-634</pre>
+634
+635
+636
+637</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 626</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 629</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_min'>min</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='id identifier rubyid_normalized_extreme_count'>normalized_extreme_count</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span>
@@ -9775,9 +9775,6 @@ Enumerator.</p>
       <pre class="lines">
 
 
-660
-661
-662
 663
 664
 665
@@ -9787,10 +9784,13 @@ Enumerator.</p>
 669
 670
 671
-672</pre>
+672
+673
+674
+675</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 660</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 663</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_min_by'>min_by</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='id identifier rubyid_normalized_extreme_count'>normalized_extreme_count</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span>
@@ -9999,14 +9999,14 @@ Enumerator.</p>
       <pre class="lines">
 
 
-613
-614
-615
 616
-617</pre>
+617
+618
+619
+620</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 613</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 616</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_minmax'>minmax</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_snapshot'>snapshot</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span>
@@ -10113,16 +10113,16 @@ Enumerator.</p>
       <pre class="lines">
 
 
-700
-701
-702
 703
 704
 705
-706</pre>
+706
+707
+708
+709</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 700</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 703</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_minmax_by'>minmax_by</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -10226,10 +10226,10 @@ Enumerator.</p>
       <pre class="lines">
 
 
-555</pre>
+558</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 555</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 558</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_pack'>pack</span><span class='lparen'>(</span><span class='id identifier rubyid_format'>format</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_pack'>pack</span><span class='lparen'>(</span><span class='id identifier rubyid_format'>format</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span></pre>
     </td>
@@ -10332,15 +10332,15 @@ Enumerator.</p>
       <pre class="lines">
 
 
-588
-589
-590
 591
 592
-593</pre>
+593
+594
+595
+596</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 588</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 591</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_partition'>partition</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -10594,10 +10594,10 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-903</pre>
+906</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 903</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 906</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span></pre>
     </td>
@@ -10683,12 +10683,12 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-863
-864
-865</pre>
+866
+867
+868</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 863</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 866</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='kw'>self</span> <span class='op'>:</span> <span class='kw'>false</span>
@@ -10759,10 +10759,10 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-100</pre>
+103</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 100</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 103</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_rassoc'>rassoc</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_find_pair'>find_pair</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='int'>1</span><span class='rparen'>)</span></pre>
     </td>
@@ -10861,14 +10861,14 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-310
-311
-312
 313
-314</pre>
+314
+315
+316
+317</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 310</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 313</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_reject'>reject</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -10922,10 +10922,10 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-382</pre>
+385</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 382</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 385</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_reverse'>reverse</span> <span class='op'>=</span> <span class='id identifier rubyid_build_derived_vector'>build_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span><span class='period'>.</span><span class='id identifier rubyid_reverse'>reverse</span><span class='rparen'>)</span></pre>
     </td>
@@ -11025,15 +11025,15 @@ Replacements and removals can affect entries not yet visited. The block runs wit
       <pre class="lines">
 
 
-54
-55
-56
 57
 58
-59</pre>
+59
+60
+61
+62</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 54</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 57</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_reverse_each'>reverse_each</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -11163,15 +11163,15 @@ block.</p>
       <pre class="lines">
 
 
-266
-267
-268
 269
 270
-271</pre>
+271
+272
+273
+274</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 266</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 269</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_rfind'>rfind</span><span class='lparen'>(</span><span class='id identifier rubyid_if_none'>if_none</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='comma'>,</span> <span class='id identifier rubyid_if_none'>if_none</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -11300,9 +11300,6 @@ block.</p>
       <pre class="lines">
 
 
-242
-243
-244
 245
 246
 247
@@ -11315,10 +11312,13 @@ block.</p>
 254
 255
 256
-257</pre>
+257
+258
+259
+260</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 242</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 245</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_rindex'>rindex</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>if</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span> <span class='comment'># rubocop:disable Lint/ToEnumArguments
@@ -11404,10 +11404,10 @@ block.</p>
       <pre class="lines">
 
 
-387</pre>
+390</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 387</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 390</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_rotate'>rotate</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='int'>1</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_build_derived_vector'>build_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span><span class='period'>.</span><span class='id identifier rubyid_rotate'>rotate</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -11495,14 +11495,14 @@ block.</p>
       <pre class="lines">
 
 
-454
-455
-456
 457
-458</pre>
+458
+459
+460
+461</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 454</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 457</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_sample'>sample</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='comma'>,</span> <span class='label'>random:</span> <span class='const'>Random</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_snapshot'>snapshot</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span>
@@ -11729,14 +11729,14 @@ block.</p>
       <pre class="lines">
 
 
-297
-298
-299
 300
-301</pre>
+301
+302
+303
+304</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 297</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 300</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_select'>select</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -11790,10 +11790,10 @@ block.</p>
       <pre class="lines">
 
 
-1029</pre>
+1032</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1029</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1032</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -11864,10 +11864,10 @@ block.</p>
       <pre class="lines">
 
 
-448</pre>
+451</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 448</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 451</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shuffle'>shuffle</span><span class='lparen'>(</span><span class='label'>random:</span> <span class='const'>Random</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_build_derived_vector'>build_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span><span class='period'>.</span><span class='id identifier rubyid_shuffle'>shuffle</span><span class='lparen'>(</span><span class='label'>random:</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -11921,10 +11921,10 @@ block.</p>
       <pre class="lines">
 
 
-1019</pre>
+1022</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1019</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1022</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span></pre>
     </td>
@@ -12011,9 +12011,6 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-180
-181
-182
 183
 184
 185
@@ -12022,10 +12019,13 @@ Range and start-length results are Vectors.</p>
 188
 189
 190
-191</pre>
+191
+192
+193
+194</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 180</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 183</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_slice'>slice</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_snapshot'>snapshot</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span>
@@ -12158,12 +12158,12 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-786
-787
-788</pre>
+789
+790
+791</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 786</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 789</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_slice_after'>slice_after</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_arguments'>arguments</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_logical_grouping_enumerator'>logical_grouping_enumerator</span><span class='lparen'>(</span><span class='symbol'>:slice_after</span><span class='comma'>,</span> <span class='id identifier rubyid_arguments'>arguments</span><span class='comma'>,</span> <span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
@@ -12287,12 +12287,12 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-776
-777
-778</pre>
+779
+780
+781</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 776</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 779</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_slice_before'>slice_before</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_arguments'>arguments</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_logical_grouping_enumerator'>logical_grouping_enumerator</span><span class='lparen'>(</span><span class='symbol'>:slice_before</span><span class='comma'>,</span> <span class='id identifier rubyid_arguments'>arguments</span><span class='comma'>,</span> <span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
@@ -12425,13 +12425,13 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-796
-797
-798
-799</pre>
+799
+800
+801
+802</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 796</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 799</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_slice_when'>slice_when</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block'>block</span>
@@ -12552,15 +12552,15 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-395
-396
-397
 398
 399
-400</pre>
+400
+401
+402
+403</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 395</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 398</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_sort'>sort</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_snapshot'>snapshot</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span>
@@ -12664,16 +12664,16 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-407
-408
-409
 410
 411
 412
-413</pre>
+413
+414
+415
+416</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 407</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 410</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_sort_by'>sort_by</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -12926,10 +12926,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-857</pre>
+860</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 857</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 860</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span></pre>
     </td>
@@ -13049,10 +13049,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-918</pre>
+921</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 918</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 921</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -13153,10 +13153,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-910</pre>
+913</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 910</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 913</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span></pre>
     </td>
@@ -13225,10 +13225,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-418</pre>
+421</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 418</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 421</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_take'>take</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_build_derived_vector'>build_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span><span class='period'>.</span><span class='id identifier rubyid_take'>take</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -13327,13 +13327,13 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-430
-431
-432
-433</pre>
+433
+434
+435
+436</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 430</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 433</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_take_while'>take_while</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -13585,10 +13585,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-63</pre>
+66</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 63</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 66</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_a'>to_a</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span><span class='period'>.</span><span class='id identifier rubyid_map!'>map!</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_logical_value'>logical_value</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='rparen'>)</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -13776,10 +13776,10 @@ Range and start-length results are Vectors.</p>
       <pre class="lines">
 
 
-73</pre>
+76</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 73</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 76</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_h'>to_h</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_h'>to_h</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_normalize_hash_pair'>normalize_hash_pair</span><span class='lparen'>(</span><span class='id identifier rubyid_block_given?'>block_given?</span> <span class='op'>?</span> <span class='kw'>yield</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_it'>it</span><span class='rparen'>)</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -14384,10 +14384,10 @@ Requires ActiveSupport's optional Builder dependency, as Array#to_xml does.</p>
       <pre class="lines">
 
 
-510</pre>
+513</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 510</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 513</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_union'>union</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_others'>others</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_derive_array_operation'>derive_array_operation</span><span class='lparen'>(</span><span class='symbol'>:union</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_others'>others</span><span class='rparen'>)</span></pre>
     </td>
@@ -14487,18 +14487,18 @@ directly.</p>
       <pre class="lines">
 
 
-370
-371
-372
 373
 374
 375
 376
 377
-378</pre>
+378
+379
+380
+381</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 370</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 373</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_uniq'>uniq</span>
   <span class='id identifier rubyid_snapshot'>snapshot</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span>
@@ -14645,10 +14645,10 @@ directly.</p>
       <pre class="lines">
 
 
-938</pre>
+941</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 938</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 941</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -14802,10 +14802,10 @@ directly.</p>
       <pre class="lines">
 
 
-948</pre>
+951</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 948</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 951</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_initial'>initial</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_initial'>initial</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -14886,10 +14886,10 @@ directly.</p>
       <pre class="lines">
 
 
-153</pre>
+156</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 153</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 156</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_values_at'>values_at</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_build_derived_vector'>build_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span><span class='period'>.</span><span class='id identifier rubyid_values_at'>values_at</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -15030,10 +15030,10 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-959</pre>
+962</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 959</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 962</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -15134,12 +15134,12 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-1005
-1006
-1007</pre>
+1008
+1009
+1010</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1005</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1008</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
@@ -15242,12 +15242,12 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-996
-997
-998</pre>
+999
+1000
+1001</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 996</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 999</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_match'>wait_until_match</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span> <span class='comment'># rubocop:disable Style/CaseEquality
@@ -15335,10 +15335,10 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-1016</pre>
+1019</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1016</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1019</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span></pre>
     </td>
@@ -15439,12 +15439,12 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-987
-988
-989</pre>
+990
+991
+992</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 987</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 990</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_value'>wait_until_value</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>?</span> <span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
@@ -15585,13 +15585,13 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-968
-969
-970
-971</pre>
+971
+972
+973
+974</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 968</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 971</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while'>wait_while</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -15695,12 +15695,12 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-978
-979
-980</pre>
+981
+982
+983</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 978</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 981</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while_match'>wait_while_match</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_wait_while'>wait_while</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span> <span class='comment'># rubocop:disable Style/CaseEquality
@@ -15801,10 +15801,10 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-1010</pre>
+1013</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1010</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1013</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while_value'>wait_while_value</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -15926,9 +15926,6 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-807
-808
-809
 810
 811
 812
@@ -15946,10 +15943,13 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
 824
 825
 826
-827</pre>
+827
+828
+829
+830</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 807</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 810</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_zip'>zip</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_others'>others</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_snapshot'>snapshot</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span>
@@ -16038,10 +16038,10 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-495</pre>
+498</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 495</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 498</span>
 
 <span class='kw'>def</span> <span class='op'>|</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_derive_array_operation'>derive_array_operation</span><span class='lparen'>(</span><span class='symbol'>:|</span><span class='comma'>,</span> <span class='id identifier rubyid_other'>other</span><span class='rparen'>)</span></pre>
     </td>
@@ -16054,7 +16054,7 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 30 21:52:44 2026 by
+  Generated on Fri Oct  2 10:09:38 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

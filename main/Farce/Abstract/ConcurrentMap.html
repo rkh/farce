@@ -136,7 +136,7 @@
 
 </div><div id="subclasses">
   <h2>Direct Known Subclasses</h2>
-  <p class="children"><span class='object_link'><a href="WeakKeyMap.html" title="Farce::Abstract::WeakKeyMap (class)">WeakKeyMap</a></span>, <span class='object_link'><a href="WeakMap.html" title="Farce::Abstract::WeakMap (class)">WeakMap</a></span>, <span class='object_link'><a href="WeakValueMap.html" title="Farce::Abstract::WeakValueMap (class)">WeakValueMap</a></span>, <span class='object_link'><a href="../Local/Map.html" title="Farce::Local::Map (class)">Local::Map</a></span>, <span class='object_link'><a href="../Map.html" title="Farce::Map (class)">Map</a></span>, <span class='object_link'><a href="../Strict/Map.html" title="Farce::Strict::Map (class)">Strict::Map</a></span>, <span class='object_link'><a href="../Unshared/Map.html" title="Farce::Unshared::Map (class)">Unshared::Map</a></span></p>
+  <p class="children"><span class='object_link'><a href="WeakKeyMap.html" title="Farce::Abstract::WeakKeyMap (class)">WeakKeyMap</a></span>, <span class='object_link'><a href="WeakMap.html" title="Farce::Abstract::WeakMap (class)">WeakMap</a></span>, <span class='object_link'><a href="WeakValueMap.html" title="Farce::Abstract::WeakValueMap (class)">WeakValueMap</a></span>, <span class='object_link'><a href="../Local/Map.html" title="Farce::Local::Map (class)">Local::Map</a></span>, <span class='object_link'><a href="../Map.html" title="Farce::Map (class)">Map</a></span>, <span class='object_link'><a href="../Strict/Map.html" title="Farce::Strict::Map (class)">Strict::Map</a></span>, <span class='object_link'><a href="../Transaction/Map.html" title="Farce::Transaction::Map (class)">Transaction::Map</a></span>, <span class='object_link'><a href="../Unshared/Map.html" title="Farce::Unshared::Map (class)">Unshared::Map</a></span></p>
 </div>
 
 
@@ -1172,10 +1172,10 @@
       <pre class="lines">
 
 
-12</pre>
+15</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 12</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 15</span>
 
 <span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span></pre>
     </td>
@@ -1263,12 +1263,12 @@
       <pre class="lines">
 
 
-15
-16
-17</pre>
+18
+19
+20</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 15</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 18</span>
 
 <span class='kw'>def</span> <span class='op'>[]=</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_map'>internal_map</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
@@ -1320,13 +1320,13 @@
       <pre class="lines">
 
 
-244
-245
-246
-247</pre>
+247
+248
+249
+250</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 244</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 247</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
   <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -1380,10 +1380,10 @@ The whole operation is not atomic, as with <span class='object_link'><a href="#d
       <pre class="lines">
 
 
-277</pre>
+280</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 277</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 280</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compact!'>compact!</span> <span class='op'>=</span> <span class='id identifier rubyid_reject!'>reject!</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid__'>_</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='kw'>nil</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -1557,12 +1557,12 @@ The configured value-comparison mode determines whether matching uses equality o
       <pre class="lines">
 
 
-78
-79
-80</pre>
+81
+82
+83</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 78</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 81</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
@@ -1618,10 +1618,10 @@ The configured value-comparison mode determines whether matching uses equality o
       <pre class="lines">
 
 
-187</pre>
+190</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 187</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 190</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span></pre>
     </td>
@@ -1675,10 +1675,10 @@ The configured value-comparison mode determines whether matching uses equality o
       <pre class="lines">
 
 
-190</pre>
+193</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 190</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 193</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span></pre>
     </td>
@@ -1751,10 +1751,10 @@ The configured value-comparison mode determines whether matching uses equality o
       <pre class="lines">
 
 
-241</pre>
+244</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 241</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 244</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_delete'>delete</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_delete'>delete</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -1838,15 +1838,15 @@ The same reentrancy restrictions as <span class='object_link'><a href="#update-i
       <pre class="lines">
 
 
-259
-260
-261
 262
 263
-264</pre>
+264
+265
+266
+267</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 259</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 262</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_delete_if'>delete_if</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1890,15 +1890,15 @@ The map can be modified safely from the block.
       <pre class="lines">
 
 
-202
-203
-204
 205
 206
-207</pre>
+207
+208
+209
+210</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 202</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 205</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___callee__'>__callee__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block'>block</span>
@@ -2047,15 +2047,15 @@ Keys are not guaranteed to be yielded in insertion order.</p>
       <pre class="lines">
 
 
-225
-226
-227
 228
 229
-230</pre>
+230
+231
+232
+233</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 225</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 228</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_key'>each_key</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___callee__'>__callee__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block'>block</span>
@@ -2204,15 +2204,15 @@ Values are not guaranteed to be yielded in insertion order.</p>
       <pre class="lines">
 
 
-233
-234
-235
 236
 237
-238</pre>
+238
+239
+240
+241</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 233</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 236</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_value'>each_value</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___callee__'>__callee__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block'>block</span>
@@ -2507,9 +2507,6 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-20
-21
-22
 23
 24
 25
@@ -2519,10 +2516,13 @@ If both a default and a block are provided, the block takes precedence and a war
 29
 30
 31
-32</pre>
+32
+33
+34
+35</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 20</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 23</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_arguments'>arguments</span><span class='rparen'>)</span>
   <span class='kw'>unless</span> <span class='id identifier rubyid_arguments'>arguments</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span><span class='period'>.</span><span class='id identifier rubyid_between?'>between?</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
@@ -2654,10 +2654,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-41</pre>
+44</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 44</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -2730,10 +2730,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-181</pre>
+184</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 181</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 184</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_getkey'>getkey</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_getkey'>getkey</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -2779,15 +2779,15 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-281
-282
-283
 284
 285
-286</pre>
+286
+287
+288
+289</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 281</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 284</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_keep_if'>keep_if</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -2865,10 +2865,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-178</pre>
+181</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 178</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 181</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -2923,10 +2923,10 @@ The returned keys are not guaranteed to be in insertion order.</p>
       <pre class="lines">
 
 
-193</pre>
+196</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 193</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 196</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_keys'>keys</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_keys'>keys</span></pre>
     </td>
@@ -3042,9 +3042,6 @@ The operation is not atomic across keys. Exceptions leave earlier changes in pla
       <pre class="lines">
 
 
-325
-326
-327
 328
 329
 330
@@ -3057,10 +3054,13 @@ The operation is not atomic across keys. Exceptions leave earlier changes in pla
 337
 338
 339
-340</pre>
+340
+341
+342
+343</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 325</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 328</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_merge!'>merge!</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_others'>others</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span> <span class='kw'>if</span> <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:check_frozen!</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
@@ -3121,14 +3121,14 @@ The operation is not atomic across keys. Exceptions leave earlier changes in pla
       <pre class="lines">
 
 
-268
-269
-270
 271
-272</pre>
+272
+273
+274
+275</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 268</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 271</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_reject!'>reject!</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -3275,14 +3275,14 @@ Inserted values use the map's transfer mode, including move semantics.</p>
       <pre class="lines">
 
 
-290
-291
-292
 293
-294</pre>
+294
+295
+296
+297</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 290</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 293</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_select!'>select!</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -3340,10 +3340,10 @@ Inserted values use the map's transfer mode, including move semantics.</p>
       <pre class="lines">
 
 
-184</pre>
+187</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 184</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 187</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span></pre>
     </td>
@@ -3478,10 +3478,10 @@ Inserted values use the map's transfer mode, including move semantics.</p>
       <pre class="lines">
 
 
-50</pre>
+53</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 50</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 53</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -3618,10 +3618,10 @@ Inserted values use the map's transfer mode, including move semantics.</p>
       <pre class="lines">
 
 
-69</pre>
+72</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 69</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 72</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -3756,10 +3756,10 @@ Inserted values use the map's transfer mode, including move semantics.</p>
       <pre class="lines">
 
 
-60</pre>
+63</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 60</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 63</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -3826,19 +3826,19 @@ Results use this map's transfer mode. The same reentrancy restrictions as <span 
       <pre class="lines">
 
 
-304
-305
-306
 307
 308
 309
 310
 311
 312
-313</pre>
+313
+314
+315
+316</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 304</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 307</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_transform_values!'>transform_values!</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___method__'>__method__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -4004,10 +4004,10 @@ The block receives nil when the key is absent or its current value is nil.</p>
       <pre class="lines">
 
 
-91</pre>
+94</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 91</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 94</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -4179,10 +4179,10 @@ The block is not called when the key is absent.</p>
       <pre class="lines">
 
 
-103</pre>
+106</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 103</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 106</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_initial'>initial</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_initial'>initial</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -4232,10 +4232,10 @@ The block is not called when the key is absent.</p>
       <pre class="lines">
 
 
-197</pre>
+200</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 197</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 200</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_values'>values</span> <span class='op'>=</span> <span class='id identifier rubyid_each_value'>each_value</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span></pre>
     </td>
@@ -4376,10 +4376,10 @@ An absent key is observed as nil.</p>
       <pre class="lines">
 
 
-114</pre>
+117</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 114</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 117</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -4515,12 +4515,12 @@ An absent key is observed as nil. The configured value-comparison mode determine
       <pre class="lines">
 
 
-165
-166
-167</pre>
+168
+169
+170</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 165</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 168</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
@@ -4608,12 +4608,12 @@ An absent key is observed as nil. The configured value-comparison mode determine
       <pre class="lines">
 
 
-153
-154
-155</pre>
+156
+157
+158</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 153</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 156</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_match'>wait_until_match</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span> <span class='comment'># rubocop:disable Style/CaseEquality
@@ -4735,10 +4735,10 @@ An absent key is observed as nil. The configured value-comparison mode determine
       <pre class="lines">
 
 
-175</pre>
+178</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 175</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 178</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_map'>internal_map</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -4839,12 +4839,12 @@ An absent key is observed as nil. The configured value-comparison mode determine
       <pre class="lines">
 
 
-145
-146
-147</pre>
+148
+149
+150</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 145</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 148</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_value'>wait_until_value</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span> <span class='op'>?</span> <span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
@@ -4985,13 +4985,13 @@ An absent key is observed as nil. The configured value-comparison mode determine
       <pre class="lines">
 
 
-123
-124
-125
-126</pre>
+126
+127
+128
+129</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 123</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 126</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while'>wait_while</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -5095,12 +5095,12 @@ An absent key is observed as nil. The configured value-comparison mode determine
       <pre class="lines">
 
 
-133
-134
-135</pre>
+136
+137
+138</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 133</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 136</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while_match'>wait_while_match</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_wait_while'>wait_while</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span> <span class='comment'># rubocop:disable Style/CaseEquality
@@ -5236,10 +5236,10 @@ An absent key is observed as nil. The configured value-comparison mode determine
       <pre class="lines">
 
 
-138</pre>
+141</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 138</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/concurrent_map.rb', line 141</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while_value'>wait_while_value</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -5252,7 +5252,7 @@ An absent key is observed as nil. The configured value-comparison mode determine
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 30 21:52:46 2026 by
+  Generated on Fri Oct  2 10:09:41 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -135,7 +135,7 @@ Operations on several fields are not a transaction or a consistent snapshot.</p>
 
 </div><div id="subclasses">
   <h2>Direct Known Subclasses</h2>
-  <p class="children"><span class='object_link'><a href="../Local/Molecule.html" title="Farce::Local::Molecule (class)">Local::Molecule</a></span>, <span class='object_link'><a href="../Molecule.html" title="Farce::Molecule (class)">Molecule</a></span>, <span class='object_link'><a href="../Strict/Molecule.html" title="Farce::Strict::Molecule (class)">Strict::Molecule</a></span>, <span class='object_link'><a href="../Unshared/Molecule.html" title="Farce::Unshared::Molecule (class)">Unshared::Molecule</a></span></p>
+  <p class="children"><span class='object_link'><a href="../Local/Molecule.html" title="Farce::Local::Molecule (class)">Local::Molecule</a></span>, <span class='object_link'><a href="../Molecule.html" title="Farce::Molecule (class)">Molecule</a></span>, <span class='object_link'><a href="../Strict/Molecule.html" title="Farce::Strict::Molecule (class)">Strict::Molecule</a></span>, <span class='object_link'><a href="../Transaction/Molecule.html" title="Farce::Transaction::Molecule (class)">Transaction::Molecule</a></span>, <span class='object_link'><a href="../Unshared/Molecule.html" title="Farce::Unshared::Molecule (class)">Unshared::Molecule</a></span></p>
 </div>
 
 
@@ -996,10 +996,10 @@ Missing initial values default to nil. Generated classes may be subclassed.</p>
       <pre class="lines">
 
 
-132</pre>
+135</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 135</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_atoms'>atoms</span> <span class='op'>=</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_atoms'>atoms</span></pre>
     </td>
@@ -1046,10 +1046,10 @@ Explicitly supplied atoms retain their own comparison policy.</p>
       <pre class="lines">
 
 
-129</pre>
+132</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 129</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 132</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='ivar'>@compare_by_identity</span></pre>
     </td>
@@ -1133,13 +1133,13 @@ Explicitly supplied atoms retain their own comparison policy.</p>
       <pre class="lines">
 
 
-141
-142
-143
-144</pre>
+144
+145
+146
+147</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 141</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 144</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each'>each</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='symbol'>:each</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1222,13 +1222,13 @@ Explicitly supplied atoms retain their own comparison policy.</p>
       <pre class="lines">
 
 
-151
-152
-153
-154</pre>
+154
+155
+156
+157</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 151</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 154</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_atom'>each_atom</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='symbol'>:each_atom</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1281,13 +1281,13 @@ Explicitly supplied atoms retain their own comparison policy.</p>
       <pre class="lines">
 
 
-158
-159
-160
-161</pre>
+161
+162
+163
+164</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 158</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 161</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_member'>each_member</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='symbol'>:each_member</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1336,13 +1336,13 @@ Explicitly supplied atoms retain their own comparison policy.</p>
       <pre class="lines">
 
 
-166
-167
-168
-169</pre>
+169
+170
+171
+172</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 166</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 169</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_value'>each_value</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='symbol'>:each_value</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1392,14 +1392,14 @@ Coordinate with writers before freezing. This is not a snapshot operation.</p>
       <pre class="lines">
 
 
-174
-175
-176
 177
-178</pre>
+178
+179
+180
+181</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 174</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 177</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_freeze'>freeze</span>
   <span class='kw'>return</span> <span class='kw'>self</span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
@@ -1453,10 +1453,10 @@ Coordinate with writers before freezing. This is not a snapshot operation.</p>
       <pre class="lines">
 
 
-135</pre>
+138</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 135</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/molecule.rb', line 138</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_members'>members</span> <span class='op'>=</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_members'>members</span></pre>
     </td>
@@ -1469,7 +1469,7 @@ Coordinate with writers before freezing. This is not a snapshot operation.</p>
 </div>
 
       <div id="footer">
-  Generated on Wed Sep 30 21:52:44 2026 by
+  Generated on Fri Oct  2 10:09:38 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
