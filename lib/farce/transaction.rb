@@ -33,6 +33,12 @@ module Farce
   # ## Supported objects
   #
   # Out of the box, transactions support instances of the following classes:
+  # * Atoms, except weak atoms
+  # * ConcurrentMap subclasses, except weak maps
+  # * Molecules
+  # * Sets, including sorted sets
+  # * TreeMap subclasses
+  # * Vectors
   class Transaction
     include Internal::Autoloads
     include Unshareable
