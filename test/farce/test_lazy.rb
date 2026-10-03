@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../setup"
 require "pp"
@@ -6,6 +8,9 @@ require "pp"
 module Farce
   class TestLazy < Test
     include Helpers::InternalTestHelpers
+
+    def lazy_class = Lazy
+    def strict_result_options = { mode: :raise }
 
     class CountingFactory
       def initialize(calls, result)
@@ -49,7 +54,7 @@ module Farce
     end
 
     def test_is_an_abstract_value_and_is_shareable
-      lazy = Lazy.new { 42 }
+      lazy = lazy_class.new { 42 }
 
       assert_kind_of Abstract::Value, lazy
       refute_predicate lazy, :frozen?
@@ -62,7 +67,7 @@ module Farce
     def test_computes_a_callable_factory_only_once
       calls = Counter.new
       result = "result"
-      lazy = Lazy.new(CountingFactory.new(calls, result))
+      lazy = lazy_class.new(CountingFactory.new(calls, result))
 
       assert_equal 0, calls.value
       assert_same result, lazy.value
@@ -72,7 +77,7 @@ module Farce
 
     def test_caches_nil
       calls = Counter.new
-      lazy = Lazy.new(CountingFactory.new(calls, nil))
+      lazy = lazy_class.new(CountingFactory.new(calls, nil))
 
       assert_nil lazy.value
       assert_nil lazy.value
@@ -81,42 +86,42 @@ module Farce
 
     def test_caches_false
       calls = Counter.new
-      lazy = Lazy.new(CountingFactory.new(calls, false))
+      lazy = lazy_class.new(CountingFactory.new(calls, false))
 
       refute lazy.value
       refute lazy.value
       assert_equal 1, calls.value
-      assert_equal "#<Farce::Lazy false>", lazy.inspect
-      assert_equal "#<Farce::Lazy false>", lazy.pretty_inspect.chomp
+      assert_equal "#<#{lazy_class.name} false>", lazy.inspect
+      assert_equal "#<#{lazy_class.name} false>", lazy.pretty_inspect.chomp
     end
 
     def test_accepts_a_proc_factory
-      lazy = Lazy.new(-> { 42 })
+      lazy = lazy_class.new(-> { 42 })
 
       assert_equal 42, lazy.value
     end
 
     def test_binds_a_block_to_the_self_option
-      lazy = Lazy.new(self: 40) { self + 2 }
+      lazy = lazy_class.new(self: 40) { self + 2 }
 
       assert_equal 42, lazy.value
     end
 
     def test_uses_new_for_a_class_factory
-      lazy = Lazy.new(ClassFactory)
+      lazy = lazy_class.new(ClassFactory)
 
       assert_equal :created, lazy.value
     end
 
     def test_rejects_a_factory_and_block_together
-      error = assert_raises(ArgumentError) { Lazy.new(ClassFactory) { :block } }
+      error = assert_raises(ArgumentError) { lazy_class.new(ClassFactory) { :block } }
 
       assert_equal "factory and block cannot be both given", error.message
     end
 
     def test_retries_after_the_factory_raises
       calls = Counter.new
-      lazy = Lazy.new(FlakyFactory.new(calls))
+      lazy = lazy_class.new(FlakyFactory.new(calls))
 
       assert_raises(RuntimeError) { lazy.value }
       assert_equal :ready, lazy.value
@@ -126,7 +131,7 @@ module Farce
 
     def test_freeze_retries_after_factory_failure
       calls = Counter.new
-      lazy = Lazy.new(FlakyFactory.new(calls))
+      lazy = lazy_class.new(FlakyFactory.new(calls))
 
       assert_raises(RuntimeError) { lazy.freeze }
       refute_predicate lazy, :frozen?
@@ -138,7 +143,7 @@ module Farce
 
     def test_freeze_caches_nil_without_freezing_the_factory_result
       calls = Counter.new
-      lazy = Lazy.new(CountingFactory.new(calls, nil))
+      lazy = lazy_class.new(CountingFactory.new(calls, nil))
 
       assert_same lazy, lazy.freeze
       assert_nil lazy.value
@@ -149,7 +154,7 @@ module Farce
     def test_copies_share_evaluation_and_keep_independent_logical_freeze_state
       calls = Counter.new
       result = Map.new
-      source = Lazy.new(CountingFactory.new(calls, result))
+      source = lazy_class.new(CountingFactory.new(calls, result))
       frozen_copy = source.dup
 
       assert_same frozen_copy, frozen_copy.freeze
@@ -174,7 +179,7 @@ module Farce
 
     def test_computes_once_under_thread_contention
       calls = Counter.new
-      lazy = Lazy.new(CountingFactory.new(calls, 42))
+      lazy = lazy_class.new(CountingFactory.new(calls, 42))
       workers = 8.times.map { Thread.new { lazy.value } }
 
       assert_equal [42], workers.map(&:value).uniq
@@ -187,7 +192,7 @@ module Farce
       return unless Internal.native_ractors?
 
       calls = Counter.new
-      lazy = Lazy.new(CountingFactory.new(calls, 42))
+      lazy = lazy_class.new(CountingFactory.new(calls, 42))
       workers = 4.times.map { Ractor.new(lazy, &:value) }
 
       assert_equal [42], workers.map { |worker| ractor_value(worker) }.uniq
@@ -198,7 +203,7 @@ module Farce
       return unless Internal.native_ractors?
 
       calls = Counter.new
-      lazy = Lazy.new(UnshareableThenValueFactory.new(calls))
+      lazy = lazy_class.new(UnshareableThenValueFactory.new(calls), **strict_result_options)
 
       assert_raises(Ractor::IsolationError) { lazy.value }
       assert_equal :ready, lazy.value
@@ -206,7 +211,7 @@ module Farce
     end
 
     def test_delegates_missing_methods_to_the_value
-      lazy = Lazy.new { "value" }
+      lazy = lazy_class.new { "value" }
 
       assert_respond_to lazy, :upcase
       assert_equal "VALUE", lazy.upcase
@@ -215,13 +220,13 @@ module Farce
     end
 
     def test_inspect_and_pretty_print_do_not_compute_the_value
-      lazy = Lazy.new(ClassFactory)
+      lazy = lazy_class.new(ClassFactory)
 
-      assert_equal "#<Farce::Lazy #{ClassFactory}>", lazy.inspect
-      assert_equal "#<Farce::Lazy #{ClassFactory}>", lazy.pretty_inspect.chomp
+      assert_equal "#<#{lazy_class.name} #{ClassFactory}>", lazy.inspect
+      assert_equal "#<#{lazy_class.name} #{ClassFactory}>", lazy.pretty_inspect.chomp
       assert_equal :created, lazy.value
-      assert_equal "#<Farce::Lazy :created>", lazy.inspect
-      assert_equal "#<Farce::Lazy :created>", lazy.pretty_inspect.chomp
+      assert_equal "#<#{lazy_class.name} :created>", lazy.inspect
+      assert_equal "#<#{lazy_class.name} :created>", lazy.pretty_inspect.chomp
     end
   end
 end

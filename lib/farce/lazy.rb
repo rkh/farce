@@ -4,7 +4,10 @@
 
 module Farce
   # A ractor-shareable lazy value that is computed on demand.
-  # The value is computed only once, and subsequent calls to `value` will return the same value.
+  # The factory runs once. Its result is transferred according to {#mode}.
+  # With the default `:copy` mode, each Ractor receives its own cached copy.
+  # The factory and its bound receiver must remain Ractor-shareable.
+  # Use {Strict::Lazy} for direct shareable results or {Unshared::Lazy} for local factories.
   #
   # You can use it to make the following, common Ruby idiom ractor-safe:
   #
@@ -59,12 +62,39 @@ module Farce
   class Lazy < Farce::Abstract::Lazy
     include Shareable::Tracked
 
-    # Resolve the slot before freezing it. The resolved value remains mutable.
+    # @!macro modes
+    # @overload initialize(factory, mode: :copy)
+    #   @param factory [Class, Proc, #call] the shareable factory for the value
+    #   @param mode [Symbol] the transfer mode for the computed result
+    # @overload initialize(mode: :copy, self: nil)
+    #   @param mode [Symbol] the transfer mode for the computed result
+    #   @param self [BasicObject] the shareable receiver to bind to the block
+    #   @yield computes the value on first access
+    #   @yieldreturn [BasicObject] the result to transfer
+    def initialize(factory = nil, mode: :copy, **, &)
+      @manager = ModeManager.new(mode:)
+      super(factory, **, &)
+    end
+
+    # @return [Symbol] the transfer mode for the computed result
+    def mode = @manager.mode
+
+    # Compute once and return the result according to the configured transfer mode.
+    # Repeated reads return the same value within the current Ractor.
+    # @return [BasicObject] the computed result
+    def value = @manager.unwrap(super)
+
+    # Resolve the slot before freezing it. This does not freeze the result.
     # @return [self]
     def freeze
       value
       internal_atom.freeze
       super
     end
+
+    private
+
+    def compute_value = @manager.wrap(super)
+    def display_value = @manager.unwrap(super)
   end
 end

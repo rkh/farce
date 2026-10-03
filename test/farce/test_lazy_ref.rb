@@ -8,14 +8,17 @@ module Farce
   class TestLazyRef < Test
     include Helpers::InternalTestHelpers
 
+    def reference_class = LazyRef
+    def lazy_class = Lazy
+
     def test_defers_initialization_until_delegation_and_caches_the_result
       calls = Counter.new
-      reference = LazyRef.new do
+      reference = reference_class.new do
         calls.increment
         "hello"
       end
 
-      assert_kind_of Lazy, Reference.deref(reference)
+      assert_kind_of lazy_class, Reference.deref(reference)
       assert_equal 0, calls.value
       assert_equal "HELLO", reference.upcase
       assert_equal 5, reference.length
@@ -23,12 +26,12 @@ module Farce
     end
 
     def test_accepts_class_and_proc_factories
-      assert_predicate LazyRef.new(Counter), :zero?
-      assert_equal :ready, LazyRef.new(-> { :ready }).itself
+      assert_predicate reference_class.new(Counter), :zero?
+      assert_equal :ready, reference_class.new(-> { :ready }).itself
     end
 
     def test_forwards_the_self_option_to_the_block
-      reference = LazyRef.new(self: 40) { self + 2 }
+      reference = reference_class.new(self: 40) { self + 2 }
 
       assert_equal 42, reference.itself
     end
@@ -36,7 +39,7 @@ module Farce
     def test_caches_nil_and_false
       [nil, false].each do |result|
         calls = Counter.new
-        reference = LazyRef.new do
+        reference = reference_class.new do
           calls.increment
           result
         end
@@ -49,7 +52,7 @@ module Farce
 
     def test_retries_after_the_factory_raises
       calls = Counter.new
-      reference = LazyRef.new do
+      reference = reference_class.new do
         raise "not ready" if calls.increment == 1
         :ready
       end
@@ -61,12 +64,12 @@ module Farce
     end
 
     def test_rejects_a_factory_and_block_together
-      assert_raises(ArgumentError) { LazyRef.new(Counter) { 42 } }
+      assert_raises(ArgumentError) { reference_class.new(Counter) { 42 } }
     end
 
     def test_computes_once_across_ractors
       calls = Counter.new
-      reference = LazyRef.new do
+      reference = reference_class.new do
         calls.increment
         "shared"
       end

@@ -19,21 +19,22 @@ module Farce
       #   @param [BasicObject] self The `self` parameter to be provided to the block. Must be ractor-shareable.
       def initialize(factory = nil, **, &)
         @factory = prepare_factory(factory, **, &)
-        @atom    = Internal::Atom.new
+        @atom    = new_internal_atom
         super()
       end
 
       # The first time this method is called, the value will be computed based on the factory provided.
       # Subsequent calls will return the same value.
       #
-      # This is thread-safe and may be called from any Ractor, even concurrently.
+      # Concurrent access computes the value once.
+      # Shareable variants support calls from any Ractor.
       # @return [BasicObject] The value computed by the factory.
       def value
         atom  = internal_atom
         value = atom.value
         if value.nil?
           value = atom.store_if_absent do
-            value = @factory.is_a?(Class) ? @factory.new : @factory.call
+            value = compute_value
             value.nil? ? UNDEFINED : value
           end
         end
@@ -49,14 +50,18 @@ module Farce
 
       private
 
-      def internal_atom = @atom
+      def internal_atom     = @atom
+      def new_internal_atom = Internal::StrictAtom.new
+      def compute_value     = @factory.is_a?(Class) ? @factory.new : @factory.call
+      def prepare_proc(factory, **) = Ractor.shareable_proc(**, &factory)
 
-      def prepare_factory(factory, **, &block)
+      def prepare_factory(factory, **options, &block)
+        Internal.self_option(options.dup)
         if block
           raise ArgumentError, "factory and block cannot be both given" unless factory.nil?
           factory = block
         end
-        factory.is_a?(Proc) ? Ractor.shareable_proc(**, &factory) : factory
+        factory.is_a?(Proc) ? prepare_proc(factory, **options) : factory
       end
 
       def display_value
