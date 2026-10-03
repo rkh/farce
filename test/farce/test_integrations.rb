@@ -60,6 +60,7 @@ module Farce
         require "farce"
         raise "loaded dry-types" if defined?(Dry::Types)
         raise "loaded ActiveSupport" if defined?(ActiveSupport)
+        raise "loaded concurrent-ruby" if defined?(::Concurrent::TVar)
         raise "loaded ractor-sharing" if defined?(::Ractor::TVar)
         raise "unexpected active integrations" unless Farce::Integrations.load_active.empty?
       RUBY
@@ -145,7 +146,7 @@ module Farce
         require "active_support/core_ext"
         require "farce"
         raise "ActiveSupport integration missing" unless Farce::Vector.method_defined?(:in_groups)
-        raise "wrong active integrations" unless Farce::Integrations.load_active == [:active_support, :json, :psych]
+        raise "wrong active integrations" unless Farce::Integrations.load_active == [:active_support, :concurrent, :json, :psych]
       RUBY
     end
 
@@ -220,7 +221,7 @@ module Farce
     def test_load_available_loads_integrations_without_freezing_configuration
       assert_integration_process(<<~RUBY)
         require "farce"
-        expected = [:active_support, :dry_types, :json, :msgpack, :psych]
+        expected = [:active_support, :dry_types, :concurrent, :json, :msgpack, :psych]
         expected << :oj unless Gem::Specification.find_all_by_name("oj").empty?
         expected << :yajl unless Gem::Specification.find_all_by_name("yajl-ruby").empty?
         expected << :ractor_sharing unless Gem::Specification.find_all_by_name("ractor-sharing").empty?
@@ -235,14 +236,16 @@ module Farce
 
     def test_load_available_skips_missing_optional_dependencies
       {
-        ["active_support"]               => %i[dry_types json msgpack psych],
-        ["dry/types"]                    => %i[active_support json msgpack psych],
-        ["active_support", "dry/types"]  => %i[json msgpack psych],
-        ["farce/integrations/dry_types"] => %i[active_support json msgpack psych],
-        ["ractor/tvar"]                  => %i[active_support dry_types json msgpack psych],
+        ["active_support"]                => %i[dry_types concurrent json msgpack psych],
+        ["dry/types"]                     => %i[active_support concurrent json msgpack psych],
+        ["active_support", "dry/types"]   => %i[concurrent json msgpack psych],
+        ["farce/integrations/dry_types"]  => %i[active_support concurrent json msgpack psych],
+        ["farce/integrations/concurrent"] => %i[active_support dry_types json msgpack psych],
+        ["ractor/tvar"]                   => %i[active_support dry_types concurrent json msgpack psych],
       }.each do |missing, expected|
         assert_integration_process(<<~RUBY)
           require "farce"
+          Farce.config.autoload_integrations = false
           #{missing_dependencies(missing)}
           result = Farce::Integrations.load_available
           expected = #{expected.inspect}

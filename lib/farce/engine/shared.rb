@@ -13,8 +13,11 @@ module Farce
   module Internal # :nodoc: all
     include Autoloads["#{__dir__}/shared"]
 
-    def self.commit_transaction(entries, guards = []) = PortableTransaction.commit(entries, guards)
-    def self.notify_transaction(entries)              = entries.each(&:notify)
+    def self.commit_transaction(entries, guards = [], _transaction = nil) 
+      PortableTransaction.commit(entries, guards)
+    end
+
+    def self.notify_transaction(entries) = entries.each(&:notify)
 
     # TruffleRuby 34 omits superclass constants. JRuby 10 can include names
     # hidden by private constants. Normalize inherited enumeration for Walker.

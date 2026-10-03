@@ -579,6 +579,7 @@ typedef struct {
     bool synchronized;
     bool shareable_container;
     bool shareable_keys;
+    bool transaction_reserved;
     rb_atomic_t publication_state;
 } tc_core_map;
 
@@ -679,6 +680,7 @@ tc_core_map_allocate(VALUE klass, const rb_data_type_t *type,
     core->map.size = 0;
     core->map.guard = 0;
     core->map.revision = 0;
+    core->transaction_reserved = false;
     core->owner_fiber = Qnil;
     core->owner_ruby_thread = Qnil;
     core->waiters = NULL;
@@ -1806,8 +1808,47 @@ tc_transaction_notify(farce_transaction_entry_t *entry)
     tc_core_map_notify_one_locked(entry->source_data);
 }
 
+static void
+tc_transaction_reserve(farce_transaction_entry_t *entry, VALUE fiber, VALUE thread)
+{
+    tc_core_map *core = entry->source_data;
+    core->transaction_reserved = true;
+    core->owner_fiber = fiber;
+    core->owner_ruby_thread = thread;
+}
+
+static void
+tc_transaction_release(farce_transaction_entry_t *entry)
+{
+    tc_core_map *core = entry->source_data;
+    core->transaction_reserved = false;
+    core->owner_fiber = Qnil;
+    core->owner_ruby_thread = Qnil;
+    tc_core_map_notify_one_locked(core);
+}
+
+static VALUE
+tc_core_map_freeze(VALUE self)
+{
+    tc_core_map *core = tc_core_map_get_raw(self);
+    if (!core->mutex_initialized) return rb_obj_freeze(self);
+    pthread_mutex_lock(&core->lock);
+    if (core->transaction_reserved) {
+        pthread_mutex_unlock(&core->lock);
+        tc_core_map_lock(self, core);
+        rb_obj_freeze(self);
+        tc_core_map_unlock(core);
+    }
+    else {
+        rb_obj_freeze(self);
+        pthread_mutex_unlock(&core->lock);
+    }
+    return self;
+}
+
 static const farce_transaction_ops_t tc_transaction_ops = {
     tc_transaction_valid, tc_transaction_apply, tc_transaction_notify,
+    tc_transaction_reserve, tc_transaction_release,
 };
 
 typedef struct {
@@ -1850,6 +1891,7 @@ tc_transaction_snapshot(VALUE self)
 static void
 tc_core_map_define_methods(VALUE klass)
 {
+    rb_define_method(klass, "freeze", tc_core_map_freeze, 0);
     rb_define_method(klass, "transaction_snapshot", tc_transaction_snapshot, 0);
     rb_define_method(klass, "initialize", tc_core_map_initialize, -1);
     rb_define_method(klass, "initialize_copy", tc_core_map_initialize_copy, 1);

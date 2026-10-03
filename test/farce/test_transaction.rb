@@ -126,6 +126,47 @@ module Farce
       assert_equal 3, ledger[:withdrawal]
     end
 
+    def test_entry_factory_enrolls_a_source_without_a_snapshot_hook
+      source = Object.new
+      backend = Internal::UnsharedAtom.new(1)
+
+      refute_respond_to source, :transaction_snapshot
+      assert(Farce.transaction do |tx|
+        entry = tx.enlist(source) do |participant|
+          assert_same source, participant
+          backend.transaction_snapshot
+        end
+        entry.write!
+        entry.working.value = 2
+
+        assert_equal 1, backend.value
+      end)
+      assert_equal 2, backend.value
+    end
+
+    def test_entry_factory_reuses_the_canonical_source_entry
+      source = Object.new
+      alias_source = Struct.new(:transaction_source).new(source)
+      backend = Internal::UnsharedAtom.new(1)
+      calls = 0
+
+      assert(Farce.transaction do |tx|
+        entry = tx.enlist(alias_source) do |participant|
+          calls += 1
+
+          assert_same source, participant
+          backend.transaction_snapshot
+        end
+
+        assert_same entry, tx.enlist(source) { raise "duplicate snapshot" }
+        assert_same entry, tx.enlist(alias_source)
+        entry.write!
+        entry.working.value = 2
+      end)
+      assert_equal 1, calls
+      assert_equal 2, backend.value
+    end
+
     def test_factory_registration_invalidates_ancestor_lookup_and_supports_super
       parent = Class.new(Struct.new(:balance))
       child = Class.new(parent)

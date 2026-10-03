@@ -1,6 +1,7 @@
 #include "containers.h"
 #include "transaction.h"
 #include "ruby/io.h"
+#include "ruby/fiber/scheduler.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -12,6 +13,8 @@
 
 #define VECTOR_INITIAL_CAPACITY 16
 static VALUE cVector;
+static ID vector_values_id, vector_updating_id, vector_mutex_id;
+static VALUE vector_transaction_marker;
 
 typedef struct vector_waiter vector_waiter_t;
 
@@ -30,8 +33,10 @@ typedef struct {
     vector_waiter_t *waiters;
     uint64_t generation;
     bool compare_by_identity;
-    bool updating;
+    uint8_t updating;
     bool initialized;
+    VALUE updating_fiber;
+    VALUE updating_thread;
 } vector_t;
 
 typedef struct {
@@ -43,6 +48,8 @@ static void
 vector_mark(void *pointer)
 {
     vector_t *vector = pointer;
+    rb_gc_mark_movable(vector->updating_fiber);
+    rb_gc_mark_movable(vector->updating_thread);
     if (!vector->values) return;
     for (size_t index = 0; index < vector->size; index++) {
         rb_gc_mark_movable(vector->values[index]);
@@ -53,6 +60,8 @@ static void
 vector_compact(void *pointer)
 {
     vector_t *vector = pointer;
+    vector->updating_fiber = rb_gc_location(vector->updating_fiber);
+    vector->updating_thread = rb_gc_location(vector->updating_thread);
     if (!vector->values) return;
     for (size_t index = 0; index < vector->size; index++) {
         vector->values[index] = rb_gc_location(vector->values[index]);
@@ -110,6 +119,8 @@ vector_allocate(VALUE klass)
     vector->compare_by_identity = false;
     vector->updating = false;
     vector->initialized = false;
+    vector->updating_fiber = Qnil;
+    vector->updating_thread = Qnil;
     return object;
 }
 
@@ -309,12 +320,63 @@ vector_wait_once(vector_t *vector, vector_timeout_t *timeout)
     return RTEST(rb_ensure(vector_wait_body, (VALUE)&context, vector_wait_cleanup, (VALUE)&context));
 }
 
+static void
+vector_check_reservation_wait_locked(vector_t *vector)
+{
+    if (vector->updating != FARCE_TRANSACTION_RESERVED) return;
+    pthread_mutex_unlock(&vector->lock);
+    VALUE fiber = rb_fiber_current();
+    VALUE thread = rb_thread_current();
+    VALUE scheduler = rb_fiber_scheduler_current();
+    pthread_mutex_lock(&vector->lock);
+    if (vector->updating != FARCE_TRANSACTION_RESERVED) return;
+    if (vector->updating_fiber == fiber ||
+        (vector->updating_thread == thread && NIL_P(scheduler))) {
+        pthread_mutex_unlock(&vector->lock);
+        rb_raise(rb_eThreadError, "deadlock; recursive or unscheduled vector transaction access");
+    }
+}
+
+/* Called with the short mutex held. Return with it held on success. */
+static bool
+vector_wait_for_reservation_locked(vector_t *vector, vector_timeout_t *timeout)
+{
+    while (vector->updating == FARCE_TRANSACTION_RESERVED) {
+        vector_check_reservation_wait_locked(vector);
+        if (vector->updating != FARCE_TRANSACTION_RESERVED) break;
+        if (!vector_wait_once(vector, timeout) && timeout->finite) return false;
+        pthread_mutex_lock(&vector->lock);
+    }
+    return true;
+}
+
+static void
+vector_read_lock(vector_t *vector)
+{
+    vector_timeout_t timeout = {.finite = false, .deadline = 0};
+    pthread_mutex_lock(&vector->lock);
+    (void)vector_wait_for_reservation_locked(vector, &timeout);
+}
+
+static VALUE
+vector_freeze(VALUE self)
+{
+    vector_t *vector;
+    TypedData_Get_Struct(self, vector_t, &vector_type, vector);
+    vector_read_lock(vector);
+    rb_obj_freeze(self);
+    pthread_mutex_unlock(&vector->lock);
+    return self;
+}
+
 /* Returns with vector->lock held on success and released on timeout. */
 static bool
 vector_lock_for_update(vector_t *vector, vector_timeout_t *timeout)
 {
     for (;;) {
         pthread_mutex_lock(&vector->lock);
+        if (!vector->updating) return true;
+        vector_check_reservation_wait_locked(vector);
         if (!vector->updating) return true;
         if (!vector_wait_once(vector, timeout)) return false;
     }
@@ -419,7 +481,7 @@ vector_snapshot_unlock(VALUE self)
 static VALUE
 vector_snapshot(VALUE self)
 {
-    pthread_mutex_lock(&get_vector(self)->lock);
+    vector_read_lock(get_vector(self));
     return rb_ensure(vector_snapshot_locked, self, vector_snapshot_unlock, self);
 }
 
@@ -428,7 +490,7 @@ vector_size(VALUE self)
 {
     vector_t *vector = get_vector(self);
     size_t size;
-    pthread_mutex_lock(&vector->lock);
+    vector_read_lock(vector);
     size = vector->size;
     pthread_mutex_unlock(&vector->lock);
     return SIZET2NUM(size);
@@ -440,12 +502,12 @@ vector_each(VALUE self)
 {
     RETURN_ENUMERATOR(self, 0, NULL);
     vector_t *vector = get_vector(self);
-    pthread_mutex_lock(&vector->lock);
+    vector_read_lock(vector);
     size_t limit = vector->size;
     pthread_mutex_unlock(&vector->lock);
 
     for (size_t index = 0; index < limit; index++) {
-        pthread_mutex_lock(&vector->lock);
+        vector_read_lock(vector);
         if (index >= vector->size) {
             pthread_mutex_unlock(&vector->lock);
             break;
@@ -462,12 +524,12 @@ vector_reverse_each(VALUE self)
 {
     RETURN_ENUMERATOR(self, 0, NULL);
     vector_t *vector = get_vector(self);
-    pthread_mutex_lock(&vector->lock);
+    vector_read_lock(vector);
     size_t index = vector->size;
     pthread_mutex_unlock(&vector->lock);
 
     while (index > 0) {
-        pthread_mutex_lock(&vector->lock);
+        vector_read_lock(vector);
         if (index > vector->size) index = vector->size;
         if (index == 0) {
             pthread_mutex_unlock(&vector->lock);
@@ -486,7 +548,7 @@ vector_fetch(VALUE self, VALUE index_value)
     vector_t *vector = get_vector(self);
     long long raw = vector_convert_index(index_value);
     size_t index;
-    pthread_mutex_lock(&vector->lock);
+    vector_read_lock(vector);
     bool found = vector_lookup_index(vector, raw, &index);
     VALUE result = found ? vector->values[index] : Qnil;
     pthread_mutex_unlock(&vector->lock);
@@ -508,7 +570,7 @@ vector_get_fast(VALUE self, VALUE index_value)
     long long raw = vector_convert_index(index_value);
     size_t index;
     VALUE result = Qnil;
-    pthread_mutex_lock(&vector->lock);
+    vector_read_lock(vector);
     if (vector_lookup_index(vector, raw, &index)) result = vector->values[index];
     pthread_mutex_unlock(&vector->lock);
     return result;
@@ -927,6 +989,7 @@ vector_wait_until_changed(int argc, VALUE *argv, VALUE self)
         uint64_t generation;
         size_t index;
         pthread_mutex_lock(&vector->lock);
+        if (!vector_wait_for_reservation_locked(vector, &timeout)) return Qnil;
         VALUE current = vector_lookup_index(vector, raw, &index) ? vector->values[index] : Qnil;
         generation = vector->generation;
         pthread_mutex_unlock(&vector->lock);
@@ -934,6 +997,7 @@ vector_wait_until_changed(int argc, VALUE *argv, VALUE self)
         if (!vector_values_equal(vector, current, expected)) return current;
 
         pthread_mutex_lock(&vector->lock);
+        if (!vector_wait_for_reservation_locked(vector, &timeout)) return Qnil;
         if (vector->generation != generation) {
             pthread_mutex_unlock(&vector->lock);
             continue;
@@ -954,6 +1018,7 @@ vector_wait_until_non_nil(int argc, VALUE *argv, VALUE self)
 
     for (;;) {
         pthread_mutex_lock(&vector->lock);
+        if (!vector_wait_for_reservation_locked(vector, &timeout)) return Qnil;
         size_t index;
         VALUE current = vector_lookup_index(vector, raw, &index) ? vector->values[index] : Qnil;
         if (!NIL_P(current)) {
@@ -964,13 +1029,29 @@ vector_wait_until_non_nil(int argc, VALUE *argv, VALUE self)
     }
 }
 
+static VALUE
+unshared_vector_capture_values(VALUE self)
+{
+    return rb_ivar_get(self, vector_values_id);
+}
+
+static VALUE
+unshared_vector_read_values(VALUE self)
+{
+    if (rb_ivar_get(self, vector_updating_id) == vector_transaction_marker) {
+        VALUE mutex = rb_ivar_get(self, vector_mutex_id);
+        return rb_mutex_synchronize(mutex, unshared_vector_capture_values, self);
+    }
+    return unshared_vector_capture_values(self);
+}
+
 /* An unshared Array is confined to one Ractor. Its reads run under that
  * Ractor's GVL, so no Ruby mutex is needed between yields on CRuby. */
 static VALUE
 unshared_vector_each(VALUE self)
 {
     RETURN_ENUMERATOR(self, 0, NULL);
-    VALUE values = rb_ivar_get(self, rb_intern("@values"));
+    VALUE values = unshared_vector_read_values(self);
     Check_Type(values, T_ARRAY);
     long limit = RARRAY_LEN(values);
     for (long index = 0; index < limit && index < RARRAY_LEN(values); index++) {
@@ -984,7 +1065,7 @@ static VALUE
 unshared_vector_reverse_each(VALUE self)
 {
     RETURN_ENUMERATOR(self, 0, NULL);
-    VALUE values = rb_ivar_get(self, rb_intern("@values"));
+    VALUE values = unshared_vector_read_values(self);
     Check_Type(values, T_ARRAY);
     long index = RARRAY_LEN(values);
     while (index > 0) {
@@ -1024,8 +1105,27 @@ vector_transaction_notify(farce_transaction_entry_t *entry)
     vector_notify_waiters_locked(entry->source_data);
 }
 
+static void
+vector_transaction_reserve(farce_transaction_entry_t *entry, VALUE fiber, VALUE thread)
+{
+    vector_t *vector = entry->source_data;
+    vector->updating = FARCE_TRANSACTION_RESERVED;
+    vector->updating_fiber = fiber;
+    vector->updating_thread = thread;
+}
+
+static void
+vector_transaction_release(farce_transaction_entry_t *entry)
+{
+    vector_t *vector = entry->source_data;
+    vector->updating_fiber = Qnil;
+    vector->updating_thread = Qnil;
+    vector_finish_update_locked(vector);
+}
+
 static const farce_transaction_ops_t vector_transaction_ops = {
     vector_transaction_valid, vector_transaction_apply, vector_transaction_notify,
+    vector_transaction_reserve, vector_transaction_release,
 };
 
 static VALUE
@@ -1059,12 +1159,17 @@ vector_transaction_snapshot(VALUE self)
 void
 containers_init_vector(VALUE namespace)
 {
+    vector_values_id = rb_intern("@values");
+    vector_updating_id = rb_intern("@updating");
+    vector_mutex_id = rb_intern("@mutex");
+    vector_transaction_marker = ID2SYM(rb_intern("transaction"));
     VALUE iteration = rb_define_module_under(namespace, "UnsharedVectorIteration");
     rb_define_method(iteration, "each", unshared_vector_each, 0);
     rb_define_method(iteration, "reverse_each", unshared_vector_reverse_each, 0);
 
     cVector = rb_define_class_under(namespace, "Vector", rb_cObject);
     rb_define_alloc_func(cVector, vector_allocate);
+    rb_define_method(cVector, "freeze", vector_freeze, 0);
     rb_define_method(cVector, "initialize", vector_initialize, -1);
     rb_define_method(cVector, "size", vector_size, 0);
     rb_define_method(cVector, "snapshot", vector_snapshot, 0);

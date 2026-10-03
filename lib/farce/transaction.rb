@@ -37,6 +37,8 @@ module Farce
   # * Sets, including sorted sets
   # * TreeMap subclasses
   # * Vectors
+  # * Concurrent::TVar from the concurrent-ruby gem
+  # * Ractor::TVar from the ractor-sharing gem
   class Transaction
     include Internal::Autoloads
     include Unshareable
@@ -143,7 +145,8 @@ module Farce
     end
 
     # Report the attempt's lifecycle state.
-    # @return [Symbol] :new before run, :active during the block, then :committed or :failed
+    # @return [Symbol] :new before run, :active during the block, :committing
+    #   during publication, then :committed or :failed
     attr_reader :state
 
     # Whether abort! was called during this attempt.
@@ -184,19 +187,26 @@ module Farce
       check_open!
 
       Thread.handle_interrupt(Internal::INTERRUPT_MASK) do
+        @state = :committing
         entries = @entries.values
         unless @failed
           entries = entries.filter_map { Internal::TransactionMapSnapshot === it ? it.prepare_commit : it }
         end
-        committed = !@failed && Internal.commit_transaction(entries, @guards.values)
+        committed = !@failed && Internal.commit_transaction(entries, @guards.values, self)
         @state    = committed ? :committed : :failed
-        Internal.notify_transaction(entries) if committed && Internal.respond_to?(:notify_transaction)
+        Internal.notify_transaction(entries) if committed && entries.none? { it.respond_to?(:commit_group) } &&
+          Internal.respond_to?(:notify_transaction)
         committed
       end
     rescue Aborted, Internal::TransactionConflict
       false
     ensure
-      @state = :failed if started && @state == :active
+      if started
+        @state = :failed if %i[active committing].include?(@state)
+        Thread.handle_interrupt(Internal::INTERRUPT_MASK) do
+          @entries.each_value { it.release if it.respond_to?(:release) }
+        end
+      end
     end
 
     # Includes an object in this transaction and returns a transaction-aware version of it.
@@ -270,18 +280,35 @@ module Farce
     # Backends that expose transaction_source share enrollment with that source,
     # so wrappers of the same storage cannot stage conflicting independent copies.
     #
-    # @param backend [Object] storage providing a snapshot or transaction_source
-    # @param per_key [Boolean] track map dependencies as keys are accessed
+    # An optional block builds an entry for integrations whose sources do not
+    # expose transaction_snapshot. It runs once per source in each attempt.
+    # Without a block, enrollment uses the source's snapshot hook.
+    #
+    # Entries may implement release to free resources held during the attempt.
+    # It is called after commit or on any exit that discards staged writes.
+    #
+    # @param backend [Object] storage to enroll, optionally exposing transaction_source
+    # @param per_key [Boolean] track map dependencies when using the source's snapshot hook
+    # @yieldparam source [Object] the canonical source whose entry is being created
+    # @yieldreturn [#working] the entry containing staged storage and commit hooks
     # @return [#working] the enrolled entry containing this attempt's staged storage
     # @api private
     def enlist(backend, per_key: false)
       check_open!
       source = backend.respond_to?(:transaction_source) ? backend.transaction_source : backend
       @entries.fetch(source) do
-        unless source.respond_to?(:transaction_snapshot)
+        unless block_given? || source.respond_to?(:transaction_snapshot)
           raise TypeError, "#{source.class} does not support transactions"
         end
-        @entries[source] = per_key ? Internal::TransactionMapSnapshot.new(source) : source.transaction_snapshot
+        Thread.handle_interrupt(Internal::INTERRUPT_MASK) do
+          @entries[source] = if block_given?
+                               yield source
+                             elsif per_key
+                               Internal::TransactionMapSnapshot.new(source)
+                             else
+                               source.transaction_snapshot
+                             end
+        end
       end
     end
 

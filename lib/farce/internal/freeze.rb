@@ -69,7 +69,9 @@ module Farce
 
         def initialize_copy(other, **)
           super
-          @farce_freeze_state = Internal::Flag.new(false)
+          state = other.instance_variable_get(:@farce_freeze_state)
+          guard = state.respond_to?(:native_flag) ? state.class : Internal::Flag
+          @farce_freeze_state = guard.new(false)
         end
 
         def publish_shareable_copy(other, operation:, freeze: nil)

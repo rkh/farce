@@ -9,6 +9,7 @@ module Farce
     INTEGRATIONS = {
       active_support: %w[active_support active_support/core_ext].freeze,
       dry_types:      %w[dry/types].freeze,
+      concurrent:     %w[concurrent/tvar concurrent].freeze,
       json:           %w[json].freeze,
       msgpack:        %w[msgpack].freeze,
       psych:          %w[psych].freeze,
@@ -25,7 +26,12 @@ module Farce
       ].freeze,
     }.freeze
 
-    PATHS = INTEGRATIONS.to_h { [_2.last, _1] }.merge("oj/json" => :oj, "yajl/json_gem" => :yajl).freeze
+    PATHS = INTEGRATIONS.to_h { [_2.last, _1] }.merge(
+      "concurrent/tvar" => :concurrent,
+      "ractor/tvar"     => :ractor_sharing,
+      "oj/json"         => :oj,
+      "yajl/json_gem"   => :yajl,
+    ).freeze
 
     # Zeitwerk aliases Kernel#require. Prepending there can leave the aliased
     # wrapper without a valid super target on TruffleRuby. Define the instance
@@ -39,9 +45,12 @@ module Farce
       # @return [Boolean] Whether the requested feature was newly loaded.
       def require(path, ...)
         path        = File.path(path)
-        result      = super
+        result      = Integrations.loading(path) { super }
         integration = PATHS[path.delete_suffix(".rb")]
-        super("farce/integrations/#{integration}") if integration && Farce.config.autoload_integrations
+        if integration && !Integrations.loading?(integration) && Farce.config.autoload_integrations
+          integration_path = "farce/integrations/#{integration}"
+          Integrations.loading(integration_path) { super(integration_path) }
+        end
         result
       end
     end
@@ -61,9 +70,12 @@ module Farce
       # @return [Boolean] Whether the requested feature was newly loaded.
       def require(path, ...)
         path        = File.path(path)
-        result      = farce_original_require(path, ...)
+        result      = Integrations.loading(path) { farce_original_require(path, ...) }
         integration = PATHS[path.delete_suffix(".rb")]
-        farce_original_require("farce/integrations/#{integration}") if integration && Farce.config.autoload_integrations
+        if integration && !Integrations.loading?(integration) && Farce.config.autoload_integrations
+          integration_path = "farce/integrations/#{integration}"
+          Integrations.loading(integration_path) { farce_original_require(integration_path) }
+        end
         result
       end
     end
@@ -71,6 +83,22 @@ module Farce
     private_constant :INTEGRATIONS, :PATHS
 
     extend self
+
+    # Avoid requiring an integration again while it loads its own dependencies.
+    # @api private
+    def loading(path)
+      return yield unless path.start_with?("farce/integrations/")
+      previous = Thread.current[:farce_loading_integration]
+      Thread.current[:farce_loading_integration] = path.delete_prefix("farce/integrations/").delete_suffix(".rb").to_sym
+      begin
+        yield
+      ensure
+        Thread.current[:farce_loading_integration] = previous
+      end
+    end
+
+    # @api private
+    def loading?(integration) = Thread.current[:farce_loading_integration] == integration
 
     # Activate integrations at startup when automatic loading is enabled.
     # @api private

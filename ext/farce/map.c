@@ -69,7 +69,7 @@ typedef struct {
     bool compare_keys_by_identity;
     bool compare_values_by_identity;
     bool shareable;
-    bool comparing;
+    uint8_t comparing;
     VALUE comparing_owner;
     VALUE comparing_thread;
     map_reservation_t *reservations;
@@ -2058,8 +2058,44 @@ map_transaction_notify(farce_transaction_entry_t *entry)
     map_notify_waiters_locked(entry->source_data);
 }
 
+static void
+map_transaction_reserve(farce_transaction_entry_t *entry, VALUE fiber, VALUE thread)
+{
+    map_t *map = entry->source_data;
+    map->comparing = FARCE_TRANSACTION_RESERVED;
+    map->comparing_owner = fiber;
+    map->comparing_thread = thread;
+}
+
+static void
+map_transaction_release(farce_transaction_entry_t *entry)
+{
+    map_t *map = entry->source_data;
+    map->comparing = false;
+    map->comparing_owner = Qnil;
+    map->comparing_thread = Qnil;
+    map_notify_waiters_locked(map);
+}
+
+static VALUE
+map_freeze(VALUE self)
+{
+    map_t *map;
+    TypedData_Get_Struct(self, map_t, &map_type, map);
+    pthread_mutex_lock(&map->lock);
+    if (map->comparing == FARCE_TRANSACTION_RESERVED) {
+        pthread_mutex_unlock(&map->lock);
+        map_execution_context_t context = map_current_execution_context();
+        map_lock_state(map, &context);
+    }
+    rb_obj_freeze(self);
+    pthread_mutex_unlock(&map->lock);
+    return self;
+}
+
 static const farce_transaction_ops_t map_transaction_ops = {
     map_transaction_valid, map_transaction_apply, map_transaction_notify,
+    map_transaction_reserve, map_transaction_release,
 };
 
 static bool
@@ -2077,6 +2113,7 @@ map_transaction_size_noop(farce_transaction_entry_t *entry)
 
 static const farce_transaction_ops_t map_transaction_size_ops = {
     map_transaction_size_valid, map_transaction_size_noop, map_transaction_size_noop,
+    map_transaction_reserve, map_transaction_release,
 };
 
 /* Count-only participants use the same commit lock without copying slots or
@@ -2143,6 +2180,7 @@ map_define_methods(VALUE klass)
     rb_define_method(klass, "key?", map_key_p, 1);
     rb_define_method(klass, "delete", map_delete, 1);
     rb_define_method(klass, "clear", map_clear, 0);
+    rb_define_method(klass, "freeze", map_freeze, 0);
     rb_define_method(klass, "transaction_snapshot", map_transaction_snapshot, 0);
     rb_define_method(klass, "transaction_size_snapshot", map_transaction_size_snapshot, 1);
     rb_define_method(klass, "compare_and_set", map_compare_and_set, -1);

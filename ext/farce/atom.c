@@ -36,7 +36,7 @@ typedef struct {
     atom_waiter_t *waiters;
     uint64_t version;
     bool compare_by_identity;
-    bool updating;
+    uint8_t updating;
     VALUE updating_fiber;
     VALUE updating_thread;
     bool weak;
@@ -419,6 +419,46 @@ atom_lock_for_update_with_timeout(
     }
 }
 
+/* Returns with the state mutex held. Ordinary updates still permit value
+ * reads. Only the external commit reservation excludes them. */
+static bool
+atom_lock_for_read(atom_t *atom, atom_timeout_t *timeout)
+{
+    for (;;) {
+        pthread_mutex_lock(&atom->lock);
+        if (atom->updating != FARCE_TRANSACTION_RESERVED) return true;
+        pthread_mutex_unlock(&atom->lock);
+        atom_execution_context_t context = atom_current_execution_context();
+        pthread_mutex_lock(&atom->lock);
+        if (atom->updating != FARCE_TRANSACTION_RESERVED) return true;
+        atom_check_update_wait_locked(atom, &context);
+        if (!atom_wait_once(atom, timeout) && timeout->finite) return false;
+    }
+}
+
+static VALUE
+atom_reserved_value(VALUE self)
+{
+    atom_t *atom = get_atom(self);
+    atom_timeout_t timeout = {.finite = false, .deadline = 0};
+    (void)atom_lock_for_read(atom, &timeout);
+    VALUE value = atom->value;
+    pthread_mutex_unlock(&atom->lock);
+    return value;
+}
+
+static VALUE
+atom_freeze(VALUE self)
+{
+    atom_t *atom;
+    TypedData_Get_Struct(self, atom_t, &atom_type, atom);
+    atom_timeout_t timeout = {.finite = false, .deadline = 0};
+    (void)atom_lock_for_read(atom, &timeout);
+    rb_obj_freeze(self);
+    pthread_mutex_unlock(&atom->lock);
+    return self;
+}
+
 static VALUE
 atom_timeout_result(void)
 {
@@ -796,6 +836,36 @@ atom_wait_until_changed(int argc, VALUE *argv, VALUE self)
 }
 
 static VALUE
+atom_wait_until_changed_reserved(int argc, VALUE *argv, VALUE self)
+{
+    VALUE expected;
+    atom_t *atom = get_atom(self);
+    VALUE timeout_value = atom_extract_timeout(argc, argv, "1:", &expected);
+    atom_check_value(atom, expected);
+    atom_timeout_t timeout = atom_parse_timeout(timeout_value);
+    atom_execution_context_t execution = atom_current_execution_context();
+
+    for (;;) {
+        VALUE current;
+        uint64_t version;
+        if (!atom_lock_for_read(atom, &timeout)) return atom_timeout_result();
+        current = atom->value;
+        version = atom->version;
+        pthread_mutex_unlock(&atom->lock);
+
+        if (!atom_values_equal(atom, current, expected)) return current;
+
+        if (!atom_lock_for_read(atom, &timeout)) return atom_timeout_result();
+        if (atom->version != version) {
+            pthread_mutex_unlock(&atom->lock);
+            continue;
+        }
+        if (atom->updating) atom_check_update_wait_locked(atom, &execution);
+        if (!atom_wait_once(atom, &timeout)) return atom_timeout_result();
+    }
+}
+
+static VALUE
 atom_wait_until_non_nil(int argc, VALUE *argv, VALUE self)
 {
     atom_t *atom = get_atom(self);
@@ -804,6 +874,25 @@ atom_wait_until_non_nil(int argc, VALUE *argv, VALUE self)
 
     for (;;) {
         pthread_mutex_lock(&atom->lock);
+        if (!NIL_P(atom->value)) {
+            VALUE current = atom->value;
+            pthread_mutex_unlock(&atom->lock);
+            return current;
+        }
+        if (atom->updating) atom_check_update_wait_locked(atom, &execution);
+        if (!atom_wait_once(atom, &timeout)) return atom_timeout_result();
+    }
+}
+
+static VALUE
+atom_wait_until_non_nil_reserved(int argc, VALUE *argv, VALUE self)
+{
+    atom_t *atom = get_atom(self);
+    atom_timeout_t timeout = atom_parse_timeout(atom_extract_timeout(argc, argv, "0:", NULL));
+    atom_execution_context_t execution = atom_current_execution_context();
+
+    for (;;) {
+        if (!atom_lock_for_read(atom, &timeout)) return atom_timeout_result();
         if (!NIL_P(atom->value)) {
             VALUE current = atom->value;
             pthread_mutex_unlock(&atom->lock);
@@ -841,8 +930,24 @@ atom_transaction_notify(farce_transaction_entry_t *entry)
     atom_changed(entry->source_data);
 }
 
+static void
+atom_transaction_reserve(farce_transaction_entry_t *entry, VALUE fiber, VALUE thread)
+{
+    atom_t *atom = entry->source_data;
+    atom->updating = FARCE_TRANSACTION_RESERVED;
+    atom->updating_fiber = fiber;
+    atom->updating_thread = thread;
+}
+
+static void
+atom_transaction_release(farce_transaction_entry_t *entry)
+{
+    atom_finished_update(entry->source_data, false);
+}
+
 static const farce_transaction_ops_t atom_transaction_ops = {
     atom_transaction_valid, atom_transaction_apply, atom_transaction_notify,
+    atom_transaction_reserve, atom_transaction_release,
 };
 
 static VALUE
@@ -868,11 +973,11 @@ atom_transaction_snapshot(VALUE self)
 }
 
 static void
-define_atom_methods(VALUE klass)
+define_atom_methods(VALUE klass, bool reserved_reads)
 {
     rb_define_alloc_func(klass, atom_allocate);
     rb_define_method(klass, "initialize", atom_initialize, -1);
-    rb_define_method(klass, "value", atom_value, 0);
+    rb_define_method(klass, "value", reserved_reads ? atom_reserved_value : atom_value, 0);
     rb_define_method(klass, "value=", atom_set_value, 1);
     rb_define_method(klass, "get", atom_get, -1);
     rb_define_method(klass, "store", atom_store, -1);
@@ -882,8 +987,8 @@ define_atom_methods(VALUE klass)
     rb_define_method(klass, "compare_and_set", atom_compare_and_set, -1);
     rb_define_method(klass, "update", atom_update, -1);
     rb_define_method(klass, "upsert", atom_upsert, -1);
-    rb_define_method(klass, "wait_until_changed", atom_wait_until_changed, -1);
-    rb_define_method(klass, "wait_until_non_nil", atom_wait_until_non_nil, -1);
+    rb_define_method(klass, "wait_until_changed", reserved_reads ? atom_wait_until_changed_reserved : atom_wait_until_changed, -1);
+    rb_define_method(klass, "wait_until_non_nil", reserved_reads ? atom_wait_until_non_nil_reserved : atom_wait_until_non_nil, -1);
     rb_define_method(klass, "compare_by_identity?", atom_compare_by_identity_p, 0);
 }
 
@@ -900,12 +1005,13 @@ void
 containers_init_atom(VALUE namespace)
 {
     cAtom = rb_define_class_under(namespace, "Atom", rb_cObject);
-    define_atom_methods(cAtom);
+    define_atom_methods(cAtom, true);
+    rb_define_method(cAtom, "freeze", atom_freeze, 0);
 #ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
     cWeakAtom = rb_define_class_under(namespace, "WeakAtom", rb_cObject);
-    define_atom_methods(cWeakAtom);
+    define_atom_methods(cWeakAtom, false);
     cUnsharedWeakAtom = rb_define_class_under(namespace, "UnsharedWeakAtom", rb_cObject);
-    define_atom_methods(cUnsharedWeakAtom);
+    define_atom_methods(cUnsharedWeakAtom, false);
     rb_define_private_method(cUnsharedWeakAtom, "initialize_copy", unshared_weak_atom_initialize_copy, 1);
 #endif
 }

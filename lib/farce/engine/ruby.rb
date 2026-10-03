@@ -68,7 +68,10 @@ module Farce
       alias commit_native_transaction commit_transaction
     end
 
-    def self.commit_transaction(entries, guards = [])
+    def self.commit_transaction(entries, guards = [], transaction = nil)
+      external, entries = entries.partition { it.respond_to?(:commit_group) }
+      return ExternalTransaction.commit(entries, external, guards, transaction) unless external.empty?
+      guards = guards.map { it.respond_to?(:native_flag) ? it.native_flag : it }
       native, portable = entries.partition { NativeTransactionEntry === it }
       return commit_native_transaction(native, guards) if portable.empty?
       PortableTransaction.commit(portable, guards) { commit_native_transaction(native, guards) }

@@ -22,8 +22,14 @@ module Farce
         def freeze
           return Object.instance_method(:freeze).bind_call(self) unless @farce_freeze_state
 
-          freeze_scoped_value(scoped_value)
-          super
+          state = @farce_freeze_state
+          if state.respond_to?(:native_flag)
+            state.set { freeze_scoped_value(scoped_value) }
+            self
+          else
+            freeze_scoped_value(scoped_value)
+            super
+          end
         end
 
         private
@@ -88,7 +94,10 @@ module Farce
       def initialize(*arguments, scope: :ractor, **options)
         raise ArgumentError, "Invalid scope: #{scope.inspect}" unless Internal::Storage::SCOPES.include?(scope)
 
-        @farce_freeze_state = Internal::Flag.new(false) if is_a?(Shareable::Tracked)
+        if is_a?(Shareable::Tracked)
+          guard = Internal.native_ractors? ? Internal::TransactionFreezeGuard : Internal::Flag
+          @farce_freeze_state = guard.new(false)
+        end
         @scope         = scope
         @configuration = MANAGER.wrap([arguments.freeze, options.freeze].freeze)
 

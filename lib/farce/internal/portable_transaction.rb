@@ -118,6 +118,20 @@ module Farce
           @source.instance_variable_set(:@version, @next_version) if @kind == :atom
         end
 
+        # CRuby's Array iteration captures storage without its Ruby mutex.
+        # Hide provisional replacements from newly starting iterators.
+        def reserve
+          return unless @kind == :vector
+          @reserved = true
+          @source.instance_variable_set(:@updating, :transaction)
+        end
+
+        def unreserve
+          return unless @reserved
+          @source.instance_variable_set(:@updating, false)
+          @reserved = false
+        end
+
         def restore
           return unless @applied
           @source.instance_variable_set(@field, @original)

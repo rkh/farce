@@ -12,12 +12,6 @@ module Farce
   #
   #   object = MyClass.new
   #   Ractor.shareable?(object) # => true
-  # Shareability and frozen state are independent. Mutable Farce containers begin
-  # unfrozen. Their freeze prevents explicit changes to their own contents without
-  # freezing stored values. Weak contents can still disappear during garbage collection.
-  # Live services, such as queues and locks, reject freeze with TypeError.
-  # Coordinate with writers before freezing. Freeze does not wait for operations
-  # already in progress and is not a snapshot operation.
   module Shareable
     # A structurally frozen wrapper whose logical frozen state is owned by its backend.
     # The including class must implement a private `freeze_backend` method.
