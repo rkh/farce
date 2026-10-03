@@ -273,10 +273,14 @@ The same choices appear in several Farce APIs. Containers normally default to `:
 | `Farce::PriorityQueue` | `new`, `push`, `try_push` | Values, independently of priority. |
 | `Farce::TimerQueue` | `new`, `push`, `try_push` | Values, independently of their scheduled time. |
 | `Farce::Exchanger` | `new`, `exchange` | The value offered to a partner. |
+| `Farce::WeakAtom` | `new`, `store`, `update`, and other replacement operations | Weakly held values. Supports only `:raise`, `:make_shareable`, and `:dedup`. Defaults to `:raise`. |
 | `Farce::Atom` | `new`, `store`, `swap`, `update`, and other replacement operations | The stored value. |
+| `Farce::Lazy`, `Farce::LazyRef` | `new` | The result computed once by the factory. |
 | `Farce::Molecule` | `define`, `new` | Newly created field atoms. |
 | `Farce::Vector` | `new`, `push`, `store`, `update`, and other replacement operations | Element values. |
+| `Farce::WeakSet` | `new`, `add`, `add?` | Weakly held elements. Supports only `:raise`, `:make_shareable`, and `:dedup`. Defaults to `:raise`. |
 | `Farce::Set`, `Farce::SortedSet` | `new`, `add`, `add?` | Set elements. Membership uses an insertion-time snapshot. |
+| `Farce::WeakMap`, `Farce::WeakValueMap` | `new`, `store`, `update`, and other replacement operations | Weakly held values only. Supports only `:raise`, `:make_shareable`, and `:dedup`. Defaults to `:raise`. |
 | `Farce::Map`, `Farce::WeakKeyMap` | `new`, `store`, `update`, and other replacement operations | Values only. Keys must already be shareable. |
 | `Farce::TreeMap` | `new` | Values only. Keys follow the tree map's own rules. |
 | `Farce::LRUMap` | `new` | Values only. Individual value hits and writes update eviction order. |
@@ -284,6 +288,18 @@ The same choices appear in several Farce APIs. Containers normally default to `:
 | `Farce::Scheduler` | `schedule` | Task arguments, with automatic local transfer enabled by default. |
 | `Farce::ThreadScheduler` | `schedule`, `execute` | Accepts scheduler options but always keeps arguments local. |
 | `Farce::Pool` | `schedule` | Task arguments. `:local` is rejected. |
+
+`Farce::Lazy` runs its shareable factory once and applies the mode to the result. With
+`:copy`, each Ractor receives its own cached copy. Use `Farce::Strict::Lazy` when the
+result must already be shareable, or `Farce::Unshared::Lazy` for a factory that captures
+mutable state within one Ractor. The corresponding `LazyRef` classes delegate to those
+results directly.
+
+```ruby
+snapshot = Farce::Lazy.new(mode: :make_shareable) { { jobs: [] } }
+snapshot.value # => { jobs: [] }
+Farce::Ractor.shareable?(snapshot.value) # => true
+```
 
 ### Queue work for another Ractor
 
@@ -352,6 +368,40 @@ cache[:account] # => { roles: [:reader] }
 
 cache.update(:account) { |current| { roles: current[:roles] + [:admin] } }
 cache[:account] # => { roles: [:reader, :admin] }
+```
+
+`Farce::WeakAtom`, `Farce::WeakMap`, and `Farce::WeakValueMap` default to
+`:raise` and accept only `:raise`, `:make_shareable`, and `:dedup`. They store
+prepared values directly and retain them weakly. Unsupported modes raise
+`ArgumentError`, including when the supplied value is already shareable.
+Modes never prepare map keys or expected values used by comparisons and waits.
+
+With `:make_shareable`, keeping the original referenced keeps the stored value
+alive. With `:dedup`, the stored canonical value can differ from the input.
+Keep the result returned by `store` or `update` when it must remain alive.
+Assignment evaluates to the input, so it does not reliably retain the canonical
+result. A constructor also retains no strong reference to its prepared value.
+
+```ruby
+cache = Farce::WeakValueMap.new(mode: :dedup)
+retained = cache.store(:roles, [String.new("reader")])
+cache[:roles].equal?(retained) # => true
+# The entry can disappear after retained is no longer referenced.
+```
+
+`Farce::WeakSet` uses the same restricted modes for its elements. It stores
+prepared elements directly and retains them weakly. Membership checks and
+deletion do not freeze or deduplicate their arguments. `add` returns the set,
+and `add?` returns the set or nil. Neither returns the prepared element.
+With `:dedup`, retain the canonical element elsewhere if it must stay alive.
+Already-shareable elements pass through unchanged, as in the other containers.
+
+```ruby
+retained = Farce::Ractor.make_shareable(Farce.dedup([String.new("reader")]))
+set = Farce::WeakSet.new(mode: :dedup)
+set.add(retained)
+set.include?(retained) # => true
+# The element can disappear after retained is no longer referenced.
 ```
 
 `Farce::WeakKeyMap` uses the same value modes, but keeps its keys weakly. `Farce::TreeMap` keeps entries sorted by key and selects the value mode at construction. Modes do not copy or wrap map keys. Tree maps also make mutable string keys immutable.
