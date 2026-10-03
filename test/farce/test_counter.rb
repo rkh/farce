@@ -8,6 +8,14 @@ module Farce
   class TestCounter < Test
     include Helpers::InternalTestHelpers
 
+    def test_strict_alias
+      assert_same Counter, Strict::Counter
+    end
+
+    def test_unshared_alias
+      assert_same Counter, Unshared::Counter
+    end
+
     def test_initialization_and_shareability
       counter = Counter.new("12")
 

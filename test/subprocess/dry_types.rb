@@ -300,11 +300,11 @@ module Farce
       end
 
       assert_instance_of Strict::Atom, strict::Atom[1]
-      refute strict.const_defined?(:Counter, false)
-      refute strict.const_defined?(:Flag, false)
+      assert_instance_of Strict::Counter, strict::Counter[1]
+      assert_instance_of Strict::Flag, strict::Flag[true]
       assert_instance_of Unshared::Atom, unshared::Atom[1]
-      refute unshared.const_defined?(:Counter, false)
-      refute unshared.const_defined?(:Flag, false)
+      assert_instance_of Unshared::Counter, unshared::Counter[1]
+      assert_instance_of Unshared::Flag, unshared::Flag[true]
 
       counter = local::Counter["8"]
       flag = local::Flag["true"]

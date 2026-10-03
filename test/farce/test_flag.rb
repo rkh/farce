@@ -6,6 +6,14 @@ require_relative "internal/test_flag"
 
 module Farce
   class TestFlag < Internal::TestFlag
+    def test_strict_alias
+      assert_same Flag, Strict::Flag
+    end
+
+    def test_unshared_alias
+      assert_same Flag, Unshared::Flag
+    end
+
     def test_public_type_and_shareability
       flag = Flag.new
 
