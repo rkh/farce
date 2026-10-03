@@ -22,10 +22,10 @@ module Farce
         initialize_resource(resource)
       end
 
-      def available? = state == AVAILABLE && !@lock.locked?
-      def checked_out? = !retired? && @lock.locked?
-      def owned? = !retired? && @lock.owned?
-      def retired? = state == RETIRED
+      def available?        = state == AVAILABLE && !@lock.locked?
+      def checked_out?      = !retired? && @lock.locked?
+      def owned?            = !retired? && @lock.owned?
+      def retired?          = state == RETIRED
       def explicitly_owned? = owned? && state == EXPLICIT
 
       # Return the resource held by the current Fiber.
