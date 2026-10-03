@@ -10,9 +10,7 @@ module Farce
   # `Ractor::Port` subclass with additional features, namely {#owned? ownership tracking} and
   # {#send mode based sending}.
   class Port < Internal::Port
-    include Internal::Noncopyable
-    include Shareable::Native
-    include Shareable::Unfreezable
+    include Abstract::Port
 
     MANAGER    = ModeManager.new
     SUBCLASSES = ModeManager::MODES.to_h do |mode|
@@ -56,7 +54,7 @@ module Farce
       self[mode || self.mode, auto_local: auto_local].new
     end
 
-    # @overload initialize(mode: :copy, auto_local: false)
+    # @!method initialize(mode: :copy, auto_local: false)
     #   Creates a new port with the given default mode.
     #
     #   @!macro modes
@@ -66,11 +64,6 @@ module Farce
     #
     #   @param auto_local [Boolean]
     #     Whether to automatically use `:local` mode when sending values from the owning ractor.
-    def initialize(...)
-      # Important: Cannot set instance variables on a Ractor::Port.
-      Internal::Storage.ractor[self] = true
-      super
-    end
 
     # @attribute [r] mode
     # The port's default mode. Set via {#initialize}.
@@ -82,11 +75,6 @@ module Farce
     # @return [Boolean] `true` if auto_local is enabled, `false` otherwise.
     # @see #send
     def auto_local? = self.class.auto_local?
-
-    # Checks ractor ownership of this port. The ractor owning this port is the only one that can receive messages
-    # through the port or close it.
-    # @return [Boolean] `true` if the current Ractor owns this port, `false` otherwise.
-    def owned? = !!Internal::Storage.ractor[self]
 
     # Sends a message through the port.
     #
@@ -132,36 +120,15 @@ module Farce
       end
     end
 
-    alias << send
-    alias push send
-
-    # Receives a message from the port. Blocks until a message is available or the timeout is reached.
-    # @param timeout [Numeric, nil] The maximum time to wait for a message, in seconds. If `nil`, waits indefinitely.
-    # @return [BasicObject, nil] The received message, or `nil` if the timeout was reached.
-    # @raise [Farce::Ractor::ClosedError] if the port is closed.
+    # (see Abstract::Port#receive)
+    # Automatically opens envelopes created by this port's mode manager.
     def receive(timeout: nil)
       # Omit the absent keyword instead of allocating arguments for super.
       result = timeout.nil? ? super() : super
       MANAGER.unwrap(result)
     end
-    alias pop receive
 
     # @return [String] A string representation of the port, including its class name and mode.
     def inspect = super.sub(/\A#<.+? (?=(?:to|id):#?\d+)/, "#<Farce::Port mode:#{mode} ")
-
-    # @api private
-    def pretty_print(pp)
-      string = inspect
-      return pp.text(string) unless match = string.match(/\A#<([\w:]+)((?: \w+:#?\w+)+)>\z/)
-
-      pp.group(1, "#<#{match[1]}", ">") do
-        match[2].split.each do |pair|
-          pp.breakable " "
-          key, value = pair.split(":", 2)
-          pp.text "#{key}:"
-          pp.text value
-        end
-      end
-    end
   end
 end

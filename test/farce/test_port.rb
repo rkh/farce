@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../setup"
 require "pp"
@@ -6,6 +8,61 @@ require "pp"
 module Farce
   class TestPort < Test
     include Helpers::InternalTestHelpers
+
+    module DelegateOverrides
+      def send(message, ...) = super([:sent, message].freeze, ...)
+      def receive(...) = [:received, super].freeze
+    end
+
+    class DelegatingPort < Farce::Port
+      include DelegateOverrides
+    end
+
+    class DelegatingStrictPort < Farce::Strict::Port
+      include DelegateOverrides
+    end
+
+    def test_shared_type_and_traits
+      [Port, Strict::Port].each do |type|
+        port = type.new
+
+        assert_kind_of Abstract::Port, port
+        assert_equal Internal::Port, type.superclass
+        assert_predicate port, :owned?
+        assert Ractor.shareable?(port)
+        assert_raises(TypeError) { port.dup }
+        assert_raises(TypeError) { port.clone }
+        assert_raises(TypeError) { port.freeze }
+      ensure
+        port&.close
+      end
+    end
+
+    def test_delegates_dispatch_to_overridden_send_and_receive
+      [DelegatingPort, DelegatingStrictPort].each do |type|
+        port = type.new
+
+        assert_same port, port << :first
+        assert_same port, port.push(:second)
+        assert_equal [:received, %i[sent first]], port.pop(timeout: 1)
+        assert_equal [:received, %i[sent second]], port.pop
+      ensure
+        port&.close
+      end
+    end
+
+    def test_send_delegates_forward_transfer_options
+      port = Port.new(mode: :raise)
+      first = ModePayload.new(:first)
+      second = ModePayload.new(:second)
+
+      assert_same port, port.push(first, mode: :local)
+      assert_same port, port.public_send(:<<, second, auto_local: true)
+      assert_same first, port.pop(timeout: 1)
+      assert_same second, port.pop
+    ensure
+      port&.close
+    end
 
     def test_initialization_hierarchy_and_defaults
       port = Port.new
@@ -186,7 +243,7 @@ module Farce
       assert_equal "invalid move: :invalid", error.message
     end
 
-    def test_send_and_receive_aliases
+    def test_send_and_receive_delegates
       port = Port.new
 
       assert_same port, port << :first

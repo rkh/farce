@@ -95,7 +95,7 @@ module Farce
   #   Returns an array containing the Ractor or Port that produced the value, and the value itself.
   #   Or `nil` if the timeout has been reached.
   #
-  #   @param ractors_or_ports [Array<Ractor, Farce::Port>] The Ractors or Ports to select from.
+  #   @param ractors_or_ports [Array<Ractor, Farce::Abstract::Port>] The Ractors or Ports to select from.
   #   @param timeout [Numeric, nil] The timeout in seconds, or `nil` for no timeout.
   #   @return [Array(Object, BasicObject), nil]
   #     An array containing the Ractor or Port that produced the value, and the value itself,

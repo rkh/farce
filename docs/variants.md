@@ -166,6 +166,15 @@ end
       <td align="center" style="text-align: center">✅</td> <!-- Transaction -->
     </tr>
     <tr>
+      <td><tt>Port</tt></td>
+      <td align="center" style="text-align: center">✅</td> <!-- Farce -->
+      <td align="center" style="text-align: center">✅</td> <!-- Strict -->
+      <td align="center" style="text-align: center">➖</td> <!-- Local -->
+      <td align="center" style="text-align: center">➖</td> <!-- Unshared -->
+      <td align="center" style="text-align: center">➖</td> <!-- Unsafe -->
+      <td align="center" style="text-align: center">➖</td> <!-- Transaction -->
+    </tr>
+    <tr>
       <td><tt>PriorityQueue</tt></td>
       <td align="center" style="text-align: center">✅</td> <!-- Farce -->
       <td align="center" style="text-align: center">✅</td> <!-- Strict -->
@@ -285,7 +294,7 @@ Legend:
 
 When using the variant namespaces interchangeably, keep in mind that some classes do not come with variants.
 
-This is obvious for classes that aren't data containers, like `Signal` or `Lock`, but also include `Port`, which supports modes, and `WeakValue` and `WeakRef`, which will choose (and switch) between the correct `WeakAtom` variants automatically.
+This is obvious for classes that aren't data containers, like `Signal` or `Lock`, but also include classes like `Envelope` and `Scheduler`, which support modes, and `WeakValue` and `WeakRef`, which will choose (and switch) between the correct `WeakAtom` variants automatically.
 
 ## Abstract Classes and Modules
 

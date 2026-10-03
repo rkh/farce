@@ -37,6 +37,23 @@ module Farce
         assert_equal [:sender, nil], events
       end
 
+      def test_strict_port_receive_yields_and_preserves_envelopes
+        input = Farce::Strict::Port.new
+        @ports << input
+        envelope = Farce::Envelope.new([:payload], mode: :local)
+        events = []
+        Fiber.schedule { events << input.pop }
+        Fiber.schedule do
+          events << :sender
+          input << envelope
+        end
+        @scheduler.run
+
+        assert_equal [:sender, envelope], events
+        assert_same envelope, events.last
+        assert_nil input.receive(timeout: 0)
+      end
+
       def test_select_multiplexes_independent_and_overlapping_waits
         first, second, third = port, port, port
         results = []
