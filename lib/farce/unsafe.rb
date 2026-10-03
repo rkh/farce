@@ -5,6 +5,7 @@
 module Farce
   # Module holding classes with instances which are not thread-safe and cannot be shared between Ractors.
   module Unsafe
+    include Unshared
     include Internal::Autoloads
   end
 end
