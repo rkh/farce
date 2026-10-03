@@ -85,12 +85,17 @@
   
 
   
+  <dl>
+    <dt>Included in:</dt>
+    <dd><span class='object_link'><a href="Unsafe.html" title="Farce::Unsafe (module)">Unsafe</a></span></dd>
+  </dl>
+  
 
   
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/unshared.rb<span class="defines">,<br>
-  lib/farce/unshared/map.rb,<br> lib/farce/unshared/set.rb,<br> lib/farce/unshared/atom.rb,<br> lib/farce/unshared/lease.rb,<br> lib/farce/unshared/queue.rb,<br> lib/farce/unshared/vector.rb,<br> lib/farce/unshared/lfu_map.rb,<br> lib/farce/unshared/lru_map.rb,<br> lib/farce/unshared/molecule.rb,<br> lib/farce/unshared/tree_map.rb,<br> lib/farce/unshared/weak_map.rb,<br> lib/farce/unshared/weak_set.rb,<br> lib/farce/unshared/lease_map.rb,<br> lib/farce/unshared/weak_atom.rb,<br> lib/farce/unshared/lease_pool.rb,<br> lib/farce/unshared/sorted_set.rb,<br> lib/farce/unshared/timer_queue.rb,<br> lib/farce/unshared/weak_key_map.rb,<br> lib/farce/unshared/priority_queue.rb,<br> lib/farce/unshared/weak_value_map.rb</span>
+  lib/farce/unshared/map.rb,<br> lib/farce/unshared/set.rb,<br> lib/farce/unshared/atom.rb,<br> lib/farce/unshared/flag.rb,<br> lib/farce/unshared/lazy.rb,<br> lib/farce/unshared/lease.rb,<br> lib/farce/unshared/queue.rb,<br> lib/farce/unshared/vector.rb,<br> lib/farce/unshared/counter.rb,<br> lib/farce/unshared/lfu_map.rb,<br> lib/farce/unshared/lru_map.rb,<br> lib/farce/unshared/lazy_ref.rb,<br> lib/farce/unshared/molecule.rb,<br> lib/farce/unshared/tree_map.rb,<br> lib/farce/unshared/weak_map.rb,<br> lib/farce/unshared/weak_set.rb,<br> lib/farce/unshared/lease_map.rb,<br> lib/farce/unshared/weak_atom.rb,<br> lib/farce/unshared/lease_pool.rb,<br> lib/farce/unshared/sorted_set.rb,<br> lib/farce/unshared/timer_queue.rb,<br> lib/farce/unshared/weak_key_map.rb,<br> lib/farce/unshared/priority_queue.rb,<br> lib/farce/unshared/weak_value_map.rb</span>
 
 </dd>
   </dl>
@@ -113,10 +118,51 @@
     
   
     
-      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Unshared/Atom.html" title="Farce::Unshared::Atom (class)">Atom</a></span>, <span class='object_link'><a href="Unshared/LFUMap.html" title="Farce::Unshared::LFUMap (class)">LFUMap</a></span>, <span class='object_link'><a href="Unshared/LRUMap.html" title="Farce::Unshared::LRUMap (class)">LRUMap</a></span>, <span class='object_link'><a href="Unshared/Lease.html" title="Farce::Unshared::Lease (class)">Lease</a></span>, <span class='object_link'><a href="Unshared/LeaseMap.html" title="Farce::Unshared::LeaseMap (class)">LeaseMap</a></span>, <span class='object_link'><a href="Unshared/LeasePool.html" title="Farce::Unshared::LeasePool (class)">LeasePool</a></span>, <span class='object_link'><a href="Unshared/Map.html" title="Farce::Unshared::Map (class)">Map</a></span>, <span class='object_link'><a href="Unshared/Molecule.html" title="Farce::Unshared::Molecule (class)">Molecule</a></span>, <span class='object_link'><a href="Unshared/PriorityQueue.html" title="Farce::Unshared::PriorityQueue (class)">PriorityQueue</a></span>, <span class='object_link'><a href="Unshared/Queue.html" title="Farce::Unshared::Queue (class)">Queue</a></span>, <span class='object_link'><a href="Unshared/Set.html" title="Farce::Unshared::Set (class)">Set</a></span>, <span class='object_link'><a href="Unshared/SortedSet.html" title="Farce::Unshared::SortedSet (class)">SortedSet</a></span>, <span class='object_link'><a href="Unshared/TimerQueue.html" title="Farce::Unshared::TimerQueue (class)">TimerQueue</a></span>, <span class='object_link'><a href="Unshared/TreeMap.html" title="Farce::Unshared::TreeMap (class)">TreeMap</a></span>, <span class='object_link'><a href="Unshared/Vector.html" title="Farce::Unshared::Vector (class)">Vector</a></span>, <span class='object_link'><a href="Unshared/WeakAtom.html" title="Farce::Unshared::WeakAtom (class)">WeakAtom</a></span>, <span class='object_link'><a href="Unshared/WeakKeyMap.html" title="Farce::Unshared::WeakKeyMap (class)">WeakKeyMap</a></span>, <span class='object_link'><a href="Unshared/WeakMap.html" title="Farce::Unshared::WeakMap (class)">WeakMap</a></span>, <span class='object_link'><a href="Unshared/WeakSet.html" title="Farce::Unshared::WeakSet (class)">WeakSet</a></span>, <span class='object_link'><a href="Unshared/WeakValueMap.html" title="Farce::Unshared::WeakValueMap (class)">WeakValueMap</a></span>
+      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Unshared/Atom.html" title="Farce::Unshared::Atom (class)">Atom</a></span>, <span class='object_link'><a href="Unshared/LFUMap.html" title="Farce::Unshared::LFUMap (class)">LFUMap</a></span>, <span class='object_link'><a href="Unshared/LRUMap.html" title="Farce::Unshared::LRUMap (class)">LRUMap</a></span>, <span class='object_link'><a href="Unshared/Lazy.html" title="Farce::Unshared::Lazy (class)">Lazy</a></span>, <span class='object_link'><a href="Unshared/LazyRef.html" title="Farce::Unshared::LazyRef (class)">LazyRef</a></span>, <span class='object_link'><a href="Unshared/Lease.html" title="Farce::Unshared::Lease (class)">Lease</a></span>, <span class='object_link'><a href="Unshared/LeaseMap.html" title="Farce::Unshared::LeaseMap (class)">LeaseMap</a></span>, <span class='object_link'><a href="Unshared/LeasePool.html" title="Farce::Unshared::LeasePool (class)">LeasePool</a></span>, <span class='object_link'><a href="Unshared/Map.html" title="Farce::Unshared::Map (class)">Map</a></span>, <span class='object_link'><a href="Unshared/Molecule.html" title="Farce::Unshared::Molecule (class)">Molecule</a></span>, <span class='object_link'><a href="Unshared/PriorityQueue.html" title="Farce::Unshared::PriorityQueue (class)">PriorityQueue</a></span>, <span class='object_link'><a href="Unshared/Queue.html" title="Farce::Unshared::Queue (class)">Queue</a></span>, <span class='object_link'><a href="Unshared/Set.html" title="Farce::Unshared::Set (class)">Set</a></span>, <span class='object_link'><a href="Unshared/SortedSet.html" title="Farce::Unshared::SortedSet (class)">SortedSet</a></span>, <span class='object_link'><a href="Unshared/TimerQueue.html" title="Farce::Unshared::TimerQueue (class)">TimerQueue</a></span>, <span class='object_link'><a href="Unshared/TreeMap.html" title="Farce::Unshared::TreeMap (class)">TreeMap</a></span>, <span class='object_link'><a href="Unshared/Vector.html" title="Farce::Unshared::Vector (class)">Vector</a></span>, <span class='object_link'><a href="Unshared/WeakAtom.html" title="Farce::Unshared::WeakAtom (class)">WeakAtom</a></span>, <span class='object_link'><a href="Unshared/WeakKeyMap.html" title="Farce::Unshared::WeakKeyMap (class)">WeakKeyMap</a></span>, <span class='object_link'><a href="Unshared/WeakMap.html" title="Farce::Unshared::WeakMap (class)">WeakMap</a></span>, <span class='object_link'><a href="Unshared/WeakSet.html" title="Farce::Unshared::WeakSet (class)">WeakSet</a></span>, <span class='object_link'><a href="Unshared/WeakValueMap.html" title="Farce::Unshared::WeakValueMap (class)">WeakValueMap</a></span>
     
   
 </p>
+
+  
+    <h2>
+      Constant Summary
+      <small><a href="#" class="constants_summary_toggle">collapse</a></small>
+    </h2>
+
+    <dl class="constants">
+      
+        <dt id="Flag-constant" class="">Flag =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Alias for <span class='object_link'><a href="Flag.html" title="Farce::Flag (class)">Flag</a></span> so <span class='object_link'><a href="" title="Farce::Unshared (module)">Farce::Unshared</a></span> can be more easily used as a namespace.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Flag.html" title="Farce::Flag (class)">Flag</a></span></span></pre></dd>
+      
+        <dt id="Counter-constant" class="">Counter =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Alias for <span class='object_link'><a href="Counter.html" title="Farce::Counter (class)">Counter</a></span> so <span class='object_link'><a href="" title="Farce::Unshared (module)">Farce::Unshared</a></span> can be more easily used as a namespace.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Counter.html" title="Farce::Counter (class)">Counter</a></span></span></pre></dd>
+      
+    </dl>
+  
 
 
 
@@ -136,7 +182,7 @@
 </div>
 
       <div id="footer">
-  Generated on Fri Oct  2 11:35:43 2026 by
+  Generated on Sat Oct  3 10:30:45 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

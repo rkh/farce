@@ -90,7 +90,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/strict.rb<span class="defines">,<br>
-  lib/farce/strict/map.rb,<br> lib/farce/strict/set.rb,<br> lib/farce/strict/atom.rb,<br> lib/farce/strict/queue.rb,<br> lib/farce/strict/vector.rb,<br> lib/farce/strict/lfu_map.rb,<br> lib/farce/strict/lru_map.rb,<br> lib/farce/strict/molecule.rb,<br> lib/farce/strict/tree_map.rb,<br> lib/farce/strict/weak_map.rb,<br> lib/farce/strict/weak_set.rb,<br> lib/farce/strict/exchanger.rb,<br> lib/farce/strict/weak_atom.rb,<br> lib/farce/strict/sorted_set.rb,<br> lib/farce/strict/timer_queue.rb,<br> lib/farce/strict/weak_key_map.rb,<br> lib/farce/strict/priority_queue.rb,<br> lib/farce/strict/weak_value_map.rb</span>
+  lib/farce/strict/map.rb,<br> lib/farce/strict/set.rb,<br> lib/farce/strict/atom.rb,<br> lib/farce/strict/flag.rb,<br> lib/farce/strict/lazy.rb,<br> lib/farce/strict/port.rb,<br> lib/farce/strict/lease.rb,<br> lib/farce/strict/queue.rb,<br> lib/farce/strict/vector.rb,<br> lib/farce/strict/counter.rb,<br> lib/farce/strict/lfu_map.rb,<br> lib/farce/strict/lru_map.rb,<br> lib/farce/strict/lazy_ref.rb,<br> lib/farce/strict/molecule.rb,<br> lib/farce/strict/tree_map.rb,<br> lib/farce/strict/weak_map.rb,<br> lib/farce/strict/weak_set.rb,<br> lib/farce/strict/exchanger.rb,<br> lib/farce/strict/lease_map.rb,<br> lib/farce/strict/weak_atom.rb,<br> lib/farce/strict/lease_pool.rb,<br> lib/farce/strict/sorted_set.rb,<br> lib/farce/strict/timer_queue.rb,<br> lib/farce/strict/weak_key_map.rb,<br> lib/farce/strict/priority_queue.rb,<br> lib/farce/strict/weak_value_map.rb</span>
 
 </dd>
   </dl>
@@ -113,10 +113,51 @@
     
   
     
-      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Strict/Atom.html" title="Farce::Strict::Atom (class)">Atom</a></span>, <span class='object_link'><a href="Strict/Exchanger.html" title="Farce::Strict::Exchanger (class)">Exchanger</a></span>, <span class='object_link'><a href="Strict/LFUMap.html" title="Farce::Strict::LFUMap (class)">LFUMap</a></span>, <span class='object_link'><a href="Strict/LRUMap.html" title="Farce::Strict::LRUMap (class)">LRUMap</a></span>, <span class='object_link'><a href="Strict/Map.html" title="Farce::Strict::Map (class)">Map</a></span>, <span class='object_link'><a href="Strict/Molecule.html" title="Farce::Strict::Molecule (class)">Molecule</a></span>, <span class='object_link'><a href="Strict/PriorityQueue.html" title="Farce::Strict::PriorityQueue (class)">PriorityQueue</a></span>, <span class='object_link'><a href="Strict/Queue.html" title="Farce::Strict::Queue (class)">Queue</a></span>, <span class='object_link'><a href="Strict/Set.html" title="Farce::Strict::Set (class)">Set</a></span>, <span class='object_link'><a href="Strict/SortedSet.html" title="Farce::Strict::SortedSet (class)">SortedSet</a></span>, <span class='object_link'><a href="Strict/TimerQueue.html" title="Farce::Strict::TimerQueue (class)">TimerQueue</a></span>, <span class='object_link'><a href="Strict/TreeMap.html" title="Farce::Strict::TreeMap (class)">TreeMap</a></span>, <span class='object_link'><a href="Strict/Vector.html" title="Farce::Strict::Vector (class)">Vector</a></span>, <span class='object_link'><a href="Strict/WeakAtom.html" title="Farce::Strict::WeakAtom (class)">WeakAtom</a></span>, <span class='object_link'><a href="Strict/WeakKeyMap.html" title="Farce::Strict::WeakKeyMap (class)">WeakKeyMap</a></span>, <span class='object_link'><a href="Strict/WeakMap.html" title="Farce::Strict::WeakMap (class)">WeakMap</a></span>, <span class='object_link'><a href="Strict/WeakSet.html" title="Farce::Strict::WeakSet (class)">WeakSet</a></span>, <span class='object_link'><a href="Strict/WeakValueMap.html" title="Farce::Strict::WeakValueMap (class)">WeakValueMap</a></span>
+      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Strict/Atom.html" title="Farce::Strict::Atom (class)">Atom</a></span>, <span class='object_link'><a href="Strict/Exchanger.html" title="Farce::Strict::Exchanger (class)">Exchanger</a></span>, <span class='object_link'><a href="Strict/LFUMap.html" title="Farce::Strict::LFUMap (class)">LFUMap</a></span>, <span class='object_link'><a href="Strict/LRUMap.html" title="Farce::Strict::LRUMap (class)">LRUMap</a></span>, <span class='object_link'><a href="Strict/Lazy.html" title="Farce::Strict::Lazy (class)">Lazy</a></span>, <span class='object_link'><a href="Strict/LazyRef.html" title="Farce::Strict::LazyRef (class)">LazyRef</a></span>, <span class='object_link'><a href="Strict/Lease.html" title="Farce::Strict::Lease (class)">Lease</a></span>, <span class='object_link'><a href="Strict/LeaseMap.html" title="Farce::Strict::LeaseMap (class)">LeaseMap</a></span>, <span class='object_link'><a href="Strict/LeasePool.html" title="Farce::Strict::LeasePool (class)">LeasePool</a></span>, <span class='object_link'><a href="Strict/Map.html" title="Farce::Strict::Map (class)">Map</a></span>, <span class='object_link'><a href="Strict/Molecule.html" title="Farce::Strict::Molecule (class)">Molecule</a></span>, <span class='object_link'><a href="Strict/Port.html" title="Farce::Strict::Port (class)">Port</a></span>, <span class='object_link'><a href="Strict/PriorityQueue.html" title="Farce::Strict::PriorityQueue (class)">PriorityQueue</a></span>, <span class='object_link'><a href="Strict/Queue.html" title="Farce::Strict::Queue (class)">Queue</a></span>, <span class='object_link'><a href="Strict/Set.html" title="Farce::Strict::Set (class)">Set</a></span>, <span class='object_link'><a href="Strict/SortedSet.html" title="Farce::Strict::SortedSet (class)">SortedSet</a></span>, <span class='object_link'><a href="Strict/TimerQueue.html" title="Farce::Strict::TimerQueue (class)">TimerQueue</a></span>, <span class='object_link'><a href="Strict/TreeMap.html" title="Farce::Strict::TreeMap (class)">TreeMap</a></span>, <span class='object_link'><a href="Strict/Vector.html" title="Farce::Strict::Vector (class)">Vector</a></span>, <span class='object_link'><a href="Strict/WeakAtom.html" title="Farce::Strict::WeakAtom (class)">WeakAtom</a></span>, <span class='object_link'><a href="Strict/WeakKeyMap.html" title="Farce::Strict::WeakKeyMap (class)">WeakKeyMap</a></span>, <span class='object_link'><a href="Strict/WeakMap.html" title="Farce::Strict::WeakMap (class)">WeakMap</a></span>, <span class='object_link'><a href="Strict/WeakSet.html" title="Farce::Strict::WeakSet (class)">WeakSet</a></span>, <span class='object_link'><a href="Strict/WeakValueMap.html" title="Farce::Strict::WeakValueMap (class)">WeakValueMap</a></span>
     
   
 </p>
+
+  
+    <h2>
+      Constant Summary
+      <small><a href="#" class="constants_summary_toggle">collapse</a></small>
+    </h2>
+
+    <dl class="constants">
+      
+        <dt id="Flag-constant" class="">Flag =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Alias for <span class='object_link'><a href="Flag.html" title="Farce::Flag (class)">Flag</a></span> so <span class='object_link'><a href="" title="Farce::Strict (module)">Farce::Strict</a></span> can be more easily used as a namespace.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Flag.html" title="Farce::Flag (class)">Flag</a></span></span></pre></dd>
+      
+        <dt id="Counter-constant" class="">Counter =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Alias for <span class='object_link'><a href="Counter.html" title="Farce::Counter (class)">Counter</a></span> so <span class='object_link'><a href="" title="Farce::Strict (module)">Farce::Strict</a></span> can be more easily used as a namespace.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Counter.html" title="Farce::Counter (class)">Counter</a></span></span></pre></dd>
+      
+    </dl>
+  
 
 
 
@@ -136,7 +177,7 @@
 </div>
 
       <div id="footer">
-  Generated on Fri Oct  2 11:35:43 2026 by
+  Generated on Sat Oct  3 10:30:45 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

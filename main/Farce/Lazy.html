@@ -121,7 +121,10 @@
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
     <p>A ractor-shareable lazy value that is computed on demand.
-The value is computed only once, and subsequent calls to <code>value</code> will return the same value.</p>
+The factory runs once. Its result is transferred according to <span class='object_link'><a href="#mode-instance_method" title="Farce::Lazy#mode (method)">#mode</a></span>.
+With the default <code>:copy</code> mode, each Ractor receives its own cached copy.
+The factory and its bound receiver must remain Ractor-shareable.
+Use <span class='object_link'><a href="Strict/Lazy.html" title="Farce::Strict::Lazy (class)">Strict::Lazy</a></span> for direct shareable results or <span class='object_link'><a href="Unshared/Lazy.html" title="Farce::Unshared::Lazy (class)">Unshared::Lazy</a></span> for local factories.</p>
 <p>You can use it to make the following, common Ruby idiom ractor-safe:</p>
 <pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>MyClass</span>
   <span class='kw'>def</span> <span class='id identifier rubyid_expensive_attribute'>expensive_attribute</span> <span class='op'>=</span> <span class='ivar'>@expensive_attribute</span> <span class='op'>||=</span> <span class='id identifier rubyid_compute_expensive_attribute'>compute_expensive_attribute</span>
@@ -152,7 +155,7 @@ The value is computed only once, and subsequent calls to <code>value</code> will
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span>
-    <span class='ivar'>@expensive_attribute</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>Lazy</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span> <span class='kw'>do</span>
+    <span class='ivar'>@expensive_attribute</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>Lazy</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="Farce::Lazy#initialize (method)">new</a></span></span> <span class='kw'>do</span>
       <span class='id identifier rubyid_sleep'>sleep</span> <span class='float'>0.5</span> <span class='comment'># pretend like we&#39;re working
 </span>      <span class='int'>42</span>
     <span class='kw'>end</span>
@@ -212,6 +215,77 @@ The value is computed only once, and subsequent calls to <code>value</code> will
 </li>
 
       
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(factory = nil, mode: :copy)  &#x21d2; Lazy </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Valid modes are: * <code>:copy</code> - The value will be copied between Ractors.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#mode-instance_method" title="#mode (instance method)">#<strong>mode</strong>  &#x21d2; Symbol </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The transfer mode for the computed result.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#value-instance_method" title="#value (instance method)">#<strong>value</strong>  &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Compute once and return the result according to the configured transfer mode.</p>
+</div></span>
+  
+</li>
+
+      
     </ul>
     
   
@@ -235,7 +309,7 @@ The value is computed only once, and subsequent calls to <code>value</code> will
   
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">#initialize</a></span>, <span class='object_link'><a href="Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
 
   
   
@@ -247,7 +321,7 @@ The value is computed only once, and subsequent calls to <code>value</code> will
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Abstract/Lazy.html" title="Farce::Abstract::Lazy (class)">Abstract::Lazy</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Abstract/Lazy.html#initialize-instance_method" title="Farce::Abstract::Lazy#initialize (method)">#initialize</a></span>, <span class='object_link'><a href="Abstract/Lazy.html#inspect-instance_method" title="Farce::Abstract::Lazy#inspect (method)">#inspect</a></span>, <span class='object_link'><a href="Abstract/Lazy.html#value-instance_method" title="Farce::Abstract::Lazy#value (method)">#value</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Lazy.html#inspect-instance_method" title="Farce::Abstract::Lazy#inspect (method)">#inspect</a></span></p>
 
   
   
@@ -259,7 +333,7 @@ The value is computed only once, and subsequent calls to <code>value</code> will
   
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Abstract::Value</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Abstract/Value.html#blank%3F-instance_method" title="Farce::Abstract::Value#blank? (method)">#blank?</a></span>, <span class='object_link'><a href="Abstract/Value.html#unwrap-instance_method" title="Farce::Abstract::Value#unwrap (method)">#unwrap</a></span>, <span class='object_link'><a href="Abstract/Value.html#value-instance_method" title="Farce::Abstract::Value#value (method)">#value</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Value.html#blank%3F-instance_method" title="Farce::Abstract::Value#blank? (method)">#blank?</a></span>, <span class='object_link'><a href="Abstract/Value.html#unwrap-instance_method" title="Farce::Abstract::Value#unwrap (method)">#unwrap</a></span></p>
 
   
   
@@ -272,6 +346,212 @@ The value is computed only once, and subsequent calls to <code>value</code> will
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="Internal/Copyable.html#duplicable%3F-instance_method" title="Farce::Internal::Copyable#duplicable? (method)">#duplicable?</a></span></p>
+<div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    
+      <span class="overload">#<strong>initialize</strong>(factory, mode: :copy)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Lazy (class)">Lazy</a></span></tt> </span>
+    
+      <span class="overload">#<strong>initialize</strong>(mode: :copy, self: nil) { ... } &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Lazy (class)">Lazy</a></span></tt> </span>
+    
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Valid modes are:</p>
+<ul>
+<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Ractor.make_shareable</a></span>.</li>
+<li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
+that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
+that pushed it.</li>
+<li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
+get an error. Useful for usage contained within a single Ractor.</li>
+<li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
+<li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="../Farce.html#dedup-class_method" title="Farce.dedup (method)">Farce.dedup</a></span>, then made Ractor-shareable.
+This may update and freeze the original. Already-shareable values pass through unchanged.</li>
+<li><code>:shareable_copy</code> - The value will be copied and the copy will be made Ractor-shareable.</li>
+</ul>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <p class="tag_title">Overloads:</p>
+  <ul class="overload">
+    
+      
+      <li class="overload_item">
+        <span class="signature">#<strong>initialize</strong>(factory, mode: :copy)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Lazy (class)">Lazy</a></span></tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>factory</span>
+      
+      
+        <span class='type'>(<tt>Class</tt>, <tt>Proc</tt>, <tt>#call</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the shareable factory for the value</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>mode</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>:copy</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the transfer mode for the computed result</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">#<strong>initialize</strong>(mode: :copy, self: nil) { ... } &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Lazy (class)">Lazy</a></span></tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>mode</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>:copy</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the transfer mode for the computed result</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>self</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the shareable receiver to bind to the block</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'></span>
+      
+      
+      
+        
+        <div class='inline'><p>computes the value on first access</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the result to transfer</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+      </li>
+    
+  </ul>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+74
+75
+76
+77</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 74</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_factory'>factory</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='ivar'>@manager</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ModeManager.html#initialize-instance_method" title="Farce::ModeManager#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span><span class='rparen'>)</span>
+  <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_factory'>factory</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
 <div id="method_missing_details" class="method_details_list">
   <h2>Dynamic Method Handling</h2>
   <p class="notice super">
@@ -299,7 +579,7 @@ The value is computed only once, and subsequent calls to <code>value</code> will
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Resolve the slot before freezing it. The resolved value remains mutable.</p>
+    <p>Resolve the slot before freezing it. This does not freeze the result.</p>
 
 
   </div>
@@ -326,14 +606,14 @@ The value is computed only once, and subsequent calls to <code>value</code> will
       <pre class="lines">
 
 
-64
-65
-66
-67
-68</pre>
+89
+90
+91
+92
+93</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 64</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 89</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_freeze'>freeze</span>
   <span class='id identifier rubyid_value'>value</span>
@@ -345,12 +625,119 @@ The value is computed only once, and subsequent calls to <code>value</code> will
 </table>
 </div>
     
+      <div class="method_details ">
+  <h3 class="signature " id="mode-instance_method">
+  
+    #<strong>mode</strong>  &#x21d2; <tt>Symbol</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the transfer mode for the computed result.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the transfer mode for the computed result</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+80</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 80</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_mode'>mode</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="value-instance_method">
+  
+    #<strong>value</strong>  &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Compute once and return the result according to the configured transfer mode.
+Repeated reads return the same value within the current Ractor.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the computed result</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 85</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='kw'>super</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
   </div>
 
 </div>
 
       <div id="footer">
-  Generated on Fri Oct  2 11:35:44 2026 by
+  Generated on Sat Oct  3 10:30:46 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

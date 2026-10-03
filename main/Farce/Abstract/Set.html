@@ -1533,8 +1533,8 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
       
       
         &mdash;
-        <div class='inline'><p>The default transfer mode. Only Farce::Set and Farce::SortedSet
-accept this option. Defaults to :copy for those classes.</p>
+        <div class='inline'><p>The default transfer mode for Farce::Set, Farce::SortedSet,
+and Farce::WeakSet. Defaults to :copy for strong sets and :raise for WeakSet.</p>
 </div>
       
     </li>
@@ -2105,7 +2105,7 @@ superset, or nil when neither relation holds or other is not a set.</p>
       
         &mdash;
         <div class='inline'><p>Override the transfer mode for this insertion. Only
-Farce::Set and Farce::SortedSet accept this option. Nil uses the set's default.</p>
+Farce::Set, Farce::SortedSet, and Farce::WeakSet accept this option. Nil uses the set's default.</p>
 </div>
       
     </li>
@@ -2203,7 +2203,7 @@ Farce::Set and Farce::SortedSet accept this option. Nil uses the set's default.<
       
         &mdash;
         <div class='inline'><p>Override the transfer mode for this insertion. Only
-Farce::Set and Farce::SortedSet accept this option. Nil uses the set's default.</p>
+Farce::Set, Farce::SortedSet, and Farce::WeakSet accept this option. Nil uses the set's default.</p>
 </div>
       
     </li>
@@ -6455,7 +6455,7 @@ are supplied. Otherwise, returns a new instance of klass.</p>
 </div>
 
       <div id="footer">
-  Generated on Fri Oct  2 11:35:48 2026 by
+  Generated on Sat Oct  3 10:30:50 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

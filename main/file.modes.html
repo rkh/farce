@@ -359,9 +359,19 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <td>The value offered to a partner.</td>
 </tr>
 <tr>
+<td><code>Farce::WeakAtom</code></td>
+<td><code>new</code>, <code>store</code>, <code>update</code>, and other replacement operations</td>
+<td>Weakly held values. Supports only <code>:raise</code>, <code>:make_shareable</code>, and <code>:dedup</code>. Defaults to <code>:raise</code>.</td>
+</tr>
+<tr>
 <td><code>Farce::Atom</code></td>
 <td><code>new</code>, <code>store</code>, <code>swap</code>, <code>update</code>, and other replacement operations</td>
 <td>The stored value.</td>
+</tr>
+<tr>
+<td><code>Farce::Lazy</code>, <code>Farce::LazyRef</code></td>
+<td><code>new</code></td>
+<td>The result computed once by the factory.</td>
 </tr>
 <tr>
 <td><code>Farce::Molecule</code></td>
@@ -374,9 +384,19 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <td>Element values.</td>
 </tr>
 <tr>
+<td><code>Farce::WeakSet</code></td>
+<td><code>new</code>, <code>add</code>, <code>add?</code></td>
+<td>Weakly held elements. Supports only <code>:raise</code>, <code>:make_shareable</code>, and <code>:dedup</code>. Defaults to <code>:raise</code>.</td>
+</tr>
+<tr>
 <td><code>Farce::Set</code>, <code>Farce::SortedSet</code></td>
 <td><code>new</code>, <code>add</code>, <code>add?</code></td>
 <td>Set elements. Membership uses an insertion-time snapshot.</td>
+</tr>
+<tr>
+<td><code>Farce::WeakMap</code>, <code>Farce::WeakValueMap</code></td>
+<td><code>new</code>, <code>store</code>, <code>update</code>, and other replacement operations</td>
+<td>Weakly held values only. Supports only <code>:raise</code>, <code>:make_shareable</code>, and <code>:dedup</code>. Defaults to <code>:raise</code>.</td>
 </tr>
 <tr>
 <td><code>Farce::Map</code>, <code>Farce::WeakKeyMap</code></td>
@@ -415,6 +435,15 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </tr>
 </tbody>
 </table>
+<p><code>Farce::Lazy</code> runs its shareable factory once and applies the mode to the result. With
+<code>:copy</code>, each Ractor receives its own cached copy. Use <code>Farce::Strict::Lazy</code> when the
+result must already be shareable, or <code>Farce::Unshared::Lazy</code> for a factory that captures
+mutable state within one Ractor. The corresponding <code>LazyRef</code> classes delegate to those
+results directly.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_snapshot'>snapshot</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Lazy.html" title="Farce::Lazy (class)">Lazy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Lazy.html#initialize-instance_method" title="Farce::Lazy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:make_shareable</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='lbrace'>{</span> <span class='label'>jobs:</span> <span class='lbracket'>[</span><span class='rbracket'>]</span> <span class='rbrace'>}</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_snapshot'>snapshot</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='comment'># =&gt; { jobs: [] }
+</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Farce/Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_snapshot'>snapshot</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
+</span></code></pre>
 <h3 id="queue-work-for-another-ractor">Queue work for another Ractor<a href="#queue-work-for-another-ractor" aria-label="Link to heading 'Queue work for another Ractor'" data-heading-content="Queue work for another Ractor" class="anchor"></a></h3>
 <p>Unlike a port, a queue does not restrict consumption to its creator. This makes a queue a natural place to hand work to a consumer. Here the worker gets ownership of a batch and sends back a shareable integer.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_jobs'>jobs</span>      <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Queue.html" title="Farce::Queue (class)">Queue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Queue.html#initialize-instance_method" title="Farce::Queue#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:move</span><span class='rparen'>)</span>
@@ -466,6 +495,33 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </span>
 <span class='id identifier rubyid_cache'>cache</span><span class='period'>.</span><span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='symbol'>:account</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_current'>current</span><span class='op'>|</span> <span class='lbrace'>{</span> <span class='label'>roles:</span> <span class='id identifier rubyid_current'>current</span><span class='lbracket'>[</span><span class='symbol'>:roles</span><span class='rbracket'>]</span> <span class='op'>+</span> <span class='lbracket'>[</span><span class='symbol'>:admin</span><span class='rbracket'>]</span> <span class='rbrace'>}</span> <span class='rbrace'>}</span>
 <span class='id identifier rubyid_cache'>cache</span><span class='lbracket'>[</span><span class='symbol'>:account</span><span class='rbracket'>]</span> <span class='comment'># =&gt; { roles: [:reader, :admin] }
+</span></code></pre>
+<p><code>Farce::WeakAtom</code>, <code>Farce::WeakMap</code>, and <code>Farce::WeakValueMap</code> default to
+<code>:raise</code> and accept only <code>:raise</code>, <code>:make_shareable</code>, and <code>:dedup</code>. They store
+prepared values directly and retain them weakly. Unsupported modes raise
+<code>ArgumentError</code>, including when the supplied value is already shareable.
+Modes never prepare map keys or expected values used by comparisons and waits.</p>
+<p>With <code>:make_shareable</code>, keeping the original referenced keeps the stored value
+alive. With <code>:dedup</code>, the stored canonical value can differ from the input.
+Keep the result returned by <code>store</code> or <code>update</code> when it must remain alive.
+Assignment evaluates to the input, so it does not reliably retain the canonical
+result. A constructor also retains no strong reference to its prepared value.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_cache'>cache</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/WeakValueMap.html" title="Farce::WeakValueMap (class)">WeakValueMap</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:dedup</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_retained'>retained</span> <span class='op'>=</span> <span class='id identifier rubyid_cache'>cache</span><span class='period'>.</span><span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='symbol'>:roles</span><span class='comma'>,</span> <span class='lbracket'>[</span><span class='const'>String</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>reader</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='rbracket'>]</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_cache'>cache</span><span class='lbracket'>[</span><span class='symbol'>:roles</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_retained'>retained</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
+</span><span class='comment'># The entry can disappear after retained is no longer referenced.
+</span></code></pre>
+<p><code>Farce::WeakSet</code> uses the same restricted modes for its elements. It stores
+prepared elements directly and retains them weakly. Membership checks and
+deletion do not freeze or deduplicate their arguments. <code>add</code> returns the set,
+and <code>add?</code> returns the set or nil. Neither returns the prepared element.
+With <code>:dedup</code>, retain the canonical element elsewhere if it must stay alive.
+Already-shareable elements pass through unchanged, as in the other containers.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_retained'>retained</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="Farce/Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_dedup'><span class='object_link'><a href="Farce.html#dedup-class_method" title="Farce.dedup (method)">dedup</a></span></span><span class='lparen'>(</span><span class='lbracket'>[</span><span class='const'>String</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>reader</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='rbracket'>]</span><span class='rparen'>)</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_set'>set</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/WeakSet.html" title="Farce::WeakSet (class)">WeakSet</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:dedup</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_set'>set</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='id identifier rubyid_retained'>retained</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_set'>set</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_retained'>retained</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
+</span><span class='comment'># The element can disappear after retained is no longer referenced.
 </span></code></pre>
 <p><code>Farce::WeakKeyMap</code> uses the same value modes, but keeps its keys weakly. <code>Farce::TreeMap</code> keeps entries sorted by key and selects the value mode at construction. Modes do not copy or wrap map keys. Tree maps also make mutable string keys immutable.</p>
 <h3 id="store-a-series-of-snapshots-in-a-vector">Store a series of snapshots in a vector<a href="#store-a-series-of-snapshots-in-a-vector" aria-label="Link to heading 'Store a series of snapshots in a vector'" data-heading-content="Store a series of snapshots in a vector" class="anchor"></a></h3>
@@ -621,7 +677,7 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </div></div>
 
       <div id="footer">
-  Generated on Fri Oct  2 11:35:42 2026 by
+  Generated on Sat Oct  3 10:30:45 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
