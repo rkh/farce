@@ -11,7 +11,7 @@ module Farce
 
     STRONG_TYPES = [Set, SortedSet, Strict::Set, Strict::SortedSet, Unshared::Set, Unshared::SortedSet,
                     Local::Set, Local::SortedSet].freeze
-    WEAK_TYPES = [Strict::WeakSet, Unshared::WeakSet, Local::WeakSet].freeze
+    WEAK_TYPES = [WeakSet, Strict::WeakSet, Unshared::WeakSet, Local::WeakSet].freeze
     TYPES = (STRONG_TYPES + WEAK_TYPES).freeze
 
     MutableOrderedKey = Struct.new(:rank) do
@@ -19,7 +19,7 @@ module Farce
     end
 
     def test_public_hierarchy_and_properties
-      refute Farce.const_defined?(:WeakSet, false)
+      assert_equal Abstract::WeakSet, WeakSet.superclass
       refute Farce.const_defined?(:WeakSortedSet, false)
       assert_equal Abstract::Set, Set.superclass
       assert_equal Abstract::SortedSet, SortedSet.superclass
@@ -310,6 +310,7 @@ module Farce
     def test_yaml_preserves_configuration_and_current_members
       TYPES.each do |type|
         options = type.name.start_with?("Farce::Local::") ? { scope: :fiber } : {}
+        options[:mode] = :make_shareable if type == WeakSet
         source = type.new(%w[ONE TWO], normalize: :downcase, **options)
         source.freeze unless source.is_a?(Unshareable)
         copy = Psych.unsafe_load(Psych.dump(source))

@@ -11,7 +11,7 @@ module Farce
     TREE_TYPES = [TreeMap, Strict::TreeMap, Unshared::TreeMap, Unsafe::TreeMap, Local::TreeMap].freeze
     BOUNDED_TYPES = [LRUMap, LFUMap, Strict::LRUMap, Strict::LFUMap, Unshared::LRUMap,
                      Unshared::LFUMap, Unsafe::LRUMap, Unsafe::LFUMap, Local::LRUMap, Local::LFUMap].freeze
-    WEAK_TYPES = [WeakKeyMap, Strict::WeakKeyMap, Strict::WeakValueMap, Strict::WeakMap,
+    WEAK_TYPES = [WeakMap, WeakValueMap, WeakKeyMap, Strict::WeakKeyMap, Strict::WeakValueMap, Strict::WeakMap,
                   Unshared::WeakKeyMap, Unshared::WeakValueMap, Unshared::WeakMap,
                   Local::WeakKeyMap, Local::WeakValueMap, Local::WeakMap].freeze
 

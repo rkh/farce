@@ -29,7 +29,7 @@ module Farce
         raise ArgumentError, "compare_values_by_identity must be a boolean" unless valid_comparison
         @compare_values_by_identity = compare_values_by_identity
 
-        @manager = ModeManager.new(mode:)
+        @manager = new_mode_manager(mode:)
         @map     = new_map(compare_by_identity:, compare_keys_by_identity:, compare_values_by_identity: true)
         KeyNormalizer.prepare_concurrent(@map)
 
@@ -188,6 +188,8 @@ module Farce
       def unwrap_value(value)          = NIL_VALUE.equal?(value) ? nil : @manager.unwrap(value)
 
       private
+
+      def new_mode_manager(mode:) = ModeManager.new(mode:)
 
       def check_key(key)
         return if Ractor.shareable?(key)

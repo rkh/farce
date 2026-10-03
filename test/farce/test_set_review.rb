@@ -9,7 +9,7 @@ module Farce
     include Helpers::InternalTestHelpers
 
     TYPES = [
-      Set, SortedSet, Strict::Set, Strict::SortedSet, Strict::WeakSet,
+      Set, SortedSet, WeakSet, Strict::Set, Strict::SortedSet, Strict::WeakSet,
       Unshared::Set, Unshared::SortedSet, Unshared::WeakSet,
       Local::Set, Local::SortedSet, Local::WeakSet
     ].freeze

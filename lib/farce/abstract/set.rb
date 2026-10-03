@@ -66,8 +66,8 @@ module Farce
       # @param enumerable [#each, nil] The initial elements, or nil for an empty set.
       # @param normalize [Symbol, Proc, Hash, Farce::Abstract::Map, nil] The element normalizer.
       # @param compare_by_identity [Boolean] Whether membership uses object identity.
-      # @param mode [Symbol] The default transfer mode. Only Farce::Set and Farce::SortedSet
-      #   accept this option. Defaults to :copy for those classes.
+      # @param mode [Symbol] The default transfer mode for Farce::Set, Farce::SortedSet,
+      #   and Farce::WeakSet. Defaults to :copy for strong sets and :raise for WeakSet.
       # @param options [Hash] Additional options for the selected variant.
       # @option options [Symbol] scope (:ractor) The scope used by Farce::Local variants.
       # @yield [element] Optionally transform each initial element before storage.
@@ -114,7 +114,7 @@ module Farce
       # Add an element and return self.
       # @param element [BasicObject] The element to normalize and store.
       # @param mode [Symbol, nil] Override the transfer mode for this insertion. Only
-      #   Farce::Set and Farce::SortedSet accept this option. Nil uses the set's default.
+      #   Farce::Set, Farce::SortedSet, and Farce::WeakSet accept this option. Nil uses the set's default.
       # @return [self] The set.
       def add(element, mode: UNDEFINED)
         check_frozen!
@@ -126,7 +126,7 @@ module Farce
       # Add an absent element and return self, or nil if it was already present.
       # @param element [BasicObject] The element to normalize and store.
       # @param mode [Symbol, nil] Override the transfer mode for this insertion. Only
-      #   Farce::Set and Farce::SortedSet accept this option. Nil uses the set's default.
+      #   Farce::Set, Farce::SortedSet, and Farce::WeakSet accept this option. Nil uses the set's default.
       # @return [self, nil] The set if added, otherwise nil.
       def add?(element, mode: UNDEFINED) # rubocop:disable Naming/PredicateMethod
         check_frozen!

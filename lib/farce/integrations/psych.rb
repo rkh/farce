@@ -144,7 +144,7 @@ module Farce
       end
       coder["compare_by_identity"] = compare_by_identity?
       coder["frozen"]              = frozen?
-      coder["mode"]                = @manager.mode if value_modes?
+      coder["mode"]                = mode if respond_to?(:mode)
       coder["scope"]               = scope if respond_to?(:scope)
       coder["normalize"]           = Internal::KeyNormalizer.dump(@normalizer) if @normalizer
       coder
@@ -161,7 +161,7 @@ module Farce
       options[:normalize] = Internal::KeyNormalizer.restore(coder["normalize"]) if coder.map.key?("normalize")
       entries             = coder["entries"]
 
-      if coder["mode"]
+      if coder["mode"] && value_modes?
         initialize(nil, **options)
         entries.each { restore_yaml_entry(it) }
       else

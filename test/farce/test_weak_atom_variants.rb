@@ -12,8 +12,8 @@ module Farce
 
     def run(...) = Timeout.timeout(5) { super }
 
-    def test_hierarchy_supports_type_matching_without_a_top_level_weak_atom
-      refute Farce.const_defined?(:WeakAtom, false)
+    def test_hierarchy_supports_type_matching
+      assert_equal Abstract::WeakAtom, WeakAtom.superclass
 
       assert_equal Abstract::Atom, Atom.superclass
       assert_equal Abstract::Atom, Abstract::WeakAtom.superclass
