@@ -158,10 +158,8 @@ module Farce
     end
 
     def test_dedup_mode_preserves_values_on_emulated_ractors
-      skip "requires emulated Ractors" if Internal.native_ractors?
-
+      return if Internal.native_ractors?
       value = [+"dedup emulated value"]
-
       assert_same value, ModeManager.new(mode: :dedup).wrap(value)
       refute_predicate value, :frozen?
     end

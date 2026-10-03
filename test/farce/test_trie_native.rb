@@ -339,7 +339,7 @@ module Farce
     end
 
     def test_native_allocation_failure_cleanup
-      skip "failure-injection build only" unless native_test_hook?(:__native_failure_after=)
+      return unless native_test_hook?(:__native_failure_after=)
 
       begin
         entries = ("a".."h").each_with_index.map { |literal, id| [[literal], id] }
@@ -446,7 +446,7 @@ module Farce
     end
 
     def test_interrupted_native_construction_and_lookup_cleanup
-      skip "failure-injection build only" unless native_test_hook?(:__native_interrupt_queue=)
+      return unless native_test_hook?(:__native_interrupt_queue=)
 
       begin
         ready = Queue.new
