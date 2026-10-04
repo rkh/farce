@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 return unless RUBY_ENGINE == "ruby" && Fiber.respond_to?(:set_scheduler)
 
@@ -51,11 +53,17 @@ module Farce
 
     def test_timeout_does_not_block_another_fiber
       scheduler = Helpers::QueueTestScheduler.new
+      timeout = queue_class == Unshared::PriorityQueue ? 1 : 60
+      unless queue_class == Unshared::PriorityQueue
+        # Park before reporting expiry. Unshared signals recheck the native
+        # deadline, so they need the scheduler's real timer instead.
+        def scheduler.io_wait(io, events, _duration) = super(io, events, 0)
+      end
       Fiber.set_scheduler(scheduler)
       queue = queue_class.new
       events = []
 
-      Fiber.schedule { events << queue.pop(timeout: 0.01) }
+      Fiber.schedule { events << queue.pop(timeout:) }
       Fiber.schedule { events << :other_fiber }
       Fiber.set_scheduler(nil)
 
