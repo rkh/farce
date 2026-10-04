@@ -39,6 +39,7 @@ module Farce
   # * Vectors
   # * Concurrent::TVar from the concurrent-ruby gem
   # * Ractor::TVar from the ractor-sharing gem
+  # * Ractor::TMVar from the ractor-tmvar gem
   class Transaction
     include Internal::Autoloads
     include Unshareable

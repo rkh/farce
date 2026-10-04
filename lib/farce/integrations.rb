@@ -15,6 +15,7 @@ module Farce
       psych:          %w[psych].freeze,
       oj:             %w[oj].freeze,
       yajl:           %w[yajl].freeze,
+      ractor_tmvar:   %w[ractor/tvar ractor/tmvar].freeze,
       ractor_sharing: %w[
         ractor/tvar
         ractor/lockvar

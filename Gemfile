@@ -29,7 +29,13 @@ group :benchmark do
   gem "lazy_priority_queue"
   gem "philiprehberger-priority_queue"
   gem "pqueue"
-  gem "ractor-sharing", platforms: %i[mri_40 mri_41]
+
+  platforms :mri_40, :mri_41 do
+    gem "ractor-sharing"
+    # TODO: Switch to official gem once https://github.com/yoshitsugu/ractor-tmvar/pull/1 has been merged and released
+    gem "ractor-tmvar", github: "rkh/ractor-tmvar", branch: "patch-1"
+  end
+
   platforms :mri_34, :mri_40 do
     gem "carbon_fiber"
     gem "io-event"

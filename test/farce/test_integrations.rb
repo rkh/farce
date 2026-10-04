@@ -224,6 +224,7 @@ module Farce
         expected = [:active_support, :dry_types, :concurrent, :json, :msgpack, :psych]
         expected << :oj unless Gem::Specification.find_all_by_name("oj").empty?
         expected << :yajl unless Gem::Specification.find_all_by_name("yajl-ruby").empty?
+        expected << :ractor_tmvar unless Gem::Specification.find_all_by_name("ractor-tmvar").empty?
         expected << :ractor_sharing unless Gem::Specification.find_all_by_name("ractor-sharing").empty?
         raise "wrong available integrations" unless Farce::Integrations.load_available == expected
         raise "dry-types integration missing" unless Farce.respond_to?(:DryTypes)
@@ -242,6 +243,7 @@ module Farce
         ["farce/integrations/dry_types"]  => %i[active_support concurrent json msgpack psych],
         ["farce/integrations/concurrent"] => %i[active_support dry_types json msgpack psych],
         ["ractor/tvar"]                   => %i[active_support dry_types concurrent json msgpack psych],
+        ["ractor/tmvar"]                  => %i[active_support dry_types concurrent json msgpack psych],
       }.each do |missing, expected|
         assert_integration_process(<<~RUBY)
           require "farce"
@@ -251,6 +253,8 @@ module Farce
           expected = #{expected.inspect}
           expected << :oj unless Gem::Specification.find_all_by_name("oj").empty?
           expected << :yajl unless Gem::Specification.find_all_by_name("yajl-ruby").empty?
+          expected << :ractor_tmvar if #{!missing.intersect?(["ractor/tvar", "ractor/tmvar"])} &&
+            !Gem::Specification.find_all_by_name("ractor-tmvar").empty?
           expected << :ractor_sharing if #{!missing.include?("ractor/tvar")} &&
             !Gem::Specification.find_all_by_name("ractor-sharing").empty?
           raise "wrong available integrations: \#{result.inspect}" unless result == expected
