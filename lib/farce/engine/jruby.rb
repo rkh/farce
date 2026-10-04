@@ -5,8 +5,9 @@
 require "jruby"
 require "java"
 
-# Load reservation waits before worker threads can contend or be canceled.
+# Load wait helpers before worker threads can contend or be canceled.
 require "farce/internal/reservation_waiting"
+require "farce/engine/jruby/lease_waiting"
 require "farce/engine/shared"
 require "farce/engine/jvm"
 
@@ -20,7 +21,6 @@ module Farce
     autoload :WeakMap,         "farce/engine/shared/unshared_weak_map"
     autoload :WeakKeyMap,      "farce/engine/shared/unshared_weak_map"
     autoload :WeakValueMap,    "farce/engine/shared/unshared_weak_map"
-    autoload :LeaseWaiting,    "farce/engine/jruby/lease_waiting"
     autoload :LFUMap,          "farce/engine/jruby/bounded_map"
     autoload :LRUMap,          "farce/engine/jruby/bounded_map"
     autoload :ShareableLFUMap, "farce/engine/jruby/bounded_map"

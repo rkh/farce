@@ -25,6 +25,32 @@ class TestInternalAutoloads < Test
     assert_equal "ok", output.strip
   end
 
+  def test_canceling_first_lease_wait_does_not_leave_a_partial_helper
+    return unless RUBY_ENGINE == "jruby"
+
+    output, error, status = ruby_isolated(<<~RUBY)
+      require "farce"
+      abort "loading wait helpers froze configuration" if Farce.config.frozen?
+      internal = Farce.const_get(:Internal)
+      signal = internal::Signal.new
+
+      # Cancel precisely after autoload publishes the module, before defining its method.
+      trace = TracePoint.new(:class) do |event|
+        Thread.current.kill if event.self.name == "Farce::Internal::LeaseWaiting"
+      end
+      trace.enable do
+        Thread.new { signal.wait(timeout: 0.001) }.value
+      end
+
+      abort "wrong cancellation interval" unless internal::LeaseWaiting.wait_interval(nil) == 0.05
+      abort "later wait did not time out" unless signal.wait(timeout: 0.001).nil?
+      puts "ok"
+    RUBY
+
+    assert_predicate status, :success?, error
+    assert_equal "ok", output.strip
+  end
+
   def test_thread_pool_and_scheduler_helpers_load_independently
     output, error, status = ruby_isolated(<<~'RUBY')
       require "farce"
