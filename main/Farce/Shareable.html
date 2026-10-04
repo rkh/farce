@@ -103,12 +103,6 @@
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
     <p>Mixin that makes sure instances are shareable between Ractors.</p>
-<p>Shareability and frozen state are independent. Mutable Farce containers begin
-unfrozen. Their freeze prevents explicit changes to their own contents without
-freezing stored values. Weak contents can still disappear during garbage collection.
-Live services, such as queues and locks, reject freeze with TypeError.
-Coordinate with writers before freezing. Freeze does not wait for operations
-already in progress and is not a snapshot operation.</p>
 
 
   </div>
@@ -236,13 +230,13 @@ Accepts any arguments and passes them on to the superclass initializer.</p>
       <pre class="lines">
 
 
-142
-143
-144
-145</pre>
+136
+137
+138
+139</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/shareable.rb', line 142</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/shareable.rb', line 136</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
   <span class='kw'>super</span>
@@ -302,10 +296,10 @@ Accepts any arguments and passes them on to the superclass initializer.</p>
       <pre class="lines">
 
 
-149</pre>
+143</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/shareable.rb', line 149</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/shareable.rb', line 143</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_ractor_shareable?'>ractor_shareable?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -318,7 +312,7 @@ Accepts any arguments and passes them on to the superclass initializer.</p>
 </div>
 
       <div id="footer">
-  Generated on Sat Oct  3 10:30:45 2026 by
+  Generated on Sun Oct  4 09:04:49 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
