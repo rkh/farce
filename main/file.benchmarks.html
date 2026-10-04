@@ -175,6 +175,12 @@ so these numbers may not be accurate in the future.</li>
 <td>Not ractor-shareable</td>
 </tr>
 <tr>
+<td><code>RactorSafe::HashMap</code></td>
+<td>4.8x slower</td>
+<td>4.8x slower</td>
+<td></td>
+</tr>
+<tr>
 <td><code>Farce::TreeMap</code></td>
 <td>5.5x slower</td>
 <td>40x slower</td>
@@ -233,6 +239,13 @@ so these numbers may not be accurate in the future.</li>
 <td>1.6x slower</td>
 <td>64-bit</td>
 <td>no overflow protection</td>
+</tr>
+<tr>
+<td>ractor_safe</td>
+<td>2.1x slower</td>
+<td>2.1x slower</td>
+<td>64-bit</td>
+<td></td>
 </tr>
 <tr>
 <td>concurrent-ruby</td>
@@ -344,13 +357,18 @@ Farce and concurrent-ruby provide plenty of options.</p>
 <td></td>
 </tr>
 <tr>
+<td><code>RactorSafe::Queue</code></td>
+<td>2.9x slower</td>
+<td>only allows sharable objects</td>
+</tr>
+<tr>
 <td><code>Ratomic::Queue</code></td>
-<td>8.7x slower</td>
+<td>9.8x slower</td>
 <td>breaks ractor isolation</td>
 </tr>
 <tr>
 <td><code>RactorQueue</code></td>
-<td>27x slower</td>
+<td>30x slower</td>
 <td>breaks ractor isolation</td>
 </tr>
 <tr>
@@ -435,7 +453,7 @@ The below numbers compare non-blocking APIs, as only Farce implements a blocking
 </div></div>
 
       <div id="footer">
-  Generated on Sun Oct  4 09:43:37 2026 by
+  Generated on Sun Oct  4 10:39:16 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

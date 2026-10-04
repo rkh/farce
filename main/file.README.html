@@ -225,6 +225,19 @@
       <td>❌ <b>not supported</b></td>
       <td>⚠️ CRuby only<b>¹</b></td>
     </tr>
+    <tr>
+      <td rowspan="2"><a href="https://github.com/jhawthorn/ractor_safe">ractor_safe</a></td>
+      <td>HashMap, AtomicInteger</td>
+      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only</td>
+      <td>✅ supported</td>
+    </tr>
+    <tr>
+      <td>Queue</td>
+      <td>⚠️ CRuby only</td>
+      <td>❌ <b>not supported</b></td>
+      <td>✅ supported</td>
+    </tr>
   </tbody>
 </table>
 <p>Notes:</p>
@@ -302,7 +315,9 @@
 <ul>
 <li><a href="https://github.com/eregon/ractor-shim/">ractor-shim</a> provides similar functionality to <code>Farce::Ractor</code>. See <a href="file.ractor-shim.html" title="the comparison document">the comparison document</a> for more details.</li>
 <li><a href="https://github.com/ruby-concurrency/concurrent-ruby">concurrent-ruby</a> provides a more complete set of concurrency primitives than Farce, but is not compatible with Ractors.</li>
-<li><a href="https://mperham.github.io/ratomic/">ratomic</a> has overlapping functionality with Farce. See <a href="docs/gems/ratomic.md">the comparison document</a> for more details.</li>
+<li><a href="https://mperham.github.io/ratomic/">ratomic</a> has overlapping functionality with Farce for basic data structures like maps, counters, and queues.</li>
+<li><a href="https://github.com/jhawthorn/ractor_safe/">ractor_safe</a> has overlapping functionality with Farce for basic data structures like maps, counters, and queues.</li>
+<li><a href="https://github.com/ko1/ractor-sharing">ractor-sharing</a> has overlapping functionality with Farce for basic data structures like maps, counters, queues, as well as software transactional memory.</li>
 </ul>
 <p>All of the above projects can safely be used alongside Farce in the same application.</p>
 <h2 id="installation">Installation<a href="#installation" aria-label="Link to heading 'Installation'" data-heading-content="Installation" class="anchor"></a></h2>
@@ -359,7 +374,7 @@ need to specifically load any particular file.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Sun Oct  4 09:43:37 2026 by
+  Generated on Sun Oct  4 10:39:16 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
