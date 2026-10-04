@@ -34,6 +34,7 @@ group :benchmark do
     gem "ractor-sharing"
     # TODO: Switch to official gem once https://github.com/yoshitsugu/ractor-tmvar/pull/1 has been merged and released
     gem "ractor-tmvar", github: "rkh/ractor-tmvar", branch: "patch-1"
+    gem "ractor_safe"
   end
 
   platforms :mri_34, :mri_40 do

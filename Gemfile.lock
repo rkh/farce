@@ -127,6 +127,7 @@ GEM
     ractor-sharing (0.3.0)
     ractor_queue (0.2.1)
       rice (~> 4.0)
+    ractor_safe (0.1.0)
     rainbow (3.1.1)
     rake (13.4.2)
     rake-compiler (1.3.1)
@@ -235,6 +236,7 @@ DEPENDENCIES
   ractor-sharing
   ractor-tmvar!
   ractor_queue
+  ractor_safe
   rake
   rake-compiler
   rake-compiler-dock
@@ -316,6 +318,7 @@ CHECKSUMS
   ractor-sharing (0.3.0) sha256=9adb2f899e4e38f477a2d3c02368e8ff40be96b119172312253338ee1e22f63f
   ractor-tmvar (0.2.0)
   ractor_queue (0.2.1) sha256=834ba7d0ee580c5cae260a8db879b4352981a929874de080e996d5fc31b33086
+  ractor_safe (0.1.0) sha256=d6a3b7fd210a0f04ad4bb56ecc807e399d1ab729415ca696ad1fb26a085a49be
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
   rake-compiler (1.3.1) sha256=6b351612b6e2d73ddd5563ee799bb58685176e05363db6758504bd11573d670a

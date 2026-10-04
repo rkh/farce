@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 if RUBY_ENGINE == "ruby"
   case ENV["JIT"].to_s.downcase
@@ -66,6 +68,13 @@ if defined?(Ractor)
   begin
     require "ratomic"
     queues["Ratomic::Queue"] = -> { Ratomic::Queue.new(1024) }
+  rescue LoadError => e
+    warn "#{e.class}: #{e.message}"
+  end
+
+  begin
+    require "ractor_safe"
+    queues["RactorSafe::Queue"] = -> { RactorSafe::Queue.new }
   rescue LoadError => e
     warn "#{e.class}: #{e.message}"
   end

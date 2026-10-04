@@ -35,6 +35,7 @@ A shared map is a very common data structure for tracking state. While the read 
  `Farce::LFUMap`             | 3.5x slower | 7.6x slower | Automatic eviction
  `Farce::Unsafe::TreeMap`    | 3.7x slower | 4.1x slower | Ordered entries, not thread-safe, not ractor-shareable
  `HashWithIndifferentAccess` | 4.5x slower | 5.3x slower | Not ractor-shareable
+ `RactorSafe::HashMap`       | 4.8x slower | 4.8x slower | 
  `Farce::TreeMap`            | 5.5x slower | 40x slower  | Ordered entries
  `Farce::LeaseMap`           | 30x slower  | 40x slower  | Shared ractor for all lease maps
  `Ractor::ActorHash`         | 400x slower | 280x slower | Additional ractor per map
@@ -42,7 +43,6 @@ A shared map is a very common data structure for tracking state. While the read 
 The map implementations namespaced under `Ractor` are from the [ractor-sharing](https://github.com/ko1/ractor-sharing) gem.
 
 Also note that `Ratomic::Map` has a significant performance benefit over all other implementations when repeatedly writing to different keys in very large maps concurrently on a very high number of Ractors due to the underlying [DashMap](https://github.com/xacrimon/dashmap) implementing data sharding. This benefit does not materializes if different Ractors share the keys they use, so its usefulness is slightly hampered by the fact that you cannot iterate over Ratomic's maps at all.
-
 
 ## Counter performance
 
@@ -56,6 +56,7 @@ Also note that `Ratomic::Map` has a significant performance benefit over all oth
  farce               | fastest     | fastest        | 64-bit       |
  concurrent-ruby-ext | 1.2x slower | same-ish       | 32-bit       | no ractor support
  ratomic             | 1.5x slower | 1.6x slower    | 64-bit       | no overflow protection
+ ractor_safe         | 2.1x slower | 2.1x slower    | 64-bit       |
  concurrent-ruby     | 12x slower  | 5x slower      | 32-bit       | no ractor support
 
 Performance differences between implementations are consistent between single-threaded and multi-threaded benchmarks.
@@ -103,8 +104,9 @@ In the producer/consumer workload in `benchmark/queue.rb`, Ruby's built-in `Thre
  `Thread::SizedQueue`          | 1.4x slower | no ractor support
  `Farce::Strict::Queue`        | 1.5x slower | only allows sharable objects
  `Farce::Queue`                | 2.1x slower |
- `Ratomic::Queue`              | 8.7x slower | breaks ractor isolation
- `RactorQueue`                 | 27x slower  | breaks ractor isolation
+ `RactorSafe::Queue`           | 2.9x slower | only allows sharable objects
+ `Ratomic::Queue`              | 9.8x slower | breaks ractor isolation
+ `RactorQueue`                 | 30x slower  | breaks ractor isolation
  `Ractor::Port` (multiplexing) | 100x slower |
 
 ## Priority queue performance

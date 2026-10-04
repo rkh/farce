@@ -146,6 +146,19 @@ Both the Ruby core library, and other libraries, like the very popular [concurre
       <td>❌ <b>not supported</b></td>
       <td>⚠️ CRuby only<b>¹</b></td>
     </tr>
+    <tr>
+      <td rowspan="2"><a href="https://github.com/jhawthorn/ractor_safe">ractor_safe</a></td>
+      <td>HashMap, AtomicInteger</td>
+      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only</td>
+      <td>✅ supported</td>
+    </tr>
+    <tr>
+      <td>Queue</td>
+      <td>⚠️ CRuby only</td>
+      <td>❌ <b>not supported</b></td>
+      <td>✅ supported</td>
+    </tr>
   </tbody>
 </table>
 
@@ -238,7 +251,9 @@ Moreover:
 
 * [ractor-shim](https://github.com/eregon/ractor-shim/) provides similar functionality to `Farce::Ractor`. See [the comparison document](docs/gems/ractor-shim.md) for more details.
 * [concurrent-ruby](https://github.com/ruby-concurrency/concurrent-ruby) provides a more complete set of concurrency primitives than Farce, but is not compatible with Ractors.
-* [ratomic](https://mperham.github.io/ratomic/) has overlapping functionality with Farce. See [the comparison document](docs/gems/ratomic.md) for more details.
+* [ratomic](https://mperham.github.io/ratomic/) has overlapping functionality with Farce for basic data structures like maps, counters, and queues.
+* [ractor_safe](https://github.com/jhawthorn/ractor_safe/) has overlapping functionality with Farce for basic data structures like maps, counters, and queues.
+* [ractor-sharing](https://github.com/ko1/ractor-sharing) has overlapping functionality with Farce for basic data structures like maps, counters, queues, as well as software transactional memory.
 
 All of the above projects can safely be used alongside Farce in the same application.
 

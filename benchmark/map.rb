@@ -12,7 +12,7 @@ if RUBY_ENGINE == "ruby"
 end
 
 # Run with ruby benchmark/map.rb. Requires benchmark-ips, concurrent-ruby, and ActiveSupport.
-# Ratomic and ractor-sharing are optional on unsupported Rubies. Override TIME,
+# Ratomic, ractor-sharing, and ractor_safe are optional on unsupported Rubies. Override TIME,
 # WARMUP, SIZE, FILTER, or JSON (an output filename prefix) through the environment.
 require "bundler/setup"
 require "benchmark/ips"
@@ -31,6 +31,12 @@ begin
   require "ractor/sharing"
 rescue LoadError => e
   warn "Skipping ractor-sharing hashes: #{e.message}"
+end
+
+begin
+  require "ractor_safe"
+rescue LoadError => e
+  warn "Skipping RactorSafe::HashMap: #{e.message}"
 end
 
 class MutexHash
@@ -76,6 +82,7 @@ if ObjectSpace.const_defined?(:WeakKeyMap, false)
   factories["ObjectSpace::WeakKeyMap"] = -> { ObjectSpace::WeakKeyMap.new }
 end
 factories["Ratomic::Map"] = -> { Ratomic::Map.new } if defined?(Ratomic::Map)
+factories["RactorSafe::HashMap"] = -> { RactorSafe::HashMap.new } if defined?(RactorSafe::HashMap)
 if defined?(Ractor::LockHash)
   factories["Ractor::LockHash"]    = -> { Ractor::LockHash.new }
   factories["Ractor::KeyLockHash"] = -> { Ractor::KeyLockHash.new }
@@ -103,6 +110,7 @@ puts "Farce #{Farce::VERSION}; benchmark-ips #{Benchmark::IPS::VERSION}"
 puts "concurrent-ruby #{Gem.loaded_specs.fetch("concurrent-ruby").version}; " \
      "ratomic #{Gem.loaded_specs["ratomic"]&.version || "unavailable"}"
 puts "ractor-sharing #{Gem.loaded_specs["ractor-sharing"]&.version || "unavailable"}"
+puts "ractor_safe #{Gem.loaded_specs["ractor_safe"]&.version || "unavailable"}"
 puts "#{size} entries; frozen String keys/values; defaults; one thread; GC enabled."
 puts "Hot-key reads and repeated overwrites. One iteration is one map access."
 puts "LeaseMap reads hold a checkout acquired before timing; writes are unowned."

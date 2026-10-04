@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require "bundler/setup"
 require "benchmark"
@@ -34,6 +36,15 @@ rescue LoadError => e
   warn "#{e.class}: #{e.message}"
 end
 
+begin
+  require "ractor_safe"
+  counter_classes << RactorSafe::AtomicInteger
+  thread_classes  << RactorSafe::AtomicInteger
+  ractor_classes  << RactorSafe::AtomicInteger
+rescue LoadError => e
+  warn "#{e.class}: #{e.message}"
+end
+
 benchmark_time   = Float(ENV.fetch("BENCHMARK_TIME",   2))
 benchmark_warmup = Float(ENV.fetch("BENCHMARK_WARMUP", 1))
 
@@ -64,13 +75,37 @@ workloads = {
   end,
 }
 
+# AtomicInteger takes no delta for increment/decrement. Select these direct
+# calls before timing so adapting its API adds no dispatch inside the loop.
+ractor_safe_workloads = {
+  increment: lambda do |counter, times|
+    index = 0
+    while index < times
+      counter.increment
+      index += 1
+    end
+  end,
+  decrement: lambda do |counter, times|
+    index = 0
+    while index < times
+      counter.decrement
+      index += 1
+    end
+  end,
+}
+
 workloads.each do |operation, workload|
   puts "", "==== Single-threaded #{operation} ===="
   Benchmark.ips do |x|
     x.config(time: benchmark_time, warmup: benchmark_warmup)
     counter_classes.each do |counter_class|
       counter = counter_class.new
-      x.report("#{counter_class.name}##{operation}") { |times| workload.call(counter, times) }
+      selected = if defined?(RactorSafe::AtomicInteger) && counter_class == RactorSafe::AtomicInteger
+                   ractor_safe_workloads.fetch(operation, workload)
+                 else
+                   workload
+                 end
+      x.report("#{counter_class.name}##{operation}") { |times| selected.call(counter, times) }
     end
     x.compare!
   end
@@ -94,9 +129,16 @@ thread_types.each do |worker_class, counter_classes|
         workers = worker_count.times.map do
           worker_class.new(counter, increments) do |shared, count|
             index = 0
-            while index < count
-              shared.increment(1)
-              index += 1
+            if defined?(RactorSafe::AtomicInteger) && shared.is_a?(RactorSafe::AtomicInteger)
+              while index < count
+                shared.increment
+                index += 1
+              end
+            else
+              while index < count
+                shared.increment(1)
+                index += 1
+              end
             end
             nil
           end
