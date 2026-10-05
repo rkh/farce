@@ -189,6 +189,17 @@ module Farce
 
       private
 
+      def each_for_inspect(&) = @map.each(&)
+
+      def inspect_pair(inspector, key, value)
+        inspector.hash_pair(key, value, @manager) { inspect_value(inspector, value) }
+      end
+
+      def inspect_value(inspector, value)
+        value = nil if NIL_VALUE.equal?(value)
+        super(inspector, value, @manager)
+      end
+
       def new_mode_manager(mode:) = ModeManager.new(mode:)
 
       def check_key(key)

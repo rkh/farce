@@ -48,6 +48,23 @@ module Farce
       include Internal::Copyable
       include Value
       include Internal::ValueSerialization
+      include Internal::Inspect
+
+      # @api private
+      def inspect_with(inspector)
+        begin
+          current = value
+        rescue StandardError
+          # FrozenError may inspect an allocated flag before it is initialized.
+          return inspector.object_with_address(self)
+        end
+
+        super do
+          yield if block_given?
+          inspector.breakable
+          inspector.object(current)
+        end
+      end
     end
   end
 end

@@ -29,6 +29,7 @@ module Farce
   #   weak.value # WeakRefError: Invalid Reference - probably recycled
   class WeakValue
     include Abstract::Value
+    include Internal::Inspect
 
     MOVED = Object.new.freeze
     private_constant :MOVED
@@ -124,29 +125,14 @@ module Farce
       raise WeakRefError, "Invalid Reference - referenced object has been moved"
     end
 
-    # @return [String] a string representation of the weak value
-    def inspect
-      state, value = state_and_value
-      "#<#{self.class.name} state=#{state.inspect}#{" value=#{value.inspect}" if state == :alive}>"
-    end
-
     # @api private
-    # @return [void]
-    # simplecov:disable
-    def pretty_print(pp)
+    def inspect_with(inspector)
       state, value = state_and_value
-      pp.group(1, "#<#{self.class.name}", ">") do
-        pp.breakable " "
-        pp.text "state="
-        pp.pp(state)
-        if state == :alive
-          pp.breakable " "
-          pp.text "value="
-          pp.pp(value)
-        end
+      super do
+        inspector.attribute(:state, state)
+        inspector.attribute(:value, value) if state == :alive
       end
     end
-    # simplecov:enable
 
     private
 

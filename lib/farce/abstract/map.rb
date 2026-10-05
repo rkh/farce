@@ -154,6 +154,7 @@ module Farce
     #   @abstract
     class Map
       include Enumerable
+      include Internal::Inspect
 
       # Store a value using the map's assignment operation.
       # Concurrent maps override this method to support timeouts.
@@ -282,34 +283,17 @@ module Farce
       def weak_values? = false
 
       # @return [String] String representation of the map, suitable for debugging.
-      def inspect
-        out   = "#<#{self.class.name} {"
-        comma = false
-        each_for_inspect do |key, value|
-          out << ", " if comma
-          comma = true
-          if Symbol === key
-            key = key.to_s.inspect if key.inspect.match?(%r{\A:["$@!]|[%&*+\-/<=>@\]^`|~]\z})
-            out << "#{key}:"
-          else
-            out << "#{key.inspect} =>"
-          end
-          out << " #{value.inspect}"
-        end
-        out << "}>"
-      end
-
-      # @return [String] The same representation as {#inspect}.
       def to_s = inspect
 
       # @api private
-      # @return [void]
-      def pretty_print(pp)
-        pp.group(1, "#<#{self.class.name} ", ">") do
-          pp.group(1, "{", "}") do
-            pp.breakable ""
-            pp.seplist(self, nil, :each_for_inspect) do |key, value|
-              pp.group { pp.pp_hash_pair(key, value) }
+      def inspect_with(inspector)
+        super do
+          yield if block_given?
+          inspector.breakable
+          inspector.group("{", "}") do
+            inspector.breakable ""
+            inspector.seplist(self, nil, :each_for_inspect) do |key, value|
+              inspector.group { inspect_pair(inspector, key, value) }
             end
           end
         end
@@ -352,7 +336,9 @@ module Farce
         raise TypeError, "entries must yield key/value pairs with #each"
       end
 
-      def each_for_inspect(&) = each(&)
+      def each_for_inspect(&)                 = each(&)
+      def inspect_pair(inspector, key, value) = inspector.hash_pair(key, value) { inspect_value(inspector, value) }
+      def inspect_value(inspector, ...)       = inspector.object(...)
     end
   end
 end

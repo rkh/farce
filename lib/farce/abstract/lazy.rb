@@ -7,6 +7,7 @@ module Farce
     # @abstract Shared factory, caching, and delegation behavior for lazy values.
     class Lazy
       include Internal::Copyable
+      include Internal::Inspect
       include Value
 
       # @overload initialize(factory)
@@ -41,12 +42,13 @@ module Farce
         value unless UNDEFINED.equal?(value)
       end
 
-      # @return [String] Returns a string representation of the lazy instance.
-      def inspect = "#<#{self.class.name} #{display_value.inspect}>"
-
       # @api private
-      # @return [void]
-      def pretty_print(pp) = pp.group(1, "#<#{self.class.name} ", ">") { pp.pp(display_value) }
+      def inspect_with(inspector)
+        super do
+          inspector.breakable
+          display_value(inspector)
+        end
+      end
 
       private
 
@@ -64,11 +66,12 @@ module Farce
         factory.is_a?(Proc) ? prepare_proc(factory, **options) : factory
       end
 
-      def display_value
-        value = internal_atom.value
-        return @factory if value.nil?
-
-        value unless UNDEFINED.equal?(value)
+      def display_value(inspector, ...)
+        case value = internal_atom.value
+        when nil       then inspector.object(@factory, ...)
+        when UNDEFINED then inspector.object(nil)
+        else inspector.object(value, ...)
+        end
       end
 
       # Delegates all method calls to {#value}.

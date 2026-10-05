@@ -63,6 +63,7 @@ module Farce
       # @return [Class] the configured wrapper class
       def self.inherit(klass, *helpers, writes: [])
         helpers += writes
+        helpers |= %i[inspect pretty_print inspect_with] if klass.method_defined?(:inspect_with)
         owners     = klass.ancestors.take_while { |ancestor| ancestor != klass.superclass }
         own        = klass.public_instance_methods.select { owners.include?(klass.instance_method(it).owner) }
         enumerable = klass <= Enumerable ? Enumerable.public_instance_methods : []

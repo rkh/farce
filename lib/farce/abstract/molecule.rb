@@ -11,6 +11,7 @@ module Farce
     # Operations on several fields are not a transaction or a consistent snapshot.
     class Molecule
       include Internal::Freeze::Tracked
+      include Internal::Inspect
       include Enumerable
 
       EMPTY_ARRAY = [].freeze
@@ -63,8 +64,13 @@ module Farce
 
           @atoms   = Ractor.make_shareable(atoms.freeze)
           @members = Ractor.make_shareable(members.freeze)
+
+          set_temporary_name("#{superclass.name}#{@members.inspect}")
         end
       end
+
+      # @api private
+      def self.[](...) = define(...)
 
       # @return [Boolean] the default comparison policy for new records
       def self.compare_by_identity? = false
@@ -178,6 +184,19 @@ module Farce
         return self if frozen?
         each_atom { |_, atom| atom.freeze }
         super
+      end
+
+      # @api private
+      def inspect_with(inspector)
+        super do
+          yield if block_given?
+          each_member do |member|
+            inspector.breakable
+            inspector.text("#{member}=")
+            atom = public_send(:"#{member}_atom")
+            atom.__send__(:inspect_value, inspector, nil)
+          end
+        end
       end
 
       private

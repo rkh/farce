@@ -7,6 +7,7 @@ module Farce
     # @abstract Shared checkout, return, ownership, and capacity behavior for resource pools.
     class LeasePool
       include Internal::Noncopyable
+      include Internal::Inspect
 
       # Construct an empty pool whose resources are created on demand.
       # @param max_size [Integer] the maximum number of managed resources
@@ -63,6 +64,15 @@ module Farce
 
       # @return [Integer] capacity reserved by in-progress factory calls
       def creating_count = internal_pool.creating_count
+
+      # @api private
+      def inspect_with(inspector)
+        super do
+          yield if block_given?
+          inspector.attribute(:size,     size)
+          inspector.attribute(:max_size, max_size)
+        end
+      end
 
       private
 

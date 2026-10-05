@@ -23,6 +23,7 @@ module Farce
   #   @return [Boolean] `true` if the envelope has been claimed by the current Ractor, `false` otherwise.
   class Envelope
     include Internal::Noncopyable
+    include Internal::Inspect
 
     VAULT_ATOM = Internal::Atom.new
     private_constant :VAULT_ATOM
@@ -283,22 +284,11 @@ module Farce
       left == right
     end
 
-    # @return [String] String representation of the map, suitable for debugging.
-    def inspect
-      return "#<#{self.class.name} value=#{value.inspect}>" if owned?
-      "#<#{self.class.name} #{claimed? ? "claimed" : "unclaimed"}>"
-    end
-
     # @api private
-    # @return [void]
-    def pretty_print(pp)
-      pp.group(1, "#<#{self.class.name} ", ">") do
-        if owned?
-          pp.text "value="
-          pp.pp(value)
-        else
-          pp.text claimed? ? "claimed" : "unclaimed"
-        end
+    def inspect_with(inspector)
+      super do
+        inspector.breakable
+        inspector.from_envelope(self, "value=")
       end
     end
 

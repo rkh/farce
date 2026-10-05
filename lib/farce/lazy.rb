@@ -94,7 +94,7 @@ module Farce
 
     private
 
-    def compute_value = @manager.wrap(super)
-    def display_value = @manager.unwrap(super)
+    def compute_value            = @manager.wrap(super)
+    def display_value(inspector) = super(inspector, @manager)
   end
 end

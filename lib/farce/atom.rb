@@ -224,6 +224,14 @@ module Farce
     # @return [BasicObject, nil] the non-nil value or the fallback result
     def wait_until_non_nil(timeout: nil, &) = wait_until_changed(nil, timeout:, &)
 
+    # @api private
+    def inspect_with(inspector)
+      super do
+        yield if block_given?
+        inspector.attribute(:mode, mode)
+      end
+    end
+
     private
 
     def freeze_backend = @atom
@@ -241,6 +249,19 @@ module Farce
       return if NIL_VALUE.equal?(value)
 
       @manager.unwrap(value)
+    end
+
+    def inspect_value(inspector, prefix = "value=")
+      value = @atom.value
+      value = nil if NIL_VALUE.equal?(value)
+      inspector.breakable if prefix
+
+      if @manager.managed_envelope?(value)
+        inspector.from_envelope(value, prefix)
+      else
+        inspector.text(prefix) if prefix
+        inspector.object(value)
+      end
     end
 
     def unwrap_result(result)

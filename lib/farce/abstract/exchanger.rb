@@ -8,6 +8,7 @@ module Farce
     # Each call participates in one exchange. The exchanger can be reused by any number of callers.
     class Exchanger
       include Internal::Noncopyable
+      include Internal::Inspect
 
       # Wait for a partner and return the partner's value.
       # Offering nil allows a caller to receive a value without sending a payload.

@@ -41,8 +41,10 @@ module Farce
 
     private
 
-    def new_bounded_map(...) = Internal::StrictLFUMap.new(...)
-    def freeze_backend = internal_map
+    def each_for_inspect(&)             = internal_map.each(&)
+    def inspect_value(inspector, value) = super(inspector, value, @manager)
+    def new_bounded_map(...)            = Internal::StrictLFUMap.new(...)
+    def freeze_backend                  = internal_map
 
     def new_key_locks(compare_keys_by_identity:)
       Internal::KeyLockMap.new(registry_class: Farce::Strict::Map, compare_keys_by_identity:)

@@ -48,7 +48,9 @@ module Farce
 
     private
 
-    def new_tree_map(...) = Internal::StrictTreeMap.new(...)
-    def freeze_backend    = internal_map
+    def each_for_inspect(&)             = internal_map.each(&)
+    def inspect_value(inspector, value) = super(inspector, value, @manager)
+    def new_tree_map(...)               = Internal::StrictTreeMap.new(...)
+    def freeze_backend                  = internal_map
   end
 end

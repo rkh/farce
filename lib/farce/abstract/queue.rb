@@ -145,6 +145,8 @@ module Farce
     #   @raise [Farce::SealedQueueError] when the queue is sealed but not yet closed
     #   @return [Boolean] `true` if space is available, `false` if the timeout expired.
     class Queue
+      include Internal::Inspect
+
       # The default mode used to transfer values between Ractors.
       # @return [Symbol]
       def mode = :raise
@@ -170,25 +172,6 @@ module Farce
       # Whether the queue is at capacity.
       # @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
       def full? = capacity && size >= capacity
-
-      # @return [String] A string representation of the queue, including its class name and current state.
-      def inspect = "#<#{self.class.name} #{closed? ? "closed" : inspect_info.map { "#{_1}=#{_2.inspect}" }.join(" ")}>"
-
-      # @api private
-      def pretty_print(pp)
-        pp.group(1, "#<#{self.class.name}", ">") do
-          if closed?
-            pp.breakable " "
-            pp.text "closed"
-          else
-            inspect_info.each do |key, value|
-              pp.breakable " "
-              pp.text "#{key}="
-              pp.pp value
-            end
-          end
-        end
-      end
 
       def capacity = internal_queue.capacity
 
@@ -254,6 +237,18 @@ module Farce
       def wait_pop(timeout: nil) = internal_queue.wait_pop(timeout:)
 
       def wait_push(timeout: nil) = internal_queue.wait_push(timeout:)
+
+      # @api private
+      def inspect_with(inspector)
+        super do
+          if closed?
+            inspector.breakable " "
+            inspector.text "closed"
+          else
+            inspector.attributes(inspect_info)
+          end
+        end
+      end
 
       private
 

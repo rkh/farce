@@ -9,6 +9,7 @@ module Farce
     #   directly from the native counter and avoid delegation overhead.
     module Counter
       include Internal::Copyable
+      include Internal::Inspect
 
       def self.included(base)
         Internal.prepare_mutable_numeric(base)
@@ -174,12 +175,13 @@ module Farce
       methods.uniq!
       Internal.delegate(self, :value, *methods)
 
-      # @return [String] Returns a string representation of the counter.
-      def inspect = "#<#{self.class.name} #{value.inspect}>"
-
       # @api private
-      # @return [void]
-      def pretty_print(pp) = pp.group(1, "#<#{self.class.name} ", ">") { pp.pp(value) }
+      def inspect_with(inspector)
+        super do
+          inspector.breakable
+          inspector.object(value)
+        end
+      end
 
       private
 

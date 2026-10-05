@@ -7,6 +7,7 @@ module Farce
     # @abstract Shared checkout, return, ownership, and retirement behavior for leases.
     class Lease
       include Internal::Noncopyable
+      include Internal::Inspect
 
       # Construct a lease from one resource-building block.
       # @yield builds the resource managed by the lease
@@ -73,6 +74,18 @@ module Farce
 
       # @return [Boolean] whether the lease has been permanently retired
       def retired? = internal_lease.retired?
+
+      # @api private
+      def inspect_with(inspector)
+        super do
+          yield if block_given?
+          inspector.breakable
+          next inspector.text("checked_out") if checked_out?
+          next inspector.text("available")   if available?
+          next inspector.text("retired")     if retired?
+          inspector.text("unknown")
+        end
+      end
 
       private
 

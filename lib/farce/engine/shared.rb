@@ -13,7 +13,7 @@ module Farce
   module Internal # :nodoc: all
     include Autoloads["#{__dir__}/shared"]
 
-    def self.commit_transaction(entries, guards = [], _transaction = nil) 
+    def self.commit_transaction(entries, guards = [], _transaction = nil)
       PortableTransaction.commit(entries, guards)
     end
 

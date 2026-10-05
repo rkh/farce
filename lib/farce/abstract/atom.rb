@@ -11,6 +11,7 @@ module Farce
     # retains it weakly.
     class Atom
       include Internal::Copyable
+      include Internal::Inspect
       include Value
       include Internal::ValueSerialization
 
@@ -147,11 +148,27 @@ module Farce
       # @return [BasicObject, nil] the non-nil value or the fallback result
       def wait_until_non_nil(timeout: nil, &) = internal_atom.wait_until_non_nil(timeout:, &)
 
+      # @api private
+      def inspect_with(inspector)
+        super do
+          yield if block_given?
+          inspect_value(inspector)
+        end
+      end
+
       protected
 
       def internal_atom = @atom
 
       private
+
+      def inspect_value(inspector, prefix = "value=")
+        if prefix
+          inspector.breakable
+          inspector.text(prefix)
+        end
+        inspector.object(value)
+      end
 
       def initialize_copy(other)
         super

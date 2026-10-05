@@ -203,12 +203,6 @@ module Farce
       # @return [Array<Farce::Abstract::Lease>]
       def values = to_h.values
 
-      # Show keys and Lease states without checking resources out.
-      def inspect
-        states = to_a.map { |key, lease| "#{key.inspect} => #{lease_state(lease)}" }.join(", ")
-        "#<#{self.class.name} {#{states}}>"
-      end
-
       private
 
       def prepare_initial_resources(entries, normalizer)
@@ -246,19 +240,18 @@ module Farce
 
       def each_for_inspect
         return enum_for(__method__) { size } unless block_given?
-
         to_a.each { |key, lease| yield key, lease_state(lease) }
         self
       end
 
-      def internal_lease_map = @lease_map
-      def new_internal_lease_map(_) = raise(NoMethodError, "abstract lease map storage")
+      def internal_lease_map                 = @lease_map
+      def new_internal_lease_map(_)          = raise(NoMethodError, "abstract lease map storage")
+      def inspect_value(inspector, lease, *) = inspector.text(lease.to_s)
 
       def lease_state(lease)
         return :retired if lease.retired?
         return :available if lease.available?
         return :owned if lease.owned?
-
         :checked_out
       end
     end
