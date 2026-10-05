@@ -80,9 +80,22 @@ jobs:
           Remove-Item Gemfile.lock
           bundle install
 
+      - name: Configure Windows crash reports
+        shell: pwsh
+        run: ./.github/scripts/configure-windows-crash-reports.ps1
+
       - run: bundle exec rake ci
         env:
           TEST_TIMEOUT: 600
+
+      - name: Upload Windows crash reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ruby-crashes-Windows-${{ runner.arch }}-${{ matrix.ruby }}
+          path: ${{ runner.temp }}/farce-crash-reports/
+          if-no-files-found: ignore
+          retention-days: 7
 
   arm:
     name: ${{ matrix.os.name }} ARM / Ruby 4.0
@@ -111,9 +124,23 @@ jobs:
         run: Remove-Item Gemfile.lock
 
       - run: bundle install
+      - name: Configure Windows crash reports
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./.github/scripts/configure-windows-crash-reports.ps1
+
       - run: bundle exec rake ci
         env:
           TEST_TIMEOUT: 600
+
+      - name: Upload Windows crash reports
+        if: failure() && runner.os == 'Windows'
+        uses: actions/upload-artifact@v7
+        with:
+          name: ruby-crashes-Windows-${{ runner.arch }}-4.0
+          path: ${{ runner.temp }}/farce-crash-reports/
+          if-no-files-found: ignore
+          retention-days: 7
 
   # windows-copy-regression:
   #   name: Windows ${{ matrix.arch }} / copy-transfer regression (quarantined)

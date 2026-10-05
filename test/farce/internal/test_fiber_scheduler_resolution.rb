@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
+
 return unless RUBY_ENGINE == "ruby"
 require_relative "../../setup"
 
@@ -77,14 +80,14 @@ module Farce
         RUBY
 
         failure = <<~MESSAGE
-          scheduler resolution subprocess failed
+          scheduler resolution subprocess failed (backend: #{implementation}, status: #{status.inspect})
           stdout:
           #{output}
           stderr:
           #{error}
         MESSAGE
         assert_predicate status, :success?, failure
-        assert_equal "ok", output.strip
+        assert_equal "ok", output.strip, failure
       end
     end
   end
