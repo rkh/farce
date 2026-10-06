@@ -190,10 +190,11 @@ module Farce
 
     private
 
-    def derived_storage(value)     = @manager.wrap(value)
-    def freeze_backend             = @vector
-    def wrap_comparison(value)     = @manager.wrap(value, mode: compare_by_identity? ? :local : :copy)
-    def values_equal?(left, right) = @manager.same_value?(left, right, identity: compare_by_identity?)
+    def inspect_value(inspector, value) = super(inspector, value, @manager)
+    def derived_storage(value)          = @manager.wrap(value)
+    def freeze_backend                  = @vector
+    def wrap_comparison(value)          = @manager.wrap(value, mode: compare_by_identity? ? :local : :copy)
+    def values_equal?(left, right)      = @manager.same_value?(left, right, identity: compare_by_identity?)
 
     def timeout_deadline(timeout)
       return if timeout.nil?

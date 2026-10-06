@@ -8,17 +8,7 @@ module Farce
     # Negative indexes count from the end. Assignments beyond the end fill gaps with nil.
     # Atomic updates reserve the entire vector. Reads through {#[]} do not wait for updates.
     # Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.
-    class Vector
-      include Enumerable
-      include Internal::Copyable
-
-      # @overload [](*source, **options)
-      #   Create a new vector from the given source values.
-      #   @param source [Array] The initial values.
-      #   @param **options [Hash] Additional options passed to the constructor.
-      #   @return [Vector] A new vector containing the source values.
-      def self.[](*source, **) = new(source, **)
-
+    class Vector < Collection
       # @api private
       def transaction_wrapper(transaction) = Transaction::Vector.new(transaction, self, internal_vector)
 
@@ -74,11 +64,6 @@ module Farce
       # @yieldreturn [Array, Vector] A two-element key-value pair.
       # @return [Hash] The converted pairs. Without a block, entries must be pair-like.
       def to_h = to_a.to_h { normalize_hash_pair(block_given? ? yield(it) : it) }
-
-      # Join a logical snapshot into a String.
-      # @param separator [String, nil] The separator. Nil uses Array's default separator.
-      # @return [String] The joined values.
-      def join(separator = nil) = to_a.join(separator)
 
       # Recursively retrieve a nested value.
       # @param index [Integer] The initial index. Negative indexes count from the end.
@@ -191,23 +176,6 @@ module Farce
         end
 
         result && build_derived_vector(result)
-      end
-
-      # Count all values, matching values, or values accepted by a block.
-      # @param item [BasicObject] The value to count. Omit to count all entries or use the block.
-      # @yield [value] Select entries to count when item is omitted.
-      # @yieldparam value [BasicObject] The current entry.
-      # @yieldreturn [BasicObject] A truthy value to count the entry.
-      # @return [Integer] The number of matching entries.
-      def count(item = UNDEFINED)
-        return size if item.equal?(UNDEFINED) && !block_given?
-
-        if item.equal?(UNDEFINED)
-          super() { yield it }
-        else
-          warn("given block not used") if block_given?
-          super(item, &nil)
-        end
       end
 
       # Return whether a live entry equals value.
@@ -1020,10 +988,6 @@ module Farce
 
       # @return [Integer] The number of slots, including nil slots.
       def size = internal_vector.size
-      alias length size
-
-      # @return [Boolean] Whether there are no slots.
-      def empty? = size.zero?
 
       # @return [Boolean] Whether values are compared by identity.
       def compare_by_identity? = internal_vector.compare_by_identity?
@@ -1056,6 +1020,8 @@ module Farce
       end
 
       private
+
+      def each_for_inspect(&) = internal_vector.each(&)
 
       def build_derived_values(values) = build_derived_vector(values.map { derived_storage(it) })
 

@@ -302,7 +302,9 @@ module Farce
       set = Unshared::Set.new
       set.add(set)
 
-      assert_match(/\.\.\./, set.inspect)
+      address = Kernel.instance_method(:to_s).bind_call(set)
+
+      assert_equal "#<Farce::Unshared::Set [#{address}]>", set.inspect
       assert_kind_of Integer, set.hash
       assert_raises(ArgumentError) { set.flatten }
     end

@@ -126,11 +126,14 @@ module Farce
         Unshared::Vector.new(values.map { unwrap_stored(it) }, compare_by_identity: compare_by_identity?)
       end
 
-      private def derived_storage(value) = wrap(value)
+      private
+
+      def inspect_value(inspector, value) = super(inspector, value, @manager)
+      def derived_storage(value)          = wrap(value)
 
       Wrapper.inherit(self, :each_index, :reverse_each, :to_a, :deconstruct, :to_h, :join, :dig, :assoc,
         :rassoc, :at, :fetch, :fetch_values, :values_at, :slice, :rfind, :bsearch, :bsearch_index, :pack,
-        :length, :compare_by_identity?, :shareable_values?)
+        :length, :count, :compare_by_identity?, :shareable_values?)
     end
   end
 end

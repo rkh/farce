@@ -10,10 +10,7 @@ module Farce
     # every element. Structural changes during traversal can invalidate it.
     # Identity comparison and normalization are fixed at construction, so this
     # class does not provide Set#compare_by_identity or Set#reset.
-    class Set
-      include Enumerable
-      include Internal::Copyable
-
+    class Set < Collection
       # A shareable, immutable key used by mode-backed sets. Structural keys
       # contain an insertion-time snapshot. Identity keys contain either the
       # shareable element itself or an opaque token.
@@ -56,11 +53,6 @@ module Farce
       IDENTITY_TOKENS = Local::WeakKeyMap.new(compare_keys_by_identity: true)
       MISSING_KEY = Object.new.freeze
       private_constant :IDENTITY_TOKENS, :MISSING_KEY
-
-      # Construct a set from the arguments.
-      # @param elements [Array<BasicObject>] The initial elements.
-      # @return [Farce::Abstract::Set] A new instance of the receiving class.
-      def self.[](*elements) = new(elements)
 
       # Construct a set, optionally transforming each initial element before normalization.
       # @param enumerable [#each, nil] The initial elements, or nil for an empty set.
@@ -190,11 +182,6 @@ module Farce
       # Return the number of elements currently present.
       # @return [Integer]
       def size = @map.size
-      alias length size
-
-      # Return whether no elements are present.
-      # @return [Boolean]
-      def empty? = @map.empty?
 
       # Remove all elements and return self.
       # @return [self]
@@ -539,24 +526,6 @@ module Farce
         guard&.delete(self) if entered
       end
 
-      # Return a debugging representation.
-      # @return [String] The class name and observed members.
-      def inspect
-        guard = recursion_guard(:farce_set_inspect_guard)
-        return "#<#{self.class.name}: {...}>" if guard.key?(self)
-        guard[self] = true
-        entered = true
-        "#<#{self.class.name}: {#{map(&:inspect).join(", ")}}>"
-      ensure
-        guard&.delete(self) if entered
-      end
-      alias to_s inspect
-
-      # Join the members through Array#join.
-      # @param separator [String, nil] The separator. Nil uses Array's default separator.
-      # @return [String] The joined elements.
-      def join(separator = nil) = to_a.join(separator)
-
       protected
 
       def initialize_empty_copy(other)
@@ -613,6 +582,18 @@ module Farce
       def ordered?     = false
 
       private
+
+      def each_for_inspect
+        each_stored { |key, entry| yield(value_modes? ? entry : key) }
+      end
+
+      def inspect_value(inspector, value)
+        if value_modes?
+          inspector.object(value.payload, value.manager)
+        else
+          super
+        end
+      end
 
       def check_frozen! = Internal::Freeze.check(self)
       def freeze_backend = @map

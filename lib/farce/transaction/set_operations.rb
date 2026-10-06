@@ -13,7 +13,7 @@ module Farce
       include Wrapper
 
       READ_HELPERS = %i[
-        each size length empty? include? member? === compare_by_identity? weak?
+        each size length empty? count include? member? === compare_by_identity? weak?
         == eql? hash subset? proper_subset? superset? proper_superset? intersect? disjoint? <=>
         <= < >= > join inspect to_s to_set each_stored equality_index ordered? public_stored
       ].freeze

@@ -111,6 +111,113 @@ module Farce
       end
     end
 
+    def test_sets_and_vectors_show_empty_and_populated_contents
+      %i[Set SortedSet WeakSet Vector].each do |name|
+        variants(name).each do |klass|
+          assert_inspection "#<#{klass.name} []>", klass.new
+          collection = klass.new(["value"])
+
+          assert_inspection "#<#{klass.name} [\"value\"]>", collection
+          assert_equal collection.inspect, collection.to_s
+        end
+      end
+    end
+
+    def test_sorted_sets_inspect_in_comparator_order
+      variants(:SortedSet).each do |klass|
+        assert_inspection "#<#{klass.name} [1, 2, 3]>", klass.new([3, 1, 2])
+      end
+    end
+
+    def test_vectors_inspect_in_index_order_including_nil_and_false
+      variants(:Vector).each do |klass|
+        assert_inspection "#<#{klass.name} [:value, nil, false]>", klass.new([:value, nil, false])
+      end
+    end
+
+    def test_collections_inspect_owned_mode_values
+      [Set, SortedSet, Vector].each do |klass|
+        %i[copy local make_shareable shareable_copy].each do |mode|
+          collection = klass.new(["value".dup], mode:)
+
+          assert_inspection "#<#{klass.name} [\"value\"]>", collection
+        end
+      end
+    end
+
+    def test_move_collections_do_not_claim_values_during_inspection
+      return unless Internal.native_ractors?
+
+      [Set, SortedSet, Vector].each do |klass|
+        %i[inspect pretty_inspect].each do |method|
+          collection = klass.new(["value".dup], mode: :move)
+
+          assert_equal "#<#{klass.name} [unclaimed]>", collection.public_send(method).chomp
+          worker = Ractor.new(collection) { |shared| shared.first.to_sym }
+
+          assert_equal :value, ractor_value(worker)
+          assert_inspection "#<#{klass.name} [claimed]>", collection
+        end
+      end
+    end
+
+    def test_vectors_inspect_mixed_transfer_modes
+      return unless Internal.native_ractors?
+
+      vector = Vector.new(["value"])
+      vector.push(ModePayload.new(:value), mode: :move)
+
+      assert_inspection '#<Farce::Vector ["value", unclaimed]>', vector
+      worker = Ractor.new(vector) { |shared| shared[1].value }
+
+      assert_equal :value, ractor_value(worker)
+    end
+
+    def test_sets_inspect_mixed_transfer_modes
+      return unless Internal.native_ractors?
+
+      [Set, SortedSet].each do |klass|
+        set = klass.new(["value"])
+        set.add("work".dup, mode: :move)
+        expected = /\A#<#{Regexp.escape(klass.name)} \[(?:"value", unclaimed|unclaimed, "value")\]>\z/
+
+        %i[inspect pretty_inspect].each do |method|
+          assert_match expected, set.public_send(method).chomp
+        end
+        worker = Ractor.new(set) { |shared| shared.find { it == "work" }.to_sym }
+
+        assert_equal :work, ractor_value(worker)
+      end
+    end
+
+    def test_imported_set_entries_keep_their_inspection_manager
+      return unless Internal.native_ractors?
+
+      source = Set.new(["value".dup], mode: :move)
+      set = Set.new.merge(source)
+
+      assert_inspection "#<Farce::Set [unclaimed]>", set
+      worker = Ractor.new(set) { |shared| shared.first.to_sym }
+
+      assert_equal :value, ractor_value(worker)
+      assert_inspection "#<Farce::Set [claimed]>", source
+    end
+
+    def test_explicit_collection_move_envelopes_remain_wrapped_and_unclaimed
+      return unless Internal.native_ractors?
+
+      [Set, Vector].each do |klass|
+        envelope = Envelope::Move.new(ModePayload.new(:value))
+        collection = klass.new([envelope])
+
+        assert_inspection "#<#{klass.name} [#<Farce::Envelope::Move unclaimed>]>", collection
+        refute_predicate envelope, :claimed?
+        worker = Ractor.new(envelope) { |shared| shared.value.value }
+
+        assert_equal :value, ractor_value(worker)
+      end
+    end
+
     def test_mode_maps_show_nil_instead_of_the_storage_placeholder
       [Map, WeakKeyMap, WeakValueMap, WeakMap].each do |klass|
         map = klass.new({ key: nil })
@@ -344,6 +451,34 @@ module Farce
       end
     end
 
+    def test_recursive_sets_and_vectors_use_identity_placeholders
+      [Unshared::Set, Unshared::Vector].each do |klass|
+        collection = klass.new
+        collection << collection
+        address = Kernel.instance_method(:to_s).bind_call(collection)
+
+        assert_inspection "#<#{klass.name} [#{address}]>", collection
+      end
+    end
+
+    def test_collections_format_nested_farce_and_foreign_values
+      [Unshared::Set, Unshared::Vector].each do |klass|
+        collection = klass.new([[Counter.new(2), { count: Counter.new(3) }]])
+
+        assert_inspection "#<#{klass.name} [[#<Farce::Counter 2>, {count: #<Farce::Counter 3>}]]>", collection
+      end
+    end
+
+    def test_collection_formatting_errors_fall_back_to_element_identity
+      [Unshared::Set, Unshared::Vector].each do |klass|
+        value = BrokenFormatting.new
+        collection = klass.new([value])
+        address = Kernel.instance_method(:to_s).bind_call(value)
+
+        assert_inspection "#<#{klass.name} [#{address}]>", collection
+      end
+    end
+
     def test_foreign_formatting_errors_fall_back_to_object_identity
       value = BrokenFormatting.new
       atom = Unshared::Atom.new(value)
@@ -374,7 +509,7 @@ module Farce
     end
 
     def test_transaction_inspection_rejects_closed_attempts
-      [Atom.new, Map.new, TreeMap.new, Molecule.define.new].each do |object|
+      [Atom.new, Map.new, TreeMap.new, Set.new, SortedSet.new, Vector.new, Molecule.define.new].each do |object|
         wrapped = nil
 
         assert Transaction.run(object) { |_, value| wrapped = value }
@@ -385,7 +520,7 @@ module Farce
     end
 
     def test_transaction_inspection_rejects_other_fibers
-      [Atom.new, Map.new, TreeMap.new, Molecule.define.new].each do |object|
+      [Atom.new, Map.new, TreeMap.new, Set.new, SortedSet.new, Vector.new, Molecule.define.new].each do |object|
         assert Transaction.run(object) { |_, wrapped|
           %i[inspect pretty_inspect].each do |method|
             error = Fiber.new do
@@ -444,6 +579,32 @@ module Farce
       assert_equal :staged, record.item
     end
 
+    def test_transaction_collections_show_staged_values
+      %i[Set SortedSet Vector].each do |name|
+        variants(name).each do |klass|
+          collection = klass.new(["initial"])
+
+          assert Transaction.run(collection) { |_, wrapped|
+            wrapped.clear
+            wrapped << "staged"
+
+            assert_inspection "#<Farce::Transaction::#{name} [\"staged\"]>", wrapped
+          }
+          assert_equal ["staged"], collection.to_a
+        end
+      end
+    end
+
+    def test_transaction_collections_inspect_owned_mode_values
+      [Set, SortedSet, Vector].each do |klass|
+        collection = klass.new(["value".dup])
+
+        assert Transaction.run(collection) { |_, wrapped|
+          assert_inspection "#<Farce::Transaction::#{klass.name.split("::").last} [\"value\"]>", wrapped
+        }
+      end
+    end
+
     def test_pretty_print_wraps_nested_contents
       map = Map.new({ key: %i[first second third] })
 
@@ -453,6 +614,16 @@ module Farce
       assert_operator output.lines.size, :>, 1
       assert_includes output, "key:"
       %w[first second third].each { assert_includes output, ":#{it}" }
+    end
+
+    def test_collection_pretty_print_wraps_nested_contents
+      [Unshared::Set, Unshared::Vector].each do |klass|
+        collection = klass.new([%i[first second third]])
+        output = PP.pp(collection, +"", 30)
+
+        assert_operator output.lines.size, :>, 1
+        %w[first second third].each { assert_includes output, ":#{it}" }
+      end
     end
 
     private
