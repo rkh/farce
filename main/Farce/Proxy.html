@@ -503,18 +503,18 @@ custom methods:</p>
       <pre class="lines">
 
 
-249
-250
-251
-252
 253
 254
 255
 256
-257</pre>
+257
+258
+259
+260
+261</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 249</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 253</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>register:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>scheduler:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='ivar'>@token</span>        <span class='op'>=</span> <span class='op'>::</span><span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span> <span class='comment'># cross-ractor finalizers don&#39;t work reliably across Ruby versions
@@ -563,13 +563,13 @@ custom methods:</p>
       <pre class="lines">
 
 
-277
-278
-279
-280</pre>
+281
+282
+283
+284</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 277</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 281</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='ivar'>@supervisor</span><span class='period'>.</span><span class='id identifier rubyid_send'>send</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
@@ -1089,10 +1089,10 @@ invoked in the caller's Ractor.</p>
       <pre class="lines">
 
 
-264</pre>
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 264</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 268</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='ivar'>@proxy_class</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'> object=#&lt;</span><span class='embexpr_beg'>#{</span><span class='ivar'>@object_class</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>:0x</span><span class='embexpr_beg'>#{</span><span class='ivar'>@object_id</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='lparen'>(</span><span class='int'>16</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;&gt;</span><span class='tstring_end'>&quot;</span></span></pre>
     </td>
@@ -1142,10 +1142,10 @@ invoked in the caller's Ractor.</p>
       <pre class="lines">
 
 
-260</pre>
+264</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 260</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 264</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_ractor_shareable?'>ractor_shareable?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -1158,7 +1158,7 @@ invoked in the caller's Ractor.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 08:09:05 2026 by
+  Generated on Tue Oct  6 09:51:01 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
