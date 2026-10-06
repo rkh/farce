@@ -18,6 +18,7 @@
 #     that pushed it.
 #   * `:local` - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 #     get an error. Useful for usage contained within a single Ractor.
+#   * `:proxy` - The value will be wrapped in a `Farce::Proxy` that executes calls in the original Ractor.
 #   * `:raise` - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.
 #   * `:dedup` - The value will be deduplicated using {Farce.dedup}, then made Ractor-shareable.
 #     This may update and freeze the original. Already-shareable values pass through unchanged.
