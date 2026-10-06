@@ -5,16 +5,6 @@ source "https://rubygems.org"
 
 gemspec
 
-group :compatibility do
-  gem "concurrent-ruby"
-  gem "concurrent-ruby-ext"
-  gem "ratomic", platforms: %i[mri_34 mri_40]
-  platform :mri do
-    gem "async", "~> 2.45"
-    gem "ractor_queue"
-  end
-end
-
 group :development do
   gem "irb"
   gem "rake"
@@ -23,29 +13,18 @@ group :development do
   gem "ruby-lsp", platform: :mri
 end
 
-group :benchmark do
-  gem "benchmark"
-  gem "benchmark-ips"
-  gem "lazy_priority_queue"
-  gem "philiprehberger-priority_queue"
-  gem "pqueue"
+group :test do
+  gem "minitest"
+  gem "minitest-reporters"
 
-  platforms :mri_40, :mri_41 do
-    gem "ractor-sharing"
-    # TODO: Switch to official gem once https://github.com/yoshitsugu/ractor-tmvar/pull/1 has been merged and released
-    gem "ractor-tmvar", github: "rkh/ractor-tmvar", branch: "patch-1"
-    install_if -> { !ENV["CI"] } do
-      gem "ractor_safe"
-    end
+  platforms :mri do
+    gem "rubocop"
+    gem "rubocop-minitest"
+    gem "rubocop-rake"
   end
 
-  platforms :mri_34, :mri_40 do
-    gem "carbon_fiber"
-    gem "io-event"
-    gem "nio4r"
-    gem "priority_queue_cxx", require: "fc"
-    gem "rbtree"
-  end
+  gem "simplecov"
+  gem "simplecov-console"
 end
 
 platform :mri_40 do
@@ -56,22 +35,46 @@ platform :mri_40 do
   end
 end
 
-group :test do
+# Do not use ~> for version constraints in this group, use >= instead
+group :compatibility do
   gem "activesupport"
+  gem "concurrent-ruby"
+  gem "concurrent-ruby-ext"
   gem "dry-types"
-  gem "minitest"
-  gem "minitest-reporters"
-  gem "msgpack", "~> 1.8"
+  gem "msgpack", ">= 1.8"
   gem "oj", platforms: %i[mri truffleruby]
+  gem "ratomic", platforms: %i[mri_34 mri_40]
+
   # yajl-ruby 1.4.3 uses untyped C data APIs removed in Ruby 4.1.
   gem "yajl-ruby", platforms: %i[mri_34 mri_40 truffleruby]
 
-  platforms :mri do
-    gem "rubocop"
-    gem "rubocop-minitest"
-    gem "rubocop-rake"
+  platforms :mri_40, :mri_41 do
+    gem "ractor-sharing"
+    gem "ractor-tmvar", ">= 0.3.0"
   end
 
-  gem "simplecov"
-  gem "simplecov-console"
+  platform :mri do
+    gem "async", ">= 2.45"
+    gem "ractor_queue"
+  end
+end
+
+group :benchmark do
+  gem "benchmark"
+  gem "benchmark-ips"
+  gem "lazy_priority_queue"
+  gem "philiprehberger-priority_queue"
+  gem "pqueue"
+
+  install_if -> { !ENV["CI"] } do
+    gem "ractor_safe", platforms: %i[mri_40 mri_41]
+  end
+
+  platforms :mri_34, :mri_40 do
+    gem "carbon_fiber"
+    gem "io-event"
+    gem "nio4r"
+    gem "priority_queue_cxx", require: "fc"
+    gem "rbtree"
+  end
 end
