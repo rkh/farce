@@ -234,7 +234,11 @@ module Farce
       initialized = initializer.swap(nil).call
       local_scheduler = nil
       local_scheduler = ProxyOwner.create_scheduler if owned && !::Farce::Ractor.shareable?(initialized)
-      result.value = ::Farce::Proxy.create(initialized, register:, scheduler: local_scheduler)
+      created         = ::Farce::Proxy.create(initialized, register:, scheduler: local_scheduler)
+      # Resolve shareability before the atom setter. Its native traversal scratch
+      # state can otherwise retain the proxy while the owner drains its scheduler.
+      ::Farce::Ractor.make_shareable(created)
+      result.value  = created
       success.value = true
       local_scheduler
     rescue ::Exception # rubocop:disable Lint/RescueException -- Close the owned scheduler before propagating initialization failures.
