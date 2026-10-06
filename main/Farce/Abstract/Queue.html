@@ -98,6 +98,11 @@
   
   
   
+  <dl>
+      <dt>Includes:</dt>
+      <dd>Internal::Inspect</dd>
+  </dl>
+  
   
 
   
@@ -537,29 +542,6 @@ The order is typically FIFO (first-in, first-out), but other orderings may be ap
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#inspect-instance_method" title="#inspect (instance method)">#<strong>inspect</strong>  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>A string representation of the queue, including its class name and current state.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#length-instance_method" title="#length (instance method)">#<strong>length</strong>  &#x21d2; Integer </a>
     
 
@@ -837,7 +819,8 @@ The order is typically FIFO (first-in, first-out), but other orderings may be ap
     
   
 
-<div id="constructor_details" class="method_details_list">
+
+  <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
     <div class="method_details first">
@@ -1029,17 +1012,14 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -1065,25 +1045,6 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -1149,6 +1110,18 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -1341,17 +1314,14 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -1377,25 +1347,6 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -1461,6 +1412,18 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -1640,17 +1603,14 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -1676,25 +1636,6 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -1760,6 +1701,18 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -1949,17 +1902,14 @@ without modifying the queue.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -1985,25 +1935,6 @@ without modifying the queue.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -2069,6 +2000,18 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -2256,17 +2199,14 @@ without modifying the queue.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -2292,25 +2232,6 @@ without modifying the queue.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -2376,6 +2297,18 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -2445,10 +2378,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-216</pre>
+199</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 216</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 199</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_age_tracking?'>age_tracking?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_age_tracking?'>age_tracking?</span></pre>
     </td>
@@ -2617,17 +2550,14 @@ without modifying the queue.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -2653,25 +2583,6 @@ without modifying the queue.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -2737,6 +2648,18 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -2918,17 +2841,14 @@ without modifying the queue.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -2954,25 +2874,6 @@ without modifying the queue.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -3038,6 +2939,18 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -3223,17 +3136,14 @@ without modifying the queue.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -3259,25 +3169,6 @@ without modifying the queue.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -3344,6 +3235,18 @@ without modifying the queue.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
   <span class='id identifier rubyid_private'>private</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid__other'>_other</span><span class='rparen'>)</span>
@@ -3392,10 +3295,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-154</pre>
+156</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 154</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 156</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_deq'>deq</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -3628,17 +3531,14 @@ without modifying the queue.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -3664,25 +3564,6 @@ without modifying the queue.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -3749,6 +3630,18 @@ without modifying the queue.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
   <span class='id identifier rubyid_private'>private</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid__other'>_other</span><span class='rparen'>)</span>
@@ -3797,10 +3690,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-159</pre>
+161</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 159</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 161</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_enq'>enq</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -3850,10 +3743,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-172</pre>
+174</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 172</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 174</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span></pre>
     </td>
@@ -3903,65 +3796,12 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-219</pre>
+202</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 219</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 202</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_generation'>generation</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_generation'>generation</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="inspect-instance_method">
-  
-    #<strong>inspect</strong>  &#x21d2; <tt>String</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Returns A string representation of the queue, including its class name and current state.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>String</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>A string representation of the queue, including its class name and current state.</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-175</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 175</span>
-
-<span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span></pre>
     </td>
   </tr>
 </table>
@@ -4009,10 +3849,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-164</pre>
+166</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 164</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 166</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span></pre>
     </td>
@@ -4062,10 +3902,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-168</pre>
+170</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 168</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 170</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_max'>max</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>||</span> <span class='const'>Float</span><span class='op'>::</span><span class='const'>INFINITY</span></pre>
     </td>
@@ -4115,10 +3955,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-226</pre>
+209</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 226</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 209</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_oldest_age'>oldest_age</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_oldest_age'>oldest_age</span></pre>
     </td>
@@ -4168,10 +4008,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-223</pre>
+206</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 223</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 206</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_oldest_enqueued_at'>oldest_enqueued_at</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_oldest_enqueued_at'>oldest_enqueued_at</span></pre>
     </td>
@@ -4323,17 +4163,14 @@ without modifying the queue.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -4359,25 +4196,6 @@ without modifying the queue.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -4443,6 +4261,18 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -4607,17 +4437,14 @@ without modifying the queue.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -4643,25 +4470,6 @@ without modifying the queue.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -4727,6 +4535,18 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -4904,17 +4724,14 @@ without modifying the queue.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -4940,25 +4757,6 @@ without modifying the queue.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -5024,6 +4822,18 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -5205,17 +5015,14 @@ without modifying the queue.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -5241,25 +5048,6 @@ without modifying the queue.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -5325,6 +5113,18 @@ without modifying the queue.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -5529,17 +5329,14 @@ If no item is available, the method will call the block if given, or return <cod
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -5565,25 +5362,6 @@ If no item is available, the method will call the block if given, or return <cod
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -5649,6 +5427,18 @@ If no item is available, the method will call the block if given, or return <cod
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -5902,17 +5692,14 @@ If the queue is at capacity, the method will call the block if given, or return 
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -5938,25 +5725,6 @@ If the queue is at capacity, the method will call the block if given, or return 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -6022,6 +5790,18 @@ If the queue is at capacity, the method will call the block if given, or return 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -6251,17 +6031,14 @@ If <code>0</code>, the method will not wait at all.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -6287,25 +6064,6 @@ If <code>0</code>, the method will not wait at all.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -6371,6 +6129,18 @@ If <code>0</code>, the method will not wait at all.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_private'>private</span>
 
@@ -6612,17 +6382,14 @@ If <code>0</code>, the method will not wait at all.</p>
 263
 264
 265
-266
-267
-268
-269
-270
-271</pre>
+266</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
   <span class='comment'># The default mode used to transfer values between Ractors.
 </span>  <span class='comment'># @return [Symbol]
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='symbol'>:raise</span>
@@ -6648,25 +6415,6 @@ If <code>0</code>, the method will not wait at all.</p>
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
-
-  <span class='comment'># @return [String] A string representation of the queue, including its class name and current state.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__1'>_1</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid__2'>_2</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-
-  <span class='comment'># @api private
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='tstring_end'>&quot;</span></span>
-          <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_value'>value</span>
-        <span class='kw'>end</span>
-      <span class='kw'>end</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
 
@@ -6733,6 +6481,18 @@ If <code>0</code>, the method will not wait at all.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_wait_push'>wait_push</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>closed</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_attributes'>attributes</span><span class='lparen'>(</span><span class='id identifier rubyid_inspect_info'>inspect_info</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
   <span class='id identifier rubyid_private'>private</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_initialize_copy'>initialize_copy</span><span class='lparen'>(</span><span class='id identifier rubyid__other'>_other</span><span class='rparen'>)</span>
@@ -6757,7 +6517,7 @@ If <code>0</code>, the method will not wait at all.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Oct  5 07:01:37 2026 by
+  Generated on Tue Oct  6 08:09:10 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

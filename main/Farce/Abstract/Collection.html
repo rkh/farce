@@ -1,0 +1,3393 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: Farce::Abstract::Collection
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="../../css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "Farce::Abstract::Collection";
+  relpath = '../../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="../../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../index.html" selected>main</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../../_index.html">Index (C)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span>
+     &raquo; 
+    <span class="title">Collection</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: Farce::Abstract::Collection
+  <span class="abstract note title">Abstract</span>
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">Farce::Abstract::Collection</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  <dl>
+      <dt>Includes:</dt>
+      <dd>Enumerable, <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span>, Internal::Inspect</dd>
+  </dl>
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/farce/abstract/collection.rb
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This class is abstract.</strong>
+  <div class='inline'><p>Superclass for a collection of elements.</p>
+</div>
+</div>
+<p>Subclasses define traversal, comparison, and insertion rules.
+They may accept additional optional parameters for the methods below.</p>
+<p>Notable subclasses include <span class='object_link'><a href="Vector.html" title="Farce::Abstract::Vector (class)">Vector</a></span>, <span class='object_link'><a href="Set.html" title="Farce::Abstract::Set (class)">Set</a></span>, and <span class='object_link'><a href="SortedSet.html" title="Farce::Abstract::SortedSet (class)">SortedSet</a></span>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><div id="subclasses">
+  <h2>Direct Known Subclasses</h2>
+  <p class="children"><span class='object_link'><a href="Set.html" title="Farce::Abstract::Set (class)">Set</a></span>, <span class='object_link'><a href="Vector.html" title="Farce::Abstract::Vector (class)">Vector</a></span></p>
+</div>
+
+
+
+
+
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#[]-class_method" title="[] (class method)">.<strong>[]</strong>(*elements, **options)  &#x21d2; Farce::Abstract::Collection </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Construct a collection from the arguments.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#<<-instance_method" title="#&lt;&lt; (instance method)">#<strong>&lt;&lt;</strong>(element)  &#x21d2; self </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Add an element using the collection's insertion rules and return self.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#clear-instance_method" title="#clear (instance method)">#<strong>clear</strong>  &#x21d2; self </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Remove all elements and return self.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#compare_by_identity%3F-instance_method" title="#compare_by_identity? (instance method)">#<strong>compare_by_identity?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return whether elements are compared by object identity.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#count-instance_method" title="#count (instance method)">#<strong>count</strong>(item = UNDEFINED) {|element| ... } &#x21d2; Integer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Count all elements, matching elements, or elements accepted by a block.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#each-instance_method" title="#each (instance method)">#<strong>each</strong> {|element| ... } &#x21d2; self, Enumerator </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Iterate over the elements currently present.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#empty%3F-instance_method" title="#empty? (instance method)">#<strong>empty?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return whether no elements are present.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#filter-instance_method" title="#filter (instance method)">#<strong>filter</strong> {|element| ... } &#x21d2; Farce::Abstract::Collection, Enumerator </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return elements accepted by the block, as with <span class='object_link'><a href="#select-instance_method" title="Farce::Abstract::Collection#select (method)">#select</a></span>.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#include%3F-instance_method" title="#include? (instance method)">#<strong>include?</strong>(element)  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return whether an element is present using the collection's membership rules.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#join-instance_method" title="#join (instance method)">#<strong>join</strong>(separator = nil)  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Join the elements through Array#join.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#length-instance_method" title="#length (instance method)">#<strong>length</strong>  &#x21d2; Integer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return the number of elements currently present.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#member%3F-instance_method" title="#member? (instance method)">#<strong>member?</strong>(element)  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return whether an element is present, as with <span class='object_link'><a href="#include%3F-instance_method" title="Farce::Abstract::Collection#include? (method)">#include?</a></span>.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#reject-instance_method" title="#reject (instance method)">#<strong>reject</strong> {|element| ... } &#x21d2; Farce::Abstract::Collection, Enumerator </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return a collection of the same kind excluding elements accepted by the block.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#select-instance_method" title="#select (instance method)">#<strong>select</strong> {|element| ... } &#x21d2; Farce::Abstract::Collection, Enumerator </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return a collection of the same kind containing elements accepted by the block.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#size-instance_method" title="#size (instance method)">#<strong>size</strong>  &#x21d2; Integer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return the number of elements currently present.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_a-instance_method" title="#to_a (instance method)">#<strong>to_a</strong>  &#x21d2; Array&lt;BasicObject&gt; </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  <span class="abstract note title">abstract</span>
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return the observed elements in a new Array.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_s-instance_method" title="#to_s (instance method)">#<strong>to_s</strong>  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The class name and observed elements, suitable for debugging.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Internal/Copyable.html#duplicable%3F-instance_method" title="Farce::Internal::Copyable#duplicable? (method)">#duplicable?</a></span></p>
+
+  
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="[]-class_method">
+  
+    .<strong>[]</strong>(*elements, **options)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Farce::Abstract::Collection</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="docstring">
+  <div class="discussion">
+    <p>Construct a collection from the arguments.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>elements</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;BasicObject&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The initial elements.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>**options</span>
+      
+      
+        <span class='type'>(<tt>Hash</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Additional options passed to the constructor.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Farce::Abstract::Collection</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>A new instance of the receiving class.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+95</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 95</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="<<-instance_method">
+  
+    #<strong>&lt;&lt;</strong>(element)  &#x21d2; <tt>self</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Add an element using the collection's insertion rules and return self.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>element</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The element to add.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The collection.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 85</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Collection</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @overload [](*elements, **options)
+</span>  <span class='comment'>#   Construct a collection from the arguments.
+</span>  <span class='comment'>#   @param elements [Array&lt;BasicObject&gt;] The initial elements.
+</span>  <span class='comment'>#   @param **options [Hash] Additional options passed to the constructor.
+</span>  <span class='comment'>#   @return [Farce::Abstract::Collection] A new instance of the receiving class.
+</span>  <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
+
+  <span class='comment'># Return the number of elements currently present.
+</span>  <span class='comment'># @return [Integer] The collection&#39;s size.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether no elements are present.
+</span>  <span class='comment'># @return [Boolean] Whether the collection is empty.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Count all elements, matching elements, or elements accepted by a block.
+</span>  <span class='comment'># Without an argument or block, read the size without traversing elements.
+</span>  <span class='comment'># @param item [BasicObject] The value to count. Omit to count all elements or use the block.
+</span>  <span class='comment'># @yield [element] Select elements to count when item is omitted.
+</span>  <span class='comment'># @yieldparam element [BasicObject] The current element.
+</span>  <span class='comment'># @yieldreturn [BasicObject] A truthy value to count the element.
+</span>  <span class='comment'># @return [Integer] The number of matching elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>given block not used</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Join the elements through Array#join.
+</span>  <span class='comment'># @param separator [String, nil] The separator. Nil uses Array&#39;s default separator.
+</span>  <span class='comment'># @return [String] The joined elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span>
+
+  <span class='comment'># @return [String] The class name and observed elements, suitable for debugging.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>[</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>]</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_seplist'>seplist</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='symbol'>:each_for_inspect</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+          <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>           <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="clear-instance_method">
+  
+    #<strong>clear</strong>  &#x21d2; <tt>self</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Remove all elements and return self.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The collection.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 85</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Collection</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @overload [](*elements, **options)
+</span>  <span class='comment'>#   Construct a collection from the arguments.
+</span>  <span class='comment'>#   @param elements [Array&lt;BasicObject&gt;] The initial elements.
+</span>  <span class='comment'>#   @param **options [Hash] Additional options passed to the constructor.
+</span>  <span class='comment'>#   @return [Farce::Abstract::Collection] A new instance of the receiving class.
+</span>  <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
+
+  <span class='comment'># Return the number of elements currently present.
+</span>  <span class='comment'># @return [Integer] The collection&#39;s size.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether no elements are present.
+</span>  <span class='comment'># @return [Boolean] Whether the collection is empty.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Count all elements, matching elements, or elements accepted by a block.
+</span>  <span class='comment'># Without an argument or block, read the size without traversing elements.
+</span>  <span class='comment'># @param item [BasicObject] The value to count. Omit to count all elements or use the block.
+</span>  <span class='comment'># @yield [element] Select elements to count when item is omitted.
+</span>  <span class='comment'># @yieldparam element [BasicObject] The current element.
+</span>  <span class='comment'># @yieldreturn [BasicObject] A truthy value to count the element.
+</span>  <span class='comment'># @return [Integer] The number of matching elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>given block not used</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Join the elements through Array#join.
+</span>  <span class='comment'># @param separator [String, nil] The separator. Nil uses Array&#39;s default separator.
+</span>  <span class='comment'># @return [String] The joined elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span>
+
+  <span class='comment'># @return [String] The class name and observed elements, suitable for debugging.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>[</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>]</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_seplist'>seplist</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='symbol'>:each_for_inspect</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+          <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>           <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="compare_by_identity?-instance_method">
+  
+    #<strong>compare_by_identity?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Return whether elements are compared by object identity.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether identity comparison is enabled.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 85</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Collection</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @overload [](*elements, **options)
+</span>  <span class='comment'>#   Construct a collection from the arguments.
+</span>  <span class='comment'>#   @param elements [Array&lt;BasicObject&gt;] The initial elements.
+</span>  <span class='comment'>#   @param **options [Hash] Additional options passed to the constructor.
+</span>  <span class='comment'>#   @return [Farce::Abstract::Collection] A new instance of the receiving class.
+</span>  <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
+
+  <span class='comment'># Return the number of elements currently present.
+</span>  <span class='comment'># @return [Integer] The collection&#39;s size.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether no elements are present.
+</span>  <span class='comment'># @return [Boolean] Whether the collection is empty.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Count all elements, matching elements, or elements accepted by a block.
+</span>  <span class='comment'># Without an argument or block, read the size without traversing elements.
+</span>  <span class='comment'># @param item [BasicObject] The value to count. Omit to count all elements or use the block.
+</span>  <span class='comment'># @yield [element] Select elements to count when item is omitted.
+</span>  <span class='comment'># @yieldparam element [BasicObject] The current element.
+</span>  <span class='comment'># @yieldreturn [BasicObject] A truthy value to count the element.
+</span>  <span class='comment'># @return [Integer] The number of matching elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>given block not used</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Join the elements through Array#join.
+</span>  <span class='comment'># @param separator [String, nil] The separator. Nil uses Array&#39;s default separator.
+</span>  <span class='comment'># @return [String] The joined elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span>
+
+  <span class='comment'># @return [String] The class name and observed elements, suitable for debugging.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>[</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>]</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_seplist'>seplist</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='symbol'>:each_for_inspect</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+          <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>           <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="count-instance_method">
+  
+    #<strong>count</strong>(item = UNDEFINED) {|element| ... } &#x21d2; <tt>Integer</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Count all elements, matching elements, or elements accepted by a block.
+Without an argument or block, read the size without traversing elements.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>item</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>UNDEFINED</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to count. Omit to count all elements or use the block.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>element</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Select elements to count when item is omitted.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>element</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The current element.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>A truthy value to count the element.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The number of matching elements.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 112</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
+
+  <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+  <span class='kw'>else</span>
+    <span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>given block not used</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+    <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="each-instance_method">
+  
+    #<strong>each</strong> {|element| ... } &#x21d2; <tt>self</tt>, <tt>Enumerator</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Iterate over the elements currently present.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>element</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Visit each element. Returns an Enumerator without a block.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>element</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The current element.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>void</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The result is ignored.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>, <tt>Enumerator</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Self, or a sized Enumerator without a block.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 85</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Collection</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @overload [](*elements, **options)
+</span>  <span class='comment'>#   Construct a collection from the arguments.
+</span>  <span class='comment'>#   @param elements [Array&lt;BasicObject&gt;] The initial elements.
+</span>  <span class='comment'>#   @param **options [Hash] Additional options passed to the constructor.
+</span>  <span class='comment'>#   @return [Farce::Abstract::Collection] A new instance of the receiving class.
+</span>  <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
+
+  <span class='comment'># Return the number of elements currently present.
+</span>  <span class='comment'># @return [Integer] The collection&#39;s size.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether no elements are present.
+</span>  <span class='comment'># @return [Boolean] Whether the collection is empty.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Count all elements, matching elements, or elements accepted by a block.
+</span>  <span class='comment'># Without an argument or block, read the size without traversing elements.
+</span>  <span class='comment'># @param item [BasicObject] The value to count. Omit to count all elements or use the block.
+</span>  <span class='comment'># @yield [element] Select elements to count when item is omitted.
+</span>  <span class='comment'># @yieldparam element [BasicObject] The current element.
+</span>  <span class='comment'># @yieldreturn [BasicObject] A truthy value to count the element.
+</span>  <span class='comment'># @return [Integer] The number of matching elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>given block not used</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Join the elements through Array#join.
+</span>  <span class='comment'># @param separator [String, nil] The separator. Nil uses Array&#39;s default separator.
+</span>  <span class='comment'># @return [String] The joined elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span>
+
+  <span class='comment'># @return [String] The class name and observed elements, suitable for debugging.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>[</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>]</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_seplist'>seplist</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='symbol'>:each_for_inspect</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+          <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>           <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="empty?-instance_method">
+  
+    #<strong>empty?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Return whether no elements are present.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether the collection is empty.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+103</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 103</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="filter-instance_method">
+  
+    #<strong>filter</strong> {|element| ... } &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Farce::Abstract::Collection</a></span></tt>, <tt>Enumerator</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Return elements accepted by the block, as with <span class='object_link'><a href="#select-instance_method" title="Farce::Abstract::Collection#select (method)">#select</a></span>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>element</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Test each element. Returns an Enumerator without a block.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>element</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The current element.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>A truthy value to retain the element.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Farce::Abstract::Collection</a></span></tt>, <tt>Enumerator</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>A new collection of the same kind, or an Enumerator.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+  <p class="tag_title">See Also:</p>
+  <ul class="see">
+    
+      <li><span class='object_link'><a href="#select-instance_method" title="Farce::Abstract::Collection#select (method)">#select</a></span></li>
+    
+  </ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 85</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Collection</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @overload [](*elements, **options)
+</span>  <span class='comment'>#   Construct a collection from the arguments.
+</span>  <span class='comment'>#   @param elements [Array&lt;BasicObject&gt;] The initial elements.
+</span>  <span class='comment'>#   @param **options [Hash] Additional options passed to the constructor.
+</span>  <span class='comment'>#   @return [Farce::Abstract::Collection] A new instance of the receiving class.
+</span>  <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
+
+  <span class='comment'># Return the number of elements currently present.
+</span>  <span class='comment'># @return [Integer] The collection&#39;s size.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether no elements are present.
+</span>  <span class='comment'># @return [Boolean] Whether the collection is empty.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Count all elements, matching elements, or elements accepted by a block.
+</span>  <span class='comment'># Without an argument or block, read the size without traversing elements.
+</span>  <span class='comment'># @param item [BasicObject] The value to count. Omit to count all elements or use the block.
+</span>  <span class='comment'># @yield [element] Select elements to count when item is omitted.
+</span>  <span class='comment'># @yieldparam element [BasicObject] The current element.
+</span>  <span class='comment'># @yieldreturn [BasicObject] A truthy value to count the element.
+</span>  <span class='comment'># @return [Integer] The number of matching elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>given block not used</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Join the elements through Array#join.
+</span>  <span class='comment'># @param separator [String, nil] The separator. Nil uses Array&#39;s default separator.
+</span>  <span class='comment'># @return [String] The joined elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span>
+
+  <span class='comment'># @return [String] The class name and observed elements, suitable for debugging.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>[</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>]</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_seplist'>seplist</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='symbol'>:each_for_inspect</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+          <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>           <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="include?-instance_method">
+  
+    #<strong>include?</strong>(element)  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Return whether an element is present using the collection's membership rules.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>element</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The element to look up.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether the element is present.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 85</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Collection</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @overload [](*elements, **options)
+</span>  <span class='comment'>#   Construct a collection from the arguments.
+</span>  <span class='comment'>#   @param elements [Array&lt;BasicObject&gt;] The initial elements.
+</span>  <span class='comment'>#   @param **options [Hash] Additional options passed to the constructor.
+</span>  <span class='comment'>#   @return [Farce::Abstract::Collection] A new instance of the receiving class.
+</span>  <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
+
+  <span class='comment'># Return the number of elements currently present.
+</span>  <span class='comment'># @return [Integer] The collection&#39;s size.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether no elements are present.
+</span>  <span class='comment'># @return [Boolean] Whether the collection is empty.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Count all elements, matching elements, or elements accepted by a block.
+</span>  <span class='comment'># Without an argument or block, read the size without traversing elements.
+</span>  <span class='comment'># @param item [BasicObject] The value to count. Omit to count all elements or use the block.
+</span>  <span class='comment'># @yield [element] Select elements to count when item is omitted.
+</span>  <span class='comment'># @yieldparam element [BasicObject] The current element.
+</span>  <span class='comment'># @yieldreturn [BasicObject] A truthy value to count the element.
+</span>  <span class='comment'># @return [Integer] The number of matching elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>given block not used</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Join the elements through Array#join.
+</span>  <span class='comment'># @param separator [String, nil] The separator. Nil uses Array&#39;s default separator.
+</span>  <span class='comment'># @return [String] The joined elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span>
+
+  <span class='comment'># @return [String] The class name and observed elements, suitable for debugging.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>[</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>]</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_seplist'>seplist</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='symbol'>:each_for_inspect</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+          <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>           <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="join-instance_method">
+  
+    #<strong>join</strong>(separator = nil)  &#x21d2; <tt>String</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Join the elements through Array#join.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>separator</span>
+      
+      
+        <span class='type'>(<tt>String</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The separator. Nil uses Array's default separator.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The joined elements.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+126</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 126</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="length-instance_method">
+  
+    #<strong>length</strong>  &#x21d2; <tt>Integer</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Return the number of elements currently present.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The collection's size.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+99</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 99</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="member?-instance_method">
+  
+    #<strong>member?</strong>(element)  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Return whether an element is present, as with <span class='object_link'><a href="#include%3F-instance_method" title="Farce::Abstract::Collection#include? (method)">#include?</a></span>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>element</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The element to look up.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether the element is present.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+  <p class="tag_title">See Also:</p>
+  <ul class="see">
+    
+      <li><span class='object_link'><a href="#include%3F-instance_method" title="Farce::Abstract::Collection#include? (method)">#include?</a></span></li>
+    
+  </ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 85</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Collection</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @overload [](*elements, **options)
+</span>  <span class='comment'>#   Construct a collection from the arguments.
+</span>  <span class='comment'>#   @param elements [Array&lt;BasicObject&gt;] The initial elements.
+</span>  <span class='comment'>#   @param **options [Hash] Additional options passed to the constructor.
+</span>  <span class='comment'>#   @return [Farce::Abstract::Collection] A new instance of the receiving class.
+</span>  <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
+
+  <span class='comment'># Return the number of elements currently present.
+</span>  <span class='comment'># @return [Integer] The collection&#39;s size.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether no elements are present.
+</span>  <span class='comment'># @return [Boolean] Whether the collection is empty.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Count all elements, matching elements, or elements accepted by a block.
+</span>  <span class='comment'># Without an argument or block, read the size without traversing elements.
+</span>  <span class='comment'># @param item [BasicObject] The value to count. Omit to count all elements or use the block.
+</span>  <span class='comment'># @yield [element] Select elements to count when item is omitted.
+</span>  <span class='comment'># @yieldparam element [BasicObject] The current element.
+</span>  <span class='comment'># @yieldreturn [BasicObject] A truthy value to count the element.
+</span>  <span class='comment'># @return [Integer] The number of matching elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>given block not used</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Join the elements through Array#join.
+</span>  <span class='comment'># @param separator [String, nil] The separator. Nil uses Array&#39;s default separator.
+</span>  <span class='comment'># @return [String] The joined elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span>
+
+  <span class='comment'># @return [String] The class name and observed elements, suitable for debugging.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>[</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>]</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_seplist'>seplist</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='symbol'>:each_for_inspect</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+          <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>           <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="reject-instance_method">
+  
+    #<strong>reject</strong> {|element| ... } &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Farce::Abstract::Collection</a></span></tt>, <tt>Enumerator</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Return a collection of the same kind excluding elements accepted by the block.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>element</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Test each element. Returns an Enumerator without a block.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>element</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The current element.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>A truthy value to exclude the element.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Farce::Abstract::Collection</a></span></tt>, <tt>Enumerator</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>A new collection, or an Enumerator without a block.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 85</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Collection</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @overload [](*elements, **options)
+</span>  <span class='comment'>#   Construct a collection from the arguments.
+</span>  <span class='comment'>#   @param elements [Array&lt;BasicObject&gt;] The initial elements.
+</span>  <span class='comment'>#   @param **options [Hash] Additional options passed to the constructor.
+</span>  <span class='comment'>#   @return [Farce::Abstract::Collection] A new instance of the receiving class.
+</span>  <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
+
+  <span class='comment'># Return the number of elements currently present.
+</span>  <span class='comment'># @return [Integer] The collection&#39;s size.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether no elements are present.
+</span>  <span class='comment'># @return [Boolean] Whether the collection is empty.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Count all elements, matching elements, or elements accepted by a block.
+</span>  <span class='comment'># Without an argument or block, read the size without traversing elements.
+</span>  <span class='comment'># @param item [BasicObject] The value to count. Omit to count all elements or use the block.
+</span>  <span class='comment'># @yield [element] Select elements to count when item is omitted.
+</span>  <span class='comment'># @yieldparam element [BasicObject] The current element.
+</span>  <span class='comment'># @yieldreturn [BasicObject] A truthy value to count the element.
+</span>  <span class='comment'># @return [Integer] The number of matching elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>given block not used</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Join the elements through Array#join.
+</span>  <span class='comment'># @param separator [String, nil] The separator. Nil uses Array&#39;s default separator.
+</span>  <span class='comment'># @return [String] The joined elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span>
+
+  <span class='comment'># @return [String] The class name and observed elements, suitable for debugging.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>[</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>]</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_seplist'>seplist</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='symbol'>:each_for_inspect</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+          <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>           <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="select-instance_method">
+  
+    #<strong>select</strong> {|element| ... } &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Farce::Abstract::Collection</a></span></tt>, <tt>Enumerator</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Return a collection of the same kind containing elements accepted by the block.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>element</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Test each element. Returns an Enumerator without a block.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>element</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The current element.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>A truthy value to retain the element.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Farce::Abstract::Collection</a></span></tt>, <tt>Enumerator</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>A new collection, or an Enumerator without a block.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 85</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Collection</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @overload [](*elements, **options)
+</span>  <span class='comment'>#   Construct a collection from the arguments.
+</span>  <span class='comment'>#   @param elements [Array&lt;BasicObject&gt;] The initial elements.
+</span>  <span class='comment'>#   @param **options [Hash] Additional options passed to the constructor.
+</span>  <span class='comment'>#   @return [Farce::Abstract::Collection] A new instance of the receiving class.
+</span>  <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
+
+  <span class='comment'># Return the number of elements currently present.
+</span>  <span class='comment'># @return [Integer] The collection&#39;s size.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether no elements are present.
+</span>  <span class='comment'># @return [Boolean] Whether the collection is empty.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Count all elements, matching elements, or elements accepted by a block.
+</span>  <span class='comment'># Without an argument or block, read the size without traversing elements.
+</span>  <span class='comment'># @param item [BasicObject] The value to count. Omit to count all elements or use the block.
+</span>  <span class='comment'># @yield [element] Select elements to count when item is omitted.
+</span>  <span class='comment'># @yieldparam element [BasicObject] The current element.
+</span>  <span class='comment'># @yieldreturn [BasicObject] A truthy value to count the element.
+</span>  <span class='comment'># @return [Integer] The number of matching elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>given block not used</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Join the elements through Array#join.
+</span>  <span class='comment'># @param separator [String, nil] The separator. Nil uses Array&#39;s default separator.
+</span>  <span class='comment'># @return [String] The joined elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span>
+
+  <span class='comment'># @return [String] The class name and observed elements, suitable for debugging.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>[</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>]</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_seplist'>seplist</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='symbol'>:each_for_inspect</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+          <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>           <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="size-instance_method">
+  
+    #<strong>size</strong>  &#x21d2; <tt>Integer</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Return the number of elements currently present.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The number of elements.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 85</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Collection</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @overload [](*elements, **options)
+</span>  <span class='comment'>#   Construct a collection from the arguments.
+</span>  <span class='comment'>#   @param elements [Array&lt;BasicObject&gt;] The initial elements.
+</span>  <span class='comment'>#   @param **options [Hash] Additional options passed to the constructor.
+</span>  <span class='comment'>#   @return [Farce::Abstract::Collection] A new instance of the receiving class.
+</span>  <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
+
+  <span class='comment'># Return the number of elements currently present.
+</span>  <span class='comment'># @return [Integer] The collection&#39;s size.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether no elements are present.
+</span>  <span class='comment'># @return [Boolean] Whether the collection is empty.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Count all elements, matching elements, or elements accepted by a block.
+</span>  <span class='comment'># Without an argument or block, read the size without traversing elements.
+</span>  <span class='comment'># @param item [BasicObject] The value to count. Omit to count all elements or use the block.
+</span>  <span class='comment'># @yield [element] Select elements to count when item is omitted.
+</span>  <span class='comment'># @yieldparam element [BasicObject] The current element.
+</span>  <span class='comment'># @yieldreturn [BasicObject] A truthy value to count the element.
+</span>  <span class='comment'># @return [Integer] The number of matching elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>given block not used</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Join the elements through Array#join.
+</span>  <span class='comment'># @param separator [String, nil] The separator. Nil uses Array&#39;s default separator.
+</span>  <span class='comment'># @return [String] The joined elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span>
+
+  <span class='comment'># @return [String] The class name and observed elements, suitable for debugging.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>[</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>]</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_seplist'>seplist</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='symbol'>:each_for_inspect</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+          <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>           <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="to_a-instance_method">
+  
+    #<strong>to_a</strong>  &#x21d2; <tt>Array&lt;BasicObject&gt;</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This method is abstract.</strong>
+  <div class='inline'></div>
+</div>
+<p>Return the observed elements in a new Array.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array&lt;BasicObject&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The observed elements.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 85</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Collection (class)">Collection</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Enumerable</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @overload [](*elements, **options)
+</span>  <span class='comment'>#   Construct a collection from the arguments.
+</span>  <span class='comment'>#   @param elements [Array&lt;BasicObject&gt;] The initial elements.
+</span>  <span class='comment'>#   @param **options [Hash] Additional options passed to the constructor.
+</span>  <span class='comment'>#   @return [Farce::Abstract::Collection] A new instance of the receiving class.
+</span>  <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_elements'>elements</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
+
+  <span class='comment'># Return the number of elements currently present.
+</span>  <span class='comment'># @return [Integer] The collection&#39;s size.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span>
+
+  <span class='comment'># Return whether no elements are present.
+</span>  <span class='comment'># @return [Boolean] Whether the collection is empty.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+
+  <span class='comment'># Count all elements, matching elements, or elements accepted by a block.
+</span>  <span class='comment'># Without an argument or block, read the size without traversing elements.
+</span>  <span class='comment'># @param item [BasicObject] The value to count. Omit to count all elements or use the block.
+</span>  <span class='comment'># @yield [element] Select elements to count when item is omitted.
+</span>  <span class='comment'># @yieldparam element [BasicObject] The current element.
+</span>  <span class='comment'># @yieldreturn [BasicObject] A truthy value to count the element.
+</span>  <span class='comment'># @return [Integer] The number of matching elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_count'>count</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_size'>size</span> <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_block_given?'>block_given?</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_item'>item</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>yield</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>given block not used</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_item'>item</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Join the elements through Array#join.
+</span>  <span class='comment'># @param separator [String, nil] The separator. Nil uses Array&#39;s default separator.
+</span>  <span class='comment'># @return [String] The joined elements.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='id identifier rubyid_separator'>separator</span><span class='rparen'>)</span>
+
+  <span class='comment'># @return [String] The class name and observed elements, suitable for debugging.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>[</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>]</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
+        <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_seplist'>seplist</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='symbol'>:each_for_inspect</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+          <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_each_for_inspect'>each_for_inspect</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>           <span class='op'>=</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="to_s-instance_method">
+  
+    #<strong>to_s</strong>  &#x21d2; <tt>String</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns The class name and observed elements, suitable for debugging.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The class name and observed elements, suitable for debugging.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+129</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/collection.rb', line 129</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=</span> <span class='id identifier rubyid_inspect'>inspect</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Tue Oct  6 08:09:14 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>

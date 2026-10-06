@@ -84,7 +84,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span>, <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span>, <span class='object_link'><a href="../Internal/ValueSerialization.html" title="Farce::Internal::ValueSerialization (module)">Internal::ValueSerialization</a></span></dd>
+      <dd><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span>, <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span>, <span class='object_link'><a href="../Internal/ValueSerialization.html" title="Farce::Internal::ValueSerialization (module)">Internal::ValueSerialization</a></span>, Internal::Inspect</dd>
   </dl>
   
   
@@ -340,6 +340,7 @@ directly from the native flag and avoid delegation overhead.</p>
   
   
   
+  
   <h3 class="inherited">Methods included from <span class='object_link'><a href="../Internal/ValueSerialization.html" title="Farce::Internal::ValueSerialization (module)">Internal::ValueSerialization</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Internal/ValueSerialization.html#as_json-instance_method" title="Farce::Internal::ValueSerialization#as_json (method)">#as_json</a></span>, <span class='object_link'><a href="../Internal/ValueSerialization.html#to_json-instance_method" title="Farce::Internal::ValueSerialization#to_json (method)">#to_json</a></span>, <span class='object_link'><a href="../Internal/ValueSerialization.html#to_msgpack-instance_method" title="Farce::Internal::ValueSerialization#to_msgpack (method)">#to_msgpack</a></span></p>
 
@@ -469,7 +470,24 @@ directly from the native flag and avoid delegation overhead.</p>
 48
 49
 50
-51</pre>
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
@@ -478,6 +496,23 @@ directly from the native flag and avoid delegation overhead.</p>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/ValueSerialization.html" title="Farce::Internal::ValueSerialization (module)">ValueSerialization</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>begin</span>
+      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>rescue</span> <span class='const'>StandardError</span>
+      <span class='comment'># FrozenError may inspect an allocated flag before it is initialized.
+</span>      <span class='kw'>return</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object_with_address'>object_with_address</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -526,7 +561,24 @@ directly from the native flag and avoid delegation overhead.</p>
 48
 49
 50
-51</pre>
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
@@ -535,6 +587,23 @@ directly from the native flag and avoid delegation overhead.</p>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/ValueSerialization.html" title="Farce::Internal::ValueSerialization (module)">ValueSerialization</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>begin</span>
+      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>rescue</span> <span class='const'>StandardError</span>
+      <span class='comment'># FrozenError may inspect an allocated flag before it is initialized.
+</span>      <span class='kw'>return</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object_with_address'>object_with_address</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -623,7 +692,24 @@ directly from the native flag and avoid delegation overhead.</p>
 48
 49
 50
-51</pre>
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
@@ -632,6 +718,23 @@ directly from the native flag and avoid delegation overhead.</p>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/ValueSerialization.html" title="Farce::Internal::ValueSerialization (module)">ValueSerialization</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>begin</span>
+      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>rescue</span> <span class='const'>StandardError</span>
+      <span class='comment'># FrozenError may inspect an allocated flag before it is initialized.
+</span>      <span class='kw'>return</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object_with_address'>object_with_address</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -720,7 +823,24 @@ directly from the native flag and avoid delegation overhead.</p>
 48
 49
 50
-51</pre>
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
@@ -729,6 +849,23 @@ directly from the native flag and avoid delegation overhead.</p>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/ValueSerialization.html" title="Farce::Internal::ValueSerialization (module)">ValueSerialization</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>begin</span>
+      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>rescue</span> <span class='const'>StandardError</span>
+      <span class='comment'># FrozenError may inspect an allocated flag before it is initialized.
+</span>      <span class='kw'>return</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object_with_address'>object_with_address</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -781,7 +918,24 @@ directly from the native flag and avoid delegation overhead.</p>
 48
 49
 50
-51</pre>
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
@@ -790,6 +944,23 @@ directly from the native flag and avoid delegation overhead.</p>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/ValueSerialization.html" title="Farce::Internal::ValueSerialization (module)">ValueSerialization</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>begin</span>
+      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>rescue</span> <span class='const'>StandardError</span>
+      <span class='comment'># FrozenError may inspect an allocated flag before it is initialized.
+</span>      <span class='kw'>return</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object_with_address'>object_with_address</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -838,7 +1009,24 @@ directly from the native flag and avoid delegation overhead.</p>
 48
 49
 50
-51</pre>
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
@@ -847,6 +1035,23 @@ directly from the native flag and avoid delegation overhead.</p>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/ValueSerialization.html" title="Farce::Internal::ValueSerialization (module)">ValueSerialization</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>begin</span>
+      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>rescue</span> <span class='const'>StandardError</span>
+      <span class='comment'># FrozenError may inspect an allocated flag before it is initialized.
+</span>      <span class='kw'>return</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object_with_address'>object_with_address</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -899,7 +1104,24 @@ directly from the native flag and avoid delegation overhead.</p>
 48
 49
 50
-51</pre>
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
@@ -908,6 +1130,23 @@ directly from the native flag and avoid delegation overhead.</p>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/ValueSerialization.html" title="Farce::Internal::ValueSerialization (module)">ValueSerialization</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>begin</span>
+      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>rescue</span> <span class='const'>StandardError</span>
+      <span class='comment'># FrozenError may inspect an allocated flag before it is initialized.
+</span>      <span class='kw'>return</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object_with_address'>object_with_address</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -943,7 +1182,24 @@ directly from the native flag and avoid delegation overhead.</p>
 48
 49
 50
-51</pre>
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 47</span>
@@ -952,6 +1208,23 @@ directly from the native flag and avoid delegation overhead.</p>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/ValueSerialization.html" title="Farce::Internal::ValueSerialization (module)">ValueSerialization</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>begin</span>
+      <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>rescue</span> <span class='const'>StandardError</span>
+      <span class='comment'># FrozenError may inspect an allocated flag before it is initialized.
+</span>      <span class='kw'>return</span> <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object_with_address'>object_with_address</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='kw'>yield</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -963,7 +1236,7 @@ directly from the native flag and avoid delegation overhead.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Oct  5 07:01:33 2026 by
+  Generated on Tue Oct  6 08:09:03 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

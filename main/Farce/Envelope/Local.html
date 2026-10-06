@@ -306,7 +306,7 @@ Can only be opened by the Ractor that created it.</p>
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Envelope.html" title="Farce::Envelope (class)">Farce::Envelope</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="../Envelope.html#blank%3F-instance_method" title="Farce::Envelope#blank? (method)">#blank?</a></span>, <span class='object_link'><a href="../Envelope.html#claim!-instance_method" title="Farce::Envelope#claim! (method)">#claim!</a></span>, <span class='object_link'><a href="../Envelope.html#inspect-instance_method" title="Farce::Envelope#inspect (method)">#inspect</a></span>, <span class='object_link'><a href="../Envelope.html#same_value%3F-instance_method" title="Farce::Envelope#same_value? (method)">#same_value?</a></span>, <span class='object_link'><a href="../Envelope.html#value-instance_method" title="Farce::Envelope#value (method)">#value</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="../Envelope.html#blank%3F-instance_method" title="Farce::Envelope#blank? (method)">#blank?</a></span>, <span class='object_link'><a href="../Envelope.html#claim!-instance_method" title="Farce::Envelope#claim! (method)">#claim!</a></span>, <span class='object_link'><a href="../Envelope.html#same_value%3F-instance_method" title="Farce::Envelope#same_value? (method)">#same_value?</a></span>, <span class='object_link'><a href="../Envelope.html#value-instance_method" title="Farce::Envelope#value (method)">#value</a></span></p>
 
   
   
@@ -332,6 +332,7 @@ Can only be opened by the Ractor that created it.</p>
   <h3 class="inherited">Methods included from <span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
 
+  
   
   
   
@@ -401,14 +402,14 @@ Can only be opened by the Ractor that created it.</p>
       <pre class="lines">
 
 
-146
 147
 148
 149
-150</pre>
+150
+151</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 146</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 147</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='ivar'>@owner</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current'><span class='object_link'><a href="../Ractor.html#current-class_method" title="Farce::Ractor.current (method)">current</a></span></span>
@@ -469,7 +470,6 @@ Can only be opened by the Ractor that created it.</p>
       <pre class="lines">
 
 
-141
 142
 143
 144
@@ -496,10 +496,11 @@ Can only be opened by the Ractor that created it.</p>
 165
 166
 167
-168</pre>
+168
+169</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 141</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 142</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Envelope::Local (class)">Local</a></span></span> <span class='op'>&lt;</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Envelope.html" title="Farce::Envelope (class)">Envelope</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Copyable</span>
@@ -582,10 +583,10 @@ Can only be opened by the Ractor that created it.</p>
       <pre class="lines">
 
 
-153</pre>
+154</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 153</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 154</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_claim'>claim</span> <span class='op'>=</span> <span class='id identifier rubyid_owned?'>owned?</span> <span class='op'>?</span> <span class='kw'>self</span> <span class='op'>:</span> <span class='kw'>nil</span></pre>
     </td>
@@ -635,10 +636,10 @@ Can only be opened by the Ractor that created it.</p>
       <pre class="lines">
 
 
-156</pre>
+157</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 156</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 157</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_claimed?'>claimed?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -688,10 +689,10 @@ Can only be opened by the Ractor that created it.</p>
       <pre class="lines">
 
 
-159</pre>
+160</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 159</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 160</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_owned?'>owned?</span> <span class='op'>=</span> <span class='ivar'>@owner</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current'><span class='object_link'><a href="../Ractor.html#current-class_method" title="Farce::Ractor.current (method)">current</a></span></span></pre>
     </td>
@@ -704,7 +705,7 @@ Can only be opened by the Ractor that created it.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Oct  5 07:01:35 2026 by
+  Generated on Tue Oct  6 08:09:06 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

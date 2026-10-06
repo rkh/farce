@@ -306,7 +306,7 @@ The value will be copied once when the envelope is created, and then once per Ra
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Envelope.html" title="Farce::Envelope (class)">Farce::Envelope</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="../Envelope.html#blank%3F-instance_method" title="Farce::Envelope#blank? (method)">#blank?</a></span>, <span class='object_link'><a href="../Envelope.html#claim!-instance_method" title="Farce::Envelope#claim! (method)">#claim!</a></span>, <span class='object_link'><a href="../Envelope.html#inspect-instance_method" title="Farce::Envelope#inspect (method)">#inspect</a></span>, <span class='object_link'><a href="../Envelope.html#same_value%3F-instance_method" title="Farce::Envelope#same_value? (method)">#same_value?</a></span>, <span class='object_link'><a href="../Envelope.html#value-instance_method" title="Farce::Envelope#value (method)">#value</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="../Envelope.html#blank%3F-instance_method" title="Farce::Envelope#blank? (method)">#blank?</a></span>, <span class='object_link'><a href="../Envelope.html#claim!-instance_method" title="Farce::Envelope#claim! (method)">#claim!</a></span>, <span class='object_link'><a href="../Envelope.html#same_value%3F-instance_method" title="Farce::Envelope#same_value? (method)">#same_value?</a></span>, <span class='object_link'><a href="../Envelope.html#value-instance_method" title="Farce::Envelope#value (method)">#value</a></span></p>
 
   
   
@@ -332,6 +332,7 @@ The value will be copied once when the envelope is created, and then once per Ra
   <h3 class="inherited">Methods included from <span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
 
+  
   
   
   
@@ -401,14 +402,14 @@ The value will be copied once when the envelope is created, and then once per Ra
       <pre class="lines">
 
 
-62
 63
 64
 65
-66</pre>
+66
+67</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 62</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 63</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='ivar'>@vault</span> <span class='op'>=</span> <span class='const'>VAULT_ATOM</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span> <span class='lbrace'>{</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Vault</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='rbrace'>}</span>
@@ -469,7 +470,6 @@ The value will be copied once when the envelope is created, and then once per Ra
       <pre class="lines">
 
 
-57
 58
 59
 60
@@ -510,10 +510,11 @@ The value will be copied once when the envelope is created, and then once per Ra
 95
 96
 97
-98</pre>
+98
+99</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 57</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 58</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Envelope::Copy (class)">Copy</a></span></span> <span class='op'>&lt;</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Envelope.html" title="Farce::Envelope (class)">Envelope</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Copyable</span>
@@ -610,10 +611,10 @@ The value will be copied once when the envelope is created, and then once per Ra
       <pre class="lines">
 
 
-69</pre>
+70</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 69</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 70</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_claim'>claim</span> <span class='op'>=</span> <span class='kw'>self</span></pre>
     </td>
@@ -663,10 +664,10 @@ The value will be copied once when the envelope is created, and then once per Ra
       <pre class="lines">
 
 
-72</pre>
+73</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 72</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 73</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_claimed?'>claimed?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -716,10 +717,10 @@ The value will be copied once when the envelope is created, and then once per Ra
       <pre class="lines">
 
 
-75</pre>
+76</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 75</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 76</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_owned?'>owned?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -732,7 +733,7 @@ The value will be copied once when the envelope is created, and then once per Ra
 </div>
 
       <div id="footer">
-  Generated on Mon Oct  5 07:01:35 2026 by
+  Generated on Tue Oct  6 08:09:06 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

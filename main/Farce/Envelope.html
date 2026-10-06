@@ -100,7 +100,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Abstract::Value</a></span>, <span class='object_link'><a href="Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Internal::Noncopyable</a></span>, <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></dd>
+      <dd><span class='object_link'><a href="Abstract/Value.html" title="Farce::Abstract::Value (module)">Abstract::Value</a></span>, <span class='object_link'><a href="Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Internal::Noncopyable</a></span>, <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span>, Internal::Inspect</dd>
   </dl>
   
   
@@ -353,29 +353,6 @@ Ractor, others can be claimed by any Ractor. Claims cannot be taken back.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#inspect-instance_method" title="#inspect (instance method)">#<strong>inspect</strong>  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>String representation of the map, suitable for debugging.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#owned%3F-instance_method" title="#owned? (instance method)">#<strong>owned?</strong>  &#x21d2; Boolean </a>
     
 
@@ -477,6 +454,7 @@ Ractor, others can be claimed by any Ractor. Claims cannot be taken back.</p>
   
   
   
+  
   <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
@@ -548,14 +526,14 @@ Ractor, others can be claimed by any Ractor. Claims cannot be taken back.</p>
       <pre class="lines">
 
 
-246
 247
 248
 249
-250</pre>
+250
+251</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 246</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 247</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid__'>_</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>auto_unwrap needs to be shareable</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rparen'>)</span>
@@ -842,14 +820,14 @@ created. Otherwise, the type of envelope will be determined by the keyword argum
       <pre class="lines">
 
 
-224
 225
 226
 227
-228</pre>
+228
+229</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 224</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 225</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='kw'>super</span> <span class='kw'>if</span> <span class='kw'>self</span> <span class='op'>!=</span> <span class='const'><span class='object_link'><a href="" title="Farce::Envelope (class)">Envelope</a></span></span>
@@ -1262,23 +1240,14 @@ created. Otherwise, the type of envelope will be determined by the keyword argum
 296
 297
 298
-299
-300
-301
-302
-303
-304
-305
-306
-307
-308
-309</pre>
+299</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 24</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Envelope (class)">Envelope</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Noncopyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
 
   <span class='const'>VAULT_ATOM</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Atom</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
   <span class='id identifier rubyid_private_constant'>private_constant</span> <span class='symbol'>:VAULT_ATOM</span>
@@ -1539,22 +1508,11 @@ created. Otherwise, the type of envelope will be determined by the keyword argum
     <span class='id identifier rubyid_left'>left</span> <span class='op'>==</span> <span class='id identifier rubyid_right'>right</span>
   <span class='kw'>end</span>
 
-  <span class='comment'># @return [String] String representation of the map, suitable for debugging.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span>
-    <span class='kw'>return</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> value=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_owned?'>owned?</span>
-    <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_claimed?'>claimed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>claimed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unclaimed</span><span class='tstring_end'>&quot;</span></span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-  <span class='kw'>end</span>
-
   <span class='comment'># @api private
-</span>  <span class='comment'># @return [void]
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_owned?'>owned?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>value=</span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='id identifier rubyid_claimed?'>claimed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>claimed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unclaimed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>end</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_from_envelope'>from_envelope</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>value=</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
     <span class='kw'>end</span>
   <span class='kw'>end</span>
 
@@ -1628,10 +1586,10 @@ Raises an exception if it was unable to claim the envelope.</p>
       <pre class="lines">
 
 
-256</pre>
+257</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 256</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 257</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_claim!'>claim!</span> <span class='op'>=</span> <span class='id identifier rubyid_claim'>claim</span> <span class='op'>||</span> <span class='id identifier rubyid_raise'>raise</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="#AlreadyClaimed-constant" title="Farce::Envelope::AlreadyClaimed (constant)">AlreadyClaimed</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>envelope has already been claimed by another Ractor</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span></pre>
     </td>
@@ -1956,23 +1914,14 @@ Raises an exception if it was unable to claim the envelope.</p>
 296
 297
 298
-299
-300
-301
-302
-303
-304
-305
-306
-307
-308
-309</pre>
+299</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 24</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Envelope (class)">Envelope</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Noncopyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
 
   <span class='const'>VAULT_ATOM</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Atom</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
   <span class='id identifier rubyid_private_constant'>private_constant</span> <span class='symbol'>:VAULT_ATOM</span>
@@ -2233,22 +2182,11 @@ Raises an exception if it was unable to claim the envelope.</p>
     <span class='id identifier rubyid_left'>left</span> <span class='op'>==</span> <span class='id identifier rubyid_right'>right</span>
   <span class='kw'>end</span>
 
-  <span class='comment'># @return [String] String representation of the map, suitable for debugging.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span>
-    <span class='kw'>return</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> value=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_owned?'>owned?</span>
-    <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_claimed?'>claimed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>claimed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unclaimed</span><span class='tstring_end'>&quot;</span></span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-  <span class='kw'>end</span>
-
   <span class='comment'># @api private
-</span>  <span class='comment'># @return [void]
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_owned?'>owned?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>value=</span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='id identifier rubyid_claimed?'>claimed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>claimed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unclaimed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>end</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_from_envelope'>from_envelope</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>value=</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
     <span class='kw'>end</span>
   <span class='kw'>end</span>
 
@@ -2256,65 +2194,6 @@ Raises an exception if it was unable to claim the envelope.</p>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_comparison_vault'>comparison_vault</span> <span class='op'>=</span> <span class='kw'>defined?</span><span class='lparen'>(</span><span class='ivar'>@vault</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='ivar'>@vault</span>
   <span class='kw'>def</span> <span class='id identifier rubyid_comparison_key'>comparison_key</span>   <span class='op'>=</span> <span class='kw'>defined?</span><span class='lparen'>(</span><span class='ivar'>@vault_key</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='ivar'>@vault_key</span> <span class='op'>:</span> <span class='kw'>self</span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="inspect-instance_method">
-  
-    #<strong>inspect</strong>  &#x21d2; <tt>String</tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Returns String representation of the map, suitable for debugging.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>String</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>String representation of the map, suitable for debugging.</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-287
-288
-289
-290</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 287</span>
-
-<span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span>
-  <span class='kw'>return</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> value=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_owned?'>owned?</span>
-  <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_claimed?'>claimed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>claimed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unclaimed</span><span class='tstring_end'>&quot;</span></span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -2638,23 +2517,14 @@ Raises an exception if it was unable to claim the envelope.</p>
 296
 297
 298
-299
-300
-301
-302
-303
-304
-305
-306
-307
-308
-309</pre>
+299</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 24</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Envelope (class)">Envelope</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Noncopyable</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Inspect</span>
 
   <span class='const'>VAULT_ATOM</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Atom</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
   <span class='id identifier rubyid_private_constant'>private_constant</span> <span class='symbol'>:VAULT_ATOM</span>
@@ -2915,22 +2785,11 @@ Raises an exception if it was unable to claim the envelope.</p>
     <span class='id identifier rubyid_left'>left</span> <span class='op'>==</span> <span class='id identifier rubyid_right'>right</span>
   <span class='kw'>end</span>
 
-  <span class='comment'># @return [String] String representation of the map, suitable for debugging.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span>
-    <span class='kw'>return</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> value=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_owned?'>owned?</span>
-    <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_claimed?'>claimed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>claimed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unclaimed</span><span class='tstring_end'>&quot;</span></span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span>
-  <span class='kw'>end</span>
-
   <span class='comment'># @api private
-</span>  <span class='comment'># @return [void]
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pretty_print'>pretty_print</span><span class='lparen'>(</span><span class='id identifier rubyid_pp'>pp</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_group'>group</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>&gt;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
-      <span class='kw'>if</span> <span class='id identifier rubyid_owned?'>owned?</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>value=</span><span class='tstring_end'>&quot;</span></span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_pp'>pp</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-      <span class='kw'>else</span>
-        <span class='id identifier rubyid_pp'>pp</span><span class='period'>.</span><span class='id identifier rubyid_text'>text</span> <span class='id identifier rubyid_claimed?'>claimed?</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>claimed</span><span class='tstring_end'>&quot;</span></span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unclaimed</span><span class='tstring_end'>&quot;</span></span>
-      <span class='kw'>end</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_with'>inspect_with</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='rparen'>)</span>
+    <span class='kw'>super</span> <span class='kw'>do</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_breakable'>breakable</span>
+      <span class='id identifier rubyid_inspector'>inspector</span><span class='period'>.</span><span class='id identifier rubyid_from_envelope'>from_envelope</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>value=</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
     <span class='kw'>end</span>
   <span class='kw'>end</span>
 
@@ -3023,7 +2882,6 @@ claiming or opening either envelope.</p>
       <pre class="lines">
 
 
-269
 270
 271
 272
@@ -3038,10 +2896,11 @@ claiming or opening either envelope.</p>
 281
 282
 283
-284</pre>
+284
+285</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 269</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 270</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_same_value?'>same_value?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>identity:</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='kw'>if</span> <span class='id identifier rubyid_comparison_vault'>comparison_vault</span>
@@ -3124,10 +2983,10 @@ May be called multiple times.</p>
       <pre class="lines">
 
 
-262</pre>
+263</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 262</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 263</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_claim!'>claim!</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_retrieve'>retrieve</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -3140,7 +2999,7 @@ May be called multiple times.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Oct  5 07:01:35 2026 by
+  Generated on Tue Oct  6 08:09:06 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
