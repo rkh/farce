@@ -113,7 +113,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/set.rb<span class="defines">,<br>
-  lib/farce/integrations/psych.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/shared/to_json.rb,<br> lib/farce/integrations/active_support/set.rb,<br> lib/farce/integrations/active_support/duplicable.rb</span>
+  lib/farce/integrations/bson.rb,<br> lib/farce/integrations/psych.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/shared/to_json.rb,<br> lib/farce/integrations/active_support/set.rb,<br> lib/farce/integrations/active_support/duplicable.rb</span>
 
 </dd>
   </dl>
@@ -150,6 +150,108 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
 
 
+  
+    <h2>
+      BSON Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#as_extended_json-instance_method" title="#as_extended_json (instance method)">#<strong>as_extended_json</strong>(**options)  &#x21d2; Array </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Represent current members as Extended JSON, forwarding BSON's format options.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#bson_type-instance_method" title="#bson_type (instance method)">#<strong>bson_type</strong>  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Identify this value as a BSON array when embedded in a document or array.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_bson-instance_method" title="#to_bson (instance method)">#<strong>to_bson</strong>(buffer = ::BSON::ByteBuffer.new)  &#x21d2; BSON::ByteBuffer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize current members using BSON's array representation.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_bson_normalized_value-instance_method" title="#to_bson_normalized_value (instance method)">#<strong>to_bson_normalized_value</strong>  &#x21d2; Array </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return current members with nested values normalized by BSON.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
   
     <h2>
       ActiveSupport Integration
@@ -2086,6 +2188,96 @@ Farce::Set, Farce::SortedSet, and Farce::WeakSet accept this option. Nil uses th
 </div>
     
       <div class="method_details ">
+  <h3 class="signature " id="as_extended_json-instance_method">
+  
+    #<strong>as_extended_json</strong>(**options)  &#x21d2; <tt>Array</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This method is only available if BSON has been loaded.</p>
+</div>
+  </div>
+
+<p>Represent current members as Extended JSON, forwarding BSON's format options.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>options</span>
+      
+      
+        <span class='type'>(<tt>Hash</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Options forwarded to Array#as_extended_json.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The Extended JSON representation.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+85</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/bson.rb', line 85</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_as_extended_json'>as_extended_json</span><span class='lparen'>(</span><span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_as_extended_json'>as_extended_json</span><span class='lparen'>(</span><span class='op'>**</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
   <h3 class="signature " id="as_json-instance_method">
   
     #<strong>as_json</strong>(options = nil)  &#x21d2; <tt>Array</tt> 
@@ -2173,6 +2365,66 @@ Farce::Set, Farce::SortedSet, and Farce::WeakSet accept this option. Nil uses th
       <pre class="code"><span class="info file"># File 'lib/farce/integrations/active_support/set.rb', line 46</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_as_json'>as_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_as_json'>as_json</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="bson_type-instance_method">
+  
+    #<strong>bson_type</strong>  &#x21d2; <tt>String</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This method is only available if BSON has been loaded.</p>
+</div>
+  </div>
+
+<p>Identify this value as a BSON array when embedded in a document or array.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The BSON array type byte.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+73</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/bson.rb', line 73</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_bson_type'>bson_type</span> <span class='op'>=</span> <span class='op'>::</span><span class='const'>BSON</span><span class='op'>::</span><span class='const'>Array</span><span class='op'>::</span><span class='const'>BSON_TYPE</span></pre>
     </td>
   </tr>
 </table>
@@ -5473,6 +5725,148 @@ The outer result is an Unshared::Set that holds the subsets strongly.</p>
 </div>
     
       <div class="method_details ">
+  <h3 class="signature " id="to_bson-instance_method">
+  
+    #<strong>to_bson</strong>(buffer = ::BSON::ByteBuffer.new)  &#x21d2; <tt>BSON::ByteBuffer</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This method is only available if BSON has been loaded.</p>
+</div>
+  </div>
+
+<p>Serialize current members using BSON's array representation.
+Nested value wrappers are read before encoding their BSON types and payloads.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>buffer</span>
+      
+      
+        <span class='type'>(<tt>BSON::ByteBuffer</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>::BSON::ByteBuffer.new</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>An optional buffer to append to.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BSON::ByteBuffer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The buffer containing the encoded array.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+68</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/bson.rb', line 68</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_to_bson'>to_bson</span><span class='lparen'>(</span><span class='id identifier rubyid_buffer'>buffer</span> <span class='op'>=</span> <span class='op'>::</span><span class='const'>BSON</span><span class='op'>::</span><span class='const'>ByteBuffer</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_bson_normalized_value'>to_bson_normalized_value</span><span class='period'>.</span><span class='id identifier rubyid_to_bson'>to_bson</span><span class='lparen'>(</span><span class='id identifier rubyid_buffer'>buffer</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="to_bson_normalized_value-instance_method">
+  
+    #<strong>to_bson_normalized_value</strong>  &#x21d2; <tt>Array</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This method is only available if BSON has been loaded.</p>
+</div>
+  </div>
+
+<p>Return current members with nested values normalized by BSON.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The normalized array.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+78</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/bson.rb', line 78</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_to_bson_normalized_value'>to_bson_normalized_value</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_bson_normalized_value'>to_bson_normalized_value</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
   <h3 class="signature " id="to_json-instance_method">
   
     #<strong>to_json</strong>(*arguments)  &#x21d2; <tt>String</tt> 
@@ -6087,7 +6481,7 @@ are supplied. Otherwise, returns a new instance of klass.</p>
 </div>
 
       <div id="footer">
-  Generated on Wed Oct  7 11:02:19 2026 by
+  Generated on Wed Oct  7 11:52:44 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
