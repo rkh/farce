@@ -28,6 +28,7 @@ module Farce
   #   weak.alive? # => false
   #   weak.value # WeakRefError: Invalid Reference - probably recycled
   class WeakValue
+    include Internal::MarshalSupport::WeakValue
     include Abstract::Value
     include Internal::Inspect
 
@@ -37,6 +38,11 @@ module Farce
     nil_value = new
 
     class << nil_value
+      undef marshal_dump
+
+      # @api private
+      def _dump(_) = "nil"
+
       def dup               = self
       def clone(**)         = self
       def value             = nil
@@ -57,6 +63,11 @@ module Farce
 
     recycled = new
     class << recycled
+      undef marshal_dump
+
+      # @api private
+      def _dump(_) = "recycled"
+
       def dup               = self
       def clone(**)         = self
       def alive?            = false
@@ -76,6 +87,15 @@ module Farce
     # @return [WeakValue] a new weak value wrapping the given object
     # @see #initialize
     def self.new(value) = value.nil? ? NIL_VALUE : super
+
+    # @api private
+    def self._load(state)
+      case state
+      when "nil" then NIL_VALUE
+      when "recycled" then RECYCLED
+      else raise TypeError, "invalid weak value state"
+      end
+    end
 
     # @param value [Object] the object to be weakly referenced
     def initialize(value)

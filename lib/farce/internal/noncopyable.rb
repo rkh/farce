@@ -6,6 +6,8 @@ module Farce
   module Internal
     # Coordination objects own live state that cannot be duplicated.
     module Noncopyable
+      include MarshalSupport::Reject
+
       def dup         = initialize_copy(self)
       def clone(...)  = initialize_copy(self)
 

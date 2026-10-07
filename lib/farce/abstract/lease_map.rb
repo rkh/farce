@@ -6,6 +6,8 @@ module Farce
   module Abstract
     # @abstract Shared per-key checkout, mutation, and automatic cleanup behavior for lease maps.
     class LeaseMap < Map
+      include Internal::MarshalSupport::Reject
+
       # Construct a lease map from a block returning key/value entries.
       # @!macro key_normalization
       # @yield builds the initial key and resource mapping

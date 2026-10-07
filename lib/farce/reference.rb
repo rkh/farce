@@ -4,6 +4,7 @@
 
 module Farce
   # A delegating reference to a Farce::Abstract::Value object.
+  # Marshal preserves the holder and wrapper without resolving the referenced value.
   #
   # @example
   #   atom = Farce::Atom.new(:example)
@@ -111,6 +112,22 @@ module Farce
     #   @param value [Farce::Abstract::Value] the value to be referenced
     #   @param deep [Boolean] whether to resolve nested values (like an {Envelope} inside of an {Atom})
     def initialize(value) = @value = value
+
+    # @api private
+    def marshal_dump = [1, @value, ::Kernel.instance_method(:frozen?).bind_call(self)]
+
+    # @api private
+    def marshal_load(data)
+      @value, frozen = Internal::MarshalSupport.payload(data, 2)
+      ::Kernel.instance_method(:freeze).bind_call(self) if frozen
+    end
+
+    # Marshal hook discovery must inspect this wrapper without resolving its target.
+    def respond_to?(name, include_private = false) # rubocop:disable Style/OptionalBooleanParameter
+      return true if name == :marshal_dump || name == :marshal_load
+      return false if Internal.marshal_protocol_method?(name)
+      method_missing(:respond_to?, name, include_private)
+    end
 
     # Replacing the holder's value can make this false again.
     # @return [Boolean] whether this proxy and its current target are frozen

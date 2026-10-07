@@ -32,6 +32,19 @@ module Farce
       super
     end
 
+    # @api private
+    def marshal_dump = [1, @skip.to_a, @store.to_a]
+
+    # @api private
+    def marshal_load(data)
+      skip, store = Internal::MarshalSupport.payload(data, 2)
+      @shared     = Strict::WeakKeyMap.new
+      @local      = Local::WeakKeyMap.new
+      @skip       = Strict::Vector.new(skip)
+      @store      = Strict::Vector.new(store)
+      publish_shareable
+    end
+
     # Exclude matching objects and their children from subsequent calls.
     # @param modules [Array<Module>] classes or modules matched with is_a?
     # @return [self]

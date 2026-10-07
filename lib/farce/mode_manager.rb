@@ -68,6 +68,18 @@ module Farce
       super()
     end
 
+    # @api private
+    def marshal_dump
+      raise TypeError, "proxy registers cannot be marshaled" if @register
+      [1, mode]
+    end
+
+    # @api private
+    def marshal_load(data)
+      mode, = Internal::MarshalSupport.payload(data, 1)
+      initialize(mode:)
+    end
+
     # Wraps a value in an envelope if it is not Ractor-shareable.
     #
     # @!macro modes

@@ -13,6 +13,11 @@ module Farce
   module Internal # :nodoc: all
     include Autoloads["#{__dir__}/shared"]
 
+    # @api private
+    # The shim's shareable? can delegate to a lazy or weak value and change its state.
+    # Snapshot metadata uses only structural properties on engines without Ractors.
+    def marshal_shareable?(value) = Shareable === value || Kernel.instance_method(:frozen?).bind_call(value)
+
     def self.commit_transaction(entries, guards = [], _transaction = nil)
       PortableTransaction.commit(entries, guards)
     end

@@ -46,6 +46,22 @@ module Farce
       self.additional_thread_pool_size ||= ENV.fetch("FARCE_ADDITIONAL_THREAD_POOL_SIZE", 2)
     end
 
+    # @api private
+    def marshal_dump
+      [1, autoload_integrations, fiber_scheduler, main_thread_pool_size, additional_thread_pool_size, frozen?]
+    end
+
+    # @api private
+    def marshal_load(data)
+      autoload, scheduler, main_size, additional_size, frozen = Internal::MarshalSupport.payload(data, 5)
+
+      self.autoload_integrations        = autoload
+      self.fiber_scheduler              = scheduler
+      self.main_thread_pool_size        = main_size
+      self.additional_thread_pool_size  = additional_size
+      freeze if frozen
+    end
+
     # Enable or disable automatic integration loading. Already loaded integrations remain active.
     # @param value [Boolean, String] true, false, or their environment variable representations.
     # @raise [ArgumentError] If the value is not a supported boolean.

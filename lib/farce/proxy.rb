@@ -277,6 +277,9 @@ module Farce
 
     private
 
+    # @api private
+    def marshal_dump = ::Kernel.raise(::TypeError, "Farce::Proxy cannot be marshaled")
+
     # Dispatches method calls to be processed by the Ractor the proxied object resides in.
     def method_missing(...)
       result = @supervisor.send(...)

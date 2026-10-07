@@ -92,6 +92,12 @@ module Farce
       # @param options [Hash{Symbol => BasicObject}] keyword arguments for the backing object
       # @param scope [Symbol] The storage scope. Defaults to :ractor.
       def initialize(*arguments, scope: :ractor, **options)
+        initialize_scoped(arguments, options, scope:)
+      end
+
+      private
+
+      def initialize_scoped(arguments, options, scope:, configuration: nil)
         raise ArgumentError, "Invalid scope: #{scope.inspect}" unless Internal::Storage::SCOPES.include?(scope)
 
         if is_a?(Shareable::Tracked)
@@ -99,7 +105,7 @@ module Farce
           @farce_freeze_state = guard.new(false)
         end
         @scope         = scope
-        @configuration = MANAGER.wrap([arguments.freeze, options.freeze].freeze)
+        @configuration = configuration || MANAGER.wrap([arguments.freeze, options.freeze].freeze)
 
         Internal::Storage.scope(scope)[self] = new_scoped_value(*arguments, **options) if eager_scoped_value?
 
@@ -108,7 +114,41 @@ module Farce
         Internal::Freeze.publish(self)
       end
 
-      private
+      def marshal_configuration
+        value = Envelope === @configuration ? @configuration.marshal_dump[1] : @configuration
+        arguments, options = value
+        canonical = Internal::KeyNormalizer.canonical_entries?(arguments.first)
+        if canonical
+          arguments = arguments.dup
+          arguments[0] = arguments[0].to_a.freeze
+          value = [arguments.freeze, options].freeze
+        end
+        [Internal::MarshalSupport.value(value), canonical]
+      end
+
+      # @api private
+      def marshal_initialize(arguments, options, configuration)
+        options = options.dup
+        scope = options.delete(:scope)
+        if options.key?(:normalize_keys)
+          normalizer = Internal::KeyNormalizer.build(options.delete(:normalize_keys), shareable: true)
+          if is_a?(Abstract::ConcurrentMap)
+            @key_normalizer = normalizer
+          else
+            Internal::KeyNormalizer.install(self, normalizer, Internal::KeyNormalizer.operations_for(self))
+          end
+        end
+        original, canonical = configuration
+        original = Internal::MarshalSupport.restore_value(original)
+        if canonical
+          initial, settings = original
+          initial = initial.dup
+          initial[0] = Internal::KeyNormalizer.canonical_entries.concat(initial[0])
+          original = [initial.freeze, settings].freeze
+        end
+        configuration = MANAGER.wrap(original)
+        initialize_scoped(arguments, options, scope:, configuration:)
+      end
 
       # Subclasses without initial contents can defer backing storage allocation.
       def eager_scoped_value? = true

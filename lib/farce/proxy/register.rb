@@ -29,6 +29,8 @@ module Farce
     #     custom_proxy.fetch(:key) { Ractor.main? } # => false
     #   end
     class Register
+      include Internal::MarshalSupport::Reject
+
       # Mixin extending the modules created by {Register#define}
       module Definition
         # Same as `Module#define_method`, but makes Proc definitions shareable across Ractors.

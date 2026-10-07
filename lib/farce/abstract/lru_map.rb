@@ -8,6 +8,12 @@ module Farce
     class LRUMap < BoundedMap
       private
 
+      # @api private
+      def marshal_entries
+        map = marshal_map.dup
+        Array.new(map.size) { map.shift }
+      end
+
       # simplecov:disable
       def new_bounded_map(...)
         raise "subclass failed to implement #new_bounded_map" unless instance_of?(LRUMap)

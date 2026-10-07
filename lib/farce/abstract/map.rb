@@ -153,6 +153,7 @@ module Farce
     #   @return [Integer] The number of entries.
     #   @abstract
     class Map
+      include Internal::MarshalSupport::Map
       include Enumerable
       include Internal::Inspect
 

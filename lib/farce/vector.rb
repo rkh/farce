@@ -41,6 +41,22 @@ module Farce
     # @return [Symbol] The default transfer mode.
     def mode = @manager.mode
 
+    # @api private
+    def marshal_dump
+      entries = @vector.snapshot.map { Internal::MarshalSupport.value(it) }
+      [1, entries, @manager, compare_by_identity?, frozen?]
+    end
+
+    # @api private
+    def marshal_load(data)
+      entries, @manager, identity, frozen = Internal::MarshalSupport.payload(data, 4)
+      @compare_by_identity = identity
+      @vector = Internal::Vector.new(compare_by_identity: true)
+      publish_shareable
+      entries.each { @vector.push(Internal::MarshalSupport.restore_value(it)) }
+      Internal::MarshalSupport.freeze(self, frozen)
+    end
+
     # (see Farce::Abstract::Vector#compare_by_identity?)
     def compare_by_identity? = @compare_by_identity
 

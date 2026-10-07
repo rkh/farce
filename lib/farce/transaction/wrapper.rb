@@ -13,6 +13,8 @@ module Farce
     #
     # @api private
     module Wrapper
+      include Internal::MarshalSupport::Reject
+
       # Wrappers inherit abstract container classes for their interfaces, but
       # must not initialize another ordinary container. This constructor ends
       # Unshareable's super chain after binding the existing transaction snapshot.

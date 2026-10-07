@@ -6,6 +6,7 @@ module Farce
   module Abstract
     # @abstract Shared factory, caching, and delegation behavior for lazy values.
     class Lazy
+      include Internal::MarshalSupport::Initialize
       include Internal::Copyable
       include Internal::Inspect
       include Value
@@ -43,6 +44,35 @@ module Farce
       end
 
       # @api private
+      def marshal_dump
+        current           = marshal_current_value
+        resolved          = !current.nil?
+        stored            = UNDEFINED.equal?(current) ? nil : current
+        manager           = @manager if defined?(@manager)
+        options           = {}
+        options[:mode]    = manager.mode if manager
+        options[:manager] = manager if manager
+        options[:scope]   = scope if is_a?(Local::Lazy)
+
+        # Other scopes still need their factory even when this scope is resolved.
+        factory = @factory if !resolved || is_a?(Local::Lazy)
+
+        [1, resolved, factory, Internal::MarshalSupport.value(stored), options, frozen?]
+      end
+
+      # @api private
+      def marshal_load(data)
+        resolved, factory, stored, options, frozen = Internal::MarshalSupport.payload(data, 5)
+        @manager = options.delete(:manager) if options.key?(:manager)
+        initialize(factory, **options)
+        if resolved
+          value = Internal::MarshalSupport.restore_value(stored)
+          internal_atom.store(value.nil? ? UNDEFINED : value)
+        end
+        Internal::MarshalSupport.freeze(self, frozen)
+      end
+
+      # @api private
       def inspect_with(inspector)
         super do
           inspector.breakable
@@ -51,6 +81,9 @@ module Farce
       end
 
       private
+
+      # @api private
+      def marshal_current_value = internal_atom.value
 
       def internal_atom     = @atom
       def new_internal_atom = Internal::StrictAtom.new

@@ -31,7 +31,6 @@ module Farce
               raise "YAML hooks exposed by core" if source.respond_to?(:encode_with) || source.respond_to?(:init_with)
             end
             raise "YAML helper exposed by core" if Farce::Set.private_method_defined?(:restore_yaml_entry)
-            raise "normalizer dumping exposed by core" if Farce.const_get(:Internal)::KeyNormalizer.respond_to?(:dump)
           end
           require #{feature.inspect}
           raise "Psych integration missing" unless Farce::Integrations.load_active.include?(:psych)

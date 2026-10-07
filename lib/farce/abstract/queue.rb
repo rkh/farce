@@ -145,6 +145,7 @@ module Farce
     #   @raise [Farce::SealedQueueError] when the queue is sealed but not yet closed
     #   @return [Boolean] `true` if space is available, `false` if the timeout expired.
     class Queue
+      include Internal::MarshalSupport::Reject
       include Internal::Inspect
 
       # The default mode used to transfer values between Ractors.

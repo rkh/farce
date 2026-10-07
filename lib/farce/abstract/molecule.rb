@@ -10,6 +10,7 @@ module Farce
     # Use each field's `<name>_atom` for updates, comparisons, and waits.
     # Operations on several fields are not a transaction or a consistent snapshot.
     class Molecule
+      include Internal::MarshalSupport::Initialize
       include Internal::Freeze::Tracked
       include Internal::Inspect
       include Enumerable
@@ -127,6 +128,22 @@ module Farce
         members.each { initialize_atom(it, nil) unless public_send(:"#{it}_atom") }
         @molecule_atoms.freeze
         super()
+      end
+
+      # @api private
+      def marshal_dump
+        options = { compare_by_identity: compare_by_identity? }
+        options[:mode] = mode if respond_to?(:mode)
+        options[:scope] = scope if respond_to?(:scope)
+        fields = members.map { |member| [member, public_send(:"#{member}_atom")] }
+        [1, fields, options, frozen?]
+      end
+
+      # @api private
+      def marshal_load(data)
+        fields, options, frozen = Internal::MarshalSupport.payload(data, 3)
+        initialize(**fields.to_h, **options)
+        Internal::MarshalSupport.freeze(self, frozen)
       end
 
       # @api private

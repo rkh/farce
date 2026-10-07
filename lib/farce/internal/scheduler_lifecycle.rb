@@ -213,7 +213,7 @@ module Farce
       end
 
       def initialize_copy(*) = raise(TypeError, "fiber schedulers cannot be copied")
-      def marshal_dump = raise(TypeError, "fiber schedulers cannot be marshalled")
+      def marshal_dump = raise(TypeError, "fiber schedulers cannot be marshaled")
 
       def check_owner
         raise ThreadError, "scheduler belongs to another thread" unless owner_thread.equal?(@owner)

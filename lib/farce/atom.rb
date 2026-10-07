@@ -56,6 +56,24 @@ module Farce
     end
 
     # @api private
+    def marshal_dump
+      stored = @atom.value
+      stored = nil if NIL_VALUE.equal?(stored)
+      [1, Internal::MarshalSupport.value(stored), @manager, compare_by_identity?, frozen?]
+    end
+
+    # @api private
+    def marshal_load(data)
+      stored, @manager, identity, frozen = Internal::MarshalSupport.payload(data, 4)
+      @compare_by_identity               = identity
+      @atom                              = Internal::Atom.new(NIL_VALUE, compare_by_identity: true)
+      publish_shareable
+      value = Internal::MarshalSupport.restore_value(stored)
+      @atom.store(nil.equal?(value) ? NIL_VALUE : value)
+      Internal::MarshalSupport.freeze(self, frozen)
+    end
+
+    # @api private
     def transaction_wrapper(transaction)
       Transaction::Atom.new(transaction, self, @atom, manager: @manager, nil_value: NIL_VALUE)
     end

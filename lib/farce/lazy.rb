@@ -72,7 +72,7 @@ module Farce
     #   @yield computes the value on first access
     #   @yieldreturn [BasicObject] the result to transfer
     def initialize(factory = nil, mode: :copy, **, &)
-      @manager = ModeManager.new(mode:)
+      @manager = marshal_mode_manager(mode)
       super(factory, **, &)
     end
 

@@ -25,7 +25,7 @@ module Farce
         raise ArgumentError, "entries given as both positional and keyword arguments" unless entries.nil?
         entries = keyword_entries
       end
-      @manager = ModeManager.new(mode:)
+      @manager = marshal_mode_manager(mode)
       super(entries, normalize_keys:)
     end
 

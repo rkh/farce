@@ -188,18 +188,4 @@ module Farce
       entry["shareable"] ? Ractor.make_shareable(value) : value
     end
   end
-
-  module Internal::KeyNormalizer
-    module_function
-
-    def restore(value) = Restoration.new(value)
-
-    def dump(normalizer)
-      case normalizer
-      when SymbolNormalizer then normalizer.value
-      when LookupNormalizer then normalizer.source
-      else raise TypeError, "Proc key normalizers cannot be serialized"
-      end
-    end
-  end
 end

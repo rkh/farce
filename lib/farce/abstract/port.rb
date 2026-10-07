@@ -27,6 +27,7 @@ module Farce
     # @!method closed?
     #   @return [Boolean] whether the port is closed
     module Port
+      include Internal::MarshalSupport::Reject
       include Internal::Noncopyable
       include Shareable::Native
       include Shareable::Unfreezable

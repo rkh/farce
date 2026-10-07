@@ -7,6 +7,7 @@ module Farce
   module Internal # :nodoc: all
     # Fallback for Ruby implementations supporting Ractor but not Ractor::Port (CRuby 3.x)
     class Port
+      include MarshalSupport::Reject
       include Freeze::Unfreezable
 
       class QueueReader

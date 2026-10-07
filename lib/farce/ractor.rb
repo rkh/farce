@@ -215,6 +215,7 @@ module Farce
   #   @ruby CRuby 3.x
   #   @return [BasicObject] The received message.
   module Ractor
+    include Internal::MarshalSupport::Reject
     ::Ractor.include(self) if Internal.native_ractors?
 
     # @!parse

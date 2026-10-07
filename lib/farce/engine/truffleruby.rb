@@ -39,6 +39,12 @@ module Farce
 
     def native_ractors? = false
 
+    # @api private
+    # TruffleRuby probes this additional hook before using _dump.
+    def marshal_protocol_method?(name)
+      name == :__custom_marshal__ || MarshalSupport.protocol_method?(name)
+    end
+
     # Autoload on TruffleRuby is not thread-safe: A thread can see the module before its methods are defined.
     # So lets eager load all autoloaded constants, except the ones that would trigger a configuration freeze.
     # These use constant assignment anyway, so they are safe to load lazily.

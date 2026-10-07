@@ -69,6 +69,11 @@ module Farce
 
       private
 
+      def marshal_initialize(arguments, options, configuration)
+        @initial = Integer(arguments.first)
+        super
+      end
+
       def initialize_copy(other)
         # Numeric#initialize_copy cannot copy mutable Numeric subclasses on JRuby.
         @farce_freeze_state = Internal::Flag.new(false)

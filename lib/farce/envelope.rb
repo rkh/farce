@@ -66,6 +66,19 @@ module Farce
         @vault.copy_in(self, value)
       end
 
+      # @api private
+      def marshal_dump
+        storage = Internal::Storage.ractor
+        [1, storage.key?(self) ? storage[self] : retrieve, auto_unwrap]
+      end
+
+      # @api private
+      def marshal_load(data)
+        value, manager = Internal::MarshalSupport.payload(data, 2)
+        initialize(value, manager)
+        Internal::Storage.ractor[self] = value
+      end
+
       # (see Envelope#claim)
       def claim = self
 
@@ -106,6 +119,7 @@ module Farce
     #   @param (see Farce::Envelope#initialize)
     #   @return [Move, Share] A new envelope wrapping the given value.
     class Move < Farce::Envelope
+      include Internal::MarshalSupport::Reject
       include Shareable::Unfreezable
 
       # @overload initialize(value)
@@ -150,6 +164,18 @@ module Farce
         super
       end
 
+      # @api private
+      def marshal_dump
+        raise TypeError, "local envelope belongs to another Ractor" unless owned?
+        [1, Internal::Storage.ractor[self], auto_unwrap]
+      end
+
+      # @api private
+      def marshal_load(data)
+        value, manager = Internal::MarshalSupport.payload(data, 2)
+        initialize(value, manager)
+      end
+
       # (see Envelope#claim)
       def claim = owned? ? self : nil
 
@@ -186,6 +212,15 @@ module Farce
         raise ArgumentError, "value must be shareable" unless Ractor.shareable?(value)
         @value = value
         super
+      end
+
+      # @api private
+      def marshal_dump = [1, value, auto_unwrap]
+
+      # @api private
+      def marshal_load(data)
+        value, manager = Internal::MarshalSupport.payload(data, 2)
+        initialize(Ractor.make_shareable(value), manager)
       end
 
       # (see Envelope#claim)

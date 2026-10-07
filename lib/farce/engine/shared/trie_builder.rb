@@ -87,6 +87,7 @@ module Farce
     #   @return [Trie, Enumerator] self after normal exhaustion, or an Enumerator
     #     when no block is given
     class Trie
+      include Internal::MarshalSupport::Reject
       include Internal::Copyable unless ancestors.include?(Internal::Copyable)
       include Shareable::Immutable unless ancestors.include?(Shareable::Immutable)
 
@@ -95,6 +96,20 @@ module Farce
         # Create an empty builder.
         def initialize
           @entries = []
+        end
+
+        # @api private
+        def marshal_dump
+          entries = @entries.map { |parts, token| [parts, Internal::MarshalSupport.value(token)] }
+          [1, entries, frozen?]
+        end
+
+        # @api private
+        def marshal_load(data)
+          entries, frozen = Internal::MarshalSupport.payload(data, 2)
+          initialize
+          entries.each { |parts, token| add(parts, Internal::MarshalSupport.restore_value(token)) }
+          freeze if frozen
         end
 
         # Add a String and Regexp chain.

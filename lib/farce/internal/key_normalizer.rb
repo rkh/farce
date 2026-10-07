@@ -206,6 +206,16 @@ module Farce
 
       module_function
 
+      def restore(value) = Restoration.new(value)
+
+      def dump(normalizer)
+        case normalizer
+        when SymbolNormalizer then normalizer.value
+        when LookupNormalizer then normalizer.source
+        else raise TypeError, "Proc key normalizers cannot be serialized"
+        end
+      end
+
       def build(value, shareable:)
         return if value.nil?
         restoring = value.is_a?(Restoration)

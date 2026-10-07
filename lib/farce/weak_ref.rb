@@ -15,14 +15,29 @@ module Farce
   #   GC.start                       # start the garbage collector
   #   p foo.to_s                     # should raise exception (recycled)
   class WeakRef < Delegator
+    include Internal::MarshalSupport::WeakRef
+
     recycled = allocate
     recycled.instance_variable_set(:@value, WeakValue::RECYCLED)
+
+    class << recycled
+      undef marshal_dump
+
+      # @api private
+      def _dump(_) = "recycled"
+    end
 
     # @api private
     RECYCLED = Kernel.instance_method(:freeze).bind_call(recycled)
 
     # Alias for {WeakRefError} to mimic `::WeakRef::RefError`
     RefError = WeakRefError
+
+    # @api private
+    def self._load(state)
+      raise TypeError, "invalid weak reference state" unless state == "recycled"
+      RECYCLED
+    end
 
     def initialize(value)
       @value = WeakValue.new(value)
@@ -40,6 +55,11 @@ module Farce
     def weakref_alive? = @value.alive?
 
     private
+
+    def respond_to_missing?(name, include_private = false)
+      return false if Internal.marshal_protocol_method?(name)
+      super
+    end
 
     def initialize_dup(other)       = initialize_copy(other)
     def initialize_clone(other, **) = initialize_copy(other)

@@ -8,6 +8,7 @@ module Farce
     # @note This is a module rather than a class so {Farce::Counter} can inherit
     #   directly from the native counter and avoid delegation overhead.
     module Counter
+      include Internal::MarshalSupport::Counter
       include Internal::Copyable
       include Internal::Inspect
 

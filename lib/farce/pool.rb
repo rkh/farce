@@ -37,6 +37,7 @@ module Farce
   #   # Schedule some work
   #   pool.schedule { MyClass.do_something }
   class Pool < Farce::Abstract::Scheduler
+    include Internal::MarshalSupport::Reject
     include Shareable::Unfreezable
     include Internal::Inspect
 

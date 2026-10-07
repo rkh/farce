@@ -26,12 +26,13 @@ module Farce
       def operation_lock                 = Lock.new
       def ensure_mutation_still_allowed! = Internal::Freeze.check(self)
 
-      def with_map_operation(state, mutation:) # rubocop:disable Lint/UnusedMethodArgument
+      def with_map_operation(state, mutation:)
         current = Fiber.current
         raise ThreadError, "deadlock; recursive tree map access" if
           primitive_identical?(state.operation_owner, current)
 
         state.lock.synchronize do
+          ensure_mutation_still_allowed! if mutation
           without_async_interrupts { state.operation_owner = current }
           yield
         ensure

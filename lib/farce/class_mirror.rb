@@ -28,6 +28,23 @@ module Farce
       super()
     end
 
+    # @api private
+    def marshal_dump
+      raise TypeError, "class mirror callbacks cannot be marshaled" if @callback
+      [1, @mapping.to_h, frozen?]
+    end
+
+    # @api private
+    def marshal_load(data)
+      mapping, frozen     = Internal::MarshalSupport.payload(data, 2)
+      @mapping            = Strict::Map.new(mapping)
+      @cache              = Strict::WeakKeyMap.new
+      @callback           = nil
+      @farce_freeze_state = Internal::Flag.new(false)
+      publish_shareable
+      Internal::MarshalSupport.freeze(self, frozen)
+    end
+
     # Look up a mirror or the cached result of the constructor block.
     # @param klass [Class] the source class
     # @return [Object] the mirror class or the block result

@@ -41,6 +41,7 @@ module Farce
   # * Ractor::TVar from the ractor-sharing gem
   # * Ractor::TMVar from the ractor-tmvar gem
   class Transaction
+    include Internal::MarshalSupport::Reject
     include Internal::Autoloads
     include Unshareable
 

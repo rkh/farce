@@ -27,6 +27,8 @@ module Farce
   #     Integer === object ? object + 1 : walker.traverse
   #   end # => [2, [3]]
   class Walker
+    include Internal::MarshalSupport::Reject
+
     module SendTo
       private
 

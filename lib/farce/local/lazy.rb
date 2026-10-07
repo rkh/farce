@@ -28,6 +28,8 @@ module Farce
 
       private
 
+      def marshal_current_value = Internal::Storage.scope(scope)[@state_key]&.value
+
       def eager_scoped_value? = false
       def internal_atom       = Internal::Storage.store_if_absent(@state_key, scope:) { new_scoped_value }
       def new_scoped_value    = Internal::UnsharedAtom.new

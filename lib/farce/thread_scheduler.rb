@@ -6,6 +6,7 @@ module Farce
   # A scheduler that starts a new thread for each scheduled task. Executes synchronous tasks inline.
   # Creating an instance starts no threads. Blocks and arguments stay local to the caller.
   # Tasks are not tracked, and closing this stateless scheduler has no effect.
+  # Default instances support Marshal. Instances with a custom thread factory reject dumping.
   class ThreadScheduler < Farce::Abstract::Scheduler
     include Shareable::Immutable
     include Internal::Inspect
@@ -13,6 +14,18 @@ module Farce
     def initialize(&factory)
       @factory = factory
       super()
+    end
+
+    # @api private
+    def marshal_dump
+      raise TypeError, "scheduler factories cannot be marshaled" if @factory
+      [1]
+    end
+
+    # @api private
+    def marshal_load(data)
+      Internal::MarshalSupport.payload(data, 0)
+      initialize
     end
 
     # Starts a thread in the caller's Ractor, preserving the block and arguments.

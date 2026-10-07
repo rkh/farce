@@ -9,6 +9,8 @@ module Farce
     # Atomic updates reserve the entire vector. Reads through {#[]} do not wait for updates.
     # Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.
     class Vector < Collection
+      include Internal::MarshalSupport::Vector
+
       # @api private
       def transaction_wrapper(transaction) = Transaction::Vector.new(transaction, self, internal_vector)
 

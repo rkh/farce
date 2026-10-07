@@ -10,6 +10,7 @@ module Farce
     # A value may become `nil` without an explicit update when an implementation
     # retains it weakly.
     class Atom
+      include Internal::MarshalSupport::Atom
       include Internal::Copyable
       include Internal::Inspect
       include Value

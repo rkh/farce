@@ -45,18 +45,23 @@ module Farce
     # Make sure to call `super` if you include this module.
     # Accepts any arguments and passes them on to the superclass initializer.
     def initialize(...)
-      if Internal.native_ractors?
-        case self
-        when Movable  then Internal::Unshareable.prevent_copyable(self) unless is_a?(Copyable)
-        when Copyable then Internal::Unshareable.prevent_movable(self)
-        else Internal::Unshareable.pin_to_current_ractor(self)
-        end
-      end
+      pin_unshareable
       super
     end
 
     # @return [Boolean] false
     # @see Shareable#ractor_shareable?
     def ractor_shareable? = false
+
+    private
+
+    def pin_unshareable
+      return unless Internal.native_ractors?
+      case self
+      when Movable  then Internal::Unshareable.prevent_copyable(self) unless is_a?(Copyable)
+      when Copyable then Internal::Unshareable.prevent_movable(self)
+      else Internal::Unshareable.pin_to_current_ractor(self)
+      end
+    end
   end
 end

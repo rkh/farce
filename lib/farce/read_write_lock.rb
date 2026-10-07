@@ -11,6 +11,7 @@ module Farce
   # additional upgraders yield their read slot to avoid deadlock and restore it
   # before returning to the outer read-lock block.
   class ReadWriteLock
+    include Internal::MarshalSupport::Reject
     include Internal::Copyable
     include Shareable::Unfreezable
 

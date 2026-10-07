@@ -36,6 +36,12 @@ module Farce
     include Autoloads
     extend self
 
+    # @api private
+    def marshal_protocol_method?(name) = MarshalSupport.protocol_method?(name)
+
+    # @api private
+    def marshal_shareable?(value) = Ractor.shareable?(value)
+
     # Get the value from an options hash with only the `:self` key, and raise an error if there are any other keys.
     def self_option(options, default = nil)
       new_self = options.key?(:self) ? options.delete(:self) : (block_given? ? yield : default)

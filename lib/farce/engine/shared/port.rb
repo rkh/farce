@@ -7,6 +7,7 @@ module Farce
   module Internal # :nodoc: all
     # Fallback for Ruby implementations not supporting Ractor at all
     class Port
+      include MarshalSupport::Reject
       include Freeze::Unfreezable
 
       def initialize = @queue = Thread::Queue.new

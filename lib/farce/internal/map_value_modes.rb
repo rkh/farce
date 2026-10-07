@@ -189,6 +189,13 @@ module Farce
 
       private
 
+      def marshal_map_value(value) = super(NIL_VALUE.equal?(value) ? nil : value)
+
+      def marshal_restore_map_value(data)
+        value = super
+        nil.equal?(value) ? NIL_VALUE : value
+      end
+
       def each_for_inspect(&) = @map.each(&)
 
       def inspect_pair(inspector, key, value)
@@ -200,7 +207,7 @@ module Farce
         super(inspector, value, @manager)
       end
 
-      def new_mode_manager(mode:) = ModeManager.new(mode:)
+      def new_mode_manager(mode:) = marshal_mode_manager(mode)
 
       def check_key(key)
         return if Ractor.shareable?(key)

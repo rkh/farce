@@ -11,6 +11,8 @@ module Farce
     # Identity comparison and normalization are fixed at construction, so this
     # class does not provide Set#compare_by_identity or Set#reset.
     class Set < Collection
+      include Internal::MarshalSupport::Initialize
+
       # A shareable, immutable key used by mode-backed sets. Structural keys
       # contain an insertion-time snapshot. Identity keys contain either the
       # shareable element itself or an opaque token.
@@ -98,6 +100,50 @@ module Farce
         end
 
         super()
+      end
+
+      # @api private
+      def marshal_dump
+        normalizer = @normalizer && Internal::KeyNormalizer.dump(@normalizer)
+        contents   =
+          if value_modes?
+            each_stored.map do |key, entry|
+              identity = identity_storage_key?(key)
+              snapshot = identity ? key.value : key
+              [identity, Internal::MarshalSupport.value(snapshot), entry.manager,
+               Internal::MarshalSupport.value(entry.payload)]
+            end
+          else
+            @map.marshal_dump
+          end
+        [1, contents, compare_by_identity?, normalizer, respond_to?(:mode) ? mode : nil, frozen?]
+      end
+
+      # @api private
+      def marshal_load(data)
+        contents, identity, normalizer, mode, frozen = Internal::MarshalSupport.payload(data, 5)
+        @compare_by_identity = identity
+        @normalizer = Internal::KeyNormalizer.build(
+          normalizer && Internal::KeyNormalizer.restore(normalizer),
+          shareable: !is_a?(Unshareable),
+        )
+        initialize_value_mode(mode || UNDEFINED)
+        if value_modes?
+          @map = new_map(nil, compare_keys_by_identity: false)
+          publish_marshaled
+          contents.each do |identity_key, snapshot, manager, stored|
+            key   = Internal::MarshalSupport.restore_value(snapshot)
+            key   = MembershipKey.new(key, identity: true) if identity_key
+            value = Internal::MarshalSupport.restore_value(stored)
+            add_stored(key, StoredEntry.new(manager, value))
+          end
+        else
+          # Select the backing class locally without recording its private name.
+          @map = new_map(nil, compare_keys_by_identity: identity).class.allocate
+          @map.marshal_load(contents)
+          publish_marshaled
+        end
+        Internal::MarshalSupport.freeze(self, frozen)
       end
 
       # @api private

@@ -23,7 +23,7 @@ module Farce
     #   Optional initial entries. Entries are stored sequentially and may be evicted.
     # @param mode [Symbol] The default value transfer mode.
     def initialize(entries = nil, mode: :copy, **)
-      @manager = ModeManager.new(mode:)
+      @manager = marshal_mode_manager(mode)
       super(entries, **)
     end
 
