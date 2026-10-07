@@ -62,7 +62,7 @@ module Farce
         raise "loaded ActiveSupport" if defined?(ActiveSupport)
         raise "loaded concurrent-ruby" if defined?(::Concurrent::TVar)
         raise "loaded ractor-sharing" if defined?(::Ractor::TVar)
-        raise "unexpected active integrations" unless Farce::Integrations.load_active.empty?
+        raise "unexpected active integrations" unless Farce::Integrations.load_active == [:weakref]
       RUBY
     end
 
@@ -138,7 +138,7 @@ module Farce
         require "dry/types"
         require "farce"
         raise "dry-types integration missing" unless Farce.respond_to?(:DryTypes)
-        raise "wrong active integrations" unless Farce::Integrations.load_active == [:dry_types]
+        raise "wrong active integrations" unless Farce::Integrations.load_active == [:dry_types, :weakref]
         Kernel.require "shellwords"
       RUBY
       assert_integration_process(<<~RUBY, coverage: false)
@@ -146,7 +146,7 @@ module Farce
         require "active_support/core_ext"
         require "farce"
         raise "ActiveSupport integration missing" unless Farce::Vector.method_defined?(:in_groups)
-        raise "wrong active integrations" unless Farce::Integrations.load_active == [:active_support, :concurrent, :json, :psych]
+        raise "wrong active integrations" unless Farce::Integrations.load_active == [:active_support, :concurrent, :json, :psych, :weakref]
       RUBY
     end
 
@@ -163,7 +163,7 @@ module Farce
         require "farce"
         require "active_support"
         raise "integration loaded too early" if Farce::Vector.method_defined?(:in_groups)
-        raise "base gem was treated as core_ext" unless Farce::Integrations.load_active.empty?
+        raise "base gem was treated as core_ext" unless Farce::Integrations.load_active == [:weakref]
         require "active_support/core_ext"
         raise "ActiveSupport integration missing" unless Farce::Vector.method_defined?(:in_groups)
       RUBY
@@ -223,6 +223,8 @@ module Farce
         require "farce"
         expected = [:active_support, :dry_types, :concurrent, :json, :msgpack, :psych]
         expected << :oj unless Gem::Specification.find_all_by_name("oj").empty?
+        expected << :sorted_set unless Gem::Specification.find_all_by_name("sorted_set").empty?
+        expected << :weakref
         expected << :yajl unless Gem::Specification.find_all_by_name("yajl-ruby").empty?
         expected << :ractor_tmvar unless Gem::Specification.find_all_by_name("ractor-tmvar").empty?
         expected << :ractor_sharing unless Gem::Specification.find_all_by_name("ractor-sharing").empty?
@@ -242,6 +244,7 @@ module Farce
         ["active_support", "dry/types"]   => %i[concurrent json msgpack psych],
         ["farce/integrations/dry_types"]  => %i[active_support concurrent json msgpack psych],
         ["farce/integrations/concurrent"] => %i[active_support dry_types json msgpack psych],
+        ["sorted_set"]                    => %i[active_support dry_types concurrent json msgpack psych],
         ["ractor/tvar"]                   => %i[active_support dry_types concurrent json msgpack psych],
         ["ractor/tmvar"]                  => %i[active_support dry_types concurrent json msgpack psych],
       }.each do |missing, expected|
@@ -252,6 +255,9 @@ module Farce
           result = Farce::Integrations.load_available
           expected = #{expected.inspect}
           expected << :oj unless Gem::Specification.find_all_by_name("oj").empty?
+          expected << :sorted_set if #{!missing.include?("sorted_set")} &&
+            !Gem::Specification.find_all_by_name("sorted_set").empty?
+          expected << :weakref
           expected << :yajl unless Gem::Specification.find_all_by_name("yajl-ruby").empty?
           expected << :ractor_tmvar if #{!missing.intersect?(["ractor/tvar", "ractor/tmvar"])} &&
             !Gem::Specification.find_all_by_name("ractor-tmvar").empty?

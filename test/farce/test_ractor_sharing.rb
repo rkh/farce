@@ -43,6 +43,19 @@ module Farce
       end
     end
 
+    def test_enfarce_converts_lock_hashes_in_each_namespace
+      [::Ractor::LockHash, ::Ractor::KeyLockHash].product([Farce, Local, Strict, Unsafe, Unshared]).each do |klass, ns|
+        source = klass.new({ values: [1, { name: :ruby }].freeze })
+        result = ns.enfarce(source, freeze: false)
+
+        assert_instance_of ns::Map, result
+        assert_instance_of ns::Vector, result[:values]
+        assert_instance_of ns::Map, result[:values][1]
+        assert_equal :ruby, result[:values][1][:name]
+        assert_equal [1, { name: :ruby }], source[:values]
+      end
+    end
+
     def test_active_objects_stop_at_owner_ractor_boundary
       map = ::Ractor::ActorHash.new(value: [1])
       object = ActiveBox.new([1])

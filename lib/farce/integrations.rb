@@ -9,11 +9,13 @@ module Farce
     INTEGRATIONS = {
       active_support: %w[active_support active_support/core_ext].freeze,
       dry_types:      %w[dry/types].freeze,
-      concurrent:     %w[concurrent/tvar concurrent].freeze,
+      concurrent:     %w[concurrent/map concurrent/tvar concurrent].freeze,
       json:           %w[json].freeze,
       msgpack:        %w[msgpack].freeze,
       psych:          %w[psych].freeze,
       oj:             %w[oj].freeze,
+      sorted_set:     %w[sorted_set].freeze,
+      weakref:        %w[weakref].freeze,
       yajl:           %w[yajl].freeze,
       ractor_tmvar:   %w[ractor/tvar ractor/tmvar].freeze,
       ractor_sharing: %w[
@@ -55,8 +57,6 @@ module Farce
         result
       end
     end
-
-    Object.prepend(RequireHook)
     private_constant :RequireHook
 
     # A prepended singleton hook can recurse when Zeitwerk aliases it. Preserve
@@ -104,6 +104,7 @@ module Farce
     # Activate integrations at startup when automatic loading is enabled.
     # @api private
     def setup
+      Object.prepend(RequireHook)
       load_active if Farce.config.autoload_integrations
     end
 

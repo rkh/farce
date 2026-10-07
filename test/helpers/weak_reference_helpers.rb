@@ -23,7 +23,7 @@ module Helpers
     end
 
     def reference_alive?(reference)
-      Farce::WeakRef === reference ? reference.weakref_alive? : reference.alive?
+      reference.respond_to?(:weakref_alive?) ? reference.weakref_alive? : reference.alive?
     end
   end
 end

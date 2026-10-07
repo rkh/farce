@@ -168,4 +168,8 @@ module Farce
       end
     end
   end
+
+  Internal::Converter.define(ActiveSupport::HashWithIndifferentAccess, :Map) do
+    def prepare(...) = super.with_indifferent_access
+  end
 end

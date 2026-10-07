@@ -57,8 +57,14 @@ module Farce
               tvar = Concurrent::TVar.new(1)
               raise "transaction failed" unless Farce.transaction { |tx| tx[tvar].value = 2 }
               raise "wrong value" unless tvar.value == 2
-              raise "integration not active" unless Farce::Integrations.load_active == [:concurrent]
+              raise "integration not active" unless Farce::Integrations.load_active == [:concurrent, :weakref]
               raise "configuration frozen" if Farce.config.frozen?
+              map = Concurrent::Map.new
+              map[:values] = [1]
+              converted = Farce.enfarce(map)
+              raise "wrong map class" unless converted.instance_of?(Farce::Map)
+              raise "wrong vector class" unless converted[:values].instance_of?(Farce::Vector)
+              raise "wrong values" unless converted[:values].to_a == [1]
             RUBY
 
             assert_predicate status, :success?, "#{output}\n#{error}"

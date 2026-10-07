@@ -15,12 +15,19 @@ module Farce
   #   GC.start                       # start the garbage collector
   #   p foo.to_s                     # should raise exception (recycled)
   class WeakRef < Delegator
+    recycled = allocate
+    recycled.instance_variable_set(:@value, WeakValue::RECYCLED)
+
+    # @api private
+    RECYCLED = Kernel.instance_method(:freeze).bind_call(recycled)
+
     # Alias for {WeakRefError} to mimic `::WeakRef::RefError`
     RefError = WeakRefError
 
     def initialize(value)
       @value = WeakValue.new(value)
       super
+      Kernel.instance_method(:freeze).bind_call(self)
     end
 
     # @api private

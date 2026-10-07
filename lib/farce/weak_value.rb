@@ -55,6 +55,23 @@ module Farce
     NIL_VALUE = nil_value.freeze
     private_constant :NIL_VALUE
 
+    recycled = new
+    class << recycled
+      def dup               = self
+      def clone(**)         = self
+      def alive?            = false
+      def moved?            = false
+      def ractor_shareable? = true
+
+      private
+
+      def _value          = nil
+      def state_and_value = [:recycled, nil]
+    end
+
+    # @api private
+    RECYCLED = recycled.freeze
+
     # @param (see #initialize)
     # @return [WeakValue] a new weak value wrapping the given object
     # @see #initialize

@@ -161,6 +161,29 @@ module Farce
     DEDUPER.dedup(object, **)
   end
 
+  # @overload enfarce(object, freeze: nil, mode: :copy)
+  #   Converts vanilla Ruby objects into their {Farce} equivalents.
+  #
+  #   @!macro modes
+  #
+  #   @example
+  #     Farce.enfarce({ foo: ["bar"] }) # =>  #<Farce::Map {foo: #<Farce::Vector ["bar"]>}>
+  #
+  #   @yield [object] Optional block, called with any object that doesn't have a specific conversion defined.
+  #   @yieldparam object [BasicObject] the object to convert
+  #   @yieldreturn [BasicObject] the converted object
+  #   @param object [BasicObject] The root object to convert
+  #   @param freeze [Boolean, nil]
+  #     Whether to freeze the converted objects.
+  #     If set to `nil` (default), the freezing behavior will depend on the original object's frozen state.
+  #   @param mode [Symbol] The conversion mode, e.g., `:copy`.
+  #   @return [BasicObject] the converted object
+  #   @see Farce::Local.enfarce
+  #   @see Farce::Strict.enfarce
+  #   @see Farce::Unsafe.enfarce
+  #   @see Farce::Unshared.enfarce
+  def self.enfarce(object, **, &) = Internal::Converter.new(self, **, &).convert(object)
+
   # Recursively freeze an object graph using {Walker} traversal.
   #
   # Visits container elements, hash keys and values, and instance variables.

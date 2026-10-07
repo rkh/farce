@@ -42,8 +42,9 @@ group :compatibility do
   gem "concurrent-ruby-ext"
   gem "dry-types"
   gem "msgpack", ">= 1.8"
-  gem "oj", platforms: %i[mri truffleruby]
-  gem "ratomic", platforms: %i[mri_34 mri_40]
+  gem "oj",         platforms: %i[mri truffleruby]
+  gem "ratomic",    platforms: %i[mri_34 mri_40]
+  gem "weakref"
 
   # yajl-ruby 1.4.3 uses untyped C data APIs removed in Ruby 4.1.
   gem "yajl-ruby", platforms: %i[mri_34 mri_40 truffleruby]
@@ -56,6 +57,7 @@ group :compatibility do
   platform :mri do
     gem "async", ">= 2.45"
     gem "ractor_queue"
+    gem "sorted_set"
   end
 end
 

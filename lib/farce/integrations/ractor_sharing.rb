@@ -115,6 +115,15 @@ module Farce
     klass.include(Internal::Noncopyable) unless klass < Internal::Noncopyable
   end
 
+  [::Ractor::LockHash, ::Ractor::KeyLockHash].each do |klass|
+    Internal::Converter.define(klass, :Map) do |instance, hash|
+      hash.keys.each do |key| # rubocop:disable Style/HashEachMethods
+        value = hash.fetch(key, UNDEFINED)
+        instance[key] = convert(value) unless UNDEFINED.equal?(value)
+      end
+    end
+  end
+
   Walker.define(::Ractor::TVar) do |object, walker|
     walker.update(object, [object.value]) do |target, results|
       ::Ractor.atomically { target.value = results.first unless target.value.equal?(results.first) }

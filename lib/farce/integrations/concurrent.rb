@@ -4,6 +4,7 @@
 
 # @!group concurrent-ruby Integration
 require "farce"
+require "concurrent/map"
 require "concurrent/tvar"
 
 module Farce
@@ -103,5 +104,9 @@ module Farce
 
   Transaction.define(::Concurrent::TVar) do |object, transaction|
     Farce::Transaction::TVar.new(transaction, object, object)
+  end
+
+  Internal::Converter.define(::Concurrent::Map, :Map) do |instance, value|
+    value.each { instance[_1] = convert(_2) }
   end
 end
