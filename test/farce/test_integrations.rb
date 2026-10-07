@@ -221,7 +221,7 @@ module Farce
     def test_load_available_loads_integrations_without_freezing_configuration
       assert_integration_process(<<~RUBY)
         require "farce"
-        expected = [:active_support, :dry_types, :concurrent, :json, :msgpack, :psych]
+        expected = [:active_support, :bson, :dry_types, :concurrent, :json, :msgpack, :psych]
         expected << :oj unless Gem::Specification.find_all_by_name("oj").empty?
         expected << :sorted_set unless Gem::Specification.find_all_by_name("sorted_set").empty?
         expected << :weakref
@@ -239,14 +239,15 @@ module Farce
 
     def test_load_available_skips_missing_optional_dependencies
       {
-        ["active_support"]                => %i[dry_types concurrent json msgpack psych],
-        ["dry/types"]                     => %i[active_support concurrent json msgpack psych],
-        ["active_support", "dry/types"]   => %i[concurrent json msgpack psych],
-        ["farce/integrations/dry_types"]  => %i[active_support concurrent json msgpack psych],
-        ["farce/integrations/concurrent"] => %i[active_support dry_types json msgpack psych],
-        ["sorted_set"]                    => %i[active_support dry_types concurrent json msgpack psych],
-        ["ractor/tvar"]                   => %i[active_support dry_types concurrent json msgpack psych],
-        ["ractor/tmvar"]                  => %i[active_support dry_types concurrent json msgpack psych],
+        ["bson"]                          => %i[active_support dry_types concurrent json msgpack psych],
+        ["active_support"]                => %i[bson dry_types concurrent json msgpack psych],
+        ["dry/types"]                     => %i[active_support bson concurrent json msgpack psych],
+        ["active_support", "dry/types"]   => %i[bson concurrent json msgpack psych],
+        ["farce/integrations/dry_types"]  => %i[active_support bson concurrent json msgpack psych],
+        ["farce/integrations/concurrent"] => %i[active_support bson dry_types json msgpack psych],
+        ["sorted_set"]                    => %i[active_support bson dry_types concurrent json msgpack psych],
+        ["ractor/tvar"]                   => %i[active_support bson dry_types concurrent json msgpack psych],
+        ["ractor/tmvar"]                  => %i[active_support bson dry_types concurrent json msgpack psych],
       }.each do |missing, expected|
         assert_integration_process(<<~RUBY)
           require "farce"

@@ -38,6 +38,7 @@ end
 # Do not use ~> for version constraints in this group, use >= instead
 group :compatibility do
   gem "activesupport"
+  gem "bson"
   gem "concurrent-ruby"
   gem "concurrent-ruby-ext"
   gem "dry-types"

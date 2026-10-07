@@ -8,6 +8,7 @@ module Farce
     # Dependency entry points, ending with the feature that activates each integration.
     INTEGRATIONS = {
       active_support: %w[active_support active_support/core_ext].freeze,
+      bson:           %w[bson].freeze,
       dry_types:      %w[dry/types].freeze,
       concurrent:     %w[concurrent/map concurrent/tvar concurrent].freeze,
       json:           %w[json].freeze,
