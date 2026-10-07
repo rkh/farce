@@ -38,6 +38,7 @@ module Farce
   #   pool.schedule { MyClass.do_something }
   class Pool < Farce::Abstract::Scheduler
     include Shareable::Unfreezable
+    include Internal::Inspect
 
     # @return [Float] Maximum queue wait before adding a worker.
     attr_reader :grow_after
@@ -232,6 +233,19 @@ module Farce
       schedule_scaler(next_started) if @pressure.compare_and_set(started, next_started)
     rescue Exception => e # rubocop:disable Lint/RescueException
       @error.compare_and_set(nil, Envelope.new(e))
+    end
+
+    # @api private
+    def inspect_with(inspector)
+      super do
+        inspector.attribute(:state,        state)
+        inspector.attribute(:backend,      @backend)
+        inspector.attribute(:size,         size)
+        inspector.attribute(:min_size,     @min_size)
+        inspector.attribute(:max_size,     @max_size)
+        inspector.attribute(:max_inflight, @max_inflight) if @max_inflight
+        yield if block_given?
+      end
     end
 
     private

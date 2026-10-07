@@ -8,6 +8,7 @@ module Farce
   # Tasks are not tracked, and closing this stateless scheduler has no effect.
   class ThreadScheduler < Farce::Abstract::Scheduler
     include Shareable::Immutable
+    include Internal::Inspect
 
     def initialize(&factory)
       @factory = factory

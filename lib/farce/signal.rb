@@ -20,6 +20,7 @@ module Farce
   #
   class Signal
     include Internal::Noncopyable
+    include Internal::Inspect
     include Shareable::Unfreezable
 
     def initialize
@@ -82,6 +83,14 @@ module Farce
         remaining = deadline - Clock.now if deadline
         return if remaining && !remaining.positive?
         return unless wait(observed, timeout: remaining)
+      end
+    end
+
+    # @api private
+    def inspect_with(inspector)
+      super do
+        inspector.attributes({ generation:, num_waiting: })
+        yield if block_given?
       end
     end
   end

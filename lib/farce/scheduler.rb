@@ -31,6 +31,7 @@ module Farce
   #   Fiber.schedule { puts "Hello from the scheduler!" }
   class Scheduler < Farce::Abstract::Scheduler
     include Shareable::Unfreezable
+    include Internal::Inspect
 
     CLOSED_STATES = ::Set[:closed, :closing, :error].freeze
     private_constant :CLOSED_STATES
@@ -399,6 +400,18 @@ module Farce
     # @return [Boolean] Whether the dispatcher is in its `:running` state.
     # @see #state
     def alive? = @state.value == :running
+
+    # @api private
+    def inspect_with(inspector)
+      super do
+        external = Internal::Storage[self]
+        inspector.attribute(:state, state)
+        inspector.attribute(:backend, @backend)
+        inspector.attribute(:external_scheduler, external) if external && !external.is_a?(Internal::FiberScheduler)
+        inspector.attribute(:local, local?) if @owner.value
+        yield if block_given?
+      end
+    end
 
     private
 
