@@ -448,14 +448,14 @@ Defeats the purpose of an envelope, but is provided for code that expects an env
       <pre class="lines">
 
 
-185
-186
-187
-188
-189</pre>
+211
+212
+213
+214
+215</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 185</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 211</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>value must be shareable</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="../Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
@@ -499,12 +499,12 @@ Defeats the purpose of an envelope, but is provided for code that expects an env
       <pre class="lines">
 
 
-181
-182
-183</pre>
+207
+208
+209</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 181</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 207</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span>
   <span class='ivar'>@value</span>
@@ -563,31 +563,40 @@ Defeats the purpose of an envelope, but is provided for code that expects an env
       <pre class="lines">
 
 
-178
-179
-180
-181
-182
-183
-184
-185
-186
-187
-188
-189
-190
-191
-192
-193
-194
-195
-196
-197
-198
-199</pre>
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 178</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 204</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Envelope::Share (class)">Share</a></span></span> <span class='op'>&lt;</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Envelope.html" title="Farce::Envelope (class)">Envelope</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Copyable</span>
@@ -600,6 +609,15 @@ Defeats the purpose of an envelope, but is provided for code that expects an env
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>value must be shareable</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="../Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
     <span class='ivar'>@value</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
     <span class='kw'>super</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_marshal_dump'>marshal_dump</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rbracket'>]</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_marshal_load'>marshal_load</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_payload'>payload</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># (see Envelope#claim)
@@ -664,10 +682,10 @@ Defeats the purpose of an envelope, but is provided for code that expects an env
       <pre class="lines">
 
 
-192</pre>
+227</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 192</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 227</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_claim'>claim</span> <span class='op'>=</span> <span class='kw'>self</span></pre>
     </td>
@@ -717,10 +735,10 @@ Defeats the purpose of an envelope, but is provided for code that expects an env
       <pre class="lines">
 
 
-195</pre>
+230</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 195</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 230</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_claimed?'>claimed?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -770,10 +788,10 @@ Defeats the purpose of an envelope, but is provided for code that expects an env
       <pre class="lines">
 
 
-198</pre>
+233</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 198</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 233</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_owned?'>owned?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -786,7 +804,7 @@ Defeats the purpose of an envelope, but is provided for code that expects an env
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:51:02 2026 by
+  Generated on Wed Oct  7 11:02:16 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

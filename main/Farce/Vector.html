@@ -620,6 +620,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
   
   
   
+  
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Abstract/Collection.html" title="Farce::Abstract::Collection (class)">Abstract::Collection</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="Abstract/Collection.html#<<-instance_method" title="Farce::Abstract::Collection#&lt;&lt; (method)">#<<</a></span>, <span class='object_link'><a href="Abstract/Collection.html#[]-class_method" title="Farce::Abstract::Collection.[] (method)">[]</a></span>, <span class='object_link'><a href="Abstract/Collection.html#clear-instance_method" title="Farce::Abstract::Collection#clear (method)">#clear</a></span>, <span class='object_link'><a href="Abstract/Collection.html#count-instance_method" title="Farce::Abstract::Collection#count (method)">#count</a></span>, <span class='object_link'><a href="Abstract/Collection.html#each-instance_method" title="Farce::Abstract::Collection#each (method)">#each</a></span>, <span class='object_link'><a href="Abstract/Collection.html#empty%3F-instance_method" title="Farce::Abstract::Collection#empty? (method)">#empty?</a></span>, <span class='object_link'><a href="Abstract/Collection.html#filter-instance_method" title="Farce::Abstract::Collection#filter (method)">#filter</a></span>, <span class='object_link'><a href="Abstract/Collection.html#include%3F-instance_method" title="Farce::Abstract::Collection#include? (method)">#include?</a></span>, <span class='object_link'><a href="Abstract/Collection.html#join-instance_method" title="Farce::Abstract::Collection#join (method)">#join</a></span>, <span class='object_link'><a href="Abstract/Collection.html#length-instance_method" title="Farce::Abstract::Collection#length (method)">#length</a></span>, <span class='object_link'><a href="Abstract/Collection.html#member%3F-instance_method" title="Farce::Abstract::Collection#member? (method)">#member?</a></span>, <span class='object_link'><a href="Abstract/Collection.html#reject-instance_method" title="Farce::Abstract::Collection#reject (method)">#reject</a></span>, <span class='object_link'><a href="Abstract/Collection.html#select-instance_method" title="Farce::Abstract::Collection#select (method)">#select</a></span>, <span class='object_link'><a href="Abstract/Collection.html#size-instance_method" title="Farce::Abstract::Collection#size (method)">#size</a></span>, <span class='object_link'><a href="Abstract/Collection.html#to_a-instance_method" title="Farce::Abstract::Collection#to_a (method)">#to_a</a></span>, <span class='object_link'><a href="Abstract/Collection.html#to_s-instance_method" title="Farce::Abstract::Collection#to_s (method)">#to_s</a></span></p>
 
@@ -659,6 +660,7 @@ that can't be copied but moved (like IO objects). However, the value will no lon
 that pushed it.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
+<li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
 <li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
 <li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="../Farce.html#dedup-class_method" title="Farce.dedup (method)">Farce.dedup</a></span>, then made Ractor-shareable.
 This may update and freeze the original. Already-shareable values pass through unchanged.</li>
@@ -844,10 +846,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-51</pre>
+67</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 51</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 67</span>
 
 <span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span><span class='rparen'>)</span></pre>
     </td>
@@ -931,14 +933,14 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-54
-55
-56
-57
-58</pre>
+70
+71
+72
+73
+74</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 54</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 70</span>
 
 <span class='kw'>def</span> <span class='op'>[]=</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -1236,7 +1238,23 @@ This may update and freeze the original. Already-shareable values pass through u
 207
 208
 209
-210</pre>
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 19</span>
@@ -1265,6 +1283,22 @@ This may update and freeze the original. Already-shareable values pass through u
 
   <span class='comment'># @return [Symbol] The default transfer mode.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_mode'>mode</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_marshal_dump'>marshal_dump</span>
+    <span class='id identifier rubyid_entries'>entries</span> <span class='op'>=</span> <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_snapshot'>snapshot</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+    <span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_entries'>entries</span><span class='comma'>,</span> <span class='ivar'>@manager</span><span class='comma'>,</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span><span class='comma'>,</span> <span class='id identifier rubyid_frozen?'>frozen?</span><span class='rbracket'>]</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_marshal_load'>marshal_load</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_entries'>entries</span><span class='comma'>,</span> <span class='ivar'>@manager</span><span class='comma'>,</span> <span class='id identifier rubyid_identity'>identity</span><span class='comma'>,</span> <span class='id identifier rubyid_frozen'>frozen</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_payload'>payload</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span> <span class='int'>4</span><span class='rparen'>)</span>
+    <span class='ivar'>@compare_by_identity</span> <span class='op'>=</span> <span class='id identifier rubyid_identity'>identity</span>
+    <span class='ivar'>@vector</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Vector</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>compare_by_identity:</span> <span class='kw'>true</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_publish_shareable'>publish_shareable</span>
+    <span class='id identifier rubyid_entries'>entries</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='lbrace'>{</span> <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_restore_value'>restore_value</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_frozen'>frozen</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># (see Farce::Abstract::Vector#compare_by_identity?)
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='ivar'>@compare_by_identity</span>
@@ -1460,6 +1494,7 @@ that can't be copied but moved (like IO objects). However, the value will no lon
 that pushed it.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
+<li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
 <li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
 <li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="../Farce.html#dedup-class_method" title="Farce.dedup (method)">Farce.dedup</a></span>, then made Ractor-shareable.
 This may update and freeze the original. Already-shareable values pass through unchanged.</li>
@@ -1578,27 +1613,27 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
-145
-146
-147
-148
-149
 150
-151</pre>
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 134</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 150</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -1665,10 +1700,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-45</pre>
+61</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 45</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 61</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='ivar'>@compare_by_identity</span></pre>
     </td>
@@ -1754,10 +1789,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-61</pre>
+77</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 61</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 77</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -1882,10 +1917,10 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-78</pre>
+94</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 78</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 94</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -1988,13 +2023,13 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-72
-73
-74
-75</pre>
+88
+89
+90
+91</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 72</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 88</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -2047,10 +2082,10 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-48</pre>
+64</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 48</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 64</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -2168,13 +2203,13 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-65
-66
-67
-68</pre>
+81
+82
+83
+84</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 65</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 81</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -2314,18 +2349,18 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-90
-91
-92
-93
-94
-95
-96
-97
-98</pre>
+106
+107
+108
+109
+110
+111
+112
+113
+114</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 90</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 106</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -2362,6 +2397,7 @@ that can't be copied but moved (like IO objects). However, the value will no lon
 that pushed it.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
+<li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
 <li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
 <li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="../Farce.html#dedup-class_method" title="Farce.dedup (method)">Farce.dedup</a></span>, then made Ractor-shareable.
 This may update and freeze the original. Already-shareable values pass through unchanged.</li>
@@ -2465,13 +2501,13 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-83
-84
-85
-86</pre>
+99
+100
+101
+102</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 83</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 99</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -2503,6 +2539,7 @@ that can't be copied but moved (like IO objects). However, the value will no lon
 that pushed it.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
+<li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
 <li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
 <li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="../Farce.html#dedup-class_method" title="Farce.dedup (method)">Farce.dedup</a></span>, then made Ractor-shareable.
 This may update and freeze the original. Already-shareable values pass through unchanged.</li>
@@ -2644,18 +2681,18 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-103
-104
-105
-106
-107
-108
-109
-110
-111</pre>
+119
+120
+121
+122
+123
+124
+125
+126
+127</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 103</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 119</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -2692,6 +2729,7 @@ that can't be copied but moved (like IO objects). However, the value will no lon
 that pushed it.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
+<li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
 <li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
 <li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="../Farce.html#dedup-class_method" title="Farce.dedup (method)">Farce.dedup</a></span>, then made Ractor-shareable.
 This may update and freeze the original. Already-shareable values pass through unchanged.</li>
@@ -2848,23 +2886,23 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-116
-117
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127
-128
-129</pre>
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 116</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 132</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_initial'>initial</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -2978,19 +3016,19 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-154
-155
-156
-157
-158
-159
-160
-161
-162
-163</pre>
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 154</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 170</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_timeout_deadline'>timeout_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
@@ -3085,10 +3123,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-166</pre>
+182</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 166</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 182</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -3101,7 +3139,7 @@ This may update and freeze the original. Already-shareable values pass through u
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:51:01 2026 by
+  Generated on Wed Oct  7 11:02:15 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

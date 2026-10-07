@@ -100,6 +100,11 @@
   
   
   
+  <dl>
+      <dt>Includes:</dt>
+      <dd>Internal::MarshalSupport::WeakRef</dd>
+  </dl>
+  
   
 
   
@@ -265,6 +270,7 @@
   
 
 
+  
   <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
@@ -293,17 +299,19 @@
       <pre class="lines">
 
 
-21
-22
-23
-24</pre>
+42
+43
+44
+45
+46</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/weak_ref.rb', line 21</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/weak_ref.rb', line 42</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='ivar'>@value</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="WeakValue.html" title="Farce::WeakValue (class)">WeakValue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="WeakValue.html#new-class_method" title="Farce::WeakValue.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='kw'>super</span>
+  <span class='const'>Kernel</span><span class='period'>.</span><span class='id identifier rubyid_instance_method'>instance_method</span><span class='lparen'>(</span><span class='symbol'>:freeze</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_bind_call'>bind_call</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -419,10 +427,10 @@
       <pre class="lines">
 
 
-33</pre>
+55</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/weak_ref.rb', line 33</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/weak_ref.rb', line 55</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_weakref_alive?'>weakref_alive?</span> <span class='op'>=</span> <span class='ivar'>@value</span><span class='period'>.</span><span class='id identifier rubyid_alive?'>alive?</span></pre>
     </td>
@@ -435,7 +443,7 @@
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:51:03 2026 by
+  Generated on Wed Oct  7 11:02:17 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

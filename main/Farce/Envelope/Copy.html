@@ -511,7 +511,20 @@ The value will be copied once when the envelope is created, and then once per Ra
 96
 97
 98
-99</pre>
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 58</span>
@@ -525,6 +538,19 @@ The value will be copied once when the envelope is created, and then once per Ra
     <span class='ivar'>@vault</span> <span class='op'>=</span> <span class='const'>VAULT_ATOM</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span> <span class='lbrace'>{</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Vault</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='rbrace'>}</span>
     <span class='kw'>super</span>
     <span class='ivar'>@vault</span><span class='period'>.</span><span class='id identifier rubyid_copy_in'>copy_in</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_marshal_dump'>marshal_dump</span>
+    <span class='id identifier rubyid_storage'>storage</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span>
+    <span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_storage'>storage</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='id identifier rubyid_storage'>storage</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='id identifier rubyid_retrieve'>retrieve</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rbracket'>]</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># @api private
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_marshal_load'>marshal_load</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_payload'>payload</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span><span class='rparen'>)</span>
+    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
   <span class='kw'>end</span>
 
   <span class='comment'># (see Envelope#claim)
@@ -611,10 +637,10 @@ The value will be copied once when the envelope is created, and then once per Ra
       <pre class="lines">
 
 
-70</pre>
+83</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 70</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 83</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_claim'>claim</span> <span class='op'>=</span> <span class='kw'>self</span></pre>
     </td>
@@ -664,10 +690,10 @@ The value will be copied once when the envelope is created, and then once per Ra
       <pre class="lines">
 
 
-73</pre>
+86</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 73</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 86</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_claimed?'>claimed?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -717,10 +743,10 @@ The value will be copied once when the envelope is created, and then once per Ra
       <pre class="lines">
 
 
-76</pre>
+89</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 76</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 89</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_owned?'>owned?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -733,7 +759,7 @@ The value will be copied once when the envelope is created, and then once per Ra
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:51:02 2026 by
+  Generated on Wed Oct  7 11:02:16 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

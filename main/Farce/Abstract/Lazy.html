@@ -100,7 +100,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span>, <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span>, Internal::Inspect</dd>
+      <dd><span class='object_link'><a href="Value.html" title="Farce::Abstract::Value (module)">Value</a></span>, <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span>, Internal::Inspect, Internal::MarshalSupport::Initialize</dd>
   </dl>
   
   
@@ -226,7 +226,8 @@
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Internal/Copyable.html#duplicable%3F-instance_method" title="Farce::Internal::Copyable#duplicable? (method)">#duplicable?</a></span></p>
-<div id="constructor_details" class="method_details_list">
+
+  <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
     <div class="method_details first">
@@ -384,14 +385,14 @@
       <pre class="lines">
 
 
-21
 22
 23
 24
-25</pre>
+25
+26</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lazy.rb', line 21</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lazy.rb', line 22</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_factory'>factory</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='ivar'>@factory</span> <span class='op'>=</span> <span class='id identifier rubyid_prepare_factory'>prepare_factory</span><span class='lparen'>(</span><span class='id identifier rubyid_factory'>factory</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
@@ -436,10 +437,10 @@
       <pre class="lines">
 
 
-78</pre>
+111</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lazy.rb', line 78</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lazy.rb', line 111</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_public_send'>public_send</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -499,7 +500,6 @@ Shareable variants support calls from any Ractor.</p>
       <pre class="lines">
 
 
-33
 34
 35
 36
@@ -509,10 +509,11 @@ Shareable variants support calls from any Ractor.</p>
 40
 41
 42
-43</pre>
+43
+44</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lazy.rb', line 33</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lazy.rb', line 34</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span>
   <span class='id identifier rubyid_atom'>atom</span>  <span class='op'>=</span> <span class='id identifier rubyid_internal_atom'>internal_atom</span>
@@ -535,7 +536,7 @@ Shareable variants support calls from any Ractor.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:51:06 2026 by
+  Generated on Wed Oct  7 11:02:19 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

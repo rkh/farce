@@ -112,7 +112,8 @@
 
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
-    <p>A delegating reference to a Farce::Abstract::Value object.</p>
+    <p>A delegating reference to a Farce::Abstract::Value object.
+Marshal preserves the holder and wrapper without resolving the referenced value.</p>
 
 
   </div>
@@ -337,6 +338,29 @@
 </li>
 
       
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#respond_to%3F-instance_method" title="#respond_to? (instance method)">#<strong>respond_to?</strong>(name, include_private = false)  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Marshal hook discovery must inspect this wrapper without resolving its target.</p>
+</div></span>
+  
+</li>
+
+      
     </ul>
     
   
@@ -424,10 +448,10 @@
       <pre class="lines">
 
 
-113</pre>
+114</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 113</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 114</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@value</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span></pre>
     </td>
@@ -468,10 +492,10 @@
       <pre class="lines">
 
 
-139</pre>
+156</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 139</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 156</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@value</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Style/MissingRespondToMissing</span></pre>
     </td>
@@ -555,7 +579,6 @@ automatically.</p>
       <pre class="lines">
 
 
-59
 60
 61
 62
@@ -573,10 +596,11 @@ automatically.</p>
 74
 75
 76
-77</pre>
+77
+78</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 59</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 60</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_factory'>factory</span><span class='comma'>,</span> <span class='label'>deep:</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='op'>::</span><span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>factory must be a class</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_factory'>factory</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='op'>::</span><span class='const'>Class</span><span class='rparen'>)</span>
@@ -659,13 +683,13 @@ automatically.</p>
       <pre class="lines">
 
 
-105
 106
 107
-108</pre>
+108
+109</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 105</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 106</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_deref'>deref</span><span class='lparen'>(</span><span class='id identifier rubyid_reference'>reference</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_reference'>reference</span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="" title="Farce::Reference (class)">Reference</a></span></span> <span class='op'>===</span> <span class='id identifier rubyid_reference'>reference</span>
@@ -774,15 +798,15 @@ automatically.</p>
       <pre class="lines">
 
 
-84
 85
 86
 87
 88
-89</pre>
+89
+90</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 84</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 85</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>deep:</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_deref'>deref</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
@@ -903,13 +927,13 @@ automatically.</p>
       <pre class="lines">
 
 
-121
-122
-123
-124</pre>
+138
+139
+140
+141</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 121</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 138</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_freeze'>freeze</span>
   <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:freeze</span><span class='rparen'>)</span>
@@ -962,12 +986,69 @@ automatically.</p>
       <pre class="lines">
 
 
-117</pre>
+134</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 117</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 134</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_frozen?'>frozen?</span> <span class='op'>=</span> <span class='kw'>super</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:frozen?</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="respond_to?-instance_method">
+  
+    #<strong>respond_to?</strong>(name, include_private = false)  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Marshal hook discovery must inspect this wrapper without resolving its target.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+126
+127
+128
+129
+130</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/reference.rb', line 126</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='id identifier rubyid_include_private'>include_private</span> <span class='op'>=</span> <span class='kw'>false</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Style/OptionalBooleanParameter
+</span>  <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_name'>name</span> <span class='op'>==</span> <span class='symbol'>:marshal_dump</span> <span class='op'>||</span> <span class='id identifier rubyid_name'>name</span> <span class='op'>==</span> <span class='symbol'>:marshal_load</span>
+  <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_marshal_protocol_method?'>marshal_protocol_method?</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:respond_to?</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='id identifier rubyid_include_private'>include_private</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -978,7 +1059,7 @@ automatically.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:51:03 2026 by
+  Generated on Wed Oct  7 11:02:17 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -102,7 +102,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span>, <span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Shareable::Native</a></span>, <span class='object_link'><a href="Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Shareable::Unfreezable</a></span></dd>
+      <dd><span class='object_link'><a href="Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span>, <span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Shareable::Native</a></span>, <span class='object_link'><a href="Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Shareable::Unfreezable</a></span>, Internal::MarshalSupport::Reject</dd>
   </dl>
   
   
@@ -360,6 +360,7 @@ ThreadError. Waiting for a lock cooperates with an installed Fiber scheduler.</p
   <p class="inherited"><span class='object_link'><a href="Internal/Copyable.html#duplicable%3F-instance_method" title="Farce::Internal::Copyable#duplicable? (method)">#duplicable?</a></span></p>
 
   
+  
 
   <div id="instance_method_details" class="method_details_list">
     <h2>Instance Method Details</h2>
@@ -426,12 +427,14 @@ ThreadError. Waiting for a lock cooperates with an installed Fiber scheduler.</p
 49
 50
 51
-52</pre>
+52
+53</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/lock.rb', line 46</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Lock (class)">Lock</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Lock</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
@@ -491,12 +494,14 @@ ThreadError. Waiting for a lock cooperates with an installed Fiber scheduler.</p
 49
 50
 51
-52</pre>
+52
+53</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/lock.rb', line 46</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Lock (class)">Lock</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Lock</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
@@ -556,12 +561,14 @@ ThreadError. Waiting for a lock cooperates with an installed Fiber scheduler.</p
 49
 50
 51
-52</pre>
+52
+53</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/lock.rb', line 46</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Lock (class)">Lock</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Lock</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
@@ -655,12 +662,14 @@ ThreadError. Waiting for a lock cooperates with an installed Fiber scheduler.</p
 49
 50
 51
-52</pre>
+52
+53</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/lock.rb', line 46</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Lock (class)">Lock</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Lock</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
@@ -754,12 +763,14 @@ ThreadError. Waiting for a lock cooperates with an installed Fiber scheduler.</p
 49
 50
 51
-52</pre>
+52
+53</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/lock.rb', line 46</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Lock (class)">Lock</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Lock</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
@@ -819,12 +830,14 @@ ThreadError. Waiting for a lock cooperates with an installed Fiber scheduler.</p
 49
 50
 51
-52</pre>
+52
+53</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/lock.rb', line 46</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Lock (class)">Lock</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Lock</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
@@ -897,12 +910,14 @@ ThreadError. Waiting for a lock cooperates with an installed Fiber scheduler.</p
 49
 50
 51
-52</pre>
+52
+53</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/lock.rb', line 46</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Lock (class)">Lock</a></span></span> <span class='op'>&lt;</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Lock</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Copyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
@@ -919,7 +934,7 @@ ThreadError. Waiting for a lock cooperates with an installed Fiber scheduler.</p
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:51:00 2026 by
+  Generated on Wed Oct  7 11:02:14 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

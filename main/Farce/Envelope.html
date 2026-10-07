@@ -526,14 +526,14 @@ Ractor, others can be claimed by any Ractor. Claims cannot be taken back.</p>
       <pre class="lines">
 
 
-247
-248
-249
-250
-251</pre>
+282
+283
+284
+285
+286</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 247</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 282</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid__'>_</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>auto_unwrap needs to be shareable</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rparen'>)</span>
@@ -820,14 +820,14 @@ created. Otherwise, the type of envelope will be determined by the keyword argum
       <pre class="lines">
 
 
-225
-226
-227
-228
-229</pre>
+260
+261
+262
+263
+264</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 225</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 260</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='kw'>super</span> <span class='kw'>if</span> <span class='kw'>self</span> <span class='op'>!=</span> <span class='const'><span class='object_link'><a href="" title="Farce::Envelope (class)">Envelope</a></span></span>
@@ -1240,7 +1240,42 @@ created. Otherwise, the type of envelope will be determined by the keyword argum
 296
 297
 298
-299</pre>
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 24</span>
@@ -1290,6 +1325,19 @@ created. Otherwise, the type of envelope will be determined by the keyword argum
       <span class='ivar'>@vault</span><span class='period'>.</span><span class='id identifier rubyid_copy_in'>copy_in</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
     <span class='kw'>end</span>
 
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_dump'>marshal_dump</span>
+      <span class='id identifier rubyid_storage'>storage</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span>
+      <span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_storage'>storage</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='id identifier rubyid_storage'>storage</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='id identifier rubyid_retrieve'>retrieve</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rbracket'>]</span>
+    <span class='kw'>end</span>
+
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_load'>marshal_load</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_payload'>payload</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+
     <span class='comment'># (see Envelope#claim)
 </span>    <span class='kw'>def</span> <span class='id identifier rubyid_claim'>claim</span> <span class='op'>=</span> <span class='kw'>self</span>
 
@@ -1330,6 +1378,7 @@ created. Otherwise, the type of envelope will be determined by the keyword argum
 </span>  <span class='comment'>#   @param (see Farce::Envelope#initialize)
 </span>  <span class='comment'>#   @return [Move, Share] A new envelope wrapping the given value.
 </span>  <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="Envelope/Move.html" title="Farce::Envelope::Move (class)">Move</a></span></span> <span class='op'>&lt;</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="" title="Farce::Envelope (class)">Envelope</a></span></span>
+    <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
     <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
 
     <span class='comment'># @overload initialize(value)
@@ -1374,6 +1423,18 @@ created. Otherwise, the type of envelope will be determined by the keyword argum
       <span class='kw'>super</span>
     <span class='kw'>end</span>
 
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_dump'>marshal_dump</span>
+      <span class='id identifier rubyid_raise'>raise</span> <span class='const'>TypeError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>local envelope belongs to another Ractor</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_owned?'>owned?</span>
+      <span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rbracket'>]</span>
+    <span class='kw'>end</span>
+
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_load'>marshal_load</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_payload'>payload</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
     <span class='comment'># (see Envelope#claim)
 </span>    <span class='kw'>def</span> <span class='id identifier rubyid_claim'>claim</span> <span class='op'>=</span> <span class='id identifier rubyid_owned?'>owned?</span> <span class='op'>?</span> <span class='kw'>self</span> <span class='op'>:</span> <span class='kw'>nil</span>
 
@@ -1410,6 +1471,15 @@ created. Otherwise, the type of envelope will be determined by the keyword argum
       <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>value must be shareable</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
       <span class='ivar'>@value</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
       <span class='kw'>super</span>
+    <span class='kw'>end</span>
+
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_dump'>marshal_dump</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rbracket'>]</span>
+
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_load'>marshal_load</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_payload'>payload</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span><span class='rparen'>)</span>
     <span class='kw'>end</span>
 
     <span class='comment'># (see Envelope#claim)
@@ -1586,10 +1656,10 @@ Raises an exception if it was unable to claim the envelope.</p>
       <pre class="lines">
 
 
-257</pre>
+292</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 257</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 292</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_claim!'>claim!</span> <span class='op'>=</span> <span class='id identifier rubyid_claim'>claim</span> <span class='op'>||</span> <span class='id identifier rubyid_raise'>raise</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="#AlreadyClaimed-constant" title="Farce::Envelope::AlreadyClaimed (constant)">AlreadyClaimed</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>envelope has already been claimed by another Ractor</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span></pre>
     </td>
@@ -1914,7 +1984,42 @@ Raises an exception if it was unable to claim the envelope.</p>
 296
 297
 298
-299</pre>
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 24</span>
@@ -1964,6 +2069,19 @@ Raises an exception if it was unable to claim the envelope.</p>
       <span class='ivar'>@vault</span><span class='period'>.</span><span class='id identifier rubyid_copy_in'>copy_in</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
     <span class='kw'>end</span>
 
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_dump'>marshal_dump</span>
+      <span class='id identifier rubyid_storage'>storage</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span>
+      <span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_storage'>storage</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='id identifier rubyid_storage'>storage</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='id identifier rubyid_retrieve'>retrieve</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rbracket'>]</span>
+    <span class='kw'>end</span>
+
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_load'>marshal_load</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_payload'>payload</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+
     <span class='comment'># (see Envelope#claim)
 </span>    <span class='kw'>def</span> <span class='id identifier rubyid_claim'>claim</span> <span class='op'>=</span> <span class='kw'>self</span>
 
@@ -2004,6 +2122,7 @@ Raises an exception if it was unable to claim the envelope.</p>
 </span>  <span class='comment'>#   @param (see Farce::Envelope#initialize)
 </span>  <span class='comment'>#   @return [Move, Share] A new envelope wrapping the given value.
 </span>  <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="Envelope/Move.html" title="Farce::Envelope::Move (class)">Move</a></span></span> <span class='op'>&lt;</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="" title="Farce::Envelope (class)">Envelope</a></span></span>
+    <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
     <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
 
     <span class='comment'># @overload initialize(value)
@@ -2048,6 +2167,18 @@ Raises an exception if it was unable to claim the envelope.</p>
       <span class='kw'>super</span>
     <span class='kw'>end</span>
 
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_dump'>marshal_dump</span>
+      <span class='id identifier rubyid_raise'>raise</span> <span class='const'>TypeError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>local envelope belongs to another Ractor</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_owned?'>owned?</span>
+      <span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rbracket'>]</span>
+    <span class='kw'>end</span>
+
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_load'>marshal_load</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_payload'>payload</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
     <span class='comment'># (see Envelope#claim)
 </span>    <span class='kw'>def</span> <span class='id identifier rubyid_claim'>claim</span> <span class='op'>=</span> <span class='id identifier rubyid_owned?'>owned?</span> <span class='op'>?</span> <span class='kw'>self</span> <span class='op'>:</span> <span class='kw'>nil</span>
 
@@ -2084,6 +2215,15 @@ Raises an exception if it was unable to claim the envelope.</p>
       <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>value must be shareable</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
       <span class='ivar'>@value</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
       <span class='kw'>super</span>
+    <span class='kw'>end</span>
+
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_dump'>marshal_dump</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rbracket'>]</span>
+
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_load'>marshal_load</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_payload'>payload</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span><span class='rparen'>)</span>
     <span class='kw'>end</span>
 
     <span class='comment'># (see Envelope#claim)
@@ -2517,7 +2657,42 @@ Raises an exception if it was unable to claim the envelope.</p>
 296
 297
 298
-299</pre>
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 24</span>
@@ -2567,6 +2742,19 @@ Raises an exception if it was unable to claim the envelope.</p>
       <span class='ivar'>@vault</span><span class='period'>.</span><span class='id identifier rubyid_copy_in'>copy_in</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
     <span class='kw'>end</span>
 
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_dump'>marshal_dump</span>
+      <span class='id identifier rubyid_storage'>storage</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span>
+      <span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_storage'>storage</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='id identifier rubyid_storage'>storage</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='id identifier rubyid_retrieve'>retrieve</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rbracket'>]</span>
+    <span class='kw'>end</span>
+
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_load'>marshal_load</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_payload'>payload</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span><span class='rparen'>)</span>
+      <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>end</span>
+
     <span class='comment'># (see Envelope#claim)
 </span>    <span class='kw'>def</span> <span class='id identifier rubyid_claim'>claim</span> <span class='op'>=</span> <span class='kw'>self</span>
 
@@ -2607,6 +2795,7 @@ Raises an exception if it was unable to claim the envelope.</p>
 </span>  <span class='comment'>#   @param (see Farce::Envelope#initialize)
 </span>  <span class='comment'>#   @return [Move, Share] A new envelope wrapping the given value.
 </span>  <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="Envelope/Move.html" title="Farce::Envelope::Move (class)">Move</a></span></span> <span class='op'>&lt;</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="" title="Farce::Envelope (class)">Envelope</a></span></span>
+    <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
     <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
 
     <span class='comment'># @overload initialize(value)
@@ -2651,6 +2840,18 @@ Raises an exception if it was unable to claim the envelope.</p>
       <span class='kw'>super</span>
     <span class='kw'>end</span>
 
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_dump'>marshal_dump</span>
+      <span class='id identifier rubyid_raise'>raise</span> <span class='const'>TypeError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>local envelope belongs to another Ractor</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_owned?'>owned?</span>
+      <span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rbracket'>]</span>
+    <span class='kw'>end</span>
+
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_load'>marshal_load</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_payload'>payload</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
     <span class='comment'># (see Envelope#claim)
 </span>    <span class='kw'>def</span> <span class='id identifier rubyid_claim'>claim</span> <span class='op'>=</span> <span class='id identifier rubyid_owned?'>owned?</span> <span class='op'>?</span> <span class='kw'>self</span> <span class='op'>:</span> <span class='kw'>nil</span>
 
@@ -2687,6 +2888,15 @@ Raises an exception if it was unable to claim the envelope.</p>
       <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>value must be shareable</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
       <span class='ivar'>@value</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
       <span class='kw'>super</span>
+    <span class='kw'>end</span>
+
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_dump'>marshal_dump</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_unwrap'>auto_unwrap</span><span class='rbracket'>]</span>
+
+    <span class='comment'># @api private
+</span>    <span class='kw'>def</span> <span class='id identifier rubyid_marshal_load'>marshal_load</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='period'>.</span><span class='id identifier rubyid_payload'>payload</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_make_shareable'><span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">make_shareable</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='id identifier rubyid_manager'>manager</span><span class='rparen'>)</span>
     <span class='kw'>end</span>
 
     <span class='comment'># (see Envelope#claim)
@@ -2882,25 +3092,25 @@ claiming or opening either envelope.</p>
       <pre class="lines">
 
 
-270
-271
-272
-273
-274
-275
-276
-277
-278
-279
-280
-281
-282
-283
-284
-285</pre>
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 270</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 305</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_same_value?'>same_value?</span><span class='lparen'>(</span><span class='id identifier rubyid_other'>other</span><span class='comma'>,</span> <span class='label'>identity:</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='kw'>if</span> <span class='id identifier rubyid_comparison_vault'>comparison_vault</span>
@@ -2983,10 +3193,10 @@ May be called multiple times.</p>
       <pre class="lines">
 
 
-263</pre>
+298</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 263</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/envelope.rb', line 298</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_claim!'>claim!</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_retrieve'>retrieve</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -2999,7 +3209,7 @@ May be called multiple times.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:51:02 2026 by
+  Generated on Wed Oct  7 11:02:16 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

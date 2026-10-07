@@ -232,6 +232,7 @@ through its wrapper to avoid trying to acquire its mutex again.</p>
   
   
   
+  
   <div id="method_missing_details" class="method_details_list">
   <h2>Dynamic Method Handling</h2>
   <p class="notice super">
@@ -290,10 +291,10 @@ through its wrapper to avoid trying to acquire its mutex again.</p>
       <pre class="lines">
 
 
-89</pre>
+90</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/concurrent.rb', line 89</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/concurrent.rb', line 90</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_access'>access</span> <span class='lbrace'>{</span> <span class='ivar'>@working</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -362,12 +363,12 @@ through its wrapper to avoid trying to acquire its mutex again.</p>
       <pre class="lines">
 
 
-94
 95
-96</pre>
+96
+97</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/concurrent.rb', line 94</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/concurrent.rb', line 95</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value='>value=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_write'>write</span> <span class='lbrace'>{</span> <span class='ivar'>@working</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
@@ -382,7 +383,7 @@ through its wrapper to avoid trying to acquire its mutex again.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:51:13 2026 by
+  Generated on Wed Oct  7 11:02:26 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

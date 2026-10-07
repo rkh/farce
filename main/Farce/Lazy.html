@@ -342,7 +342,8 @@ Use <span class='object_link'><a href="Strict/Lazy.html" title="Farce::Strict::L
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="Internal/Copyable.html#duplicable%3F-instance_method" title="Farce::Internal::Copyable#duplicable? (method)">#duplicable?</a></span></p>
-<div id="constructor_details" class="method_details_list">
+
+  <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
     <div class="method_details first">
@@ -369,6 +370,7 @@ that can't be copied but moved (like IO objects). However, the value will no lon
 that pushed it.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
+<li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
 <li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
 <li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="../Farce.html#dedup-class_method" title="Farce.dedup (method)">Farce.dedup</a></span>, then made Ractor-shareable.
 This may update and freeze the original. Already-shareable values pass through unchanged.</li>
@@ -539,7 +541,7 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 74</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_factory'>factory</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
-  <span class='ivar'>@manager</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ModeManager.html#initialize-instance_method" title="Farce::ModeManager#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span><span class='rparen'>)</span>
+  <span class='ivar'>@manager</span> <span class='op'>=</span> <span class='id identifier rubyid_marshal_mode_manager'>marshal_mode_manager</span><span class='lparen'>(</span><span class='id identifier rubyid_mode'>mode</span><span class='rparen'>)</span>
   <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_factory'>factory</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -733,7 +735,7 @@ Repeated reads return the same value within the current Ractor.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:51:00 2026 by
+  Generated on Wed Oct  7 11:02:14 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

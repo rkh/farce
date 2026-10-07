@@ -100,7 +100,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="../Shareable/Tracked.html" title="Farce::Shareable::Tracked (module)">Shareable::Tracked</a></span></dd>
+      <dd><span class='object_link'><a href="../Shareable/Tracked.html" title="Farce::Shareable::Tracked (module)">Shareable::Tracked</a></span>, Internal::MarshalSupport::Reject</dd>
   </dl>
   
   
@@ -251,7 +251,8 @@ Helpful to isolate proxy definitions that shouldn't be activated globally.</p>
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
-<div id="constructor_details" class="method_details_list">
+
+  <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
     <div class="method_details first">
@@ -279,14 +280,14 @@ Helpful to isolate proxy definitions that shouldn't be activated globally.</p>
       <pre class="lines">
 
 
-60
-61
 62
 63
-64</pre>
+64
+65
+66</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy/register.rb', line 60</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy/register.rb', line 62</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span>
   <span class='ivar'>@inner_mirror</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../ClassMirror.html" title="Farce::ClassMirror (class)">ClassMirror</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../ClassMirror.html#initialize-instance_method" title="Farce::ClassMirror#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='const'>Wrapper</span><span class='op'>::</span><span class='const'>Inner</span><span class='rparen'>)</span>
@@ -405,17 +406,17 @@ invoked in the caller's Ractor.</p>
       <pre class="lines">
 
 
-79
-80
 81
 82
 83
 84
 85
-86</pre>
+86
+87
+88</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy/register.rb', line 79</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy/register.rb', line 81</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_define'>define</span><span class='lparen'>(</span><span class='id identifier rubyid_klass'>klass</span><span class='comma'>,</span> <span class='label'>layer:</span> <span class='symbol'>:outer</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -435,7 +436,7 @@ invoked in the caller's Ractor.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:51:07 2026 by
+  Generated on Wed Oct  7 11:02:20 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

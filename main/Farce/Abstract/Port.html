@@ -84,7 +84,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Internal::Noncopyable</a></span>, <span class='object_link'><a href="../Shareable/Native.html" title="Farce::Shareable::Native (module)">Shareable::Native</a></span>, <span class='object_link'><a href="../Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Shareable::Unfreezable</a></span></dd>
+      <dd><span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Internal::Noncopyable</a></span>, <span class='object_link'><a href="../Shareable/Native.html" title="Farce::Shareable::Native (module)">Shareable::Native</a></span>, <span class='object_link'><a href="../Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Shareable::Unfreezable</a></span>, Internal::MarshalSupport::Reject</dd>
   </dl>
   
   
@@ -370,6 +370,7 @@
   <h3 class="inherited">Methods included from <span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Internal::Noncopyable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Internal/Noncopyable.html#duplicable%3F-instance_method" title="Farce::Internal::Noncopyable#duplicable? (method)">#duplicable?</a></span></p>
 
+  
 
   <div id="instance_method_details" class="method_details_list">
     <h2>Instance Method Details</h2>
@@ -413,10 +414,10 @@
       <pre class="lines">
 
 
-47</pre>
+48</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/port.rb', line 47</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/port.rb', line 48</span>
 
 <span class='kw'>def</span> <span class='op'>&lt;&lt;</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_send'>send</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -504,12 +505,14 @@
 68
 69
 70
-71</pre>
+71
+72</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/port.rb', line 29</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Port (module)">Port</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Noncopyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
@@ -641,12 +644,14 @@
 68
 69
 70
-71</pre>
+71
+72</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/port.rb', line 29</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Port (module)">Port</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Noncopyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
@@ -736,10 +741,10 @@
       <pre class="lines">
 
 
-43</pre>
+44</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/port.rb', line 43</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/port.rb', line 44</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_owned?'>owned?</span> <span class='op'>=</span> <span class='op'>!</span><span class='op'>!</span><span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='period'>.</span><span class='id identifier rubyid_ractor'>ractor</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='rbracket'>]</span></pre>
     </td>
@@ -789,10 +794,10 @@
       <pre class="lines">
 
 
-55</pre>
+56</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/port.rb', line 55</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/port.rb', line 56</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_receive'>receive</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -838,10 +843,10 @@
       <pre class="lines">
 
 
-51</pre>
+52</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/port.rb', line 51</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/port.rb', line 52</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_send'>send</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -971,12 +976,14 @@
 68
 69
 70
-71</pre>
+71
+72</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/port.rb', line 29</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Port (module)">Port</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Noncopyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
@@ -1140,12 +1147,14 @@
 68
 69
 70
-71</pre>
+71
+72</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/port.rb', line 29</span>
 
 <span class='kw'>module</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Port (module)">Port</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Noncopyable</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Shareable/Native.html" title="Farce::Shareable::Native (module)">Native</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Unfreezable</a></span></span>
@@ -1198,7 +1207,7 @@
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:50:59 2026 by
+  Generated on Wed Oct  7 11:02:14 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

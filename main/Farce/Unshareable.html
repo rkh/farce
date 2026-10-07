@@ -249,25 +249,13 @@ Accepts any arguments and passes them on to the superclass initializer.</p>
 47
 48
 49
-50
-51
-52
-53
-54
-55
-56</pre>
+50</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/unshareable.rb', line 47</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
-  <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_ractors?'>native_ractors?</span>
-    <span class='kw'>case</span> <span class='kw'>self</span>
-    <span class='kw'>when</span> <span class='const'><span class='object_link'><a href="Unshareable/Movable.html" title="Farce::Unshareable::Movable (module)">Movable</a></span></span>  <span class='kw'>then</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Unshareable</span><span class='period'>.</span><span class='id identifier rubyid_prevent_copyable'>prevent_copyable</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Unshareable/Copyable.html" title="Farce::Unshareable::Copyable (module)">Copyable</a></span></span><span class='rparen'>)</span>
-    <span class='kw'>when</span> <span class='const'><span class='object_link'><a href="Unshareable/Copyable.html" title="Farce::Unshareable::Copyable (module)">Copyable</a></span></span> <span class='kw'>then</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Unshareable</span><span class='period'>.</span><span class='id identifier rubyid_prevent_movable'>prevent_movable</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
-    <span class='kw'>else</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Unshareable</span><span class='period'>.</span><span class='id identifier rubyid_pin_to_current_ractor'>pin_to_current_ractor</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
-    <span class='kw'>end</span>
-  <span class='kw'>end</span>
+  <span class='id identifier rubyid_pin_unshareable'>pin_unshareable</span>
   <span class='kw'>super</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -324,10 +312,10 @@ Accepts any arguments and passes them on to the superclass initializer.</p>
       <pre class="lines">
 
 
-60</pre>
+54</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/unshareable.rb', line 60</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/unshareable.rb', line 54</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_ractor_shareable?'>ractor_shareable?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -340,7 +328,7 @@ Accepts any arguments and passes them on to the superclass initializer.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:50:59 2026 by
+  Generated on Wed Oct  7 11:02:13 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

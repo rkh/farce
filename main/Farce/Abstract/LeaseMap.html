@@ -100,6 +100,11 @@
   
   
   
+  <dl>
+      <dt>Includes:</dt>
+      <dd>Internal::MarshalSupport::Reject</dd>
+  </dl>
+  
   
 
   
@@ -867,9 +872,11 @@
   
   
   
+  
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Map.html" title="Farce::Abstract::Map (class)">Map</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="Map.html#assoc-instance_method" title="Farce::Abstract::Map#assoc (method)">#assoc</a></span>, <span class='object_link'><a href="Map.html#compare_by_identity%3F-instance_method" title="Farce::Abstract::Map#compare_by_identity? (method)">#compare_by_identity?</a></span>, <span class='object_link'><a href="Map.html#deconstruct_keys-instance_method" title="Farce::Abstract::Map#deconstruct_keys (method)">#deconstruct_keys</a></span>, <span class='object_link'><a href="Map.html#dig-instance_method" title="Farce::Abstract::Map#dig (method)">#dig</a></span>, <span class='object_link'><a href="Map.html#empty%3F-instance_method" title="Farce::Abstract::Map#empty? (method)">#empty?</a></span>, <span class='object_link'><a href="Map.html#fetch_values-instance_method" title="Farce::Abstract::Map#fetch_values (method)">#fetch_values</a></span>, <span class='object_link'><a href="Map.html#has_key%3F-instance_method" title="Farce::Abstract::Map#has_key? (method)">#has_key?</a></span>, <span class='object_link'><a href="Map.html#key-instance_method" title="Farce::Abstract::Map#key (method)">#key</a></span>, <span class='object_link'><a href="Map.html#length-instance_method" title="Farce::Abstract::Map#length (method)">#length</a></span>, <span class='object_link'><a href="Map.html#rassoc-instance_method" title="Farce::Abstract::Map#rassoc (method)">#rassoc</a></span>, <span class='object_link'><a href="Map.html#store-instance_method" title="Farce::Abstract::Map#store (method)">#store</a></span>, <span class='object_link'><a href="Map.html#to_hash-instance_method" title="Farce::Abstract::Map#to_hash (method)">#to_hash</a></span>, <span class='object_link'><a href="Map.html#to_json-instance_method" title="Farce::Abstract::Map#to_json (method)">#to_json</a></span>, <span class='object_link'><a href="Map.html#to_s-instance_method" title="Farce::Abstract::Map#to_s (method)">#to_s</a></span>, <span class='object_link'><a href="Map.html#value%3F-instance_method" title="Farce::Abstract::Map#value? (method)">#value?</a></span>, <span class='object_link'><a href="Map.html#values_at-instance_method" title="Farce::Abstract::Map#values_at (method)">#values_at</a></span>, <span class='object_link'><a href="Map.html#weak_keys%3F-instance_method" title="Farce::Abstract::Map#weak_keys? (method)">#weak_keys?</a></span>, <span class='object_link'><a href="Map.html#weak_values%3F-instance_method" title="Farce::Abstract::Map#weak_values? (method)">#weak_values?</a></span></p>
 
+  
   
   <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
@@ -972,8 +979,6 @@
       <pre class="lines">
 
 
-13
-14
 15
 16
 17
@@ -983,19 +988,21 @@
 21
 22
 23
-24</pre>
+24
+25
+26</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 13</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 15</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>normalize_keys:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>a resource constructor block is required</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
 
-  <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/KeyNormalizer.html" title="Farce::Internal::KeyNormalizer (module)">KeyNormalizer</a></span></span><span class='period'>.</span><span class='id identifier rubyid_build'>build</span><span class='lparen'>(</span>
+  <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_build'>build</span><span class='lparen'>(</span>
     <span class='id identifier rubyid_normalize_keys'>normalize_keys</span><span class='comma'>,</span>
-    <span class='label'>shareable:</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/KeyNormalizer.html" title="Farce::Internal::KeyNormalizer (module)">KeyNormalizer</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable_target?'>shareable_target?</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='comma'>,</span>
+    <span class='label'>shareable:</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_shareable_target?'>shareable_target?</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span><span class='comma'>,</span>
   <span class='rparen'>)</span>
-  <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/KeyNormalizer.html" title="Farce::Internal::KeyNormalizer (module)">KeyNormalizer</a></span></span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/KeyNormalizer.html" title="Farce::Internal::KeyNormalizer (module)">KeyNormalizer</a></span></span><span class='op'>::</span><span class='const'>LeaseOperations</span><span class='rparen'>)</span>
+  <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install'>install</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='comma'>,</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='op'>::</span><span class='const'>LeaseOperations</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_mapping'>mapping</span> <span class='op'>=</span> <span class='id identifier rubyid_prepare_initial_resources'>prepare_initial_resources</span><span class='lparen'>(</span><span class='kw'>yield</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span>
   <span class='ivar'>@lease_map</span> <span class='op'>=</span> <span class='id identifier rubyid_new_internal_lease_map'>new_internal_lease_map</span><span class='lparen'>(</span><span class='id identifier rubyid_mapping'>mapping</span><span class='rparen'>)</span>
   <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span>
@@ -1037,10 +1044,10 @@
       <pre class="lines">
 
 
-84</pre>
+86</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 84</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 86</span>
 
 <span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_read_entry'>read_entry</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_last'>last</span></pre>
     </td>
@@ -1110,12 +1117,12 @@ is invalid during a checkout block or an iteration yield.</p>
       <pre class="lines">
 
 
-108
-109
-110</pre>
+110
+111
+112</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 108</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 110</span>
 
 <span class='kw'>def</span> <span class='op'>[]=</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_resource'>resource</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_resource'>resource</span><span class='rparen'>)</span>
@@ -1207,10 +1214,10 @@ Nested scopes return only the resources they acquire, including on exceptions an
       <pre class="lines">
 
 
-81</pre>
+83</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 81</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 83</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_auto_lease'>auto_lease</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_auto_lease'>auto_lease</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -1260,10 +1267,10 @@ Nested scopes return only the resources they acquire, including on exceptions an
       <pre class="lines">
 
 
-138</pre>
+140</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 138</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 140</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_available?'>available?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_available?'>available?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -1313,10 +1320,10 @@ Nested scopes return only the resources they acquire, including on exceptions an
       <pre class="lines">
 
 
-141</pre>
+143</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 141</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 143</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_checked_out?'>checked_out?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_checked_out?'>checked_out?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -1426,10 +1433,10 @@ Nested scopes return only the resources they acquire, including on exceptions an
       <pre class="lines">
 
 
-53</pre>
+55</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 53</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 55</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_checkin'>checkin</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_resource'>resource</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_checkin_canonical'>checkin_canonical</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_resource'>resource</span><span class='comma'>,</span> <span class='label'>missing_key:</span> <span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -1564,10 +1571,10 @@ Nested scopes return only the resources they acquire, including on exceptions an
       <pre class="lines">
 
 
-38</pre>
+40</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 38</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 40</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_checkout'>checkout</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_checkout_canonical'>checkout_canonical</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>missing_key:</span> <span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -1614,13 +1621,13 @@ Entries concurrently reinserted under the same key are preserved.</p>
       <pre class="lines">
 
 
-132
-133
 134
-135</pre>
+135
+136
+137</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 134</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
   <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -1669,10 +1676,10 @@ Entries concurrently reinserted under the same key are preserved.</p>
       <pre class="lines">
 
 
-159</pre>
+161</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 159</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 161</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span></pre>
     </td>
@@ -1717,10 +1724,10 @@ Entries concurrently reinserted under the same key are preserved.</p>
       <pre class="lines">
 
 
-160</pre>
+162</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 160</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 162</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_compare_values_by_identity?'>compare_values_by_identity?</span></pre>
     </td>
@@ -1770,10 +1777,10 @@ Entries concurrently reinserted under the same key are preserved.</p>
       <pre class="lines">
 
 
-127</pre>
+129</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 127</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 129</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_delete'>delete</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_delete'>delete</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -1870,15 +1877,15 @@ Entries concurrently reinserted under the same key are preserved.</p>
       <pre class="lines">
 
 
-167
-168
 169
 170
 171
-172</pre>
+172
+173
+174</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 167</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 169</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___callee__'>__callee__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block'>block</span>
@@ -1916,15 +1923,15 @@ Entries concurrently reinserted under the same key are preserved.</p>
       <pre class="lines">
 
 
-176
-177
 178
 179
 180
-181</pre>
+181
+182
+183</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 176</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 178</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_key'>each_key</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___callee__'>__callee__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block'>block</span>
@@ -1962,15 +1969,15 @@ Entries concurrently reinserted under the same key are preserved.</p>
       <pre class="lines">
 
 
-184
-185
 186
 187
 188
-189</pre>
+189
+190
+191</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 184</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 186</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_each_value'>each_value</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_enum_for'>enum_for</span><span class='lparen'>(</span><span class='id identifier rubyid___callee__'>__callee__</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_size'>size</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_block'>block</span>
@@ -2278,8 +2285,6 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-87
-88
 89
 90
 91
@@ -2291,10 +2296,12 @@ If both a default and a block are provided, the block takes precedence and a war
 97
 98
 99
-100</pre>
+100
+101
+102</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 87</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 89</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_arguments'>arguments</span><span class='rparen'>)</span>
   <span class='kw'>unless</span> <span class='id identifier rubyid_arguments'>arguments</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span><span class='period'>.</span><span class='id identifier rubyid_between?'>between?</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
@@ -2380,10 +2387,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-150</pre>
+152</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 150</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 152</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_getkey'>getkey</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_getkey'>getkey</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -2456,10 +2463,10 @@ If both a default and a block are provided, the block takes precedence and a war
       <pre class="lines">
 
 
-147</pre>
+149</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 149</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -2514,10 +2521,10 @@ The returned keys are not guaranteed to be in insertion order.</p>
       <pre class="lines">
 
 
-156</pre>
+158</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 156</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 158</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_keys'>keys</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_keys'>keys</span></pre>
     </td>
@@ -2604,10 +2611,10 @@ A retained handle becomes retired when its entry is deleted.</p>
       <pre class="lines">
 
 
-60</pre>
+62</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 60</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 62</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_lease_for'>lease_for</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_lease_for_canonical'>lease_for_canonical</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>missing_key:</span> <span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -2657,10 +2664,10 @@ A retained handle becomes retired when its entry is deleted.</p>
       <pre class="lines">
 
 
-144</pre>
+146</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 144</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 146</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_owned?'>owned?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_owned?'>owned?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
     </td>
@@ -2706,10 +2713,10 @@ A retained handle becomes retired when its entry is deleted.</p>
       <pre class="lines">
 
 
-163</pre>
+165</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 163</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 165</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_keys?'>shareable_keys?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -2754,10 +2761,10 @@ A retained handle becomes retired when its entry is deleted.</p>
       <pre class="lines">
 
 
-164</pre>
+166</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 164</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 166</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -2811,10 +2818,10 @@ A retained handle becomes retired when its entry is deleted.</p>
       <pre class="lines">
 
 
-153</pre>
+155</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 153</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 155</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span></pre>
     </td>
@@ -2963,10 +2970,10 @@ affect published entries and do not cancel a pending constructor.</p>
       <pre class="lines">
 
 
-123</pre>
+125</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 123</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 125</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -3013,10 +3020,10 @@ Unlike iteration, this method never checks resources out.</p>
       <pre class="lines">
 
 
-194</pre>
+196</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 194</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 196</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_a'>to_a</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_lease_map'>internal_lease_map</span><span class='period'>.</span><span class='id identifier rubyid_handles'>handles</span></pre>
     </td>
@@ -3064,10 +3071,10 @@ A block receives each key and Lease handle and returns a pair for the new Hash.<
       <pre class="lines">
 
 
-200</pre>
+202</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 200</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 202</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_entries_to_hash'>entries_to_hash</span><span class='lparen'>(</span><span class='id identifier rubyid_to_a'>to_a</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -3172,10 +3179,10 @@ A block receives each key and Lease handle and returns a pair for the new Hash.<
       <pre class="lines">
 
 
-45</pre>
+47</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 45</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 47</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_try_checkout'>try_checkout</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_try_checkout_canonical'>try_checkout_canonical</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>missing_key:</span> <span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -3221,10 +3228,10 @@ A block receives each key and Lease handle and returns a pair for the new Hash.<
       <pre class="lines">
 
 
-204</pre>
+206</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 204</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/lease_map.rb', line 206</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_values'>values</span> <span class='op'>=</span> <span class='id identifier rubyid_to_h'>to_h</span><span class='period'>.</span><span class='id identifier rubyid_values'>values</span></pre>
     </td>
@@ -3237,7 +3244,7 @@ A block receives each key and Lease handle and returns a pair for the new Hash.<
 </div>
 
       <div id="footer">
-  Generated on Tue Oct  6 09:51:10 2026 by
+  Generated on Wed Oct  7 11:02:23 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
