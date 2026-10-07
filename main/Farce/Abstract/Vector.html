@@ -113,7 +113,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/abstract/vector.rb<span class="defines">,<br>
-  lib/farce/integrations/bson.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/shared/to_json.rb,<br> lib/farce/integrations/active_support/vector.rb</span>
+  lib/farce/integrations/bson.rb,<br> lib/farce/integrations/cbor.rb,<br> lib/farce/integrations/msgpack.rb,<br> lib/farce/integrations/shared/to_json.rb,<br> lib/farce/integrations/active_support/vector.rb</span>
 
 </dd>
   </dl>
@@ -243,6 +243,39 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Return a snapshot with nested values normalized by BSON.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+    <h2>
+      CBOR Integration
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_cbor-instance_method" title="#to_cbor (instance method)">#<strong>to_cbor</strong>(*arguments)  &#x21d2; String, ... </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize a snapshot as a CBOR array.</p>
 </div></span>
   
 </li>
@@ -13523,6 +13556,110 @@ Nested value wrappers are read before encoding their BSON types and payloads.</p
 </div>
     
       <div class="method_details ">
+  <h3 class="signature " id="to_cbor-instance_method">
+  
+    #<strong>to_cbor</strong>(*arguments)  &#x21d2; <tt>String</tt>, ... 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="docstring">
+  <div class="discussion">
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>This method is only available if CBOR has been loaded.</p>
+</div>
+  </div>
+
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>On CRuby, CBOR's native encoder must run in the main Ractor.</p>
+</div>
+  </div>
+
+<p>Serialize a snapshot as a CBOR array.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+      <pre class="example code"><code><span class='const'>CBOR</span><span class='period'>.</span><span class='id identifier rubyid_decode'>decode</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Vector.html" title="Farce::Vector (class)">Vector</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Vector.html#initialize-instance_method" title="Farce::Vector#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='lbracket'>[</span><span class='int'>1</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rbracket'>]</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_to_cbor'>to_cbor</span><span class='rparen'>)</span> <span class='comment'># =&gt; [1, false]</span></code></pre>
+    
+  </div>
+<p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>arguments</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;Object&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Arguments forwarded to Array#to_cbor.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>, <tt>::CBOR::Packer</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Encoded bytes, the supplied packer, or nil when writing to IO.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+19</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/cbor.rb', line 19</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_to_cbor'>to_cbor</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_to_a'>to_a</span><span class='period'>.</span><span class='id identifier rubyid_to_cbor'>to_cbor</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
   <h3 class="signature " id="to_fs-instance_method">
   
     #<strong>to_fs</strong>(format = :default)  &#x21d2; <tt>String</tt> 
@@ -15980,7 +16117,7 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
 </div>
 
       <div id="footer">
-  Generated on Wed Oct  7 11:52:46 2026 by
+  Generated on Wed Oct  7 12:41:19 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
