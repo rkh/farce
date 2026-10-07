@@ -39,6 +39,10 @@ end
 group :compatibility do
   gem "activesupport"
   gem "bson"
+
+  # cbor 0.5.10.3 uses untyped C data APIs removed in Ruby 4.1.
+  gem "cbor", platforms: %i[mri_34 mri_40 truffleruby]
+
   gem "concurrent-ruby"
   gem "concurrent-ruby-ext"
   gem "dry-types"

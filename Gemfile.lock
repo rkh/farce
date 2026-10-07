@@ -37,6 +37,7 @@ GEM
     carbon_fiber (0.2.0)
     carbon_fiber (0.2.0-arm64-darwin)
     carbon_fiber (0.2.0-x86_64-linux)
+    cbor (0.5.10.3)
     commonmarker (2.10.0)
       rb_sys (~> 0.9)
     commonmarker (2.10.0-arm64-darwin)
@@ -220,6 +221,7 @@ DEPENDENCIES
   benchmark-ips
   bson
   carbon_fiber
+  cbor
   commonmarker
   concurrent-ruby
   concurrent-ruby-ext
@@ -274,6 +276,7 @@ CHECKSUMS
   carbon_fiber (0.2.0) sha256=2feab587b247695b6b8bfb2abd5456d28c1deab7cfba6b330620386ad053b3ce
   carbon_fiber (0.2.0-arm64-darwin) sha256=5501b087fb6337445705ad7ffb160ca68c8b7f4a9b7b6bbb977a811c4df869e7
   carbon_fiber (0.2.0-x86_64-linux) sha256=9792141dabf6910724c8223fc8f0b64dca995502dc558e6836babf4620a2839c
+  cbor (0.5.10.3) sha256=c3aa1d0c7e9bbffe8de4bed554f588d7926c62276ffe2dd7fabb65bae801d28a
   commonmarker (2.10.0) sha256=1884529957bf59bcd4f19fcc29e931f2042760ced273353e8010a20fe4ae68cb
   commonmarker (2.10.0-arm64-darwin) sha256=39ecc891d1e4308b5233cc28b40383de854a2bfbefe17d68e49174347a8aa79e
   commonmarker (2.10.0-x86_64-linux) sha256=945c510c0bfca9022245928e2248468fe3ddad58c939be0c37b20082cc392880
