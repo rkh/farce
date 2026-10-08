@@ -298,11 +298,17 @@ module Farce
       return if at_max_size? || queue_empty? || state != :running
       start_worker(only_if_empty: true) if size.zero?
       return if at_max_size?
+
       started = @queue.generation
-      age = @queue.oldest_age
+      age     = @queue.oldest_age
+
       return unless age
       return unless @pressure.compare_and_set(nil, started)
-      schedule_scaler(started, [@grow_after - age, 0].max)
+
+      remaining = @grow_after - age
+      remaining = 0 if remaining.negative?
+
+      schedule_scaler(started, remaining)
     end
 
     def schedule_scaler(started, delay = @grow_after)

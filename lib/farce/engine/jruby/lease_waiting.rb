@@ -6,12 +6,13 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     module LeaseWaiting
+      MIN = 0.05
+
       # JRuby delivers Thread#raise after its Java Phaser wait returns.
       # Bound each wait so cancellation remains responsive.
       def self.wait_interval(remaining)
-        return 0.05 unless remaining
-
-        [remaining, 0.05].min
+        return MIN unless remaining || remaining > MIN
+        remaining
       end
     end
   end

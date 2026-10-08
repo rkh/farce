@@ -148,8 +148,8 @@ module Farce
           service_policy
           break if idle?
           deadline = @timers.peek_priority
-          timeout = deadline ? [deadline - Clock.now, 0].max : nil
-          timeout = 0 if ready? || !@mailbox.empty?
+          timeout = deadline ? deadline - Clock.now : nil
+          timeout = 0 if timeout&.negative? || ready? || !@mailbox.empty?
           dispatch(timeout, @timers.empty? ? @dispatch_budget : 256)
         end
 

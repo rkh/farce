@@ -38,7 +38,7 @@ module Farce
         previous_object = @current_object
         if node = @nodes[object]
           if node.active && parent
-            parent.low    = [parent.low, node.index].min
+            parent.low    = node.index if parent.low > node.index
             parent.cyclic = node.cyclic = true
           end
           return node.result
@@ -73,7 +73,7 @@ module Farce
         end
 
         if parent && node.active
-          parent.low = [parent.low, node.low].min
+          parent.low    = node.low if parent.low > node.low
           parent.cyclic = true
         end
 

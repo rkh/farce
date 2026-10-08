@@ -65,7 +65,9 @@ module Farce
     end
 
     def remaining_timeout(deadline)
-      [deadline - Clock.now, 0].max if deadline
+      return unless deadline
+      remaining = deadline - Clock.now
+      remaining.negative? ? 0 : remaining
     end
 
     # Repeat with one timeout budget. Even a zero timeout permits the first check.

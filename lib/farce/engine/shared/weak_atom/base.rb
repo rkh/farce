@@ -180,7 +180,8 @@ module Farce
 
       def remaining_timeout(deadline)
         return unless deadline
-        [deadline - Clock.now, 0].max
+        remaining = deadline - Clock.now
+        remaining.negative? ? 0 : remaining
       end
     end
     private_constant :WeakAtomBase
