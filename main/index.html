@@ -70,6 +70,63 @@
 
       <div id="content"><div id='filecontents'><h1 id="farce-fiber-and-ractor-compatibility-enabler">Farce: Fiber and Ractor Compatibility Enabler<a href="#farce-fiber-and-ractor-compatibility-enabler" aria-label="Link to heading 'Farce: Fiber and Ractor Compatibility Enabler'" data-heading-content="Farce: Fiber and Ractor Compatibility Enabler" class="anchor"></a></h1>
 <p>Farce provides tools and data structures to write code that works well with both <strong>Fiber schedulers</strong> and <strong>Ractors</strong>, as well as the classic <strong>Threads</strong>. Its main purpose is to be used by other gems to provide better compatibility with these concurrency primitives, but it can also be used directly in applications.</p>
+<p><strong>Here's a taste:</strong></p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_map'>map</span>    <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Map.html" title="Farce::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span>
+<span class='id identifier rubyid_output'>output</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Mutable.html" title="Farce::Mutable (class)">Mutable</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Mutable.html#initialize-instance_method" title="Farce::Mutable#initialize (method)">new</a></span></span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Hello from Farce! The map has 0 entries, with a total sum of 0.</span><span class='tstring_end'>&quot;</span></span>
+
+<span class='comment'># Mutate output in another Ractor - this would not work with a String.
+</span><span class='comment'># Using Farce::Ractor here instead of Ractor so it also works on JRuby and TruffleRuby.
+</span><span class='id identifier rubyid_ractor'>ractor</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_output'>output</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_output'>output</span><span class='op'>|</span>
+  <span class='id identifier rubyid_sleep'>sleep</span> <span class='id identifier rubyid_rand'>rand</span> <span class='comment'># I laugh in the face of race conditions. Ha, ha, ha, ha!
+</span>  <span class='id identifier rubyid_output'>output</span><span class='period'>.</span><span class='id identifier rubyid_gsub!'>gsub!</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Farce</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>✨ Farce ✨</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+<span class='kw'>end</span>
+
+<span class='comment'># No idea if the above ractor is done modifying output, but we don&#39;t need to worry!
+</span><span class='comment'># We&#39;ll just pick a random key one hundred times and increase the corresponding counter by one.
+</span><span class='comment'># Oh, and update the output string.
+</span><span class='int'>100</span><span class='period'>.</span><span class='id identifier rubyid_times'>times</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='kw'>do</span>
+
+  <span class='comment'># And of course we need to do it all in parallel for maximum performance!
+</span>  <span class='comment'># Let&#39;s ignore the fact that this would be much faster if we didn&#39;t.
+</span>  <span class='comment'># Starting 100 ractors is the main performance issue here. But that wouldn&#39;t be an interesting example, right?
+</span>  <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_output'>output</span><span class='comma'>,</span> <span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_output'>output</span><span class='comma'>,</span> <span class='id identifier rubyid_map'>map</span><span class='op'>|</span>
+    <span class='id identifier rubyid_key'>key</span> <span class='op'>=</span> <span class='qsymbols_beg'>%i[</span><span class='tstring_content'>foo</span><span class='words_sep'> </span><span class='tstring_content'>bar</span><span class='words_sep'> </span><span class='tstring_content'>baz</span><span class='tstring_end'>]</span></span><span class='period'>.</span><span class='id identifier rubyid_sample'>sample</span>
+
+    <span class='comment'># Wrap the modifications in a transaction, so map and output never disagree
+</span>    <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_transaction'><span class='object_link'><a href="Farce.html#transaction-class_method" title="Farce.transaction (method)">transaction</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_output'>output</span><span class='comma'>,</span> <span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid__'>_</span><span class='comma'>,</span> <span class='id identifier rubyid_output'>output</span><span class='comma'>,</span> <span class='id identifier rubyid_map'>map</span><span class='op'>|</span>
+
+      <span class='comment'># Increase the value we have for the given key by one!
+</span>      <span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>||=</span> <span class='int'>0</span>
+      <span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span>  <span class='op'>+=</span> <span class='int'>1</span>
+
+      <span class='comment'># Could also replace the lines above with:
+</span>      <span class='comment'>#
+</span>      <span class='comment'>#   map.upsert(key, 1) { it + 1 }
+</span>      <span class='comment'>#
+</span>      <span class='comment'># … which would be atomic.
+</span>      <span class='comment'># But we&#39;re in a transaction, so everything is atomic! ☢️
+</span>
+      <span class='id identifier rubyid_output'>output</span><span class='period'>.</span><span class='id identifier rubyid_sub!'>sub!</span><span class='lparen'>(</span><span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>\d+ entries</span><span class='regexp_end'>/</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span><span class='embexpr_end'>}</span><span class='tstring_content'> entries</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_output'>output</span><span class='period'>.</span><span class='id identifier rubyid_sub!'>sub!</span><span class='lparen'>(</span><span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>sum of \d+</span><span class='regexp_end'>/</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>sum of </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_values'>values</span><span class='period'>.</span><span class='id identifier rubyid_sum'>sum</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+<span class='kw'>end</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:join</span><span class='rparen'>)</span>
+
+<span class='comment'># Lets be sure that first ractor has completed its modification
+</span><span class='id identifier rubyid_ractor'>ractor</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+
+<span class='comment'># Hello from ✨ Farce ✨! The map has 3 entries with a total sum of 100.
+</span><span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_output'>output</span>
+</code></pre>
+<p><strong>You don't see why you'd want this?</strong><br>
+→ Start with the <a href="#introduction">Introduction</a>.</p>
+<p><strong>Now you want to know what else Farce can do?</strong><br>
+→ Check out the <a href="#features">Features</a>!</p>
+<p><strong>Returning user and you need the details?</strong><br>
+→ See the <a href="https://rkh.github.io/farce/">API reference</a>.</p>
+<p><strong>Want to contribute?</strong><br>
+→ Read the <a href="file.CONTRIBUTING.html" title="contribution guide">contribution guide</a>, <a href="file.CODE_OF_CONDUCT.html" title="code of conduct">code of conduct</a>, and <a href="file.SECURITY.html" title="security policy">security policy</a>.</p>
 <h2 id="table-of-contents">Table of Contents<a href="#table-of-contents" aria-label="Link to heading 'Table of Contents'" data-heading-content="Table of Contents" class="anchor"></a></h2>
 <ul>
 <li><a href="#farce-fiber-and-ractor-compatibility-enabler">Farce: Fiber and Ractor Compatibility Enabler</a>
@@ -374,7 +431,7 @@ need to specifically load any particular file.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Thu Oct  8 11:10:05 2026 by
+  Generated on Thu Oct  8 12:04:07 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
