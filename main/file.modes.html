@@ -87,8 +87,10 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <li><a href="#move-hand-off-a-finished-batch"><code>:move</code>: hand off a finished batch</a></li>
 <li><a href="#local-preserve-object-identity"><code>:local</code>: preserve object identity</a></li>
 <li><a href="#make_shareable-publish-the-original"><code>:make_shareable</code>: publish the original</a></li>
+<li><a href="#mutable-share-editable-values"><code>:mutable</code>: share editable values</a></li>
 <li><a href="#shareable_copy-publish-without-freezing-your-draft"><code>:shareable_copy</code>: publish without freezing your draft</a></li>
 <li><a href="#dedup-reuse-equal-values"><code>:dedup</code>: reuse equal values</a></li>
+<li><a href="#proxy-access-an-object-in-its-original-ractor"><code>:proxy</code>: access an object in its original Ractor</a></li>
 <li><a href="#raise-require-prepared-data"><code>:raise</code>: require prepared data</a></li>
 <li><a href="#set-a-default-then-override-individual-sends">Set a default, then override individual sends</a></li>
 <li><a href="#let-local-sends-keep-their-identity">Let local sends keep their identity</a></li>
@@ -143,7 +145,7 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_receive'>receive</span> <span class='comment'># =&gt; [4, 5]
 </span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
 </code></pre>
-<p>Farce extends this choice with eight named modes.</p>
+<p>Farce extends this choice with nine named modes.</p>
 <h2 id="farces-modes">Farce's Modes<a href="#farces-modes" aria-label="Link to heading 'Farce's Modes'" data-heading-content="Farce's Modes" class="anchor"></a></h2>
 <p>The following modes are accepted by <code>Farce::Port</code>. They apply to non-shareable values. Already-shareable values pass through unchanged, including when you select <code>:move</code> or <code>:raise</code>.</p>
 <table>
@@ -174,6 +176,11 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <td><code>:make_shareable</code></td>
 <td>Calls <code>Ractor.make_shareable</code> on the original.</td>
 <td>Publish finished configuration.</td>
+</tr>
+<tr>
+<td><code>:mutable</code></td>
+<td>Copies non-shareable objects into a <code>Farce::Mutable</code>.</td>
+<td>Synchronize mutations across Ractors.</td>
 </tr>
 <tr>
 <td><code>:shareable_copy</code></td>
@@ -255,6 +262,31 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
 </code></pre>
 <p>Ruby raises an error if the value cannot be made shareable. This mode works well for configuration and completed lookup tables, but it cannot turn arbitrary resources into shared objects.</p>
+<h3 id="mutable-share-editable-values"><code>:mutable</code>: share editable values<a href="#mutable-share-editable-values" aria-label="Link to heading ':mutable: share editable values'" data-heading-content=":mutable: share editable values" class="anchor"></a></h3>
+<p>Use <code>:mutable</code> when several Ractors need to edit the same stored value. Farce wraps each non-shareable value in a <code>Farce::Mutable</code>. The wrapper keeps a frozen snapshot and atomically replaces it when a method mutates the value. Changes are visible through the same wrapper in every Ractor. The original object stays separate and usable.</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># Native Ruby 4.0 or later.
+</span><span class='id identifier rubyid_draft'>draft</span> <span class='op'>=</span> <span class='const'>String</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>queued</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+<span class='id identifier rubyid_statuses'>statuses</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Map.html" title="Farce::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span><span class='lparen'>(</span>
+  <span class='lbrace'>{</span> <span class='label'>import:</span> <span class='id identifier rubyid_draft'>draft</span><span class='comma'>,</span> <span class='label'>export:</span> <span class='const'>String</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>queued</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='rbrace'>}</span><span class='comma'>,</span>
+  <span class='label'>mode:</span> <span class='symbol'>:mutable</span><span class='comma'>,</span>
+<span class='rparen'>)</span>
+
+<span class='id identifier rubyid_worker'>worker</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_statuses'>statuses</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_shared'>shared</span><span class='op'>|</span>
+  <span class='id identifier rubyid_shared'>shared</span><span class='lbracket'>[</span><span class='symbol'>:import</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_replace'>replace</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>running</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_shared'>shared</span><span class='lbracket'>[</span><span class='symbol'>:export</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> for retry</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>nil</span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_worker'>worker</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+
+<span class='id identifier rubyid_statuses'>statuses</span><span class='lbracket'>[</span><span class='symbol'>:import</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span>  <span class='comment'># =&gt; &quot;running&quot;
+</span><span class='id identifier rubyid_statuses'>statuses</span><span class='lbracket'>[</span><span class='symbol'>:export</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span>  <span class='comment'># =&gt; &quot;queued for retry&quot;
+</span><span class='id identifier rubyid_draft'>draft</span>                   <span class='comment'># =&gt; &quot;queued&quot;
+</span>
+<span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Mutable.html" title="Farce::Mutable (class)">Mutable</a></span></span><span class='period'>.</span><span class='id identifier rubyid_deref'><span class='object_link'><a href="Farce/Mutable.html#deref-class_method" title="Farce::Mutable.deref (method)">deref</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_statuses'>statuses</span><span class='lbracket'>[</span><span class='symbol'>:import</span><span class='rbracket'>]</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_frozen?'>frozen?</span> <span class='comment'># =&gt; true
+</span></code></pre>
+<p>Each mutation copies the entire wrapped value. Prefer a dedicated Farce collection for large arrays or hashes. Wrapping is shallow, so nested values must already be shareable. A map applies the mode to its individual values, which makes mutable strings a useful fit. <code>Farce::Mutable.deref</code> returns the current snapshot without changing it.</p>
+<p>On JRuby and TruffleRuby, ordinary values are already shareable and pass through unchanged, so this mode does not add wrappers or synchronize their mutations.</p>
 <h3 id="shareable_copy-publish-without-freezing-your-draft"><code>:shareable_copy</code>: publish without freezing your draft<a href="#shareable_copy-publish-without-freezing-your-draft" aria-label="Link to heading ':shareable_copy: publish without freezing your draft'" data-heading-content=":shareable_copy: publish without freezing your draft" class="anchor"></a></h3>
 <p>Use <code>:shareable_copy</code> when readers need a stable snapshot but the sender will keep editing. Farce calls <code>Ractor.make_shareable(value, copy: true)</code>.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_port'>port</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Port.html" title="Farce::Port (class)">Port</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:shareable_copy</span><span class='rparen'>)</span>
@@ -282,6 +314,27 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
 </code></pre>
 <p>Deduplication may update and freeze the original. The cache holds values weakly, so keep a reference to a result when its identity matters. Already-shareable inputs pass through unchanged. On JRuby and TruffleRuby, ordinary values are already shareable and skip deduplication. Values that cannot be made shareable raise an error.</p>
+<h3 id="proxy-access-an-object-in-its-original-ractor"><code>:proxy</code>: access an object in its original Ractor<a href="#proxy-access-an-object-in-its-original-ractor" aria-label="Link to heading ':proxy: access an object in its original Ractor'" data-heading-content=":proxy: access an object in its original Ractor" class="anchor"></a></h3>
+<p>Use <code>:proxy</code> when another Ractor needs to call methods on an object that should stay in its originating Ractor. Farce creates a shareable <code>Farce::Proxy</code>. Calls through the proxy execute in the original Ractor and can mutate the original object.</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># Native Ruby 4.0 or later.
+</span><span class='id identifier rubyid_port'>port</span>   <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Port.html" title="Farce::Port (class)">Port</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:proxy</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_events'>events</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+
+<span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_send'>send</span><span class='lparen'>(</span><span class='id identifier rubyid_events'>events</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_proxy'>proxy</span> <span class='op'>=</span> <span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_receive'>receive</span>
+
+<span class='id identifier rubyid_worker'>worker</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_proxy'>proxy</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_shared'>shared</span><span class='op'>|</span>
+  <span class='id identifier rubyid_shared'>shared</span> <span class='op'>&lt;&lt;</span> <span class='symbol'>:processed</span>
+  <span class='kw'>nil</span>
+<span class='kw'>end</span>
+<span class='id identifier rubyid_worker'>worker</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+
+<span class='id identifier rubyid_events'>events</span>       <span class='comment'># =&gt; [:processed]
+</span><span class='id identifier rubyid_proxy'>proxy</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span> <span class='comment'># =&gt; 1
+</span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
+</code></pre>
+<p>Each delegated call involves a request and response. Non-shareable arguments and return values are copied by default, while methods that return the original object return its proxy. Keep the owning Ractor alive while callers use the proxy. Calls raise <code>Farce::Ractor::RemoteError</code> after the owner exits. Access through other references to the original object still needs its own coordination.</p>
+<p>On JRuby and TruffleRuby, ordinary values are already shareable, so this mode passes them through without creating a proxy.</p>
 <h3 id="raise-require-prepared-data"><code>:raise</code>: require prepared data<a href="#raise-require-prepared-data" aria-label="Link to heading ':raise: require prepared data'" data-heading-content=":raise: require prepared data" class="anchor"></a></h3>
 <p>Use <code>:raise</code> when callers should prepare shareable messages explicitly. A bad value fails at the send operation, where the caller can fix it.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_port'>port</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Port.html" title="Farce::Port (class)">Port</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:raise</span><span class='rparen'>)</span>
@@ -629,7 +682,7 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 </code></pre>
 <p>Both queues accept the envelope in <code>:raise</code> mode because the wrapper is shareable. Neither queue opens it automatically. For routing metadata, put the envelope in a shareable message such as <code>[:billing, package].freeze</code>. The router can read the destination without accessing the payload.</p>
 <h3 id="mode-managers-prepare-values-and-open-their-own-envelopes">Mode managers prepare values and open their own envelopes<a href="#mode-managers-prepare-values-and-open-their-own-envelopes" aria-label="Link to heading 'Mode managers prepare values and open their own envelopes'" data-heading-content="Mode managers prepare values and open their own envelopes" class="anchor"></a></h3>
-<p><code>Farce::ModeManager</code> provides two core operations: <code>wrap</code> prepares a value for shared storage, and <code>unwrap</code> retrieves values from envelopes that this manager created. It passes already-shareable values through unchanged. For non-shareable values, <code>:copy</code>, <code>:move</code>, and <code>:local</code> create managed envelopes. The remaining modes call <code>Ractor.make_shareable</code>, make a shareable copy, deduplicate and make the result shareable, or raise.</p>
+<p><code>Farce::ModeManager</code> provides two core operations: <code>wrap</code> prepares a value for shared storage, and <code>unwrap</code> retrieves values from envelopes that this manager created. It passes already-shareable values through unchanged. For non-shareable values, <code>:copy</code>, <code>:move</code>, and <code>:local</code> create managed envelopes. The remaining modes prepare shareable data directly, create a <code>Farce::Mutable</code> or <code>Farce::Proxy</code>, or raise. Mutable and proxy wrappers remain wrapped when read.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/ModeManager.html#initialize-instance_method" title="Farce::ModeManager#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_source'>source</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='label'>ids:</span> <span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='rbrace'>}</span>
 <span class='id identifier rubyid_stored'>stored</span> <span class='op'>=</span> <span class='id identifier rubyid_manager'>manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_source'>source</span><span class='rparen'>)</span>
@@ -677,7 +730,7 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 </div></div>
 
       <div id="footer">
-  Generated on Wed Oct  7 12:41:05 2026 by
+  Generated on Thu Oct  8 10:22:58 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -1094,6 +1094,7 @@ tasks, only blocking when that queue's capacity has been reached.</p>
 <li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
 that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
 that pushed it.</li>
+<li><code>:mutable</code> - A <span class='object_link'><a href="../Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
@@ -1497,7 +1498,7 @@ May be ignored by some schedulers.</p>
 </div>
 
       <div id="footer">
-  Generated on Wed Oct  7 12:41:22 2026 by
+  Generated on Thu Oct  8 10:23:13 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
