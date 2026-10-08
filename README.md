@@ -22,7 +22,8 @@ end
 
   # And of course we need to do it all in parallel for maximum performance!
   # Let's ignore the fact that this would be much faster if we didn't.
-  # Starting 100 ractors is the main performance issue here. But that wouldn't be an interesting example, right?
+  # Starting 100 ractors is the main performance issue here.
+  # But that wouldn't be an interesting example, right?
   Farce::Ractor.new(output, map) do |output, map|
     key = %i[foo bar baz].sample
 
