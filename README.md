@@ -2,6 +2,60 @@
 
 Farce provides tools and data structures to write code that works well with both **Fiber schedulers** and **Ractors**, as well as the classic **Threads**. Its main purpose is to be used by other gems to provide better compatibility with these concurrency primitives, but it can also be used directly in applications.
 
+**Here's a taste:**
+
+```ruby
+map    = Farce::Map.new
+output = Farce::Mutable.new "Hello from Farce! The map has 0 entries, with a total sum of 0."
+
+# Mutate output in another Ractor - this would not work with a String.
+# Using Farce::Ractor here instead of Ractor so it also works on JRuby and TruffleRuby.
+ractor = Farce::Ractor.new(output) do |output|
+  sleep rand # I laugh in the face of race conditions. Ha, ha, ha, ha!
+  output.gsub!("Farce", "✨ Farce ✨")
+end
+
+# No idea if the above ractor is done modifying output, but we don't need to worry!
+# We'll just pick a random key one hundred times and increase the corresponding counter by one.
+# Oh, and update the output string.
+100.times.map do
+
+  # And of course we need to do it all in parallel for maximum performance!
+  # Let's ignore the fact that this would be much faster if we didn't.
+  # Starting 100 ractors is the main performance issue here. But that wouldn't be an interesting example, right?
+  Farce::Ractor.new(output, map) do |output, map|
+    key = %i[foo bar baz].sample
+
+    # Wrap the modifications in a transaction, so map and output never disagree
+    Farce.transaction(output, map) do |_, output, map|
+      map.upsert(key, 1) { it + 1 }
+      output.sub!(/\d+ entries/, "#{map.size} entries")
+      output.sub!(/sum of \d+/, "sum of #{map.values.sum}")
+    end
+  end
+
+end.each(&:join)
+
+# Lets be sure that first ractor has completed its modification
+ractor.join
+
+# Hello from ✨ Farce ✨! The map has 3 entries with a total sum of 100.
+puts output
+```
+
+**You don't see why you'd want this?**<br>
+→ Start with the [Introduction](#introduction).
+
+**Now you want to know what else Farce can do?**<br>
+→ Check out the [Features](#features)!
+
+**Returning user and you need the details?**<br> 
+→ See the [API reference](https://rkh.github.io/farce/).
+
+**Want to contribute?**<br>
+→ Read the [contribution guide](CONTRIBUTING.md), [code of conduct](CODE_OF_CONDUCT.md), and [security policy](SECURITY.md).
+
+
 ## Table of Contents
 
 - [Farce: Fiber and Ractor Compatibility Enabler](#farce-fiber-and-ractor-compatibility-enabler)
