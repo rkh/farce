@@ -18,8 +18,10 @@ This improves over the default control via `Ractor::Port`'s `move:` option.
     - [`:move`: hand off a finished batch](#move-hand-off-a-finished-batch)
     - [`:local`: preserve object identity](#local-preserve-object-identity)
     - [`:make_shareable`: publish the original](#make_shareable-publish-the-original)
+    - [`:mutable`: share editable values](#mutable-share-editable-values)
     - [`:shareable_copy`: publish without freezing your draft](#shareable_copy-publish-without-freezing-your-draft)
     - [`:dedup`: reuse equal values](#dedup-reuse-equal-values)
+    - [`:proxy`: access an object in its original Ractor](#proxy-access-an-object-in-its-original-ractor)
     - [`:raise`: require prepared data](#raise-require-prepared-data)
     - [Set a default, then override individual sends](#set-a-default-then-override-individual-sends)
     - [Let local sends keep their identity](#let-local-sends-keep-their-identity)
@@ -74,7 +76,7 @@ port.receive # => [4, 5]
 port.close
 ```
 
-Farce extends this choice with eight named modes.
+Farce extends this choice with nine named modes.
 
 ## Farce's Modes
 
@@ -86,7 +88,7 @@ The following modes are accepted by `Farce::Port`. They apply to non-shareable v
 | `:move` | Transfers ownership and makes the original inaccessible. | Hand a completed batch to a consumer. |
 | `:local` | Keeps the same object in its originating Ractor. | Pass work between local threads or fibers. |
 | `:make_shareable` | Calls `Ractor.make_shareable` on the original. | Publish finished configuration. |
-| `:mutable` | Copies non-shareable objects into a `Farce::Mutable` | Synchronize mutations across ractors. |
+| `:mutable` | Copies non-shareable objects into a `Farce::Mutable`. | Synchronize mutations across Ractors. |
 | `:shareable_copy` | Makes a shareable copy and leaves the original alone. | Publish a snapshot of an editable document. |
 | `:dedup` | Deduplicates the value, then makes it shareable. May update and freeze the original. | Reuse repeated message contents. |
 | `:proxy` | Creates a `Farce::Proxy` that executes calls in the original Ractor. | Share access to a mutable object. |
@@ -170,6 +172,37 @@ port.close
 
 Ruby raises an error if the value cannot be made shareable. This mode works well for configuration and completed lookup tables, but it cannot turn arbitrary resources into shared objects.
 
+### `:mutable`: share editable values
+
+Use `:mutable` when several Ractors need to edit the same stored value. Farce wraps each non-shareable value in a `Farce::Mutable`. The wrapper keeps a frozen snapshot and atomically replaces it when a method mutates the value. Changes are visible through the same wrapper in every Ractor. The original object stays separate and usable.
+
+```ruby
+# Native Ruby 4.0 or later.
+draft = String.new("queued")
+statuses = Farce::Map.new(
+  { import: draft, export: String.new("queued") },
+  mode: :mutable,
+)
+
+worker = Farce::Ractor.new(statuses) do |shared|
+  shared[:import].replace("running")
+  shared[:export] << " for retry"
+  nil
+end
+
+worker.join
+
+statuses[:import].to_s  # => "running"
+statuses[:export].to_s  # => "queued for retry"
+draft                   # => "queued"
+
+Farce::Mutable.deref(statuses[:import]).frozen? # => true
+```
+
+Each mutation copies the entire wrapped value. Prefer a dedicated Farce collection for large arrays or hashes. Wrapping is shallow, so nested values must already be shareable. A map applies the mode to its individual values, which makes mutable strings a useful fit. `Farce::Mutable.deref` returns the current snapshot without changing it.
+
+On JRuby and TruffleRuby, ordinary values are already shareable and pass through unchanged, so this mode does not add wrappers or synchronize their mutations.
+
 ### `:shareable_copy`: publish without freezing your draft
 
 Use `:shareable_copy` when readers need a stable snapshot but the sender will keep editing. Farce calls `Ractor.make_shareable(value, copy: true)`.
@@ -205,6 +238,33 @@ port.close
 ```
 
 Deduplication may update and freeze the original. The cache holds values weakly, so keep a reference to a result when its identity matters. Already-shareable inputs pass through unchanged. On JRuby and TruffleRuby, ordinary values are already shareable and skip deduplication. Values that cannot be made shareable raise an error.
+
+### `:proxy`: access an object in its original Ractor
+
+Use `:proxy` when another Ractor needs to call methods on an object that should stay in its originating Ractor. Farce creates a shareable `Farce::Proxy`. Calls through the proxy execute in the original Ractor and can mutate the original object.
+
+```ruby
+# Native Ruby 4.0 or later.
+port   = Farce::Port.new(mode: :proxy)
+events = []
+
+port.send(events)
+proxy = port.receive
+
+worker = Farce::Ractor.new(proxy) do |shared|
+  shared << :processed
+  nil
+end
+worker.join
+
+events       # => [:processed]
+proxy.length # => 1
+port.close
+```
+
+Each delegated call involves a request and response. Non-shareable arguments and return values are copied by default, while methods that return the original object return its proxy. Keep the owning Ractor alive while callers use the proxy. Calls raise `Farce::Ractor::RemoteError` after the owner exits. Access through other references to the original object still needs its own coordination.
+
+On JRuby and TruffleRuby, ordinary values are already shareable, so this mode passes them through without creating a proxy.
 
 ### `:raise`: require prepared data
 
@@ -513,7 +573,7 @@ Both queues accept the envelope in `:raise` mode because the wrapper is shareabl
 
 ### Mode managers prepare values and open their own envelopes
 
-`Farce::ModeManager` provides two core operations: `wrap` prepares a value for shared storage, and `unwrap` retrieves values from envelopes that this manager created. It passes already-shareable values through unchanged. For non-shareable values, `:copy`, `:move`, and `:local` create managed envelopes. The remaining modes call `Ractor.make_shareable`, make a shareable copy, deduplicate and make the result shareable, or raise.
+`Farce::ModeManager` provides two core operations: `wrap` prepares a value for shared storage, and `unwrap` retrieves values from envelopes that this manager created. It passes already-shareable values through unchanged. For non-shareable values, `:copy`, `:move`, and `:local` create managed envelopes. The remaining modes prepare shareable data directly, create a `Farce::Mutable` or `Farce::Proxy`, or raise. Mutable and proxy wrappers remain wrapped when read.
 
 ```ruby
 manager = Farce::ModeManager.new(mode: :copy)
