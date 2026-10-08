@@ -16,6 +16,17 @@ module Farce
   #
   # Non-mutating calls do not incur this cost.
   #
+  # Use a transaction view to stage mutations alongside changes to other participants.
+  # The original value changes only when the transaction commits.
+  #
+  # @example Updating two strings together
+  #   first  = Farce::Mutable.new("queued")
+  #   second = Farce::Mutable.new("waiting")
+  #   Farce.transaction(first, second) do |_, first_view, second_view|
+  #     first_view.replace("running")
+  #     second_view << " for worker"
+  #   end
+  #
   # @example
   #   shareable_string = Farce::Mutable.new("foo")
   #   Ractor.new(shareable_string) { it << "bar" }.join
@@ -95,11 +106,14 @@ module Farce
     end
 
     # @api private
+    def transaction_wrapper(transaction) = Transaction::Mutable.new(transaction, self, @atom)
+
+    # @api private
     def marshal_dump = ::Kernel.raise(::TypeError, "Farce::Mutable cannot be marshaled")
 
     # Marshal hook discovery must inspect the wrapper without delegating to its snapshot.
     def respond_to?(name, include_private = false) # rubocop:disable Style/OptionalBooleanParameter
-      return true if name == :marshal_dump
+      return true if name == :marshal_dump || name == :transaction_wrapper
       return false if Internal.marshal_protocol_method?(name)
       method_missing(:respond_to?, name, include_private)
     end

@@ -34,6 +34,7 @@ module Farce
   # * Atoms, except weak atoms
   # * ConcurrentMap subclasses, except weak maps
   # * Molecules
+  # * Mutable wrappers with frozen snapshots
   # * Sets, including sorted sets
   # * TreeMap subclasses
   # * Vectors
@@ -220,7 +221,8 @@ module Farce
     def [](object)
       check_open!
       @wrappers.fetch(object) do
-        @wrappers[object] = REGISTER[object.class].call(object, self)
+        klass = Kernel.instance_method(:class).bind_call(object)
+        @wrappers[object] = REGISTER[klass].call(object, self)
       end
     rescue Internal::TransactionConflict
       fail! if @state == :active && @owner.equal?(Fiber.current)
