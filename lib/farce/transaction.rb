@@ -98,27 +98,35 @@ module Farce
     REGISTER = ClassMirror.new(Factory) { |mapped, _source| mapped.new }
     private_constant :Factory, :REGISTER
 
-    # @overload run(*objects, retries: 100, backoff_after: 10)
+    # @overload run(*objects, retries: nil, backoff_after: 10, max_backoff: 1.0)
     #   Creates and runs a new transaction attempt.
-    #   Automatically retries failed attempts up to the specified number of retries.
-    #   Starts backing off after the specified number of attempts.
+    #
+    #   Automatically retries failed attempts indefinitely unless a retry limit is specified.
+    #   Starts backing off after the specified number of attempts, up to the maximum delay.
+    #
     #   @param objects [Array] list of objects to enroll in the transaction
-    #   @param retries [Integer] maximum additional attempts
+    #   @param retries [Integer, nil] maximum additional attempts, or nil for unlimited retries
     #   @param backoff_after [Integer] number of attempts before starting to back off
+    #   @param max_backoff [Numeric] maximum backoff delay in seconds
     #   @return [Boolean] whether the transaction committed successfully
     #   @see Farce.transaction
-    def self.run(*, retries: 100, backoff_after: 10, &) # rubocop:disable Naming/PredicateMethod
+    def self.run(*, retries: nil, backoff_after: 10, max_backoff: 1.0, &) # rubocop:disable Naming/PredicateMethod
       raise LocalJumpError, "no block given" unless block_given?
-      raise ArgumentError, "retries must be a non-negative Integer" unless Integer === retries && retries >= 0
+
+      unless retries.nil? || (Integer === retries && retries >= 0)
+        raise ArgumentError, "retries must be nil or a non-negative Integer"
+      end
+
       unless Integer === backoff_after && backoff_after >= 0
         raise ArgumentError, "backoff_after must be a non-negative Integer"
       end
 
       attempt = 0
 
-      while attempt <= retries
+      while retries.nil? || attempt <= retries
         if attempt > backoff_after
-          delay = (attempt - backoff_after) * 0.01
+          delay     = (attempt - backoff_after) * 0.01
+          delay     = max_backoff if delay > max_backoff
           scheduler = Fiber.scheduler if Fiber.respond_to?(:scheduler) && !Fiber.current.blocking?
           scheduler ? scheduler.kernel_sleep(delay) : sleep(delay)
         end

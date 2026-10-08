@@ -1119,7 +1119,7 @@ module Farce
       atom = Strict::Atom.new(0)
       attempts = 0
       assert_raises(ArgumentError) do
-        Transaction.run(retries: 3) do |tx|
+        Transaction.run do |tx|
           attempts += 1
           tx[atom].value = 1
           raise ArgumentError, "bad input"
@@ -1133,7 +1133,7 @@ module Farce
       atom = Strict::Atom.new(0)
       attempts = 0
 
-      refute(Transaction.run(retries: 3) do |tx|
+      refute(Transaction.run do |tx|
         attempts += 1
         tx[atom].value = 1
         begin
@@ -1159,8 +1159,10 @@ module Farce
     end
 
     def test_retry_option_validation
-      [-1, nil, true, 1.0].each do |value|
+      [-1, true, 1.0].each do |value|
         assert_raises(ArgumentError) { Transaction.run(retries: value) { true } }
+      end
+      [-1, nil, true, 1.0].each do |value|
         assert_raises(ArgumentError) { Transaction.run(backoff_after: value) { true } }
       end
       assert_raises(LocalJumpError) { Transaction.run }
@@ -1219,20 +1221,69 @@ module Farce
       assert_equal 0, atom.value
     end
 
-    def test_default_retry_limit_and_backoff
+    def test_retry_backoff_uses_the_configured_maximum
       runner = Class.new(Transaction)
       delays = []
       runner.define_singleton_method(:sleep) { |delay| delays << delay }
       attempts = 0
 
-      refute(runner.run do |tx|
+      refute(runner.run(retries: 3, backoff_after: 0, max_backoff: 0.02) do |tx|
         attempts += 1
         tx.fail!
       end)
-      assert_equal 101, attempts
-      assert_equal 90, delays.size
+      assert_equal 4, attempts
+      assert_equal [0.01, 0.02, 0.02], delays
+    end
+
+    def test_unlimited_retries_and_capped_backoff
+      [{}, { retries: nil }].each do |options|
+        runner = Class.new(Transaction)
+        delays = []
+        runner.define_singleton_method(:sleep) { |delay| delays << delay }
+        atom = Strict::Atom.new(0)
+        attempts = 0
+
+        assert(runner.run(atom, **options) do |tx, reference|
+          attempts += 1
+          reference.value = attempts
+          tx.fail! if attempts < 125
+        end)
+        assert_equal 125, attempts
+        assert_equal 125, atom.value
+        assert_equal 114, delays.size
+        assert_in_delta 0.01, delays.first
+        assert_in_delta 0.99, delays[98]
+        assert_equal [1.0] * 15, delays.drop(99)
+      end
+    end
+
+    def test_finite_retries_with_capped_backoff
+      runner = Class.new(Transaction)
+      delays = []
+      runner.define_singleton_method(:sleep) { |delay| delays << delay }
+      attempts = 0
+
+      refute(runner.run(retries: 125, backoff_after: 0) do |tx|
+        attempts += 1
+        tx.fail!
+      end)
+      assert_equal 126, attempts
+      assert_equal 125, delays.size
       assert_in_delta 0.01, delays.first
-      assert_in_delta 0.9, delays.last
+      assert_equal [1.0] * 26, delays.drop(99)
+    end
+
+    def test_non_retryable_failure_stops_unlimited_retries
+      atom = Strict::Atom.new(0)
+      attempts = 0
+
+      refute(Transaction.run(atom, retries: nil) do |tx, reference|
+        attempts += 1
+        reference.value = 1
+        tx.fail!(retryable: false)
+      end)
+      assert_equal 1, attempts
+      assert_equal 0, atom.value
     end
 
     def test_wrapper_lifetime_and_attempt_state

@@ -53,10 +53,11 @@ module Farce
   autoload :DEDUPER, "farce/deduper"
   private_constant :Internal, :UNDEFINED, :DEDUPER
 
-  # @overload transaction(*objects, retries: 100, backoff_after: 10)
+  # @overload transaction(*objects, retries: nil, backoff_after: 10, max_backoff: 1.0)
   #   Creates and runs a new transaction attempt.
-  #   Automatically retries failed attempts up to the specified number of retries.
-  #   Starts backing off after the specified number of attempts.
+  #
+  #   Automatically retries failed attempts indefinitely unless a retry limit is specified.
+  #   Starts backing off after the specified number of attempts, up to the maximum delay.
   #
   #   @example Modifying multiple entries in a map
   #     accounts = Farce::Map.new({a: 100, b: 200})
@@ -86,8 +87,9 @@ module Farce
   #     end
   #
   #   @param objects [Array] list of objects to enroll in the transaction
-  #   @param retries [Integer] maximum additional attempts
+  #   @param retries [Integer, nil] maximum additional attempts, or nil for unlimited retries
   #   @param backoff_after [Integer] number of attempts before starting to back off
+  #   @param max_backoff [Numeric] maximum backoff delay in seconds
   #   @yield [transaction, *objects] the current transaction and the enrolled objects
   #   @yieldparam transaction [Farce::Transaction] the current transaction
   #   @yieldparam objects [Array] the enrolled objects
