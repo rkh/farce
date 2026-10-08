@@ -28,7 +28,18 @@ end
 
     # Wrap the modifications in a transaction, so map and output never disagree
     Farce.transaction(output, map) do |_, output, map|
-      map.upsert(key, 1) { it + 1 }
+
+      # Increase the value we have for the given key by one!
+      map[key] ||= 0
+      map[key]  += 1
+
+      # Could also replace the lines above with:
+      #
+      #   map.upsert(key, 1) { it + 1 }
+      #
+      # … which would be atomic.
+      # But we're in a transaction, so everything is atomic! ☢️
+
       output.sub!(/\d+ entries/, "#{map.size} entries")
       output.sub!(/sum of \d+/, "sum of #{map.values.sum}")
     end
