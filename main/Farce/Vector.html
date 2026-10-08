@@ -1255,7 +1255,8 @@ This may update and freeze the original. Already-shareable values pass through u
 223
 224
 225
-226</pre>
+226
+227</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 19</span>
@@ -1465,7 +1466,8 @@ This may update and freeze the original. Already-shareable values pass through u
 
   <span class='kw'>def</span> <span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span>
     <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_deadline'>deadline</span>
-    <span class='lbracket'>[</span><span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>-</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span><span class='comma'>,</span> <span class='int'>0</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_max'>max</span>
+    <span class='id identifier rubyid_remaining'>remaining</span> <span class='op'>=</span> <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>-</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span>
+    <span class='id identifier rubyid_remaining'>remaining</span><span class='period'>.</span><span class='id identifier rubyid_negative?'>negative?</span> <span class='op'>?</span> <span class='int'>0</span> <span class='op'>:</span> <span class='id identifier rubyid_remaining'>remaining</span>
   <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -3144,7 +3146,7 @@ This may update and freeze the original. Already-shareable values pass through u
 </div>
 
       <div id="footer">
-  Generated on Thu Oct  8 10:23:02 2026 by
+  Generated on Thu Oct  8 11:10:07 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -118,6 +118,8 @@ and performing an atomic update of this reference for mutating method calls.</p>
 like using a <span class='object_link'><a href="Map.html" title="Farce::Map (class)">Map</a></span> instead of wrapping a Hash in a <span class='object_link'><a href="" title="Farce::Mutable (class)">Mutable</a></span>, or a <span class='object_link'><a href="Vector.html" title="Farce::Vector (class)">Vector</a></span>
 instead of doing the same with an Array.</p>
 <p>Non-mutating calls do not incur this cost.</p>
+<p>Use a transaction view to stage mutations alongside changes to other participants.
+The original value changes only when the transaction commits.</p>
 
 
   </div>
@@ -128,6 +130,17 @@ instead of doing the same with an Array.</p>
     <h4 class="tag_title">Examples:</h4>
     
       
+        <h5 class="example_title"><div class='inline'><p>Updating two strings together</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_first'>first</span>  <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>Mutable</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="Farce::Mutable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>queued</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+<span class='id identifier rubyid_second'>second</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>Mutable</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="Farce::Mutable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>waiting</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+<span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_transaction'><span class='object_link'><a href="../Farce.html#transaction-class_method" title="Farce.transaction (method)">transaction</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_first'>first</span><span class='comma'>,</span> <span class='id identifier rubyid_second'>second</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid__'>_</span><span class='comma'>,</span> <span class='id identifier rubyid_first_view'>first_view</span><span class='comma'>,</span> <span class='id identifier rubyid_second_view'>second_view</span><span class='op'>|</span>
+  <span class='id identifier rubyid_first_view'>first_view</span><span class='period'>.</span><span class='id identifier rubyid_replace'>replace</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>running</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_second_view'>second_view</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> for worker</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span></code></pre>
+    
+      
       <pre class="example code"><code><span class='id identifier rubyid_shareable_string'>shareable_string</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>Mutable</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="Farce::Mutable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>foo</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
 <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_shareable_string'>shareable_string</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_it'>it</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>bar</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
 <span class='id identifier rubyid_shareable_string'>shareable_string</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span> <span class='comment'># =&gt; &quot;foobar&quot;</span></code></pre>
@@ -135,7 +148,11 @@ instead of doing the same with an Array.</p>
   </div>
 
 
+</div><div id="subclasses">
+  <h2>Direct Known Subclasses</h2>
+  <p class="children"><span class='object_link'><a href="Transaction/Mutable.html" title="Farce::Transaction::Mutable (class)">Transaction::Mutable</a></span></p>
 </div>
+
 
 
 
@@ -336,13 +353,13 @@ A frozen version of the object must be Ractor-shareable.</p>
       <pre class="lines">
 
 
-92
-93
-94
-95</pre>
+103
+104
+105
+106</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mutable.rb', line 92</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mutable.rb', line 103</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
   <span class='ivar'>@atom</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Atom</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='const'>Mutator</span><span class='period'>.</span><span class='id identifier rubyid_prepare'>prepare</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
@@ -388,21 +405,21 @@ freezes it, and uses that as internal value.</p>
       <pre class="lines">
 
 
-127
-128
-129
-130
-131
-132
-133
-134
-135
-136
-137
-138</pre>
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mutable.rb', line 127</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mutable.rb', line 141</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Style/MissingRespondToMissing
 </span>  <span class='ivar'>@atom</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
@@ -513,27 +530,27 @@ by invoking <code>new</code> on it with any arguments being passed on.</p>
       <pre class="lines">
 
 
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
 80
 81
 82
 83
 84
 85
-86</pre>
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mutable.rb', line 69</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mutable.rb', line 80</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_factory'>factory</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='op'>::</span><span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Ractor.html#IsolationError-constant" title="Farce::Ractor::IsolationError (constant)">IsolationError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>factory is not shareable</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='op'>::</span><span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_factory'>factory</span><span class='rparen'>)</span>
@@ -619,10 +636,10 @@ by invoking <code>new</code> on it with any arguments being passed on.</p>
       <pre class="lines">
 
 
-57</pre>
+68</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mutable.rb', line 57</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mutable.rb', line 68</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_deref'>deref</span><span class='lparen'>(</span><span class='id identifier rubyid_mutable'>mutable</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="" title="Farce::Mutable (class)">Mutable</a></span></span> <span class='op'>===</span> <span class='id identifier rubyid_mutable'>mutable</span> <span class='op'>?</span> <span class='const'>Mutator</span><span class='period'>.</span><span class='id identifier rubyid_deref'>deref</span><span class='lparen'>(</span><span class='id identifier rubyid_mutable'>mutable</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_mutable'>mutable</span></pre>
     </td>
@@ -674,17 +691,17 @@ by invoking <code>new</code> on it with any arguments being passed on.</p>
       <pre class="lines">
 
 
-101
-102
-103
-104
-105</pre>
+115
+116
+117
+118
+119</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/mutable.rb', line 101</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/mutable.rb', line 115</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='id identifier rubyid_include_private'>include_private</span> <span class='op'>=</span> <span class='kw'>false</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Style/OptionalBooleanParameter
-</span>  <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_name'>name</span> <span class='op'>==</span> <span class='symbol'>:marshal_dump</span>
+</span>  <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_name'>name</span> <span class='op'>==</span> <span class='symbol'>:marshal_dump</span> <span class='op'>||</span> <span class='id identifier rubyid_name'>name</span> <span class='op'>==</span> <span class='symbol'>:transaction_wrapper</span>
   <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_marshal_protocol_method?'>marshal_protocol_method?</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='symbol'>:respond_to?</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='id identifier rubyid_include_private'>include_private</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
@@ -698,7 +715,7 @@ by invoking <code>new</code> on it with any arguments being passed on.</p>
 </div>
 
       <div id="footer">
-  Generated on Thu Oct  8 10:23:03 2026 by
+  Generated on Thu Oct  8 11:10:08 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -111,7 +111,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/farce/transaction.rb<span class="defines">,<br>
-  lib/farce/transaction/map.rb,<br> lib/farce/transaction/set.rb,<br> lib/farce/transaction/atom.rb,<br> lib/farce/transaction/vector.rb,<br> lib/farce/transaction/wrapper.rb,<br> lib/farce/transaction/molecule.rb,<br> lib/farce/transaction/tree_map.rb,<br> lib/farce/transaction/sorted_set.rb,<br> lib/farce/integrations/concurrent.rb,<br> lib/farce/integrations/ractor_tmvar.rb,<br> lib/farce/transaction/map_operations.rb,<br> lib/farce/transaction/set_operations.rb,<br> lib/farce/integrations/ractor_sharing.rb</span>
+  lib/farce/transaction/map.rb,<br> lib/farce/transaction/set.rb,<br> lib/farce/transaction/atom.rb,<br> lib/farce/transaction/vector.rb,<br> lib/farce/transaction/mutable.rb,<br> lib/farce/transaction/wrapper.rb,<br> lib/farce/transaction/molecule.rb,<br> lib/farce/transaction/tree_map.rb,<br> lib/farce/transaction/sorted_set.rb,<br> lib/farce/integrations/concurrent.rb,<br> lib/farce/integrations/ractor_tmvar.rb,<br> lib/farce/transaction/map_operations.rb,<br> lib/farce/transaction/set_operations.rb,<br> lib/farce/integrations/ractor_sharing.rb</span>
 
 </dd>
   </dl>
@@ -144,6 +144,7 @@ changes affecting data within multiple scopes.</p>
 <li>Atoms, except weak atoms</li>
 <li>ConcurrentMap subclasses, except weak maps</li>
 <li>Molecules</li>
+<li>Mutable wrappers with frozen snapshots</li>
 <li>Sets, including sorted sets</li>
 <li>TreeMap subclasses</li>
 <li>Vectors</li>
@@ -164,7 +165,7 @@ changes affecting data within multiple scopes.</p>
     
   
     
-      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Transaction/Atom.html" title="Farce::Transaction::Atom (class)">Atom</a></span>, <span class='object_link'><a href="Transaction/Map.html" title="Farce::Transaction::Map (class)">Map</a></span>, <span class='object_link'><a href="Transaction/Molecule.html" title="Farce::Transaction::Molecule (class)">Molecule</a></span>, <span class='object_link'><a href="Transaction/RactorTMVar.html" title="Farce::Transaction::RactorTMVar (class)">RactorTMVar</a></span>, <span class='object_link'><a href="Transaction/RactorTVar.html" title="Farce::Transaction::RactorTVar (class)">RactorTVar</a></span>, <span class='object_link'><a href="Transaction/Set.html" title="Farce::Transaction::Set (class)">Set</a></span>, <span class='object_link'><a href="Transaction/SortedSet.html" title="Farce::Transaction::SortedSet (class)">SortedSet</a></span>, <span class='object_link'><a href="Transaction/TVar.html" title="Farce::Transaction::TVar (class)">TVar</a></span>, <span class='object_link'><a href="Transaction/TreeMap.html" title="Farce::Transaction::TreeMap (class)">TreeMap</a></span>, <span class='object_link'><a href="Transaction/Vector.html" title="Farce::Transaction::Vector (class)">Vector</a></span>
+      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Transaction/Atom.html" title="Farce::Transaction::Atom (class)">Atom</a></span>, <span class='object_link'><a href="Transaction/Map.html" title="Farce::Transaction::Map (class)">Map</a></span>, <span class='object_link'><a href="Transaction/Molecule.html" title="Farce::Transaction::Molecule (class)">Molecule</a></span>, <span class='object_link'><a href="Transaction/Mutable.html" title="Farce::Transaction::Mutable (class)">Mutable</a></span>, <span class='object_link'><a href="Transaction/RactorTMVar.html" title="Farce::Transaction::RactorTMVar (class)">RactorTMVar</a></span>, <span class='object_link'><a href="Transaction/RactorTVar.html" title="Farce::Transaction::RactorTVar (class)">RactorTVar</a></span>, <span class='object_link'><a href="Transaction/Set.html" title="Farce::Transaction::Set (class)">Set</a></span>, <span class='object_link'><a href="Transaction/SortedSet.html" title="Farce::Transaction::SortedSet (class)">SortedSet</a></span>, <span class='object_link'><a href="Transaction/TVar.html" title="Farce::Transaction::TVar (class)">TVar</a></span>, <span class='object_link'><a href="Transaction/TreeMap.html" title="Farce::Transaction::TreeMap (class)">TreeMap</a></span>, <span class='object_link'><a href="Transaction/Vector.html" title="Farce::Transaction::Vector (class)">Vector</a></span>
     
   
 </p>
@@ -283,7 +284,7 @@ changes affecting data within multiple scopes.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#run-class_method" title="run (class method)">.<strong>run</strong>(*objects, retries: 100, backoff_after: 10)  &#x21d2; Boolean </a>
+      <a href="#run-class_method" title="run (class method)">.<strong>run</strong>(*objects, retries: nil, backoff_after: 10, max_backoff: 1.0)  &#x21d2; Boolean </a>
     
 
     
@@ -537,19 +538,19 @@ failed comparisons or conflicts should create and run fresh attempts.</p>
       <pre class="lines">
 
 
-138
-139
-140
-141
-142
-143
-144
-145
-146
-147</pre>
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 138</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 147</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span>
   <span class='ivar'>@owner</span>     <span class='op'>=</span> <span class='const'>Fiber</span><span class='period'>.</span><span class='id identifier rubyid_current'>current</span>
@@ -616,12 +617,12 @@ during publication, then :committed or :failed</p>
       <pre class="lines">
 
 
-152
-153
-154</pre>
+161
+162
+163</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 152</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 161</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_state'>state</span>
   <span class='ivar'>@state</span>
@@ -771,14 +772,14 @@ during publication, then :committed or :failed</p>
       <pre class="lines">
 
 
-76
 77
 78
 79
-80</pre>
+80
+81</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 76</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 77</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_define'>define</span><span class='lparen'>(</span><span class='id identifier rubyid_klass'>klass</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -793,7 +794,7 @@ during publication, then :committed or :failed</p>
       <div class="method_details ">
   <h3 class="signature " id="run-class_method">
   
-    .<strong>run</strong>(*objects, retries: 100, backoff_after: 10)  &#x21d2; <tt>Boolean</tt> 
+    .<strong>run</strong>(*objects, retries: nil, backoff_after: 10, max_backoff: 1.0)  &#x21d2; <tt>Boolean</tt> 
   
 
   
@@ -809,9 +810,9 @@ during publication, then :committed or :failed</p>
   
   <div class="docstring">
   <div class="discussion">
-    <p>Creates and runs a new transaction attempt.
-Automatically retries failed attempts up to the specified number of retries.
-Starts backing off after the specified number of attempts.</p>
+    <p>Creates and runs a new transaction attempt.</p>
+<p>Automatically retries failed attempts indefinitely unless a retry limit is specified.
+Starts backing off after the specified number of attempts, up to the maximum delay.</p>
 
 
   </div>
@@ -840,14 +841,14 @@ Starts backing off after the specified number of attempts.</p>
         <span class='name'>retries</span>
       
       
-        <span class='type'>(<tt>Integer</tt>)</span>
+        <span class='type'>(<tt>Integer</tt>, <tt>nil</tt>)</span>
       
       
-        <em class="default">(defaults to: <tt>100</tt>)</em>
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
       
       
         &mdash;
-        <div class='inline'><p>maximum additional attempts</p>
+        <div class='inline'><p>maximum additional attempts, or nil for unlimited retries</p>
 </div>
       
     </li>
@@ -865,6 +866,23 @@ Starts backing off after the specified number of attempts.</p>
       
         &mdash;
         <div class='inline'><p>number of attempts before starting to back off</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>max_backoff</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>1.0</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>maximum backoff delay in seconds</p>
 </div>
       
     </li>
@@ -918,10 +936,6 @@ Starts backing off after the specified number of attempts.</p>
       <pre class="lines">
 
 
-109
-110
-111
-112
 113
 114
 115
@@ -942,23 +956,37 @@ Starts backing off after the specified number of attempts.</p>
 130
 131
 132
-133</pre>
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 109</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 113</span>
 
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_run'>run</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>retries:</span> <span class='int'>100</span><span class='comma'>,</span> <span class='label'>backoff_after:</span> <span class='int'>10</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_run'>run</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>retries:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>backoff_after:</span> <span class='int'>10</span><span class='comma'>,</span> <span class='label'>max_backoff:</span> <span class='float'>1.0</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
 </span>  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
-  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>retries must be a non-negative Integer</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='const'>Integer</span> <span class='op'>===</span> <span class='id identifier rubyid_retries'>retries</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_retries'>retries</span> <span class='op'>&gt;=</span> <span class='int'>0</span>
+
+  <span class='kw'>unless</span> <span class='id identifier rubyid_retries'>retries</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>||</span> <span class='lparen'>(</span><span class='const'>Integer</span> <span class='op'>===</span> <span class='id identifier rubyid_retries'>retries</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_retries'>retries</span> <span class='op'>&gt;=</span> <span class='int'>0</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>retries must be nil or a non-negative Integer</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+
   <span class='kw'>unless</span> <span class='const'>Integer</span> <span class='op'>===</span> <span class='id identifier rubyid_backoff_after'>backoff_after</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_backoff_after'>backoff_after</span> <span class='op'>&gt;=</span> <span class='int'>0</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>backoff_after must be a non-negative Integer</span><span class='tstring_end'>&quot;</span></span>
   <span class='kw'>end</span>
 
   <span class='id identifier rubyid_attempt'>attempt</span> <span class='op'>=</span> <span class='int'>0</span>
 
-  <span class='kw'>while</span> <span class='id identifier rubyid_attempt'>attempt</span> <span class='op'>&lt;=</span> <span class='id identifier rubyid_retries'>retries</span>
+  <span class='kw'>while</span> <span class='id identifier rubyid_retries'>retries</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>||</span> <span class='id identifier rubyid_attempt'>attempt</span> <span class='op'>&lt;=</span> <span class='id identifier rubyid_retries'>retries</span>
     <span class='kw'>if</span> <span class='id identifier rubyid_attempt'>attempt</span> <span class='op'>&gt;</span> <span class='id identifier rubyid_backoff_after'>backoff_after</span>
-      <span class='id identifier rubyid_delay'>delay</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_attempt'>attempt</span> <span class='op'>-</span> <span class='id identifier rubyid_backoff_after'>backoff_after</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='float'>0.01</span>
+      <span class='id identifier rubyid_delay'>delay</span>     <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_attempt'>attempt</span> <span class='op'>-</span> <span class='id identifier rubyid_backoff_after'>backoff_after</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='float'>0.01</span>
+      <span class='id identifier rubyid_delay'>delay</span>     <span class='op'>=</span> <span class='id identifier rubyid_max_backoff'>max_backoff</span> <span class='kw'>if</span> <span class='id identifier rubyid_delay'>delay</span> <span class='op'>&gt;</span> <span class='id identifier rubyid_max_backoff'>max_backoff</span>
       <span class='id identifier rubyid_scheduler'>scheduler</span> <span class='op'>=</span> <span class='const'>Fiber</span><span class='period'>.</span><span class='id identifier rubyid_scheduler'>scheduler</span> <span class='kw'>if</span> <span class='const'>Fiber</span><span class='period'>.</span><span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:scheduler</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='const'>Fiber</span><span class='period'>.</span><span class='id identifier rubyid_current'>current</span><span class='period'>.</span><span class='id identifier rubyid_blocking?'>blocking?</span>
       <span class='id identifier rubyid_scheduler'>scheduler</span> <span class='op'>?</span> <span class='id identifier rubyid_scheduler'>scheduler</span><span class='period'>.</span><span class='id identifier rubyid_kernel_sleep'>kernel_sleep</span><span class='lparen'>(</span><span class='id identifier rubyid_delay'>delay</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_sleep'>sleep</span><span class='lparen'>(</span><span class='id identifier rubyid_delay'>delay</span><span class='rparen'>)</span>
     <span class='kw'>end</span>
@@ -1062,29 +1090,31 @@ Read from and write to the returned object, so the transaction can keep track of
       <pre class="lines">
 
 
-220
-221
-222
-223
-224
-225
-226
-227
-228
 229
 230
 231
 232
 233
-234</pre>
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 220</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 229</span>
 
 <span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_open!'>check_open!</span>
   <span class='ivar'>@wrappers</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span> <span class='kw'>do</span>
-    <span class='ivar'>@wrappers</span><span class='lbracket'>[</span><span class='id identifier rubyid_object'>object</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>REGISTER</span><span class='lbracket'>[</span><span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='kw'>self</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_klass'>klass</span> <span class='op'>=</span> <span class='const'>Kernel</span><span class='period'>.</span><span class='id identifier rubyid_instance_method'>instance_method</span><span class='lparen'>(</span><span class='symbol'>:class</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_bind_call'>bind_call</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
+    <span class='ivar'>@wrappers</span><span class='lbracket'>[</span><span class='id identifier rubyid_object'>object</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>REGISTER</span><span class='lbracket'>[</span><span class='id identifier rubyid_klass'>klass</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='kw'>self</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 <span class='kw'>rescue</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>TransactionConflict</span>
   <span class='id identifier rubyid_fail!'>fail!</span> <span class='kw'>if</span> <span class='ivar'>@state</span> <span class='op'>==</span> <span class='symbol'>:active</span> <span class='op'>&amp;&amp;</span> <span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>Fiber</span><span class='period'>.</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
@@ -1153,14 +1183,14 @@ The surrounding run call returns false. No writes to participants are published.
       <pre class="lines">
 
 
-247
-248
-249
-250
-251</pre>
+257
+258
+259
+260
+261</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 247</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 257</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_abort!'>abort!</span>
   <span class='id identifier rubyid_check_open!'>check_open!</span>
@@ -1210,10 +1240,10 @@ The surrounding run call returns false. No writes to participants are published.
       <pre class="lines">
 
 
-156</pre>
+165</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 156</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 165</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_aborted?'>aborted?</span> <span class='op'>=</span> <span class='ivar'>@aborted</span></pre>
     </td>
@@ -1285,15 +1315,15 @@ call <code>fail!(retryable: false)</code> to prevent earlier writes from committ
       <pre class="lines">
 
 
-264
-265
-266
-267
-268
-269</pre>
+274
+275
+276
+277
+278
+279</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 264</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 274</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fail!'>fail!</span><span class='lparen'>(</span><span class='label'>retryable:</span> <span class='kw'>true</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
 </span>  <span class='id identifier rubyid_check_open!'>check_open!</span>
@@ -1345,10 +1375,10 @@ Explicit aborts, wrapper exceptions, and fail!(retryable: false) disable retries
       <pre class="lines">
 
 
-161</pre>
+170</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 161</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 170</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_retryable?'>retryable?</span> <span class='op'>=</span> <span class='ivar'>@retryable</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ivar'>@aborted</span></pre>
     </td>
@@ -1502,15 +1532,6 @@ committed, an interruption does not undo the changes.</p>
       <pre class="lines">
 
 
-177
-178
-179
-180
-181
-182
-183
-184
-185
 186
 187
 188
@@ -1537,10 +1558,19 @@ committed, an interruption does not undo the changes.</p>
 209
 210
 211
-212</pre>
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 177</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction.rb', line 186</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_run'>run</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_objects'>objects</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_started'>started</span> <span class='op'>=</span> <span class='kw'>false</span>
@@ -1588,7 +1618,7 @@ committed, an interruption does not undo the changes.</p>
 </div>
 
       <div id="footer">
-  Generated on Thu Oct  8 10:23:06 2026 by
+  Generated on Thu Oct  8 11:10:10 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
