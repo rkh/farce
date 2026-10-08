@@ -16,6 +16,11 @@ module Farce
           inspector.object(self)
         end
 
+        def pretty_print_cycle(pp)
+          inspector = PrettyPrinter.create(pp)
+          inspector.object_with_address(self)
+        end
+
         def inspect_with(inspector, &)
           return inspector.object_group(self, &) if block_given?
           inspector.object_with_address(self)

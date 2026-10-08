@@ -86,6 +86,7 @@ The following modes are accepted by `Farce::Port`. They apply to non-shareable v
 | `:move` | Transfers ownership and makes the original inaccessible. | Hand a completed batch to a consumer. |
 | `:local` | Keeps the same object in its originating Ractor. | Pass work between local threads or fibers. |
 | `:make_shareable` | Calls `Ractor.make_shareable` on the original. | Publish finished configuration. |
+| `:mutable` | Copies non-shareable objects into a `Farce::Mutable` | Synchronize mutations across ractors. |
 | `:shareable_copy` | Makes a shareable copy and leaves the original alone. | Publish a snapshot of an editable document. |
 | `:dedup` | Deduplicates the value, then makes it shareable. May update and freeze the original. | Reuse repeated message contents. |
 | `:proxy` | Creates a `Farce::Proxy` that executes calls in the original Ractor. | Share access to a mutable object. |

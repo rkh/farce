@@ -33,7 +33,7 @@ module Farce
     end
 
     def test_accepts_every_documented_mode
-      expected = ::Set[:copy, :move, :local, :make_shareable, :raise, :shareable_copy, :dedup, :proxy]
+      expected = ::Set[:copy, :move, :local, :make_shareable, :mutable, :raise, :shareable_copy, :dedup, :proxy]
 
       assert_equal expected, ModeManager::MODES
       expected.each do |mode|
@@ -94,6 +94,64 @@ module Farce
       assert_instance_of Envelope::Local, envelope
       assert_same manager, envelope.auto_unwrap
       assert_same source, manager.unwrap(envelope)
+    end
+
+    def test_mutable_mode_preserves_shareable_values_and_existing_wrappers
+      manager = ModeManager.new(mode: :mutable)
+
+      assert_nil manager.wrap(nil)
+      assert_nil manager.unwrap(nil)
+      [false, :value, [1].freeze, Mutable.new([1])].each do |value|
+        assert_same value, manager.wrap(value)
+        assert_same value, manager.unwrap(value)
+      end
+    end
+
+    def test_mutable_mode_wraps_a_snapshot_without_automatically_unwrapping_it
+      return unless Internal.native_ractors?
+      manager = ModeManager.new(mode: :mutable)
+      source = [1]
+      mutable = manager.wrap(source)
+      source.push(2)
+
+      assert_operator Mutable, :===, mutable
+      assert Ractor.shareable?(mutable)
+      assert_same mutable, manager.unwrap(mutable)
+      assert_same mutable, ModeManager.new.unwrap(mutable)
+      refute manager.managed_envelope?(mutable)
+      assert_equal [1], Mutable.deref(mutable)
+      mutable.push(3)
+
+      assert_equal [1, 3], Mutable.deref(mutable)
+      assert_equal [1, 2], source
+    end
+
+    def test_mutable_mode_override_keeps_the_default_mode
+      return unless Internal.native_ractors?
+      manager = ModeManager.new(mode: :raise)
+      mutable = manager.wrap([1], mode: :mutable)
+
+      assert_operator Mutable, :===, mutable
+      assert_equal :raise, manager.mode
+      assert_same mutable, manager.unwrap(mutable)
+    end
+
+    def test_mutable_mode_rejects_nested_unshareable_values
+      return unless Internal.native_ractors?
+      source = [[]]
+
+      assert_raises(Ractor::IsolationError) { ModeManager.new(mode: :mutable).wrap(source) }
+      refute_predicate source, :frozen?
+      refute_predicate source.first, :frozen?
+    end
+
+    def test_mutable_mode_preserves_values_on_emulated_ractors
+      return if Internal.native_ractors?
+      source = [1]
+
+      assert_same source, ModeManager.new(mode: :mutable).wrap(source)
+      assert_same source, ModeManager.new(mode: :raise).wrap(source, mode: :mutable)
+      refute_predicate source, :frozen?
     end
 
     def test_raise_mode_rejects_an_unshareable_value

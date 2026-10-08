@@ -16,6 +16,7 @@
 #   * `:move` - The value will be moved between Ractors. This saves memory compared to copying, and supports values
 #     that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
 #     that pushed it.
+#   * `:mutable` - A {Farce::Mutable} instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.
 #   * `:local` - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 #     get an error. Useful for usage contained within a single Ractor.
 #   * `:proxy` - The value will be wrapped in a `Farce::Proxy` that executes calls in the original Ractor.
