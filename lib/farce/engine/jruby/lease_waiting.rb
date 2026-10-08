@@ -11,7 +11,7 @@ module Farce
       # JRuby delivers Thread#raise after its Java Phaser wait returns.
       # Bound each wait so cancellation remains responsive.
       def self.wait_interval(remaining)
-        return MIN unless remaining || remaining > MIN
+        return MIN if !remaining || remaining > MIN
         remaining
       end
     end
