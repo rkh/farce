@@ -16,7 +16,7 @@ ractor = Farce::Ractor.new(output) do |output|
 end
 
 # No idea if the above ractor is done modifying output, but we don't need to worry!
-# We'll just pick a random key one hundred times and increase the corresponding counter by one.
+# We'll just pick a random key one hundred times and increase its counter by one.
 # Oh, and update the output string.
 100.times.map do
 
@@ -55,16 +55,16 @@ ractor.join
 puts output
 ```
 
-**You don't see why you'd want this?**<br>
+🤨 **You don't see why you'd want this?**<br>
 → Start with the [Introduction](#introduction).
 
-**Now you want to know what else Farce can do?**<br>
+📖 **Now you want to know what else Farce can do?**<br>
 → Check out the [Features](#features)!
 
-**Returning user and you need the details?**<br> 
+🔎 **Returning user and you need the details?**<br> 
 → See the [API reference](https://rkh.github.io/farce/).
 
-**Want to contribute?**<br>
+🛠️ **Want to contribute?**<br>
 → Read the [contribution guide](CONTRIBUTING.md), [code of conduct](CODE_OF_CONDUCT.md), and [security policy](SECURITY.md).
 
 
