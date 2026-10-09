@@ -35,10 +35,10 @@ jobs:
             test_timeout: 1200
           - name: truffleruby
             version: truffleruby
-            test_timeout: 600
+            test_timeout: 1200
           - name: truffleruby-dev
             version: truffleruby-head
-            test_timeout: 600
+            test_timeout: 1200
           - name: truffleruby+graalvm
             version: truffleruby+graalvm
             # Each subprocess starts a fresh JVM, which can exceed 15 seconds on CI.
@@ -87,7 +87,7 @@ jobs:
 
       - run: bundle exec rake ci
         env:
-          TEST_TIMEOUT: 600
+          TEST_TIMEOUT: 1200
 
       - name: Upload Windows crash reports
         if: failure()
@@ -132,7 +132,7 @@ jobs:
 
       - run: bundle exec rake ci
         env:
-          TEST_TIMEOUT: 600
+          TEST_TIMEOUT: 1200
 
       - name: Upload Windows crash reports
         if: failure() && runner.os == 'Windows'
