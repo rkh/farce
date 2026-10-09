@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: Farce::Unshared::WeakMap
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="../../css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "Farce::Unshared::WeakMap";
+  relpath = '../../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="../../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../../../main/index.html">main</option>
+<option value="../../index.html" selected>v0.0.1.alpha2</option>
+<option value="../../../v0.0.1.alpha1/index.html">v0.0.1.alpha1</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../../_index.html">Index (W)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Unshared.html" title="Farce::Unshared (module)">Unshared</a></span></span>
+     &raquo; 
+    <span class="title">WeakMap</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: Farce::Unshared::WeakMap
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName"><span class='object_link'><a href="../Abstract/WeakMap.html" title="Farce::Abstract::WeakMap (class)">Abstract::WeakMap</a></span></span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next"><span class='object_link'><a href="../Abstract/Map.html" title="Farce::Abstract::Map (class)">Abstract::Map</a></span></li>
+          
+            <li class="next"><span class='object_link'><a href="../Abstract/ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">Abstract::ConcurrentMap</a></span></li>
+          
+            <li class="next"><span class='object_link'><a href="../Abstract/WeakMap.html" title="Farce::Abstract::WeakMap (class)">Abstract::WeakMap</a></span></li>
+          
+            <li class="next">Farce::Unshared::WeakMap</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  <dl>
+      <dt>Includes:</dt>
+      <dd><span class='object_link'><a href="../Unshareable.html" title="Farce::Unshareable (module)">Farce::Unshareable</a></span></dd>
+  </dl>
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/farce/unshared/weak_map.rb
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>A thread-safe map with weak keys and values for use within one Ractor.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Keeping a relationship while both mutable objects remain alive</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_key'>key</span>   <span class='op'>=</span> <span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
+<span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
+<span class='id identifier rubyid_map'>map</span>   <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Unshared.html" title="Farce::Unshared (module)">Unshared</a></span></span><span class='op'>::</span><span class='const'>WeakMap</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="Farce::Unshared::WeakMap#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='lbrace'>{</span> <span class='id identifier rubyid_key'>key</span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
+</span>
+<span class='comment'># The entry can disappear once its key or value is collected
+</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>nil</span></code></pre>
+    
+  </div>
+
+
+</div>
+
+
+
+
+
+
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(initial_mapping = nil, normalize_keys: nil, compare_by_identity: false, compare_keys_by_identity: compare_by_identity, compare_values_by_identity: compare_by_identity)  &#x21d2; WeakMap </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>A new instance of WeakMap.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../Unshareable.html" title="Farce::Unshareable (module)">Farce::Unshareable</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Unshareable.html#ractor_shareable%3F-instance_method" title="Farce::Unshareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/WeakMap.html" title="Farce::Abstract::WeakMap (class)">Abstract::WeakMap</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/WeakMap.html#weak_keys%3F-instance_method" title="Farce::Abstract::WeakMap#weak_keys? (method)">#weak_keys?</a></span>, <span class='object_link'><a href="../Abstract/WeakMap.html#weak_values%3F-instance_method" title="Farce::Abstract::WeakMap#weak_values? (method)">#weak_values?</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">Abstract::ConcurrentMap</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/ConcurrentMap.html#[]-instance_method" title="Farce::Abstract::ConcurrentMap#[] (method)">#[]</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#[]=-instance_method" title="Farce::Abstract::ConcurrentMap#[]= (method)">#[]=</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#clear-instance_method" title="Farce::Abstract::ConcurrentMap#clear (method)">#clear</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compact!-instance_method" title="Farce::Abstract::ConcurrentMap#compact! (method)">#compact!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compact_blank!-instance_method" title="Farce::Abstract::ConcurrentMap#compact_blank! (method)">#compact_blank!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compare_and_set-instance_method" title="Farce::Abstract::ConcurrentMap#compare_and_set (method)">#compare_and_set</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compare_keys_by_identity%3F-instance_method" title="Farce::Abstract::ConcurrentMap#compare_keys_by_identity? (method)">#compare_keys_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compare_values_by_identity%3F-instance_method" title="Farce::Abstract::ConcurrentMap#compare_values_by_identity? (method)">#compare_values_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#delete-instance_method" title="Farce::Abstract::ConcurrentMap#delete (method)">#delete</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#delete_if-instance_method" title="Farce::Abstract::ConcurrentMap#delete_if (method)">#delete_if</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#each-instance_method" title="Farce::Abstract::ConcurrentMap#each (method)">#each</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#each_key-instance_method" title="Farce::Abstract::ConcurrentMap#each_key (method)">#each_key</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#each_value-instance_method" title="Farce::Abstract::ConcurrentMap#each_value (method)">#each_value</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#fetch-instance_method" title="Farce::Abstract::ConcurrentMap#fetch (method)">#fetch</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#get-instance_method" title="Farce::Abstract::ConcurrentMap#get (method)">#get</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#getkey-instance_method" title="Farce::Abstract::ConcurrentMap#getkey (method)">#getkey</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#keep_if-instance_method" title="Farce::Abstract::ConcurrentMap#keep_if (method)">#keep_if</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#key%3F-instance_method" title="Farce::Abstract::ConcurrentMap#key? (method)">#key?</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#keys-instance_method" title="Farce::Abstract::ConcurrentMap#keys (method)">#keys</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#merge!-instance_method" title="Farce::Abstract::ConcurrentMap#merge! (method)">#merge!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#reject!-instance_method" title="Farce::Abstract::ConcurrentMap#reject! (method)">#reject!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#reverse_merge!-instance_method" title="Farce::Abstract::ConcurrentMap#reverse_merge! (method)">#reverse_merge!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#select!-instance_method" title="Farce::Abstract::ConcurrentMap#select! (method)">#select!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#size-instance_method" title="Farce::Abstract::ConcurrentMap#size (method)">#size</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#store-instance_method" title="Farce::Abstract::ConcurrentMap#store (method)">#store</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#store_if_absent-instance_method" title="Farce::Abstract::ConcurrentMap#store_if_absent (method)">#store_if_absent</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#swap-instance_method" title="Farce::Abstract::ConcurrentMap#swap (method)">#swap</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#transform_values!-instance_method" title="Farce::Abstract::ConcurrentMap#transform_values! (method)">#transform_values!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#update-instance_method" title="Farce::Abstract::ConcurrentMap#update (method)">#update</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#upsert-instance_method" title="Farce::Abstract::ConcurrentMap#upsert (method)">#upsert</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#values-instance_method" title="Farce::Abstract::ConcurrentMap#values (method)">#values</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until (method)">#wait_until</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until_changed-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until_changed (method)">#wait_until_changed</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until_match-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until_match (method)">#wait_until_match</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until_non_nil-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until_non_nil (method)">#wait_until_non_nil</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until_value-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until_value (method)">#wait_until_value</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_while-instance_method" title="Farce::Abstract::ConcurrentMap#wait_while (method)">#wait_while</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_while_match-instance_method" title="Farce::Abstract::ConcurrentMap#wait_while_match (method)">#wait_while_match</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_while_value-instance_method" title="Farce::Abstract::ConcurrentMap#wait_while_value (method)">#wait_while_value</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../Abstract/DuplicableMap.html" title="Farce::Abstract::DuplicableMap (module)">Abstract::DuplicableMap</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/DuplicableMap.html#compact-instance_method" title="Farce::Abstract::DuplicableMap#compact (method)">#compact</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#compact_blank-instance_method" title="Farce::Abstract::DuplicableMap#compact_blank (method)">#compact_blank</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#deep_dup-instance_method" title="Farce::Abstract::DuplicableMap#deep_dup (method)">#deep_dup</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#duplicable%3F-instance_method" title="Farce::Abstract::DuplicableMap#duplicable? (method)">#duplicable?</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#except-instance_method" title="Farce::Abstract::DuplicableMap#except (method)">#except</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#flatten-instance_method" title="Farce::Abstract::DuplicableMap#flatten (method)">#flatten</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#invert-instance_method" title="Farce::Abstract::DuplicableMap#invert (method)">#invert</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#merge-instance_method" title="Farce::Abstract::DuplicableMap#merge (method)">#merge</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#reject-instance_method" title="Farce::Abstract::DuplicableMap#reject (method)">#reject</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#reverse_merge-instance_method" title="Farce::Abstract::DuplicableMap#reverse_merge (method)">#reverse_merge</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#select-instance_method" title="Farce::Abstract::DuplicableMap#select (method)">#select</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#slice-instance_method" title="Farce::Abstract::DuplicableMap#slice (method)">#slice</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#stringify_keys-instance_method" title="Farce::Abstract::DuplicableMap#stringify_keys (method)">#stringify_keys</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#symbolize_keys-instance_method" title="Farce::Abstract::DuplicableMap#symbolize_keys (method)">#symbolize_keys</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#to_proc-instance_method" title="Farce::Abstract::DuplicableMap#to_proc (method)">#to_proc</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#transform_keys-instance_method" title="Farce::Abstract::DuplicableMap#transform_keys (method)">#transform_keys</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#transform_values-instance_method" title="Farce::Abstract::DuplicableMap#transform_values (method)">#transform_values</a></span>, <span class='object_link'><a href="../Abstract/DuplicableMap.html#with_indifferent_access-instance_method" title="Farce::Abstract::DuplicableMap#with_indifferent_access (method)">#with_indifferent_access</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/Map.html" title="Farce::Abstract::Map (class)">Abstract::Map</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/Map.html#[]-instance_method" title="Farce::Abstract::Map#[] (method)">#[]</a></span>, <span class='object_link'><a href="../Abstract/Map.html#[]=-instance_method" title="Farce::Abstract::Map#[]= (method)">#[]=</a></span>, <span class='object_link'><a href="../Abstract/Map.html#as_extended_json-instance_method" title="Farce::Abstract::Map#as_extended_json (method)">#as_extended_json</a></span>, <span class='object_link'><a href="../Abstract/Map.html#as_json-instance_method" title="Farce::Abstract::Map#as_json (method)">#as_json</a></span>, <span class='object_link'><a href="../Abstract/Map.html#assert_valid_keys-instance_method" title="Farce::Abstract::Map#assert_valid_keys (method)">#assert_valid_keys</a></span>, <span class='object_link'><a href="../Abstract/Map.html#assoc-instance_method" title="Farce::Abstract::Map#assoc (method)">#assoc</a></span>, <span class='object_link'><a href="../Abstract/Map.html#bson_type-instance_method" title="Farce::Abstract::Map#bson_type (method)">#bson_type</a></span>, <span class='object_link'><a href="../Abstract/Map.html#clear-instance_method" title="Farce::Abstract::Map#clear (method)">#clear</a></span>, <span class='object_link'><a href="../Abstract/Map.html#compare_by_identity%3F-instance_method" title="Farce::Abstract::Map#compare_by_identity? (method)">#compare_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#compare_keys_by_identity%3F-instance_method" title="Farce::Abstract::Map#compare_keys_by_identity? (method)">#compare_keys_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#compare_values_by_identity%3F-instance_method" title="Farce::Abstract::Map#compare_values_by_identity? (method)">#compare_values_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#deconstruct_keys-instance_method" title="Farce::Abstract::Map#deconstruct_keys (method)">#deconstruct_keys</a></span>, <span class='object_link'><a href="../Abstract/Map.html#delete-instance_method" title="Farce::Abstract::Map#delete (method)">#delete</a></span>, <span class='object_link'><a href="../Abstract/Map.html#dig-instance_method" title="Farce::Abstract::Map#dig (method)">#dig</a></span>, <span class='object_link'><a href="../Abstract/Map.html#each-instance_method" title="Farce::Abstract::Map#each (method)">#each</a></span>, <span class='object_link'><a href="../Abstract/Map.html#each_key-instance_method" title="Farce::Abstract::Map#each_key (method)">#each_key</a></span>, <span class='object_link'><a href="../Abstract/Map.html#each_pair-instance_method" title="Farce::Abstract::Map#each_pair (method)">#each_pair</a></span>, <span class='object_link'><a href="../Abstract/Map.html#each_value-instance_method" title="Farce::Abstract::Map#each_value (method)">#each_value</a></span>, <span class='object_link'><a href="../Abstract/Map.html#empty%3F-instance_method" title="Farce::Abstract::Map#empty? (method)">#empty?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#fetch-instance_method" title="Farce::Abstract::Map#fetch (method)">#fetch</a></span>, <span class='object_link'><a href="../Abstract/Map.html#fetch_values-instance_method" title="Farce::Abstract::Map#fetch_values (method)">#fetch_values</a></span>, <span class='object_link'><a href="../Abstract/Map.html#getkey-instance_method" title="Farce::Abstract::Map#getkey (method)">#getkey</a></span>, <span class='object_link'><a href="../Abstract/Map.html#has_key%3F-instance_method" title="Farce::Abstract::Map#has_key? (method)">#has_key?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#key-instance_method" title="Farce::Abstract::Map#key (method)">#key</a></span>, <span class='object_link'><a href="../Abstract/Map.html#key%3F-instance_method" title="Farce::Abstract::Map#key? (method)">#key?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#keys-instance_method" title="Farce::Abstract::Map#keys (method)">#keys</a></span>, <span class='object_link'><a href="../Abstract/Map.html#length-instance_method" title="Farce::Abstract::Map#length (method)">#length</a></span>, <span class='object_link'><a href="../Abstract/Map.html#rassoc-instance_method" title="Farce::Abstract::Map#rassoc (method)">#rassoc</a></span>, <span class='object_link'><a href="../Abstract/Map.html#shareable_keys%3F-instance_method" title="Farce::Abstract::Map#shareable_keys? (method)">#shareable_keys?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#shareable_values%3F-instance_method" title="Farce::Abstract::Map#shareable_values? (method)">#shareable_values?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#size-instance_method" title="Farce::Abstract::Map#size (method)">#size</a></span>, <span class='object_link'><a href="../Abstract/Map.html#store-instance_method" title="Farce::Abstract::Map#store (method)">#store</a></span>, <span class='object_link'><a href="../Abstract/Map.html#store_if_absent-instance_method" title="Farce::Abstract::Map#store_if_absent (method)">#store_if_absent</a></span>, <span class='object_link'><a href="../Abstract/Map.html#to_a-instance_method" title="Farce::Abstract::Map#to_a (method)">#to_a</a></span>, <span class='object_link'><a href="../Abstract/Map.html#to_bson-instance_method" title="Farce::Abstract::Map#to_bson (method)">#to_bson</a></span>, <span class='object_link'><a href="../Abstract/Map.html#to_bson_normalized_value-instance_method" title="Farce::Abstract::Map#to_bson_normalized_value (method)">#to_bson_normalized_value</a></span>, <span class='object_link'><a href="../Abstract/Map.html#to_cbor-instance_method" title="Farce::Abstract::Map#to_cbor (method)">#to_cbor</a></span>, <span class='object_link'><a href="../Abstract/Map.html#to_h-instance_method" title="Farce::Abstract::Map#to_h (method)">#to_h</a></span>, <span class='object_link'><a href="../Abstract/Map.html#to_hash-instance_method" title="Farce::Abstract::Map#to_hash (method)">#to_hash</a></span>, <span class='object_link'><a href="../Abstract/Map.html#to_json-instance_method" title="Farce::Abstract::Map#to_json (method)">#to_json</a></span>, <span class='object_link'><a href="../Abstract/Map.html#to_msgpack-instance_method" title="Farce::Abstract::Map#to_msgpack (method)">#to_msgpack</a></span>, <span class='object_link'><a href="../Abstract/Map.html#to_query-instance_method" title="Farce::Abstract::Map#to_query (method)">#to_query</a></span>, <span class='object_link'><a href="../Abstract/Map.html#to_s-instance_method" title="Farce::Abstract::Map#to_s (method)">#to_s</a></span>, <span class='object_link'><a href="../Abstract/Map.html#value%3F-instance_method" title="Farce::Abstract::Map#value? (method)">#value?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#values_at-instance_method" title="Farce::Abstract::Map#values_at (method)">#values_at</a></span>, <span class='object_link'><a href="../Abstract/Map.html#weak_keys%3F-instance_method" title="Farce::Abstract::Map#weak_keys? (method)">#weak_keys?</a></span>, <span class='object_link'><a href="../Abstract/Map.html#weak_values%3F-instance_method" title="Farce::Abstract::Map#weak_values? (method)">#weak_values?</a></span></p>
+
+  
+  
+  <div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    #<strong>initialize</strong>(initial_mapping = nil, normalize_keys: nil, compare_by_identity: false, compare_keys_by_identity: compare_by_identity, compare_values_by_identity: compare_by_identity)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Unshared::WeakMap (class)">WeakMap</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns a new instance of WeakMap.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/unshared/weak_map.rb', line 20</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span>
+  <span class='id identifier rubyid_initial_mapping'>initial_mapping</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span>
+  <span class='label'>normalize_keys:</span> <span class='kw'>nil</span><span class='comma'>,</span>
+  <span class='label'>compare_by_identity:</span> <span class='kw'>false</span><span class='comma'>,</span>
+  <span class='label'>compare_keys_by_identity:</span> <span class='id identifier rubyid_compare_by_identity'>compare_by_identity</span><span class='comma'>,</span>
+  <span class='label'>compare_values_by_identity:</span> <span class='id identifier rubyid_compare_by_identity'>compare_by_identity</span>
+<span class='rparen'>)</span>
+  <span class='id identifier rubyid_initial_mapping'>initial_mapping</span> <span class='op'>=</span> <span class='id identifier rubyid_convert_entries'>convert_entries</span><span class='lparen'>(</span><span class='id identifier rubyid_initial_mapping'>initial_mapping</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_restoring'>restoring</span>  <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_restoration?'>restoration?</span><span class='lparen'>(</span><span class='id identifier rubyid_normalize_keys'>normalize_keys</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_build'>build</span><span class='lparen'>(</span><span class='id identifier rubyid_normalize_keys'>normalize_keys</span><span class='comma'>,</span> <span class='label'>shareable:</span> <span class='kw'>false</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_populate'>populate</span>   <span class='op'>=</span> <span class='id identifier rubyid_initial_mapping'>initial_mapping</span> <span class='op'>&amp;&amp;</span> <span class='lparen'>(</span><span class='lparen'>(</span><span class='id identifier rubyid_normalizer'>normalizer</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_restoring'>restoring</span><span class='rparen'>)</span> <span class='op'>||</span> <span class='op'>!</span><span class='id identifier rubyid_initial_mapping'>initial_mapping</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Hash</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='ivar'>@map</span>       <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>UnsharedWeakMap</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span>
+    <span class='id identifier rubyid_populate'>populate</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='id identifier rubyid_initial_mapping'>initial_mapping</span><span class='comma'>,</span>
+    <span class='label'>compare_by_identity:</span><span class='comma'>,</span>
+    <span class='label'>compare_keys_by_identity:</span><span class='comma'>,</span>
+    <span class='label'>compare_values_by_identity:</span><span class='comma'>,</span>
+  <span class='rparen'>)</span>
+  <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install_concurrent'>install_concurrent</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_restoring'>restoring</span>
+  <span class='id identifier rubyid_initial_mapping'>initial_mapping</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span> <span class='kw'>if</span> <span class='id identifier rubyid_populate'>populate</span>
+  <span class='const'>Internal</span><span class='op'>::</span><span class='const'>KeyNormalizer</span><span class='period'>.</span><span class='id identifier rubyid_install_concurrent'>install_concurrent</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_normalizer'>normalizer</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_restoring'>restoring</span>
+  <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+
+</div>
+
+      <div id="footer">
+  Generated on Fri Oct  9 12:44:40 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>
