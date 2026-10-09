@@ -181,7 +181,7 @@ Updates on different keys can run concurrently.</p>
   
 
   
-    <span class="summary_desc"><div class='inline'><p>A new instance of Map.</p>
+    <span class="summary_desc"><div class='inline'><p>Create a map with optional initial entries.</p>
 </div></span>
   
 </li>
@@ -308,13 +308,110 @@ Updates on different keys can run concurrently.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns a new instance of Map.</p>
+    <p>Create a map with optional initial entries.</p>
 
 
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>initial_mapping</span>
+      
+      
+        <span class='type'>(<tt>Hash</tt>, <tt><span class='object_link'><a href="../Abstract/Map.html" title="Farce::Abstract::Map (class)">Farce::Abstract::Map</a></span></tt>, <tt>#<span class='object_link'><a href="../Abstract/ConcurrentMap.html#each-instance_method" title="Farce::Abstract::ConcurrentMap#each (method)">each</a></span></tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The entries to store initially. Each iteration must yield a key-value pair.
+Nil creates an empty map.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>normalize_keys</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>, <tt>Proc</tt>, <tt>Hash</tt>, <tt><span class='object_link'><a href="../Abstract/Map.html" title="Farce::Abstract::Map (class)">Farce::Abstract::Map</a></span></tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Converts incoming keys to their canonical stored form:</p>
+<ul>
+<li>If a <code>Symbol</code> is provided, it will be used as a method name to call on each key.</li>
+<li>If a <code>Proc</code> is provided, it will be called with each key and should return the normalized key.</li>
+<li>If a <code>Hash</code> or <span class='object_link'><a href="../Abstract/Map.html" title="Farce::Abstract::Map (class)">Map</a></span> is provided, it will be used to look up the normalized key for each incoming key.</li>
+</ul>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>compare_by_identity</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>false</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The default identity-comparison setting for keys and values. Defaults to false.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>compare_keys_by_identity</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>compare_by_identity</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether keys use object identity instead of <code>hash</code> and <code>eql?</code>.
+Defaults to <code>compare_by_identity</code>.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>compare_values_by_identity</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>compare_by_identity</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether values use object identity instead of <code>==</code>.
+Defaults to <code>compare_by_identity</code>.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 
 </div><table class="source_code">
   <tr>
@@ -322,7 +419,6 @@ Updates on different keys can run concurrently.</p>
       <pre class="lines">
 
 
-22
 23
 24
 25
@@ -343,10 +439,11 @@ Updates on different keys can run concurrently.</p>
 40
 41
 42
-43</pre>
+43
+44</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/strict/map.rb', line 22</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/map.rb', line 23</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span>
   <span class='id identifier rubyid_initial_mapping'>initial_mapping</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span>
@@ -419,10 +516,10 @@ Updates on different keys can run concurrently.</p>
       <pre class="lines">
 
 
-45</pre>
+46</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/strict/map.rb', line 45</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/map.rb', line 46</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_keys?'>shareable_keys?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -467,10 +564,10 @@ Updates on different keys can run concurrently.</p>
       <pre class="lines">
 
 
-46</pre>
+47</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/strict/map.rb', line 46</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/map.rb', line 47</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -483,7 +580,7 @@ Updates on different keys can run concurrently.</p>
 </div>
 
       <div id="footer">
-  Generated on Thu Oct  8 12:04:58 2026 by
+  Generated on Fri Oct  9 11:52:50 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

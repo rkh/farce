@@ -114,7 +114,9 @@
   
   <dl>
     <dt>Defined in:</dt>
-    <dd>lib/farce/map.rb
+    <dd>lib/farce/map.rb<span class="defines">,<br>
+  lib/farce/map.rb</span>
+
 </dd>
   </dl>
   
@@ -144,14 +146,14 @@ remain Ractor-shareable.</p>
         <h5 class="example_title"><div class='inline'><p>Atomically updating a value</p>
 </div></h5>
       
-      <pre class="example code"><code><span class='id identifier rubyid_map'>map</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>Map</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='lbrace'>{</span> <span class='label'>count:</span> <span class='int'>0</span> <span class='rbrace'>}</span><span class='rparen'>)</span>
+      <pre class="example code"><code><span class='id identifier rubyid_map'>map</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>Map</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="Farce::Map#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='lbrace'>{</span> <span class='label'>count:</span> <span class='int'>0</span> <span class='rbrace'>}</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='symbol'>:count</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_count'>count</span><span class='op'>|</span> <span class='id identifier rubyid_count'>count</span> <span class='op'>+</span> <span class='int'>1</span> <span class='rbrace'>}</span> <span class='comment'># =&gt; 1</span></code></pre>
     
       
         <h5 class="example_title"><div class='inline'><p>Automatically making values shareable</p>
 </div></h5>
       
-      <pre class="example code"><code><span class='id identifier rubyid_map'>map</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>Map</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:make_shareable</span><span class='rparen'>)</span>
+      <pre class="example code"><code><span class='id identifier rubyid_map'>map</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>Map</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="Farce::Map#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:make_shareable</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='symbol'>:jobs</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
 <span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='symbol'>:jobs</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_items'>items</span><span class='op'>|</span> <span class='id identifier rubyid_items'>items</span> <span class='op'>+</span> <span class='lbracket'>[</span><span class='symbol'>:job</span><span class='rbracket'>]</span> <span class='rbrace'>}</span> <span class='comment'># =&gt; [:job]
 </span><span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='symbol'>:jobs</span><span class='rbracket'>]</span> <span class='comment'># =&gt; [:job]
@@ -167,6 +169,43 @@ remain Ractor-shareable.</p>
 
 
 
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(initial_mapping = nil, mode: :copy, normalize_keys: nil, compare_by_identity: false, compare_keys_by_identity: compare_by_identity, compare_values_by_identity: compare_by_identity)  &#x21d2; Map </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Create a map with optional initial entries.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
 
   
   
@@ -183,10 +222,10 @@ remain Ractor-shareable.</p>
   
   
   
-  <h2>Method Summary</h2>
+  
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">#initialize</a></span>, <span class='object_link'><a href="Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
 
   
   
@@ -227,12 +266,202 @@ remain Ractor-shareable.</p>
 
   
   
+  <div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
   
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    #<strong>initialize</strong>(initial_mapping = nil, mode: :copy, normalize_keys: nil, compare_by_identity: false, compare_keys_by_identity: compare_by_identity, compare_values_by_identity: compare_by_identity)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Map (class)">Map</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Create a map with optional initial entries.
+Valid modes are:</p>
+<ul>
+<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Ractor.make_shareable</a></span>.</li>
+<li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
+that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
+that pushed it.</li>
+<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Farce::Mutable</a></span> instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.</li>
+<li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
+get an error. Useful for usage contained within a single Ractor.</li>
+<li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
+<li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
+<li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="../Farce.html#dedup-class_method" title="Farce.dedup (method)">Farce.dedup</a></span>, then made Ractor-shareable.
+This may update and freeze the original. Already-shareable values pass through unchanged.</li>
+<li><code>:shareable_copy</code> - The value will be copied and the copy will be made Ractor-shareable.</li>
+</ul>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>initial_mapping</span>
+      
+      
+        <span class='type'>(<tt>Hash</tt>, <tt><span class='object_link'><a href="Abstract/Map.html" title="Farce::Abstract::Map (class)">Farce::Abstract::Map</a></span></tt>, <tt>#<span class='object_link'><a href="Abstract/ConcurrentMap.html#each-instance_method" title="Farce::Abstract::ConcurrentMap#each (method)">each</a></span></tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The entries to store initially. Each iteration must yield a key-value pair.
+Nil creates an empty map.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>normalize_keys</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>, <tt>Proc</tt>, <tt>Hash</tt>, <tt><span class='object_link'><a href="Abstract/Map.html" title="Farce::Abstract::Map (class)">Farce::Abstract::Map</a></span></tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Converts incoming keys to their canonical stored form:</p>
+<ul>
+<li>If a <code>Symbol</code> is provided, it will be used as a method name to call on each key.</li>
+<li>If a <code>Proc</code> is provided, it will be called with each key and should return the normalized key.</li>
+<li>If a <code>Hash</code> or <span class='object_link'><a href="Abstract/Map.html" title="Farce::Abstract::Map (class)">Map</a></span> is provided, it will be used to look up the normalized key for each incoming key.</li>
+</ul>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>compare_by_identity</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>false</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The default identity-comparison setting for keys and values. Defaults to false.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>compare_keys_by_identity</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>compare_by_identity</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether keys use object identity instead of <code>hash</code> and <code>eql?</code>.
+Defaults to <code>compare_by_identity</code>.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>compare_values_by_identity</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>compare_by_identity</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether values use object identity instead of <code>==</code>.
+Defaults to <code>compare_by_identity</code>.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>mode</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>:copy</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The default transfer mode for values. Defaults to <code>:copy</code>.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/map.rb', line 45</span>
+
+<span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Map (class)">Map</a></span></span> <span class='op'>&lt;</span> <span class='const'><span class='object_link'><a href="Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Abstract/ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">ConcurrentMap</a></span></span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MapValueModes</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Shareable/Delegated.html" title="Farce::Shareable::Delegated (module)">Delegated</a></span></span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_new_map'>new_map</span><span class='lparen'>(</span><span class='op'>**</span><span class='rparen'>)</span>    <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>StrictMap</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>**</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_freeze_backend'>freeze_backend</span> <span class='op'>=</span> <span class='ivar'>@map</span>
+
+  <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_prepare_map_access'>prepare_map_access</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='symbol'>:modes</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
 
 </div>
 
       <div id="footer">
-  Generated on Thu Oct  8 12:04:54 2026 by
+  Generated on Fri Oct  9 11:52:45 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

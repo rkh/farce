@@ -249,7 +249,7 @@ Converts everything to a monotonic clock time in seconds, from when <code>farce/
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#parse-instance_method" title="#parse (instance method)">#<strong>parse</strong>(value)  &#x21d2; Float </a>
+      <a href="#parse-instance_method" title="#parse (instance method)">#<strong>parse</strong>(value = nil)  &#x21d2; Float </a>
     
 
     
@@ -610,7 +610,7 @@ The value is assumed to be a relative offset from the current time.</p>
       <div class="method_details ">
   <h3 class="signature " id="parse-instance_method">
   
-    #<strong>parse</strong>(value)  &#x21d2; <tt>Float</tt> 
+    #<strong>parse</strong>(value = nil)  &#x21d2; <tt>Float</tt> 
   
 
   
@@ -634,6 +634,8 @@ The value is assumed to be a relative offset from the current time.</p>
       
         <span class='type'>(<tt>nil</tt>, <tt>Numeric</tt>, <tt>Time</tt>, <tt>ActiveSupport::Duration</tt>, <tt>Hash</tt>)</span>
       
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
       
       
         &mdash;
@@ -723,7 +725,7 @@ The value is assumed to be a relative offset from the current time.</p>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/clock.rb', line 55</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='kw'>case</span> <span class='id identifier rubyid_value'>value</span>
   <span class='kw'>when</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='const'>UNDEFINED</span> <span class='kw'>then</span> <span class='kw'>return</span> <span class='id identifier rubyid_current'>current</span>
   <span class='kw'>when</span> <span class='const'>Float</span><span class='comma'>,</span> <span class='const'>Integer</span> <span class='kw'>then</span> <span class='kw'>return</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>&gt;</span> <span class='const'>CUTOFF_CLOCK</span> <span class='op'>?</span> <span class='id identifier rubyid_time'>time</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_offset'>offset</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
@@ -865,7 +867,7 @@ Meaning that you can't pass a clock time greater than 31 years, or a timestamp b
 </div>
 
       <div id="footer">
-  Generated on Thu Oct  8 12:04:53 2026 by
+  Generated on Fri Oct  9 11:52:44 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -121,8 +121,8 @@
     <p>A Ractor-shareable read/write lock with fiber-scheduler-aware waiting.</p>
 <p>Multiple execution contexts may hold the read lock concurrently. The write
 lock is exclusive and may be acquired while the current context holds a
-read lock. One concurrent upgrader retains its read lock continuously;
-additional upgraders yield their read slot to avoid deadlock and restore it
+read lock. One concurrent upgrader retains its read lock continuously.
+Additional upgraders yield their read slot to avoid deadlock and restore it
 before returning to the outer read-lock block.</p>
 
 
@@ -562,7 +562,7 @@ before returning to the outer read-lock block.</p>
 </div>
 
       <div id="footer">
-  Generated on Thu Oct  8 12:05:02 2026 by
+  Generated on Fri Oct  9 11:52:56 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

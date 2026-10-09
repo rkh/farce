@@ -683,7 +683,7 @@ thread with <code>Fiber.set_scheduler(scheduler)</code>.</p>
       
       
         &mdash;
-        <div class='inline'><p>Pending-task capacity; nil creates an unbounded queue.</p>
+        <div class='inline'><p>Pending-task capacity, nil creates an unbounded queue.</p>
 </div>
       
     </li>
@@ -700,7 +700,7 @@ thread with <code>Fiber.set_scheduler(scheduler)</code>.</p>
       
       
         &mdash;
-        <div class='inline'><p>IO backend for the built-in scheduler; defaults to Farce configuration.</p>
+        <div class='inline'><p>IO backend for the built-in scheduler, defaults to Farce configuration.</p>
 </div>
       
     </li>
@@ -760,7 +760,7 @@ ignored for this overload.</p>
       
       
         &mdash;
-        <div class='inline'><p>Pending-task capacity; nil creates an unbounded queue.</p>
+        <div class='inline'><p>Pending-task capacity, nil creates an unbounded queue.</p>
 </div>
       
     </li>
@@ -904,7 +904,7 @@ the IO driver when using Farce's built-in scheduler.</p>
       
       
         &mdash;
-        <div class='inline'><p>Ractor or Thread; nil selects the runtime default.</p>
+        <div class='inline'><p>Ractor or Thread, nil selects the runtime default.</p>
 </div>
       
     </li>
@@ -955,7 +955,7 @@ the IO driver when using Farce's built-in scheduler.</p>
       
       
         &mdash;
-        <div class='inline'><p>Pending-task capacity; nil creates an unbounded queue.</p>
+        <div class='inline'><p>Pending-task capacity, nil creates an unbounded queue.</p>
 </div>
       
     </li>
@@ -972,7 +972,7 @@ the IO driver when using Farce's built-in scheduler.</p>
       
       
         &mdash;
-        <div class='inline'><p>IO backend for the built-in scheduler; defaults to Farce configuration.</p>
+        <div class='inline'><p>IO backend for the built-in scheduler, defaults to Farce configuration.</p>
 </div>
       
     </li>
@@ -1108,7 +1108,7 @@ Choose an executor supported by the supplied scheduler and its dependencies.</p>
       
       
         &mdash;
-        <div class='inline'><p>Pending-task capacity; nil creates an unbounded queue.</p>
+        <div class='inline'><p>Pending-task capacity, nil creates an unbounded queue.</p>
 </div>
       
     </li>
@@ -1365,7 +1365,7 @@ that scheduler. Returns <code>nil</code> when no fiber scheduler is installed.</
 </h3><div class="docstring">
   <div class="discussion">
     <p>Requests shutdown and rejects further submissions. Repeated calls are harmless.
-The dispatcher drains queued tasks before closing the queue; this method
+The dispatcher drains queued tasks before closing the queue. This method
 does not wait for dispatch or running tasks to finish.</p>
 <p>This wakes a dispatcher blocked on an empty queue. It does not directly
 close the underlying fiber scheduler.</p>
@@ -2618,7 +2618,7 @@ See <span class='object_link'><a href="ModeManager.html#wrap-instance_method" ti
 </div>
 
       <div id="footer">
-  Generated on Thu Oct  8 12:04:57 2026 by
+  Generated on Fri Oct  9 11:52:50 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -123,7 +123,7 @@
     <p>Ractor-shareable, atomic counter.
 This is a stateful, numeric object.</p>
 <p>Values are converted to Integers. On CRuby, the stored value and arithmetic
-deltas must fit in a signed 64-bit integer; overflow raises RangeError without
+deltas must fit in a signed 64-bit integer. An overflow raises RangeError without
 changing the stored value. Conditional-operation bounds may be wider, but a
 resulting stored value must still fit.</p>
 <p>On CRuby, subclasses must not add Ruby instance variables.</p>
@@ -850,7 +850,7 @@ resulting stored value must still fit.</p>
 </div>
 
       <div id="footer">
-  Generated on Thu Oct  8 12:04:56 2026 by
+  Generated on Fri Oct  9 11:52:48 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
