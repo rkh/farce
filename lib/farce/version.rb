@@ -4,5 +4,5 @@
 
 module Farce
   # @return [String] the current version of Farce
-  VERSION = "0.0.1.alpha2"
+  VERSION = "0.1.0"
 end
