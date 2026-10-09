@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    farce (0.1.0)
-    farce (0.1.0-java)
+    farce (0.0.1.alpha1)
+    farce (0.0.1.alpha1-java)
 
 GEM
   remote: https://rubygems.org/
@@ -35,11 +35,13 @@ GEM
     bson (5.2.0-java)
     builder (3.3.0)
     carbon_fiber (0.2.0)
+    carbon_fiber (0.2.0-aarch64-linux)
     carbon_fiber (0.2.0-arm64-darwin)
     carbon_fiber (0.2.0-x86_64-linux)
     cbor (0.5.10.3)
     commonmarker (2.10.0)
       rb_sys (~> 0.9)
+    commonmarker (2.10.0-aarch64-linux)
     commonmarker (2.10.0-arm64-darwin)
     commonmarker (2.10.0-x86_64-linux)
     concurrent-ruby (1.3.8)
@@ -133,6 +135,7 @@ GEM
     rake-compiler-dock (1.12.0)
     ratomic (0.4.3)
       rb_sys (~> 0.9.128)
+    ratomic (0.4.3-aarch64-linux)
     ratomic (0.4.3-arm64-darwin)
     ratomic (0.4.3-x86_64-linux)
     rb_sys (0.9.130)
@@ -209,6 +212,7 @@ GEM
     zeitwerk (2.8.3)
 
 PLATFORMS
+  aarch64-linux
   arm64-darwin-23
   arm64-darwin-25
   universal-java
@@ -274,10 +278,12 @@ CHECKSUMS
   builder (3.3.0) sha256=497918d2f9dca528fdca4b88d84e4ef4387256d984b8154e9d5d3fe5a9c8835f
   bundler (4.1.0.beta1) sha256=8a2dac8ca276ff4eff5efc2c6457b0044080fc1e431534ad7c5cc6187232b800
   carbon_fiber (0.2.0) sha256=2feab587b247695b6b8bfb2abd5456d28c1deab7cfba6b330620386ad053b3ce
+  carbon_fiber (0.2.0-aarch64-linux) sha256=ea3335c7fcde7233db54d73332c40d2733adb1e39e14a07d01a388fe74296f81
   carbon_fiber (0.2.0-arm64-darwin) sha256=5501b087fb6337445705ad7ffb160ca68c8b7f4a9b7b6bbb977a811c4df869e7
   carbon_fiber (0.2.0-x86_64-linux) sha256=9792141dabf6910724c8223fc8f0b64dca995502dc558e6836babf4620a2839c
   cbor (0.5.10.3) sha256=c3aa1d0c7e9bbffe8de4bed554f588d7926c62276ffe2dd7fabb65bae801d28a
   commonmarker (2.10.0) sha256=1884529957bf59bcd4f19fcc29e931f2042760ced273353e8010a20fe4ae68cb
+  commonmarker (2.10.0-aarch64-linux) sha256=eeb167dea203dee066eb0dd99b3fd2deb526c8b5e7297ad385f7a5d60f869478
   commonmarker (2.10.0-arm64-darwin) sha256=39ecc891d1e4308b5233cc28b40383de854a2bfbefe17d68e49174347a8aa79e
   commonmarker (2.10.0-x86_64-linux) sha256=945c510c0bfca9022245928e2248468fe3ddad58c939be0c37b20082cc392880
   concurrent-ruby (1.3.8) sha256=b2f1be836e968ccc78ccfce277ea79c72a88633f22306782c16ff23fb415d1e1
@@ -292,8 +298,8 @@ CHECKSUMS
   dry-types (1.9.1) sha256=baebeecdb9f8395d6c9d227b62011279440943e3ef2468fe8ccc1ba11467f178
   erb (6.0.7) sha256=c5ca6dc25b0ef974a44dc8f59fe847577122483b1968a38dec305c60bf91ee92
   erb (6.0.7-java) sha256=ef8339f928aa33be9205534be19e9c0daf310c4cc4eb85fd409141c094c57d61
-  farce (0.1.0)
-  farce (0.1.0-java)
+  farce (0.0.1.alpha1)
+  farce (0.0.1.alpha1-java)
   fiber-annotation (0.2.0) sha256=7abfadf1d119f508867d4103bf231c0354d019cc39a5738945dec2edadaf6c03
   fiber-local (1.1.0) sha256=c885f94f210fb9b05737de65d511136ea602e00c5105953748aa0f8793489f06
   fiber-storage (1.0.1) sha256=f48e5b6d8b0be96dac486332b55cee82240057065dc761c1ea692b2e719240e1
@@ -335,6 +341,7 @@ CHECKSUMS
   rake-compiler (1.3.1) sha256=6b351612b6e2d73ddd5563ee799bb58685176e05363db6758504bd11573d670a
   rake-compiler-dock (1.12.0) sha256=f13205c2738f3d2053afcd03491a9e4541b22a59a0bfc53fc8bc883bd8188023
   ratomic (0.4.3) sha256=468921a6b97781f5d47a198e7263dd91a4a0678d842899e8b5ada4e4478753fe
+  ratomic (0.4.3-aarch64-linux) sha256=7f9ad37bee68bce689cff7f62171df0a6c55100124c101e1056031c57f121ba3
   ratomic (0.4.3-arm64-darwin) sha256=ca59674dadf654e85b3edc33c2dd2e1428f05bc24dcb605fa98f50c87285922b
   ratomic (0.4.3-x86_64-linux) sha256=459496b942f6a606e343c291331931991e62ba1a0a5c793fe1e9830017005c88
   rb_sys (0.9.130) sha256=7d486d99c1da02635515deaf9860fc5aea90bb4ab2589b2deec7fdc7d3548615

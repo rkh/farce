@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags: ['**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.event.deleted != true
+    runs-on: ubuntu-24.04
+    environment: rubygems
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      BUNDLE_WITHOUT: compatibility:benchmark:test:docs
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up JRuby for scheduler compilation
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: jruby
+
+      - name: Locate JRuby JAR
+        run: ruby -rjruby -e 'File.open(ENV.fetch("GITHUB_ENV"), "a") { it.puts "JRUBY_JAR=#{JRuby.runtime.jruby_home}/lib/jruby.jar" }'
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+
+      - name: Build and verify all release gems
+        run: bundle exec rake release:build
+
+      - name: Publish all release gems
+        uses: rubygems/release-gem@v1
