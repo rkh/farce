@@ -7,8 +7,8 @@ module Farce
   #
   # Multiple execution contexts may hold the read lock concurrently. The write
   # lock is exclusive and may be acquired while the current context holds a
-  # read lock. One concurrent upgrader retains its read lock continuously;
-  # additional upgraders yield their read slot to avoid deadlock and restore it
+  # read lock. One concurrent upgrader retains its read lock continuously.
+  # Additional upgraders yield their read slot to avoid deadlock and restore it
   # before returning to the outer read-lock block.
   class ReadWriteLock
     include Internal::MarshalSupport::Reject

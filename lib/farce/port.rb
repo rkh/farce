@@ -13,7 +13,7 @@ module Farce
     include Abstract::Port
 
     MANAGER    = ModeManager.new
-    SUBCLASSES = ModeManager::MODES.to_h do |mode|
+    SUBCLASSES = Farce::MODES.to_h do |mode|
       if mode == :copy
         normal = self
       else

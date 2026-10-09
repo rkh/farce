@@ -138,7 +138,7 @@ module Farce
     end
 
     def test_nil_false_and_shareable_results_pass_through_in_every_mode
-      ModeManager::MODES.each do |mode|
+      Farce::MODES.each do |mode|
         [nil, false, :ready].each do |result|
           calls = Counter.new
           lazy = Lazy.new(mode:) do

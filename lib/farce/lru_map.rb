@@ -9,10 +9,11 @@ module Farce
   #
   # @example Keeping copied values in a small cache
   #   cache = Farce::LRUMap.new(max_size: 2, mode: :copy)
-  #   cache[:first] = [1]
+  #
+  #   cache[:first]  = [1]
   #   cache[:second] = [2]
-  #   cache[:first]
-  #   cache[:third] = [3]
+  #   cache[:first] # makes sure :first was accessed more recently than :second
+  #   cache[:third]  = [3]
   #
   #   cache.key?(:second) # => false
   class LRUMap < Farce::Abstract::LRUMap

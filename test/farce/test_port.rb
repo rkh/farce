@@ -96,7 +96,7 @@ module Farce
     end
 
     def test_mode_and_auto_local_specializations
-      ModeManager::MODES.each do |mode|
+      Farce::MODES.each do |mode|
         normal = Port[mode]
         local  = Port[mode, auto_local: true]
 

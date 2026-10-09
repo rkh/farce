@@ -52,7 +52,7 @@ module Farce
     #
     # @raise [ArgumentError] if the resulting clock time is NaN
     # @return [Float] the clock time in seconds
-    def parse(value)
+    def parse(value = nil)
       case value
       when nil, UNDEFINED then return current
       when Float, Integer then return value > CUTOFF_CLOCK ? time(value) : offset(value)

@@ -25,6 +25,23 @@ module Farce
   #   map.update(:jobs) { |items| items + [:job] } # => [:job]
   #   map[:jobs] # => [:job]
   #   Ractor.shareable?(map[:jobs]) # => true
+  #
+  # @!parse
+  #   class Map
+  #     # @!macro map_initialization
+  #     # @!macro modes
+  #     # @param mode [Symbol] The default transfer mode for values. Defaults to `:copy`.
+  #     # @return [Map]
+  #     def initialize(
+  #       initial_mapping = nil,
+  #       mode: :copy,
+  #       normalize_keys: nil,
+  #       compare_by_identity: false,
+  #       compare_keys_by_identity: compare_by_identity,
+  #       compare_values_by_identity: compare_by_identity
+  #     )
+  #     end
+  #   end
   class Map < Abstract::ConcurrentMap
     include Internal::MapValueModes
     include Shareable::Delegated

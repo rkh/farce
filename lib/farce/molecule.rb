@@ -24,9 +24,10 @@ module Farce
     # @param mode [Symbol, nil] the default transfer mode, or nil for :copy
     # @param compare_by_identity [Boolean, nil] the default comparison policy
     # @return [Class<Molecule>]
-    def self.define(*fields, mode: nil, **)
+    def self.define(*fields, mode: nil, **, &)
       subclass = super(*fields, **)
       subclass.class_eval "def self.default_mode = #{mode.to_sym.inspect}", __FILE__, __LINE__ unless nil.equal?(mode)
+      subclass.class_eval(&) if block_given?
       subclass
     end
 

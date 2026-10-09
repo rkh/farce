@@ -212,8 +212,18 @@ module Farce
   CONFIG = Config.new
   private_constant :CONFIG
 
-  def self.config
-    yield CONFIG if block_given?
+  # Configures Farce.
+  # @example
+  #   Farce.configure do |config|
+  #     config.fiber_scheduler = :carbon_fiber
+  #   end
+  # @yield [config] the configuration object
+  def self.configure = yield CONFIG
+
+  # @overload config
+  #   @return [Config] the global Farce configuration
+  def self.config(&)
+    configure(&) if block_given?
     CONFIG
   end
 end

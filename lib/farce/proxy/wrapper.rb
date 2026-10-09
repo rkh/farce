@@ -37,7 +37,7 @@ module Farce
       def __wrap__(...)   = @__supervisor__.mode_manager.wrap(...)
       def __unwrap__(...) = @__supervisor__.mode_manager.unwrap(...)
 
-      ::Farce::ModeManager::MODES.each do |mode|
+      ::Farce::MODES.each do |mode|
         class_eval <<~RUBY, __FILE__, __LINE__ + 1
           private def __#{mode}__(object) = __wrap__(object, mode: :#{mode})
         RUBY

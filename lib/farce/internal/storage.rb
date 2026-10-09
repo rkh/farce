@@ -6,8 +6,6 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     class Storage
-      SCOPES = %i[ractor thread_group thread fiber_storage fiber].freeze
-
       # Protect shared map access, including reads on engines with unsafe weak maps.
       # Per-key locks let initializers for unrelated keys run independently.
       class ThreadSafe < Storage
@@ -61,7 +59,7 @@ module Farce
         when :global
           raise ArgumentError, "global scope is not supported" if raise_exception
         when Symbol
-          return __send__(scope) if SCOPES.include?(scope)
+          return __send__(scope) if Farce::SCOPES.include?(scope)
           return unless raise_exception
           raise ArgumentError, "Invalid scope: #{scope.inspect}"
         when Class

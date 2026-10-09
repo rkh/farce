@@ -17,9 +17,7 @@ module Farce
       # @param compare_by_identity [Boolean, nil] the default comparison policy
       # @return [Class<Molecule>]
       def self.define(*fields, scope: nil, **)
-        unless scope.nil? || Internal::Storage::SCOPES.include?(scope)
-          raise ArgumentError, "Invalid scope: #{scope.inspect}"
-        end
+        raise ArgumentError, "Invalid scope: #{scope.inspect}" unless scope.nil? || Farce::SCOPES.include?(scope)
 
         subclass = super(*fields, **)
         subclass.class_eval "def self.default_scope = #{scope.inspect}", __FILE__, __LINE__ unless scope.nil?

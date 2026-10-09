@@ -13,17 +13,13 @@ module Farce
     class Map < Abstract::ConcurrentMap
       include Unshareable
 
-      # Create a map that strongly retains its keys and values.
+      # @!macro map_initialization
       #
       # @example Atomically updating a mutable value
       #   counters = Farce::Unshared::Map.new({ jobs: [] })
       #   counters.update(:jobs) { |jobs| jobs << :finished }
       #   counters[:jobs] # => [:finished]
       #
-      # @param initial_mapping [Hash, Farce::Abstract::Map, #each, nil] The entries to store initially.
-      # @param compare_by_identity [Boolean] Whether keys and values are compared by identity.
-      # @param compare_keys_by_identity [Boolean] Whether keys are compared by identity.
-      # @param compare_values_by_identity [Boolean] Whether values are compared by identity.
       def initialize(
         initial_mapping = nil,
         normalize_keys: nil,

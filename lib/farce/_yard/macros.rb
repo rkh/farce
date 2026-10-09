@@ -42,5 +42,20 @@
 #     * If a `Proc` is provided, it will be called with each key and should return the normalized key.
 #     * If a `Hash` or {Farce::Abstract::Map Map} is provided, it will be used to look up the normalized key for each incoming key.
 
+# @!macro map_initialization
+#   Create a map with optional initial entries.
+#   @param initial_mapping [Hash, Farce::Abstract::Map, #each, nil]
+#     The entries to store initially. Each iteration must yield a key-value pair.
+#     Nil creates an empty map.
+#   @!macro key_normalization
+#   @param compare_by_identity [Boolean]
+#     The default identity-comparison setting for keys and values. Defaults to false.
+#   @param compare_keys_by_identity [Boolean]
+#     Whether keys use object identity instead of `hash` and `eql?`.
+#     Defaults to `compare_by_identity`.
+#   @param compare_values_by_identity [Boolean]
+#     Whether values use object identity instead of `==`.
+#     Defaults to `compare_by_identity`.
+
 # @!macro active_support
 #   @note This methods is only available if ActiveSupport has been loaded.

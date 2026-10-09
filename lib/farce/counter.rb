@@ -7,7 +7,7 @@ module Farce
   # This is a stateful, numeric object.
   #
   # Values are converted to Integers. On CRuby, the stored value and arithmetic
-  # deltas must fit in a signed 64-bit integer; overflow raises RangeError without
+  # deltas must fit in a signed 64-bit integer. An overflow raises RangeError without
   # changing the stored value. Conditional-operation bounds may be wider, but a
   # resulting stored value must still fit.
   #

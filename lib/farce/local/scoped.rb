@@ -98,7 +98,7 @@ module Farce
       private
 
       def initialize_scoped(arguments, options, scope:, configuration: nil)
-        raise ArgumentError, "Invalid scope: #{scope.inspect}" unless Internal::Storage::SCOPES.include?(scope)
+        raise ArgumentError, "Invalid scope: #{scope.inspect}" unless Farce::SCOPES.include?(scope)
 
         if is_a?(Shareable::Tracked)
           guard = Internal.native_ractors? ? Internal::TransactionFreezeGuard : Internal::Flag

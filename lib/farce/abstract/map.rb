@@ -25,7 +25,7 @@ module Farce
     #
     # Implementations can compare keys and values either by equality or by identity. Operations accepting a
     # `timeout` wait at most that many seconds to acquire the access needed for the operation. A timeout must be a
-    # finite, non-negative number; `nil` waits indefinitely.
+    # finite, non-negative number, `nil` waits indefinitely.
     #
     # @!method [](key)
     #   Look up a key without waiting for atomic-update access.

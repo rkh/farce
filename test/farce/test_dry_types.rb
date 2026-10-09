@@ -43,6 +43,7 @@ module Farce
           end
           type = types::Vector.of(types::Coercible::Integer)
           raise "direct load failed" unless type[["1"]].to_a == [1]
+          Farce::SCOPES.each { |scope| Farce.DryTypes(variant: :local, scope:) }
           require "shellwords"
         RUBY
         <<~RUBY,
@@ -55,6 +56,7 @@ module Farce
           end
           type = types::Vector.of(types::Coercible::Integer)
           raise "Zeitwerk-first load failed" unless type[["1"]].to_a == [1]
+          Farce::SCOPES.each { |scope| Farce.DryTypes(variant: :local, scope:) }
           require "shellwords"
         RUBY
         <<~RUBY
@@ -67,6 +69,7 @@ module Farce
           end
           type = types::Vector.of(types::Coercible::Integer)
           raise "dry-types-first load failed" unless type[["1"]].to_a == [1]
+          Farce::SCOPES.each { |scope| Farce.DryTypes(variant: :local, scope:) }
           require "shellwords"
         RUBY
       ]

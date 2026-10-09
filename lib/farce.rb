@@ -48,6 +48,14 @@ require "farce/system"
 module Farce
   include Internal::Autoloads
 
+  # The valid storage scopes for local values and collections.
+  # @return [::Set<Symbol>]
+  SCOPES = ::Set[:ractor, :thread_group, :thread, :fiber_storage, :fiber].freeze
+
+  # The valid transfer modes for values that are not Ractor-shareable.
+  # @return [::Set<Symbol>]
+  MODES = ::Set[:copy, :move, :local, :make_shareable, :mutable, :raise, :shareable_copy, :dedup, :proxy].freeze
+
   UNDEFINED = Internal::Undefined.new("UNDEFINED")
 
   autoload :DEDUPER, "farce/deduper"

@@ -46,7 +46,7 @@ module Farce
         comparison = left <=> right
         raise ArgumentError, "comparison failed" if comparison.nil?
 
-        # Match rb_cmpint: comparator results only need ordering against zero;
+        # Match rb_cmpint: comparator results only need ordering against zero,
         # they need not implement Numeric's #positive?/#negative?.
         return 1  if comparison > 0 # rubocop:disable Style/NumericPredicate
         return -1 if comparison < 0 # rubocop:disable Style/NumericPredicate

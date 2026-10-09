@@ -110,9 +110,9 @@ module Farce
           raise ArgumentError, "mode is only supported by the shared variant" unless UNDEFINED.equal?(mode)
           if variant == :local
             selected_scope = UNDEFINED.equal?(scope) ? :ractor : scope
-            internal = Farce.const_get(:Internal, false)
-            scopes = internal.const_get(:Storage, false).const_get(:SCOPES, false)
-            raise ArgumentError, "invalid scope: #{selected_scope.inspect}" unless scopes.include?(selected_scope)
+            unless Farce::SCOPES.include?(selected_scope)
+              raise ArgumentError, "invalid scope: #{selected_scope.inspect}"
+            end
             return
           end
           return if UNDEFINED.equal?(scope)

@@ -52,9 +52,6 @@ module Farce
     include Internal::Copyable
     include Shareable::Immutable
 
-    # The set of valid modes for wrapping values.
-    MODES = ::Set[:copy, :move, :local, :make_shareable, :mutable, :raise, :shareable_copy, :dedup, :proxy].freeze
-
     # @return [Symbol] The default mode to use when wrapping values.
     attr_reader :mode
 
@@ -62,7 +59,7 @@ module Farce
     # @param mode [Symbol] The default mode to use when wrapping values. Must be one of the valid modes.
     # @param register [Proxy::Register, nil] The register to use for generating Farce::Proxy instances.
     def initialize(mode: :copy, register: nil)
-      raise ArgumentError, "invalid mode: #{mode.inspect}" unless MODES.include?(mode)
+      raise ArgumentError, "invalid mode: #{mode.inspect}" unless Farce::MODES.include?(mode)
       @mode     = mode
       @register = register
       super()

@@ -46,7 +46,7 @@ module Farce
           replace(@original, @baseline) if @applied
         end
 
-        def notify; end
+        def notify = nil
 
         private
 

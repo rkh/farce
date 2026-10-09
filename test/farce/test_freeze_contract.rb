@@ -309,7 +309,7 @@ module Farce
     end
 
     def test_every_generated_port_class_rejects_freeze
-      ModeManager::MODES.each do |mode|
+      Farce::MODES.each do |mode|
         [false, true].each do |auto_local|
           port = Port[mode, auto_local:].new
 

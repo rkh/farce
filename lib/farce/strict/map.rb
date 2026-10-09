@@ -19,6 +19,7 @@ module Farce
     class Map < Abstract::ConcurrentMap
       include Shareable::Delegated
 
+      # @!macro map_initialization
       def initialize(
         initial_mapping = nil,
         normalize_keys: nil,

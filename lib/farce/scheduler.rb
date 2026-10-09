@@ -91,11 +91,11 @@ module Farce
     #     scheduler = Farce::Scheduler.create
     #     scheduler.schedule { puts "Running on the built-in scheduler" }
     #
-    #   @param executor [Class, nil] Ractor or Thread; nil selects the runtime default.
+    #   @param executor [Class, nil] Ractor or Thread, nil selects the runtime default.
     #   @param name [String, nil] Optional worker name.
     #   @param priority [Integer, nil] Optional worker thread priority.
-    #   @param capacity [Integer, nil] Pending-task capacity; nil creates an unbounded queue.
-    #   @param backend [Symbol] IO backend for the built-in scheduler; defaults to Farce configuration.
+    #   @param capacity [Integer, nil] Pending-task capacity, nil creates an unbounded queue.
+    #   @param backend [Symbol] IO backend for the built-in scheduler, defaults to Farce configuration.
     #   @return [Scheduler]
     #
     # @overload create(executor = nil, name: nil, priority: nil, capacity: 1024, &block)
@@ -131,7 +131,7 @@ module Farce
     #     Choose an executor supported by the supplied scheduler and its dependencies.
     #   @param name [String, nil] Optional worker name.
     #   @param priority [Integer, nil] Optional worker thread priority.
-    #   @param capacity [Integer, nil] Pending-task capacity; nil creates an unbounded queue.
+    #   @param capacity [Integer, nil] Pending-task capacity, nil creates an unbounded queue.
     #   @yieldreturn [Object] The fiber scheduler to install in the worker.
     #   @return [Scheduler]
     # @see #launch
@@ -146,8 +146,8 @@ module Farce
     # @overload initialize(capacity: 1024, backend: Farce.config.io_backend)
     #   Uses the configured fiber scheduler when launched or installed.
     #
-    #   @param capacity [Integer, nil] Pending-task capacity; nil creates an unbounded queue.
-    #   @param backend [Symbol] IO backend for the built-in scheduler; defaults to Farce configuration.
+    #   @param capacity [Integer, nil] Pending-task capacity, nil creates an unbounded queue.
+    #   @param backend [Symbol] IO backend for the built-in scheduler, defaults to Farce configuration.
     #
     # @overload initialize(capacity: 1024, &block)
     #   Uses another library's fiber scheduler while retaining Farce's ability to
@@ -168,7 +168,7 @@ module Farce
     #     worker = scheduler.launch_thread
     #     scheduler.schedule { puts "Running on Async" }
     #
-    #   @param capacity [Integer, nil] Pending-task capacity; nil creates an unbounded queue.
+    #   @param capacity [Integer, nil] Pending-task capacity, nil creates an unbounded queue.
     #   @yieldreturn [Object] The fiber scheduler to install when launched or installed.
     def initialize(capacity: 1024, backend: Internal::FROZEN_CONFIG.io_backend, queue: nil, external: false,
                    pool_worker: nil, queue_owner: true, &constructor)
@@ -362,7 +362,7 @@ module Farce
     end
 
     # Requests shutdown and rejects further submissions. Repeated calls are harmless.
-    # The dispatcher drains queued tasks before closing the queue; this method
+    # The dispatcher drains queued tasks before closing the queue. This method
     # does not wait for dispatch or running tasks to finish.
     #
     # This wakes a dispatcher blocked on an empty queue. It does not directly

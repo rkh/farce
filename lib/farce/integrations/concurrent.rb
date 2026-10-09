@@ -34,7 +34,7 @@ module Farce
 
         def working = self
         def write!  = @dirty = true
-        def prepare; end
+        def prepare = nil
 
         def valid?
           !(@dirty && @source.frozen?) && Internal::PortableTransaction.same?(@source.unsafe_value, @baseline)
@@ -57,7 +57,7 @@ module Farce
           raise TypeError, "writable Concurrent::TVar cannot participate in an external commit"
         end
 
-        def notify; end
+        def notify  = nil
         def release = @lock.unlock
       end
     end

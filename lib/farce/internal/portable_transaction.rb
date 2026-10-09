@@ -156,8 +156,8 @@ module Farce
           super(source, nil, :map, size)
         end
 
-        def prepare; end
-        def valid? = @source.transaction_idle? && @source.size == @baseline
+        def prepare = nil
+        def valid?  = @source.transaction_idle? && @source.size == @baseline
       end
     end
   end
