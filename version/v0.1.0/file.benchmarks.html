@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: Benchmarks
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "benchmarks";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../main/index.html">main</option>
+<option value="index.html" selected>v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: Benchmarks</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="benchmarks">Benchmarks<a href="#benchmarks" aria-label="Link to heading 'Benchmarks'" data-heading-content="Benchmarks" class="anchor"></a></h1>
+<p>Farce also aims to be fast and efficient, aiming for anywhere between a minimal overhead to outperforming other options.</p>
+<p>Any numbers quoted here are to be taken with a grain of salt:</p>
+<ul>
+<li>They are based on micro-benchmarks, which may not reflect real-world performance.</li>
+<li>They are momentary snapshots. Gems and Ruby implementations are constantly evolving,
+so these numbers may not be accurate in the future.</li>
+<li>Concrete numbers are largely measured on a local machine, which may not reflect your deployment environment.</li>
+</ul>
+<p>You should measure the performance of your own application under realistic conditions.</p>
+<h2 id="map-performance">Map performance<a href="#map-performance" aria-label="Link to heading 'Map performance'" data-heading-content="Map performance" class="anchor"></a></h2>
+<p>A shared map is a very common data structure for tracking state. While the read and write performance is hopefully not the bottleneck for your application.</p>
+<table>
+<thead>
+<tr>
+<th>Map implementation</th>
+<th>Read</th>
+<th>Write</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Hash</code></td>
+<td>fastest</td>
+<td>fastest</td>
+<td>Not ractor-shareable (when mutable), not thread-safe</td>
+</tr>
+<tr>
+<td><code>Concurrent::Hash</code></td>
+<td>1.1x slower</td>
+<td>1.1x slower</td>
+<td>Not ractor-shareable</td>
+</tr>
+<tr>
+<td><code>Farce::Strict::Map</code></td>
+<td>1.2x slower</td>
+<td>1.1x slower</td>
+<td></td>
+</tr>
+<tr>
+<td><code>Farce::Unshared::Map</code></td>
+<td>1.2x slower</td>
+<td>1.1x slower</td>
+<td>Not ractor-shareable</td>
+</tr>
+<tr>
+<td><code>Farce::Map</code></td>
+<td>1.3x slower</td>
+<td>1.1x slower</td>
+<td></td>
+</tr>
+<tr>
+<td><code>Concurrent::Map</code></td>
+<td>1.4x slower</td>
+<td>3.2x slower</td>
+<td>Not ractor-shareable</td>
+</tr>
+<tr>
+<td><code>Hash</code> + <code>Mutex</code></td>
+<td>2.9x slower</td>
+<td>2.9x slower</td>
+<td>Not ractor-shareable</td>
+</tr>
+<tr>
+<td><code>Ractor::LockHash</code></td>
+<td>2.9x slower</td>
+<td>3.4x slower</td>
+<td>Not fiber-friendly</td>
+</tr>
+<tr>
+<td><code>Ratomic::Map</code></td>
+<td>3.1x slower</td>
+<td>2.7x slower</td>
+<td>Breaks isolation, not fiber-friendly</td>
+</tr>
+<tr>
+<td><code>Ractor::KeyLockHash</code></td>
+<td>3.2x slower</td>
+<td>2.5x slower</td>
+<td>Not fiber-friendly</td>
+</tr>
+<tr>
+<td><code>Farce::LRUMap</code></td>
+<td>3.4x slower</td>
+<td>7.6x slower</td>
+<td>Automatic eviction</td>
+</tr>
+<tr>
+<td><code>Farce::LFUMap</code></td>
+<td>3.5x slower</td>
+<td>7.6x slower</td>
+<td>Automatic eviction</td>
+</tr>
+<tr>
+<td><code>Farce::Unsafe::TreeMap</code></td>
+<td>3.7x slower</td>
+<td>4.1x slower</td>
+<td>Ordered entries, not thread-safe, not ractor-shareable</td>
+</tr>
+<tr>
+<td><code>HashWithIndifferentAccess</code></td>
+<td>4.5x slower</td>
+<td>5.3x slower</td>
+<td>Not ractor-shareable</td>
+</tr>
+<tr>
+<td><code>RactorSafe::HashMap</code></td>
+<td>4.8x slower</td>
+<td>4.8x slower</td>
+<td></td>
+</tr>
+<tr>
+<td><code>Farce::TreeMap</code></td>
+<td>5.5x slower</td>
+<td>40x slower</td>
+<td>Ordered entries</td>
+</tr>
+<tr>
+<td><code>Farce::LeaseMap</code></td>
+<td>30x slower</td>
+<td>40x slower</td>
+<td>Shared ractor for all lease maps</td>
+</tr>
+<tr>
+<td><code>Ractor::ActorHash</code></td>
+<td>400x slower</td>
+<td>280x slower</td>
+<td>Additional ractor per map</td>
+</tr>
+</tbody>
+</table>
+<p>The map implementations namespaced under <code>Ractor</code> are from the <a href="https://github.com/ko1/ractor-sharing">ractor-sharing</a> gem.</p>
+<p>Also note that <code>Ratomic::Map</code> has a significant performance benefit over all other implementations when repeatedly writing to different keys in very large maps concurrently on a very high number of Ractors due to the underlying <a href="https://github.com/xacrimon/dashmap">DashMap</a> implementing data sharding. This benefit does not materializes if different Ractors share the keys they use, so its usefulness is slightly hampered by the fact that you cannot iterate over Ratomic's maps at all.</p>
+<h2 id="counter-performance">Counter performance<a href="#counter-performance" aria-label="Link to heading 'Counter performance'" data-heading-content="Counter performance" class="anchor"></a></h2>
+<div class="markdown-alert markdown-alert-caution">
+<p class="markdown-alert-title">Caution</p>
+<p>If counter performance is your application's bottleneck, <strong>Ruby might not be the right choice for you</strong>.</p>
+</div>
+<h3 id="cruby-40">CRuby (4.0)<a href="#cruby-40" aria-label="Link to heading 'CRuby (4.0)'" data-heading-content="CRuby (4.0)" class="anchor"></a></h3>
+<table>
+<thead>
+<tr>
+<th>Implementation</th>
+<th>Increment</th>
+<th>Read value</th>
+<th>Integer size</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>farce</td>
+<td>fastest</td>
+<td>fastest</td>
+<td>64-bit</td>
+<td></td>
+</tr>
+<tr>
+<td>concurrent-ruby-ext</td>
+<td>1.2x slower</td>
+<td>same-ish</td>
+<td>32-bit</td>
+<td>no ractor support</td>
+</tr>
+<tr>
+<td>ratomic</td>
+<td>1.5x slower</td>
+<td>1.6x slower</td>
+<td>64-bit</td>
+<td>no overflow protection</td>
+</tr>
+<tr>
+<td>ractor_safe</td>
+<td>2.1x slower</td>
+<td>2.1x slower</td>
+<td>64-bit</td>
+<td></td>
+</tr>
+<tr>
+<td>concurrent-ruby</td>
+<td>12x slower</td>
+<td>5x slower</td>
+<td>32-bit</td>
+<td>no ractor support</td>
+</tr>
+</tbody>
+</table>
+<p>Performance differences between implementations are consistent between single-threaded and multi-threaded benchmarks.</p>
+<h3 id="jruby">JRuby<a href="#jruby" aria-label="Link to heading 'JRuby'" data-heading-content="JRuby" class="anchor"></a></h3>
+<table>
+<thead>
+<tr>
+<th>Implementation</th>
+<th>Increment</th>
+<th>Read value</th>
+<th>Integer size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>concurrent-ruby-ext</td>
+<td>fastest</td>
+<td>fastest</td>
+<td>64-bit</td>
+</tr>
+<tr>
+<td>farce</td>
+<td>1.7x slower</td>
+<td>2.2x slower</td>
+<td>64-bit</td>
+</tr>
+<tr>
+<td>concurrent-ruby</td>
+<td>15x slower</td>
+<td>9x slower</td>
+<td>32-bit</td>
+</tr>
+</tbody>
+</table>
+<p>Farce uses a JVM-specific Ruby implementation, concurrent-ruby uses the same Mutex-based implementation as on other platforms, and concurrent-ruby-ext comes with a Java implementation of an atomic counter (hence also the difference in integer size). The overhead in Farce can largely be attributed to Ruby dispatch overhead.</p>
+<h3 id="truffleruby">TruffleRuby<a href="#truffleruby" aria-label="Link to heading 'TruffleRuby'" data-heading-content="TruffleRuby" class="anchor"></a></h3>
+<table>
+<thead>
+<tr>
+<th>Implementation</th>
+<th>Increment</th>
+<th>Read value</th>
+<th>Integer size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>farce</td>
+<td>fastest</td>
+<td>fastest</td>
+<td>64-bit</td>
+</tr>
+<tr>
+<td>concurrent-ruby</td>
+<td>1.5x slower</td>
+<td>3.5x slower</td>
+<td>32-bit</td>
+</tr>
+</tbody>
+</table>
+<p>TruffleRuby's performance numbers are not as reliable as other Ruby implementations, and may vary significantly between runs, versions, and whether the GraalVM is in use and has warmed up. Neither farce nor concurrent-ruby use a counter written in C, so they should both be fully optimizable by the GraalVM.</p>
+<h2 id="lock-performance">Lock performance<a href="#lock-performance" aria-label="Link to heading 'Lock performance'" data-heading-content="Lock performance" class="anchor"></a></h2>
+<div class="markdown-alert markdown-alert-caution">
+<p class="markdown-alert-title">Caution</p>
+<p>If lock performance is your application's bottleneck, you might want to look into <strong>different data structures</strong>.
+Farce and concurrent-ruby provide plenty of options.</p>
+</div>
+<h3 id="cruby">CRuby<a href="#cruby" aria-label="Link to heading 'CRuby'" data-heading-content="CRuby" class="anchor"></a></h3>
+<p>Farce's locks are <strong>between 5% and 10% slower</strong> than <code>Mutex</code> for uncontended locks, and stay below a 50% performance penalty for highly contended locks between threads.</p>
+<h3 id="jruby-and-truffleruby">JRuby and TruffleRuby<a href="#jruby-and-truffleruby" aria-label="Link to heading 'JRuby and TruffleRuby'" data-heading-content="JRuby and TruffleRuby" class="anchor"></a></h3>
+<p>Farce's locks have identical performance to <code>Mutex</code> (as they are a subclass of <code>Mutex</code>).</p>
+<h2 id="queue-performance">Queue performance<a href="#queue-performance" aria-label="Link to heading 'Queue performance'" data-heading-content="Queue performance" class="anchor"></a></h2>
+<p>In the producer/consumer workload in <code>benchmark/queue.rb</code>, Ruby's built-in <code>Thread::Queue</code> and <code>Thread::SizedQueue</code> remain the fastest, but they do not support ractors.</p>
+<table>
+<thead>
+<tr>
+<th>Implementation</th>
+<th>Performance</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Thread::Queue</code></td>
+<td>Fastest</td>
+<td>no ractor support</td>
+</tr>
+<tr>
+<td><code>Thread::SizedQueue</code></td>
+<td>1.4x slower</td>
+<td>no ractor support</td>
+</tr>
+<tr>
+<td><code>Farce::Strict::Queue</code></td>
+<td>1.5x slower</td>
+<td>only allows sharable objects</td>
+</tr>
+<tr>
+<td><code>Farce::Queue</code></td>
+<td>2.1x slower</td>
+<td></td>
+</tr>
+<tr>
+<td><code>RactorSafe::Queue</code></td>
+<td>2.9x slower</td>
+<td>only allows sharable objects</td>
+</tr>
+<tr>
+<td><code>Ratomic::Queue</code></td>
+<td>9.8x slower</td>
+<td>breaks ractor isolation</td>
+</tr>
+<tr>
+<td><code>RactorQueue</code></td>
+<td>30x slower</td>
+<td>breaks ractor isolation</td>
+</tr>
+<tr>
+<td><code>Ractor::Port</code> (multiplexing)</td>
+<td>100x slower</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="priority-queue-performance">Priority queue performance<a href="#priority-queue-performance" aria-label="Link to heading 'Priority queue performance'" data-heading-content="Priority queue performance" class="anchor"></a></h2>
+<p>Many gems implement a priority queue or comparable data structure.
+Farce's implementation is the only one that allows cross-ractor communication.
+The below numbers compare non-blocking APIs, as only Farce implements a blocking API as well.</p>
+<table>
+  <thead>
+    <tr>
+      <th colspan="2"></th>
+      <th colspan="2">CRuby</th>
+      <th colspan="2">JRuby</th>
+    </tr>
+    <tr>
+      <th>↓ Gem</th>
+      <th>Insertion order →</th>
+      <th>Random</th>
+      <th>Descending</th>
+      <th>Random</th>
+      <th>Descending</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="2">farce 0.1.0</td>
+      <td>fastest</td>
+      <td>fastest</td>
+      <td>fastest</td>
+      <td>fastest</td>
+    </tr>
+    <tr>
+      <td colspan="2"><a href="https://github.com/mame/rbtree">rbtree</a> 0.4.7</td>
+      <td>1.1x slower</td>
+      <td>1.2x  slower</td>
+      <td>–</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td colspan="2"><a href="https://github.com/boborbt/priority_queue_cxx">priority_queue_cxx</a> 0.3.7</td>
+      <td>1.7x slower</td>
+      <td>1.7x slower</td>
+      <td>–</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td colspan="2"><a href="https://github.com/socketry/io-event">io-event</a> 1.21.1</td>
+      <td>2.6x slower</td>
+      <td>3.9x slower</td>
+      <td>1.3x slower</td>
+      <td>1.7x slower</td>
+    </tr>
+    <tr>
+      <td colspan="2"><a href="https://github.com/rubyworks/pqueue">pqueue</a> 2.2.0</td>
+      <td>9.5x slower</td>
+      <td>8.0x slower</td>
+      <td>2.2x slower</td>
+      <td>1.9x slower</td>
+    </tr>
+    <tr>
+      <td colspan="2"><a href="https://github.com/matiasbattocchia/lazy-priority-queue">lazy_priority_queue</a> 0.1.1</td>
+      <td>9.9x slower</td>
+      <td>7.9x slower</td>
+      <td>3.9x slower</td>
+      <td>3.2x slower</td>
+    </tr>
+    <tr>
+      <td colspan="2"><a href="https://github.com/philiprehberger/rb-priority-queue">philiprehberger-priority_queue</a> 0.5.0</td>
+      <td>13x slower</td>
+      <td>19x slower</td>
+      <td>7.6x slower</td>
+      <td>11x slower</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+
+      <div id="footer">
+  Generated on Fri Oct  9 13:33:58 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>

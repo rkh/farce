@@ -2,5 +2,9 @@
   {
     "name": "main",
     "path": "main"
+  },
+  {
+    "name": "v0.1.0",
+    "path": "version/v0.1.0"
   }
 ]
