@@ -1320,6 +1320,7 @@ For maps, this is only supported for values. Keys must be shareable.</li>
 <li><code>Exchanger</code>: A synchronization point for two-way data swapping between Threads, Ractors, and/or Fibers. Drop-in replacement for concurrent-ruby's exchanger.</li>
 <li><code>Lazy</code>: Lazily initialized value.</li>
 <li><code>LazyRef</code>: A <a href="#references">reference</a> for a lazily initialized value.</li>
+<li><code>ThreadScheduler</code>: An alternative <a href="#scheduling-code">scheduler</a> creating a new thread for each unit of work. Used on TruffleRuby.</li>
 <li><code>Walker</code>: A tool for walking a Ruby object tree.</li>
 <li><code>WeakValue</code>: A value object version of <a href="#weakref"><code>WeakRef</code></a>. Allows handling references more explicitly, without automatic method delegation.</li>
 </ul>
@@ -1424,7 +1425,7 @@ need to specifically load any particular file.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Fri Oct  9 13:17:13 2026 by
+  Generated on Fri Oct  9 13:33:19 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
