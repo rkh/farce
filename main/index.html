@@ -1106,7 +1106,7 @@ For maps, this is only supported for values. Keys must be shareable.</li>
   <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_compute_expensive_value'>compute_expensive_value</span>
 
   <span class='comment'># need to report back to the main ractor
-</span>  <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_on_main'><span class='object_link'><a href="Farce.html#on_main-class_method" title="Farce.on_main (method)">on_main</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='gvar'>$tvar</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
+</span>  <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_on_main'><span class='object_link'><a href="Farce.html#on_main-class_method" title="Farce.on_main (method)">on_main</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='gvar'>$tvar</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
 <span class='kw'>end</span>
 </code></pre>
 <p>Sometimes you don't need to wait for the code to be done running on the main Ractor. In such cases, you can use <code>schedule</code>, as <code>on_main</code> returns a <a href="#schedulers">scheduler</a> instance when called without a block:</p>
@@ -1424,7 +1424,7 @@ need to specifically load any particular file.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Fri Oct  9 11:57:23 2026 by
+  Generated on Fri Oct  9 12:24:38 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
