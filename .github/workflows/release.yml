@@ -110,3 +110,6 @@ jobs:
 
       - name: Publish all release gems
         uses: rubygems/release-gem@v1
+        with:
+          # rubygems-await 0.5.4 is incompatible with the current RubyGems compact index API.
+          await-release: false
