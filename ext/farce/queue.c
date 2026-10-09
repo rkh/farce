@@ -377,6 +377,7 @@ queue_initialize(int argc, VALUE *argv, VALUE self)
 
 typedef struct {
     bool finite;
+    bool collected;
     double deadline;
 } queue_timeout_t;
 
@@ -530,6 +531,49 @@ queue_wait_cleanup(VALUE opaque)
     return Qnil;
 }
 
+typedef struct {
+    queue_wait_context_t wait;
+    int error;
+    const char *operation;
+} queue_descriptor_pressure_t;
+
+static VALUE
+queue_descriptor_pressure_body(VALUE opaque)
+{
+    queue_descriptor_pressure_t *context = (queue_descriptor_pressure_t *)opaque;
+    queue_timeout_t *timeout = context->wait.timeout;
+    VALUE remaining = timeout->finite ? DBL2NUM(timeout->deadline - monotonic_now()) : Qnil;
+    containers_wait_without_descriptor(context->error, context->operation, &timeout->collected, remaining);
+    return Qtrue;
+}
+
+/* Count polling waiters too, and unwind the count on scheduler cancellation or
+ * a GC callback failure. No descriptor exists for this wait to close. */
+static bool
+queue_wait_without_descriptor(
+    queue_t *queue, readiness_signal_t *signal, size_t *waiter_count,
+    queue_timeout_t *timeout, int error, const char *operation
+)
+{
+    queue_descriptor_pressure_t context = {
+        .wait = {
+            .queue = queue,
+            .signal = signal,
+            .waiter_count = waiter_count,
+            .timeout = timeout,
+            .wait_fd = -1,
+        },
+        .error = error,
+        .operation = operation,
+    };
+    (*waiter_count)++;
+    queue_unlock(queue);
+    return RTEST(rb_ensure(
+        queue_descriptor_pressure_body, (VALUE)&context,
+        queue_wait_cleanup, (VALUE)&context.wait
+    ));
+}
+
 /* Called with queue->lock held and always returns with it released. Registering
  * before the unlock closes the check-to-wait race with a producer or consumer. */
 static bool
@@ -546,10 +590,7 @@ queue_wait(VALUE self, queue_t *queue, readiness_signal_t *signal, size_t *waite
         return farce_unshared_wait(list, self, timeout->finite, timeout->deadline);
     }
     if (signal->read_fd < 0 && !readiness_initialize(signal)) {
-        int error = errno;
-        queue_unlock(queue);
-        errno = error;
-        rb_sys_fail("pipe");
+        return queue_wait_without_descriptor(queue, signal, waiter_count, timeout, errno, "pipe");
     }
 #ifdef _WIN32
     VALUE main_ractor_marker;
@@ -576,10 +617,7 @@ queue_wait(VALUE self, queue_t *queue, readiness_signal_t *signal, size_t *waite
      * without letting one waiter's wrapper cleanup cancel its siblings. */
     int wait_fd = dup(signal->read_fd);
     if (wait_fd < 0) {
-        int error = errno;
-        queue_unlock(queue);
-        errno = error;
-        rb_sys_fail("dup");
+        return queue_wait_without_descriptor(queue, signal, waiter_count, timeout, errno, "dup");
     }
     set_fd_flags(wait_fd);
     queue_wait_context_t context = {

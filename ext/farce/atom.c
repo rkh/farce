@@ -46,6 +46,7 @@ typedef struct {
 
 typedef struct {
     bool finite;
+    bool collected;
     double deadline;
 } atom_timeout_t;
 
@@ -382,8 +383,13 @@ atom_wait_once(atom_t *atom, atom_timeout_t *timeout)
 {
     int descriptors[2];
     if (pipe(descriptors) != 0) {
+        int error = errno;
         pthread_mutex_unlock(&atom->lock);
-        rb_sys_fail("pipe");
+        double seconds = timeout->finite ? timeout->deadline - atom_monotonic_now() : 0;
+        if ((error == EMFILE || error == ENFILE) && timeout->finite && seconds <= 0) return false;
+        VALUE remaining = timeout->finite ? DBL2NUM(seconds) : Qnil;
+        containers_wait_without_descriptor(error, "pipe", &timeout->collected, remaining);
+        return true;
     }
     atom_set_fd_flags(descriptors[0]);
     atom_set_fd_flags(descriptors[1]);

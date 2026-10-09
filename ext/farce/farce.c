@@ -180,6 +180,41 @@ containers_sleep_without_gvl(void *opaque)
 }
 #endif
 
+/* Called only after releasing the container's native mutex. GC and scheduler
+ * callbacks can run Ruby, mutate the container, or raise. The caller must
+ * recheck its condition and original deadline after every return. */
+void
+containers_wait_without_descriptor(int error, const char *operation, bool *collected, VALUE timeout)
+{
+    if (error != EMFILE && error != ENFILE) {
+        errno = error;
+        rb_sys_fail(operation);
+    }
+    if (!*collected) {
+        *collected = true;
+        rb_gc_start();
+        return;
+    }
+
+    /* Descriptor pressure must not turn a cooperative fiber wait into a
+     * whole-thread block. Timed polling needs no new notification descriptor
+     * and lets a producer on the same scheduler make progress. */
+    double seconds = 0.001;
+    if (!NIL_P(timeout)) {
+        double remaining = NUM2DBL(timeout);
+        if (remaining <= 0) return;
+        if (remaining < seconds) seconds = remaining;
+    }
+    VALUE scheduler = rb_fiber_scheduler_current();
+    if (!NIL_P(scheduler)) {
+        rb_fiber_scheduler_kernel_sleep(scheduler, DBL2NUM(seconds));
+    }
+    else {
+        struct timeval interval = {.tv_sec = 0, .tv_usec = (int)ceil(seconds * 1000000)};
+        rb_thread_wait_for(interval);
+    }
+}
+
 static VALUE
 containers_io_wait(VALUE opaque)
 {

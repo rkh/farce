@@ -31,6 +31,9 @@ RBIMPL_ATTR_NORETURN()
 VALUE containers_raise_unfreezable(VALUE self);
 VALUE containers_normalize_string_key(VALUE key);
 bool containers_wait_for_readable(int fd, VALUE timeout);
+void containers_wait_without_descriptor(
+    int error, const char *operation, bool *collected, VALUE timeout
+);
 #ifdef _WIN32
 void containers_wait_safepoint(void);
 #endif
