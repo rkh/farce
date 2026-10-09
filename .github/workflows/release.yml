@@ -7,20 +7,46 @@ on:
 permissions:
   contents: read
 
+env:
+  BUNDLE_WITHOUT: compatibility:benchmark:test:docs
+
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  release:
+  prepare:
     if: github.event.deleted != true
     runs-on: ubuntu-24.04
-    environment: rubygems
-    permissions:
-      contents: read
-      id-token: write
-    env:
-      BUNDLE_WITHOUT: compatibility:benchmark:test:docs
+    outputs:
+      platforms: ${{ steps.matrix.outputs.platforms }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+
+      - name: Validate release tag
+        run: bundle exec rake release:validate
+
+      - name: Select all release platforms
+        id: matrix
+        run: |
+          bundle exec ruby -rrake -rjson -e 'load "Rakefile"; puts "platforms=#{JSON.generate(["source", *CROSS_PLATFORMS])}"' >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build / ${{ matrix.platform }}
+    needs: prepare
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        platform: ${{ fromJSON(needs.prepare.outputs.platforms) }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -44,8 +70,43 @@ jobs:
           ruby-version: '4.0'
           bundler-cache: true
 
-      - name: Build and verify all release gems
-        run: bundle exec rake release:build
+      - name: Build and verify platform gem
+        env:
+          RELEASE_PLATFORM: ${{ matrix.platform }}
+        run: bundle exec rake "gem:$RELEASE_PLATFORM"
+
+      - name: Upload verified gem
+        uses: actions/upload-artifact@v7
+        with:
+          name: gem-${{ matrix.platform }}
+          path: pkg/*.gem
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    # A matrix job succeeds only when every platform has built and uploaded its gem.
+    needs: [prepare, build]
+    runs-on: ubuntu-24.04
+    environment: rubygems
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+
+      - name: Download all verified gems
+        uses: actions/download-artifact@v8
+        with:
+          pattern: gem-*
+          path: pkg
+          merge-multiple: true
 
       - name: Publish all release gems
         uses: rubygems/release-gem@v1
