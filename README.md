@@ -1106,7 +1106,7 @@ Ractor.new do
   value = compute_expensive_value
 
   # need to report back to the main ractor
-  Farce.on_main(value) { $tvar.value = value }
+  Farce.on_main(value) { $tvar.value = it }
 end
 ```
 
