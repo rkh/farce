@@ -2,13 +2,5 @@
   {
     "name": "main",
     "path": "main"
-  },
-  {
-    "name": "v0.0.1.alpha2",
-    "path": "version/v0.0.1.alpha2"
-  },
-  {
-    "name": "v0.0.1.alpha1",
-    "path": "version/v0.0.1.alpha1"
   }
 ]
