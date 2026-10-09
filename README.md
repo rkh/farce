@@ -1385,6 +1385,7 @@ Other classes Farce provides include:
 * `Exchanger`: A synchronization point for two-way data swapping between Threads, Ractors, and/or Fibers. Drop-in replacement for concurrent-ruby's exchanger.
 * `Lazy`: Lazily initialized value.
 * `LazyRef`: A [reference](#references) for a lazily initialized value.
+* `ThreadScheduler`: An alternative [scheduler](#scheduling-code) creating a new thread for each unit of work. Used on TruffleRuby.
 * `Walker`: A tool for walking a Ruby object tree.
 * `WeakValue`: A value object version of [`WeakRef`](#weakref). Allows handling references more explicitly, without automatic method delegation.
 
