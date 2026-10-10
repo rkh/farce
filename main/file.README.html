@@ -45,7 +45,6 @@
 </nav>
 <!-- farce-versions:end -->
 
-
       <div id="header">
         <div id="menu">
   
@@ -233,6 +232,7 @@
 <li><a href="#compatibility-and-dependencies">Compatibility and Dependencies</a>
 <ul>
 <li><a href="#ruby">Ruby</a></li>
+<li><a href="#optional-dependencies">Optional Dependencies</a></li>
 <li><a href="#similar-projects">Similar Projects</a></li>
 </ul>
 </li>
@@ -1012,7 +1012,7 @@ For maps, this is only supported for values. Keys must be shareable.</li>
 <span class='id identifier rubyid_list'>list</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='int'>42</span>
 
 <span class='comment'># Atomically replace list[0] with 256 if the value is still 42
-</span><span class='id identifier rubyid_list'>list</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_swap'>compare_and_swap</span><span class='lparen'>(</span><span class='int'>0</span><span class='comma'>,</span> <span class='int'>42</span><span class='comma'>,</span> <span class='int'>256</span><span class='rparen'>)</span>
+</span><span class='id identifier rubyid_list'>list</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='int'>0</span><span class='comma'>,</span> <span class='int'>42</span><span class='comma'>,</span> <span class='int'>256</span><span class='rparen'>)</span>
 </code></pre>
 <h4 id="observability-and-signaling">Observability and Signaling<a href="#observability-and-signaling" aria-label="Link to heading 'Observability and Signaling'" data-heading-content="Observability and Signaling" class="anchor"></a></h4>
 <p>All the <a href="#data-structures">data structures</a> come with extra observability methods, which eliminate the need for using <a href="https://docs.ruby-lang.org/en/4.0/Thread/ConditionVariable.html">condition variables</a> and <a href="https://docs.ruby-lang.org/en/4.0/Thread/Mutex.html">mutexes</a>.</p>
@@ -1364,6 +1364,62 @@ For maps, this is only supported for values. Keys must be shareable.</li>
 <li>Dropping support for a CRuby version is only done in major releases.</li>
 <li>If support for an older CRuby version is dropped, Farce will still backport security fixes for at least as long as that CRuby version is <a href="https://www.ruby-lang.org/en/downloads/branches/">still receiving security fixes</a>.</li>
 </ul>
+<h3 id="optional-dependencies">Optional Dependencies<a href="#optional-dependencies" aria-label="Link to heading 'Optional Dependencies'" data-heading-content="Optional Dependencies" class="anchor"></a></h3>
+<p>Farce's optional <a href="#integrations">integrations</a> depend on external libraries. Automated tests only run against recent versions of these libraries, but the code is written to be compatible with as wide a range as possible.</p>
+<p>Farce should be compatible with these versions:</p>
+<table>
+<thead>
+<tr>
+<th>Gem</th>
+<th>Minimum Version</th>
+<th>Release Date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ractor-tmvar</code></td>
+<td>0.3.0</td>
+<td>2026-10-06</td>
+</tr>
+<tr>
+<td><code>msgpack</code></td>
+<td>1.7.0</td>
+<td>2023-03-29</td>
+</tr>
+<tr>
+<td><code>concurrent-ruby</code></td>
+<td>1.1.8</td>
+<td>2021-01-20</td>
+</tr>
+<tr>
+<td><code>dry-types</code></td>
+<td>1.0.0</td>
+<td>2019-04-23</td>
+</tr>
+<tr>
+<td><code>activesupport</code></td>
+<td>5.1.0</td>
+<td>2017-04-27</td>
+</tr>
+<tr>
+<td><code>oj</code></td>
+<td>2.8.1</td>
+<td>2014-04-21</td>
+</tr>
+<tr>
+<td><code>bson</code></td>
+<td>2.0.0</td>
+<td>2013-12-02</td>
+</tr>
+<tr>
+<td><code>psych</code></td>
+<td>1.1.0</td>
+<td>2011-03-30</td>
+</tr>
+</tbody>
+</table>
+<p>Any version of <code>cbor</code>, <code>json</code>, <code>ractor-sharing</code>, <code>sorted_set</code>, and <code>weakref</code> should be supported</p>
+<p>If you want to use any of these in a version that is incompatible with Farce, you can <a href="#disable-automatic-loading">disable automatic integration loading</a>.</p>
 <h3 id="similar-projects">Similar Projects<a href="#similar-projects" aria-label="Link to heading 'Similar Projects'" data-heading-content="Similar Projects" class="anchor"></a></h3>
 <ul>
 <li><a href="https://github.com/eregon/ractor-shim/">ractor-shim</a> provides similar functionality to <code>Farce::Ractor</code>. See <a href="file.ractor-shim.html" title="the comparison document">the comparison document</a> for more details.</li>
@@ -1427,7 +1483,7 @@ need to specifically load any particular file.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Fri Oct  9 13:33:19 2026 by
+  Generated on Sat Oct 10 09:07:46 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
