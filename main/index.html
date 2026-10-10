@@ -627,7 +627,7 @@
 </span></code></pre>
 <h5 id="queue-capacity">Queue capacity<a href="#queue-capacity" aria-label="Link to heading 'Queue capacity'" data-heading-content="Queue capacity" class="anchor"></a></h5>
 <p>Queues support setting a maximum capacity. If the capacity has been reached it will block any pushes to create back pressure.</p>
-<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_queue'>queue</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Queue.html" title="Farce::Queue (class)">Queue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Queue.html#initialize-instance_method" title="Farce::Queue#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='int'>2</span><span class='rparen'>)</span>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_queue'>queue</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Queue.html" title="Farce::Queue (class)">Queue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Queue.html#initialize-instance_method" title="Farce::Queue#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>capacity:</span> <span class='int'>2</span><span class='rparen'>)</span>
 
 <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_try_push'>try_push</span><span class='lparen'>(</span><span class='symbol'>:a</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
 </span><span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_try_push'>try_push</span><span class='lparen'>(</span><span class='symbol'>:b</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
@@ -1483,7 +1483,7 @@ need to specifically load any particular file.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Sat Oct 10 09:27:40 2026 by
+  Generated on Sat Oct 10 09:44:08 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
