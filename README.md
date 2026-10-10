@@ -602,7 +602,7 @@ result # => [:first, :third]
 Queues support setting a maximum capacity. If the capacity has been reached it will block any pushes to create back pressure.
 
 ```ruby
-queue = Farce::Queue.new(2)
+queue = Farce::Queue.new(capacity: 2)
 
 queue.try_push(:a) # => true
 queue.try_push(:b) # => true
