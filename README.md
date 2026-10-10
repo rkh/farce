@@ -133,6 +133,7 @@ puts output
       - [Constants](#constants)
   - [Compatibility and Dependencies](#compatibility-and-dependencies)
     - [Ruby](#ruby)
+    - [Optional Dependencies](#optional-dependencies)
     - [Similar Projects](#similar-projects)
   - [Installation](#installation)
     - [Globally](#globally)
@@ -974,7 +975,7 @@ list = Farce::Vector.new
 list[0] = 42
 
 # Atomically replace list[0] with 256 if the value is still 42
-list.compare_and_swap(0, 42, 256)
+list.compare_and_set(0, 42, 256)
 ```
 
 #### Observability and Signaling
@@ -1432,6 +1433,27 @@ Moreover:
 
 * Dropping support for a CRuby version is only done in major releases.
 * If support for an older CRuby version is dropped, Farce will still backport security fixes for at least as long as that CRuby version is [still receiving security fixes](https://www.ruby-lang.org/en/downloads/branches/).
+
+### Optional Dependencies
+
+Farce's optional [integrations](#integrations) depend on external libraries. Automated tests only run against recent versions of these libraries, but the code is written to be compatible with as wide a range as possible.
+
+Farce should be compatible with these versions:
+
+| Gem               | Minimum Version | Release Date |
+|-------------------|-----------------|--------------|
+| `ractor-tmvar`    | 0.3.0           | 2026-10-06   |
+| `msgpack`         | 1.7.0           | 2023-03-29   |
+| `concurrent-ruby` | 1.1.8           | 2021-01-20   |
+| `dry-types`       | 1.0.0           | 2019-04-23   |
+| `activesupport`   | 5.1.0           | 2017-04-27   |
+| `oj`              | 2.8.1           | 2014-04-21   |
+| `bson`            | 2.0.0           | 2013-12-02   |
+| `psych`           | 1.1.0           | 2011-03-30   |
+
+Any version of `cbor`, `json`, `ractor-sharing`, `sorted_set`, and `weakref` should be supported
+
+If you want to use any of these in a version that is incompatible with Farce, you can [disable automatic integration loading](#disable-automatic-loading).
 
 ### Similar Projects
 
