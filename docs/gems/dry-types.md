@@ -243,8 +243,7 @@ and dry-types' `Strict` namespace configure separate parts of the conversion.
 | `:local` | `Farce::Local::Vector`, `Farce::Local::Map`, `Farce::Local::Set`, `Farce::Local::Counter`, `Farce::Local::Flag`, `Farce::Local::Atom` |
 
 The integration imports only classes that Farce provides for the selected
-variant. Strict has an Atom but no Counter or Flag. Unshared has none of these
-three scalar-backed types.
+variant.
 
 For a single shared collection type, use `.with(mode: ...)`:
 
