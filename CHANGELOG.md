@@ -29,6 +29,8 @@ Measurements were taken on CRuby 4.0.7 (arm64-darwin23) with YJIT enabled. Measu
 #### Other changes
 
 * Avoid circular require warnings when automatically loading third-party integrations.
+* Do not install a require hook if automatic integration loading is disabled.
+* Improve compatibility with other gems modifying `Kernel#require`, work around an issue with Ruby 4.0's runtime ractor require patch and alias methods chains not working nicely with `Module#prepend`.
 
 ## Development Releases
 

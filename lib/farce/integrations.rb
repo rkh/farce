@@ -61,28 +61,6 @@ module Farce
     end
     private_constant :RequireHook
 
-    # A prepended singleton hook can recurse when Zeitwerk aliases it. Preserve
-    # the original method explicitly instead of relying on super here.
-    class << Kernel
-      alias farce_original_require require
-      private :farce_original_require
-
-      # Load a feature and its integration through Kernel.require.
-      # @api private
-      # @param path [String, #to_path] The feature to load.
-      # @return [Boolean] Whether the requested feature was newly loaded.
-      def require(path, ...)
-        path        = File.path(path)
-        result      = Integrations.loading(path) { farce_original_require(path, ...) }
-        integration = PATHS[path.delete_suffix(".rb")]
-        if integration && !Integrations.loading?(integration) && Farce.config.autoload_integrations
-          integration_path = "farce/integrations/#{integration}"
-          Integrations.loading(integration_path) { farce_original_require(integration_path) }
-        end
-        result
-      end
-    end
-
     private_constant :INTEGRATIONS, :PATHS
 
     extend self
@@ -106,8 +84,39 @@ module Farce
     # Activate integrations at startup when automatic loading is enabled.
     # @api private
     def setup
+      return unless Farce.config.autoload_integrations
+      install_require_hooks
+      load_active
+    end
+
+    # Install hooks once, including when automatic loading is enabled later.
+    # @api private
+    def install_require_hooks
+      return if Object.ancestors.include?(RequireHook)
+      # The instance hook handles ordinary require calls. The singleton alias
+      # chain handles Kernel.require, which bypasses Object's instance methods.
       Object.prepend(RequireHook)
-      load_active if Farce.config.autoload_integrations
+      # A prepended singleton hook can recurse when Zeitwerk aliases it. Preserve
+      # the original method explicitly instead of relying on super here.
+      class << Kernel
+        alias farce_original_require require
+        private :farce_original_require
+
+        # Load a feature and its integration through Kernel.require.
+        # @api private
+        # @param path [String, #to_path] The feature to load.
+        # @return [Boolean] Whether the requested feature was newly loaded.
+        def require(path, ...)
+          path        = File.path(path)
+          result      = Integrations.loading(path) { farce_original_require(path, ...) }
+          integration = PATHS[path.delete_suffix(".rb")]
+          if integration && !Integrations.loading?(integration) && Farce.config.autoload_integrations
+            integration_path = "farce/integrations/#{integration}"
+            Integrations.loading(integration_path) { farce_original_require(integration_path) }
+          end
+          result
+        end
+      end
     end
 
     # Loads all integrations for gems that have already been loaded.

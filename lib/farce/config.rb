@@ -24,7 +24,7 @@ module Farce
   class Config
     # Automatically load integrations when their dependencies are loaded. Defaults to true.
     # Can also be set via `FARCE_AUTOLOAD_INTEGRATIONS` (`true`/`false` or `1`/`0`).
-    # Set before requiring Farce to also disable startup integration loading.
+    # Set before requiring Farce to disable startup integration loading and require hooks.
     # @return [Boolean]
     attr_reader :autoload_integrations
 
@@ -63,6 +63,7 @@ module Farce
     end
 
     # Enable or disable automatic integration loading. Already loaded integrations remain active.
+    # Enabling this option installs require hooks if they are not already installed.
     # @param value [Boolean, String] true, false, or their environment variable representations.
     # @raise [ArgumentError] If the value is not a supported boolean.
     def autoload_integrations=(value)
@@ -71,6 +72,11 @@ module Farce
                                when false, "false", "0" then false
                                else raise ArgumentError, "autoload_integrations must be a boolean"
                                end
+      if @autoload_integrations && Farce.const_defined?(:Integrations, false) &&
+          !Farce.autoload?(:Integrations) && Farce.config.equal?(self)
+        Integrations.install_require_hooks
+      end
+      @autoload_integrations
     end
 
     # Default fiber scheduler for Pool and Scheduler.

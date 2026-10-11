@@ -14,6 +14,13 @@ module Farce
     ENGINE_PATH = "farce/engine/ruby/#{RUBY_VERSION[/^\d+\.\d+/]}".freeze
     private_constant :ENGINE_PATH
 
+    require "#{ENGINE_PATH}/require_hook" if RUBY_VERSION.start_with?("4.0.")
+    # Older Ractor activation defines a public Object#require. Keep Ruby's
+    # ordinary private visibility even when integration hooks are disabled.
+    if Object.instance_method(:require).source_location&.first == "<internal:ractor>"
+      Object.class_eval { private :require }
+    end
+
     begin
       require "#{ENGINE_PATH}/rebind"
       require "#{ENGINE_PATH}/farce"

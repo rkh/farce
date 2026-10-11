@@ -18,6 +18,9 @@ module Farce
           #{setup}
           require "json"
           require "farce"
+          raise "instance require hook installed" if Object.ancestors.any? { |ancestor| ancestor.name == "Farce::Integrations::RequireHook" }
+          kernel_require = Kernel.method(:require)
+          raise "singleton require hook installed" if kernel_require.source_location&.first&.end_with?("/farce/integrations.rb")
           raise "startup loaded integration" if $LOADED_FEATURES.any? { |path| path.end_with?("/farce/integrations/json.rb") }
           raise "configuration frozen at startup" if Farce.config.frozen?
           raise "dependency not loaded" unless #{loader}("dry/types")
@@ -26,7 +29,12 @@ module Farce
           raise "configuration frozen by hook" if Farce.config.frozen?
           require "farce/integrations/json"
           raise "explicit integration disabled" unless $LOADED_FEATURES.any? { |path| path.end_with?("/farce/integrations/json.rb") }
+          Farce::Config.new { |config| config.autoload_integrations = true }
+          raise "independent config installed hooks" unless Kernel.method(:require) == kernel_require
           Farce.config.autoload_integrations = true
+          kernel_require = Kernel.method(:require)
+          Farce.config.autoload_integrations = true
+          raise "hooks installed twice" unless Kernel.method(:require) == kernel_require
           raise "require result changed after enabling" if #{loader}("dry/types")
           raise "hook did not observe new setting" unless Farce.respond_to?(:DryTypes)
           raise "configuration frozen after enabling" if Farce.config.frozen?
