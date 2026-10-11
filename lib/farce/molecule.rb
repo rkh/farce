@@ -21,7 +21,7 @@ module Farce
     # Create a record class with defaults for newly created atoms.
     # @!macro modes
     # @param fields [Array<Symbol, String>] the field names
-    # @param mode [Symbol, nil] the default transfer mode, or nil for :copy
+    # @param mode [Symbol, nil] the default transfer mode, or nil for :smart
     # @param compare_by_identity [Boolean, nil] the default comparison policy
     # @return [Class<Molecule>]
     def self.define(*fields, mode: nil, **, &)
@@ -32,7 +32,7 @@ module Farce
     end
 
     # @return [Symbol] the default transfer mode for new records
-    def self.default_mode = :copy
+    def self.default_mode = :smart
 
     # @!visibility private
     def self.define_member(field)

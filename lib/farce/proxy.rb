@@ -50,13 +50,18 @@ module Farce
   # ```
   #
   # The above example has one issue:
-  # We cannot chain the calls, because `<<` returns an array, which actually gets copied.
+  # By default, `<<` makes the returned array shareable and freezes it.
+  # The next mutation raises `FrozenError`.
   #
   # ```ruby
   # my_instance = MyClass.new
   # my_proxy    = Farce::Proxy.create(my_instance)
   #
-  # Ractor.new(my_proxy) { it << 42 << 43 }.join
+  # Ractor.new(my_proxy) do |proxy|
+  #   proxy << 42 << 43
+  # rescue FrozenError
+  #   :frozen_result
+  # end.join
   #
   # my_instance.record # => [42]
   # ```

@@ -3,7 +3,7 @@
 # warn_indent: true
 
 # @!group WeakRef Integration
-require "farce"   unless defined?(Farce::Walker)
+require "farce"   unless defined?(Farce::Abstract)
 require "weakref" unless defined?(WeakRef)
 
 module Farce
@@ -19,6 +19,14 @@ module Farce
       # WeakRef has no setter, so replacement values need a new reference.
       target.class.new(results.first)
     end
+  end
+
+  Farce::ModeManager::SmartRule.define(::WeakRef) do |value, mode_manager, mode|
+    ref   = value.__getobj__
+    value = Farce::WeakRef.new(ref)
+    super(value, mode_manager, mode)
+  rescue ::WeakRef::RefError
+    Farce::WeakRef::RECYCLED
   end
 
   Internal::Converter.define(::WeakRef, WeakRef) do

@@ -69,12 +69,28 @@ module Farce
 
       assert_equal Internal::Port, Port.superclass
       assert_instance_of Port, port
-      assert_equal :copy, port.mode
+      assert_equal :smart_copy, port.mode
       refute_predicate port, :auto_local?
       assert_predicate port, :owned?
       refute_predicate port, :frozen?
       assert_predicate port, :ractor_shareable?
       assert Ractor.shareable?(port)
+    end
+
+    def test_default_smart_copy_reconstructs_unshared_messages
+      return unless Internal.native_ractors?
+      port = Port.new
+      source = Unshared::Map.new({ entries: [] })
+      port.send(source)
+      source[:entries] << :sender
+      result = port.receive
+      result[:entries] << :receiver
+
+      assert_instance_of Unshared::Map, result
+      assert_equal [:sender], source[:entries]
+      assert_equal [:receiver], result[:entries]
+    ensure
+      port&.close
     end
 
     def test_dedup_mode_prepares_messages
@@ -107,7 +123,7 @@ module Farce
         refute_predicate normal, :auto_local?
         assert_predicate local, :auto_local?
         assert_operator local, :<, normal
-        mode == :copy ? assert_same(Port, normal) : assert_operator(normal, :<, Port)
+        mode == :smart_copy ? assert_same(Port, normal) : assert_operator(normal, :<, Port)
 
         normal_port = Port.new(mode:)
         local_port  = Port.new(mode:, auto_local: true)
@@ -124,9 +140,9 @@ module Farce
     def test_auto_local_can_be_enabled_without_repeating_the_default_mode
       port = Port.new(auto_local: true)
 
-      assert_equal :copy, port.mode
+      assert_equal :smart_copy, port.mode
       assert_predicate port, :auto_local?
-      assert_instance_of Port[:copy, auto_local: true], port
+      assert_instance_of Port[:smart_copy, auto_local: true], port
     end
 
     def test_rejects_invalid_or_mismatched_specializations
@@ -151,7 +167,7 @@ module Farce
       assert_equal "auto_local mismatch: false vs true", error.message
     end
 
-    def test_copy_mode_sends_a_snapshot_and_receive_automatically_unwraps_it
+    def test_default_smart_copy_sends_a_snapshot_and_receive_automatically_unwraps_it
       return unless Internal.native_ractors?
       port = Port.new
       source = ModePayload.new(:original)
@@ -291,7 +307,7 @@ module Farce
       end
 
       assert_predicate port, :owned?
-      assert_equal [false, :copy, true], ractor_value(worker)
+      assert_equal [false, :smart_copy, true], ractor_value(worker)
     end
 
     def test_remote_sends_do_not_apply_auto_local

@@ -71,10 +71,19 @@ module Farce
       submitter&.kill&.join
     end
 
-    def test_auto_local_false_uses_parallel_argument_transfer
+    def test_auto_local_false_uses_smart_rules_by_default
       source = [:original]
       completed = Queue.new
-      returned = Farce.schedule(source, completed, auto_local: false) do |array, output|
+      Farce.schedule(source, completed, auto_local: false) { |array, output| output << array.frozen? }
+
+      assert_equal Ractor.builtin?, completed.pop(timeout: 5)
+      assert_equal Ractor.builtin?, source.frozen?
+    end
+
+    def test_auto_local_false_uses_parallel_copy_argument_transfer
+      source = [:original]
+      completed = Queue.new
+      returned = Farce.schedule(source, completed, mode: :copy, auto_local: false) do |array, output|
         array << :changed
         output << Ractor.main?
       end

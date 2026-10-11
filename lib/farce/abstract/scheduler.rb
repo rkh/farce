@@ -6,7 +6,7 @@ module Farce
   module Abstract
     # @abstract A shared super class for all scheduler implementations.
     #
-    # @!method schedule(*args, mode: :copy, auto_local: true)
+    # @!method schedule(*args, mode: :smart, auto_local: true)
     #   @abstract This method must be implemented by concrete scheduler subclasses.
     #
     #   Schedules a block for execution.
@@ -23,7 +23,7 @@ module Farce
     #     May be handled according to `mode`.
     #
     #   @param mode [Symbol]
-    #     The mode in which to schedule the task. Defaults to `:copy`.
+    #     The mode in which to schedule the task. Defaults to `:smart`.
     #     May be ignored by some schedulers.
     #
     #   @param auto_local [Boolean]
@@ -82,7 +82,7 @@ module Farce
       #
       # @param (see #schedule)
       # @return [self]
-      def execute(*, mode: :copy, auto_local: true, &callback)
+      def execute(*, mode: :smart, auto_local: true, &callback)
         raise LocalJumpError, "Cannot yield without a block" unless block_given?
         raise SchedulerClosedError, "cannot execute task on a closed scheduler" if closed?
 

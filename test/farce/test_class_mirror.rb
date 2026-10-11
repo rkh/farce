@@ -28,6 +28,53 @@ module Farce
       assert_same defined, mirror[child]
     end
 
+    def test_custom_membership_only_counts_explicit_definitions
+      mirror = ClassMirror.new
+      child = Class.new(Array)
+      descendant = Class.new(child)
+
+      refute mirror.custom?(BasicObject)
+      refute mirror.custom?(child)
+      mirror.define(child)
+
+      assert mirror.custom?(child)
+      [Array, Object, BasicObject, descendant, Hash].each do |klass|
+        refute mirror.custom?(klass)
+      end
+      mirror.define(Array)
+
+      assert mirror.custom?(Array)
+      assert_same mirror[child], mirror[descendant]
+    end
+
+    def test_failed_and_frozen_definitions_do_not_change_custom_membership
+      mirror = ClassMirror.new
+
+      assert_raises(ArgumentError) { mirror.define(Array) { raise ArgumentError, "invalid definition" } }
+      refute mirror.custom?(Array)
+      mirror.freeze
+
+      assert_raises(FrozenError) { mirror.define(Array) }
+      refute mirror.custom?(Array)
+    end
+
+    def test_custom_membership_observes_late_definitions_in_an_existing_ractor
+      mirror = ClassMirror.new
+      ready = Strict::Queue.new
+      release = Strict::Queue.new
+      worker = Ractor.new(mirror, ready, release) do |mapping, started, gate|
+        before = mapping.custom?(Array)
+        started << true
+        gate.pop
+        [before, mapping.custom?(Array), mapping.custom?(Object)].freeze
+      end
+      ready.pop
+      mirror.define(Array)
+      release << true
+
+      assert_equal [false, true, false], ractor_value(worker)
+    end
+
     def test_new_definitions_invalidate_cached_ancestor_lookups
       mirror = ClassMirror.new
       child = Class.new(Array)

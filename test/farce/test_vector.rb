@@ -25,7 +25,7 @@ module Farce
         assert_equal klass != Unshared::Vector, Ractor.shareable?(vector)
       end
 
-      assert_equal :copy, Vector.new.mode
+      assert_equal :smart, Vector.new.mode
     end
 
     def test_initialization_and_indexed_access
@@ -142,7 +142,7 @@ module Farce
       return unless Internal.native_ractors?
 
       original = [1]
-      vector = Vector.new([original])
+      vector = Vector.new([original], mode: :copy)
       original << 2
       first = vector[0]
 

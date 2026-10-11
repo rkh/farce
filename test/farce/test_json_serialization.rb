@@ -61,7 +61,7 @@ module Farce
         end
       end
       [nil, false, "text", [1, nil], { "x" => false }].each do |value|
-        atom = Atom.new(value)
+        atom = Atom.new(value, mode: :copy)
 
         assert_equal value.to_json, atom.to_json
         assert_equal [value], JSON.parse(JSON.generate([atom]))
@@ -91,7 +91,7 @@ module Farce
           require "json"
           build = -> do
             Farce::Vector.new([Farce::Counter.new(3), Farce::Flag.new(true),
-              Farce::Atom.new({ "visible" => 1, "hidden" => 2 }), Farce::Set.new([7])])
+              Farce::Atom.new({ "visible" => 1, "hidden" => 2 }, mode: :copy), Farce::Set.new([7])])
           end
           results = [JSON.parse(JSON.generate(build.call))]
           require "farce/integrations/active_support"
@@ -100,7 +100,7 @@ module Farce
           results << JSON.parse(JSON.generate(vector))
           results << JSON.parse(ActiveSupport::JSON.encode(vector))
           results << JSON.parse(ActiveSupport::JSON.encode({ items: vector }))
-          atom = Farce::Atom.new({ "visible" => 1, "hidden" => 2 })
+          atom = Farce::Atom.new({ "visible" => 1, "hidden" => 2 }, mode: :copy)
           results << atom.as_json(only: "visible")
           results << JSON.parse(atom.to_json(only: "visible"))
           results << JSON.parse(ActiveSupport::JSON.encode(atom, only: "visible"))

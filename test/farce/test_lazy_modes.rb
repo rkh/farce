@@ -9,9 +9,26 @@ module Farce
   class TestLazyModes < Test
     include Helpers::InternalTestHelpers
 
-    def test_defaults_to_copy_and_caches_mutable_results
+    def test_default_smart_mode_caches_shareable_results
       calls = Counter.new
       lazy = Lazy.new do
+        calls.increment
+        [:ready]
+      end
+
+      assert_equal :smart, lazy.mode
+      assert_same lazy.value, lazy.value
+      assert_equal Internal.native_ractors?, lazy.value.frozen?
+      assert_equal 1, calls.value
+      worker = Ractor.new(lazy) { |shared| [shared.value, shared.value.frozen?] }
+
+      assert_equal [[:ready], Internal.native_ractors?], ractor_value(worker)
+      assert_equal 1, calls.value
+    end
+
+    def test_copy_mode_caches_mutable_results
+      calls = Counter.new
+      lazy = Lazy.new(mode: :copy) do
         calls.increment
         []
       end
@@ -30,7 +47,7 @@ module Farce
       return unless Internal.native_ractors?
 
       calls = Counter.new
-      lazy = Lazy.new do
+      lazy = Lazy.new(mode: :copy) do
         calls.increment
         [:initial]
       end
@@ -52,7 +69,7 @@ module Farce
       return unless Internal.native_ractors?
 
       calls = Counter.new
-      lazy = Lazy.new do
+      lazy = Lazy.new(mode: :copy) do
         calls.increment
         [:initial]
       end
@@ -160,7 +177,7 @@ module Farce
     end
 
     def test_freezing_and_copying_keep_the_mutable_cached_result
-      lazy = Lazy.new { [] }
+      lazy = Lazy.new(mode: :copy) { [] }
       copy = lazy.dup
       lazy.freeze
       value = lazy.value
@@ -184,7 +201,7 @@ module Farce
     def test_lazy_ref_caches_a_separate_mutable_copy_in_each_ractor
       return unless Internal.native_ractors?
 
-      reference = LazyRef.new(Array)
+      reference = LazyRef.new(Array, mode: :copy)
       reference.push(:parent)
       worker = Ractor.new(reference) do |shared|
         shared.push(:child)

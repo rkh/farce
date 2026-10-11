@@ -23,7 +23,7 @@ module Farce
     # @param source [Array, nil] Initial values. The source array is not retained.
     # @param mode [Symbol] The default value transfer mode.
     # @param compare_by_identity [Boolean] Whether values are compared by identity.
-    def initialize(source = nil, mode: :copy, compare_by_identity: false)
+    def initialize(source = nil, mode: :smart, compare_by_identity: false)
       raise TypeError, "source must be an Array" unless source.nil? || source.is_a?(Array)
       unless true.equal?(compare_by_identity) || false.equal?(compare_by_identity)
         raise ArgumentError, "compare_by_identity must be true or false"

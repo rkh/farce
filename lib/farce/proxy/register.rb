@@ -87,6 +87,12 @@ module Farce
         end
       end
 
+      # Check whether this exact class has a definition in either proxy layer.
+      # Inherited wrapper methods do not count as a dedicated proxy.
+      # @param klass [Class] the source class
+      # @return [Boolean] whether the class has a dedicated proxy
+      def dedicated_proxy?(klass) = @inner_mirror.custom?(klass) || @outer_mirror.custom?(klass)
+
       private
 
       def mirror_for(layer)

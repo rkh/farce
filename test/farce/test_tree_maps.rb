@@ -124,7 +124,7 @@ module Farce
 
     def test_mode_map_copies_and_unwraps_values
       source = ModePayload.new(:initial)
-      map = TreeMap.new({ 2 => source })
+      map = TreeMap.new({ 2 => source }, mode: :copy)
       initial_envelope = map.instance_variable_get(:@map)[2]
 
       source.value = :changed
@@ -190,8 +190,8 @@ module Farce
       return unless Internal.native_ractors?
 
       map = TreeMap.new(
-        2 => ModePayload.new(:second),
-        1 => ModePayload.new(:first),
+        { 2 => ModePayload.new(:second), 1 => ModePayload.new(:first) },
+        mode: :copy,
       )
       worker = Ractor.new(map) { |shared| shared.values.map(&:value) }
 

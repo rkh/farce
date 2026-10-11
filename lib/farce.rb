@@ -56,6 +56,7 @@ module Farce
   # @return [::Set<Symbol>]
   MODES = ::Set[
     :copy, :marshal, :move, :local, :make_shareable, :mutable, :raise, :shareable_copy, :dedup, :proxy,
+    :smart, :smart_raise, :smart_move, :smart_copy,
   ].freeze
 
   UNDEFINED = Internal::Undefined.new("UNDEFINED")
@@ -173,7 +174,7 @@ module Farce
     DEDUPER.dedup(object, **)
   end
 
-  # @overload enfarce(object, freeze: nil, mode: :copy)
+  # @overload enfarce(object, freeze: nil, mode: :smart)
   #   Converts vanilla Ruby objects into their {Farce} equivalents.
   #
   #   @!macro modes
@@ -398,7 +399,7 @@ module Farce
   #   # Hi from the current ractor!
   #   # Hi again from the main ractor!
   #
-  # @overload on_main(*args, mode: :copy)
+  # @overload on_main(*args, mode: :smart)
   #   @param args [Array] The arguments to be passed to the block.
   #   @param mode [Symbol] The argument transfer mode when called from another ractor.
   #   @yield [*args] The block to be executed on the main ractor.
@@ -420,7 +421,7 @@ module Farce
     if Ractor.main?
       yield(*args)
     else
-      mode = :copy if UNDEFINED.equal?(mode)
+      mode = :smart if UNDEFINED.equal?(mode)
       Internal::MainScheduler.execute(*args, mode:, auto_local: false, &)
     end
 
@@ -440,7 +441,7 @@ module Farce
   #   Farce.in_parallel("hello") { |message| puts message.upcase }
   #   Farce.in_parallel.schedule { puts "another task" }
   #
-  # @overload in_parallel(*args, mode: :copy)
+  # @overload in_parallel(*args, mode: :smart)
   #   @param args [Array<Object>] Arguments passed to the block.
   #   @param mode [Symbol] Argument transfer mode. Ignored on JRuby and TruffleRuby.
   #   @yield [*args] The task to schedule.
@@ -457,12 +458,12 @@ module Farce
       return Internal::ParallelScheduler
     end
 
-    mode = :copy if UNDEFINED.equal?(mode)
+    mode = :smart if UNDEFINED.equal?(mode)
     Internal::ParallelScheduler.schedule(*args, mode:, &)
     nil
   end
 
-  # @overload schedule(*args, mode: :copy, auto_local: true, **kwargs)
+  # @overload schedule(*args, mode: :smart, auto_local: true, **kwargs)
   #   Schedules work to be executed out of band.
   #
   #   If the `mode` is set to `:local`, it will use the current thread's fiber scheduler to schedule the task.
@@ -488,7 +489,7 @@ module Farce
   #   @param kwargs [Hash] Additional keyword arguments passed to the scheduler.
   #   @yield [*args] The task to schedule.
   #   @return [nil]
-  def self.schedule(*, mode: :copy, auto_local: true, **, &)
+  def self.schedule(*, mode: :smart, auto_local: true, **, &)
     raise LocalJumpError, "no block given" unless block_given?
 
     if auto_local || mode == :local

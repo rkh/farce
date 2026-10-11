@@ -10,6 +10,7 @@ module Farce
       active_support: %w[active_support active_support/core_ext].freeze,
       bson:           %w[bson].freeze,
       cbor:           %w[cbor].freeze,
+      date:           %w[date].freeze,
       dry_types:      %w[dry/types].freeze,
       concurrent:     %w[concurrent/map concurrent/tvar concurrent].freeze,
       json:           %w[json].freeze,

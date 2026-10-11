@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../setup"
 
@@ -122,13 +124,27 @@ module Farce
       assert_equal [:value], result
     end
 
+    def test_schedule_uses_smart_rules_by_default
+      queue = Internal::Queue.new
+      scheduler = Scheduler.new(queue:)
+      source = [:ready]
+      scheduler.schedule(source, auto_local: false, &:frozen?)
+
+      assert_equal Internal.native_ractors?, queue.pop.to_proc.call
+      assert_equal Internal.native_ractors?, source.frozen?
+      assert_raises(Ractor::IsolationError) do
+        scheduler.schedule(Unshared::Map.new, auto_local: false) { nil }
+      end
+      assert_equal 0, queue.size
+    end
+
     def test_schedule_copies_remote_arguments
       return unless Internal.native_ractors?
       queue = Internal::Queue.new
       scheduler = Scheduler.new(queue:)
       source = [:original]
 
-      scheduler.schedule(source, auto_local: false) { it[0] }
+      scheduler.schedule(source, mode: :copy, auto_local: false) { it[0] }
       source[0] = :changed
 
       assert_equal :original, queue.pop.to_proc.call

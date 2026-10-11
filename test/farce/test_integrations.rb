@@ -146,7 +146,7 @@ module Farce
         require "dry/types"
         require "farce"
         raise "dry-types integration missing" unless Farce.respond_to?(:DryTypes)
-        raise "wrong active integrations" unless Farce::Integrations.load_active == [:dry_types, :weakref]
+        raise "wrong active integrations" unless Farce::Integrations.load_active == [:date, :dry_types, :weakref]
         Kernel.require "shellwords"
       RUBY
       assert_integration_process(<<~RUBY, coverage: false)
@@ -154,7 +154,7 @@ module Farce
         require "active_support/core_ext"
         require "farce"
         raise "ActiveSupport integration missing" unless Farce::Vector.method_defined?(:in_groups)
-        raise "wrong active integrations" unless Farce::Integrations.load_active == [:active_support, :concurrent, :json, :psych, :weakref]
+        raise "wrong active integrations" unless Farce::Integrations.load_active == [:active_support, :date, :concurrent, :json, :psych, :weakref]
       RUBY
     end
 
@@ -229,7 +229,7 @@ module Farce
     def test_load_available_loads_integrations_without_freezing_configuration
       assert_integration_process(<<~RUBY)
         require "farce"
-        expected = [:active_support, :bson, :dry_types, :concurrent, :json, :msgpack, :psych]
+        expected = [:active_support, :bson, :date, :dry_types, :concurrent, :json, :msgpack, :psych]
         expected.insert(2, :cbor) unless Gem::Specification.find_all_by_name("cbor").empty?
         expected << :oj unless Gem::Specification.find_all_by_name("oj").empty?
         expected << :sorted_set unless Gem::Specification.find_all_by_name("sorted_set").empty?
@@ -248,16 +248,16 @@ module Farce
 
     def test_load_available_skips_missing_optional_dependencies
       {
-        ["cbor"]                          => %i[active_support bson dry_types concurrent json msgpack psych],
-        ["bson"]                          => %i[active_support cbor dry_types concurrent json msgpack psych],
-        ["active_support"]                => %i[bson cbor dry_types concurrent json msgpack psych],
-        ["dry/types"]                     => %i[active_support bson cbor concurrent json msgpack psych],
-        ["active_support", "dry/types"]   => %i[bson cbor concurrent json msgpack psych],
-        ["farce/integrations/dry_types"]  => %i[active_support bson cbor concurrent json msgpack psych],
-        ["farce/integrations/concurrent"] => %i[active_support bson cbor dry_types json msgpack psych],
-        ["sorted_set"]                    => %i[active_support bson cbor dry_types concurrent json msgpack psych],
-        ["ractor/tvar"]                   => %i[active_support bson cbor dry_types concurrent json msgpack psych],
-        ["ractor/tmvar"]                  => %i[active_support bson cbor dry_types concurrent json msgpack psych],
+        ["cbor"]                          => %i[active_support bson date dry_types concurrent json msgpack psych],
+        ["bson"]                          => %i[active_support cbor date dry_types concurrent json msgpack psych],
+        ["active_support"]                => %i[bson cbor date dry_types concurrent json msgpack psych],
+        ["dry/types"]                     => %i[active_support bson cbor date concurrent json msgpack psych],
+        ["active_support", "dry/types"]   => %i[bson cbor date concurrent json msgpack psych],
+        ["farce/integrations/dry_types"]  => %i[active_support bson cbor date concurrent json msgpack psych],
+        ["farce/integrations/concurrent"] => %i[active_support bson cbor date dry_types json msgpack psych],
+        ["sorted_set"]                    => %i[active_support bson cbor date dry_types concurrent json msgpack psych],
+        ["ractor/tvar"]                   => %i[active_support bson cbor date dry_types concurrent json msgpack psych],
+        ["ractor/tmvar"]                  => %i[active_support bson cbor date dry_types concurrent json msgpack psych],
       }.each do |missing, expected|
         assert_integration_process(<<~RUBY)
           require "farce"

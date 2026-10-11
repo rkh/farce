@@ -39,7 +39,7 @@ module Farce
 
     def test_cbor_tagged_values_and_binary_strings
       tagged = ::CBOR::Tagged.new(42, Vector.new([Atom.new("hello"), "\x00\xff".b]))
-      decoded = ::CBOR.decode(Atom.new(tagged).to_cbor)
+      decoded = ::CBOR.decode(Atom.new(tagged, mode: :copy).to_cbor)
 
       assert_instance_of ::CBOR::Tagged, decoded
       assert_equal 42, decoded.tag

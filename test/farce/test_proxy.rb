@@ -23,6 +23,7 @@ module Farce
 
       def nothing = nil
       def negative? = false
+      def unsupported = Unshared::Map.new
       def fail! = raise ArgumentError, "target failed"
       def apply(value, &) = yield(value)
       def location = Ractor.current
@@ -69,9 +70,33 @@ module Farce
       end
     end
 
+    def test_default_smart_rules_prepare_arguments_and_results
+      proxy = proxy_for([])
+      value = [1]
+      proxy << value
+
+      assert_same value, proxy.first
+      assert_equal Internal.native_ractors?, value.frozen?
+    end
+
+    def test_default_smart_rules_reject_unsupported_arguments_and_results
+      proxy = proxy_for(Target.new)
+
+      assert_raises(Ractor::IsolationError) { proxy.append(Unshared::Map.new) }
+      assert_raises(Ractor::IsolationError) { proxy.unsupported }
+      assert_nil proxy.nothing
+    end
+
     def test_delegates_arguments_and_copies_mutable_values
       target = Target.new
-      proxy = proxy_for(target)
+      register = Proxy::Register.new
+      register.define(Target) do
+        define_method(:echo) { |value, keyword:| super(__copy__(value), keyword: __copy__(keyword)) }
+      end
+      register.define(Target, layer: :inner) do
+        define_method(:echo) { |*args, **kwargs| __copy__(super(*args, **kwargs)) }
+      end
+      proxy = proxy_for(target, register:)
       value = ["positional"]
       keyword = { nested: ["keyword"] }
       actual = proxy.echo(value, keyword:)
@@ -150,6 +175,56 @@ module Farce
       assert_nil proxy_for(Target.new).nothing
     end
 
+    def test_dedicated_membership_only_counts_exact_definitions_in_either_layer
+      register = Proxy::Register.new
+
+      [BasicObject, Object, Target, ChildTarget, Hash, Array].each do |klass|
+        refute register.dedicated_proxy?(klass)
+      end
+      register.define(Hash) { define_method(:registered?) { true } }
+      register.define(ChildTarget, layer: :inner) { define_method(:registered?) { true } }
+
+      assert register.dedicated_proxy?(Hash)
+      assert register.dedicated_proxy?(ChildTarget)
+      [BasicObject, Object, Target, Array, Class.new(Hash)].each do |klass|
+        refute register.dedicated_proxy?(klass)
+      end
+      register.define(Target) { define_method(:registered?) { true } }
+
+      assert register.dedicated_proxy?(Target)
+    end
+
+    def test_dedicated_membership_observes_late_definitions_in_an_existing_ractor
+      register = Proxy::Register.new
+      ready = Strict::Queue.new
+      release = Strict::Queue.new
+      worker = Ractor.new(register, ready, release) do |definitions, started, gate|
+        before = definitions.dedicated_proxy?(Target)
+        started << true
+        gate.pop
+        [before, definitions.dedicated_proxy?(Target), definitions.dedicated_proxy?(ChildTarget)].freeze
+      end
+      ready.pop
+      register.define(Target, layer: :inner) { define_method(:registered?) { true } }
+      release << true
+
+      assert_equal [false, true, false], ractor_value(worker)
+    end
+
+    def test_smart_mode_only_selects_proxies_for_exact_registered_classes
+      skip "ordinary values are shareable on emulated Ractors" unless Internal.native_ractors?
+
+      register = Proxy::Register.new
+      register.define(Target) { define_method(:nothing) { :custom } }
+      manager = ModeManager.new(mode: :smart, register:)
+      proxy = manager.wrap(Target.new)
+      @proxies << proxy
+
+      assert_operator Proxy, :===, proxy
+      assert_equal :custom, proxy.nothing
+      assert_raises(Ractor::IsolationError) { manager.wrap(ChildTarget.new) }
+    end
+
     def test_define_method_supports_cross_ractor_calls
       register = Proxy::Register.new
       register.define(Target) { define_method(:answer) { 42 } }
@@ -193,7 +268,10 @@ module Farce
     end
 
     def test_copying_arguments_does_not_mutate_the_callers_object
-      proxy = proxy_for([])
+      register = Proxy::Register.new
+      register.define(Array) { define_method(:<<) { |value| super(__copy__(value)) } }
+      register.define(Array, layer: :inner) { define_method(:first) { __copy__(super()) } }
+      proxy = proxy_for([], register:)
       value = [1]
       proxy << value
       value << 2

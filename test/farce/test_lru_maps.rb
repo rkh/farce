@@ -99,7 +99,7 @@ module Farce
 
     def test_mode_map_copies_and_unwraps_values
       source = ModePayload.new(:initial)
-      map = LRUMap.new({ first: source }, max_size: 2)
+      map = LRUMap.new({ first: source }, max_size: 2, mode: :copy)
       stored = map.instance_variable_get(:@map)[:first]
       source.value = :changed
 
@@ -216,7 +216,7 @@ module Farce
     def test_mode_map_values_cross_ractors_safely
       map = LRUMap.new(
         { first: ModePayload.new(:first), second: ModePayload.new(:second) },
-        max_size: 2,
+        max_size: 2, mode: :copy,
       )
       worker = Ractor.new(map) { |shared| shared.values.map(&:value) }
 

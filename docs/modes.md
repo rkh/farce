@@ -14,6 +14,7 @@ This improves over the default control via `Ractor::Port`'s `move:` option.
   - [Introduction: What Ruby gives you](#introduction-what-ruby-gives-you)
       - [What `move: true` does on `Ractor::Port`](#what-move-true-does-on-ractorport)
   - [Farce's Modes](#farces-modes)
+    - [Smart modes: apply rules before transferring](#smart-modes-apply-rules-before-transferring)
     - [`:copy`: keep working with the original](#copy-keep-working-with-the-original)
     - [`:marshal`: reconstruct a serialized snapshot](#marshal-reconstruct-a-serialized-snapshot)
     - [`:move`: hand off a finished batch](#move-hand-off-a-finished-batch)
@@ -77,7 +78,7 @@ port.receive # => [4, 5]
 port.close
 ```
 
-Farce extends this choice with ten named modes.
+Farce extends this choice with fourteen named modes.
 
 ## Farce's Modes
 
@@ -85,7 +86,11 @@ The following modes are accepted by `Farce::Port`. They apply to non-shareable v
 
 | Mode | What happens to non-shareable data | A typical use |
 | --- | --- | --- |
-| `:copy` (default) | Transfers a copy and leaves the original usable. This is the default. | Send a snapshot of a request. |
+| `:smart` | Applies smart rules or a dedicated proxy. Raises for unsupported values. Default for most mode-backed classes. | Share supported values with less copying. |
+| `:smart_raise` | Applies smart rules or a dedicated proxy, with a raising fallback. | Reject unsupported transfers. |
+| `:smart_copy` | Applies smart rules or a dedicated proxy, then tries copying and Marshal. Default for `Farce::Port`. | Send values with a copying fallback. |
+| `:smart_move` | Applies smart rules or a dedicated proxy, then tries moving. | Hand off unsupported values. |
+| `:copy` | Transfers a copy and leaves the original usable. | Send a snapshot of a request. |
 | `:marshal` | Serializes a snapshot and reconstructs it once per receiving Ractor. | Transfer an Unshared container with fresh storage. |
 | `:move` | Transfers ownership and makes the original inaccessible. | Hand a completed batch to a consumer. |
 | `:local` | Keeps the same object in its originating Ractor. | Pass work between local threads or fibers. |
@@ -96,12 +101,38 @@ The following modes are accepted by `Farce::Port`. They apply to non-shareable v
 | `:proxy` | Creates a `Farce::Proxy` that executes calls in the original Ractor. | Share access to a mutable object. |
 | `:raise` | Raises `Ractor::IsolationError`. | Enforce a shareable-data boundary. |
 
+### Smart modes: apply rules before transferring
+
+Most mode-backed classes default to `:smart`. `Farce::Port` defaults to `:smart_copy` so values without a suitable rule or dedicated proxy can still be copied. Classes with restricted weak-value modes keep their `:raise` default.
+
+Smart modes pass already-shareable values through unchanged. Mutable strings become frozen, deduplicated strings without freezing the source string. Time values are made shareable in place. The Date integration does the same for Date and DateTime values.
+
+With `:smart`, arrays and Ruby sets containing only shareable elements are made shareable in place. Symbol-keyed hashes containing only shareable values are made shareable in every smart mode. This can freeze the original, including with `:smart_copy` and `:smart_move`.
+
+For arrays and Ruby sets, `:smart_copy` makes a shallow copy and tries to prepare each element with `:smart_raise`. If all results are directly usable, it makes that copy shareable. Otherwise, it copies the original graph, preserving aliases and cycles. If native copying raises a standard error, it tries Marshal reconstruction. If both fail, it raises the original copying error. It does not recursively insert managed envelopes into the container. Identity-based Farce sets use the prepared element for membership and reject a copying envelope fallback.
+
+A dedicated proxy applies only to the exact registered class. Smart rules inherit through the source class hierarchy and can customize individual smart modes. Without applicable behavior, `:smart` and `:smart_raise` raise `Ractor::IsolationError`, `:smart_copy` tries copying and Marshal, and `:smart_move` tries moving.
+
+```ruby
+class Job
+  attr_reader :id
+  def initialize(id) = @id = id
+end
+
+Farce::ModeManager::SmartRule.define(Job, :marshal)
+queue = Farce::Queue.new
+queue << Job.new(42)
+queue.pop.id # => 42
+```
+
+Use an explicit `:copy` mode when callers need independently mutable copies even for values that smart rules could make shareable. On JRuby and TruffleRuby, ordinary values are already shareable and pass through unchanged.
+
 ### `:copy`: keep working with the original
 
 Copying is a good starting point for ordinary hashes, arrays, and strings. The receiver can change its copy without changing the sender's data. Shareable parts of the message can still be reused.
 
 ```ruby
-port = Farce::Port.new
+port = Farce::Port.new(mode: :copy)
 request = { ids: [10, 20] }
 port.send(request)
 request[:ids] << 30
@@ -285,7 +316,7 @@ proxy.length # => 1
 port.close
 ```
 
-Each delegated call involves a request and response. Non-shareable arguments and return values are copied by default, while methods that return the original object return its proxy. Keep the owning Ractor alive while callers use the proxy. Calls raise `Farce::Ractor::RemoteError` after the owner exits. Access through other references to the original object still needs its own coordination.
+Each delegated call involves a request and response. Arguments and return values use `:smart` rules by default. Unsupported values raise unless a wrapper selects another mode. Methods that return the original object return its proxy. Keep the owning Ractor alive while callers use the proxy. Calls raise `Farce::Ractor::RemoteError` after the owner exits. Access through other references to the original object still needs its own coordination.
 
 On JRuby and TruffleRuby, ordinary values are already shareable, so this mode passes them through without creating a proxy.
 
@@ -349,7 +380,7 @@ Automatic local transfer takes precedence even over an explicit `mode:` or `move
 
 ## Other classes that support modes
 
-The same choices appear in several Farce APIs. Containers normally default to `:copy` and unwrap their managed values when you read them. Setting a container's mode does not make the values it returns shareable.
+The same choices appear in several Farce APIs. Containers normally default to `:smart` and unwrap their managed values when you read them. Setting a container's mode does not make the values it returns shareable.
 
 | Class | Where to select a mode | What it controls |
 | --- | --- | --- |
@@ -599,7 +630,7 @@ Both queues accept the envelope in `:raise` mode because the wrapper is shareabl
 
 ### Mode managers prepare values and open their own envelopes
 
-`Farce::ModeManager` provides two core operations: `wrap` prepares a value for shared storage, and `unwrap` retrieves values from envelopes that this manager created. It passes already-shareable values through unchanged. For non-shareable values, `:copy`, `:move`, and `:local` create managed envelopes. The remaining modes prepare shareable data directly, create a `Farce::Mutable` or `Farce::Proxy`, or raise. Mutable and proxy wrappers remain wrapped when read.
+`Farce::ModeManager` provides two core operations: `wrap` prepares a value for shared storage, and `unwrap` retrieves values from envelopes that this manager created. It passes already-shareable values through unchanged. For non-shareable values, `:copy`, `:marshal`, `:move`, and `:local` create managed envelopes. Smart modes choose their representation through rules, dedicated proxies, and their fallback behavior. The remaining modes prepare shareable data directly, create a `Farce::Mutable` or `Farce::Proxy`, or raise. Mutable and proxy wrappers remain wrapped when read.
 
 ```ruby
 manager = Farce::ModeManager.new(mode: :copy)
@@ -628,7 +659,7 @@ Keep one manager per instance when building an abstraction around shareable stor
 class WorkInbox
   include Farce::Shareable
 
-  def initialize(mode: :copy)
+  def initialize(mode: :smart)
     @manager = Farce::ModeManager.new(mode: mode)
     @storage = Farce::Queue.new(mode: :raise)
     super()

@@ -20,7 +20,7 @@ module Farce
     def test_atoms_show_their_current_value_and_transfer_mode
       variants(:Atom).each do |klass|
         atom = klass.new(:initial)
-        mode = klass == Atom ? " mode=:copy" : ""
+        mode = klass == Atom ? " mode=:smart" : ""
 
         assert_inspection "#<#{klass.name}#{mode} value=:initial>", atom
         atom.value = nil

@@ -86,7 +86,8 @@ module Farce
       started = Queue.new
       release = Queue.new
       submitter = Thread.new do
-        @scheduler.execute(source, result, started, release, auto_local: false) do |data, output, ready, gate|
+        @scheduler.execute(source, result, started, release, mode: :copy,
+          auto_local: false) do |data, output, ready, gate|
           ready << :started
           gate.pop
           output << data[0]

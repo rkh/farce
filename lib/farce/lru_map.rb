@@ -23,7 +23,7 @@ module Farce
     # @param entries [Hash, Array<Array(BasicObject, BasicObject)>, Abstract::Map, #each, nil]
     #   Optional initial entries. Entries are stored sequentially and may be evicted.
     # @param mode [Symbol] The default value transfer mode.
-    def initialize(entries = nil, mode: :copy, **)
+    def initialize(entries = nil, mode: :smart, **)
       @manager = marshal_mode_manager(mode)
       super(entries, **)
     end

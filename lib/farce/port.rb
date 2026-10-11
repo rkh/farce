@@ -12,9 +12,9 @@ module Farce
   class Port < Internal::Port
     include Abstract::Port
 
-    MANAGER    = ModeManager.new
+    MANAGER    = ModeManager.new(mode: :smart_copy)
     SUBCLASSES = Farce::MODES.to_h do |mode|
-      if mode == :copy
+      if mode == :smart_copy
         normal = self
       else
         normal = Class.new(self)
@@ -41,7 +41,7 @@ module Farce
     end
 
     # @api private
-    def self.mode = :copy
+    def self.mode = :smart_copy
 
     # @api private
     def self.auto_local? = false
@@ -54,7 +54,7 @@ module Farce
       self[mode || self.mode, auto_local: auto_local].new
     end
 
-    # @!method initialize(mode: :copy, auto_local: false)
+    # @!method initialize(mode: :smart_copy, auto_local: false)
     #   Creates a new port with the given default mode.
     #
     #   @!macro modes

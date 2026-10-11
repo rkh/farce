@@ -111,7 +111,7 @@ module Farce
     # @yield [*args] Task to execute.
     # @return [Pool] self.
     # @raise [PoolClosedError] If the pool is closing or closed.
-    def schedule(*args, mode: :copy, auto_local: true, &block) # rubocop:disable Lint/UnusedMethodArgument
+    def schedule(*args, mode: :smart, auto_local: true, &block) # rubocop:disable Lint/UnusedMethodArgument
       raise PoolClosedError, "cannot schedule task on a closed pool" if closed?
       raise ArgumentError, "local transfer is not supported by a pool" if mode == :local
 

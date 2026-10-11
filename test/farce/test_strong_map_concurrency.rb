@@ -49,7 +49,7 @@ module Farce
     end
 
     def test_copy_mode_updates_allow_other_keys_to_progress
-      map = Map.new({ busy: ModePayload.new(:initial), free: ModePayload.new(:initial) })
+      map = Map.new({ busy: ModePayload.new(:initial), free: ModePayload.new(:initial) }, mode: :copy)
       entered = Thread::Queue.new
       release = Thread::Queue.new
       worker = Thread.new do

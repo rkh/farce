@@ -5,7 +5,7 @@
 module Farce
   # A ractor-shareable lazy value that is computed on demand.
   # The factory runs once. Its result is transferred according to {#mode}.
-  # With the default `:copy` mode, each Ractor receives its own cached copy.
+  # The default `:smart` mode prepares results using smart rules or dedicated proxies.
   # The factory and its bound receiver must remain Ractor-shareable.
   # Use {Strict::Lazy} for direct shareable results or {Unshared::Lazy} for local factories.
   #
@@ -63,15 +63,15 @@ module Farce
     include Shareable::Tracked
 
     # @!macro modes
-    # @overload initialize(factory, mode: :copy)
+    # @overload initialize(factory, mode: :smart)
     #   @param factory [Class, Proc, #call] the shareable factory for the value
     #   @param mode [Symbol] the transfer mode for the computed result
-    # @overload initialize(mode: :copy, self: nil)
+    # @overload initialize(mode: :smart, self: nil)
     #   @param mode [Symbol] the transfer mode for the computed result
     #   @param self [BasicObject] the shareable receiver to bind to the block
     #   @yield computes the value on first access
     #   @yieldreturn [BasicObject] the result to transfer
-    def initialize(factory = nil, mode: :copy, **, &)
+    def initialize(factory = nil, mode: :smart, **, &)
       @manager = marshal_mode_manager(mode)
       super(factory, **, &)
     end

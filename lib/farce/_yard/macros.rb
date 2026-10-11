@@ -15,7 +15,13 @@
 
 # @!macro modes
 #   Valid modes are:
-#   * `:copy` - The value will be copied between Ractors. This is the default mode.
+#   * `:smart` - Applies smart rules or a dedicated proxy. Raises for unsupported values.
+#     This is the default for most mode-backed classes.
+#   * `:smart_raise` - Applies smart rules or a dedicated proxy, with a raising fallback.
+#   * `:smart_copy` - Applies smart rules or a dedicated proxy, then falls back to copying or Marshal.
+#     This is the default for {Farce::Port}.
+#   * `:smart_move` - Applies smart rules or a dedicated proxy, then falls back to moving.
+#   * `:copy` - The value will be copied between Ractors.
 #   * `:marshal` - The value will be serialized immediately and reconstructed once per Ractor
 #     with Ruby's Marshal protocol.
 #     Contents must support Marshal. Nested shareable values may be reconstructed too.

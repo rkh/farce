@@ -188,7 +188,7 @@ module Farce
       assert_equal :make_shareable, other.mode
       refute_predicate other, :compare_by_identity?
       assert Ractor.shareable?(other.items)
-      assert_equal :copy, Molecule.define(:item).new.item_atom.mode
+      assert_equal :smart, Molecule.define(:item).new.item_atom.mode
       assert_raises(ArgumentError) { klass.new(mode: :invalid) }
     end
 

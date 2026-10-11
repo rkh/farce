@@ -74,7 +74,7 @@ module Farce
         def new_copied_scoped_value(map) = map
       end
 
-      MANAGER = ModeManager.new
+      MANAGER = ModeManager.new(mode: :copy)
       private_constant :MANAGER, :Map
 
       # @!visibility private

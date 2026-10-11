@@ -38,7 +38,7 @@ module Farce
       MAP_CLASSES.each do |klass|
         map = klass.new
 
-        assert_equal :copy, map.mode
+        assert_equal :smart, map.mode
         refute_predicate map, :compare_keys_by_identity?
         refute_predicate map, :compare_values_by_identity?
         assert_predicate map, :shareable_keys?
@@ -94,7 +94,7 @@ module Farce
     def test_initial_values_use_copy_mode_and_are_automatically_unwrapped
       MAP_CLASSES.each do |klass|
         source = ModePayload.new(:original)
-        map = klass.new({ key: source })
+        map = klass.new({ key: source }, mode: :copy)
         envelope = map.instance_variable_get(:@map)[:key]
 
         source.value = :changed
@@ -193,7 +193,7 @@ module Farce
 
     def test_compare_and_set_uses_logical_values_and_does_not_eagerly_move_replacements
       MAP_CLASSES.each do |klass|
-        map = klass.new({ key: ModePayload.new(:expected) })
+        map = klass.new({ key: ModePayload.new(:expected) }, mode: :copy)
         failed_replacement = ModePayload.new(:failed)
 
         refute map.compare_and_set(:missing, nil, failed_replacement, mode: :move)
@@ -308,7 +308,7 @@ module Farce
 
     def test_wait_until_changed_uses_logical_value_comparison
       MAP_CLASSES.each do |klass|
-        map = klass.new({ key: ModePayload.new(:old) })
+        map = klass.new({ key: ModePayload.new(:old) }, mode: :copy)
 
         assert_equal :timeout,
           map.wait_until_changed(:key, ModePayload.new(:old), timeout: 0) { :timeout }
@@ -326,7 +326,7 @@ module Farce
 
       MAP_CLASSES.each do |klass|
         source = ModePayload.new(:original)
-        map = klass.new({ key: source })
+        map = klass.new({ key: source }, mode: :copy)
         source.value = :changed
         worker = Ractor.new(map) do |shared|
           current = shared[:key]
@@ -447,7 +447,7 @@ module Farce
       # Build the key on a disposable native stack. CRuby conservatively scans
       # C stack slots, which can otherwise retain a stale reference to it.
       worker = Thread.new do
-        map = WeakKeyMap.new
+        map = WeakKeyMap.new(mode: :copy)
         key = Ractor.make_shareable(Object.new)
         value = ModePayload.new(:value)
         map[key] = value

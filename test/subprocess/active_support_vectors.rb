@@ -118,7 +118,7 @@ module Farce
 
     def test_deep_dup_is_independent
       [Vector, Unshared::Vector, Local::Vector].each do |type|
-        vector = type.new([["a"]])
+        vector = type.new([["a"]], **(type == Vector ? { mode: :copy } : {}))
         copy = vector.deep_dup
 
         assert_instance_of type, copy

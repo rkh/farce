@@ -39,7 +39,7 @@ module Farce
 
     def test_nested_mixed_containers_and_value_wrappers
       source = Map.new({ "items" => [Vector.new([Map.new({ "count" => Counter.new(7) })]),
-                                     { "enabled" => Atom.new(Flag.new(true)) }, Set.new([2])] })
+                                     { "enabled" => Atom.new(Flag.new(true)) }, Set.new([2])] }, mode: :copy)
       expected = { "items" => [[{ "count" => 7 }], { "enabled" => true }, [2]] }
 
       assert_equal expected.to_bson.to_s, source.to_bson.to_s
@@ -86,7 +86,7 @@ module Farce
       id = ::BSON::ObjectId.from_string("573a1391f29313caabcd9637")
       binary = ::BSON::Binary.new("bytes")
       time = Time.utc(2026, 10, 7, 12, 0, 0)
-      source = Map.new({ "id" => id, "binary" => binary, "time" => time, "long" => 1 << 40 })
+      source = Map.new({ "id" => id, "binary" => binary, "time" => time, "long" => 1 << 40 }, mode: :copy)
       expected = { "id" => id, "binary" => binary, "time" => time, "long" => 1 << 40 }
 
       assert_equal source.to_h.to_bson.to_s, source.to_bson.to_s
@@ -128,7 +128,7 @@ module Farce
     def test_extended_json_for_collections_and_value_wrappers
       id = ::BSON::ObjectId.from_string("573a1391f29313caabcd9637")
       source = Map.new({ "items" => Vector.new([id, Counter.new(1 << 40), Atom.new(Flag.new(true)),
-                                                Set.new([2])]) })
+                                                Set.new([2])], mode: :copy) })
       expected = { "items" => [id, 1 << 40, true, [2]] }
       [nil, :relaxed, :legacy].each do |mode|
         assert_equal expected.as_extended_json(mode:), source.as_extended_json(mode:)
@@ -143,7 +143,7 @@ module Farce
       id = ::BSON::ObjectId.from_string("573a1391f29313caabcd9637")
       source = { "items" => [{ "id" => id, "count" => 3 }] }
       [decode_document(source.to_bson.to_s), ::BSON::ExtJSON.parse(source.to_extended_json)].each do |document|
-        result = Farce.enfarce(document)
+        result = Farce.enfarce(document, mode: :copy)
 
         assert_instance_of Map, result
         assert_instance_of Vector, result["items"]
@@ -154,7 +154,8 @@ module Farce
     end
 
     def test_standard_document_decodes_without_farce
-      bytes = Map.new({ "items" => Vector.new([Counter.new(7), Atom.new(Flag.new(true)), Set.new([2])]) }).to_bson.to_s
+      bytes = Map.new({ "items" => Vector.new([Counter.new(7), Atom.new(Flag.new(true)), Set.new([2])],
+        mode: :copy) }).to_bson.to_s
       env = ENV.keys.grep(/\ABUNDLE/).to_h { [it, nil] }.merge("RUBYOPT" => nil, "RUBYLIB" => nil)
       output, error, status = ruby_subprocess(<<~RUBY, env:, coverage: false)
         require "bson"

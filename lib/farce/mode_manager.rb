@@ -2,6 +2,8 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
+require "farce/mode_manager/smart_rule"
+
 module Farce
   # A mode manager encapsulates logic for dealing with Ruby objects that aren't Ractor-shareable.
   # It is a perfect companion piece for APIs that require Ractor-shareable objects.
@@ -17,7 +19,7 @@ module Farce
   # class MyQueue
   #   include Farce::Shareable
   #
-  #   def initialize(capacity: 1024, mode: :copy)
+  #   def initialize(capacity: 1024, mode: :smart)
   #     @queue   = Ratomic::Queue.new(capacity)
   #     @manager = Farce::ModeManager.new(mode:)
   #   end
@@ -55,10 +57,13 @@ module Farce
     # @return [Symbol] The default mode to use when wrapping values.
     attr_reader :mode
 
+    # @return [Farce::Proxy::Register, nil] The register used for generating Farce::Proxy instances.
+    attr_reader :register
+
     # @!macro modes
     # @param mode [Symbol] The default mode to use when wrapping values. Must be one of the valid modes.
     # @param register [Proxy::Register, nil] The register to use for generating Farce::Proxy instances.
-    def initialize(mode: :copy, register: nil)
+    def initialize(mode: :smart, register: nil)
       raise ArgumentError, "invalid mode: #{mode.inspect}" unless Farce::MODES.include?(mode)
       @mode     = mode
       @register = register
@@ -87,9 +92,11 @@ module Farce
     def wrap(value, mode: nil)
       return value if Ractor.shareable?(value)
 
-      case mode || self.mode
+      case mode ||= self.mode
+      when :smart, :smart_copy, :smart_move, :smart_raise
+        return Ractor.make_shareable(-value) if value.is_a?(String)
+        SMART_RULES[value.class].call(value, self, mode)
       when :copy           then Envelope::Copy.new(value, self)
-      when :marshal        then Envelope::Marshal.new(value, self)
       when :dedup          then Ractor.make_shareable(Farce.dedup(value))
       when :local          then Envelope::Local.new(value, self)
       when :make_shareable then Ractor.make_shareable(value)
@@ -98,6 +105,7 @@ module Farce
       when :raise          then raise Ractor::IsolationError, "value is not Ractor-shareable: #{value.inspect}"
       when :shareable_copy then Ractor.make_shareable(value, copy: true)
       when :proxy          then Proxy.new(value, register: @register)
+      when :marshal        then Envelope::Marshal.new(value, self)
       else raise ArgumentError, "invalid mode: #{mode.inspect}"
       end
     end

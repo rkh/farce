@@ -61,7 +61,7 @@ module Farce
       # @param normalize [Symbol, Proc, Hash, Farce::Abstract::Map, nil] The element normalizer.
       # @param compare_by_identity [Boolean] Whether membership uses object identity.
       # @param mode [Symbol] The default transfer mode for Farce::Set, Farce::SortedSet,
-      #   and Farce::WeakSet. Defaults to :copy for strong sets and :raise for WeakSet.
+      #   and Farce::WeakSet. Defaults to :smart for strong sets and :raise for WeakSet.
       # @param options [Hash] Additional options for the selected variant.
       # @option options [Symbol] scope (:ractor) The scope used by Farce::Local variants.
       # @yield [element] Optionally transform each initial element before storage.
@@ -758,6 +758,17 @@ module Farce
           when :shareable_copy, :make_shareable
             payload = @manager.wrap(element, mode: requested_mode)
             return [insertion_key(payload), payload]
+          when :smart, :smart_raise, :smart_copy, :smart_move
+            token = IDENTITY_TOKENS[element]
+            payload = @manager.wrap(element, mode: requested_mode)
+            case payload
+            when Envelope::Copy, Envelope::Marshal
+              raise ArgumentError, "identity comparison cannot copy a non-shareable element"
+            when Envelope::Move
+              return [MembershipKey.new(token || Object.new.freeze, identity: true), payload]
+            end
+            key = @manager.managed_envelope?(payload) ? insertion_key(element) : insertion_key(payload)
+            return [key, payload]
           end
         end
 

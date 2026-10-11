@@ -25,10 +25,10 @@ module Farce
       def ==(other) = other.is_a?(ModeManager)
     end
 
-    def test_defaults_to_copy_mode_and_is_shareable
+    def test_defaults_to_smart_mode_and_is_shareable
       manager = ModeManager.new
 
-      assert_equal :copy, manager.mode
+      assert_equal :smart, manager.mode
       assert_predicate manager, :frozen?
       assert_predicate manager, :ractor_shareable?
       assert Ractor.shareable?(manager)
@@ -36,7 +36,8 @@ module Farce
 
     def test_accepts_every_documented_mode
       expected = ::Set[
-        :copy, :marshal, :move, :local, :make_shareable, :mutable, :raise, :shareable_copy, :dedup, :proxy,
+        :smart, :smart_raise, :smart_copy, :smart_move, :copy, :marshal, :move, :local,
+        :make_shareable, :mutable, :raise, :shareable_copy, :dedup, :proxy,
       ]
 
       assert_equal expected, Farce::MODES
@@ -66,7 +67,7 @@ module Farce
     end
 
     def test_copy_mode_wraps_a_snapshot_and_automatically_unwraps_it
-      manager = ModeManager.new
+      manager = ModeManager.new(mode: :copy)
       source = Payload.new(:original)
       envelope = manager.wrap(source)
       source.value = :changed
@@ -276,8 +277,8 @@ module Farce
     end
 
     def test_only_unwraps_envelopes_created_by_the_same_manager
-      manager = ModeManager.new
-      other = ModeManager.new
+      manager = ModeManager.new(mode: :copy)
+      other = ModeManager.new(mode: :copy)
       envelope = manager.wrap(Payload.new(:value))
       unmanaged = Envelope::Copy.new(Payload.new(:unmanaged))
 
@@ -287,8 +288,8 @@ module Farce
     end
 
     def test_manager_identity_does_not_use_overridden_equality
-      manager = PermissiveEqualityManager.new
-      other = PermissiveEqualityManager.new
+      manager = PermissiveEqualityManager.new(mode: :copy)
+      other = PermissiveEqualityManager.new(mode: :copy)
       envelope = manager.wrap(Payload.new(:value))
 
       assert_same envelope, other.unwrap(envelope)
@@ -296,7 +297,7 @@ module Farce
     end
 
     def test_copy_envelopes_can_be_automatically_unwrapped_in_another_ractor
-      manager = ModeManager.new
+      manager = ModeManager.new(mode: :copy)
       envelope = manager.wrap(Payload.new(:value))
       worker = Ractor.new(manager, envelope) do |shared_manager, shared_envelope|
         value = shared_manager.unwrap(shared_envelope)

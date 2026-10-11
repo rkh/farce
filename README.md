@@ -701,18 +701,22 @@ The [default variants](#variants-and-scopes) of most [data structures](#data-str
 
 These modes are:
 
-| Mode              | What happens to non-shareable data                                                   | A typical use                               |
-| ----------------- | ------------------------------------------------------------------------------------ | ------------------------------------------- |
-| `:copy` (default) | Transfers a copy and leaves the original usable. This is the default.                | Send a snapshot of a request.               |
-| `:marshal`        | Serializes a snapshot and reconstructs it once per receiving Ractor.               | Transfer an Unshared container.             |
-| `:move`           | Transfers ownership and makes the original inaccessible.                             | Hand a completed batch to a consumer.       |
-| `:local`          | Keeps the same object in its originating Ractor.                                     | Pass work between local threads or fibers.  |
-| `:make_shareable` | Calls `Ractor.make_shareable` on the original.                                       | Publish finished configuration.             |
-| `:mutable`        | Copies non-shareable objects into a [`Farce::Mutable`](#mutables).                   | Synchronize mutations across Ractors.       |
-| `:shareable_copy` | Makes a shareable copy and leaves the original alone.                                | Publish a snapshot of an editable document. |
-| `:dedup`          | Deduplicates the value, then makes it shareable. May update and freeze the original. | Reuse repeated message contents.            |
-| `:proxy`          | Creates a [`Farce::Proxy`](#proxies) that executes calls in the original Ractor.     | Share access to a mutable object.           |
-| `:raise`          | Raises `Ractor::IsolationError`.                                                     | Enforce a shareable-data boundary.          |
+| Mode | What happens to non-shareable data | A typical use |
+| --- | --- | --- |
+| `:smart` (default) | Applies smart rules or a dedicated proxy, raising for unsupported values. | Share supported values with less copying. |
+| `:smart_raise` | Applies smart rules or a dedicated proxy, with a raising fallback. | Reject unsupported transfers. |
+| `:smart_copy` | Applies smart rules or a dedicated proxy, then tries copying and Marshal. Default for `Farce::Port`. | Send values with a copying fallback. |
+| `:smart_move` | Applies smart rules or a dedicated proxy, then tries moving. | Hand off unsupported values. |
+| `:copy` | Transfers a copy and leaves the original usable. | Send a snapshot of a request. |
+| `:marshal` | Serializes a snapshot and reconstructs it once per receiving Ractor. | Transfer an Unshared container.|
+| `:move` | Transfers ownership and makes the original inaccessible. | Hand a completed batch to a consumer. |
+| `:local` | Keeps the same object in its originating Ractor. | Pass work between local threads or fibers. |
+| `:make_shareable` | Calls `Ractor.make_shareable` on the original. | Publish finished configuration. |
+| `:mutable` | Copies non-shareable objects into a [`Farce::Mutable`](#mutables). | Synchronize mutations across Ractors. |
+| `:shareable_copy` | Makes a shareable copy and leaves the original alone. | Publish a snapshot of an editable document. |
+| `:dedup` | Deduplicates the value, then makes it shareable. May update and freeze the original. | Reuse repeated message contents. |
+| `:proxy` | Creates a [`Farce::Proxy`](#proxies) that executes calls in the original Ractor. | Share access to a mutable object. |
+| `:raise` | Raises `Ractor::IsolationError`. | Enforce a shareable-data boundary. |
 
 Here's an example:
 

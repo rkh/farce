@@ -89,6 +89,19 @@ module Farce
       close_pool(pool)
     end
 
+    def test_schedule_uses_smart_rules_by_default
+      pool = Pool.new(max_size: 1, shrink_after: nil)
+      result = Queue.new
+      source = [:ready]
+      pool.schedule(source, result) { |value, output| output << value.frozen? }
+
+      assert_equal Helpers::Internal.native_ractors?, result.pop(timeout: 5)
+      assert_equal Helpers::Internal.native_ractors?, source.frozen?
+      assert_raises(Ractor::IsolationError) { pool.schedule(Unshared::Map.new) { nil } }
+    ensure
+      close_pool(pool)
+    end
+
     def test_schedule_dispatches_to_a_worker
       pool = Pool.new(max_size: 1, shrink_after: nil)
       result = Queue.new

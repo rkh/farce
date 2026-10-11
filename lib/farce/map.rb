@@ -30,11 +30,11 @@ module Farce
   #   class Map
   #     # @!macro map_initialization
   #     # @!macro modes
-  #     # @param mode [Symbol] The default transfer mode for values. Defaults to `:copy`.
+  #     # @param mode [Symbol] The default transfer mode for values. Defaults to `:smart`.
   #     # @return [Map]
   #     def initialize(
   #       initial_mapping = nil,
-  #       mode: :copy,
+  #       mode: :smart,
   #       normalize_keys: nil,
   #       compare_by_identity: false,
   #       compare_keys_by_identity: compare_by_identity,

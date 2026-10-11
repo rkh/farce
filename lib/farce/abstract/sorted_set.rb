@@ -11,12 +11,12 @@ module Farce
     # elements raise during insertion or lookup.
     class SortedSet < Set
       # Construct a set in ascending comparator order.
-      # @overload initialize(enumerable = nil, normalize: nil, compare_by_identity: false, mode: :copy, **options)
+      # @overload initialize(enumerable = nil, normalize: nil, compare_by_identity: false, mode: :smart, **options)
       #   @param enumerable [#each, nil] The initial elements, or nil for an empty set.
       #   @param normalize [Symbol, Proc, Hash, Farce::Abstract::Map, nil] The element normalizer.
       #   @param compare_by_identity [Boolean] Must be false. Membership uses <=>.
       #   @param mode [Symbol] The default transfer mode. Only Farce::SortedSet accepts
-      #     this option, which defaults to :copy.
+      #     this option, which defaults to :smart.
       #   @param options [Hash] Additional options for the selected variant.
       #   @option options [Symbol] scope (:ractor) The scope used by Farce::Local::SortedSet.
       #   @yield [element] Optionally transform each initial element before normalization.

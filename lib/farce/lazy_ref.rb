@@ -6,7 +6,7 @@ module Farce
   # @!parse
   #   # A {Reference} for a {Lazy} value.
   #   #
-  #   # Results use the lazy value's transfer mode, which defaults to `:copy`.
+  #   # Results use the lazy value's transfer mode, which defaults to `:smart`.
   #   #
   #   # Calling `freeze` resolves and freezes the target. Checking `frozen?` before
   #   # the first successful freeze does not resolve it.
@@ -24,11 +24,11 @@ module Farce
   #   #   initialized.value # => 1
   #   class LazyRef < Farce::Reference
   #     # @!macro modes
-  #     # @overload initialize(factory, mode: :copy)
+  #     # @overload initialize(factory, mode: :smart)
   #     #   @param mode [Symbol] the transfer mode for the computed result
   #     #   @param [Class, Proc, #call] factory The factory to use for creating the value. Must be ractor-shareable.
   #     #
-  #     # @overload initialize(self: nil, mode: :copy)
+  #     # @overload initialize(self: nil, mode: :smart)
   #     #   @param mode [Symbol] the transfer mode for the computed result
   #     #   @yield The block to use for creating the value. Must be ractor-shareable.
   #     #   @yieldreceiver [BasicObject] The `self` parameter provided, or `nil` if not provided.

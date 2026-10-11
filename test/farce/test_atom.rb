@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../setup"
 
@@ -13,7 +15,7 @@ module Farce
 
       assert_instance_of Internal::Atom, atom.instance_variable_get(:@atom)
       assert_nil atom.value
-      assert_equal :copy, atom.mode
+      assert_equal :smart, atom.mode
       refute_predicate atom, :compare_by_identity?
       assert_kind_of Abstract::Value, atom
       refute_predicate atom, :frozen?
@@ -139,7 +141,7 @@ module Farce
     end
 
     def test_compare_and_set_compares_copied_values_by_equality
-      atom = Atom.new(ModePayload.new(:expected))
+      atom = Atom.new(ModePayload.new(:expected), mode: :copy)
       replacement = ModePayload.new(:replacement)
 
       refute atom.compare_and_set(ModePayload.new(:other), replacement, mode: :local)
@@ -279,7 +281,7 @@ module Farce
     end
 
     def test_wait_until_changed_uses_logical_value_comparison
-      atom = Atom.new(ModePayload.new(:old))
+      atom = Atom.new(ModePayload.new(:old), mode: :copy)
 
       assert_equal :timeout,
         atom.wait_until_changed(ModePayload.new(:old), timeout: 0) { :timeout }
@@ -301,7 +303,7 @@ module Farce
     end
 
     def test_wait_until_non_nil_returns_unwrapped_values_and_fallbacks
-      atom = Atom.new
+      atom = Atom.new(mode: :copy)
 
       assert_equal :timeout, atom.wait_until_non_nil(timeout: 0) { :timeout }
 
@@ -314,7 +316,7 @@ module Farce
     def test_copy_mode_transfers_non_shareable_values_between_ractors
       return unless Internal.native_ractors?
       source = ModePayload.new(:original)
-      atom = Atom.new(source)
+      atom = Atom.new(source, mode: :copy)
       source.value = :changed
       worker = Ractor.new(atom) do |shared|
         current = shared.value

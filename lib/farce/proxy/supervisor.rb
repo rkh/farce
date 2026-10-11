@@ -120,7 +120,7 @@ module Farce
           rescue Exception => e # rubocop:disable Lint/RescueException
             request.success.value = false
             begin
-              result = @mode_manager.wrap(e)
+              result = @mode_manager.wrap(e, mode: :copy)
             rescue StandardError
               result = -"#{e.class}: #{e.message}"
             end

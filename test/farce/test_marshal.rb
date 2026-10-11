@@ -162,7 +162,7 @@ module Farce
     end
 
     def test_copy_snapshots_include_existing_local_edits_without_opening_unread_envelopes
-      source = Atom.new([])
+      source = Atom.new([], mode: :copy)
       source.value << :edited
 
       assert_equal [:edited], round_trip(source).value
@@ -219,7 +219,7 @@ module Farce
 
     def test_set_membership_snapshots_survive_mutation
       skip "mutable values use envelopes only with native Ractors" unless Internal.native_ractors?
-      source = Set.new([[1]])
+      source = Set.new([[1]], mode: :copy)
       source.first << 2
       copy = round_trip(source)
 
@@ -551,6 +551,22 @@ module Farce
       assert_same Object, mirror[String]
       assert_raises(TypeError) { ::Marshal.dump(ClassMirror.new) }
       assert_raises(TypeError) { ::Marshal.dump(ClassMirror.new(Object) { :value }) }
+    end
+
+    def test_class_mirror_snapshots_preserve_explicit_membership_and_frozen_state
+      source = ClassMirror.new(Object)
+      implicit = round_trip(source)
+      source.define(BasicObject)
+      explicit = round_trip(source.freeze)
+
+      refute implicit.custom?(BasicObject)
+      assert explicit.custom?(BasicObject)
+      refute explicit.custom?(Object)
+      refute_predicate implicit, :frozen?
+      assert_predicate explicit, :frozen?
+      assert Ractor.shareable?(explicit)
+      assert_same Object, explicit[String]
+      assert_raises(FrozenError) { explicit.define(String) }
     end
 
     def test_config_restores_explicit_values_without_changing_global_settings

@@ -11,7 +11,7 @@ module Farce
     # (see Farce::Abstract::TimerQueue#initialize)
     # @!macro modes
     # @param mode [Symbol] the transfer mode for unshareable values
-    def initialize(capacity: nil, mode: :copy, track_age: false)
+    def initialize(capacity: nil, mode: :smart, track_age: false)
       @manager = ModeManager.new(mode:)
       super(capacity:, track_age:)
     end

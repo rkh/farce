@@ -50,10 +50,19 @@ module Farce
       assert_nil(Farce.in_parallel { :done })
     end
 
-    def test_default_argument_transfer
+    def test_default_argument_transfer_uses_smart_rules
       source = [:original]
       finished = Queue.new
-      Farce.in_parallel(source, finished) do |array, output|
+      Farce.in_parallel(source, finished) { |array, output| output << array.frozen? }
+
+      assert_equal Ractor.builtin?, finished.pop(timeout: 5)
+      assert_equal Ractor.builtin?, source.frozen?
+    end
+
+    def test_copy_argument_transfer
+      source = [:original]
+      finished = Queue.new
+      Farce.in_parallel(source, finished, mode: :copy) do |array, output|
         array << :changed
         output << :done
       end

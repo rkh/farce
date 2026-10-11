@@ -11,7 +11,7 @@ module Farce
     # (see Farce::Abstract::PriorityQueue#initialize)
     # @!macro modes
     # @param mode [Symbol] the default mode for sending unshareable values
-    def initialize(capacity: nil, default_priority: 0, order: :ascending, mode: :copy, track_age: false)
+    def initialize(capacity: nil, default_priority: 0, order: :ascending, mode: :smart, track_age: false)
       @manager = ModeManager.new(mode:)
       super(capacity:, default_priority:, order:, track_age:)
     end

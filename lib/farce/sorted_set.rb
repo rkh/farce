@@ -24,7 +24,7 @@ module Farce
     private
 
     def initialize_value_mode(mode)
-      mode = :copy if UNDEFINED.equal?(mode)
+      mode = :smart if UNDEFINED.equal?(mode)
       @manager = ModeManager.new(mode:)
     end
 

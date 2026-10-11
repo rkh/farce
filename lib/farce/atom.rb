@@ -44,7 +44,7 @@ module Farce
     # @param value [BasicObject, nil] the initial value
     # @param compare_by_identity [Boolean] whether comparisons use object identity instead of equality
     # @param mode [Symbol] the default mode used to transfer values between Ractors
-    def initialize(value = nil, compare_by_identity: false, mode: :copy)
+    def initialize(value = nil, compare_by_identity: false, mode: :smart)
       unless compare_by_identity == true || compare_by_identity == false
         raise ArgumentError, "compare_by_identity must be a boolean"
       end

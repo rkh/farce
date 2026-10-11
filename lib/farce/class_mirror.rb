@@ -24,6 +24,7 @@ module Farce
       raise TypeError, "Class expected, got #{base_class.class}" unless base_class.is_a?(Class)
       @mapping  = Strict::Map.new({ BasicObject => base_class })
       @cache    = Strict::WeakKeyMap.new
+      @custom   = Strict::Map.new
       @callback = block_given? ? Ractor.shareable_proc(&) : nil
       super()
     end
@@ -31,16 +32,17 @@ module Farce
     # @api private
     def marshal_dump
       raise TypeError, "class mirror callbacks cannot be marshaled" if @callback
-      [1, @mapping.to_h, frozen?]
+      [1, @mapping.to_h, frozen?, @custom.keys]
     end
 
     # @api private
     def marshal_load(data)
-      mapping, frozen     = Internal::MarshalSupport.payload(data, 2)
-      @mapping            = Strict::Map.new(mapping)
-      @cache              = Strict::WeakKeyMap.new
-      @callback           = nil
-      @farce_freeze_state = Internal::Flag.new(false)
+      mapping, frozen, custom = Internal::MarshalSupport.payload(data, 3)
+      @mapping               = Strict::Map.new(mapping)
+      @cache                 = Strict::WeakKeyMap.new
+      @custom                = Strict::Map.new(custom.to_h { |klass| [klass, true] })
+      @callback              = nil
+      @farce_freeze_state    = Internal::Flag.new(false)
       publish_shareable
       Internal::MarshalSupport.freeze(self, frozen)
     end
@@ -71,13 +73,24 @@ module Farce
       raise Ractor::IsolationError, "must be called from main Ractor" unless Ractor.main?
       raise TypeError, "Class expected, got #{klass.class}" unless klass.is_a?(Class)
       mixin  = Module.new(&) if block_given?
-      mirror = @mapping.store_if_absent(klass) { Class.new(define(klass.superclass)) }
+      mirror = define_mirror(klass)
       mirror.include(mixin) if mixin
       @cache.clear
+      @custom[klass] = true
       mirror
     end
 
+    # Check whether this class was explicitly passed to {#define}.
+    # Automatically created ancestors and inherited definitions do not count.
+    # @param klass [Class] the source class
+    # @return [Boolean] whether the class has an explicit definition
+    def custom?(klass) = @custom.key?(klass)
+
     private
+
+    def define_mirror(klass)
+      @mapping.store_if_absent(klass) { Class.new(define_mirror(klass.superclass)) }
+    end
 
     def lookup(klass)
       raise TypeError, "Class expected, got #{klass.class}" unless klass.is_a?(Class)

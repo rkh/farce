@@ -19,7 +19,7 @@ module Farce
       vector = type[input]
 
       assert_instance_of Vector, vector
-      assert_equal :copy, vector.mode
+      assert_equal :smart, vector.mode
       assert_equal [1, 2], vector.to_a
       assert_equal ["1", 2], input
       assert_instance_of Vector, type.optional[["3"]]
@@ -69,7 +69,7 @@ module Farce
       map = type["1" => :one, 2 => "two"]
 
       assert_instance_of Map, map
-      assert_equal :copy, map.mode
+      assert_equal :smart, map.mode
       assert_equal({ 1 => "one", 2 => "two" }, map.to_h)
 
       collision = type.try("1" => "first", 1 => "second")
@@ -108,7 +108,7 @@ module Farce
       set = type[["1", 1, "2"]]
 
       assert_instance_of Set, set
-      assert_equal :copy, set.mode
+      assert_equal :smart, set.mode
       assert_equal [1, 2], set.to_a.sort
       assert_equal [3, 4], type[::Set["3", "4"]].to_a.sort
       assert_predicate type.try(["bad"]), :failure?
@@ -203,6 +203,18 @@ module Farce
       assert_instance_of Vector, types::Vector[[1]]
       assert_raises(ArgumentError) { Farce.DryTypes(variant: :local, scope: :unknown) }
       assert_raises(ArgumentError) { Farce.DryTypes(variant: :strict, mode: :copy) }
+    end
+
+    def test_smart_modes_are_supported_without_allowing_move_fallbacks
+      %i[smart smart_raise smart_copy].each do |mode|
+        type = Types::Vector.with(mode:)
+        vector = type[[1, 2]]
+
+        assert_equal mode, vector.mode
+        assert_equal [1, 2], vector.to_a
+      end
+      assert_raises(ArgumentError) { Types::Vector.with(mode: :smart_move) }
+      assert_raises(ArgumentError) { Farce.DryTypes(mode: :smart_move) }
     end
 
     def test_identity_hash_does_not_silently_drop_structural_duplicates
@@ -442,6 +454,15 @@ module Farce
       assert_equal ["draft"], result
       return unless Internal.native_ractors?
 
+      worker = Farce::Ractor.new(vector) { |source| source[0].frozen? }
+
+      assert worker.respond_to?(:value) ? worker.value : worker.take
+      assert_predicate vector[0], :frozen?
+    end
+
+    def test_explicit_copy_output_is_mutable_in_each_ractor
+      return unless Internal.native_ractors?
+      vector = Types::Vector.with(mode: :copy)[[["draft"]]]
       worker = Farce::Ractor.new(vector) do |source|
         value = source[0]
         value << "worker"

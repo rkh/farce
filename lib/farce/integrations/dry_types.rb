@@ -70,7 +70,7 @@ module Farce
           when :shared
             return {} unless %i[vector map set atom].include?(kind)
 
-            { mode: UNDEFINED.equal?(mode) ? :copy : mode }
+            { mode: UNDEFINED.equal?(mode) ? :smart : mode }
           when :local then { scope: UNDEFINED.equal?(scope) ? :ractor : scope }
           else {}
           end
@@ -101,8 +101,11 @@ module Farce
 
           if variant == :shared
             raise ArgumentError, "scope is only supported by the local variant" unless UNDEFINED.equal?(scope)
-            raise ArgumentError, "mode :move is not supported by dry-types constructors" if mode == :move
-            return if UNDEFINED.equal?(mode) || %i[copy local make_shareable raise shareable_copy].include?(mode)
+            if %i[move smart_move].include?(mode)
+              raise ArgumentError, "mode #{mode.inspect} is not supported by dry-types constructors"
+            end
+            allowed = %i[smart smart_raise smart_copy copy local make_shareable raise shareable_copy]
+            return if UNDEFINED.equal?(mode) || allowed.include?(mode)
 
             raise ArgumentError, "invalid mode: #{mode.inspect}"
           end

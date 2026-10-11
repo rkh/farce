@@ -9,7 +9,7 @@ require "psych"
 module Farce
   class TestValueSerialization < Test
     def test_json_uses_current_values_in_nested_documents
-      atom = Atom.new({ "items" => [1, false, nil] })
+      atom = Atom.new({ "items" => [1, false, nil] }, mode: :copy)
       counter = Counter.new(2).increment(3)
       flag = Flag.new
       flag.set

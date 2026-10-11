@@ -126,7 +126,7 @@ module Farce
 
       [Set, SortedSet].each do |type|
         original = [1]
-        set = type.new([original])
+        set = type.new([original], mode: :copy)
         original << 2
 
         assert_equal :copy, set.mode

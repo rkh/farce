@@ -49,7 +49,7 @@ end
 numbers = Types::IntegerVector[["1", 2]]
 numbers.class # => Farce::Vector
 numbers.to_a  # => [1, 2]
-numbers.mode  # => :copy
+numbers.mode  # => :smart
 ```
 
 The bare `Vector` accepts any Array members. Imported dry namespaces control
@@ -257,10 +257,11 @@ vector = Types::LocalValueVector[[payload]]
 vector[0].equal?(payload) # => true
 ```
 
-The supported shared modes are `:copy`, `:local`, `:make_shareable`,
-`:shareable_copy`, and `:raise`. They apply to collections and Atom. Counter and
-Flag have no transfer mode. `:move` is rejected because dry-types creates and
-examines intermediate values during coercion.
+The supported shared modes are `:smart`, `:smart_raise`, `:smart_copy`,
+`:copy`, `:local`, `:make_shareable`, `:shareable_copy`, and `:raise`.
+The default is `:smart`. They apply to collections and Atom. Counter and Flag have
+no transfer mode. `:move` and `:smart_move` are rejected because dry-types creates
+and examines intermediate values during coercion.
 
 ## Farce input and ownership
 
@@ -277,7 +278,7 @@ converted.to_a # => [1]
 ```
 
 The explicit read establishes where transfer and ownership happen. This rule
-also applies when the container's default mode is `:copy` because an individual
+also applies when the container's default mode is `:smart` because an individual
 entry might have been inserted with `mode: :move`.
 
 Vector materialization uses its normal snapshot. Map and set materialization

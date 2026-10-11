@@ -66,7 +66,7 @@ module Farce
 
     def test_mode_copy_explicit_envelope_and_move
       source = ModePayload.new(:source)
-      map = LFUMap.new({ key: source }, max_size: 2)
+      map = LFUMap.new({ key: source }, max_size: 2, mode: :copy)
       stored = map.instance_variable_get(:@map)[:key]
       source.value = :changed
 
@@ -113,7 +113,7 @@ module Farce
     def test_mode_values_cross_ractors
       map = LFUMap.new(
         { first: ModePayload.new(:first), second: ModePayload.new(:second) },
-        max_size: 2,
+        max_size: 2, mode: :copy,
       )
       worker = Ractor.new(map) { |shared| shared.values.map(&:value).sort }
 

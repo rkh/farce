@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../setup"
 require "pp"
@@ -17,7 +19,7 @@ module Farce
       assert_equal 0, queue.size
       assert_equal 0, queue.length
       assert_equal 0, queue.num_waiting
-      assert_equal :copy, queue.mode
+      assert_equal :smart, queue.mode
       assert_predicate queue, :empty?
       refute_predicate queue, :full?
       refute_predicate queue, :closed?
@@ -185,7 +187,7 @@ module Farce
     end
 
     def test_inspect_and_pretty_inspect
-      queue = Queue.new(capacity: 2)
+      queue = Queue.new(mode: :copy, capacity: 2)
 
       assert_equal "#<Farce::Queue size=0 capacity=2>", queue.inspect
       assert_equal "#<Farce::Queue size=0 capacity=2>\n", queue.pretty_inspect
@@ -195,7 +197,7 @@ module Farce
       assert_equal "#<Farce::Queue size=1 capacity=2>", queue.inspect
       assert_equal "#<Farce::Queue size=1 capacity=2>\n", queue.pretty_inspect
 
-      unbounded = Queue.new(capacity: nil)
+      unbounded = Queue.new(mode: :copy, capacity: nil)
 
       assert_equal "#<Farce::Queue size=0>", unbounded.inspect
       assert_equal "#<Farce::Queue size=0>\n", unbounded.pretty_inspect
@@ -220,7 +222,7 @@ module Farce
 
     def test_copies_unshareable_values_across_cruby_ractors
       return unless RUBY_ENGINE == "ruby"
-      queue = Queue.new
+      queue = Queue.new(mode: :copy)
       queue.push(ModePayload.new(:value))
 
       result = Ractor.new(queue) { |shared| shared.pop.value }

@@ -20,7 +20,7 @@ module Farce
     # @param entries [Hash, Array<Array(BasicObject, BasicObject)>, Abstract::Map, #each, nil]
     #   Optional initial entries for the map.
     # @param mode [Symbol] The default value transfer mode.
-    def initialize(entries = nil, mode: :copy, normalize_keys: nil, **keyword_entries)
+    def initialize(entries = nil, mode: :smart, normalize_keys: nil, **keyword_entries)
       unless keyword_entries.empty?
         raise ArgumentError, "entries given as both positional and keyword arguments" unless entries.nil?
         entries = keyword_entries

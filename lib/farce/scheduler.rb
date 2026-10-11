@@ -333,7 +333,7 @@ module Farce
     # @return [Scheduler] self.
     # @raise [SchedulerClosedError] If the handle is closing, closed, or in an error state.
     # @see Ractor.shareable_proc
-    def schedule(*args, mode: :copy, auto_local: true, &block)
+    def schedule(*args, mode: :smart, auto_local: true, &block)
       raise SchedulerClosedError, "cannot schedule task on a closed scheduler" if closed?
 
       if auto_local

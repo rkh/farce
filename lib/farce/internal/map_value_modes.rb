@@ -18,7 +18,7 @@ module Farce
       # @param compare_by_identity [Boolean] the default comparison mode for keys and values
       # @param compare_keys_by_identity [Boolean] whether keys are compared by identity
       # @param compare_values_by_identity [Boolean] whether values are compared by identity
-      def initialize(initial_mapping = nil, mode: :copy, normalize_keys: nil, compare_by_identity: false,
+      def initialize(initial_mapping = nil, mode: :smart, normalize_keys: nil, compare_by_identity: false,
                      compare_keys_by_identity: compare_by_identity, compare_values_by_identity: compare_by_identity)
         initial_mapping = convert_entries(initial_mapping)
 

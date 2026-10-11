@@ -244,12 +244,25 @@ module Farce
       ractor_value(remote) if remote
     end
 
-    def test_remote_execution_copies_mutable_arguments_by_default
+    def test_remote_execution_uses_smart_rules_by_default
       Farce.on_main
       completed = Queue.new
       remote = Ractor.new(completed) do |ready|
         source = [:original]
-        Farce.on_main(source) { |array| array << :changed }
+        Farce.on_main(source, ready) { |array, output| output << array.frozen? }
+        source.frozen?
+      end
+
+      assert_equal Internal.native_ractors?, completed.pop(timeout: 5)
+      assert_equal Internal.native_ractors?, ractor_value(remote)
+    end
+
+    def test_remote_execution_copies_mutable_arguments_when_requested
+      Farce.on_main
+      completed = Queue.new
+      remote = Ractor.new(completed) do |ready|
+        source = [:original]
+        Farce.on_main(source, mode: :copy) { |array| array << :changed }
         ready << true
         source
       end

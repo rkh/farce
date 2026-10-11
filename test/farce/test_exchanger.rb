@@ -93,8 +93,19 @@ module Farce
       end
     end
 
-    def test_default_copy_mode_between_ractors
+    def test_default_smart_mode_between_ractors
       exchanger = Exchanger.new
+      original = [:main]
+      worker = Ractor.new(exchanger) { |shared| shared.exchange([:worker], timeout: 5).frozen? }
+
+      assert_equal :smart, exchanger.mode
+      assert_equal [:worker], exchanger.exchange(original, timeout: 5)
+      assert_equal Internal.native_ractors?, ractor_value(worker)
+      assert_equal Internal.native_ractors?, original.frozen?
+    end
+
+    def test_copy_mode_between_ractors
+      exchanger = Exchanger.new(mode: :copy)
       original = [:main]
       worker = Ractor.new(exchanger) do |shared|
         received = shared.exchange([:worker], timeout: 5)

@@ -15,7 +15,7 @@ module Farce
 
     # @!macro modes
     # @param mode [Symbol] the default mode used to transfer values between Ractors
-    def initialize(mode: :copy)
+    def initialize(mode: :smart)
       @manager   = ModeManager.new(mode:)
       @exchanger = Internal::Exchanger.new
       super()

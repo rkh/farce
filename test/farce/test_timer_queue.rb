@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../setup"
 
@@ -18,7 +20,7 @@ module Farce
       assert_instance_of Internal::PriorityQueue, queue.instance_variable_get(:@queue)
       assert_nil queue.capacity
       assert_equal Float::INFINITY, queue.max
-      assert_equal :copy, queue.mode
+      assert_equal :smart, queue.mode
 
       assert_predicate queue, :empty?
       refute_predicate queue, :frozen?
@@ -313,7 +315,7 @@ module Farce
     end
 
     def test_delete_compares_copied_values_without_exposing_envelopes
-      queue = TimerQueue.new
+      queue = TimerQueue.new(mode: :copy)
       timestamp = Time.now
 
       queue.push(ModePayload.new(:same), at: timestamp)
@@ -323,7 +325,7 @@ module Farce
     end
 
     def test_identity_delete_can_match_the_value_returned_by_peek
-      queue = TimerQueue.new
+      queue = TimerQueue.new(mode: :copy)
       timestamp = Time.now
       queue.push(ModePayload.new(:stored), at: timestamp)
       value = queue.peek
@@ -375,7 +377,7 @@ module Farce
 
     def test_copies_unshareable_values_across_cruby_ractors
       return unless RUBY_ENGINE == "ruby"
-      queue = TimerQueue.new
+      queue = TimerQueue.new(mode: :copy)
       queue.push(ModePayload.new(:value), at: Clock.now)
 
       result = Ractor.new(queue) { |shared| shared.pop.value }
