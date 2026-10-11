@@ -52,7 +52,7 @@ priority_queue_snapshot_string(VALUE string)
     rb_str_replace(copy, string);
     instance_variables = rb_obj_instance_variables(string);
     for (index = 0; index < RARRAY_LEN(instance_variables); index++) {
-        ID id = SYM2ID(RARRAY_AREF(instance_variables, index));
+        ID id = SYM2ID(rb_ary_entry(instance_variables, index));
         rb_ivar_set(copy, id, rb_ivar_get(string, id));
     }
     rb_obj_freeze(copy);
@@ -436,7 +436,7 @@ priority_queue_track_remove(priority_queue_t *queue, priority_queue_value_t *val
     queue->generation++;
 }
 
-static void priority_queue_wait_for_publication(priority_queue_t *queue);
+static void priority_queue_wait_for_publication(VALUE self, priority_queue_t *queue);
 
 typedef struct {
     VALUE receiver;
@@ -581,25 +581,27 @@ priority_queue_compact(void *pointer)
     dnode_t *node;
 
     if (!queue) return;
-    queue->owner_fiber = rb_gc_location(queue->owner_fiber);
-    queue->owner_ruby_thread = rb_gc_location(queue->owner_ruby_thread);
+    containers_gc_update(&queue->owner_fiber);
+    containers_gc_update(&queue->owner_ruby_thread);
     /* The VM already roots the running publisher. dcompact only refreshes the
      * unmarked identity handles if that Fiber or Thread moved. */
-    queue->publication_owner_fiber =
-        rb_gc_location(queue->publication_owner_fiber);
-    queue->publication_owner_ruby_thread =
-        rb_gc_location(queue->publication_owner_ruby_thread);
-    queue->signal = rb_gc_location(queue->signal);
-    queue->unshared_self = rb_gc_location(queue->unshared_self);
+    containers_gc_update(&queue->publication_owner_fiber);
+    containers_gc_update(&queue->publication_owner_ruby_thread);
+    containers_gc_update(&queue->signal);
+    containers_gc_update(&queue->unshared_self);
     for (node = dict_first(&queue->tree); node; node = dict_next(&queue->tree, node)) {
         priority_queue_bucket_t *bucket = (priority_queue_bucket_t *)node;
         priority_queue_value_t *entry;
-        bucket->priority = rb_gc_location(bucket->priority);
-        node->dict_key = (const void *)bucket->priority;
+        VALUE previous_priority = bucket->priority;
+        containers_gc_update(&bucket->priority);
+        if (previous_priority != bucket->priority) node->dict_key = (const void *)bucket->priority;
+        bool rebuild = false;
         for (entry = bucket->head; entry; entry = entry->next) {
-            entry->value = rb_gc_location(entry->value);
+            VALUE previous_value = entry->value;
+            containers_gc_update(&entry->value);
+            if (previous_value != entry->value) rebuild = true;
         }
-        priority_queue_identity_index_rebuild(bucket);
+        if (rebuild) priority_queue_identity_index_rebuild(bucket);
     }
 }
 
@@ -645,7 +647,11 @@ static const rb_data_type_t priority_queue_type = {
         .dsize = priority_queue_memsize,
         .dcompact = priority_queue_compact,
     },
-    .flags = RUBY_TYPED_FROZEN_SHAREABLE,
+    .flags =
+        RUBY_TYPED_WB_PROTECTED |
+        RUBY_TYPED_FROZEN_SHAREABLE |
+        RUBY_TYPED_FREE_IMMEDIATELY |
+        FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static const rb_data_type_t unshared_priority_queue_type = {
@@ -657,6 +663,7 @@ static const rb_data_type_t unshared_priority_queue_type = {
         .dcompact = priority_queue_compact,
     },
     .parent = &priority_queue_type,
+    .flags = RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FREE_IMMEDIATELY | FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 /* The GVL protects the native fields within one Ractor. Keep the logical
@@ -737,7 +744,7 @@ priority_queue_get(VALUE self)
      * traversal cannot leak a usable half-published queue. The steady-state
      * path is one atomic load and does not touch the physical mutex. */
     if (priority_queue_publication_busy(state)) {
-        priority_queue_wait_for_publication(queue);
+        priority_queue_wait_for_publication(self, queue);
         state = RUBY_ATOMIC_LOAD(queue->publication_state);
     }
     if (state != PRIORITY_QUEUE_INITIALIZED) {
@@ -884,7 +891,7 @@ priority_queue_lock_wait_once(priority_queue_t *queue)
 }
 
 static void
-priority_queue_lock(priority_queue_t *queue, bool *acquired)
+priority_queue_lock(VALUE self, priority_queue_t *queue, bool *acquired)
 {
     VALUE current = rb_fiber_current();
     VALUE current_thread = rb_thread_current();
@@ -903,8 +910,8 @@ priority_queue_lock(priority_queue_t *queue, bool *acquired)
             rb_raise(rb_eThreadError, "deadlock; recursive priority queue access");
         }
         if (NIL_P(queue->owner_fiber) && !publication_busy) {
-            queue->owner_fiber = current;
-            queue->owner_ruby_thread = current_thread;
+            RB_OBJ_WRITE(self, &queue->owner_fiber, current);
+            RB_OBJ_WRITE(self, &queue->owner_ruby_thread, current_thread);
             *acquired = true;
             priority_queue_mutex_unlock(queue);
             return;
@@ -945,6 +952,7 @@ priority_queue_unlock(priority_queue_t *queue)
 }
 
 typedef struct {
+    VALUE self;
     priority_queue_t *queue;
     bool acquired;
 } priority_queue_publication_wait_t;
@@ -955,7 +963,7 @@ priority_queue_publication_wait_body(VALUE opaque)
     priority_queue_publication_wait_t *wait =
         (priority_queue_publication_wait_t *)opaque;
 
-    priority_queue_lock(wait->queue, &wait->acquired);
+    priority_queue_lock(wait->self, wait->queue, &wait->acquired);
     return Qnil;
 }
 
@@ -970,9 +978,10 @@ priority_queue_publication_wait_ensure(VALUE opaque)
 }
 
 static void
-priority_queue_wait_for_publication(priority_queue_t *queue)
+priority_queue_wait_for_publication(VALUE self, priority_queue_t *queue)
 {
     priority_queue_publication_wait_t wait = {
+        .self = self,
         .queue = queue,
         .acquired = false,
     };
@@ -991,6 +1000,7 @@ priority_queue_wait_for_publication(priority_queue_t *queue)
 typedef VALUE (*priority_queue_operation_t)(VALUE opaque);
 
 typedef struct {
+    VALUE self;
     priority_queue_t *queue;
     priority_queue_operation_t operation;
     VALUE argument;
@@ -1001,7 +1011,7 @@ static VALUE
 priority_queue_call_body(VALUE opaque)
 {
     priority_queue_call_t *call = (priority_queue_call_t *)opaque;
-    priority_queue_lock(call->queue, &call->acquired);
+    priority_queue_lock(call->self, call->queue, &call->acquired);
     return call->operation(call->argument);
 }
 
@@ -1016,12 +1026,14 @@ priority_queue_unlock_ensure(VALUE opaque)
 
 static VALUE
 priority_queue_call(
+    VALUE self,
     priority_queue_t *queue,
     priority_queue_operation_t operation,
     VALUE argument
 )
 {
     priority_queue_call_t call = {
+        .self = self,
         .queue = queue,
         .operation = operation,
         .argument = argument,
@@ -1217,7 +1229,7 @@ priority_queue_initialize_commit(VALUE opaque)
     queue->bounded = initialization->bounded;
     queue->capacity = initialization->capacity;
     queue->track_age = initialization->track_age;
-    queue->signal = initialization->signal;
+    RB_OBJ_WRITE(initialization->self, &queue->signal, initialization->signal);
     /* Publication installs its logical gate before marking the object shareable
      * and keeps that whole transition under nested ensure cleanup. */
     if (queue->shared) return priority_queue_publish_shareable(initialization);
@@ -1278,7 +1290,7 @@ priority_queue_initialize(int argc, VALUE *argv, VALUE self)
     priority_queue_check_initializable(self, queue);
 
     return priority_queue_call(
-        queue,
+        self, queue,
         priority_queue_initialize_commit,
         (VALUE)&initialization
     );
@@ -1363,7 +1375,7 @@ priority_queue_push_body(VALUE opaque)
         priority_queue_identity_index_prepare_insert(bucket->identity_index, push->value);
         entry = calloc(1, queue->track_age ? sizeof(priority_queue_tracked_value_t) : sizeof(priority_queue_value_t));
         if (!entry) rb_memerror();
-        entry->value = push->value;
+        RB_OBJ_WRITE(push->self, &entry->value, push->value);
         entry->previous = bucket->tail;
         entry->next = NULL;
         entry->identity_next = NULL;
@@ -1377,7 +1389,7 @@ priority_queue_push_body(VALUE opaque)
             free(entry);
             rb_memerror();
         }
-        entry->value = push->value;
+        RB_OBJ_WRITE(push->self, &entry->value, push->value);
         entry->previous = NULL;
         entry->next = NULL;
         entry->identity_next = NULL;
@@ -1393,7 +1405,7 @@ priority_queue_push_body(VALUE opaque)
         else {
             push->stored_priority = push->priority;
         }
-        bucket->priority = push->stored_priority;
+        RB_OBJ_WRITE(push->self, &bucket->priority, push->stored_priority);
         if (CLASS_OF(push->priority) == rb_cFloat) {
             bucket->float_priority = RFLOAT_VALUE(push->priority);
         }
@@ -1475,7 +1487,7 @@ priority_queue_push(VALUE self, VALUE priority, VALUE value)
         return priority_queue_push_locked((VALUE)&push);
     }
     return priority_queue_call(
-        queue,
+        self, queue,
         priority_queue_push_locked,
         (VALUE)&push
     );
@@ -1559,7 +1571,7 @@ priority_queue_read(VALUE self, priority_queue_read_kind_t kind, bool last)
         priority_queue_read_body((VALUE)&read);
     }
     else {
-        priority_queue_call(queue, priority_queue_read_body, (VALUE)&read);
+        priority_queue_call(self, queue, priority_queue_read_body, (VALUE)&read);
     }
     if (read.empty) return rb_block_given_p() ? rb_yield_values(0) : Qnil;
     return read.result;
@@ -1596,7 +1608,7 @@ priority_queue_pop_before(VALUE self, VALUE latest_priority)
         priority_queue_read_body((VALUE)&read);
     }
     else {
-        priority_queue_call(queue, priority_queue_read_body, (VALUE)&read);
+        priority_queue_call(self, queue, priority_queue_read_body, (VALUE)&read);
     }
     if (read.empty) return rb_block_given_p() ? rb_yield_values(0) : Qnil;
     return read.result;
@@ -1692,7 +1704,7 @@ priority_queue_delete(VALUE self, VALUE priority, VALUE value)
     if (queue->shared) priority_queue_check_shareable(priority);
     if (queue->shared) priority_queue_check_shareable(value);
     return priority_queue_call(
-        queue,
+        self, queue,
         priority_queue_delete_body,
         (VALUE)&deletion
     );
@@ -1713,7 +1725,7 @@ priority_queue_delete_match(VALUE self, VALUE priority, VALUE pattern)
     };
     if (queue->shared) priority_queue_check_shareable(priority);
     if (queue->shared) priority_queue_check_shareable(pattern);
-    return priority_queue_call(queue, priority_queue_delete_body, (VALUE)&deletion);
+    return priority_queue_call(self, queue, priority_queue_delete_body, (VALUE)&deletion);
 }
 
 static VALUE
@@ -1774,7 +1786,7 @@ priority_queue_delete_identity(VALUE self, VALUE priority, VALUE value)
     if (queue->shared) priority_queue_check_shareable(priority);
     if (queue->shared) priority_queue_check_shareable(value);
     return priority_queue_call(
-        queue,
+        self, queue,
         priority_queue_delete_identity_body,
         (VALUE)&deletion
     );
@@ -1799,7 +1811,7 @@ priority_queue_size(VALUE self)
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
     if (priority_queue_can_run_direct(queue)) return priority_queue_size_body((VALUE)&operation);
     return priority_queue_call(
-        queue,
+        self, queue,
         priority_queue_size_body,
         (VALUE)&operation
     );
@@ -1819,7 +1831,7 @@ priority_queue_empty(VALUE self)
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
     if (priority_queue_can_run_direct(queue)) return priority_queue_empty_body((VALUE)&operation);
     return priority_queue_call(
-        queue,
+        self, queue,
         priority_queue_empty_body,
         (VALUE)&operation
     );
@@ -1859,7 +1871,7 @@ priority_queue_seal(VALUE self)
     priority_queue_t *queue = priority_queue_get(self);
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
     if (priority_queue_can_run_direct(queue)) return priority_queue_seal_body((VALUE)&operation);
-    return priority_queue_call(queue, priority_queue_seal_body, (VALUE)&operation);
+    return priority_queue_call(self, queue, priority_queue_seal_body, (VALUE)&operation);
 }
 
 static VALUE
@@ -1869,7 +1881,7 @@ priority_queue_clear(VALUE self)
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
     if (priority_queue_can_run_direct(queue)) return priority_queue_clear_body((VALUE)&operation);
     return priority_queue_call(
-        queue,
+        self, queue,
         priority_queue_clear_body,
         (VALUE)&operation
     );
@@ -1893,7 +1905,7 @@ priority_queue_close(VALUE self)
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
     if (priority_queue_can_run_direct(queue)) return priority_queue_close_body((VALUE)&operation);
     return priority_queue_call(
-        queue,
+        self, queue,
         priority_queue_close_body,
         (VALUE)&operation
     );
@@ -1913,7 +1925,7 @@ priority_queue_closed(VALUE self)
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
     if (priority_queue_can_run_direct(queue)) return priority_queue_closed_body((VALUE)&operation);
     return priority_queue_call(
-        queue,
+        self, queue,
         priority_queue_closed_body,
         (VALUE)&operation
     );
@@ -1932,7 +1944,7 @@ priority_queue_sealed(VALUE self)
     priority_queue_t *queue = priority_queue_get(self);
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
     if (priority_queue_can_run_direct(queue)) return priority_queue_sealed_body((VALUE)&operation);
-    return priority_queue_call(queue, priority_queue_sealed_body, (VALUE)&operation);
+    return priority_queue_call(self, queue, priority_queue_sealed_body, (VALUE)&operation);
 }
 
 static VALUE
@@ -1955,7 +1967,7 @@ priority_queue_generation(VALUE self)
     if (!queue->track_age) return Qnil;
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
     if (priority_queue_can_run_direct(queue)) return priority_queue_generation_body((VALUE)&operation);
-    return priority_queue_call(queue, priority_queue_generation_body, (VALUE)&operation);
+    return priority_queue_call(self, queue, priority_queue_generation_body, (VALUE)&operation);
 }
 
 static VALUE
@@ -1973,7 +1985,7 @@ priority_queue_oldest_enqueued_at(VALUE self)
     if (!queue->track_age) return Qnil;
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
     if (priority_queue_can_run_direct(queue)) return priority_queue_oldest_body((VALUE)&operation);
-    return priority_queue_call(queue, priority_queue_oldest_body, (VALUE)&operation);
+    return priority_queue_call(self, queue, priority_queue_oldest_body, (VALUE)&operation);
 }
 
 static VALUE
@@ -1991,7 +2003,7 @@ priority_queue_oldest_age(VALUE self)
     if (!queue->track_age) return Qnil;
     priority_queue_self_operation_t operation = {.queue = queue, .self = self};
     if (priority_queue_can_run_direct(queue)) return priority_queue_oldest_age_body((VALUE)&operation);
-    return priority_queue_call(queue, priority_queue_oldest_age_body, (VALUE)&operation);
+    return priority_queue_call(self, queue, priority_queue_oldest_age_body, (VALUE)&operation);
 }
 
 static VALUE

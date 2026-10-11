@@ -1,6 +1,6 @@
 #ifndef FARCE_FIBER_REACTOR_H
 #define FARCE_FIBER_REACTOR_H
-#include <ruby.h>
+#include "containers.h"
 #include <ruby/io.h>
 #include <ruby/io/buffer.h>
 #include <ruby/thread.h>

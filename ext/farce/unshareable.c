@@ -28,7 +28,7 @@ static const rb_data_type_t containers_pin_marker_type = {
     },
     .parent = NULL,
     .data = NULL,
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY,
+    .flags = RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FREE_IMMEDIATELY | FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static bool

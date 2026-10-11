@@ -84,22 +84,6 @@ containers_lock_notify_one_locked(containers_lock_t *lock)
 }
 
 static void
-containers_lock_mark(void *pointer)
-{
-    containers_lock_t *lock = pointer;
-    rb_gc_mark_movable(lock->owner);
-    rb_gc_mark_movable(lock->owner_thread);
-}
-
-static void
-containers_lock_compact(void *pointer)
-{
-    containers_lock_t *lock = pointer;
-    lock->owner = rb_gc_location(lock->owner);
-    lock->owner_thread = rb_gc_location(lock->owner_thread);
-}
-
-static void
 containers_lock_free(void *pointer)
 {
     containers_lock_t *lock = pointer;
@@ -113,15 +97,25 @@ containers_lock_memsize(const void *pointer)
     return pointer ? sizeof(containers_lock_t) : 0;
 }
 
+RUBY_REFERENCES(containers_lock_references) = {
+    RUBY_REF_EDGE(containers_lock_t, owner),
+    RUBY_REF_EDGE(containers_lock_t, owner_thread),
+    RUBY_REF_END,
+};
+
 static const rb_data_type_t containers_lock_type = {
     .wrap_struct_name = "Ractor::Containers::Lock",
     .function = {
-        .dmark = containers_lock_mark,
+        .dmark = RUBY_REFS_LIST_PTR(containers_lock_references),
         .dfree = containers_lock_free,
         .dsize = containers_lock_memsize,
-        .dcompact = containers_lock_compact,
     },
-    .flags = RUBY_TYPED_FROZEN_SHAREABLE,
+    .flags =
+        RUBY_TYPED_DECL_MARKING |
+        RUBY_TYPED_WB_PROTECTED |
+        RUBY_TYPED_FROZEN_SHAREABLE |
+        RUBY_TYPED_FREE_IMMEDIATELY |
+        FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static VALUE
@@ -285,8 +279,8 @@ containers_lock_acquire(VALUE self)
             rb_raise(rb_eThreadError, "deadlock; recursive locking");
         }
         if (NIL_P(lock->owner)) {
-            lock->owner = current;
-            lock->owner_thread = current_thread;
+            RB_OBJ_WRITE(self, &lock->owner, current);
+            RB_OBJ_WRITE(self, &lock->owner_thread, current_thread);
             pthread_mutex_unlock(&lock->guard);
             return;
         }
@@ -338,8 +332,8 @@ containers_lock_try_lock(VALUE self)
 
     pthread_mutex_lock(&lock->guard);
     if (NIL_P(lock->owner)) {
-        lock->owner = current;
-        lock->owner_thread = rb_thread_current();
+        RB_OBJ_WRITE(self, &lock->owner, current);
+        RB_OBJ_WRITE(self, &lock->owner_thread, rb_thread_current());
         acquired = true;
     }
     pthread_mutex_unlock(&lock->guard);

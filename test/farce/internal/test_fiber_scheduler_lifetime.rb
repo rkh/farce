@@ -99,6 +99,24 @@ module Farce
         assert_equal [true], seen
       end
 
+      def test_old_scheduler_retains_new_wait_results_through_collection_and_compaction
+        3.times { GC.start }
+        result = nil
+        task = Fiber.schedule { result = @scheduler.block(nil) }
+        token = @scheduler.send(:current_wait, task)
+        Thread.new do
+          @scheduler.send(:resume_wait, token, String.new("young result").freeze)
+          nil
+        end.value
+        GC.start(full_mark: false, immediate_sweep: true)
+        GC.verify_compaction_references(toward: :empty)
+        @scheduler.run
+
+        assert_equal "young result", result
+        refute_predicate task, :alive?
+        assert_predicate @scheduler, :idle?
+      end
+
       def test_socket_reopen_between_reads_does_not_reuse_an_old_lease
         skip "Ruby cannot select a reopened socket on Windows" if Gem.win_platform?
         original, old_writer = pair

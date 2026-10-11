@@ -120,7 +120,7 @@ typedef struct {
     trie_event_kind_t kind;
     long begin;
     long end;
-    VALUE name;
+    const VALUE *name;
     long match_index;
 } trie_capture_event_t;
 
@@ -180,6 +180,7 @@ typedef struct {
 } trie_search_t;
 
 typedef struct {
+    VALUE self;
     const unsigned char *bytes;
     size_t length;
     size_t position;
@@ -213,8 +214,8 @@ trie_check_interrupts(void)
 #ifdef FARCE_TRIE_FAILURE_INJECTION
     if (!NIL_P(trie_interrupt_queue)) {
         VALUE queues = trie_interrupt_queue;
-        VALUE ready = RARRAY_AREF(queues, 0);
-        VALUE release = RARRAY_AREF(queues, 1);
+        VALUE ready = rb_ary_entry(queues, 0);
+        VALUE release = rb_ary_entry(queues, 1);
         trie_interrupt_queue = Qnil;
         rb_funcall(ready, rb_intern("<<"), 1, Qtrue);
         rb_funcall(release, rb_intern("pop"), 0);
@@ -277,7 +278,7 @@ static const rb_data_type_t trie_scratch_type = {
     },
     .parent = NULL,
     .data = NULL,
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY,
+    .flags = RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FREE_IMMEDIATELY | FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static void *
@@ -350,20 +351,20 @@ trie_mark(void *pointer)
     size_t program_index;
     if (!trie) return;
     if (!NIL_P(trie->owner)) {
-        rb_gc_mark(trie->owner);
+        rb_gc_mark_movable(trie->owner);
         return;
     }
-    rb_gc_mark(trie->tokens);
+    rb_gc_mark_movable(trie->tokens);
     for (node_index = 0; node_index < trie->node_count; node_index++) {
         trie_node_t *node = trie->nodes[node_index];
         size_t index;
         for (index = 0; index < node->static_count; index++) {
-            rb_gc_mark(node->static_edges[index].label);
+            rb_gc_mark_movable(node->static_edges[index].label);
         }
         for (index = 0; index < node->regexp_count; index++) {
-            rb_gc_mark(node->regexp_edges[index].source);
-            rb_gc_mark(node->regexp_edges[index].anchored);
-            rb_gc_mark(node->regexp_edges[index].timeout);
+            rb_gc_mark_movable(node->regexp_edges[index].source);
+            rb_gc_mark_movable(node->regexp_edges[index].anchored);
+            rb_gc_mark_movable(node->regexp_edges[index].timeout);
         }
     }
     for (program_index = 0; program_index < trie->program_count; program_index++) {
@@ -371,7 +372,38 @@ trie_mark(void *pointer)
         size_t index;
         for (index = 0; index < program->instruction_count; index++) {
             if (program->instructions[index].opcode != TRIE_LITERAL_ALTERNATIVES) {
-                rb_gc_mark(program->instructions[index].name);
+                rb_gc_mark_movable(program->instructions[index].name);
+            }
+        }
+    }
+}
+
+static void
+trie_compact(void *pointer)
+{
+    trie_t *trie = pointer;
+    if (!trie) return;
+    if (!NIL_P(trie->owner)) {
+        containers_gc_update(&trie->owner);
+        return;
+    }
+    containers_gc_update(&trie->tokens);
+    for (size_t n = 0; n < trie->node_count; n++) {
+        trie_node_t *node = trie->nodes[n];
+        for (size_t i = 0; i < node->static_count; i++) {
+            containers_gc_update(&node->static_edges[i].label);
+        }
+        for (size_t i = 0; i < node->regexp_count; i++) {
+            containers_gc_update(&node->regexp_edges[i].source);
+            containers_gc_update(&node->regexp_edges[i].anchored);
+            containers_gc_update(&node->regexp_edges[i].timeout);
+        }
+    }
+    for (size_t p = 0; p < trie->program_count; p++) {
+        trie_program_t *program = trie->programs[p];
+        for (size_t i = 0; i < program->instruction_count; i++) {
+            if (program->instructions[i].opcode != TRIE_LITERAL_ALTERNATIVES) {
+                containers_gc_update(&program->instructions[i].name);
             }
         }
     }
@@ -478,10 +510,15 @@ static const rb_data_type_t trie_type = {
     .wrap_struct_name = "Farce::Internal::Trie",
     .function = {
         .dmark = trie_mark,
+        .dcompact = trie_compact,
         .dfree = trie_free,
         .dsize = trie_memsize,
     },
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_FROZEN_SHAREABLE,
+    .flags =
+        RUBY_TYPED_WB_PROTECTED |
+        RUBY_TYPED_FREE_IMMEDIATELY |
+        RUBY_TYPED_FROZEN_SHAREABLE |
+        FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static VALUE
@@ -846,8 +883,8 @@ trie_parse_capture(trie_parser_t *parser)
     instruction.name = Qnil;
     if (!trie_program_add_instruction(parser->program, instruction)) return false;
     name = rb_enc_str_new((const char *)parser->bytes + name_start, (long)name_length, rb_usascii_encoding());
-    rb_obj_freeze(name);
-    parser->program->instructions[parser->program->instruction_count - 1].name = name;
+    name = rb_str_to_interned_str(name);
+    RB_OBJ_WRITE(parser->self, &parser->program->instructions[parser->program->instruction_count - 1].name, name);
     parser->program->capture_count++;
     if (opcode == TRIE_CAPTURE_DIGIT || opcode == TRIE_CAPTURE_WORD) {
         parser->program->requires_ascii_input = true;
@@ -1028,7 +1065,7 @@ trie_program_cache_rebuild(trie_t *trie, size_t capacity)
 }
 
 static trie_program_t *
-trie_compile_program(trie_t *trie, VALUE source, int options, VALUE timeout)
+trie_compile_program(VALUE self, trie_t *trie, VALUE source, int options, VALUE timeout)
 {
     size_t length;
     int encoding;
@@ -1068,6 +1105,7 @@ trie_compile_program(trie_t *trie, VALUE source, int options, VALUE timeout)
     program->key_options = options;
 
     memset(&parser, 0, sizeof(parser));
+    parser.self = self;
     parser.bytes = program->key;
     parser.length = length;
     parser.program = program;
@@ -1199,7 +1237,7 @@ trie_regexp_edge_equal(const trie_regexp_edge_t *edge, VALUE source,
 }
 
 static trie_node_t *
-trie_insert_string(trie_t *trie, trie_node_t *node, VALUE string)
+trie_insert_string(VALUE self, trie_t *trie, trie_node_t *node, VALUE string)
 {
     size_t offset = 0;
     size_t length = (size_t)RSTRING_LEN(string);
@@ -1210,7 +1248,7 @@ trie_insert_string(trie_t *trie, trie_node_t *node, VALUE string)
             VALUE label = trie_frozen_string(string, (long)offset, (long)(length - offset));
             size_t edge_index = node->static_count;
             trie_ensure_static_edges(node, node->static_count + 1);
-            node->static_edges[edge_index].label = label;
+            RB_OBJ_WRITE(self, &node->static_edges[edge_index].label, label);
             node->static_edges[edge_index].child = child;
             node->static_edges[edge_index].encoding = rb_enc_get_index(label);
             node->static_count++;
@@ -1233,13 +1271,13 @@ trie_insert_string(trie_t *trie, trie_node_t *node, VALUE string)
         VALUE prefix = trie_frozen_string(old_label, 0, (long)shared);
         VALUE old_suffix = trie_frozen_string(old_label, (long)shared, (long)(edge_length - shared));
         trie_ensure_static_edges(middle, shared == length - offset ? 1 : 2);
-        middle->static_edges[0].label = old_suffix;
+        RB_OBJ_WRITE(self, &middle->static_edges[0].label, old_suffix);
         middle->static_edges[0].child = edge->child;
         middle->static_edges[0].encoding = rb_enc_get_index(old_suffix);
         middle->static_count = 1;
         trie->static_edge_count++;
         trie_index_static_edge(trie, middle, 0);
-        edge->label = prefix;
+        RB_OBJ_WRITE(self, &edge->label, prefix);
         edge->child = middle;
         edge->encoding = rb_enc_get_index(prefix);
         offset += shared;
@@ -1251,7 +1289,7 @@ trie_insert_string(trie_t *trie, trie_node_t *node, VALUE string)
         }
         trie_node_t *child = trie_node_new(trie);
         VALUE new_suffix = trie_frozen_string(string, (long)offset, (long)(length - offset));
-        middle->static_edges[1].label = new_suffix;
+        RB_OBJ_WRITE(self, &middle->static_edges[1].label, new_suffix);
         middle->static_edges[1].child = child;
         middle->static_edges[1].encoding = rb_enc_get_index(new_suffix);
         middle->static_count = 2;
@@ -1267,7 +1305,7 @@ trie_insert_string(trie_t *trie, trie_node_t *node, VALUE string)
 }
 
 static trie_node_t *
-trie_insert_regexp(trie_t *trie, trie_node_t *node, VALUE regexp)
+trie_insert_regexp(VALUE self, trie_t *trie, trie_node_t *node, VALUE regexp)
 {
     VALUE source = RREGEXP_SRC(regexp);
     VALUE source_copy = rb_str_dup(source);
@@ -1287,13 +1325,13 @@ trie_insert_regexp(trie_t *trie, trie_node_t *node, VALUE regexp)
         }
     }
     VALUE anchored = trie_anchored_regexp(source_copy, options, timeout);
-    trie_program_t *program = trie_compile_program(trie, source_copy, options, timeout);
+    trie_program_t *program = trie_compile_program(self, trie, source_copy, options, timeout);
     trie_node_t *child = trie_node_new(trie);
     trie_ensure_regexp_edges(node, node->regexp_count + 1);
     trie_regexp_edge_t *edge = &node->regexp_edges[node->regexp_count++];
-    edge->source = source_copy;
-    edge->anchored = anchored;
-    edge->timeout = timeout;
+    RB_OBJ_WRITE(self, &edge->source, source_copy);
+    RB_OBJ_WRITE(self, &edge->anchored, anchored);
+    RB_OBJ_WRITE(self, &edge->timeout, timeout);
     edge->options = options;
     edge->program = program;
     edge->child = child;
@@ -1306,23 +1344,23 @@ trie_insert_regexp(trie_t *trie, trie_node_t *node, VALUE regexp)
 }
 
 static void
-trie_insert_entry(trie_t *trie, VALUE parts, uint32_t token)
+trie_insert_entry(VALUE self, trie_t *trie, VALUE parts, uint32_t token)
 {
     trie_node_t *node = trie->root;
     long index;
     Check_Type(parts, T_ARRAY);
     for (index = 0; index < RARRAY_LEN(parts); index++) {
-        VALUE part = RARRAY_AREF(parts, index);
+        VALUE part = rb_ary_entry(parts, index);
         if (RB_TYPE_P(part, T_STRING)) {
             VALUE stable_part = rb_str_new_frozen(part);
             if (rb_enc_str_coderange(stable_part) == ENC_CODERANGE_BROKEN) {
                 rb_raise(rb_eArgError, "trie literal has invalid encoding");
             }
-            node = trie_insert_string(trie, node, stable_part);
+            node = trie_insert_string(self, trie, node, stable_part);
             RB_GC_GUARD(stable_part);
         }
         else if (rb_obj_is_kind_of(part, rb_cRegexp)) {
-            node = trie_insert_regexp(trie, node, part);
+            node = trie_insert_regexp(self, trie, node, part);
         }
         else {
             rb_raise(rb_eTypeError, "trie parts must be strings or regular expressions");
@@ -1386,7 +1424,7 @@ trie_initialize(VALUE self, VALUE entries, VALUE tokens)
     token_identities = rb_hash_new();
     rb_funcall(token_identities, rb_intern("compare_by_identity"), 0);
     for (index = 0; index < RARRAY_LEN(tokens); index++) {
-        VALUE token = RARRAY_AREF(tokens, index);
+        VALUE token = rb_ary_entry(tokens, index);
         containers_check_shareable(token);
         if (rb_hash_lookup2(token_identities, token, Qundef) != Qundef) {
             rb_raise(rb_eArgError, "trie tokens must have unique identities");
@@ -1396,24 +1434,24 @@ trie_initialize(VALUE self, VALUE entries, VALUE tokens)
         if ((index & (TRIE_INTERRUPT_INTERVAL - 1)) == TRIE_INTERRUPT_INTERVAL - 1) trie_check_interrupts();
     }
     rb_obj_freeze(token_copy);
-    trie->tokens = token_copy;
+    RB_OBJ_WRITE(self, &trie->tokens, token_copy);
     trie->root = trie_node_new(trie);
 
     for (index = 0; index < RARRAY_LEN(entries); index++) {
-        VALUE entry = RARRAY_AREF(entries, index);
+        VALUE entry = rb_ary_entry(entries, index);
         VALUE parts;
         VALUE identifier;
         unsigned long id;
         Check_Type(entry, T_ARRAY);
         if (RARRAY_LEN(entry) != 2) rb_raise(rb_eArgError, "trie entry must contain parts and token id");
-        parts = RARRAY_AREF(entry, 0);
-        identifier = RARRAY_AREF(entry, 1);
+        parts = rb_ary_entry(entry, 0);
+        identifier = rb_ary_entry(entry, 1);
         if (!RB_INTEGER_TYPE_P(identifier)) rb_raise(rb_eTypeError, "trie token id must be an integer");
         id = NUM2ULONG(identifier);
         if (id >= (unsigned long)RARRAY_LEN(token_copy) || id > UINT32_MAX) {
             rb_raise(rb_eArgError, "trie token id is out of range");
         }
-        trie_insert_entry(trie, parts, (uint32_t)id);
+        trie_insert_entry(self, trie, parts, (uint32_t)id);
         if ((index & (TRIE_INTERRUPT_INTERVAL - 1)) == TRIE_INTERRUPT_INTERVAL - 1) trie_check_interrupts();
     }
     trie->initialized = true;
@@ -1477,7 +1515,7 @@ trie_search_ensure_events(trie_search_t *search, size_t minimum)
 }
 
 static void
-trie_search_append_native(trie_search_t *search, long begin, long end, VALUE name)
+trie_search_append_native(trie_search_t *search, long begin, long end, const VALUE *name)
 {
     trie_capture_event_t *event;
     trie_search_ensure_events(search, search->event_count + 1);
@@ -1500,7 +1538,7 @@ trie_search_append_ruby(trie_search_t *search, VALUE match)
     event = &search->events[search->event_count++];
     event->kind = TRIE_EVENT_RUBY;
     event->begin = event->end = 0;
-    event->name = Qnil;
+    event->name = NULL;
     event->match_index = match_index;
 }
 
@@ -1536,7 +1574,7 @@ trie_program_match(const trie_program_t *program, VALUE input, long cursor,
                 trie_search_work_checkpoint(search);
             }
             if (cursor == begin) return false;
-            trie_search_append_native(search, begin, cursor, instruction->name);
+            trie_search_append_native(search, begin, cursor, &instruction->name);
         }
     }
     if (program->end_anchor && cursor != length) return false;
@@ -1633,17 +1671,17 @@ static void
 trie_materialize_captures(trie_search_t *search, VALUE *captures, VALUE *named)
 {
     size_t index;
-    *captures = rb_ary_new();
+    *captures = rb_ary_new_capa((long)search->event_count);
     *named = rb_hash_new();
     for (index = 0; index < search->event_count; index++) {
         trie_capture_event_t *event = &search->events[index];
         if (event->kind == TRIE_EVENT_NATIVE) {
             VALUE value = rb_str_subseq(search->input, event->begin, event->end - event->begin);
             rb_ary_push(*captures, value);
-            trie_merge_named(*named, event->name, value);
+            trie_merge_named(*named, *event->name, value);
         }
         else {
-            VALUE match = RARRAY_AREF(search->matches, event->match_index);
+            VALUE match = rb_ary_entry(search->matches, event->match_index);
             VALUE edge_captures = rb_funcall(match, id_captures, 0);
             VALUE edge_named = rb_funcall(match, id_named_captures, 0);
             trie_named_merge_t merge = {.destination = *named};
@@ -1743,7 +1781,7 @@ trie_emit_terminal(trie_search_t *search, trie_frame_t *frame)
         if (trie_seen(search, id)) continue;
         trie_materialize_captures(search, &captures, &named);
         suffix = rb_str_subseq(search->input, frame->cursor, search->input_length - frame->cursor);
-        token = RARRAY_AREF(search->trie->tokens, (long)id);
+        token = rb_ary_entry(search->trie->tokens, (long)id);
         if (search->stream) {
             rb_yield_values(4, token, captures, named, suffix);
             continue;
@@ -1930,7 +1968,7 @@ trie_initialize_copy(VALUE self, VALUE other)
     trie_release_contents(destination);
     memset(destination, 0, sizeof(*destination));
     destination->tokens = Qnil;
-    destination->owner = owner;
+    RB_OBJ_WRITE(self, &destination->owner, owner);
     destination->initialized = true;
     rb_obj_freeze(self);
     containers_publish_native_with_references(self, trie_validate_references);

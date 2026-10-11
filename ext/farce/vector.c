@@ -60,11 +60,11 @@ static void
 vector_compact(void *pointer)
 {
     vector_t *vector = pointer;
-    vector->updating_fiber = rb_gc_location(vector->updating_fiber);
-    vector->updating_thread = rb_gc_location(vector->updating_thread);
+    containers_gc_update(&vector->updating_fiber);
+    containers_gc_update(&vector->updating_thread);
     if (!vector->values) return;
     for (size_t index = 0; index < vector->size; index++) {
-        vector->values[index] = rb_gc_location(vector->values[index]);
+        containers_gc_update(&vector->values[index]);
     }
 }
 
@@ -92,7 +92,11 @@ static const rb_data_type_t vector_type = {
         .dsize = vector_memsize,
         .dcompact = vector_compact,
     },
-    .flags = RUBY_TYPED_FROZEN_SHAREABLE,
+    .flags =
+        RUBY_TYPED_WB_PROTECTED |
+        RUBY_TYPED_FROZEN_SHAREABLE |
+        RUBY_TYPED_FREE_IMMEDIATELY |
+        FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static void
@@ -133,6 +137,8 @@ get_vector(VALUE self)
     return vector;
 }
 
+/* Buffer growth also runs under the state mutex. Keep the allocator pair
+ * consistent and avoid Ruby allocators that can trigger GC in that section. */
 static VALUE *
 vector_allocate_values(size_t capacity)
 {
@@ -455,9 +461,9 @@ vector_initialize(int argc, VALUE *argv, VALUE self)
     vector->capacity = capacity;
 
     for (size_t index = 0; index < size; index++) {
-        VALUE value = RARRAY_AREF(source, (long)index);
+        VALUE value = rb_ary_entry(source, (long)index);
         containers_check_shareable(value);
-        vector->values[index] = value;
+        RB_OBJ_WRITE(self, &vector->values[index], value);
     }
     vector->size = size;
     vector->initialized = true;
@@ -604,7 +610,7 @@ vector_store_internal(VALUE self, vector_t *vector, long long raw, VALUE value, 
         rb_memerror();
     }
     if (index >= vector->size) vector->size = index + 1;
-    vector->values[index] = value;
+    RB_OBJ_WRITE(self, &vector->values[index], value);
     vector_notify_waiters_locked(vector);
     pthread_mutex_unlock(&vector->lock);
     return value;
@@ -669,7 +675,7 @@ vector_push(int argc, VALUE *argv, VALUE self)
         pthread_mutex_unlock(&vector->lock);
         rb_memerror();
     }
-    vector->values[vector->size++] = value;
+    RB_OBJ_WRITE(self, &vector->values[vector->size++], value);
     vector_notify_waiters_locked(vector);
     pthread_mutex_unlock(&vector->lock);
     return self;
@@ -719,7 +725,7 @@ vector_swap(int argc, VALUE *argv, VALUE self)
     }
     VALUE previous = index < vector->size ? vector->values[index] : Qnil;
     if (index >= vector->size) vector->size = index + 1;
-    vector->values[index] = replacement;
+    RB_OBJ_WRITE(self, &vector->values[index], replacement);
     vector_notify_waiters_locked(vector);
     pthread_mutex_unlock(&vector->lock);
     return previous;
@@ -759,7 +765,7 @@ vector_store_if_absent_body(VALUE opaque)
     if (operation->index >= operation->vector->size) {
         operation->vector->size = operation->index + 1;
     }
-    operation->vector->values[operation->index] = result;
+    RB_OBJ_WRITE(operation->self, &operation->vector->values[operation->index], result);
     vector_finish_update_locked(operation->vector);
     pthread_mutex_unlock(&operation->vector->lock);
     operation->complete = true;
@@ -817,7 +823,7 @@ vector_cas_body(VALUE opaque)
     rb_check_frozen(operation->self);
 
     pthread_mutex_lock(&operation->vector->lock);
-    if (matches) operation->vector->values[operation->index] = operation->replacement;
+    if (matches) RB_OBJ_WRITE(operation->self, &operation->vector->values[operation->index], operation->replacement);
     vector_finish_update_locked(operation->vector);
     pthread_mutex_unlock(&operation->vector->lock);
     operation->complete = true;
@@ -869,7 +875,7 @@ vector_upsert_body(VALUE opaque)
     rb_check_frozen(operation->self);
     containers_check_shareable(result);
     pthread_mutex_lock(&operation->vector->lock);
-    operation->vector->values[operation->index] = result;
+    RB_OBJ_WRITE(operation->self, &operation->vector->values[operation->index], result);
     vector_finish_update_locked(operation->vector);
     pthread_mutex_unlock(&operation->vector->lock);
     operation->complete = true;
@@ -899,7 +905,7 @@ vector_upsert(int argc, VALUE *argv, VALUE self)
     }
     if (index >= vector->size) vector->size = index + 1;
     if (NIL_P(vector->values[index])) {
-        vector->values[index] = initial;
+        RB_OBJ_WRITE(self, &vector->values[index], initial);
         vector_notify_waiters_locked(vector);
         pthread_mutex_unlock(&vector->lock);
         return initial;
@@ -928,7 +934,7 @@ vector_update_body(VALUE opaque)
     if (operation->index >= operation->vector->size) {
         operation->vector->size = operation->index + 1;
     }
-    operation->vector->values[operation->index] = result;
+    RB_OBJ_WRITE(operation->self, &operation->vector->values[operation->index], result);
     vector_finish_update_locked(operation->vector);
     pthread_mutex_unlock(&operation->vector->lock);
     operation->complete = true;
@@ -1055,7 +1061,7 @@ unshared_vector_each(VALUE self)
     Check_Type(values, T_ARRAY);
     long limit = RARRAY_LEN(values);
     for (long index = 0; index < limit && index < RARRAY_LEN(values); index++) {
-        rb_yield(RARRAY_AREF(values, index));
+        rb_yield(rb_ary_entry(values, index));
     }
     RB_GC_GUARD(values);
     return self;
@@ -1071,7 +1077,7 @@ unshared_vector_reverse_each(VALUE self)
     while (index > 0) {
         if (index > RARRAY_LEN(values)) index = RARRAY_LEN(values);
         if (index == 0) break;
-        rb_yield(RARRAY_AREF(values, --index));
+        rb_yield(rb_ary_entry(values, --index));
     }
     RB_GC_GUARD(values);
     return self;
@@ -1097,6 +1103,9 @@ vector_transaction_apply(farce_transaction_entry_t *entry)
     copy->values = values;
     copy->capacity = capacity;
     copy->size = size;
+    for (size_t i = 0; i < vector->size; i++) {
+        RB_OBJ_WRITTEN(entry->source, Qundef, vector->values[i]);
+    }
 }
 
 static void
@@ -1110,8 +1119,8 @@ vector_transaction_reserve(farce_transaction_entry_t *entry, VALUE fiber, VALUE 
 {
     vector_t *vector = entry->source_data;
     vector->updating = FARCE_TRANSACTION_RESERVED;
-    vector->updating_fiber = fiber;
-    vector->updating_thread = thread;
+    RB_OBJ_WRITE(entry->source, &vector->updating_fiber, fiber);
+    RB_OBJ_WRITE(entry->source, &vector->updating_thread, thread);
 }
 
 static void

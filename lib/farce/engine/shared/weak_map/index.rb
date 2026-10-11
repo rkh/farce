@@ -184,7 +184,20 @@ module Farce
 
       def data_for(key) = Internal.garbage_collectable?(key) ? @data : @immediate
       def key_reference(key) = UnsharedWeakMapWeakReference.for(key)
-      def registry_enumerator = @entries.to_enum(:each_value)
+
+      def registry_enumerator
+        entries = @entries
+        Enumerator.new do |yielder|
+          # Compaction can rehash a weak registry and repeat earlier entries.
+          # Tokens have no back-reference to cells, keys, or values.
+          seen = {}.compare_by_identity
+          entries.each_value do |entry|
+            next if seen.key?(entry.token)
+            seen[entry.token] = true
+            yielder << entry
+          end
+        end
+      end
 
       def register(entry)
         @registry_mutex.synchronize do

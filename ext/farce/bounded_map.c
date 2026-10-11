@@ -153,17 +153,17 @@ lru_compact(void *opaque)
     lru_map_t *map = opaque;
     if (map == NULL) return;
 
-    map->lock = rb_gc_location(map->lock);
+    containers_gc_update(&map->lock);
     if (map->lfu_policy) {
         for (lfu_bucket_t *bucket = map->least_frequency;
              bucket != NULL;
              bucket = bucket->following) {
-            bucket->frequency = rb_gc_location(bucket->frequency);
+            containers_gc_update(&bucket->frequency);
             for (lru_entry_t *entry = bucket->least_recent;
                  entry != NULL;
                  entry = entry->following) {
-                entry->key = rb_gc_location(entry->key);
-                entry->value = rb_gc_location(entry->value);
+                containers_gc_update(&entry->key);
+                containers_gc_update(&entry->value);
             }
         }
     }
@@ -171,8 +171,8 @@ lru_compact(void *opaque)
         for (lru_entry_t *entry = map->least_recent;
              entry != NULL;
              entry = entry->following) {
-            entry->key = rb_gc_location(entry->key);
-            entry->value = rb_gc_location(entry->value);
+            containers_gc_update(&entry->key);
+            containers_gc_update(&entry->value);
         }
     }
 }
@@ -207,7 +207,7 @@ static const rb_data_type_t lru_map_type = {
         .dsize = lru_memsize,
         .dcompact = lru_compact,
     },
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY,
+    .flags = RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FREE_IMMEDIATELY | FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static const rb_data_type_t lru_shared_map_type = {
@@ -218,7 +218,11 @@ static const rb_data_type_t lru_shared_map_type = {
         .dsize = lru_memsize,
         .dcompact = lru_compact,
     },
-    .flags = RUBY_TYPED_FROZEN_SHAREABLE,
+    .flags =
+        RUBY_TYPED_WB_PROTECTED |
+        RUBY_TYPED_FROZEN_SHAREABLE |
+        RUBY_TYPED_FREE_IMMEDIATELY |
+        FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static VALUE
@@ -1320,8 +1324,8 @@ lru_each(VALUE self)
 
     for (long index = 0; index < length; index += 2) {
         rb_yield(rb_assoc_new(
-            RARRAY_AREF(entries, index),
-            RARRAY_AREF(entries, index + 1)
+            rb_ary_entry(entries, index),
+            rb_ary_entry(entries, index + 1)
         ));
     }
     RB_GC_GUARD(entries);
@@ -1338,7 +1342,7 @@ lru_each_key(VALUE self)
     long length = RARRAY_LEN(entries);
 
     for (long index = 0; index < length; index += 2) {
-        rb_yield(RARRAY_AREF(entries, index));
+        rb_yield(rb_ary_entry(entries, index));
     }
     RB_GC_GUARD(entries);
     return self;
@@ -1354,7 +1358,7 @@ lru_each_value(VALUE self)
     long length = RARRAY_LEN(entries);
 
     for (long index = 1; index < length; index += 2) {
-        rb_yield(RARRAY_AREF(entries, index));
+        rb_yield(rb_ary_entry(entries, index));
     }
     RB_GC_GUARD(entries);
     return self;
@@ -1370,7 +1374,7 @@ lru_keys(VALUE self)
     VALUE keys = rb_ary_new_capa(length / 2);
 
     for (long index = 0; index < length; index += 2) {
-        rb_ary_push(keys, RARRAY_AREF(entries, index));
+        rb_ary_push(keys, rb_ary_entry(entries, index));
     }
     RB_GC_GUARD(entries);
     rb_obj_freeze(keys);

@@ -471,8 +471,8 @@ tc_map_compact_node(tc_link *link)
 
     if (link == NULL) return;
     node = TC_MAP_NODE(link);
-    node->key = rb_gc_location(node->key);
-    node->value = rb_gc_location(node->value);
+    containers_gc_update(&node->key);
+    containers_gc_update(&node->value);
     tc_map_compact_node(link->left);
     tc_map_compact_node(link->right);
 }
@@ -605,12 +605,10 @@ tc_core_map_compact(void *opaque)
     tc_core_map *core = opaque;
     if (core == NULL) return;
     tc_map_compact_node(core->map.root);
-    core->owner_fiber = rb_gc_location(core->owner_fiber);
-    core->owner_ruby_thread = rb_gc_location(core->owner_ruby_thread);
-    core->publication_owner_fiber =
-        rb_gc_location(core->publication_owner_fiber);
-    core->publication_owner_ruby_thread =
-        rb_gc_location(core->publication_owner_ruby_thread);
+    containers_gc_update(&core->owner_fiber);
+    containers_gc_update(&core->owner_ruby_thread);
+    containers_gc_update(&core->publication_owner_fiber);
+    containers_gc_update(&core->publication_owner_ruby_thread);
 }
 
 static void
@@ -642,7 +640,7 @@ static const rb_data_type_t tc_unsafe_map_type = {
         .dsize = tc_core_map_memsize,
         .dcompact = tc_core_map_compact,
     },
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY,
+    .flags = RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FREE_IMMEDIATELY | FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static const rb_data_type_t tc_map_type = {
@@ -653,7 +651,7 @@ static const rb_data_type_t tc_map_type = {
         .dsize = tc_core_map_memsize,
         .dcompact = tc_core_map_compact,
     },
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY,
+    .flags = RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FREE_IMMEDIATELY | FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static const rb_data_type_t tc_shared_map_type = {
@@ -664,7 +662,11 @@ static const rb_data_type_t tc_shared_map_type = {
         .dsize = tc_core_map_memsize,
         .dcompact = tc_core_map_compact,
     },
-    .flags = RUBY_TYPED_FROZEN_SHAREABLE,
+    .flags =
+        RUBY_TYPED_WB_PROTECTED |
+        RUBY_TYPED_FROZEN_SHAREABLE |
+        RUBY_TYPED_FREE_IMMEDIATELY |
+        FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static VALUE
@@ -925,8 +927,8 @@ tc_core_map_lock(VALUE self, tc_core_map *core)
             rb_raise(rb_eThreadError, "deadlock; recursive tree map access");
         }
         if (NIL_P(core->owner_fiber) && !publication_busy) {
-            core->owner_fiber = current;
-            core->owner_ruby_thread = current_thread;
+            RB_OBJ_WRITE(self, &core->owner_fiber, current);
+            RB_OBJ_WRITE(self, &core->owner_ruby_thread, current_thread);
             pthread_mutex_unlock(&core->lock);
             return;
         }
@@ -1731,8 +1733,8 @@ tc_core_map_each(VALUE self)
     entry_count = RARRAY_LEN(entries);
     for (index = 0; index < entry_count; index += 2) {
         rb_yield(rb_assoc_new(
-            RARRAY_AREF(entries, index),
-            RARRAY_AREF(entries, index + 1)
+            rb_ary_entry(entries, index),
+            rb_ary_entry(entries, index + 1)
         ));
     }
     RB_GC_GUARD(entries);
@@ -1787,6 +1789,18 @@ tc_transaction_valid(farce_transaction_entry_t *entry)
         source->map.revision == entry->version;
 }
 
+/* A transaction transfers the tree's reference edges to a different owner. */
+static void
+tc_map_written_node(VALUE self, tc_link *link)
+{
+    if (!link) return;
+    tc_map_node *node = (tc_map_node *)link;
+    RB_OBJ_WRITTEN(self, Qundef, node->key);
+    RB_OBJ_WRITTEN(self, Qundef, node->value);
+    tc_map_written_node(self, link->left);
+    tc_map_written_node(self, link->right);
+}
+
 static void
 tc_transaction_apply(farce_transaction_entry_t *entry)
 {
@@ -1800,6 +1814,7 @@ tc_transaction_apply(farce_transaction_entry_t *entry)
     working->map.root = root;
     working->map.size = size;
     working->map.revision++;
+    tc_map_written_node(entry->source, source->map.root);
 }
 
 static void
@@ -1813,8 +1828,8 @@ tc_transaction_reserve(farce_transaction_entry_t *entry, VALUE fiber, VALUE thre
 {
     tc_core_map *core = entry->source_data;
     core->transaction_reserved = true;
-    core->owner_fiber = fiber;
-    core->owner_ruby_thread = thread;
+    RB_OBJ_WRITE(entry->source, &core->owner_fiber, fiber);
+    RB_OBJ_WRITE(entry->source, &core->owner_ruby_thread, thread);
 }
 
 static void
@@ -1882,7 +1897,7 @@ tc_transaction_snapshot(VALUE self)
     };
     VALUE pairs = tc_core_map_call_locked(self, source, tc_transaction_snapshot_body, &snapshot);
     for (long i = 0; i < RARRAY_LEN(pairs); i += 2) {
-        tc_core_map_store(working, RARRAY_AREF(pairs, i), RARRAY_AREF(pairs, i + 1));
+        tc_core_map_store(working, rb_ary_entry(pairs, i), rb_ary_entry(pairs, i + 1));
     }
     RB_GC_GUARD(pairs);
     return result;

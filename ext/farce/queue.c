@@ -198,7 +198,7 @@ queue_compact(void *pointer)
     if (!queue->values) return;
     size_t index = queue->head;
     for (size_t remaining = queue->size; remaining > 0; remaining--) {
-        queue->values[index] = rb_gc_location(queue->values[index]);
+        containers_gc_update(&queue->values[index]);
         if (++index == queue->storage_capacity) index = 0;
     }
 }
@@ -231,7 +231,11 @@ static const rb_data_type_t queue_type = {
         .dsize = queue_memsize,
         .dcompact = queue_compact,
     },
-    .flags = RUBY_TYPED_FROZEN_SHAREABLE,
+    .flags =
+        RUBY_TYPED_WB_PROTECTED |
+        RUBY_TYPED_FROZEN_SHAREABLE |
+        RUBY_TYPED_FREE_IMMEDIATELY |
+        FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static const rb_data_type_t unshared_queue_type = {
@@ -243,6 +247,7 @@ static const rb_data_type_t unshared_queue_type = {
         .dcompact = queue_compact,
     },
     .parent = &queue_type,
+    .flags = RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FREE_IMMEDIATELY | FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 /* Unshared queues are confined to one Ractor. These critical sections call no
@@ -662,7 +667,8 @@ queue_capacity(VALUE self)
     return queue->bounded ? SIZET2NUM(queue->limit) : Qnil;
 }
 
-/* Called with queue->lock held. The queue is unchanged if allocation fails. */
+/* Called with queue->lock held. The queue is unchanged if allocation fails.
+ * Ruby allocators could trigger GC while a peer is blocked on this mutex. */
 static bool
 queue_grow(queue_t *queue)
 {
@@ -921,7 +927,7 @@ queue_push_with_timeout(VALUE self, queue_t *queue, VALUE value, queue_timeout_t
                 queue_unlock(queue);
                 rb_memerror();
             }
-            queue->values[queue->tail] = value;
+            RB_OBJ_WRITE(self, &queue->values[queue->tail], value);
             if (queue->track_age) queue->enqueued_at[queue->tail] = monotonic_now();
             if (++queue->tail == queue->storage_capacity) queue->tail = 0;
             queue->size++;

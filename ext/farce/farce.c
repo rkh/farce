@@ -107,7 +107,7 @@ containers_normalize_string_key(VALUE key)
         long index;
 
         for (index = 0; index < RARRAY_LEN(instance_variables); index++) {
-            ID id = SYM2ID(RARRAY_AREF(instance_variables, index));
+            ID id = SYM2ID(rb_ary_entry(instance_variables, index));
             rb_ivar_set(stored_key, id, rb_ivar_get(key, id));
         }
         RB_GC_GUARD(instance_variables);

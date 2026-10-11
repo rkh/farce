@@ -240,7 +240,7 @@ module Farce
         next unless streamed.one?
 
         GC.start
-        GC.compact if GC.respond_to?(:compact)
+        GC.verify_compaction_references(toward: :empty)
       end
 
       assert_equal capture_count, trie.stats.fetch(:native_programs)

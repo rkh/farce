@@ -9,19 +9,44 @@
 // Tell Ruby's garbage collector which Ruby objects one fiber's wait still needs.
 static int mark_wait(st_data_t key, st_data_t value, st_data_t arg) {
     fs_wait *w = (fs_wait *)value;
-    rb_gc_mark(w->fiber); rb_gc_mark(w->token); rb_gc_mark(w->value);
-    rb_gc_mark(w->error); rb_gc_mark(w->groups); rb_gc_mark(w->ios);
+    rb_gc_mark_movable(w->fiber); rb_gc_mark_movable(w->token); rb_gc_mark_movable(w->value);
+    rb_gc_mark_movable(w->error); rb_gc_mark_movable(w->groups); rb_gc_mark_movable(w->ios);
     return ST_CONTINUE;
 }
 
 // Keep the scheduler's Ruby objects alive, including fibers that are starting or waiting.
 static void mark(void *data) {
     fs_state *s = data;
-    rb_gc_mark(s->root); rb_gc_mark(s->active);
-    for (fs_admission *a = s->admission; a; a = a->previous) { rb_gc_mark(a->parent); rb_gc_mark(a->child); }
-    rb_gc_mark(s->owner);
-    rb_gc_mark(s->backend); rb_gc_mark(s->fallback);
+    rb_gc_mark_movable(s->root); rb_gc_mark_movable(s->active);
+    for (fs_admission *a = s->admission; a; a = a->previous) { rb_gc_mark_movable(a->parent); rb_gc_mark_movable(a->child); }
+    rb_gc_mark_movable(s->owner);
+    rb_gc_mark_movable(s->backend); rb_gc_mark_movable(s->fallback);
     if (s->fibers) st_foreach(s->fibers, mark_wait, 0);
+}
+
+// Update wait references and the table's fiber identity keys together.
+static int compact_wait(st_data_t key, st_data_t value, st_data_t arg, int error) {
+    fs_wait *w = (fs_wait *)value;
+    containers_gc_update(&w->fiber); containers_gc_update(&w->token);
+    containers_gc_update(&w->value); containers_gc_update(&w->error);
+    containers_gc_update(&w->groups); containers_gc_update(&w->ios);
+    return key == (st_data_t)w->fiber ? ST_CONTINUE : ST_REPLACE;
+}
+
+static int compact_wait_key(st_data_t *key, st_data_t *value, st_data_t arg, int existing) {
+    *key = (st_data_t)((fs_wait *)*value)->fiber;
+    return ST_CONTINUE;
+}
+
+static void compact(void *data) {
+    fs_state *s = data;
+    containers_gc_update(&s->root); containers_gc_update(&s->active);
+    containers_gc_update(&s->owner); containers_gc_update(&s->backend);
+    containers_gc_update(&s->fallback);
+    for (fs_admission *a = s->admission; a; a = a->previous) {
+        containers_gc_update(&a->parent); containers_gc_update(&a->child);
+    }
+    if (s->fibers) st_foreach_with_replace(s->fibers, compact_wait, compact_wait_key, 0);
 }
 
 // Free a fiber's wait record and any extra IO watches it owns.
@@ -97,8 +122,8 @@ static size_t memsize(const void *data) {
 // Describe how Ruby should mark, free, and measure the native scheduler object.
 const rb_data_type_t fs_type = {
     .wrap_struct_name = "Farce::Internal::FiberScheduler",
-    .function = {.dmark = mark, .dfree = free_state, .dsize = memsize},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
+    .function = {.dmark = mark, .dfree = free_state, .dsize = memsize, .dcompact = compact},
+    .flags = RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FREE_IMMEDIATELY | FARCE_TYPED_THREAD_SAFE_FREE
 };
 
 // Create an empty scheduler in a closed state.
@@ -128,8 +153,8 @@ static VALUE initialize(int argc, VALUE *argv, VALUE self) {
     }
     fs_state *s = fs_get(self);
     if (!NIL_P(s->owner)) rb_raise(rb_eRuntimeError, "scheduler already initialized");
-    s->owner = rb_thread_current();
-    s->root = rb_fiber_current();
+    RB_OBJ_WRITE(self, &s->owner, rb_thread_current());
+    RB_OBJ_WRITE(self, &s->root, rb_fiber_current());
     s->fibers = st_init_numtable();
     int driver = 0;
     if (backend == ID2SYM(rb_intern("auto"))) {
@@ -144,7 +169,7 @@ static VALUE initialize(int argc, VALUE *argv, VALUE self) {
     else rb_raise(rb_eArgError, "unknown native scheduler backend");
     int error = fs_driver_init(s, driver);
     if (error) rb_syserr_fail(error, "requested fiber scheduler backend is unavailable");
-    s->backend = backend;
+    RB_OBJ_WRITE(self, &s->backend, backend);
     if (s->descriptor >= 0) fcntl(s->descriptor, F_SETFD, FD_CLOEXEC);
     if (pipe(s->wake) < 0) rb_sys_fail("scheduler wake pipe");
     for (int i = 0; i < 2; i++) {
@@ -212,7 +237,7 @@ VALUE fs_arm_checked(VALUE self) {
     fs_slot *slot = &s->slots[w->slot];
     if (slot->generation == (UINT64_MAX >> (FS_SLOT_BITS + 2))) rb_raise(rb_eRangeError, "scheduler generation exhausted");
     VALUE token = ULL2NUM((++slot->generation << FS_SLOT_BITS) | w->slot);
-    w->token = token; w->status = w->events = w->selected = w->native_error = 0;
+    RB_OBJ_WRITE(self, &w->token, token); w->status = w->events = w->selected = w->native_error = 0;
     w->value = w->error = w->groups = w->ios = Qnil;
     s->pending++;
     return token;
@@ -257,7 +282,7 @@ static fs_wait *ready_pop(fs_state *s) {
 VALUE fs_resume(VALUE self, VALUE token, VALUE value, VALUE error) {
     fs_state *s = fs_get(self); fs_wait *w = fs_lookup(s, token);
     if (!w || w->status != 0) return Qfalse;
-    w->status = 1; w->value = value; w->error = error;
+    w->status = 1; RB_OBJ_WRITE(self, &w->value, value); RB_OBJ_WRITE(self, &w->error, error);
     ready_push(s, w); return Qtrue;
 }
 
@@ -273,7 +298,7 @@ static VALUE interrupt(VALUE self, VALUE token, VALUE error) {
     fs_state *s = fs_get(self); fs_wait *w = fs_lookup(s, token);
     if (!w || w->status == 2) return Qfalse;
     if (!w->status) ready_push(s, w);
-    w->status = 1; w->error = error; return Qtrue;
+    w->status = 1; RB_OBJ_WRITE(self, &w->error, error); return Qtrue;
 }
 
 // Declare the closed-IO check used below to detect descriptor reuse.
@@ -359,14 +384,14 @@ VALUE fs_retire(VALUE self, VALUE token) {
 // Switch from the root to a ready fiber.
 // If a newly started child finishes, return control to its waiting parent
 // before returning to the root dispatcher.
-static VALUE transfer_to(fs_state *s, VALUE fiber) {
-    s->active = fiber;
+static VALUE transfer_to(VALUE self, fs_state *s, VALUE fiber) {
+    RB_OBJ_WRITE(self, &s->active, fiber);
     VALUE result = rb_fiber_transfer(fiber, 0, NULL);
     s->active = Qnil;
     // A transferred fiber returns to the thread root when its block finishes.
     // Complete nested immediate admissions before returning to the driver.
     while (s->admission && s->admission->parent != s->root) {
-        s->active = s->admission->parent;
+        RB_OBJ_WRITE(self, &s->active, s->admission->parent);
         result = rb_fiber_transfer(s->admission->parent, 0, NULL);
         s->active = Qnil;
     }
@@ -377,8 +402,8 @@ static VALUE transfer_to(fs_state *s, VALUE fiber) {
 static VALUE start_body(VALUE data) {
     VALUE *args = (VALUE *)data;
     fs_state *s = fs_get(args[0]);
-    if (rb_fiber_current() == s->root) return transfer_to(s, args[1]);
-    s->active = args[1];
+    if (rb_fiber_current() == s->root) return transfer_to(args[0], s, args[1]);
+    RB_OBJ_WRITE(args[0], &s->active, args[1]);
     return rb_fiber_transfer(args[1], 0, NULL);
 }
 
@@ -387,7 +412,7 @@ static VALUE start_body(VALUE data) {
 static VALUE start_cleanup(VALUE data) {
     VALUE *args = (VALUE *)data;
     fs_state *s = fs_get(args[0]);
-    s->active = s->admission->parent == s->root ? Qnil : s->admission->parent;
+    RB_OBJ_WRITE(args[0], &s->active, s->admission->parent == s->root ? Qnil : s->admission->parent);
     s->admission = s->admission->previous;
     return Qnil;
 }
@@ -410,9 +435,11 @@ static VALUE start_fiber(VALUE self, VALUE fiber) {
         index = s->slot_count++;
     }
     fs_wait *w = ZALLOC(fs_wait); w->slot = index; s->slots[index].wait = w;
-    w->fiber = fiber; w->token = w->value = w->error = w->groups = w->ios = Qnil;
+    RB_OBJ_WRITE(self, &w->fiber, fiber); w->token = w->value = w->error = w->groups = w->ios = Qnil;
     st_insert(s->fibers, (st_data_t)fiber, (st_data_t)w);
     fs_admission admission = {rb_fiber_current(), fiber, s->admission};
+    RB_OBJ_WRITTEN(self, Qundef, admission.parent);
+    RB_OBJ_WRITTEN(self, Qundef, admission.child);
     s->admission = &admission;
     VALUE args[] = {self, fiber};
     return rb_ensure(start_body, (VALUE)args, start_cleanup, (VALUE)args);
@@ -441,9 +468,9 @@ static VALUE park_body(VALUE data) {
             break;
         }
     }
-    s->active = next == s->root ? Qnil : next;
+    RB_OBJ_WRITE(args[0], &s->active, next == s->root ? Qnil : next);
     rb_fiber_transfer(next, 0, NULL);
-    s->active = current;
+    RB_OBJ_WRITE(args[0], &s->active, current);
     fs_wait *w = fs_lookup(fs_get(args[0]), args[1]);
     if (!w) rb_raise(rb_eRuntimeError, "retired scheduler suspension");
     if (!NIL_P(w->error)) rb_exc_raise(w->error);
@@ -486,7 +513,7 @@ VALUE fs_checkpoint(VALUE self, VALUE value) {
 // Keep the original groups so the result can return the caller's objects.
 static VALUE register_select(VALUE self, VALUE token, VALUE groups, VALUE ios) {
     fs_state *s = fs_get(self); fs_wait *w = fs_lookup(s, token);
-    w->groups = groups; w->ios = ios;
+    RB_OBJ_WRITE(self, &w->groups, groups); RB_OBJ_WRITE(self, &w->ios, ios);
     for (int i = 0; i < 3; i++) {
         VALUE list = rb_ary_entry(ios, i);
         for (long j = 0; j < RARRAY_LEN(list); j++)
@@ -728,7 +755,7 @@ drain_ready:;
         if (w->status != 1) continue;
         w->status = 2;
         s->dispatch_left--;
-        transfer_to(s, w->fiber);
+        transfer_to(self, s, w->fiber);
     }
     int count = limit - s->dispatch_left;
     s->dispatch_left = 0;

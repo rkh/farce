@@ -49,29 +49,24 @@ counter_memsize(const void *pointer)
     return pointer ? sizeof(counter_t) : 0;
 }
 
-static void
-counter_mark(void *pointer)
-{
-    counter_t *counter = pointer;
-    rb_gc_mark_movable(counter->signal);
-}
-
-static void
-counter_compact(void *pointer)
-{
-    counter_t *counter = pointer;
-    counter->signal = rb_gc_location(counter->signal);
-}
+RUBY_REFERENCES(counter_references) = {
+    RUBY_REF_EDGE(counter_t, signal),
+    RUBY_REF_END,
+};
 
 static const rb_data_type_t counter_type = {
     .wrap_struct_name = "Ractor::Containers::Counter",
     .function = {
-        .dmark = counter_mark,
-        .dcompact = counter_compact,
+        .dmark = RUBY_REFS_LIST_PTR(counter_references),
         .dfree = counter_free,
         .dsize = counter_memsize,
     },
-    .flags = RUBY_TYPED_FROZEN_SHAREABLE,
+    .flags =
+        RUBY_TYPED_DECL_MARKING |
+        RUBY_TYPED_WB_PROTECTED |
+        RUBY_TYPED_FROZEN_SHAREABLE |
+        RUBY_TYPED_FREE_IMMEDIATELY |
+        FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static VALUE
@@ -136,7 +131,7 @@ counter_initialize(int argc, VALUE *argv, VALUE self)
 #else
     counter->value = value;
 #endif
-    counter->signal = containers_signal_new();
+    RB_OBJ_WRITE(self, &counter->signal, containers_signal_new());
     counter->initial = value;
     counter->initialized = true;
     return containers_publish_native_with_references(self, counter_validate_references);
@@ -183,7 +178,7 @@ counter_initialize_copy(VALUE self, VALUE other)
 #else
     copy->value = value;
 #endif
-    copy->signal = containers_signal_new();
+    RB_OBJ_WRITE(self, &copy->signal, containers_signal_new());
     copy->initial = source->initial;
     copy->initialized = true;
     return containers_publish_native_with_references(self, counter_validate_references);

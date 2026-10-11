@@ -44,6 +44,14 @@ typedef struct {
     bool initialized;
 } atom_t;
 
+/* Weak edges use the VM's separately registered weak-reference callback. */
+static inline void
+atom_write_value(VALUE self, atom_t *atom, VALUE value)
+{
+    if (atom->weak) atom->value = value;
+    else RB_OBJ_WRITE(self, &atom->value, value);
+}
+
 typedef struct {
     bool finite;
     bool collected;
@@ -158,9 +166,9 @@ static void
 atom_compact(void *pointer)
 {
     atom_t *atom = pointer;
-    atom->value = rb_gc_location(atom->value);
-    atom->updating_fiber = rb_gc_location(atom->updating_fiber);
-    atom->updating_thread = rb_gc_location(atom->updating_thread);
+    containers_gc_update(&atom->value);
+    containers_gc_update(&atom->updating_fiber);
+    containers_gc_update(&atom->updating_thread);
 }
 
 #ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
@@ -203,7 +211,11 @@ static const rb_data_type_t atom_type = {
         .handle_weak_references = atom_handle_weak_references,
 #endif
     },
-    .flags = RUBY_TYPED_FROZEN_SHAREABLE,
+    .flags =
+        RUBY_TYPED_WB_PROTECTED |
+        RUBY_TYPED_FROZEN_SHAREABLE |
+        RUBY_TYPED_FREE_IMMEDIATELY |
+        FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static void
@@ -228,6 +240,7 @@ static const rb_data_type_t unshared_weak_atom_type = {
         .handle_weak_references = atom_handle_weak_references,
     },
     .parent = &atom_type,
+    .flags = RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FREE_IMMEDIATELY | FARCE_TYPED_THREAD_SAFE_FREE,
 };
 #endif
 
@@ -296,11 +309,11 @@ atom_check_update_wait_locked(atom_t *atom, const atom_execution_context_t *cont
 }
 
 static void
-atom_begin_update_locked(atom_t *atom, const atom_execution_context_t *context)
+atom_begin_update_locked(VALUE self, atom_t *atom, const atom_execution_context_t *context)
 {
     atom->updating = true;
-    atom->updating_fiber = context->fiber;
-    atom->updating_thread = context->thread;
+    RB_OBJ_WRITE(self, &atom->updating_fiber, context->fiber);
+    RB_OBJ_WRITE(self, &atom->updating_thread, context->thread);
 }
 
 static void
@@ -491,7 +504,7 @@ atom_initialize(int argc, VALUE *argv, VALUE self)
     TypedData_Get_Struct(self, atom_t, &atom_type, atom);
     if (atom->initialized) rb_raise(rb_eRuntimeError, "Atom is already initialized");
     atom_check_value(atom, value);
-    atom->value = value;
+    atom_write_value(self, atom, value);
     atom->compare_by_identity = identity == Qundef ? false : containers_strict_bool(identity, "compare_by_identity");
 #ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
     if (atom->weak) rb_gc_declare_weak_references(self);
@@ -520,7 +533,7 @@ atom_set_value(VALUE self, VALUE value)
     atom_check_value(atom, value);
     atom_execution_context_t execution = atom_current_execution_context();
     atom_lock_for_update(atom, &execution);
-    atom->value = value;
+    atom_write_value(self, atom, value);
     atom_changed(atom);
     pthread_mutex_unlock(&atom->lock);
     return value;
@@ -560,7 +573,7 @@ atom_store(int argc, VALUE *argv, VALUE self)
     for (;;) {
         pthread_mutex_lock(&atom->lock);
         if (!atom->updating) {
-            atom->value = value;
+            atom_write_value(self, atom, value);
             atom_changed(atom);
             pthread_mutex_unlock(&atom->lock);
             return value;
@@ -586,7 +599,7 @@ atom_swap(int argc, VALUE *argv, VALUE self)
         pthread_mutex_lock(&atom->lock);
         if (!atom->updating) {
             VALUE previous = atom->value;
-            atom->value = value;
+            atom_write_value(self, atom, value);
             atom_changed(atom);
             pthread_mutex_unlock(&atom->lock);
             return previous;
@@ -626,7 +639,7 @@ atom_store_body(VALUE opaque)
     rb_check_frozen(operation->self);
     atom_check_value(operation->atom, result);
     pthread_mutex_lock(&operation->atom->lock);
-    operation->atom->value = result;
+    atom_write_value(operation->self, operation->atom, result);
     atom_finished_update(operation->atom, true);
     pthread_mutex_unlock(&operation->atom->lock);
     operation->complete = true;
@@ -654,7 +667,7 @@ atom_store_if_absent(int argc, VALUE *argv, VALUE self)
         pthread_mutex_unlock(&atom->lock);
         return value;
     }
-    atom_begin_update_locked(atom, &operation.execution);
+    atom_begin_update_locked(self, atom, &operation.execution);
     pthread_mutex_unlock(&atom->lock);
     return rb_ensure(atom_store_body, (VALUE)&operation, atom_operation_cleanup, (VALUE)&operation);
 }
@@ -692,7 +705,9 @@ atom_cas_body(VALUE opaque)
     rb_check_frozen(operation->self);
 
     pthread_mutex_lock(&operation->atom->lock);
-    if (matches) operation->atom->value = operation->replacement;
+    if (matches) {
+        atom_write_value(operation->self, operation->atom, operation->replacement);
+    }
     atom_finished_update(operation->atom, matches);
     pthread_mutex_unlock(&operation->atom->lock);
     operation->complete = true;
@@ -730,7 +745,7 @@ atom_compare_and_set(int argc, VALUE *argv, VALUE self)
     operation.replacement = replacement;
     operation.identity = atom->compare_by_identity;
     operation.complete = false;
-    atom_begin_update_locked(atom, &operation.execution);
+    atom_begin_update_locked(self, atom, &operation.execution);
     pthread_mutex_unlock(&atom->lock);
 
     return rb_ensure(atom_cas_body, (VALUE)&operation, atom_cas_cleanup, (VALUE)&operation);
@@ -744,7 +759,7 @@ atom_update_body(VALUE opaque)
     rb_check_frozen(operation->self);
     atom_check_value(operation->atom, result);
     pthread_mutex_lock(&operation->atom->lock);
-    operation->atom->value = result;
+    atom_write_value(operation->self, operation->atom, result);
     atom_finished_update(operation->atom, true);
     pthread_mutex_unlock(&operation->atom->lock);
     operation->complete = true;
@@ -768,7 +783,7 @@ atom_update(int argc, VALUE *argv, VALUE self)
 
     if (!atom_lock_for_update_with_timeout(atom, &timeout, &operation.execution)) return Qnil;
     operation.current = atom->value;
-    atom_begin_update_locked(atom, &operation.execution);
+    atom_begin_update_locked(self, atom, &operation.execution);
     pthread_mutex_unlock(&atom->lock);
 
     return rb_ensure(atom_update_body, (VALUE)&operation, atom_operation_cleanup, (VALUE)&operation);
@@ -793,13 +808,13 @@ atom_upsert(int argc, VALUE *argv, VALUE self)
 
     if (!atom_lock_for_update_with_timeout(atom, &timeout, &operation.execution)) return Qnil;
     if (NIL_P(atom->value)) {
-        atom->value = initial;
+        atom_write_value(self, atom, initial);
         atom_changed(atom);
         pthread_mutex_unlock(&atom->lock);
         return initial;
     }
     operation.current = atom->value;
-    atom_begin_update_locked(atom, &operation.execution);
+    atom_begin_update_locked(self, atom, &operation.execution);
     pthread_mutex_unlock(&atom->lock);
 
     return rb_ensure(atom_update_body, (VALUE)&operation, atom_operation_cleanup, (VALUE)&operation);
@@ -927,7 +942,7 @@ atom_transaction_apply(farce_transaction_entry_t *entry)
 {
     atom_t *atom = entry->source_data;
     atom_t *working = entry->working_data;
-    atom->value = working->value;
+    RB_OBJ_WRITE(entry->source, &atom->value, working->value);
 }
 
 static void
@@ -941,8 +956,8 @@ atom_transaction_reserve(farce_transaction_entry_t *entry, VALUE fiber, VALUE th
 {
     atom_t *atom = entry->source_data;
     atom->updating = FARCE_TRANSACTION_RESERVED;
-    atom->updating_fiber = fiber;
-    atom->updating_thread = thread;
+    RB_OBJ_WRITE(entry->source, &atom->updating_fiber, fiber);
+    RB_OBJ_WRITE(entry->source, &atom->updating_thread, thread);
 }
 
 static void

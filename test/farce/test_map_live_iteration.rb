@@ -19,6 +19,67 @@ module Farce
       end
     end
 
+    def test_live_iteration_survives_compaction_between_batches
+      return unless RUBY_ENGINE == "ruby" && GC.respond_to?(:verify_compaction_references)
+
+      entries = 100.times.to_h { [Object.new.freeze, "value-#{it}".freeze] }
+      TYPES.each do |type|
+        map = type.new(entries)
+        observed = []
+        map.each_live do |key, value|
+          observed << [key, value]
+          GC.verify_compaction_references(toward: :empty) if [1, 33, 65].include?(observed.size)
+        end
+
+        assert_equal entries, observed.to_h, type.name
+        assert_equal entries.size, observed.size, type.name
+      end
+    end
+
+    def test_live_batch_retains_values_after_clear_and_compaction
+      return unless RUBY_ENGINE == "ruby" && GC.respond_to?(:verify_compaction_references)
+
+      TYPES.take(4).each do |type|
+        map = type.new
+        Thread.new do
+          40.times { map[it] = "value-#{it}".freeze }
+          nil
+        end.value
+        observed = []
+
+        assert_raises(RuntimeError, type.name) do
+          map.each_live do |key, value|
+            observed << [key, value]
+            next unless observed.one?
+            map.clear
+            GC.verify_compaction_references(toward: :empty)
+          end
+        end
+
+        assert_equal 32, observed.size, type.name
+        observed.each { |key, value| assert_equal "value-#{key}", value, type.name }
+      end
+    end
+
+    def test_snapshot_iteration_retains_entries_after_clear_and_compaction
+      return unless RUBY_ENGINE == "ruby" && GC.respond_to?(:verify_compaction_references)
+
+      TYPES.each do |type|
+        entries = 100.times.to_h { [Object.new.freeze, "value-#{it}".freeze] }
+        map = type.new(entries)
+        observed = {}
+        map.each do |key, value|
+          observed[key] = value
+          next unless observed.one?
+          map.clear
+          GC.verify_compaction_references(toward: :empty)
+        end
+
+        assert_equal entries, observed, type.name
+        assert_empty map, type.name
+      end
+    end
+
     def test_deletion_during_live_iteration_does_not_skip_remaining_entries
       TYPES.each do |type|
         map = type.new(100.times.to_h { [it, true] })

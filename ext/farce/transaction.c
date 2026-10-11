@@ -4,36 +4,29 @@
 
 static VALUE cTransactionEntry;
 
-static void
-transaction_entry_mark(void *pointer)
-{
-    farce_transaction_entry_t *entry = pointer;
-    rb_gc_mark_movable(entry->source);
-    rb_gc_mark_movable(entry->working);
-}
-
-static void
-transaction_entry_compact(void *pointer)
-{
-    farce_transaction_entry_t *entry = pointer;
-    entry->source = rb_gc_location(entry->source);
-    entry->working = rb_gc_location(entry->working);
-}
-
 static size_t
 transaction_entry_memsize(const void *pointer)
 {
     return pointer ? sizeof(farce_transaction_entry_t) : 0;
 }
 
+RUBY_REFERENCES(transaction_entry_references) = {
+    RUBY_REF_EDGE(farce_transaction_entry_t, source),
+    RUBY_REF_EDGE(farce_transaction_entry_t, working),
+    RUBY_REF_END,
+};
+
 static const rb_data_type_t transaction_entry_type = {
     .wrap_struct_name = "Farce::Internal::NativeTransactionEntry",
     .function = {
-        .dmark = transaction_entry_mark,
+        .dmark = RUBY_REFS_LIST_PTR(transaction_entry_references),
         .dfree = RUBY_TYPED_DEFAULT_FREE,
         .dsize = transaction_entry_memsize,
-        .dcompact = transaction_entry_compact,
     },
+    .flags =
+        RUBY_TYPED_DECL_MARKING |
+        RUBY_TYPED_FREE_IMMEDIATELY |
+        FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 VALUE
@@ -51,6 +44,9 @@ farce_transaction_entry_new(
         .source_data = source_data, .working_data = working_data,
         .lock = lock, .ops = ops,
     };
+    /* Attempt-local copies are rescanned by every GC. They do not need the
+     * barriers or ownership scans used by long-lived containers. */
+    if (!NIL_P(working)) RB_OBJ_WB_UNPROTECT(working);
     return object;
 }
 
@@ -91,13 +87,13 @@ transaction_commit(VALUE namespace, VALUE entries, VALUE guards)
     Check_Type(guards, T_ARRAY);
     /* Type-check guards before acquiring participant locks. */
     for (long i = 0; i < RARRAY_LEN(guards); i++) {
-        if (farce_transaction_flag_set(RARRAY_AREF(guards, i))) return Qfalse;
+        if (farce_transaction_flag_set(rb_ary_entry(guards, i))) return Qfalse;
     }
     long count = RARRAY_LEN(entries);
     VALUE buffer = 0;
     farce_transaction_entry_t **ordered = ALLOCV_N(farce_transaction_entry_t *, buffer, count);
     for (long i = 0; i < count; i++) {
-        ordered[i] = get_transaction_entry(RARRAY_AREF(entries, i));
+        ordered[i] = get_transaction_entry(rb_ary_entry(entries, i));
     }
     qsort(ordered, (size_t)count, sizeof(*ordered), transaction_entry_order);
     for (long i = 1; i < count; i++) {
@@ -128,7 +124,7 @@ transaction_commit(VALUE namespace, VALUE entries, VALUE guards)
     }
     if (valid) {
         for (long i = 0; i < RARRAY_LEN(guards); i++) {
-            if (farce_transaction_flag_set(RARRAY_AREF(guards, i))) {
+            if (farce_transaction_flag_set(rb_ary_entry(guards, i))) {
                 valid = false;
                 break;
             }
@@ -233,7 +229,7 @@ transaction_reservation_body(VALUE opaque)
     }
     if (valid) {
         for (long i = 0; i < RARRAY_LEN(reservation->guards); i++) {
-            if (farce_transaction_flag_set(RARRAY_AREF(reservation->guards, i))) {
+            if (farce_transaction_flag_set(rb_ary_entry(reservation->guards, i))) {
                 valid = false;
                 break;
             }
@@ -308,13 +304,13 @@ transaction_reserve(VALUE namespace, VALUE entries, VALUE guards, VALUE context)
     Check_Type(entries, T_ARRAY);
     Check_Type(guards, T_ARRAY);
     for (long i = 0; i < RARRAY_LEN(guards); i++) {
-        (void)farce_transaction_flag_set(RARRAY_AREF(guards, i));
+        (void)farce_transaction_flag_set(rb_ary_entry(guards, i));
     }
     long count = RARRAY_LEN(entries);
     VALUE buffer = 0;
     farce_transaction_entry_t **ordered = ALLOCV_N(farce_transaction_entry_t *, buffer, count);
     for (long i = 0; i < count; i++) {
-        ordered[i] = get_transaction_entry(RARRAY_AREF(entries, i));
+        ordered[i] = get_transaction_entry(rb_ary_entry(entries, i));
         if (!ordered[i]->ops->reserve || !ordered[i]->ops->release) {
             ALLOCV_END(buffer);
             rb_raise(rb_eTypeError, "participant does not support commit reservations");

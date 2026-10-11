@@ -21,6 +21,14 @@ unshared_signal_mark(void *pointer)
     farce_io_pool_mark(&signal->fiber_pool);
 }
 
+/* Wait-list VALUEs are pinned by suspended C frames. Cached IOs can move. */
+static void
+unshared_signal_compact(void *pointer)
+{
+    containers_unshared_signal_t *signal = pointer;
+    farce_io_pool_compact(&signal->fiber_pool);
+}
+
 static void
 unshared_signal_free(void *pointer)
 {
@@ -42,7 +50,9 @@ static const rb_data_type_t unshared_signal_type = {
         .dmark = unshared_signal_mark,
         .dfree = unshared_signal_free,
         .dsize = unshared_signal_memsize,
+        .dcompact = unshared_signal_compact,
     },
+    .flags = RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FREE_IMMEDIATELY | FARCE_TYPED_THREAD_SAFE_FREE,
 };
 
 static VALUE
@@ -170,6 +180,7 @@ unshared_signal_broadcast(VALUE self)
 }
 
 typedef struct {
+    VALUE self;
     containers_unshared_signal_t *signal;
     uint64_t observed;
     double deadline;
@@ -187,7 +198,7 @@ static VALUE
 unshared_signal_fiber_wait_body(VALUE opaque)
 {
     unshared_signal_fiber_wait_t *wait = (unshared_signal_fiber_wait_t *)opaque;
-    return farce_io_pool_wait(&wait->signal->fiber_pool, wait->finite, wait->deadline,
+    return farce_io_pool_wait(wait->self, &wait->signal->fiber_pool, wait->finite, wait->deadline,
                               unshared_signal_fiber_ready, wait) ? Qtrue : Qfalse;
 }
 
@@ -232,7 +243,7 @@ unshared_signal_wait(int argc, VALUE *argv, VALUE self)
         }
         if (signal->fiber_io && !NIL_P(rb_fiber_scheduler_current())) {
             /* Reuse owned pipe objects after each scheduler wait unwinds. */
-            unshared_signal_fiber_wait_t wait = {signal, observed, deadline, finite};
+            unshared_signal_fiber_wait_t wait = {self, signal, observed, deadline, finite};
             signal->fiber_waiters++;
             rb_ensure(unshared_signal_fiber_wait_body, (VALUE)&wait,
                       unshared_signal_fiber_wait_cleanup, (VALUE)&wait);

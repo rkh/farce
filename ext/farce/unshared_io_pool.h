@@ -40,8 +40,17 @@ static void
 farce_io_pool_mark(farce_io_pool_t *pool)
 {
     for (farce_io_slot_t *slot = pool->all; slot; slot = slot->all_next) {
-        rb_gc_mark(slot->reader);
-        rb_gc_mark(slot->writer);
+        rb_gc_mark_movable(slot->reader);
+        rb_gc_mark_movable(slot->writer);
+    }
+}
+
+static void
+farce_io_pool_compact(farce_io_pool_t *pool)
+{
+    for (farce_io_slot_t *slot = pool->all; slot; slot = slot->all_next) {
+        containers_gc_update(&slot->reader);
+        containers_gc_update(&slot->writer);
     }
 }
 
@@ -52,7 +61,7 @@ farce_io_pool_free(farce_io_pool_t *pool)
     while (slot) {
         farce_io_slot_t *next = slot->all_next;
         /* Ruby finalizes the IO objects and their owned descriptors. */
-        free(slot);
+        ruby_xfree(slot);
         slot = next;
     }
 }
@@ -78,7 +87,7 @@ farce_io_pool_discard(farce_io_pool_t *pool, farce_io_slot_t *slot)
     pool->size--;
     VALUE reader = slot->reader;
     VALUE writer = slot->writer;
-    free(slot);
+    ruby_xfree(slot);
     /* Cleanup must close both ends without masking the original exception. */
     VALUE error = rb_errinfo();
     int state;
@@ -92,7 +101,7 @@ farce_io_pool_discard(farce_io_pool_t *pool, farce_io_slot_t *slot)
 }
 
 static farce_io_slot_t *
-farce_io_pool_acquire(farce_io_pool_t *pool)
+farce_io_pool_acquire(VALUE self, farce_io_pool_t *pool)
 {
     if (pool->idle) {
         farce_io_slot_t *slot = pool->idle;
@@ -116,10 +125,9 @@ farce_io_pool_acquire(farce_io_pool_t *pool)
         fcntl(read_fd, F_SETFL, read_flags | O_NONBLOCK) < 0 ||
         fcntl(write_fd, F_SETFL, write_flags | O_NONBLOCK) < 0) rb_sys_fail("fcntl");
 #endif
-    farce_io_slot_t *slot = calloc(1, sizeof(*slot));
-    if (!slot) rb_memerror();
-    slot->reader = reader;
-    slot->writer = writer;
+    farce_io_slot_t *slot = ZALLOC(farce_io_slot_t);
+    RB_OBJ_WRITE(self, &slot->reader, reader);
+    RB_OBJ_WRITE(self, &slot->writer, writer);
     slot->read_fd = read_fd;
     slot->write_fd = write_fd;
     slot->all_next = pool->all;
@@ -170,6 +178,7 @@ farce_io_pool_notify(farce_io_pool_t *pool)
 }
 
 typedef struct {
+    VALUE self;
     farce_io_pool_t *pool;
     farce_io_slot_t *slot;
     bool (*ready)(void *);
@@ -184,7 +193,7 @@ static VALUE
 farce_io_pool_wait_body(VALUE opaque)
 {
     farce_io_pool_wait_t *wait = (farce_io_pool_wait_t *)opaque;
-    wait->slot = farce_io_pool_acquire(wait->pool);
+    wait->slot = farce_io_pool_acquire(wait->self, wait->pool);
     /* Acquiring a new pipe may run Ruby. Recheck the caller's condition before
      * registering under the GVL, including notifications during allocation. */
     if (wait->ready(wait->data)) { wait->completed = true; return Qtrue; }
@@ -225,9 +234,9 @@ farce_io_pool_wait_cleanup(VALUE opaque)
 }
 
 static bool
-farce_io_pool_wait(farce_io_pool_t *pool, bool finite, double deadline, bool (*ready)(void *), void *data)
+farce_io_pool_wait(VALUE self, farce_io_pool_t *pool, bool finite, double deadline, bool (*ready)(void *), void *data)
 {
-    farce_io_pool_wait_t wait = {.pool = pool, .finite = finite, .deadline = deadline, .ready = ready, .data = data};
+    farce_io_pool_wait_t wait = {.self = self, .pool = pool, .finite = finite, .deadline = deadline, .ready = ready, .data = data};
     return RTEST(rb_ensure(farce_io_pool_wait_body, (VALUE)&wait, farce_io_pool_wait_cleanup, (VALUE)&wait));
 }
 

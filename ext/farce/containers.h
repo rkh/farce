@@ -12,6 +12,21 @@
 #include <sys/time.h>
 #endif
 
+/* Ruby 4.1 can sweep independently owned native payloads in parallel. */
+#ifdef RUBY_TYPED_THREAD_SAFE_FREE
+# define FARCE_TYPED_THREAD_SAFE_FREE RUBY_TYPED_THREAD_SAFE_FREE
+#else
+# define FARCE_TYPED_THREAD_SAFE_FREE 0
+#endif
+
+/* Avoid dirtying a native page when compaction left the reference in place. */
+static inline void
+containers_gc_update(VALUE *reference)
+{
+    VALUE relocated = rb_gc_location(*reference);
+    if (relocated != *reference) *reference = relocated;
+}
+
 /* Use only after validating self as native TypedData. */
 static inline void
 containers_check_typed_frozen(VALUE self)

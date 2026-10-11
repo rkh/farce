@@ -21,7 +21,7 @@ static VALUE wait_cleanup(VALUE data) {
 static VALUE wait_body(VALUE data) {
     VALUE *args = (VALUE *)data;
     fs_state *s = fs_get(args[0]); fs_wait *w = fs_lookup(s, args[1]);
-    w->ios = args[2]; // GC root for the watched IO
+    RB_OBJ_WRITE(args[0], &w->ios, args[2]); // GC root for the watched IO
     fs_watch_io(s, w, rb_io_descriptor(args[2]), NUM2INT(args[3]), -1, 0);
     if (NIL_P(args[4])) return fs_suspend(args[0], args[1]);
     return rb_funcall(args[0], rb_intern("wait_with_timeout"), 3, args[1], args[4], INT2NUM(0));
@@ -82,7 +82,7 @@ static void transfer_wait(transfer *t, int events) {
     t->token = fs_arm_checked(t->self);
     fs_state *s = fs_get(t->self);
     fs_wait *w = fs_lookup(s, t->token);
-    w->ios = t->io;
+    RB_OBJ_WRITE(t->self, &w->ios, t->io);
     fs_watch_io(s, w, rb_io_descriptor(t->io), events, -1, 0);
     fs_suspend(t->self, t->token);
     fs_retire(t->self, t->token);
@@ -95,7 +95,7 @@ static ssize_t transfer_receive(transfer *t, void *buffer, size_t capacity) {
     t->token = fs_arm_checked(t->self);
     fs_state *s = fs_get(t->self);
     fs_wait *w = fs_lookup(s, t->token);
-    w->ios = t->io;
+    RB_OBJ_WRITE(t->self, &w->ios, t->io);
     int error = fs_driver_receive(s, w, rb_io_descriptor(t->io), buffer, capacity);
     if (error) rb_syserr_fail(error, "scheduler receive submission");
     VALUE result = fs_suspend(t->self, t->token);

@@ -139,6 +139,9 @@ farce_unshared_wait(farce_unshared_wait_list_t *list, VALUE blocker, bool finite
         .linked = true,
         .notified = false,
     };
+    RB_OBJ_WRITTEN(blocker, Qundef, waiter.thread);
+    RB_OBJ_WRITTEN(blocker, Qundef, waiter.scheduler);
+    RB_OBJ_WRITTEN(blocker, Qundef, waiter.fiber);
     if (list->last) list->last->next = &waiter;
     else list->first = &waiter;
     list->last = &waiter;
