@@ -2,6 +2,6 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
-require "farce"
-require "json" unless defined?(JSON::State)
+require "farce" unless defined?(Farce::Abstract)
+require "json"  unless defined?(JSON::State)
 require_relative "shared/to_json"

@@ -6,6 +6,19 @@ require_relative "../setup"
 
 module Farce
   class TestActiveSupportBoundary < Test
+    def test_loading_farce_after_active_support_does_not_warn_about_circular_require
+      return unless RUBY_ENGINE == "ruby"
+
+      output, error, status = ruby_subprocess(<<~RUBY, coverage: false)
+        $VERBOSE = true
+        require "active_support"
+        require "farce"
+      RUBY
+
+      assert_predicate status, :success?, "#{output}\n#{error}"
+      refute_includes error, "circular require"
+    end
+
     def test_loading_active_support_does_not_freeze_config
       output, error, status = ruby_isolated(<<~RUBY)
         require "farce"

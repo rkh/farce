@@ -3,7 +3,7 @@
 # warn_indent: true
 
 # @!group Psych Integration
-require "farce"
+require "farce" unless defined?(Farce::Abstract)
 require "psych" unless defined?(Psych::Coder)
 
 module Farce

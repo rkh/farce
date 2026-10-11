@@ -3,9 +3,9 @@
 # warn_indent: true
 
 # @!group concurrent-ruby Integration
-require "farce"
-require "concurrent/map"
-require "concurrent/tvar"
+require "farce"           unless defined?(Farce::Abstract)
+require "concurrent/map"  unless defined?(Concurrent::Map)
+require "concurrent/tvar" unless defined?(Concurrent::TVar)
 
 module Farce
   module Integrations

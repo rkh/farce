@@ -3,7 +3,7 @@
 # warn_indent: true
 
 # @!group SortedSet Integration
-require "farce"
+require "farce" unless defined?(Farce::Abstract)
 require "sorted_set"
 
 module Farce

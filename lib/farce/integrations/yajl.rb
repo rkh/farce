@@ -4,7 +4,7 @@
 
 # @!group Yajl Integration
 # Yajl 1.4.3 cannot encode or parse inside non-main native Ractors.
-require "farce"
-require "yajl" unless defined?(Yajl::Encoder)
-require "json" unless [].respond_to?(:to_json)
+require "farce" unless defined?(Farce::Abstract)
+require "yajl"  unless defined?(Yajl::Encoder)
+require "json"  unless [].respond_to?(:to_json)
 require_relative "shared/to_json"

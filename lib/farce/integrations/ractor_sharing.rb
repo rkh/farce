@@ -3,7 +3,7 @@
 # warn_indent: true
 
 # @!group ractor-sharing Integration
-require "farce"
+require "farce" unless defined?(Farce::Abstract)
 require "ractor/tvar"
 require "ractor/lockvar"
 require "ractor/lockhash"

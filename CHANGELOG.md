@@ -26,6 +26,10 @@ Beyond these specific cases:
 
 Measurements were taken on CRuby 4.0.7 (arm64-darwin23) with YJIT enabled. Measurements taken against Ruby's main branch show similar results.
 
+#### Other changes
+
+* Avoid circular require warnings when automatically loading third-party integrations.
+
 ## Development Releases
 
 ### Farce 0.1.0 (2026-10-09)

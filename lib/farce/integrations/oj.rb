@@ -3,10 +3,9 @@
 # warn_indent: true
 
 # @!group Oj Integration
-require "farce"
-require "oj" unless defined?(Oj::VERSION)
-
-require "json" unless [].respond_to?(:to_json)
+require "farce" unless defined?(Farce::Abstract)
+require "oj"    unless defined?(Oj::VERSION)
+require "json"  unless [].respond_to?(:to_json)
 require_relative "shared/to_json"
 
 module Farce

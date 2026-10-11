@@ -2,7 +2,7 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
-require "farce"
+require "farce" unless defined?(Farce::Abstract)
 require "active_support"
 require "active_support/core_ext"
 

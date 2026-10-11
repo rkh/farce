@@ -3,7 +3,7 @@
 # warn_indent: true
 
 # @!group BSON Integration
-require "farce"
+require "farce" unless defined?(Farce::Abstract)
 require "bson"
 
 module Farce

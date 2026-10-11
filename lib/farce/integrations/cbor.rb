@@ -3,7 +3,7 @@
 # warn_indent: true
 
 # @!group CBOR Integration
-require "farce"
+require "farce" unless defined?(Farce::Abstract)
 require "cbor"
 
 module Farce

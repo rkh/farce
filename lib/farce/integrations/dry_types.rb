@@ -3,7 +3,7 @@
 # warn_indent: true
 
 # @!group Dry Types Integration
-require "farce"
+require "farce" unless defined?(Farce::Abstract)
 require "dry/types"
 
 module Farce

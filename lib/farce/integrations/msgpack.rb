@@ -3,7 +3,7 @@
 # warn_indent: true
 
 # @!group ActiveSupport Integration
-require "farce"
+require "farce" unless defined?(Farce::Abstract)
 require "msgpack"
 
 module Farce
