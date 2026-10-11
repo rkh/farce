@@ -750,7 +750,7 @@ The order is typically FIFO (first-in, first-out), but other orderings may be ap
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#try_push-instance_method" title="#try_push (instance method)">#<strong>try_push</strong>(value) { ... } &#x21d2; Boolean </a>
+      <a href="#try_push-instance_method" title="#try_push (instance method)">#<strong>try_push</strong>(value) { ... } &#x21d2; BasicObject </a>
     
 
     
@@ -895,7 +895,6 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -1015,10 +1014,11 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -1199,7 +1199,6 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -1319,10 +1318,11 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -1490,7 +1490,6 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -1610,10 +1609,11 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -1791,7 +1791,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -1911,10 +1910,11 @@ without modifying the queue.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -2090,7 +2090,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -2210,10 +2209,11 @@ without modifying the queue.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -2390,10 +2390,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-200</pre>
+201</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 200</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 201</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_age_tracking?'>age_tracking?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_age_tracking?'>age_tracking?</span></pre>
     </td>
@@ -2443,7 +2443,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -2563,10 +2562,11 @@ without modifying the queue.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -2736,7 +2736,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -2856,10 +2855,11 @@ without modifying the queue.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -3033,7 +3033,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -3153,10 +3152,11 @@ without modifying the queue.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -3313,10 +3313,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-157</pre>
+158</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 157</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 158</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_deq'>deq</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -3430,7 +3430,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -3550,10 +3549,11 @@ without modifying the queue.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -3710,10 +3710,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-162</pre>
+163</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 162</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 163</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_enq'>enq</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -3763,10 +3763,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-175</pre>
+176</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 175</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 176</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span></pre>
     </td>
@@ -3816,10 +3816,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-203</pre>
+204</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 203</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 204</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_generation'>generation</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_generation'>generation</span></pre>
     </td>
@@ -3869,10 +3869,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-167</pre>
+168</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 167</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 168</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span></pre>
     </td>
@@ -3922,10 +3922,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-171</pre>
+172</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 171</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 172</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_max'>max</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>||</span> <span class='const'>Float</span><span class='op'>::</span><span class='const'>INFINITY</span></pre>
     </td>
@@ -3975,10 +3975,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-210</pre>
+211</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 210</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 211</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_oldest_age'>oldest_age</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_oldest_age'>oldest_age</span></pre>
     </td>
@@ -4028,10 +4028,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-207</pre>
+208</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 207</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 208</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_oldest_enqueued_at'>oldest_enqueued_at</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_oldest_enqueued_at'>oldest_enqueued_at</span></pre>
     </td>
@@ -4064,7 +4064,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -4184,10 +4183,11 @@ without modifying the queue.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -4340,7 +4340,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -4460,10 +4459,11 @@ without modifying the queue.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -4629,7 +4629,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -4749,10 +4748,11 @@ without modifying the queue.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -4922,7 +4922,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -5042,10 +5041,11 @@ without modifying the queue.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -5238,7 +5238,6 @@ If no item is available, the method will call the block if given, or return <cod
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -5358,10 +5357,11 @@ If no item is available, the method will call the block if given, or return <cod
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -5492,7 +5492,7 @@ If no item is available, the method will call the block if given, or return <cod
       <div class="method_details ">
   <h3 class="signature " id="try_push-instance_method">
   
-    #<strong>try_push</strong>(value) { ... } &#x21d2; <tt>Boolean</tt> 
+    #<strong>try_push</strong>(value) { ... } &#x21d2; <tt>BasicObject</tt> 
   
 
   
@@ -5555,12 +5555,13 @@ If the queue is at capacity, the method will call the block if given, or return 
     <li>
       
       
-        <span class='type'>(<tt>Boolean</tt>)</span>
+        <span class='type'>(<tt>BasicObject</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'><p><code>true</code> if the item was added to the queue, <code>false</code> if the queue was at capacity and no block was given.</p>
+        <div class='inline'><p>A truthy object if the item was added, or the fallback result if the queue was at capacity.
+Returns <code>false</code> if the queue was at capacity and no block was given.</p>
 </div>
       
     </li>
@@ -5603,7 +5604,6 @@ If the queue is at capacity, the method will call the block if given, or return 
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -5723,10 +5723,11 @@ If the queue is at capacity, the method will call the block if given, or return 
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -5944,7 +5945,6 @@ If <code>0</code>, the method will not wait at all.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -6064,10 +6064,11 @@ If <code>0</code>, the method will not wait at all.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -6297,7 +6298,6 @@ If <code>0</code>, the method will not wait at all.</p>
       <pre class="lines">
 
 
-147
 148
 149
 150
@@ -6417,10 +6417,11 @@ If <code>0</code>, the method will not wait at all.</p>
 264
 265
 266
-267</pre>
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 147</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -6553,7 +6554,7 @@ If <code>0</code>, the method will not wait at all.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 14:43:58 2026 by
+  Generated on Sun Oct 11 21:00:48 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -81,12 +81,14 @@
   <dl>
     <dt>Inherits:</dt>
     <dd>
-      <span class="inheritName">Abstract::TimerQueue</span>
+      <span class="inheritName"><span class='object_link'><a href="Abstract/TimerQueue.html" title="Farce::Abstract::TimerQueue (class)">Abstract::TimerQueue</a></span></span>
       
         <ul class="fullTree">
           <li>Object</li>
           
-            <li class="next">Abstract::TimerQueue</li>
+            <li class="next"><span class='object_link'><a href="Abstract/Queue.html" title="Farce::Abstract::Queue (class)">Abstract::Queue</a></span></li>
+          
+            <li class="next"><span class='object_link'><a href="Abstract/TimerQueue.html" title="Farce::Abstract::TimerQueue (class)">Abstract::TimerQueue</a></span></li>
           
             <li class="next">Farce::TimerQueue</li>
           
@@ -135,6 +137,11 @@
 
 
 
+  <h2>Instance Attribute Summary</h2>
+  
+  <h3 class="inherited">Attributes inherited from <span class='object_link'><a href="Abstract/Queue.html" title="Farce::Abstract::Queue (class)">Abstract::Queue</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Queue.html#capacity-instance_method" title="Farce::Abstract::Queue#capacity (method)">#capacity</a></span>, <span class='object_link'><a href="Abstract/Queue.html#mode-instance_method" title="Farce::Abstract::Queue#mode (method)">#mode</a></span>, <span class='object_link'><a href="Abstract/Queue.html#num_waiting-instance_method" title="Farce::Abstract::Queue#num_waiting (method)">#num_waiting</a></span>, <span class='object_link'><a href="Abstract/Queue.html#size-instance_method" title="Farce::Abstract::Queue#size (method)">#size</a></span></p>
+
 
   
     <h2>
@@ -147,7 +154,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(capacity: nil, mode: :copy, track_age: false)  &#x21d2; BasicObject </a>
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(capacity: nil, mode: :smart, track_age: false)  &#x21d2; BasicObject </a>
     
 
     
@@ -163,7 +170,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Valid modes are: * <code>:copy</code> - The value will be copied between Ractors.</p>
+    <span class="summary_desc"><div class='inline'><p>Valid modes are: * <code>:smart</code> - Applies smart rules or a dedicated proxy.</p>
 </div></span>
   
 </li>
@@ -218,7 +225,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#push-instance_method" title="#push (instance method)">#<strong>push</strong>(value, non_block = false, mode: nil, timeout: nil, **time_options)  &#x21d2; Boolean </a>
+      <a href="#push-instance_method" title="#push (instance method)">#<strong>push</strong>(value, non_block = false, mode: nil, timeout: nil, **time_options)  &#x21d2; Entry, false </a>
     
 
     
@@ -264,7 +271,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#try_push-instance_method" title="#try_push (instance method)">#<strong>try_push</strong>(value, mode: nil, **time_options) { ... } &#x21d2; Boolean, BasicObject </a>
+      <a href="#try_push-instance_method" title="#try_push (instance method)">#<strong>try_push</strong>(value, mode: nil, **time_options) { ... } &#x21d2; Entry, BasicObject </a>
     
 
     
@@ -310,13 +317,39 @@
   <p class="inherited"><span class='object_link'><a href="Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
 
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Abstract/TimerQueue.html" title="Farce::Abstract::TimerQueue (class)">Abstract::TimerQueue</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Abstract/TimerQueue.html#delete-instance_method" title="Farce::Abstract::TimerQueue#delete (method)">#delete</a></span>, <span class='object_link'><a href="Abstract/TimerQueue.html#first_timestamp-instance_method" title="Farce::Abstract::TimerQueue#first_timestamp (method)">#first_timestamp</a></span>, <span class='object_link'><a href="Abstract/TimerQueue.html#last_timestamp-instance_method" title="Farce::Abstract::TimerQueue#last_timestamp (method)">#last_timestamp</a></span>, <span class='object_link'><a href="Abstract/TimerQueue.html#overdue%3F-instance_method" title="Farce::Abstract::TimerQueue#overdue? (method)">#overdue?</a></span>, <span class='object_link'><a href="Abstract/TimerQueue.html#overdue_by-instance_method" title="Farce::Abstract::TimerQueue#overdue_by (method)">#overdue_by</a></span>, <span class='object_link'><a href="Abstract/TimerQueue.html#wait_pop-instance_method" title="Farce::Abstract::TimerQueue#wait_pop (method)">#wait_pop</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Abstract/Queue.html" title="Farce::Abstract::Queue (class)">Abstract::Queue</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Queue.html#age_tracking%3F-instance_method" title="Farce::Abstract::Queue#age_tracking? (method)">#age_tracking?</a></span>, <span class='object_link'><a href="Abstract/Queue.html#clear-instance_method" title="Farce::Abstract::Queue#clear (method)">#clear</a></span>, <span class='object_link'><a href="Abstract/Queue.html#close-instance_method" title="Farce::Abstract::Queue#close (method)">#close</a></span>, <span class='object_link'><a href="Abstract/Queue.html#closed%3F-instance_method" title="Farce::Abstract::Queue#closed? (method)">#closed?</a></span>, <span class='object_link'><a href="Abstract/Queue.html#deq-instance_method" title="Farce::Abstract::Queue#deq (method)">#deq</a></span>, <span class='object_link'><a href="Abstract/Queue.html#duplicable%3F-instance_method" title="Farce::Abstract::Queue#duplicable? (method)">#duplicable?</a></span>, <span class='object_link'><a href="Abstract/Queue.html#empty%3F-instance_method" title="Farce::Abstract::Queue#empty? (method)">#empty?</a></span>, <span class='object_link'><a href="Abstract/Queue.html#enq-instance_method" title="Farce::Abstract::Queue#enq (method)">#enq</a></span>, <span class='object_link'><a href="Abstract/Queue.html#full%3F-instance_method" title="Farce::Abstract::Queue#full? (method)">#full?</a></span>, <span class='object_link'><a href="Abstract/Queue.html#generation-instance_method" title="Farce::Abstract::Queue#generation (method)">#generation</a></span>, <span class='object_link'><a href="Abstract/Queue.html#length-instance_method" title="Farce::Abstract::Queue#length (method)">#length</a></span>, <span class='object_link'><a href="Abstract/Queue.html#max-instance_method" title="Farce::Abstract::Queue#max (method)">#max</a></span>, <span class='object_link'><a href="Abstract/Queue.html#oldest_age-instance_method" title="Farce::Abstract::Queue#oldest_age (method)">#oldest_age</a></span>, <span class='object_link'><a href="Abstract/Queue.html#oldest_enqueued_at-instance_method" title="Farce::Abstract::Queue#oldest_enqueued_at (method)">#oldest_enqueued_at</a></span>, <span class='object_link'><a href="Abstract/Queue.html#seal-instance_method" title="Farce::Abstract::Queue#seal (method)">#seal</a></span>, <span class='object_link'><a href="Abstract/Queue.html#sealed%3F-instance_method" title="Farce::Abstract::Queue#sealed? (method)">#sealed?</a></span>, <span class='object_link'><a href="Abstract/Queue.html#wait_pop-instance_method" title="Farce::Abstract::Queue#wait_pop (method)">#wait_pop</a></span>, <span class='object_link'><a href="Abstract/Queue.html#wait_push-instance_method" title="Farce::Abstract::Queue#wait_push (method)">#wait_push</a></span></p>
+
+  
   <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
     <div class="method_details first">
   <h3 class="signature first" id="initialize-instance_method">
   
-    #<strong>initialize</strong>(capacity: nil, mode: :copy, track_age: false)  &#x21d2; <tt>BasicObject</tt> 
+    #<strong>initialize</strong>(capacity: nil, mode: :smart, track_age: false)  &#x21d2; <tt>BasicObject</tt> 
   
 
   
@@ -326,12 +359,22 @@
   <div class="discussion">
     <p>Valid modes are:</p>
 <ul>
-<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:smart</code> - Applies smart rules or a dedicated proxy. Raises for unsupported values.
+This is the default for most mode-backed classes.</li>
+<li><code>:smart_raise</code> - Applies smart rules or a dedicated proxy, with a raising fallback.</li>
+<li><code>:smart_copy</code> - Applies smart rules or a dedicated proxy, then falls back to copying or Marshal.
+This is the default for <span class='object_link'><a href="Port.html" title="Farce::Port (class)">Port</a></span>.</li>
+<li><code>:smart_move</code> - Applies smart rules or a dedicated proxy, then falls back to moving.</li>
+<li><code>:copy</code> - The value will be copied between Ractors.</li>
+<li><code>:marshal</code> - The value will be serialized immediately and reconstructed once per Ractor
+with Ruby's Marshal protocol.
+Contents must support Marshal. Nested shareable values may be reconstructed too.</li>
 <li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Ractor.make_shareable</a></span>.</li>
 <li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
 that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
 that pushed it.</li>
-<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.</li>
+<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value.
+This isn't done recursively and thus will fail for nested unshareable values.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
@@ -373,7 +416,7 @@ This may update and freeze the original. Already-shareable values pass through u
         <span class='type'>(<tt>Symbol</tt>)</span>
       
       
-        <em class="default">(defaults to: <tt>:copy</tt>)</em>
+        <em class="default">(defaults to: <tt>:smart</tt>)</em>
       
       
         &mdash;
@@ -399,7 +442,7 @@ This may update and freeze the original. Already-shareable values pass through u
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/timer_queue.rb', line 14</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>capacity:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='comma'>,</span> <span class='label'>track_age:</span> <span class='kw'>false</span><span class='rparen'>)</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>capacity:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>track_age:</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='ivar'>@manager</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ModeManager.html#initialize-instance_method" title="Farce::ModeManager#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span><span class='rparen'>)</span>
   <span class='kw'>super</span><span class='lparen'>(</span><span class='label'>capacity:</span><span class='comma'>,</span> <span class='label'>track_age:</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
@@ -481,15 +524,15 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-59
-60
-61
-62
 63
-64</pre>
+64
+65
+66
+67
+68</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/timer_queue.rb', line 59</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/timer_queue.rb', line 63</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_peek'>peek</span>
   <span class='id identifier rubyid_empty'>empty</span> <span class='op'>=</span> <span class='kw'>false</span>
@@ -582,20 +625,20 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-37
-38
-39
-40
 41
 42
 43
 44
 45
 46
-47</pre>
+47
+48
+49
+50
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/timer_queue.rb', line 37</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/timer_queue.rb', line 41</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='id identifier rubyid_non_block'>non_block</span> <span class='op'>=</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Style/OptionalBooleanParameter
 </span>  <span class='kw'>return</span> <span class='id identifier rubyid_try_pop'>try_pop</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ThreadError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>queue empty</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span> <span class='kw'>if</span> <span class='id identifier rubyid_non_block'>non_block</span>
@@ -616,7 +659,7 @@ This may update and freeze the original. Already-shareable values pass through u
       <div class="method_details ">
   <h3 class="signature " id="push-instance_method">
   
-    #<strong>push</strong>(value, non_block = false, mode: nil, timeout: nil, **time_options)  &#x21d2; <tt>Boolean</tt> 
+    #<strong>push</strong>(value, non_block = false, mode: nil, timeout: nil, **time_options)  &#x21d2; <tt><span class='object_link'><a href="Abstract/TimerQueue/Entry.html" title="Farce::Abstract::TimerQueue::Entry (class)">Entry</a></span></tt>, <tt>false</tt> 
   
 
   
@@ -627,12 +670,22 @@ This may update and freeze the original. Already-shareable values pass through u
     <p>Add a value to become available at the given time.
 Valid modes are:</p>
 <ul>
-<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:smart</code> - Applies smart rules or a dedicated proxy. Raises for unsupported values.
+This is the default for most mode-backed classes.</li>
+<li><code>:smart_raise</code> - Applies smart rules or a dedicated proxy, with a raising fallback.</li>
+<li><code>:smart_copy</code> - Applies smart rules or a dedicated proxy, then falls back to copying or Marshal.
+This is the default for <span class='object_link'><a href="Port.html" title="Farce::Port (class)">Port</a></span>.</li>
+<li><code>:smart_move</code> - Applies smart rules or a dedicated proxy, then falls back to moving.</li>
+<li><code>:copy</code> - The value will be copied between Ractors.</li>
+<li><code>:marshal</code> - The value will be serialized immediately and reconstructed once per Ractor
+with Ruby's Marshal protocol.
+Contents must support Marshal. Nested shareable values may be reconstructed too.</li>
 <li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Ractor.make_shareable</a></span>.</li>
 <li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
 that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
 that pushed it.</li>
-<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.</li>
+<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value.
+This isn't done recursively and thus will fail for nested unshareable values.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
@@ -741,12 +794,12 @@ use <code>delay:</code> or <code>wait:</code> to schedule a relative offset.</p>
     <li>
       
       
-        <span class='type'>(<tt>Boolean</tt>)</span>
+        <span class='type'>(<tt><span class='object_link'><a href="Abstract/TimerQueue/Entry.html" title="Farce::Abstract::TimerQueue::Entry (class)">Entry</a></span></tt>, <tt>false</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'><p>whether the value was added</p>
+        <div class='inline'><p>the cancellation handle, or false if the capacity wait expires</p>
 </div>
       
     </li>
@@ -779,14 +832,18 @@ use <code>delay:</code> or <code>wait:</code> to schedule a relative offset.</p>
 22
 23
 24
-25</pre>
+25
+26
+27</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/timer_queue.rb', line 22</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_non_block'>non_block</span> <span class='op'>=</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_time_options'>time_options</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Style/OptionalBooleanParameter
-</span>  <span class='id identifier rubyid_at'>at</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_parse'><span class='object_link'><a href="Clock.html#parse-class_method" title="Farce::Clock.parse (method)">parse</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_time_options'>time_options</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_push_to_storage'>push_to_storage</span><span class='lparen'>(</span><span class='id identifier rubyid_at'>at</span><span class='comma'>,</span> <span class='id identifier rubyid_non_block'>non_block</span><span class='comma'>,</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
+</span>  <span class='id identifier rubyid_at'>at</span>    <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_parse'><span class='object_link'><a href="Clock.html#parse-class_method" title="Farce::Clock.parse (method)">parse</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_time_options'>time_options</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_entry'>entry</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Abstract/TimerQueue/Entry.html" title="Farce::Abstract::TimerQueue::Entry (class)">Entry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_at'>at</span><span class='comma'>,</span> <span class='kw'>self</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_push_to_storage'>push_to_storage</span><span class='lparen'>(</span><span class='id identifier rubyid_at'>at</span><span class='comma'>,</span> <span class='id identifier rubyid_non_block'>non_block</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_entry'>entry</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -852,15 +909,15 @@ use <code>delay:</code> or <code>wait:</code> to schedule a relative offset.</p>
       <pre class="lines">
 
 
-50
-51
-52
-53
 54
-55</pre>
+55
+56
+57
+58
+59</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/timer_queue.rb', line 50</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/timer_queue.rb', line 54</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_try_pop'>try_pop</span>
   <span class='id identifier rubyid_empty'>empty</span> <span class='op'>=</span> <span class='kw'>false</span>
@@ -876,7 +933,7 @@ use <code>delay:</code> or <code>wait:</code> to schedule a relative offset.</p>
       <div class="method_details ">
   <h3 class="signature " id="try_push-instance_method">
   
-    #<strong>try_push</strong>(value, mode: nil, **time_options) { ... } &#x21d2; <tt>Boolean</tt>, <tt>BasicObject</tt> 
+    #<strong>try_push</strong>(value, mode: nil, **time_options) { ... } &#x21d2; <tt><span class='object_link'><a href="Abstract/TimerQueue/Entry.html" title="Farce::Abstract::TimerQueue::Entry (class)">Entry</a></span></tt>, <tt>BasicObject</tt> 
   
 
   
@@ -887,12 +944,22 @@ use <code>delay:</code> or <code>wait:</code> to schedule a relative offset.</p>
     <p>Try to add a value without waiting for capacity.
 Valid modes are:</p>
 <ul>
-<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:smart</code> - Applies smart rules or a dedicated proxy. Raises for unsupported values.
+This is the default for most mode-backed classes.</li>
+<li><code>:smart_raise</code> - Applies smart rules or a dedicated proxy, with a raising fallback.</li>
+<li><code>:smart_copy</code> - Applies smart rules or a dedicated proxy, then falls back to copying or Marshal.
+This is the default for <span class='object_link'><a href="Port.html" title="Farce::Port (class)">Port</a></span>.</li>
+<li><code>:smart_move</code> - Applies smart rules or a dedicated proxy, then falls back to moving.</li>
+<li><code>:copy</code> - The value will be copied between Ractors.</li>
+<li><code>:marshal</code> - The value will be serialized immediately and reconstructed once per Ractor
+with Ruby's Marshal protocol.
+Contents must support Marshal. Nested shareable values may be reconstructed too.</li>
 <li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Ractor.make_shareable</a></span>.</li>
 <li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
 that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
 that pushed it.</li>
-<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.</li>
+<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value.
+This isn't done recursively and thus will fail for nested unshareable values.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
@@ -983,12 +1050,12 @@ With no scheduling option, the value is available immediately.</p>
     <li>
       
       
-        <span class='type'>(<tt>Boolean</tt>, <tt>BasicObject</tt>)</span>
+        <span class='type'>(<tt><span class='object_link'><a href="Abstract/TimerQueue/Entry.html" title="Farce::Abstract::TimerQueue::Entry (class)">Entry</a></span></tt>, <tt>BasicObject</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'><p>true, or the fallback result when full</p>
+        <div class='inline'><p>the cancellation handle, or the fallback result when full</p>
 </div>
       
     </li>
@@ -1001,18 +1068,22 @@ With no scheduling option, the value is available immediately.</p>
       <pre class="lines">
 
 
-30
-31
 32
 33
-34</pre>
+34
+35
+36
+37
+38</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/timer_queue.rb', line 30</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/timer_queue.rb', line 32</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_try_push'>try_push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_time_options'>time_options</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_at'>at</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_parse'><span class='object_link'><a href="Clock.html#parse-class_method" title="Farce::Clock.parse (method)">parse</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_time_options'>time_options</span><span class='rparen'>)</span>
-  <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='ivar'>@queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_at'>at</span><span class='comma'>,</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_at'>at</span>    <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_parse'><span class='object_link'><a href="Clock.html#parse-class_method" title="Farce::Clock.parse (method)">parse</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_time_options'>time_options</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_entry'>entry</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Abstract/TimerQueue/Entry.html" title="Farce::Abstract::TimerQueue::Entry (class)">Entry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_at'>at</span><span class='comma'>,</span> <span class='kw'>self</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_entry'>entry</span> <span class='kw'>if</span> <span class='ivar'>@queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_at'>at</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_block_given?'>block_given?</span> <span class='op'>?</span> <span class='kw'>yield</span> <span class='op'>:</span> <span class='kw'>false</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -1025,7 +1096,7 @@ With no scheduling option, the value is available immediately.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 14:43:56 2026 by
+  Generated on Sun Oct 11 21:00:45 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -593,7 +593,7 @@
 <span class='kw'>end</span>
 </code></pre>
 <h4 id="queues">Queues<a href="#queues" aria-label="Link to heading 'Queues'" data-heading-content="Queues" class="anchor"></a></h4>
-<p><code>Farce::Queue</code> is a drop-in replacement for Ruby's <code>Queue</code> and <code>SizedQueue</code>. It provides a blocking and a non-blocking API.</p>
+<p><code>Farce::Queue</code> is an alternative to Ruby's <code>Queue</code> and <code>SizedQueue</code>. It provides a superset of their API, offering both blocking and a non-blocking API, while implementing Ractor-sharing via <a href="#sharing-modes">sharing modes</a>.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_queue'>queue</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Queue.html" title="Farce::Queue (class)">Queue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Queue.html#initialize-instance_method" title="Farce::Queue#initialize (method)">new</a></span></span>
 <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='symbol'>:ok</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span>     <span class='comment'># =&gt; :ok
@@ -618,20 +618,29 @@
 <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span> <span class='comment'># =&gt; :b
 </span></code></pre>
 <h5 id="timer-queues">Timer Queues<a href="#timer-queues" aria-label="Link to heading 'Timer Queues'" data-heading-content="Timer Queues" class="anchor"></a></h5>
-<p>Timer queues are similar to priority queues, sorted by float values, but these values are timestamps (based on <a href="#additional-classes">Farce::Clock</a>, not on Ruby's Time, which isn't monotonic). Any <code>pull</code> will block until the next timestamp has been reached.</p>
+<p>Timer queues are similar to priority queues, sorted by float values, but these values are timestamps (based on <a href="#additional-classes">Farce::Clock</a>, not on Ruby's Time, which isn't monotonic). Any <code>pop</code> will block until the next timestamp has been reached.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_queue'>queue</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/TimerQueue.html" title="Farce::TimerQueue (class)">TimerQueue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/TimerQueue.html#initialize-instance_method" title="Farce::TimerQueue#initialize (method)">new</a></span></span>
 <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='symbol'>:ok</span><span class='comma'>,</span> <span class='label'>in:</span> <span class='float'>1.5</span><span class='rparen'>)</span>
 
 <span class='comment'># blocks for ~1.5 seconds
 </span><span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span> <span class='comment'># =&gt; :ok
 </span></code></pre>
-<p>Timer queues are useful for implementing schedulers (which is what Farce uses them for under the hood), so they have one additional feature: You can delete an entry if you know its timestamp.</p>
+<p>Timer queues are useful for implementing schedulers (which is what Farce uses them for under the hood). Both <code>push</code> and <code>try_push</code> return a cancellation handle when they succeed. Use <code>entry.delete</code> or <code>queue.delete(entry)</code> to cancel a scheduled value. The handle exposes its <code>queue</code> and scheduled <code>clock</code> time.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_queue'>queue</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/TimerQueue.html" title="Farce::TimerQueue (class)">TimerQueue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/TimerQueue.html#initialize-instance_method" title="Farce::TimerQueue#initialize (method)">new</a></span></span>
+<span class='id identifier rubyid_entry'>entry</span> <span class='op'>=</span> <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='symbol'>:work</span><span class='comma'>,</span> <span class='label'>in:</span> <span class='int'>60</span><span class='rparen'>)</span>
+
+<span class='id identifier rubyid_entry'>entry</span><span class='period'>.</span><span class='id identifier rubyid_delete'>delete</span> <span class='comment'># =&gt; true
+</span></code></pre>
+<p>You can also delete a value if you know its timestamp:</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_queue'>queue</span>     <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/TimerQueue.html" title="Farce::TimerQueue (class)">TimerQueue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/TimerQueue.html#initialize-instance_method" title="Farce::TimerQueue#initialize (method)">new</a></span></span>
 <span class='id identifier rubyid_timestamp'>timestamp</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_clock'><span class='object_link'><a href="Farce.html#clock-class_method" title="Farce.clock (method)">clock</a></span></span><span class='lparen'>(</span><span class='label'>in:</span> <span class='float'>0.2</span><span class='rparen'>)</span>
 
 <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='symbol'>:first</span><span class='comma'>,</span>  <span class='label'>at:</span> <span class='id identifier rubyid_timestamp'>timestamp</span> <span class='op'>-</span> <span class='float'>0.1</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='symbol'>:second</span><span class='comma'>,</span> <span class='label'>at:</span> <span class='id identifier rubyid_timestamp'>timestamp</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='symbol'>:third</span><span class='comma'>,</span>  <span class='label'>at:</span> <span class='id identifier rubyid_timestamp'>timestamp</span> <span class='op'>+</span> <span class='float'>0.1</span><span class='rparen'>)</span>
+
+<span class='id identifier rubyid_fourth'>fourth</span> <span class='op'>=</span> <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='symbol'>:fourth</span><span class='comma'>,</span> <span class='label'>at:</span> <span class='id identifier rubyid_timestamp'>timestamp</span> <span class='op'>+</span> <span class='float'>0.2</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_delete'>delete</span><span class='lparen'>(</span><span class='id identifier rubyid_fourth'>fourth</span><span class='rparen'>)</span>
 
 <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_delete'>delete</span><span class='lparen'>(</span><span class='symbol'>:second</span><span class='comma'>,</span> <span class='label'>at:</span> <span class='id identifier rubyid_timestamp'>timestamp</span><span class='rparen'>)</span>
 
@@ -714,9 +723,34 @@ groups.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>:copy</code> (default)</td>
-<td>Transfers a copy and leaves the original usable. This is the default.</td>
+<td><code>:smart</code> (default)</td>
+<td>Applies smart rules or a dedicated proxy, raising for unsupported values.</td>
+<td>Share supported values with less copying.</td>
+</tr>
+<tr>
+<td><code>:smart_raise</code></td>
+<td>Applies smart rules or a dedicated proxy, with a raising fallback.</td>
+<td>Reject unsupported transfers.</td>
+</tr>
+<tr>
+<td><code>:smart_copy</code></td>
+<td>Applies smart rules or a dedicated proxy, then tries copying and Marshal. Default for <code>Farce::Port</code>.</td>
+<td>Send values with a copying fallback.</td>
+</tr>
+<tr>
+<td><code>:smart_move</code></td>
+<td>Applies smart rules or a dedicated proxy, then tries moving.</td>
+<td>Hand off unsupported values.</td>
+</tr>
+<tr>
+<td><code>:copy</code></td>
+<td>Transfers a copy and leaves the original usable.</td>
 <td>Send a snapshot of a request.</td>
+</tr>
+<tr>
+<td><code>:marshal</code></td>
+<td>Serializes a snapshot and reconstructs it once per receiving Ractor.</td>
+<td>Transfer an Unshared container.</td>
 </tr>
 <tr>
 <td><code>:move</code></td>
@@ -1497,7 +1531,7 @@ need to specifically load any particular file.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Sun Oct 11 14:43:50 2026 by
+  Generated on Sun Oct 11 21:00:37 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -181,7 +181,7 @@ remain Ractor-shareable.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(initial_mapping = nil, mode: :copy, normalize_keys: nil, compare_by_identity: false, compare_keys_by_identity: compare_by_identity, compare_values_by_identity: compare_by_identity)  &#x21d2; Map </a>
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(initial_mapping = nil, mode: :smart, normalize_keys: nil, compare_by_identity: false, compare_keys_by_identity: compare_by_identity, compare_values_by_identity: compare_by_identity)  &#x21d2; Map </a>
     
 
     
@@ -273,7 +273,7 @@ remain Ractor-shareable.</p>
     <div class="method_details first">
   <h3 class="signature first" id="initialize-instance_method">
   
-    #<strong>initialize</strong>(initial_mapping = nil, mode: :copy, normalize_keys: nil, compare_by_identity: false, compare_keys_by_identity: compare_by_identity, compare_values_by_identity: compare_by_identity)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Map (class)">Map</a></span></tt> 
+    #<strong>initialize</strong>(initial_mapping = nil, mode: :smart, normalize_keys: nil, compare_by_identity: false, compare_keys_by_identity: compare_by_identity, compare_values_by_identity: compare_by_identity)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Map (class)">Map</a></span></tt> 
   
 
   
@@ -284,12 +284,22 @@ remain Ractor-shareable.</p>
     <p>Create a map with optional initial entries.
 Valid modes are:</p>
 <ul>
-<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:smart</code> - Applies smart rules or a dedicated proxy. Raises for unsupported values.
+This is the default for most mode-backed classes.</li>
+<li><code>:smart_raise</code> - Applies smart rules or a dedicated proxy, with a raising fallback.</li>
+<li><code>:smart_copy</code> - Applies smart rules or a dedicated proxy, then falls back to copying or Marshal.
+This is the default for <span class='object_link'><a href="Port.html" title="Farce::Port (class)">Port</a></span>.</li>
+<li><code>:smart_move</code> - Applies smart rules or a dedicated proxy, then falls back to moving.</li>
+<li><code>:copy</code> - The value will be copied between Ractors.</li>
+<li><code>:marshal</code> - The value will be serialized immediately and reconstructed once per Ractor
+with Ruby's Marshal protocol.
+Contents must support Marshal. Nested shareable values may be reconstructed too.</li>
 <li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Ractor.make_shareable</a></span>.</li>
 <li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
 that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
 that pushed it.</li>
-<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Farce::Mutable</a></span> instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.</li>
+<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Farce::Mutable</a></span> instance will be created for the value.
+This isn't done recursively and thus will fail for nested unshareable values.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
@@ -340,7 +350,8 @@ Nil creates an empty map.</p>
 <ul>
 <li>If a <code>Symbol</code> is provided, it will be used as a method name to call on each key.</li>
 <li>If a <code>Proc</code> is provided, it will be called with each key and should return the normalized key.</li>
-<li>If a <code>Hash</code> or <span class='object_link'><a href="Abstract/Map.html" title="Farce::Abstract::Map (class)">Map</a></span> is provided, it will be used to look up the normalized key for each incoming key.</li>
+<li>If a <code>Hash</code> or <span class='object_link'><a href="Abstract/Map.html" title="Farce::Abstract::Map (class)">Map</a></span> is provided, it will be used to look up
+the normalized key for each incoming key.</li>
 </ul>
 </div>
       
@@ -407,11 +418,11 @@ Defaults to <code>compare_by_identity</code>.</p>
         <span class='type'>(<tt>Symbol</tt>)</span>
       
       
-        <em class="default">(defaults to: <tt>:copy</tt>)</em>
+        <em class="default">(defaults to: <tt>:smart</tt>)</em>
       
       
         &mdash;
-        <div class='inline'><p>The default transfer mode for values. Defaults to <code>:copy</code>.</p>
+        <div class='inline'><p>The default transfer mode for values. Defaults to <code>:smart</code>.</p>
 </div>
       
     </li>
@@ -462,7 +473,7 @@ Defaults to <code>compare_by_identity</code>.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 14:43:52 2026 by
+  Generated on Sun Oct 11 21:00:39 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

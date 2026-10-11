@@ -150,11 +150,16 @@ Delegated calls raise Ractor::RemoteError after the owner exits.</p>
 <span class='id identifier rubyid_my_instance'>my_instance</span><span class='period'>.</span><span class='id identifier rubyid_record'>record</span> <span class='comment'># =&gt; [42]
 </span></code></pre>
 <p>The above example has one issue:
-We cannot chain the calls, because <code>&lt;&lt;</code> returns an array, which actually gets copied.</p>
+By default, <code>&lt;&lt;</code> makes the returned array shareable and freezes it.
+The next mutation raises <code>FrozenError</code>.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_my_instance'>my_instance</span> <span class='op'>=</span> <span class='const'>MyClass</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
 <span class='id identifier rubyid_my_proxy'>my_proxy</span>    <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'>Proxy</span><span class='period'>.</span><span class='id identifier rubyid_create'><span class='object_link'><a href="#create-class_method" title="Farce::Proxy.create (method)">create</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_my_instance'>my_instance</span><span class='rparen'>)</span>
 
-<span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_my_proxy'>my_proxy</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_it'>it</span> <span class='op'>&lt;&lt;</span> <span class='int'>42</span> <span class='op'>&lt;&lt;</span> <span class='int'>43</span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+<span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_my_proxy'>my_proxy</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_proxy'>proxy</span><span class='op'>|</span>
+  <span class='id identifier rubyid_proxy'>proxy</span> <span class='op'>&lt;&lt;</span> <span class='int'>42</span> <span class='op'>&lt;&lt;</span> <span class='int'>43</span>
+<span class='kw'>rescue</span> <span class='const'>FrozenError</span>
+  <span class='symbol'>:frozen_result</span>
+<span class='kw'>end</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
 
 <span class='id identifier rubyid_my_instance'>my_instance</span><span class='period'>.</span><span class='id identifier rubyid_record'>record</span> <span class='comment'># =&gt; [42]
 </span></code></pre>
@@ -504,18 +509,18 @@ custom methods:</p>
       <pre class="lines">
 
 
-253
-254
-255
-256
-257
 258
 259
 260
-261</pre>
+261
+262
+263
+264
+265
+266</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 253</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 258</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>register:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>scheduler:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='ivar'>@token</span>        <span class='op'>=</span> <span class='op'>::</span><span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span> <span class='comment'># cross-ractor finalizers don&#39;t work reliably across Ruby versions
@@ -564,13 +569,13 @@ custom methods:</p>
       <pre class="lines">
 
 
-284
-285
-286
-287</pre>
+289
+290
+291
+292</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 284</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 289</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='ivar'>@supervisor</span><span class='period'>.</span><span class='id identifier rubyid_send'>send</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
@@ -806,11 +811,6 @@ Returns its result. If the result is not Ractor-shareable, it will be proxied.</
       <pre class="lines">
 
 
-195
-196
-197
-198
-199
 200
 201
 202
@@ -823,10 +823,15 @@ Returns its result. If the result is not Ractor-shareable, it will be proxied.</
 209
 210
 211
-212</pre>
+212
+213
+214
+215
+216
+217</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 195</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 200</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_create'>create</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='comma'>,</span> <span class='label'>register:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>scheduler:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='kw'>if</span> <span class='const'>UNDEFINED</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
@@ -893,10 +898,10 @@ Returns its result. If the result is not Ractor-shareable, it will be proxied.</
       <pre class="lines">
 
 
-166</pre>
+171</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 166</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 171</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_default_register'>default_register</span> <span class='op'>=</span> <span class='const'>REGISTER</span></pre>
     </td>
@@ -1024,10 +1029,10 @@ invoked in the caller's Ractor.</p>
       <pre class="lines">
 
 
-172</pre>
+177</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 172</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 177</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_define'>define</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'>REGISTER</span><span class='period'>.</span><span class='id identifier rubyid_define'>define</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -1090,10 +1095,10 @@ invoked in the caller's Ractor.</p>
       <pre class="lines">
 
 
-268</pre>
+273</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 268</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 273</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_inspect'>inspect</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>#&lt;</span><span class='embexpr_beg'>#{</span><span class='ivar'>@proxy_class</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'> object=#&lt;</span><span class='embexpr_beg'>#{</span><span class='ivar'>@object_class</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>:0x</span><span class='embexpr_beg'>#{</span><span class='ivar'>@object_id</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='lparen'>(</span><span class='int'>16</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>&gt;&gt;</span><span class='tstring_end'>&quot;</span></span></pre>
     </td>
@@ -1143,10 +1148,10 @@ invoked in the caller's Ractor.</p>
       <pre class="lines">
 
 
-264</pre>
+269</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 264</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy.rb', line 269</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_ractor_shareable?'>ractor_shareable?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -1159,7 +1164,7 @@ invoked in the caller's Ractor.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 14:43:53 2026 by
+  Generated on Sun Oct 11 21:00:41 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

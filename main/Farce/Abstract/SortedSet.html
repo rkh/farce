@@ -225,7 +225,7 @@ elements raise during insertion or lookup.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(enumerable = nil, normalize: nil, compare_by_identity: false, mode: :copy, **options) {|element| ... } &#x21d2; Farce::Abstract::SortedSet </a>
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(enumerable = nil, normalize: nil, compare_by_identity: false, mode: :smart, **options) {|element| ... } &#x21d2; Farce::Abstract::SortedSet </a>
     
 
     
@@ -467,7 +467,7 @@ elements raise during insertion or lookup.</p>
     <div class="method_details first">
   <h3 class="signature first" id="initialize-instance_method">
   
-    #<strong>initialize</strong>(enumerable = nil, normalize: nil, compare_by_identity: false, mode: :copy, **options) {|element| ... } &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Abstract::SortedSet (class)">Farce::Abstract::SortedSet</a></span></tt> 
+    #<strong>initialize</strong>(enumerable = nil, normalize: nil, compare_by_identity: false, mode: :smart, **options) {|element| ... } &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Abstract::SortedSet (class)">Farce::Abstract::SortedSet</a></span></tt> 
   
 
   
@@ -552,12 +552,12 @@ elements raise during insertion or lookup.</p>
         <span class='type'>(<tt>Symbol</tt>)</span>
       
       
-        <em class="default">(defaults to: <tt>:copy</tt>)</em>
+        <em class="default">(defaults to: <tt>:smart</tt>)</em>
       
       
         &mdash;
         <div class='inline'><p>The default transfer mode. Only Farce::SortedSet accepts
-this option, which defaults to :copy.</p>
+this option, which defaults to :smart.</p>
 </div>
       
     </li>
@@ -1634,7 +1634,7 @@ this option, which defaults to :copy.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 14:44:03 2026 by
+  Generated on Sun Oct 11 21:00:54 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

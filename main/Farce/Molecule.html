@@ -325,12 +325,22 @@ An explicitly supplied atom keeps its own settings.</p>
     <p>Initialize fields and optionally override the record class defaults.
 Valid modes are:</p>
 <ul>
-<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:smart</code> - Applies smart rules or a dedicated proxy. Raises for unsupported values.
+This is the default for most mode-backed classes.</li>
+<li><code>:smart_raise</code> - Applies smart rules or a dedicated proxy, with a raising fallback.</li>
+<li><code>:smart_copy</code> - Applies smart rules or a dedicated proxy, then falls back to copying or Marshal.
+This is the default for <span class='object_link'><a href="Port.html" title="Farce::Port (class)">Port</a></span>.</li>
+<li><code>:smart_move</code> - Applies smart rules or a dedicated proxy, then falls back to moving.</li>
+<li><code>:copy</code> - The value will be copied between Ractors.</li>
+<li><code>:marshal</code> - The value will be serialized immediately and reconstructed once per Ractor
+with Ruby's Marshal protocol.
+Contents must support Marshal. Nested shareable values may be reconstructed too.</li>
 <li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Ractor.make_shareable</a></span>.</li>
 <li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
 that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
 that pushed it.</li>
-<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Farce::Mutable</a></span> instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.</li>
+<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Farce::Mutable</a></span> instance will be created for the value.
+This isn't done recursively and thus will fail for nested unshareable values.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
@@ -526,7 +536,7 @@ This may update and freeze the original. Already-shareable values pass through u
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/molecule.rb', line 35</span>
 
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_default_mode'>default_mode</span> <span class='op'>=</span> <span class='symbol'>:copy</span></pre>
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_default_mode'>default_mode</span> <span class='op'>=</span> <span class='symbol'>:smart</span></pre>
     </td>
   </tr>
 </table>
@@ -546,12 +556,22 @@ This may update and freeze the original. Already-shareable values pass through u
     <p>Create a record class with defaults for newly created atoms.
 Valid modes are:</p>
 <ul>
-<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:smart</code> - Applies smart rules or a dedicated proxy. Raises for unsupported values.
+This is the default for most mode-backed classes.</li>
+<li><code>:smart_raise</code> - Applies smart rules or a dedicated proxy, with a raising fallback.</li>
+<li><code>:smart_copy</code> - Applies smart rules or a dedicated proxy, then falls back to copying or Marshal.
+This is the default for <span class='object_link'><a href="Port.html" title="Farce::Port (class)">Port</a></span>.</li>
+<li><code>:smart_move</code> - Applies smart rules or a dedicated proxy, then falls back to moving.</li>
+<li><code>:copy</code> - The value will be copied between Ractors.</li>
+<li><code>:marshal</code> - The value will be serialized immediately and reconstructed once per Ractor
+with Ruby's Marshal protocol.
+Contents must support Marshal. Nested shareable values may be reconstructed too.</li>
 <li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Ractor.make_shareable</a></span>.</li>
 <li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
 that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
 that pushed it.</li>
-<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Farce::Mutable</a></span> instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.</li>
+<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Farce::Mutable</a></span> instance will be created for the value.
+This isn't done recursively and thus will fail for nested unshareable values.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
@@ -595,7 +615,7 @@ This may update and freeze the original. Already-shareable values pass through u
       
       
         &mdash;
-        <div class='inline'><p>the default transfer mode, or nil for :copy</p>
+        <div class='inline'><p>the default transfer mode, or nil for :smart</p>
 </div>
       
     </li>
@@ -663,7 +683,7 @@ This may update and freeze the original. Already-shareable values pass through u
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 14:43:55 2026 by
+  Generated on Sun Oct 11 21:00:43 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

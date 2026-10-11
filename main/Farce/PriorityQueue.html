@@ -159,7 +159,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(capacity: nil, default_priority: 0, order: :ascending, mode: :copy, track_age: false)  &#x21d2; BasicObject </a>
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(capacity: nil, default_priority: 0, order: :ascending, mode: :smart, track_age: false)  &#x21d2; BasicObject </a>
     
 
     
@@ -175,7 +175,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Valid modes are: * <code>:copy</code> - The value will be copied between Ractors.</p>
+    <span class="summary_desc"><div class='inline'><p>Valid modes are: * <code>:smart</code> - Applies smart rules or a dedicated proxy.</p>
 </div></span>
   
 </li>
@@ -354,7 +354,7 @@
     <div class="method_details first">
   <h3 class="signature first" id="initialize-instance_method">
   
-    #<strong>initialize</strong>(capacity: nil, default_priority: 0, order: :ascending, mode: :copy, track_age: false)  &#x21d2; <tt>BasicObject</tt> 
+    #<strong>initialize</strong>(capacity: nil, default_priority: 0, order: :ascending, mode: :smart, track_age: false)  &#x21d2; <tt>BasicObject</tt> 
   
 
   
@@ -364,12 +364,22 @@
   <div class="discussion">
     <p>Valid modes are:</p>
 <ul>
-<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:smart</code> - Applies smart rules or a dedicated proxy. Raises for unsupported values.
+This is the default for most mode-backed classes.</li>
+<li><code>:smart_raise</code> - Applies smart rules or a dedicated proxy, with a raising fallback.</li>
+<li><code>:smart_copy</code> - Applies smart rules or a dedicated proxy, then falls back to copying or Marshal.
+This is the default for <span class='object_link'><a href="Port.html" title="Farce::Port (class)">Farce::Port</a></span>.</li>
+<li><code>:smart_move</code> - Applies smart rules or a dedicated proxy, then falls back to moving.</li>
+<li><code>:copy</code> - The value will be copied between Ractors.</li>
+<li><code>:marshal</code> - The value will be serialized immediately and reconstructed once per Ractor
+with Ruby's Marshal protocol.
+Contents must support Marshal. Nested shareable values may be reconstructed too.</li>
 <li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Ractor.make_shareable</a></span>.</li>
 <li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
 that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
 that pushed it.</li>
-<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.</li>
+<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value.
+This isn't done recursively and thus will fail for nested unshareable values.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
@@ -447,7 +457,7 @@ try_push is called without an explicit priority</p>
         <span class='type'>(<tt>Symbol</tt>)</span>
       
       
-        <em class="default">(defaults to: <tt>:copy</tt>)</em>
+        <em class="default">(defaults to: <tt>:smart</tt>)</em>
       
       
         &mdash;
@@ -473,7 +483,7 @@ try_push is called without an explicit priority</p>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/priority_queue.rb', line 14</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>capacity:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>default_priority:</span> <span class='int'>0</span><span class='comma'>,</span> <span class='label'>order:</span> <span class='symbol'>:ascending</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='comma'>,</span> <span class='label'>track_age:</span> <span class='kw'>false</span><span class='rparen'>)</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>capacity:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>default_priority:</span> <span class='int'>0</span><span class='comma'>,</span> <span class='label'>order:</span> <span class='symbol'>:ascending</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>track_age:</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='ivar'>@manager</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ModeManager.html#initialize-instance_method" title="Farce::ModeManager#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span><span class='rparen'>)</span>
   <span class='kw'>super</span><span class='lparen'>(</span><span class='label'>capacity:</span><span class='comma'>,</span> <span class='label'>default_priority:</span><span class='comma'>,</span> <span class='label'>order:</span><span class='comma'>,</span> <span class='label'>track_age:</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
@@ -656,12 +666,22 @@ try_push is called without an explicit priority</p>
     <p>Add a value, waiting for capacity when the queue is bounded and full.
 Valid modes are:</p>
 <ul>
-<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:smart</code> - Applies smart rules or a dedicated proxy. Raises for unsupported values.
+This is the default for most mode-backed classes.</li>
+<li><code>:smart_raise</code> - Applies smart rules or a dedicated proxy, with a raising fallback.</li>
+<li><code>:smart_copy</code> - Applies smart rules or a dedicated proxy, then falls back to copying or Marshal.
+This is the default for <span class='object_link'><a href="Port.html" title="Farce::Port (class)">Farce::Port</a></span>.</li>
+<li><code>:smart_move</code> - Applies smart rules or a dedicated proxy, then falls back to moving.</li>
+<li><code>:copy</code> - The value will be copied between Ractors.</li>
+<li><code>:marshal</code> - The value will be serialized immediately and reconstructed once per Ractor
+with Ruby's Marshal protocol.
+Contents must support Marshal. Nested shareable values may be reconstructed too.</li>
 <li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Ractor.make_shareable</a></span>.</li>
 <li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
 that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
 that pushed it.</li>
-<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.</li>
+<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value.
+This isn't done recursively and thus will fail for nested unshareable values.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
@@ -913,12 +933,22 @@ This may update and freeze the original. Already-shareable values pass through u
     <p>Try to add a value without waiting.
 Valid modes are:</p>
 <ul>
-<li><code>:copy</code> - The value will be copied between Ractors. This is the default mode.</li>
+<li><code>:smart</code> - Applies smart rules or a dedicated proxy. Raises for unsupported values.
+This is the default for most mode-backed classes.</li>
+<li><code>:smart_raise</code> - Applies smart rules or a dedicated proxy, with a raising fallback.</li>
+<li><code>:smart_copy</code> - Applies smart rules or a dedicated proxy, then falls back to copying or Marshal.
+This is the default for <span class='object_link'><a href="Port.html" title="Farce::Port (class)">Farce::Port</a></span>.</li>
+<li><code>:smart_move</code> - Applies smart rules or a dedicated proxy, then falls back to moving.</li>
+<li><code>:copy</code> - The value will be copied between Ractors.</li>
+<li><code>:marshal</code> - The value will be serialized immediately and reconstructed once per Ractor
+with Ruby's Marshal protocol.
+Contents must support Marshal. Nested shareable values may be reconstructed too.</li>
 <li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Ractor.make_shareable</a></span>.</li>
 <li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
 that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
 that pushed it.</li>
-<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.</li>
+<li><code>:mutable</code> - A <span class='object_link'><a href="Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value.
+This isn't done recursively and thus will fail for nested unshareable values.</li>
 <li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 get an error. Useful for usage contained within a single Ractor.</li>
 <li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
@@ -1051,7 +1081,7 @@ This may update and freeze the original. Already-shareable values pass through u
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 14:43:59 2026 by
+  Generated on Sun Oct 11 21:00:48 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

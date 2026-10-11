@@ -183,6 +183,29 @@ Helpful to isolate proxy definitions that shouldn't be activated globally.</p>
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#dedicated_proxy%3F-instance_method" title="#dedicated_proxy? (instance method)">#<strong>dedicated_proxy?</strong>(klass)  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Check whether this exact class has a definition in either proxy layer.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#define-instance_method" title="#define (instance method)">#<strong>define</strong>(klass, layer: :outer) { ... } &#x21d2; BasicObject </a>
     
 
@@ -308,7 +331,80 @@ Helpful to isolate proxy definitions that shouldn't be activated globally.</p>
 
     
       <div class="method_details first">
-  <h3 class="signature first" id="define-instance_method">
+  <h3 class="signature first" id="dedicated_proxy?-instance_method">
+  
+    #<strong>dedicated_proxy?</strong>(klass)  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Check whether this exact class has a definition in either proxy layer.
+Inherited wrapper methods do not count as a dedicated proxy.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>klass</span>
+      
+      
+        <span class='type'>(<tt>Class</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the source class</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>whether the class has a dedicated proxy</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+94</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/proxy/register.rb', line 94</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_dedicated_proxy?'>dedicated_proxy?</span><span class='lparen'>(</span><span class='id identifier rubyid_klass'>klass</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@inner_mirror</span><span class='period'>.</span><span class='id identifier rubyid_custom?'>custom?</span><span class='lparen'>(</span><span class='id identifier rubyid_klass'>klass</span><span class='rparen'>)</span> <span class='op'>||</span> <span class='ivar'>@outer_mirror</span><span class='period'>.</span><span class='id identifier rubyid_custom?'>custom?</span><span class='lparen'>(</span><span class='id identifier rubyid_klass'>klass</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="define-instance_method">
   
     #<strong>define</strong>(klass, layer: :outer) { ... } &#x21d2; <tt>BasicObject</tt> 
   
@@ -437,7 +533,7 @@ invoked in the caller's Ractor.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 14:43:59 2026 by
+  Generated on Sun Oct 11 21:00:49 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

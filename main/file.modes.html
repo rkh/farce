@@ -84,7 +84,9 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </li>
 <li><a href="#farces-modes">Farce's Modes</a>
 <ul>
+<li><a href="#smart-modes-apply-rules-before-transferring">Smart modes: apply rules before transferring</a></li>
 <li><a href="#copy-keep-working-with-the-original"><code>:copy</code>: keep working with the original</a></li>
+<li><a href="#marshal-reconstruct-a-serialized-snapshot"><code>:marshal</code>: reconstruct a serialized snapshot</a></li>
 <li><a href="#move-hand-off-a-finished-batch"><code>:move</code>: hand off a finished batch</a></li>
 <li><a href="#local-preserve-object-identity"><code>:local</code>: preserve object identity</a></li>
 <li><a href="#make_shareable-publish-the-original"><code>:make_shareable</code>: publish the original</a></li>
@@ -146,7 +148,7 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_receive'>receive</span> <span class='comment'># =&gt; [4, 5]
 </span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
 </code></pre>
-<p>Farce extends this choice with nine named modes.</p>
+<p>Farce extends this choice with fourteen named modes.</p>
 <h2 id="farces-modes">Farce's Modes<a href="#farces-modes" aria-label="Link to heading 'Farce's Modes'" data-heading-content="Farce's Modes" class="anchor"></a></h2>
 <p>The following modes are accepted by <code>Farce::Port</code>. They apply to non-shareable values. Already-shareable values pass through unchanged, including when you select <code>:move</code> or <code>:raise</code>.</p>
 <table>
@@ -159,9 +161,34 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </thead>
 <tbody>
 <tr>
-<td><code>:copy</code> (default)</td>
-<td>Transfers a copy and leaves the original usable. This is the default.</td>
+<td><code>:smart</code></td>
+<td>Applies smart rules or a dedicated proxy. Raises for unsupported values. Default for most mode-backed classes.</td>
+<td>Share supported values with less copying.</td>
+</tr>
+<tr>
+<td><code>:smart_raise</code></td>
+<td>Applies smart rules or a dedicated proxy, with a raising fallback.</td>
+<td>Reject unsupported transfers.</td>
+</tr>
+<tr>
+<td><code>:smart_copy</code></td>
+<td>Applies smart rules or a dedicated proxy, then tries copying and Marshal. Default for <code>Farce::Port</code>.</td>
+<td>Send values with a copying fallback.</td>
+</tr>
+<tr>
+<td><code>:smart_move</code></td>
+<td>Applies smart rules or a dedicated proxy, then tries moving.</td>
+<td>Hand off unsupported values.</td>
+</tr>
+<tr>
+<td><code>:copy</code></td>
+<td>Transfers a copy and leaves the original usable.</td>
 <td>Send a snapshot of a request.</td>
+</tr>
+<tr>
+<td><code>:marshal</code></td>
+<td>Serializes a snapshot and reconstructs it once per receiving Ractor.</td>
+<td>Transfer an Unshared container with fresh storage.</td>
 </tr>
 <tr>
 <td><code>:move</code></td>
@@ -205,9 +232,26 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </tr>
 </tbody>
 </table>
+<h3 id="smart-modes-apply-rules-before-transferring">Smart modes: apply rules before transferring<a href="#smart-modes-apply-rules-before-transferring" aria-label="Link to heading 'Smart modes: apply rules before transferring'" data-heading-content="Smart modes: apply rules before transferring" class="anchor"></a></h3>
+<p>Most mode-backed classes default to <code>:smart</code>. <code>Farce::Port</code> defaults to <code>:smart_copy</code> so values without a suitable rule or dedicated proxy can still be copied. Classes with restricted weak-value modes keep their <code>:raise</code> default.</p>
+<p>Smart modes pass already-shareable values through unchanged. Mutable strings become frozen, deduplicated strings without freezing the source string. Time values are made shareable in place. The Date integration does the same for Date and DateTime values.</p>
+<p>With <code>:smart</code>, arrays and Ruby sets containing only shareable elements are made shareable in place. Symbol-keyed hashes containing only shareable values are made shareable in every smart mode. This can freeze the original, including with <code>:smart_copy</code> and <code>:smart_move</code>.</p>
+<p>For arrays and Ruby sets, <code>:smart_copy</code> makes a shallow copy and tries to prepare each element with <code>:smart_raise</code>. If all results are directly usable, it makes that copy shareable. Otherwise, it copies the original graph, preserving aliases and cycles. If native copying raises a standard error, it tries Marshal reconstruction. If both fail, it raises the original copying error. It does not recursively insert managed envelopes into the container. Identity-based Farce sets use the prepared element for membership and reject a copying envelope fallback.</p>
+<p>A dedicated proxy applies only to the exact registered class. Smart rules inherit through the source class hierarchy and can customize individual smart modes. Without applicable behavior, <code>:smart</code> and <code>:smart_raise</code> raise <code>Ractor::IsolationError</code>, <code>:smart_copy</code> tries copying and Marshal, and <code>:smart_move</code> tries moving.</p>
+<pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>Job</span>
+  <span class='id identifier rubyid_attr_reader'>attr_reader</span> <span class='symbol'>:id</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_id'>id</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@id</span> <span class='op'>=</span> <span class='id identifier rubyid_id'>id</span>
+<span class='kw'>end</span>
+
+<span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/ModeManager/SmartRule.html" title="Farce::ModeManager::SmartRule (class)">SmartRule</a></span></span><span class='period'>.</span><span class='id identifier rubyid_define'><span class='object_link'><a href="Farce/ModeManager/SmartRule.html#define-class_method" title="Farce::ModeManager::SmartRule.define (method)">define</a></span></span><span class='lparen'>(</span><span class='const'>Job</span><span class='comma'>,</span> <span class='symbol'>:marshal</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_queue'>queue</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Queue.html" title="Farce::Queue (class)">Queue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Queue.html#initialize-instance_method" title="Farce::Queue#initialize (method)">new</a></span></span>
+<span class='id identifier rubyid_queue'>queue</span> <span class='op'>&lt;&lt;</span> <span class='const'>Job</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='int'>42</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span><span class='period'>.</span><span class='id identifier rubyid_id'>id</span> <span class='comment'># =&gt; 42
+</span></code></pre>
+<p>Use an explicit <code>:copy</code> mode when callers need independently mutable copies even for values that smart rules could make shareable. On JRuby and TruffleRuby, ordinary values are already shareable and pass through unchanged.</p>
 <h3 id="copy-keep-working-with-the-original"><code>:copy</code>: keep working with the original<a href="#copy-keep-working-with-the-original" aria-label="Link to heading ':copy: keep working with the original'" data-heading-content=":copy: keep working with the original" class="anchor"></a></h3>
 <p>Copying is a good starting point for ordinary hashes, arrays, and strings. The receiver can change its copy without changing the sender's data. Shareable parts of the message can still be reused.</p>
-<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_port'>port</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Port.html" title="Farce::Port (class)">Port</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_port'>port</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Port.html" title="Farce::Port (class)">Port</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_request'>request</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='label'>ids:</span> <span class='lbracket'>[</span><span class='int'>10</span><span class='comma'>,</span> <span class='int'>20</span><span class='rbracket'>]</span> <span class='rbrace'>}</span>
 <span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_send'>send</span><span class='lparen'>(</span><span class='id identifier rubyid_request'>request</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_request'>request</span><span class='lbracket'>[</span><span class='symbol'>:ids</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='int'>30</span>
@@ -219,6 +263,21 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
 </code></pre>
 <p>Copying is not a way to serialize every Ruby object. Some objects cannot be copied across Ractors. Choose a mode that fits the value, or send ordinary data from which the receiver can build what it needs.</p>
+<h3 id="marshal-reconstruct-a-serialized-snapshot"><code>:marshal</code>: reconstruct a serialized snapshot<a href="#marshal-reconstruct-a-serialized-snapshot" aria-label="Link to heading ':marshal: reconstruct a serialized snapshot'" data-heading-content=":marshal: reconstruct a serialized snapshot" class="anchor"></a></h3>
+<p>Use <code>:marshal</code> for values with a Marshal representation, including <code>Farce::Unshared</code> containers whose backends cannot be copied directly between native Ractors. Farce calls <code>Marshal.dump</code> when preparing the value. A shareable envelope holds the frozen bytes. The first read in each Ractor calls <code>Marshal.load</code>, then caches that Ractor's reconstructed value.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_port'>port</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Port.html" title="Farce::Port (class)">Port</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:marshal</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_source'>source</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Unshared.html" title="Farce::Unshared (module)">Unshared</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Unshared/Map.html" title="Farce::Unshared::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Unshared/Map.html#initialize-instance_method" title="Farce::Unshared::Map#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='lbrace'>{</span> <span class='label'>jobs:</span> <span class='lbracket'>[</span><span class='rbracket'>]</span> <span class='rbrace'>}</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_send'>send</span><span class='lparen'>(</span><span class='id identifier rubyid_source'>source</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_source'>source</span><span class='lbracket'>[</span><span class='symbol'>:jobs</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='symbol'>:sender_change</span>
+
+<span class='id identifier rubyid_received'>received</span> <span class='op'>=</span> <span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_receive'>receive</span>
+<span class='id identifier rubyid_received'>received</span><span class='lbracket'>[</span><span class='symbol'>:jobs</span><span class='rbracket'>]</span> <span class='comment'># =&gt; []
+</span><span class='id identifier rubyid_received'>received</span><span class='lbracket'>[</span><span class='symbol'>:jobs</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='symbol'>:receiver_change</span>
+<span class='id identifier rubyid_source'>source</span><span class='lbracket'>[</span><span class='symbol'>:jobs</span><span class='rbracket'>]</span>   <span class='comment'># =&gt; [:sender_change]
+</span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
+</code></pre>
+<p>Farce's Marshal hooks rebuild containers from logical contents and settings. The receiver gets fresh backend storage and synchronization state. Repeated references and supported cycles within the serialized graph are preserved. A reconstructed Unshared container remains unshareable.</p>
+<p>Contents must support Marshal. Procs, anonymous classes, and live coordination objects such as queues and leases cannot be serialized. A serialization failure raises <code>TypeError</code> before the value is sent or stored. Unlike native Ractor copying, Marshal may also reconstruct nested shareable objects. Top-level shareable values still pass through unchanged.</p>
 <h3 id="move-hand-off-a-finished-batch"><code>:move</code>: hand off a finished batch<a href="#move-hand-off-a-finished-batch" aria-label="Link to heading ':move: hand off a finished batch'" data-heading-content=":move: hand off a finished batch" class="anchor"></a></h3>
 <p>Moving is useful when a producer has finished building a message and will never use it again. It avoids copying the payload. Do not retain a plan to reuse the original or its moved nested objects after sending.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_results'>results</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Port.html" title="Farce::Port (class)">Port</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:move</span><span class='rparen'>)</span>
@@ -334,7 +393,7 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </span><span class='id identifier rubyid_proxy'>proxy</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span> <span class='comment'># =&gt; 1
 </span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
 </code></pre>
-<p>Each delegated call involves a request and response. Non-shareable arguments and return values are copied by default, while methods that return the original object return its proxy. Keep the owning Ractor alive while callers use the proxy. Calls raise <code>Farce::Ractor::RemoteError</code> after the owner exits. Access through other references to the original object still needs its own coordination.</p>
+<p>Each delegated call involves a request and response. Arguments and return values use <code>:smart</code> rules by default. Unsupported values raise unless a wrapper selects another mode. Methods that return the original object return its proxy. Keep the owning Ractor alive while callers use the proxy. Calls raise <code>Farce::Ractor::RemoteError</code> after the owner exits. Access through other references to the original object still needs its own coordination.</p>
 <p>On JRuby and TruffleRuby, ordinary values are already shareable, so this mode passes them through without creating a proxy.</p>
 <h3 id="raise-require-prepared-data"><code>:raise</code>: require prepared data<a href="#raise-require-prepared-data" aria-label="Link to heading ':raise: require prepared data'" data-heading-content=":raise: require prepared data" class="anchor"></a></h3>
 <p>Use <code>:raise</code> when callers should prepare shareable messages explicitly. A bad value fails at the send operation, where the caller can fix it.</p>
@@ -382,7 +441,7 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 </code></pre>
 <p>Automatic local transfer takes precedence even over an explicit <code>mode:</code> or <code>move:</code>. Disable it for a particular send when the selected transfer behavior matters. Its default is <code>false</code> on ports.</p>
 <h2 id="other-classes-that-support-modes">Other classes that support modes<a href="#other-classes-that-support-modes" aria-label="Link to heading 'Other classes that support modes'" data-heading-content="Other classes that support modes" class="anchor"></a></h2>
-<p>The same choices appear in several Farce APIs. Containers normally default to <code>:copy</code> and unwrap their managed values when you read them. Setting a container's mode does not make the values it returns shareable.</p>
+<p>The same choices appear in several Farce APIs. Containers normally default to <code>:smart</code> and unwrap their managed values when you read them. Setting a container's mode does not make the values it returns shareable.</p>
 <table>
 <thead>
 <tr>
@@ -522,7 +581,7 @@ results directly.</p>
 <span class='id identifier rubyid_retries'>retries</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='lbrace'>{</span> <span class='label'>attempt:</span> <span class='int'>2</span> <span class='rbrace'>}</span><span class='comma'>,</span> <span class='label'>at:</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:make_shareable</span><span class='rparen'>)</span>
 <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Farce/Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_retries'>retries</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
 </span></code></pre>
-<p>Wrapping happens before waiting for queue space or an exchange partner. A failed <code>try_push</code> or a timeout can therefore leave a value moved or frozen. Use copying when you need to retain the original for a retry. Also, reading a moved payload can claim it: <code>TimerQueue#peek</code> opens the payload even though it leaves the item queued.</p>
+<p>Wrapping happens before waiting for queue space or an exchange partner. A failed <code>try_push</code> or a timeout can therefore leave a value moved or frozen. Use copying when you need to retain the original for a retry. Also, reading a moved payload can claim it: <code>TimerQueue#peek</code> opens the payload even though it leaves the item queued. Cancelling a timer through the handle returned by <code>push</code> or <code>try_push</code> does not open or claim the payload.</p>
 <h3 id="exchange-mutable-messages-with-a-partner">Exchange mutable messages with a partner<a href="#exchange-mutable-messages-with-a-partner" aria-label="Link to heading 'Exchange mutable messages with a partner'" data-heading-content="Exchange mutable messages with a partner" class="anchor"></a></h3>
 <p>An exchanger pairs two callers. Each caller receives the other's offered value. Copy mode lets both callers retain their originals.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_exchange'>exchange</span>   <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Exchanger.html" title="Farce::Exchanger (class)">Exchanger</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Exchanger.html#initialize-instance_method" title="Farce::Exchanger#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='rparen'>)</span>
@@ -617,9 +676,10 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 <span class='id identifier rubyid_envelope'>envelope</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='lbracket'>[</span><span class='symbol'>:ids</span><span class='rbracket'>]</span>                  <span class='comment'># =&gt; [1, 2]
 </span><span class='id identifier rubyid_envelope'>envelope</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_envelope'>envelope</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
 </span></code></pre>
-<p><code>Envelope.new</code> defaults to <code>:copy</code> and accepts <code>:copy</code>, <code>:move</code>, or <code>:local</code>. These are envelope types, not the full set of manager modes. A shareable payload produces an <code>Envelope::Share</code>. The other manager modes either prepare shareable data directly or raise an error.</p>
+<p><code>Envelope.new</code> defaults to <code>:copy</code> and accepts <code>:copy</code>, <code>:marshal</code>, <code>:move</code>, or <code>:local</code>. These are envelope types, not the full set of manager modes. A shareable payload produces an <code>Envelope::Share</code>. The other manager modes either prepare shareable data directly or raise an error.</p>
 <h3 id="when-copying-and-moving-happen">When copying and moving happen<a href="#when-copying-and-moving-happen" aria-label="Link to heading 'When copying and moving happen'" data-heading-content="When copying and moving happen" class="anchor"></a></h3>
 <p>A copy envelope copies its non-shareable payload into internal storage when created. Each Ractor that opens it gets another copy, cached for that Ractor. A move envelope moves the payload into storage immediately, then moves it out when the winning Ractor first opens it. Forwarding either envelope does not add a payload copy or move at every hop.</p>
+<p>A Marshal envelope serializes its payload when created. Each Ractor that opens it reconstructs one value from the same frozen bytes and caches it. Forwarding the envelope does not serialize or reconstruct its payload again.</p>
 <table>
 <thead>
 <tr>
@@ -633,6 +693,11 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 <td><code>Envelope::Copy</code></td>
 <td>Any Ractor.</td>
 <td>That Ractor's cached copy.</td>
+</tr>
+<tr>
+<td><code>Envelope::Marshal</code></td>
+<td>Any Ractor.</td>
+<td>That Ractor's cached reconstruction.</td>
 </tr>
 <tr>
 <td><code>Envelope::Move</code></td>
@@ -651,7 +716,7 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 </tr>
 </tbody>
 </table>
-<p>A claim belongs to a Ractor, not a thread or fiber, and cannot be revoked. <code>claim</code> returns the envelope on success or <code>nil</code> if another Ractor owns it. <code>claim!</code> and <code>value</code> raise <code>Farce::Envelope::AlreadyClaimed</code> on failure. Use <code>claimed?</code> to ask whether it has an owner and <code>owned?</code> to ask whether the current Ractor can open it. Copy and share envelopes report both as true because every Ractor can open them.</p>
+<p>A claim belongs to a Ractor, not a thread or fiber, and cannot be revoked. <code>claim</code> returns the envelope on success or <code>nil</code> if another Ractor owns it. <code>claim!</code> and <code>value</code> raise <code>Farce::Envelope::AlreadyClaimed</code> on failure. Use <code>claimed?</code> to ask whether it has an owner and <code>owned?</code> to ask whether the current Ractor can open it. Copy, Marshal, and share envelopes report both as true because every Ractor can open them.</p>
 <h3 id="forward-envelopes-without-opening-them">Forward envelopes without opening them<a href="#forward-envelopes-without-opening-them" aria-label="Link to heading 'Forward envelopes without opening them'" data-heading-content="Forward envelopes without opening them" class="anchor"></a></h3>
 <p>An explicitly created envelope stays an envelope when passed through a Farce port or queue. This lets a dispatcher route a job without taking ownership of the job's mutable contents. In this example, only the consumer opens the move envelope.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_incoming'>incoming</span>  <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Queue.html" title="Farce::Queue (class)">Queue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Queue.html#initialize-instance_method" title="Farce::Queue#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:raise</span><span class='rparen'>)</span>
@@ -683,7 +748,7 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 </code></pre>
 <p>Both queues accept the envelope in <code>:raise</code> mode because the wrapper is shareable. Neither queue opens it automatically. For routing metadata, put the envelope in a shareable message such as <code>[:billing, package].freeze</code>. The router can read the destination without accessing the payload.</p>
 <h3 id="mode-managers-prepare-values-and-open-their-own-envelopes">Mode managers prepare values and open their own envelopes<a href="#mode-managers-prepare-values-and-open-their-own-envelopes" aria-label="Link to heading 'Mode managers prepare values and open their own envelopes'" data-heading-content="Mode managers prepare values and open their own envelopes" class="anchor"></a></h3>
-<p><code>Farce::ModeManager</code> provides two core operations: <code>wrap</code> prepares a value for shared storage, and <code>unwrap</code> retrieves values from envelopes that this manager created. It passes already-shareable values through unchanged. For non-shareable values, <code>:copy</code>, <code>:move</code>, and <code>:local</code> create managed envelopes. The remaining modes prepare shareable data directly, create a <code>Farce::Mutable</code> or <code>Farce::Proxy</code>, or raise. Mutable and proxy wrappers remain wrapped when read.</p>
+<p><code>Farce::ModeManager</code> provides two core operations: <code>wrap</code> prepares a value for shared storage, and <code>unwrap</code> retrieves values from envelopes that this manager created. It passes already-shareable values through unchanged. For non-shareable values, <code>:copy</code>, <code>:marshal</code>, <code>:move</code>, and <code>:local</code> create managed envelopes. Smart modes choose their representation through rules, dedicated proxies, and their fallback behavior. The remaining modes prepare shareable data directly, create a <code>Farce::Mutable</code> or <code>Farce::Proxy</code>, or raise. Mutable and proxy wrappers remain wrapped when read.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/ModeManager.html#initialize-instance_method" title="Farce::ModeManager#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_source'>source</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='label'>ids:</span> <span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='rbrace'>}</span>
 <span class='id identifier rubyid_stored'>stored</span> <span class='op'>=</span> <span class='id identifier rubyid_manager'>manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_source'>source</span><span class='rparen'>)</span>
@@ -705,7 +770,7 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 <pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>WorkInbox</span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:copy</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='rparen'>)</span>
     <span class='ivar'>@manager</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/ModeManager.html#initialize-instance_method" title="Farce::ModeManager#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span><span class='rparen'>)</span>
     <span class='ivar'>@storage</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Queue.html" title="Farce::Queue (class)">Queue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Queue.html#initialize-instance_method" title="Farce::Queue#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:raise</span><span class='rparen'>)</span>
     <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span>
@@ -731,7 +796,7 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 </div></div>
 
       <div id="footer">
-  Generated on Sun Oct 11 14:43:51 2026 by
+  Generated on Sun Oct 11 21:00:37 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

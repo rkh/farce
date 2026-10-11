@@ -104,7 +104,7 @@ check an existing Farce object without conversion:</p>
 <span class='id identifier rubyid_numbers'>numbers</span> <span class='op'>=</span> <span class='const'>Types</span><span class='op'>::</span><span class='const'>IntegerVector</span><span class='lbracket'>[</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>1</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='int'>2</span><span class='rbracket'>]</span><span class='rbracket'>]</span>
 <span class='id identifier rubyid_numbers'>numbers</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span> <span class='comment'># =&gt; Farce::Vector
 </span><span class='id identifier rubyid_numbers'>numbers</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span>  <span class='comment'># =&gt; [1, 2]
-</span><span class='id identifier rubyid_numbers'>numbers</span><span class='period'>.</span><span class='id identifier rubyid_mode'>mode</span>  <span class='comment'># =&gt; :copy
+</span><span class='id identifier rubyid_numbers'>numbers</span><span class='period'>.</span><span class='id identifier rubyid_mode'>mode</span>  <span class='comment'># =&gt; :smart
 </span></code></pre>
 <p>The bare <code>Vector</code> accepts any Array members. Imported dry namespaces control
 the outer native input in the same way as their Array type:</p>
@@ -277,10 +277,11 @@ variant.</p>
 <span class='id identifier rubyid_vector'>vector</span> <span class='op'>=</span> <span class='const'>Types</span><span class='op'>::</span><span class='const'>LocalValueVector</span><span class='lbracket'>[</span><span class='lbracket'>[</span><span class='id identifier rubyid_payload'>payload</span><span class='rbracket'>]</span><span class='rbracket'>]</span>
 <span class='id identifier rubyid_vector'>vector</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_payload'>payload</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
 </span></code></pre>
-<p>The supported shared modes are <code>:copy</code>, <code>:local</code>, <code>:make_shareable</code>,
-<code>:shareable_copy</code>, and <code>:raise</code>. They apply to collections and Atom. Counter and
-Flag have no transfer mode. <code>:move</code> is rejected because dry-types creates and
-examines intermediate values during coercion.</p>
+<p>The supported shared modes are <code>:smart</code>, <code>:smart_raise</code>, <code>:smart_copy</code>,
+<code>:copy</code>, <code>:local</code>, <code>:make_shareable</code>, <code>:shareable_copy</code>, and <code>:raise</code>.
+The default is <code>:smart</code>. They apply to collections and Atom. Counter and Flag have
+no transfer mode. <code>:move</code> and <code>:smart_move</code> are rejected because dry-types creates
+and examines intermediate values during coercion.</p>
 <h2 id="farce-input-and-ownership">Farce input and ownership<a href="#farce-input-and-ownership" aria-label="Link to heading 'Farce input and ownership'" data-heading-content="Farce input and ownership" class="anchor"></a></h2>
 <p>Mode-free Strict, Unshared, and Local Farce collections can be converted
 directly. Construction always returns a fresh configured variant.</p>
@@ -291,7 +292,7 @@ before traversal. Materialize one explicitly when reading it is intended:</p>
 <span class='id identifier rubyid_converted'>converted</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span> <span class='comment'># =&gt; [1]
 </span></code></pre>
 <p>The explicit read establishes where transfer and ownership happen. This rule
-also applies when the container's default mode is <code>:copy</code> because an individual
+also applies when the container's default mode is <code>:smart</code> because an individual
 entry might have been inserted with <code>mode: :move</code>.</p>
 <p>Vector materialization uses its normal snapshot. Map and set materialization
 uses normal iteration and is not a globally atomic snapshot during concurrent
@@ -303,7 +304,7 @@ configuration and is not promised to be Ractor-shareable.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Sun Oct 11 14:43:51 2026 by
+  Generated on Sun Oct 11 21:00:37 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

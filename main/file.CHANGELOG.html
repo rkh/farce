@@ -85,6 +85,13 @@
 
 <span class='id identifier rubyid_flag'>flag</span><span class='period'>.</span><span class='id identifier rubyid_set'>set</span>
 </code></pre>
+<h5 id="timer-queue-entries">Timer Queue Entries<a href="#timer-queue-entries" aria-label="Link to heading 'Timer Queue Entries'" data-heading-content="Timer Queue Entries" class="anchor"></a></h5>
+<p><code>TimerQueue#push</code> and <code>TimerQueue#try_push</code> now return a <code>TimerQueue::Entry</code> object on a successful push.
+This allows you to cancel a scheduled value using the returned entry:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_queue'>queue</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/TimerQueue.html" title="Farce::TimerQueue (class)">TimerQueue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/TimerQueue.html#initialize-instance_method" title="Farce::TimerQueue#initialize (method)">new</a></span></span>
+<span class='id identifier rubyid_entry'>entry</span> <span class='op'>=</span> <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='symbol'>:work</span><span class='comma'>,</span> <span class='label'>delay:</span> <span class='int'>60</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_entry'>entry</span><span class='period'>.</span><span class='id identifier rubyid_delete'>delete</span> <span class='comment'># =&gt; true
+</span></code></pre>
 <h5 id="expanded-vector-functionality">Expanded Vector Functionality<a href="#expanded-vector-functionality" aria-label="Link to heading 'Expanded Vector Functionality'" data-heading-content="Expanded Vector Functionality" class="anchor"></a></h5>
 <p>Improved Array compatibility for <code>Vector</code>, <code>Strict::Vector</code>, <code>Unshared::Vector</code>, and <code>Local::Vector</code>:</p>
 <ul>
@@ -100,6 +107,7 @@
 <ul>
 <li>Unshareable objects may now be frozen.</li>
 <li>Trying to make an unshareable object shareable raises a better error message now (<code>Ractor::Error</code> with a descriptive message, instead of a <code>NoMethodError</code>).</li>
+<li>Added a new transfer mode: <code>:marshal</code>, which will copy objects between Ractors using Ruby's <a href="https://docs.ruby-lang.org/en/4.0/Marshal.html">Marshal</a> serialization.</li>
 </ul>
 <h4 id="bug-fixes">Bug Fixes<a href="#bug-fixes" aria-label="Link to heading 'Bug Fixes'" data-heading-content="Bug Fixes" class="anchor"></a></h4>
 <ul>
@@ -168,7 +176,7 @@
 </div></div>
 
       <div id="footer">
-  Generated on Sun Oct 11 14:43:51 2026 by
+  Generated on Sun Oct 11 21:00:37 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
