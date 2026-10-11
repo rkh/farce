@@ -338,6 +338,29 @@ Only true and false are accepted. Read <span class='object_link'><a href="#value
 </li>
 
       
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#wait_until_changed-instance_method" title="#wait_until_changed (instance method)">#<strong>wait_until_changed</strong> { ... } &#x21d2; Boolean, ... </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Wait until the current value differs from the expected value.</p>
+</div></span>
+  
+</li>
+
+      
     </ul>
     
   
@@ -384,6 +407,11 @@ Only true and false are accepted. Read <span class='object_link'><a href="#value
   
   
   
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../Abstract/Flag.html" title="Farce::Abstract::Flag (module)">Abstract::Flag</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/Flag.html#wait_until-instance_method" title="Farce::Abstract::Flag#wait_until (method)">#wait_until</a></span>, <span class='object_link'><a href="../Abstract/Flag.html#wait_until_match-instance_method" title="Farce::Abstract::Flag#wait_until_match (method)">#wait_until_match</a></span>, <span class='object_link'><a href="../Abstract/Flag.html#wait_until_set-instance_method" title="Farce::Abstract::Flag#wait_until_set (method)">#wait_until_set</a></span>, <span class='object_link'><a href="../Abstract/Flag.html#wait_until_unset-instance_method" title="Farce::Abstract::Flag#wait_until_unset (method)">#wait_until_unset</a></span>, <span class='object_link'><a href="../Abstract/Flag.html#wait_until_value-instance_method" title="Farce::Abstract::Flag#wait_until_value (method)">#wait_until_value</a></span>, <span class='object_link'><a href="../Abstract/Flag.html#wait_while-instance_method" title="Farce::Abstract::Flag#wait_while (method)">#wait_while</a></span>, <span class='object_link'><a href="../Abstract/Flag.html#wait_while_match-instance_method" title="Farce::Abstract::Flag#wait_while_match (method)">#wait_while_match</a></span>, <span class='object_link'><a href="../Abstract/Flag.html#wait_while_value-instance_method" title="Farce::Abstract::Flag#wait_while_value (method)">#wait_while_value</a></span></p>
+
   
   
   
@@ -607,10 +635,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-49</pre>
+52</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 49</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 52</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='rparen'>)</span></pre>
     </td>
@@ -804,10 +832,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-43</pre>
+46</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 43</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 46</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span></pre>
     </td>
@@ -857,10 +885,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-53</pre>
+56</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 53</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 56</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_toggle'>toggle</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_toggle'>toggle</span></pre>
     </td>
@@ -974,12 +1002,133 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </table>
 </div>
     
+      <div class="method_details ">
+  <h3 class="signature " id="wait_until_changed-instance_method">
+  
+    #<strong>wait_until_changed</strong> { ... } &#x21d2; <tt>Boolean</tt>, ... 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Wait until the current value differs from the expected value.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>expected</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the value to wait to change from</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the total seconds available</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'></span>
+      
+      
+      
+        
+        <div class='inline'><p>called when the timeout expires</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>, <tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the changed value or timeout fallback</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>ArgumentError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>if expected is not true or false</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+39</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/flag.rb', line 39</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
   </div>
 
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 11:15:33 2026 by
+  Generated on Sun Oct 11 11:46:41 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
