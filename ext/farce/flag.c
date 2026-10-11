@@ -18,6 +18,7 @@ typedef struct {
     pthread_mutex_t lock;
     bool value;
 #endif
+    VALUE signal;
     bool initialized;
 } flag_t;
 
@@ -42,13 +43,20 @@ flag_memsize(const void *pointer)
     return pointer ? sizeof(flag_t) : 0;
 }
 
+RUBY_REFERENCES(flag_references) = {
+    RUBY_REF_EDGE(flag_t, signal),
+    RUBY_REF_END,
+};
+
 static const rb_data_type_t flag_type = {
     .wrap_struct_name = "Ractor::Containers::Flag",
     .function = {
+        .dmark = RUBY_REFS_LIST_PTR(flag_references),
         .dfree = flag_free,
         .dsize = flag_memsize,
     },
     .flags =
+        RUBY_TYPED_DECL_MARKING |
         RUBY_TYPED_WB_PROTECTED |
         RUBY_TYPED_FROZEN_SHAREABLE |
         RUBY_TYPED_FREE_IMMEDIATELY |
@@ -81,8 +89,21 @@ flag_allocate(VALUE klass)
     pthread_mutex_init(&flag->lock, NULL);
     flag->value = false;
 #endif
+    flag->signal = Qnil;
     flag->initialized = false;
     return object;
+}
+
+static void
+flag_validate_references(VALUE self)
+{
+    containers_check_shareable(get_flag(self)->signal);
+}
+
+static VALUE
+flag_change_signal(VALUE self)
+{
+    return get_flag(self)->signal;
 }
 
 static VALUE
@@ -103,8 +124,9 @@ flag_initialize(int argc, VALUE *argv, VALUE self)
 #else
     flag->value = value;
 #endif
+    RB_OBJ_WRITE(self, &flag->signal, containers_signal_new());
     flag->initialized = true;
-    return containers_publish_native_reference_free(self);
+    return containers_publish_native_with_references(self, flag_validate_references);
 }
 
 static VALUE
@@ -135,8 +157,9 @@ flag_initialize_copy(VALUE self, VALUE other)
 #else
     copy->value = value;
 #endif
+    RB_OBJ_WRITE(self, &copy->signal, containers_signal_new());
     copy->initialized = true;
-    return containers_publish_native_reference_free(self);
+    return containers_publish_native_with_references(self, flag_validate_references);
 }
 
 static VALUE
@@ -151,6 +174,7 @@ flag_set(VALUE self)
     flag->value = true;
     pthread_mutex_unlock(&flag->lock);
 #endif
+    containers_signal_broadcast(flag->signal);
     return Qtrue;
 }
 
@@ -166,6 +190,7 @@ flag_unset(VALUE self)
     flag->value = false;
     pthread_mutex_unlock(&flag->lock);
 #endif
+    containers_signal_broadcast(flag->signal);
     return Qfalse;
 }
 
@@ -182,6 +207,7 @@ flag_store(VALUE self, VALUE input)
     flag->value = value;
     pthread_mutex_unlock(&flag->lock);
 #endif
+    containers_signal_broadcast(flag->signal);
     return input;
 }
 
@@ -203,6 +229,7 @@ flag_swap(VALUE self, VALUE input)
     flag->value = replacement;
     pthread_mutex_unlock(&flag->lock);
 #endif
+    containers_signal_broadcast(flag->signal);
     return flag_boolean(previous);
 }
 
@@ -227,6 +254,7 @@ flag_compare_and_set(VALUE self, VALUE expected_input, VALUE replacement_input)
     if (exchanged) flag->value = replacement;
     pthread_mutex_unlock(&flag->lock);
 #endif
+    if (exchanged) containers_signal_broadcast(flag->signal);
     return flag_boolean(exchanged);
 }
 
@@ -247,6 +275,7 @@ flag_toggle(VALUE self)
                 memory_order_relaxed,
                 memory_order_relaxed
             )) {
+            containers_signal_broadcast(flag->signal);
             return flag_boolean(replacement);
         }
     }
@@ -254,6 +283,7 @@ flag_toggle(VALUE self)
     pthread_mutex_lock(&flag->lock);
     bool value = flag->value = !flag->value;
     pthread_mutex_unlock(&flag->lock);
+    containers_signal_broadcast(flag->signal);
     return flag_boolean(value);
 #endif
 }
@@ -265,6 +295,8 @@ containers_init_flag(VALUE namespace)
     rb_define_alloc_func(cFlag, flag_allocate);
     rb_define_method(cFlag, "initialize", flag_initialize, -1);
     rb_define_private_method(cFlag, "initialize_copy", flag_initialize_copy, 1);
+    rb_include_module(cFlag, rb_const_get(namespace, rb_intern("FlagWaiting")));
+    rb_define_method(cFlag, "change_signal", flag_change_signal, 0);
     rb_define_method(cFlag, "value", flag_value, 0);
     rb_define_alias(cFlag, "get", "value");
     rb_define_method(cFlag, "set", flag_set, 0);
