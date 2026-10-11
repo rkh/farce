@@ -103,14 +103,8 @@
 
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
-    
-  <div class="note notetag">
-    <strong>Note:</strong>
-    <div class='inline'><p>Mixin in this module will remove the <code>freeze</code> method from the class.</p>
-</div>
-  </div>
-
-<p>Mixin that makes sure instances cannot be shared between Ractors.</p>
+    <p>Mixin that makes sure instances cannot be shared between Ractors.
+Instances may be frozen without becoming Ractor-shareable.</p>
 
 
   </div>
@@ -126,7 +120,7 @@
 <span class='kw'>end</span>
 
 <span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='const'>MyClass</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
-<span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span> <span class='comment'># this would normally make it shareable
+<span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span> <span class='comment'># Preserves the Ractor restrictions.
 </span>
 <span class='const'><span class='object_link'><a href="Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span> <span class='comment'># =&gt; false</span></code></pre>
     
@@ -209,13 +203,6 @@
   
 
 
-  
-  
-  
-  
-  
-  
-  
 
   <div id="instance_method_details" class="method_details_list">
     <h2>Instance Method Details</h2>
@@ -247,13 +234,13 @@ Accepts any arguments and passes them on to the superclass initializer.</p>
       <pre class="lines">
 
 
-47
-48
-49
-50</pre>
+31
+32
+33
+34</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/unshareable.rb', line 47</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/unshareable.rb', line 31</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_pin_unshareable'>pin_unshareable</span>
@@ -313,10 +300,10 @@ Accepts any arguments and passes them on to the superclass initializer.</p>
       <pre class="lines">
 
 
-54</pre>
+38</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/unshareable.rb', line 54</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/unshareable.rb', line 38</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_ractor_shareable?'>ractor_shareable?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
     </td>
@@ -329,7 +316,7 @@ Accepts any arguments and passes them on to the superclass initializer.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 12:32:43 2026 by
+  Generated on Sun Oct 11 14:43:51 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

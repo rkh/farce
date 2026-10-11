@@ -103,7 +103,7 @@
   
   <dl>
       <dt>Includes:</dt>
-      <dd><span class='object_link'><a href="../Unshareable.html" title="Farce::Unshareable (module)">Farce::Unshareable</a></span></dd>
+      <dd><span class='object_link'><a href="../Unshareable.html" title="Farce::Unshareable (module)">Farce::Unshareable</a></span>, Internal::Freeze::Delegated</dd>
   </dl>
   
   
@@ -196,16 +196,10 @@ Mutable values keep their identity. Updates are serialized between threads.</p>
   
   
   
+  
   <h3 class="inherited">Methods included from <span class='object_link'><a href="../Unshareable.html" title="Farce::Unshareable (module)">Farce::Unshareable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Unshareable.html#ractor_shareable%3F-instance_method" title="Farce::Unshareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
 
-  
-  
-  
-  
-  
-  
-  
   
   
   
@@ -321,13 +315,13 @@ Mutable values keep their identity. Updates are serialized between threads.</p>
       <pre class="lines">
 
 
-18
 19
 20
-21</pre>
+21
+22</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/unshared/atom.rb', line 18</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/unshared/atom.rb', line 19</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>compare_by_identity:</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='ivar'>@atom</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>UnsharedAtom</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>compare_by_identity:</span><span class='rparen'>)</span>
@@ -344,7 +338,7 @@ Mutable values keep their identity. Updates are serialized between threads.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 12:32:48 2026 by
+  Generated on Sun Oct 11 14:43:58 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

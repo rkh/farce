@@ -96,6 +96,11 @@
 <li>Added <code>flatten</code>, <code>transpose</code>, <code>product</code>, <code>combination</code>, <code>repeated_combination</code>, <code>permutation</code>, and <code>repeated_permutation</code>.</li>
 <li>Added lexicographic <code>&lt;=&gt;</code>. Equality and hashing continue to use object identity.</li>
 </ul>
+<h5 id="miscellaneous">Miscellaneous<a href="#miscellaneous" aria-label="Link to heading 'Miscellaneous'" data-heading-content="Miscellaneous" class="anchor"></a></h5>
+<ul>
+<li>Unshareable objects may now be frozen.</li>
+<li>Trying to make an unshareable object shareable raises a better error message now (<code>Ractor::Error</code> with a descriptive message, instead of a <code>NoMethodError</code>).</li>
+</ul>
 <h4 id="bug-fixes">Bug Fixes<a href="#bug-fixes" aria-label="Link to heading 'Bug Fixes'" data-heading-content="Bug Fixes" class="anchor"></a></h4>
 <ul>
 <li>Improve compatibility with other gems modifying <code>Kernel#require</code>, work around an issue with Ruby 4.0's runtime ractor require patch and alias methods chains not working nicely with <code>Module#prepend</code>.</li>
@@ -163,7 +168,7 @@
 </div></div>
 
       <div id="footer">
-  Generated on Sun Oct 11 12:32:42 2026 by
+  Generated on Sun Oct 11 14:43:51 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
