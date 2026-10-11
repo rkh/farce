@@ -448,7 +448,7 @@ retries.push({ attempt: 2 }, at: Farce::Clock.now, mode: :make_shareable)
 Farce::Ractor.shareable?(retries.pop) # => true
 ```
 
-Wrapping happens before waiting for queue space or an exchange partner. A failed `try_push` or a timeout can therefore leave a value moved or frozen. Use copying when you need to retain the original for a retry. Also, reading a moved payload can claim it: `TimerQueue#peek` opens the payload even though it leaves the item queued.
+Wrapping happens before waiting for queue space or an exchange partner. A failed `try_push` or a timeout can therefore leave a value moved or frozen. Use copying when you need to retain the original for a retry. Also, reading a moved payload can claim it: `TimerQueue#peek` opens the payload even though it leaves the item queued. Cancelling a timer through the handle returned by `push` or `try_push` does not open or claim the payload.
 
 ### Exchange mutable messages with a partner
 

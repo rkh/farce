@@ -23,6 +23,17 @@ end
 flag.set
 ```
 
+##### Timer Queue Entries
+
+`TimerQueue#push` and `TimerQueue#try_push` now return a `TimerQueue::Entry` object on a successful push.
+This allows you to cancel a scheduled value using the returned entry:
+
+```ruby
+queue = Farce::TimerQueue.new
+entry = queue.push(:work, delay: 60)
+entry.delete # => true
+```
+
 ##### Expanded Vector Functionality
 
 Improved Array compatibility for `Vector`, `Strict::Vector`, `Unshared::Vector`, and `Local::Vector`:

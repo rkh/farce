@@ -8,6 +8,37 @@ module Farce
     class TimerQueue < Queue
       include Internal::BlockingPriorityQueue
 
+      # A handle for canceling a scheduled value.
+      # Entries keep the stored value private, so canceling a moved value does not claim it.
+      # With local queues, cancellation uses the current scope.
+      #
+      # @example Cancel a delayed value
+      #   queue = Farce::TimerQueue.new
+      #   entry = queue.push(:work, delay: 60)
+      #   entry.delete # => true
+      class Entry
+        # @return [Float] the scheduled monotonic clock time
+        attr_reader :clock
+
+        # @return [Farce::Abstract::TimerQueue] the queue that created this entry
+        attr_reader :queue
+
+        # @api private
+        def initialize(value, clock, queue)
+          @value = value
+          @clock = clock
+          @queue = queue
+          freeze
+        end
+
+        # Cancel the scheduled value by identity at its exact timestamp.
+        # If the same value was queued more than once at that timestamp, delete the oldest match.
+        # @return [Boolean] whether a value was deleted
+        # @raise [Farce::ClosedQueueError] when the queue is closed
+        def delete = queue.delete(@value, at: clock, compare_by_identity: true)
+        alias cancel delete
+      end
+
       # @param capacity [Integer, nil] the maximum number of values, or nil for an unbounded queue
       def initialize(capacity: nil, track_age: false)
         super
@@ -22,10 +53,11 @@ module Farce
       #   With no scheduling option, the value is available immediately. Since `timeout:` controls the capacity wait,
       #   use `delay:` or `wait:` to schedule a relative offset.
       # @raise [ThreadError] when the queue is at capacity and non_block is true
-      # @return [Boolean] whether the value was added
+      # @return [Entry, false] the cancellation handle, or false if the capacity wait expires
       def push(value, non_block = false, timeout: nil, **time_options) # rubocop:disable Style/OptionalBooleanParameter
         at = Clock.parse(time_options)
-        push_to_storage(at, non_block, value, timeout:)
+        entry = Entry.new(value, at, self)
+        push_to_storage(at, non_block, value, timeout:) && entry
       end
 
       # Remove the earliest value, waiting until its timestamp is reached.
@@ -50,10 +82,11 @@ module Farce
       #   `at:`, `time:`, `timeout_at:`, `delay:`, `in:`, `offset:`, `timeout:`, `wait:`, or `clock:`.
       #   With no scheduling option, the value is available immediately.
       # @yield called when the queue is at capacity
-      # @return [Boolean, BasicObject] true, or the fallback result when full
+      # @return [Entry, BasicObject] the cancellation handle, or the fallback result when full
       def try_push(value, **time_options)
         at = Clock.parse(time_options)
-        return true if internal_queue.push(at, value)
+        entry = Entry.new(value, at, self)
+        return entry if internal_queue.push(at, value)
         block_given? ? yield : false
       end
 
@@ -100,12 +133,18 @@ module Farce
         !UNDEFINED.equal?(wait_for_timestamp(timeout_at(timeout)))
       end
 
-      # Delete the oldest matching value at the exact time.
-      # @param value [BasicObject] the value to delete
-      # @param at [Numeric, Time] the exact time to search
-      # @param compare_by_identity [Boolean] compare values by identity instead of equality
-      # @return [Boolean] whether a value was deleted
-      def delete(value, at:, compare_by_identity: false)
+      # Cancel an entry, or delete the oldest matching value at the exact time.
+      # Pass `at:` to delete an Entry that was itself queued as a value.
+      # @param value [Entry, BasicObject] the cancellation handle or value to delete
+      # @param at [Numeric, Time] the exact time to search, required when deleting a value
+      # @param compare_by_identity [Boolean] compare values by identity instead of equality when `at:` is given
+      # @return [Boolean] whether a value was deleted, or false if the entry belongs to another queue
+      # @raise [ArgumentError] when deleting a value without `at:`
+      def delete(value, at: UNDEFINED, compare_by_identity: false)
+        if UNDEFINED.equal?(at)
+          raise ArgumentError, "at: is required when deleting a value" unless Entry === value
+          return value.queue.equal?(self) && value.delete
+        end
         delete_from_storage(Clock.at(at), value, compare_by_identity:)
       end
 

@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 return unless RUBY_ENGINE == "ruby"
 
@@ -111,7 +113,11 @@ module Farce
         Fiber.schedule { results << queue.push(:second, timeout: 2) }
         Fiber.set_scheduler(nil)
 
-        assert_equal [:first, true], results
+        assert_equal 2, results.size
+        assert_equal :first, results.first
+        expected_class = klass == Unshared::TimerQueue ? Abstract::TimerQueue::Entry : TrueClass
+
+        assert_instance_of expected_class, results.last
         assert_equal :second, queue.pop
         assert_wait_protocol(scheduler)
         assert_operator(io_path? ? scheduler.io_wait_calls : scheduler.unblock_calls, :>=, 2)

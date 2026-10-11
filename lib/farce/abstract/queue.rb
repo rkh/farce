@@ -98,7 +98,7 @@ module Farce
     #   @raise [Farce::ClosedQueueError] when the queue is closed
     #   @raise [Farce::SealedQueueError] when the queue is sealed but not yet closed
     #   @raise [ThreadError] when the queue is full and non_block is true
-    #   @return [Boolean] `true` if the item was added to the queue
+    #   @return [BasicObject, false] a truthy object if the item was added, or `false` if the timeout expired
     #
     # @!method try_pop
     #   @abstract Subclasses may add additional parameters to this method.
@@ -116,8 +116,9 @@ module Farce
     #   @yield Block called if the queue is at capacity.
     #   @raise [Farce::ClosedQueueError] when the queue is closed
     #   @raise [Farce::SealedQueueError] when the queue is sealed but not yet closed
-    #   @return [Boolean]
-    #     `true` if the item was added to the queue, `false` if the queue was at capacity and no block was given.
+    #   @return [BasicObject]
+    #     A truthy object if the item was added, or the fallback result if the queue was at capacity.
+    #     Returns `false` if the queue was at capacity and no block was given.
     #
     # @!method wait_pop(timeout: nil)
     #   @abstract Subclasses may add additional parameters to this method.

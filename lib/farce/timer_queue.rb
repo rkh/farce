@@ -4,7 +4,7 @@
 
 module Farce
   # A shareable timer queue with transfer modes for unshareable values.
-  class TimerQueue < Abstract::TimerQueue
+  class TimerQueue < Farce::Abstract::TimerQueue
     include Internal::ManagedQueue
     include Shareable::Unfreezable
 
@@ -20,16 +20,20 @@ module Farce
     # @!macro modes
     # @param mode [Symbol] the transfer mode for unshareable values
     def push(value, non_block = false, mode: nil, timeout: nil, **time_options) # rubocop:disable Style/OptionalBooleanParameter
-      at = Clock.parse(time_options)
-      push_to_storage(at, non_block, @manager.wrap(value, mode:), timeout:)
+      at    = Clock.parse(time_options)
+      value = @manager.wrap(value, mode:)
+      entry = Entry.new(value, at, self)
+      push_to_storage(at, non_block, value, timeout:) && entry
     end
 
     # (see Farce::Abstract::TimerQueue#try_push)
     # @!macro modes
     # @param mode [Symbol] the transfer mode for unshareable values
     def try_push(value, mode: nil, **time_options)
-      at = Clock.parse(time_options)
-      return true if @queue.push(at, @manager.wrap(value, mode:))
+      at    = Clock.parse(time_options)
+      value = @manager.wrap(value, mode:)
+      entry = Entry.new(value, at, self)
+      return entry if @queue.push(at, value)
       block_given? ? yield : false
     end
 
@@ -61,6 +65,16 @@ module Farce
       value = @queue.peek { empty = true }
       return @manager.unwrap(value) unless empty
       yield if block_given?
+    end
+
+    private
+
+    def delete_from_storage(priority, value, compare_by_identity:)
+      if compare_by_identity && @manager.managed_envelope?(value)
+        @queue.delete_identity(priority, value)
+      else
+        super
+      end
     end
   end
 end

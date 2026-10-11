@@ -587,7 +587,7 @@ queue.pop # => :b
 
 ##### Timer Queues
 
-Timer queues are similar to priority queues, sorted by float values, but these values are timestamps (based on [Farce::Clock](#additional-classes), not on Ruby's Time, which isn't monotonic). Any `pull` will block until the next timestamp has been reached.
+Timer queues are similar to priority queues, sorted by float values, but these values are timestamps (based on [Farce::Clock](#additional-classes), not on Ruby's Time, which isn't monotonic). Any `pop` will block until the next timestamp has been reached.
 
 ```ruby
 queue = Farce::TimerQueue.new
@@ -597,7 +597,16 @@ queue.push(:ok, in: 1.5)
 queue.pop # => :ok
 ```
 
-Timer queues are useful for implementing schedulers (which is what Farce uses them for under the hood), so they have one additional feature: You can delete an entry if you know its timestamp.
+Timer queues are useful for implementing schedulers (which is what Farce uses them for under the hood). Both `push` and `try_push` return a cancellation handle when they succeed. Use `entry.delete` or `queue.delete(entry)` to cancel a scheduled value. The handle exposes its `queue` and scheduled `clock` time.
+
+```ruby
+queue = Farce::TimerQueue.new
+entry = queue.push(:work, in: 60)
+
+entry.delete # => true
+```
+
+You can also delete a value if you know its timestamp:
 
 ```ruby
 queue     = Farce::TimerQueue.new
@@ -606,6 +615,9 @@ timestamp = Farce.clock(in: 0.2)
 queue.push(:first,  at: timestamp - 0.1)
 queue.push(:second, at: timestamp)
 queue.push(:third,  at: timestamp + 0.1)
+
+fourth = queue.push(:fourth, at: timestamp + 0.2)
+queue.delete(fourth)
 
 queue.delete(:second, at: timestamp)
 
