@@ -296,7 +296,7 @@ namespace.</p>
 
 </div>
         </dt>
-        <dd><pre class="code"><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>0.1.0</span><span class='tstring_end'>&quot;</span></span></pre></dd>
+        <dd><pre class="code"><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>0.1.1</span><span class='tstring_end'>&quot;</span></span></pre></dd>
       
         <dt id="SCOPES-constant" class="">SCOPES =
           <div class="docstring">
@@ -363,39 +363,6 @@ namespace.</p>
 
 
 
-  
-    <h2>
-      Dry Types Integration
-      <small><a href="#" class="summary_toggle">collapse</a></small>
-    </h2>
-
-    <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#DryTypes-class_method" title="DryTypes (class method)">.<strong>DryTypes</strong>(*namespaces, default: UNDEFINED, variant: :shared, mode: UNDEFINED, scope: UNDEFINED, **aliases)  &#x21d2; Module </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Build a dry-types import for Farce types.</p>
-</div></span>
-  
-</li>
-
-      
-    </ul>
-    
   
     <h2>
       Class Method Summary
@@ -490,6 +457,29 @@ namespace.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Deduplicate values using the default <span class='object_link'><a href="Farce/Deduper.html" title="Farce::Deduper (class)">Deduper</a></span>.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#DryTypes-class_method" title="DryTypes (class method)">.<strong>DryTypes</strong>(*namespaces, default: UNDEFINED, variant: :shared, mode: UNDEFINED, scope: UNDEFINED, **aliases)  &#x21d2; Module </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Build a dry-types import for Farce types.</p>
 </div></span>
   
 </li>
@@ -1105,13 +1095,13 @@ namespace.</p>
       <pre class="lines">
 
 
-225
-226
-227
-228</pre>
+231
+232
+233
+234</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 225</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 231</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_config'>config</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_configure'>configure</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1174,10 +1164,10 @@ namespace.</p>
       <pre class="lines">
 
 
-221</pre>
+227</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 221</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 227</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_configure'>configure</span> <span class='op'>=</span> <span class='kw'>yield</span> <span class='const'>CONFIG</span></pre>
     </td>
@@ -3309,7 +3299,7 @@ Starts backing off after the specified number of attempts, up to the maximum del
 </div>
 
       <div id="footer">
-  Generated on Sat Oct 10 09:44:09 2026 by
+  Generated on Sun Oct 11 10:59:18 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

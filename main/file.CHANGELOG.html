@@ -71,15 +71,72 @@
 
       <div id="content"><div id='filecontents'><h1 id="changelog">Changelog<a href="#changelog" aria-label="Link to heading 'Changelog'" data-heading-content="Changelog" class="anchor"></a></h1>
 <p>Farce follows <a href="http://semver.org/">Semantic Versioning 2.0</a>. Any public method on any public class or module documented in the README or via YARD and not declared private is part of the public API.</p>
+<h2 id="upcoming-releases">Upcoming Releases<a href="#upcoming-releases" aria-label="Link to heading 'Upcoming Releases'" data-heading-content="Upcoming Releases" class="anchor"></a></h2>
+<h3 id="farce-011-unreleased">Farce 0.1.1 (Unreleased)<a href="#farce-011-unreleased" aria-label="Link to heading 'Farce 0.1.1 (Unreleased)'" data-heading-content="Farce 0.1.1 (Unreleased)" class="anchor"></a></h3>
+<h4 id="rework-cruby-native-extension">Rework CRuby native extension<a href="#rework-cruby-native-extension" aria-label="Link to heading 'Rework CRuby native extension'" data-heading-content="Rework CRuby native extension" class="anchor"></a></h4>
+<p>Incorporated the advice from <a href="https://github.com/ruby/ruby/blob/master/doc/efficient_extensions.md">&quot;Tips for updating Ruby C extensions for efficiently using Ruby 4 VM APIs&quot;</a>.</p>
+<p>With this change, all long-living Farce objects can be compacted and moved to old GC generations. This was not the case previously for maps and vectors that had snapshots taken of them (either for iteration or for transactions). These ended up being permanently kept in young generations. A long-living map or vector would therefore cause frequent GC runs to be quite expensive.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Before</th>
+<th>After</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Map#each</code> over 1024 entries</td>
+<td>34.1 μs</td>
+<td>35.2 μs</td>
+<td>3% slower</td>
+</tr>
+<tr>
+<td>Transaction with a map with 16 entries</td>
+<td>25.2 μs</td>
+<td>25.3 μs</td>
+<td>0.4% slower</td>
+</tr>
+<tr>
+<td>Transaction with a map with 1024 entries</td>
+<td>26.7 μs</td>
+<td>29.2 μs</td>
+<td>9% slower</td>
+</tr>
+<tr>
+<td>Transaction with a vector with 10,000 entries</td>
+<td>26.1 μs</td>
+<td>29.4 μs</td>
+<td>13% slower</td>
+</tr>
+<tr>
+<td>GC while keeping a vector with 10,000 entries alive</td>
+<td>67.6 μs</td>
+<td>28.6 μs</td>
+<td>58% faster</td>
+</tr>
+</tbody>
+</table>
+<p>Beyond these specific cases:</p>
+<ul>
+<li>Other iteration methods will have a similar performance impact to <code>Map#each</code> (for instance, <code>Map#transform_values</code>).</li>
+<li>Methods not involving iterations, like reading or writing a specific map entry, do not show any measurable performance impact.</li>
+</ul>
+<p>Measurements were taken on CRuby 4.0.7 (arm64-darwin23) with YJIT enabled. Measurements taken against Ruby's main branch show similar results.</p>
+<h4 id="other-changes">Other changes<a href="#other-changes" aria-label="Link to heading 'Other changes'" data-heading-content="Other changes" class="anchor"></a></h4>
+<ul>
+<li>Avoid circular require warnings when automatically loading third-party integrations.</li>
+<li>Do not install a require hook if automatic integration loading is disabled.</li>
+<li>Improve compatibility with other gems modifying <code>Kernel#require</code>, work around an issue with Ruby 4.0's runtime ractor require patch and alias methods chains not working nicely with <code>Module#prepend</code>.</li>
+</ul>
 <h2 id="development-releases">Development Releases<a href="#development-releases" aria-label="Link to heading 'Development Releases'" data-heading-content="Development Releases" class="anchor"></a></h2>
 <h3 id="farce-010-2026-10-09">Farce 0.1.0 (2026-10-09)<a href="#farce-010-2026-10-09" aria-label="Link to heading 'Farce 0.1.0 (2026-10-09)'" data-heading-content="Farce 0.1.0 (2026-10-09)" class="anchor"></a></h3>
-<ul>
-<li>Initial release</li>
-</ul>
+<p>Initial release.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Sat Oct 10 09:44:08 2026 by
+  Generated on Sun Oct 11 10:59:18 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

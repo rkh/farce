@@ -153,7 +153,7 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
   
     <h2>
-      BSON Integration
+      JSON Integration
       <small><a href="#" class="summary_toggle">collapse</a></small>
     </h2>
 
@@ -162,7 +162,7 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#as_extended_json-instance_method" title="#as_extended_json (instance method)">#<strong>as_extended_json</strong>(**options)  &#x21d2; Array </a>
+      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
     
 
     
@@ -176,109 +176,7 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Represent current members as Extended JSON, forwarding BSON's format options.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#bson_type-instance_method" title="#bson_type (instance method)">#<strong>bson_type</strong>  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Identify this value as a BSON array when embedded in a document or array.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_bson-instance_method" title="#to_bson (instance method)">#<strong>to_bson</strong>(buffer = ::BSON::ByteBuffer.new)  &#x21d2; BSON::ByteBuffer </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize current members using BSON's array representation.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_bson_normalized_value-instance_method" title="#to_bson_normalized_value (instance method)">#<strong>to_bson_normalized_value</strong>  &#x21d2; Array </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return current members with nested values normalized by BSON.</p>
-</div></span>
-  
-</li>
-
-      
-    </ul>
-    
-  
-    <h2>
-      CBOR Integration
-      <small><a href="#" class="summary_toggle">collapse</a></small>
-    </h2>
-
-    <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_cbor-instance_method" title="#to_cbor (instance method)">#<strong>to_cbor</strong>(*arguments)  &#x21d2; String, ... </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize current members as a CBOR array.</p>
+    <span class="summary_desc"><div class='inline'><p>Serialize current members as a JSON Array.</p>
 </div></span>
   
 </li>
@@ -460,29 +358,6 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#to_msgpack-instance_method" title="#to_msgpack (instance method)">#<strong>to_msgpack</strong>(*arguments)  &#x21d2; String, ::MessagePack::Packer </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize current members as a MessagePack array.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#to_param-instance_method" title="#to_param (instance method)">#<strong>to_param</strong>  &#x21d2; String </a>
     
 
@@ -521,39 +396,6 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Encode the elements as repeated query parameters under a key.</p>
-</div></span>
-  
-</li>
-
-      
-    </ul>
-    
-  
-    <h2>
-      JSON Integration
-      <small><a href="#" class="summary_toggle">collapse</a></small>
-    </h2>
-
-    <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize current members as a JSON Array.</p>
 </div></span>
   
 </li>
@@ -681,6 +523,52 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Add an absent element and return self, or nil if it was already present.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#as_extended_json-instance_method" title="#as_extended_json (instance method)">#<strong>as_extended_json</strong>(**options)  &#x21d2; Array </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Represent current members as Extended JSON, forwarding BSON's format options.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#bson_type-instance_method" title="#bson_type (instance method)">#<strong>bson_type</strong>  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Identify this value as a BSON array when embedded in a document or array.</p>
 </div></span>
   
 </li>
@@ -1391,6 +1279,98 @@ class does not provide Set#compare_by_identity or Set#reset.</p>
 
   
     <span class="summary_desc"><div class='inline'><p>Return the elements in an Array.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_bson-instance_method" title="#to_bson (instance method)">#<strong>to_bson</strong>(buffer = ::BSON::ByteBuffer.new)  &#x21d2; BSON::ByteBuffer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize current members using BSON's array representation.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_bson_normalized_value-instance_method" title="#to_bson_normalized_value (instance method)">#<strong>to_bson_normalized_value</strong>  &#x21d2; Array </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return current members with nested values normalized by BSON.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_cbor-instance_method" title="#to_cbor (instance method)">#<strong>to_cbor</strong>(*arguments)  &#x21d2; String, ... </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize current members as a CBOR array.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_msgpack-instance_method" title="#to_msgpack (instance method)">#<strong>to_msgpack</strong>(*arguments)  &#x21d2; String, ::MessagePack::Packer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize current members as a MessagePack array.</p>
 </div></span>
   
 </li>
@@ -6611,7 +6591,7 @@ are supplied. Otherwise, returns a new instance of klass.</p>
 </div>
 
       <div id="footer">
-  Generated on Sat Oct 10 09:44:17 2026 by
+  Generated on Sun Oct 11 10:59:27 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

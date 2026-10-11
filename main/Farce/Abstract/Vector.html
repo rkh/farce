@@ -151,7 +151,7 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <h2>
-      BSON Integration
+      JSON Integration
       <small><a href="#" class="summary_toggle">collapse</a></small>
     </h2>
 
@@ -160,7 +160,7 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#as_extended_json-instance_method" title="#as_extended_json (instance method)">#<strong>as_extended_json</strong>(**options)  &#x21d2; Array </a>
+      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
     
 
     
@@ -174,109 +174,7 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Represent a snapshot as Extended JSON, forwarding BSON's format options.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#bson_type-instance_method" title="#bson_type (instance method)">#<strong>bson_type</strong>  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Identify this value as a BSON array when embedded in a document or array.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_bson-instance_method" title="#to_bson (instance method)">#<strong>to_bson</strong>(buffer = ::BSON::ByteBuffer.new)  &#x21d2; BSON::ByteBuffer </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize a snapshot using BSON's array representation.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_bson_normalized_value-instance_method" title="#to_bson_normalized_value (instance method)">#<strong>to_bson_normalized_value</strong>  &#x21d2; Array </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Return a snapshot with nested values normalized by BSON.</p>
-</div></span>
-  
-</li>
-
-      
-    </ul>
-    
-  
-    <h2>
-      CBOR Integration
-      <small><a href="#" class="summary_toggle">collapse</a></small>
-    </h2>
-
-    <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_cbor-instance_method" title="#to_cbor (instance method)">#<strong>to_cbor</strong>(*arguments)  &#x21d2; String, ... </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize a snapshot as a CBOR array.</p>
+    <span class="summary_desc"><div class='inline'><p>Serialize a logical snapshot as a JSON Array.</p>
 </div></span>
   
 </li>
@@ -851,29 +749,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#to_msgpack-instance_method" title="#to_msgpack (instance method)">#<strong>to_msgpack</strong>(*arguments)  &#x21d2; String, ::MessagePack::Packer </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize a snapshot as a MessagePack array.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#to_param-instance_method" title="#to_param (instance method)">#<strong>to_param</strong>  &#x21d2; String </a>
     
 
@@ -967,39 +842,6 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
     
       <h3 class="inherited">Methods included from <span class='object_link'><a href="../Internal/Copyable.html" title="Farce::Internal::Copyable (module)">Internal::Copyable</a></span></h3>
       <p class="inherited"><span class='object_link'><a href="../Internal/Copyable.html#duplicable%3F-instance_method" title="Farce::Internal::Copyable#duplicable? (method)">#duplicable?</a></span></p>
-    
-  
-    <h2>
-      JSON Integration
-      <small><a href="#" class="summary_toggle">collapse</a></small>
-    </h2>
-
-    <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#to_json-instance_method" title="#to_json (instance method)">#<strong>to_json</strong>(*arguments)  &#x21d2; String </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Serialize a logical snapshot as a JSON Array.</p>
-</div></span>
-  
-</li>
-
-      
-    </ul>
     
   
     <h2>
@@ -1196,6 +1038,29 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#as_extended_json-instance_method" title="#as_extended_json (instance method)">#<strong>as_extended_json</strong>(**options)  &#x21d2; Array </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Represent a snapshot as Extended JSON, forwarding BSON's format options.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#assoc-instance_method" title="#assoc (instance method)">#<strong>assoc</strong>(key)  &#x21d2; Array, ... </a>
     
 
@@ -1280,6 +1145,29 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Binary-search the live entries and return the matching index.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#bson_type-instance_method" title="#bson_type (instance method)">#<strong>bson_type</strong>  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Identify this value as a BSON array when embedded in a document or array.</p>
 </div></span>
   
 </li>
@@ -2816,6 +2704,75 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#to_bson-instance_method" title="#to_bson (instance method)">#<strong>to_bson</strong>(buffer = ::BSON::ByteBuffer.new)  &#x21d2; BSON::ByteBuffer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize a snapshot using BSON's array representation.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_bson_normalized_value-instance_method" title="#to_bson_normalized_value (instance method)">#<strong>to_bson_normalized_value</strong>  &#x21d2; Array </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return a snapshot with nested values normalized by BSON.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_cbor-instance_method" title="#to_cbor (instance method)">#<strong>to_cbor</strong>(*arguments)  &#x21d2; String, ... </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize a snapshot as a CBOR array.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#to_h-instance_method" title="#to_h (instance method)">#<strong>to_h</strong> {|value| ... } &#x21d2; Hash </a>
     
 
@@ -2831,6 +2788,29 @@ Timeouts are finite, non-negative seconds. Nil waits indefinitely for access.</p
 
   
     <span class="summary_desc"><div class='inline'><p>Convert pair-like entries to a Hash.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_msgpack-instance_method" title="#to_msgpack (instance method)">#<strong>to_msgpack</strong>(*arguments)  &#x21d2; String, ::MessagePack::Packer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Serialize a snapshot as a MessagePack array.</p>
 </div></span>
   
 </li>
@@ -16118,7 +16098,7 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
 </div>
 
       <div id="footer">
-  Generated on Sat Oct 10 09:44:21 2026 by
+  Generated on Sun Oct 11 10:59:30 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
