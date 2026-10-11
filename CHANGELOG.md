@@ -2,9 +2,9 @@
 
 Farce follows [Semantic Versioning 2.0](http://semver.org/). Any public method on any public class or module documented in the README or via YARD and not declared private is part of the public API.
 
-## Upcoming Releases
+## Development Releases
 
-### Farce 0.2.0 (Unreleased)
+### Farce 0.2.0 (2026-10-11)
 
 #### New Features
 
@@ -82,8 +82,6 @@ Measurements were taken on CRuby 4.0.7 (arm64-darwin23) with YJIT enabled. Measu
 
 * Avoid circular require warnings when automatically loading third-party integrations.
 * Do not install a require hook if automatic integration loading is disabled.
-
-## Development Releases
 
 ### Farce 0.1.0 (2026-10-09)
 
