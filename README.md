@@ -554,7 +554,7 @@ end
 
 #### Queues
 
-`Farce::Queue` is a drop-in replacement for Ruby's `Queue` and `SizedQueue`. It provides a blocking and a non-blocking API.
+`Farce::Queue` is an alternative to Ruby's `Queue` and `SizedQueue`. It provides a superset of their API, offering both blocking and a non-blocking API, while implementing Ractor-sharing via [sharing modes](#sharing-modes).
 
 ```ruby
 queue = Farce::Queue.new
