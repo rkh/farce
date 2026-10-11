@@ -23,6 +23,18 @@ end
 flag.set
 ```
 
+##### Expanded Vector Functionality
+
+Improved Array compatibility for `Vector`, `Strict::Vector`, `Unshared::Vector`, and `Local::Vector`:
+
+* Added `to_ary`, `delete`, and `delete_if`.
+* Added range and start/length indexing, slice assignment, multiple-value `push` and `append`, and `pop(count)`.
+* Added `shift`, `unshift`, `prepend`, `insert`, `delete_at`, `slice!`, `replace`, and `fill`.
+* Added `map!`, `collect!`, `keep_if`, `select!`, `filter!`, `reject!`, `compact!`, and `uniq!`.
+* Added `reverse!`, `rotate!`, `shuffle!`, `sort!`, `sort_by!`, and `flatten!`.
+* Added `flatten`, `transpose`, `product`, `combination`, `repeated_combination`, `permutation`, and `repeated_permutation`.
+* Added lexicographic `<=>`. Equality and hashing continue to use object identity.
+
 #### Bug Fixes
 
 * Improve compatibility with other gems modifying `Kernel#require`, work around an issue with Ruby 4.0's runtime ractor require patch and alias methods chains not working nicely with `Module#prepend`.

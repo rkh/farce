@@ -57,8 +57,48 @@ module Farce
       # @return [Array<BasicObject>] A new Array of logical values.
       def to_a = internal_vector.snapshot.map! { logical_value(it) }
 
+      # Return an Array snapshot for implicit Array conversion, such as `[].concat(vector)`.
+      # @return [Array<BasicObject>] A new Array of logical values.
+      def to_ary = to_a
+
       # (see #to_a)
       def deconstruct = to_a
+
+      # Remove all matching values using the configured comparison mode.
+      # Other writers wait until the comparison finishes. Reads can observe the original values.
+      # Comparison callbacks must not write to this vector.
+      # @param value [BasicObject] The value to remove.
+      # @yield [value] Called only when no entry matches, after releasing update access.
+      # @yieldparam value [BasicObject] The requested value.
+      # @yieldreturn [BasicObject] The fallback result.
+      # @return [BasicObject, nil] The last removed value, or the fallback result. Nil if absent without a block.
+      def delete(value)
+        expected = deletion_comparison(value)
+        removed = UNDEFINED
+        mutate_vector do |values|
+          values.delete_if do |stored|
+            next false unless deletion_match?(stored, expected)
+            removed = stored
+            true
+          end
+        end
+        return logical_value(removed) unless removed.equal?(UNDEFINED)
+        yield(value) if block_given?
+      end
+
+      # Atomically remove entries for which the block returns a truthy value.
+      # The block runs without a collection lock. Other writers wait for update access.
+      # The block must not write to this vector.
+      # Reads can observe the original values. If the block raises, no entries are removed.
+      # @yield [value] Called once for each logical value. Returns an Enumerator without a block.
+      # @yieldparam value [BasicObject] The current value.
+      # @yieldreturn [BasicObject] A truthy value to remove the entry.
+      # @return [self, Enumerator]
+      def delete_if
+        return enum_for(__method__) { size } unless block_given?
+        mutate_vector { |values| values.delete_if { yield logical_value(it) } }
+        self
+      end
 
       # Convert pair-like entries to a Hash. Vector entries are accepted as pairs.
       # @yield [value] Optionally transform each entry into a key-value pair.
@@ -162,7 +202,7 @@ module Farce
         build_derived_vector(snapshot.last(count))
       end
 
-      # Return an element or subsequence without changing the hot path for {#[]}.
+      # Return an element or subsequence from a snapshot.
       # Range and start-length results are Vectors.
       # @param index [Integer, Range] An index, range, or start index when length is supplied.
       # @param length [Integer] The maximum length of a subsequence. Omit for a single index or range.
@@ -329,6 +369,222 @@ module Farce
         build_derived_from_logical(values, snapshot, logical)
       end
       alias collect_concat flat_map
+
+      # Replace each entry with the block result, publishing all replacements together.
+      # The block must not write to this vector. Failure leaves the stored entries unchanged.
+      # @yield [value] Transform each logical value. Returns an Enumerator without a block.
+      # @yieldparam value [BasicObject] The current value.
+      # @yieldreturn [BasicObject] The replacement value.
+      # @return [self, Enumerator]
+      def map!
+        return enum_for(__method__) { size } unless block_given?
+        mutate_vector do |values|
+          logical = values.map { logical_value(it) }
+          mapped = logical.map { yield it }
+          values.replace(storage_from_logical(mapped, values, logical))
+        end
+        self
+      end
+      alias collect! map!
+
+      # Keep entries accepted by the block, publishing the result atomically.
+      # The block must not write to this vector.
+      # @yield [value] Test each logical value. Returns an Enumerator without a block.
+      # @yieldparam value [BasicObject] The current value.
+      # @yieldreturn [BasicObject] A truthy value to retain the entry.
+      # @return [self, Enumerator]
+      def keep_if
+        return enum_for(__method__) { size } unless block_given?
+        mutate_vector { |values| values.keep_if { yield logical_value(it) } }
+        self
+      end
+
+      # Keep entries accepted by the block, returning nil if no entry was removed.
+      # The block must not write to this vector.
+      # @yield [value] Test each logical value. Returns an Enumerator without a block.
+      # @yieldparam value [BasicObject] The current value.
+      # @yieldreturn [BasicObject] A truthy value to retain the entry.
+      # @return [self, nil, Enumerator]
+      def select!
+        return enum_for(__method__) { size } unless block_given?
+        changed = mutate_vector { |values| values.select! { yield logical_value(it) } }
+        self if changed
+      end
+      alias filter! select!
+
+      # Remove entries accepted by the block, returning nil if no entry was removed.
+      # The block must not write to this vector.
+      # @yield [value] Test each logical value. Returns an Enumerator without a block.
+      # @yieldparam value [BasicObject] The current value.
+      # @yieldreturn [BasicObject] A truthy value to remove the entry.
+      # @return [self, nil, Enumerator]
+      def reject!
+        return enum_for(__method__) { size } unless block_given?
+        changed = mutate_vector { |values| values.reject! { yield logical_value(it) } }
+        self if changed
+      end
+
+      # Remove nil entries atomically.
+      # @return [self, nil] Self if entries were removed, otherwise nil.
+      def compact!
+        changed = mutate_vector(&:compact!)
+        self if changed
+      end
+
+      # Remove duplicate entries atomically, retaining the first stored entry.
+      # The block must not write to this vector.
+      # @yield [value] Optionally compute a key for each logical value.
+      # @yieldparam value [BasicObject] The current value.
+      # @yieldreturn [BasicObject] The key compared using `hash` and `eql?`.
+      # @return [self, nil] Self if entries were removed, otherwise nil.
+      def uniq!
+        changed = mutate_vector do |values|
+          values.uniq! { block_given? ? yield(logical_value(it)) : logical_value(it) }
+        end
+        self if changed
+      end
+
+      # Reverse all entries atomically.
+      # @return [self]
+      def reverse!
+        mutate_vector(&:reverse!)
+        self
+      end
+
+      # Rotate all entries atomically.
+      # @param count [Integer] The rotation distance. Negative values rotate right.
+      # @return [self]
+      def rotate!(count = 1)
+        mutate_vector { it.rotate!(count) }
+        self
+      end
+
+      # Shuffle all entries atomically without transferring retained values again.
+      # @param random [#rand] The random number generator.
+      # @return [self]
+      def shuffle!(random: Random)
+        mutate_vector { it.shuffle!(random:) }
+        self
+      end
+
+      # Sort all entries atomically using logical values.
+      # The comparison block must not write to this vector.
+      # @yield [left, right] Optionally compare two entries. Otherwise uses `<=>`.
+      # @yieldparam left [BasicObject] The left entry.
+      # @yieldparam right [BasicObject] The right entry.
+      # @yieldreturn [Numeric] A negative number, zero, or a positive number.
+      # @return [self]
+      def sort!(&block)
+        mutate_vector do |values|
+          logical = values.map { logical_value(it) }
+          sorted = block ? logical.sort(&block) : logical.sort
+          values.replace(storage_from_logical(sorted, values, logical))
+        end
+        self
+      end
+
+      # Sort all entries atomically by the block result.
+      # The block must not write to this vector.
+      # @yield [value] Compute a key. Returns an Enumerator without a block.
+      # @yieldparam value [BasicObject] The current logical value.
+      # @yieldreturn [BasicObject] The sort key.
+      # @return [self, Enumerator]
+      def sort_by!
+        return enum_for(__method__) { size } unless block_given?
+        mutate_vector { |values| values.sort_by! { yield logical_value(it) } }
+        self
+      end
+
+      # Expand nested Arrays and Vectors into a new Vector.
+      # @param level [Integer] The maximum depth. Negative values expand every level.
+      # @return [Vector] The flattened logical values.
+      # @raise [ArgumentError] If the expanded graph is recursive.
+      def flatten(level = -1)
+        snapshot = internal_vector.snapshot
+        logical = snapshot.map { logical_value(it) }
+        retained = retained_storage_index(snapshot, logical)
+        flattened = flatten_vector_values(logical, level, retained)
+        build_derived_vector(sequence_storage(flattened, retained))
+      end
+
+      # Expand nested Arrays and Vectors atomically.
+      # @param level [Integer] The maximum depth. Negative values expand every level.
+      # @return [self, nil] Self if nesting was expanded, otherwise nil.
+      # @raise [ArgumentError] If the expanded graph is recursive.
+      def flatten!(level = -1)
+        changed = mutate_vector do |values|
+          logical = values.map { logical_value(it) }
+          retained = retained_storage_index(values, logical)
+          flattened = flatten_vector_values(logical, level, retained)
+          next if flattened.equal?(logical)
+          values.replace(sequence_storage(flattened, retained))
+        end
+        self if changed
+      end
+
+      # Transpose rows represented by Arrays or Vectors.
+      # @return [Vector] A Vector containing same-kind column Vectors.
+      # @raise [IndexError] If rows have different lengths.
+      def transpose
+        retained = {}.compare_by_identity
+        rows = to_a.map { sequence_operand(it, retained) }
+        columns = rows.transpose.map { build_derived_vector(sequence_storage(it, retained)) }
+        build_derived_values(columns)
+      end
+
+      # Produce tuples containing one entry from each sequence.
+      # @param others [Array<Vector, #to_ary>] The other sequences.
+      # @yield [tuple] Optionally visit each tuple instead of collecting results.
+      # @yieldparam tuple [Vector] A same-kind Vector containing the tuple.
+      # @yieldreturn [void] The result is ignored.
+      # @return [Vector, self] Collected tuples, or self when a block is supplied.
+      def product(*others)
+        snapshot = internal_vector.snapshot
+        logical = snapshot.map { logical_value(it) }
+        retained = retained_storage_index(snapshot, logical)
+        operands = others.map { sequence_operand(it, retained) }
+        if block_given?
+          logical.product(*operands) { yield build_derived_vector(sequence_storage(it, retained)) }
+          self
+        else
+          tuples = logical.product(*operands).map { build_derived_vector(sequence_storage(it, retained)) }
+          build_derived_values(tuples)
+        end
+      end
+
+      # Visit combinations of entries in a snapshot.
+      # @param count [Integer] The number of entries per combination.
+      # @yield [tuple] Visit each combination. Returns a sized Enumerator without a block.
+      # @yieldparam tuple [Vector] A same-kind Vector containing the combination.
+      # @yieldreturn [void] The result is ignored.
+      # @return [self, Enumerator]
+      def combination(count, &block) = vector_combinations(__method__, [count], block)
+
+      # Visit combinations that may reuse entries in a snapshot.
+      # @param count [Integer] The number of entries per combination.
+      # @yield [tuple] Visit each combination. Returns a sized Enumerator without a block.
+      # @yieldparam tuple [Vector] A same-kind Vector containing the combination.
+      # @yieldreturn [void] The result is ignored.
+      # @return [self, Enumerator]
+      def repeated_combination(count, &block) = vector_combinations(__method__, [count], block)
+
+      # Visit permutations of entries in a snapshot.
+      # @param count [Integer] The number of entries per permutation. Defaults to the vector's length.
+      # @yield [tuple] Visit each permutation. Returns a sized Enumerator without a block.
+      # @yieldparam tuple [Vector] A same-kind Vector containing the permutation.
+      # @yieldreturn [void] The result is ignored.
+      # @return [self, Enumerator]
+      def permutation(count = UNDEFINED, &block)
+        vector_combinations(__method__, count.equal?(UNDEFINED) ? [] : [count], block)
+      end
+
+      # Visit permutations that may reuse entries in a snapshot.
+      # @param count [Integer] The number of entries per permutation.
+      # @yield [tuple] Visit each permutation. Returns a sized Enumerator without a block.
+      # @yieldparam tuple [Vector] A same-kind Vector containing the permutation.
+      # @yieldreturn [void] The result is ignored.
+      # @return [self, Enumerator]
+      def repeated_permutation(count, &block) = vector_combinations(__method__, [count], block)
 
       # Remove nil values.
       # @return [Vector] A new same-kind Vector containing the result.
@@ -803,17 +1059,27 @@ module Farce
       # @return [Vector] A new same-kind Vector containing the result.
       def entries = build_derived_vector(internal_vector.snapshot)
 
-      # Read an index without waiting for atomic-update access.
-      # @param index [Integer] The index. Negative indexes count from the end.
-      # @return [BasicObject, nil] The value, or nil for an index outside the vector.
-      def [](index) = internal_vector[index]
+      # Read an index without waiting for atomic-update access, or return a slice snapshot.
+      # @param index [Integer, Range] The index, start index, or range. Negative indexes count from the end.
+      # @param length [Integer] The slice length. Omit for a single index or range.
+      # @return [BasicObject, Vector, nil] The logical value, a slice Vector, or nil if absent.
+      def [](index, length = UNDEFINED)
+        return internal_vector[index] if length.equal?(UNDEFINED) && !index.is_a?(Range)
+        slice(index, length)
+      end
 
-      # Store a value, growing the vector if necessary.
-      # @param index [Integer] The index. Negative indexes count from the end.
-      # @param value [BasicObject] The value to store.
-      # @return [BasicObject] The assigned value.
-      def []=(index, value)
-        internal_vector[index] = value
+      # Store a value or replace a slice atomically, growing the vector if necessary.
+      # Slice replacements accept a Vector, Array-like object, or one scalar value.
+      # @param index [Integer, Range] The index, start index, or range.
+      # @param value [BasicObject, Integer] The assigned value, or the slice length for three arguments.
+      # @param replacement [BasicObject] The replacement for the three-argument form.
+      # @return [BasicObject] The assigned value or replacement sequence.
+      def []=(index, value, replacement = UNDEFINED)
+        if replacement.equal?(UNDEFINED) && !index.is_a?(Range)
+          internal_vector[index] = value
+        else
+          assign_vector_slice(index, value, replacement)
+        end
       end
 
       # Read an index after acquiring atomic-update access.
@@ -829,12 +1095,18 @@ module Farce
       # @return [BasicObject, false] The value, or false on timeout.
       def store(index, value, timeout: nil) = internal_vector.store(index, value, timeout:)
 
-      # Append a single value.
-      # @param value [BasicObject] The value to append.
+      # Append values atomically. Calls with one value use the scalar backend path.
+      # @param value [BasicObject] The first value. Omit to leave contents unchanged.
+      # @param rest [Array<BasicObject>] Additional values to append.
       # @param timeout [Numeric, nil] The maximum wait in seconds. Nil waits indefinitely.
       # @return [self, false] Self on success, or false on timeout.
-      def push(value, timeout: nil)
-        internal_vector.push(value, timeout:) ? self : false
+      def push(value = UNDEFINED, *rest, timeout: nil)
+        if rest.empty? && !value.equal?(UNDEFINED)
+          backend = internal_vector
+          completed = timeout.nil? ? backend.push(value) : backend.push(value, timeout:)
+          return completed ? self : false
+        end
+        push_values(value.equal?(UNDEFINED) ? rest : [value, *rest], timeout:)
       end
 
       # Append snapshots of one or more sequences and return this vector.
@@ -862,18 +1134,107 @@ module Farce
       # @return [self]
       def <<(value) = push(value)
 
-      # Append one value using the same options as {#push}.
-      # @overload append(value, timeout: nil)
-      #   @param value [BasicObject] The value to append.
+      # Append values using the same options as {#push}.
+      # @overload append(*values, timeout: nil)
+      #   @param values [Array<BasicObject>] The values to append.
       #   @param timeout [Numeric, nil] The maximum wait in seconds. Nil waits indefinitely.
       #   @return [self, false] Self on success, or false on timeout.
       def append(...) = push(...)
 
-      # Remove and return the last value.
+      # Remove and return the last value, or a Vector of the last count values, atomically.
       # This does not wait for an empty vector to become nonempty.
+      # @param count [Integer] The maximum number of values. Omit to return one value.
       # @param timeout [Numeric, nil] The maximum wait in seconds. Nil waits indefinitely.
-      # @return [BasicObject, nil] The last value, or nil if empty or timed out.
-      def pop(timeout: nil) = internal_vector.pop(timeout:)
+      # @return [BasicObject, Vector, nil] Removed values, or nil if empty without a count or timed out.
+      def pop(count = UNDEFINED, timeout: nil)
+        if count.equal?(UNDEFINED)
+          backend = internal_vector
+          return timeout.nil? ? backend.pop : backend.pop(timeout:)
+        end
+        pop_values(count, timeout:)
+      end
+
+      # Remove the first entry, or the first count entries, atomically.
+      # @param count [Integer] The maximum number of entries. Omit to return one entry.
+      # @return [BasicObject, Vector, nil] The first entry, nil if empty, or a Vector of removed entries.
+      def shift(count = UNDEFINED)
+        result = mutate_vector { count.equal?(UNDEFINED) ? it.shift : it.shift(count) }
+        count.equal?(UNDEFINED) ? logical_value(result) : build_derived_vector(result)
+      end
+
+      # Prepend values atomically using the vector's default transfer mode.
+      # @param values [Array<BasicObject>] The values to prepend.
+      # @return [self]
+      def unshift(*values)
+        mutate_vector { it.unshift(*values.map { derived_storage(it) }) }
+        self
+      end
+      alias prepend unshift
+
+      # Insert values before an index atomically. Negative indexes count from the end.
+      # @param index [Integer] The insertion index. -1 appends values.
+      # @param values [Array<BasicObject>] The values to insert.
+      # @return [self]
+      def insert(index, *values)
+        mutate_vector { it.insert(index, *values.map { derived_storage(it) }) }
+        self
+      end
+
+      # Remove the entry at an index and shift later entries left atomically.
+      # @param index [Integer] The index. Negative indexes count from the end.
+      # @return [BasicObject, nil] The removed logical value, or nil if absent.
+      def delete_at(index) = logical_value(mutate_vector { it.delete_at(index) })
+
+      # Remove a range of entries atomically.
+      # @param index [Integer, Range] The index, start index, or range.
+      # @param length [Integer] The number of entries. Omit for a single index or range.
+      # @return [BasicObject, Vector, nil] The removed entry, a Vector of removed entries, or nil if absent.
+      def slice!(index, length = UNDEFINED)
+        result = mutate_vector { length.equal?(UNDEFINED) ? it.slice!(index) : it.slice!(index, length) }
+        return if result.nil?
+        length.equal?(UNDEFINED) && !index.is_a?(Range) ? logical_value(result) : build_derived_vector(result)
+      end
+
+      # Replace all entries atomically with the contents of another sequence.
+      # @param source [Vector, #to_ary] The replacement sequence.
+      # @return [self]
+      def replace(source)
+        mutate_vector { |values| values.replace(source.equal?(self) ? values : operand_storage(source)) }
+        self
+      end
+
+      # Fill all or part of the vector atomically, growing it when necessary.
+      # The block must not write to this vector.
+      # @overload fill(value, start = 0, length = size)
+      #   @param value [BasicObject] The fill value.
+      #   @param start [Integer, Range] The start index or range.
+      #   @param length [Integer] The number of entries to fill.
+      # @overload fill(start = 0, length = size) { |index| ... }
+      #   @param start [Integer, Range] The start index or range.
+      #   @param length [Integer] The number of entries to fill.
+      #   @yield [index] Compute a value for each filled position.
+      #   @yieldparam index [Integer] The current index.
+      #   @yieldreturn [BasicObject] The fill value.
+      # @return [self]
+      def fill(*arguments)
+        mutate_vector do |values|
+          if block_given?
+            values.fill(*arguments) { derived_storage(yield(it)) }
+          else
+            raise ArgumentError, "wrong number of arguments (given 0, expected 1..3)" if arguments.empty?
+            values.fill(derived_storage(arguments.first), *arguments.drop(1))
+          end
+        end
+        self
+      end
+
+      # Compare logical entries lexicographically, as with Array.
+      # @param other [Vector, #to_ary] The sequence to compare against.
+      # @return [Integer, nil] A negative number, zero, a positive number, or nil if incomparable.
+      def <=>(other)
+        return 0 if equal?(other)
+        compare_vector(other)
+      end
 
       # Replace an index and return its previous value, growing the vector if necessary.
       # @param index [Integer] The index. Negative indexes count from the end.
@@ -1011,6 +1372,12 @@ module Farce
       # Convert a stored value into the value visible through the public API.
       def logical_value(value) = value
 
+      def deletion_comparison(value) = value
+
+      def deletion_match?(stored, expected)
+        compare_by_identity? ? stored.equal?(expected) : array_value_equal?(stored, expected)
+      end
+
       # Build a new same-kind Vector from already prepared stored values.
       def build_derived_vector(values)
         self.class.new(values, compare_by_identity: compare_by_identity?)
@@ -1023,17 +1390,132 @@ module Farce
 
       private
 
+      def mutate_vector(timeout: nil)
+        result = nil
+        completed = internal_vector.batch_update(timeout:) { |values| result = yield values }
+        completed ? result : UNDEFINED
+      end
+
+      def push_values(values, timeout: nil, mode: nil)
+        result = mutate_vector(timeout:) { it.concat(values.map { prepare_vector_value(it, mode:) }) }
+        result.equal?(UNDEFINED) ? false : self
+      end
+
+      def prepare_vector_value(value, **) = derived_storage(value)
+
+      def pop_values(count, timeout: nil)
+        result = mutate_vector(timeout:) { it.pop(count) }
+        build_derived_vector(result) unless result.equal?(UNDEFINED)
+      end
+
+      def operand_storage(source)
+        reusable_operand_snapshot(source) || vector_operand(source).map { derived_storage(it) }
+      end
+
+      def assign_vector_slice(index, value, replacement)
+        assigned = replacement.equal?(UNDEFINED) ? value : replacement
+        mutate_vector do |values|
+          stored = if assigned.equal?(self)
+                     values.dup
+                   elsif assigned.is_a?(Vector)
+                     operand_storage(assigned)
+                   else
+                     converted = Array.try_convert(assigned)
+                     converted ? converted.map { derived_storage(it) } : [derived_storage(assigned)]
+                   end
+          if replacement.equal?(UNDEFINED)
+            values[index] = stored
+          else
+            values[index, value] = stored
+          end
+        end
+        assigned
+      end
+
+      def storage_from_logical(values, source_storage, source_values)
+        retained = retained_storage_index(source_storage, source_values)
+        values.map { |value| retained.fetch(value) { derived_storage(value) } }
+      end
+
+      def retained_storage_index(storage, logical)
+        retained = {}.compare_by_identity
+        logical.each_with_index { |value, index| retained[value] ||= storage[index] }
+        retained
+      end
+
+      def sequence_storage(values, retained)
+        values.map { |value| retained.fetch(value) { prepare_sequence_value(value) } }
+      end
+
+      def prepare_sequence_value(value) = derived_storage(value)
+
+      def sequence_operand(value, retained)
+        storage = reusable_operand_snapshot(value) if value.is_a?(Vector)
+        return vector_operand(value) unless storage
+        logical = storage.map { logical_value(it) }
+        logical.each_with_index { |entry, index| retained[entry] ||= storage[index] }
+        logical
+      end
+
+      def flatten_vector_values(logical, level, retained)
+        level = convert_vector_count(level)
+        return logical if level.zero?
+        seen = {}.compare_by_identity
+        expanded = false
+        result = []
+        stack = [[logical, 0, level, nil]]
+        until stack.empty?
+          values, index, depth, owner = stack.last
+          if index >= values.length
+            seen.delete(owner) if owner
+            stack.pop
+            next
+          end
+          value = values[index]
+          stack.last[1] += 1
+          nested = unless depth.zero?
+                     value.is_a?(Vector) ? sequence_operand(value, retained) : Array.try_convert(value)
+                   end
+          unless nested
+            result << value
+            next
+          end
+          raise ArgumentError, "tried to flatten recursive array" if seen.key?(value)
+          expanded = true
+          seen[value] = true
+          stack << [nested, 0, depth.negative? ? -1 : depth - 1, value]
+        end
+        expanded ? result : logical
+      end
+
+      def vector_combinations(method, arguments, block)
+        return enum_for(method, *arguments) { to_a.public_send(method, *arguments).size } unless block
+        snapshot = internal_vector.snapshot
+        logical = snapshot.map { logical_value(it) }
+        logical.public_send(method, *arguments) { block.call(build_derived_from_logical(it, snapshot, logical)) }
+        self
+      end
+
+      def compare_vector(other)
+        guard = Internal::Storage.fiber.store_if_absent(:farce_vector_comparison) { {}.compare_by_identity }
+        peers = (guard[self] ||= {}.compare_by_identity)
+        return 0 if peers.key?(other)
+        peers[other] = true
+        entered = true
+        to_a <=> (other.is_a?(Vector) ? other.to_a : other)
+      ensure
+        if entered
+          peers.delete(other)
+          guard.delete(self) if peers.empty?
+        end
+      end
+
       def each_for_inspect(&) = internal_vector.each(&)
 
       def build_derived_values(values) = build_derived_vector(values.map { derived_storage(it) })
 
       def build_derived_from_logical(values, source_storage, source_values)
-        retained = {}.compare_by_identity
-        source_values.each_with_index { |value, index| retained[value] ||= source_storage[index] }
-        storage = values.map do |value|
-          retained.fetch(value) { derived_storage(value) }
-        end
-        build_derived_vector(storage)
+        build_derived_vector(storage_from_logical(values, source_storage, source_values))
       end
 
       def derived_storage(value) = value

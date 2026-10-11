@@ -973,6 +973,60 @@ vector_update(int argc, VALUE *argv, VALUE self)
     return rb_ensure(vector_update_body, (VALUE)&operation, vector_operation_cleanup, (VALUE)&operation);
 }
 
+static VALUE
+vector_batch_update_body(VALUE opaque)
+{
+    vector_operation_t *operation = (vector_operation_t *)opaque;
+    VALUE values = vector_snapshot(operation->self);
+    rb_yield(values);
+    rb_check_frozen(operation->self);
+    size_t size = (size_t)RARRAY_LEN(values);
+    for (size_t index = 0; index < size; index++) {
+        containers_check_shareable(rb_ary_entry(values, (long)index));
+    }
+    pthread_mutex_lock(&operation->vector->lock);
+    if (RB_OBJ_FROZEN(operation->self)) {
+        pthread_mutex_unlock(&operation->vector->lock);
+        rb_check_frozen(operation->self);
+    }
+    if (!vector_ensure_capacity(operation->vector, size)) {
+        pthread_mutex_unlock(&operation->vector->lock);
+        rb_memerror();
+    }
+    for (size_t index = 0; index < size; index++) {
+        RB_OBJ_WRITE(operation->self, &operation->vector->values[index], rb_ary_entry(values, (long)index));
+    }
+    for (size_t index = size; index < operation->vector->size; index++) {
+        operation->vector->values[index] = Qnil;
+    }
+    operation->vector->size = size;
+    vector_finish_update_locked(operation->vector);
+    pthread_mutex_unlock(&operation->vector->lock);
+    operation->complete = true;
+    RB_GC_GUARD(values);
+    return Qtrue;
+}
+
+static VALUE
+vector_batch_update(int argc, VALUE *argv, VALUE self)
+{
+    VALUE keywords = Qnil;
+    rb_scan_args(argc, argv, "0:", &keywords);
+    rb_check_frozen(self);
+    rb_need_block();
+    vector_timeout_t timeout = vector_parse_timeout(vector_timeout_keyword(keywords));
+    vector_t *vector = get_vector(self);
+    if (!vector_lock_for_update(vector, &timeout)) return Qfalse;
+    if (RB_OBJ_FROZEN(self)) {
+        pthread_mutex_unlock(&vector->lock);
+        rb_check_frozen(self);
+    }
+    vector_operation_t operation = { .self = self, .vector = vector, .complete = false };
+    vector->updating = true;
+    pthread_mutex_unlock(&vector->lock);
+    return rb_ensure(vector_batch_update_body, (VALUE)&operation, vector_operation_cleanup, (VALUE)&operation);
+}
+
 static bool
 vector_values_equal(vector_t *vector, VALUE left, VALUE right)
 {
@@ -1186,6 +1240,7 @@ containers_init_vector(VALUE namespace)
     rb_define_method(cVector, "reverse_each", vector_reverse_each, 0);
     rb_define_method(cVector, "fetch", vector_fetch, 1);
     rb_define_method(cVector, "clear", vector_clear, 0);
+    rb_define_method(cVector, "batch_update", vector_batch_update, -1);
     rb_define_method(cVector, "[]", vector_get_fast, 1);
     rb_define_method(cVector, "[]=", vector_set_fast, 2);
     rb_define_method(cVector, "get", vector_get, -1);

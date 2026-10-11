@@ -10,9 +10,9 @@ module Farce
   #   vector = Farce::Vector.new([[]], mode: :make_shareable)
   #   vector.update(0) { |jobs| jobs + [:finished] } # => [:finished]
   #
-  # @!method append(value, mode: nil, timeout: nil)
-  #   Append one value using the same options as {#push}.
-  #   @param value [BasicObject] The value to append.
+  # @!method append(*values, mode: nil, timeout: nil)
+  #   Append values using the same options as {#push}.
+  #   @param values [Array<BasicObject>] The values to append.
   #   @param mode [Symbol, nil] The transfer mode, or nil to use the default.
   #   @param timeout [Numeric, nil] The maximum wait in seconds. Nil waits indefinitely.
   #   @return [self, false] Self on success, or false on timeout.
@@ -64,13 +64,20 @@ module Farce
     def shareable_values? = true
 
     # (see Farce::Abstract::Vector#[])
-    def [](index) = @manager.unwrap(@vector[index])
+    def [](index, length = UNDEFINED)
+      return @manager.unwrap(@vector[index]) if length.equal?(UNDEFINED) && !index.is_a?(Range)
+      slice(index, length)
+    end
 
     # (see Farce::Abstract::Vector#[]=)
-    def []=(index, value)
-      check_frozen!
-      @vector[index] = @manager.wrap(value)
-      value
+    def []=(index, value, replacement = UNDEFINED)
+      if replacement.equal?(UNDEFINED) && !index.is_a?(Range)
+        check_frozen!
+        @vector[index] = @manager.wrap(value)
+        value
+      else
+        assign_vector_slice(index, value, replacement)
+      end
     end
 
     # (see Farce::Abstract::Vector#get)
@@ -85,13 +92,21 @@ module Farce
 
     # (see Farce::Abstract::Vector#push)
     # @param mode [Symbol, nil] The transfer mode, or nil to use the default.
-    def push(value, mode: nil, timeout: nil)
-      check_frozen!
-      @vector.push(@manager.wrap(value, mode:), timeout:) ? self : false
+    def push(value = UNDEFINED, *rest, mode: nil, timeout: nil)
+      if rest.empty? && !value.equal?(UNDEFINED)
+        check_frozen!
+        stored = mode.nil? ? @manager.wrap(value) : @manager.wrap(value, mode:)
+        completed = timeout.nil? ? @vector.push(stored) : @vector.push(stored, timeout:)
+        return completed ? self : false
+      end
+      push_values(value.equal?(UNDEFINED) ? rest : [value, *rest], mode:, timeout:)
     end
 
     # (see Farce::Abstract::Vector#pop)
-    def pop(timeout: nil) = @manager.unwrap(@vector.pop(timeout:))
+    def pop(count = UNDEFINED, timeout: nil)
+      return @manager.unwrap(timeout.nil? ? @vector.pop : @vector.pop(timeout:)) if count.equal?(UNDEFINED)
+      pop_values(count, timeout:)
+    end
 
     # (see Farce::Abstract::Vector#swap)
     # @!macro modes
@@ -183,7 +198,9 @@ module Farce
 
     protected
 
-    def logical_value(value) = @manager.unwrap(value)
+    def logical_value(value)              = @manager.unwrap(value)
+    def deletion_comparison(value)        = wrap_comparison(value)
+    def deletion_match?(stored, expected) = values_equal?(stored, expected)
 
     def build_derived_vector(values)
       self.class.allocate.initialize_derived_vector(values, @manager, @compare_by_identity)
@@ -206,11 +223,19 @@ module Farce
 
     private
 
-    def inspect_value(inspector, value) = super(inspector, value, @manager)
-    def derived_storage(value)          = @manager.wrap(value)
-    def freeze_backend                  = @vector
-    def wrap_comparison(value)          = @manager.wrap(value, mode: compare_by_identity? ? :local : :copy)
-    def values_equal?(left, right)      = @manager.same_value?(left, right, identity: compare_by_identity?)
+    def inspect_value(inspector, value)        = super(inspector, value, @manager)
+    def derived_storage(value)                 = @manager.wrap(value)
+    def prepare_vector_value(value, mode: nil) = @manager.wrap(value, mode:)
+
+    # Expanded descendants have no independent envelope to reuse. Copy them rather than
+    # moving them out of a retained parent Array or another sequence's storage.
+    def prepare_sequence_value(value)
+      @manager.wrap(value, mode: mode == :move ? :copy : nil)
+    end
+
+    def freeze_backend             = @vector
+    def wrap_comparison(value)     = @manager.wrap(value, mode: compare_by_identity? ? :local : :copy)
+    def values_equal?(left, right) = @manager.same_value?(left, right, identity: compare_by_identity?)
 
     def timeout_deadline(timeout)
       return if timeout.nil?

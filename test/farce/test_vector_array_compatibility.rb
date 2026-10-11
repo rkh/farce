@@ -6,6 +6,8 @@ require_relative "../setup"
 
 module Farce
   class TestVectorArrayCompatibility < Test
+    include Helpers::InternalTestHelpers
+
     VECTOR_CLASSES = [Vector, Strict::Vector, Unshared::Vector, Local::Vector].freeze
 
     def run(...) = Timeout.timeout(15) { super }
@@ -32,6 +34,215 @@ module Farce
         assert_instance_of Array, vector.to_a
         assert_instance_of Array, vector.deconstruct
         refute_same vector.to_a, vector.to_a
+      end
+    end
+
+    def test_implicit_array_conversion_returns_an_independent_logical_snapshot
+      each_vector([1, nil, false]) do |vector|
+        assert_equal [0, 1, nil, false], [0].concat(vector)
+        assert_equal [1, nil, false], Array.try_convert(vector)
+        snapshot = vector.to_ary
+        snapshot << 2
+
+        assert_equal [1, nil, false], vector.to_a
+      end
+      vector = Vector.new([+"value"], mode: :copy)
+
+      assert_instance_of String, vector.to_ary.first
+    end
+
+    def test_delete_removes_all_matches_and_returns_the_last_removed_value
+      each_vector([1, 2, 1, nil, false]) do |vector|
+        assert_equal 1, vector.delete(1) { flunk "unexpected fallback" }
+        assert_equal [2, nil, false], vector.to_a
+        assert_nil vector.delete(nil) { flunk "nil was present" }
+        assert_same false, vector.delete(false) { flunk "false was present" }
+        assert_nil vector.delete(:missing)
+        assert_equal :missing, vector.delete(:missing) { it }
+        assert_equal [2], vector.to_a
+        assert_equal :fallback, vector.delete(:absent) {
+          vector.push(3)
+          :fallback
+        }
+        assert_equal [2, 3], vector.to_a
+      end
+    end
+
+    def test_delete_respects_equality_and_identity
+      VECTOR_CLASSES.each do |klass|
+        first = "same".dup.freeze
+        last = "same".dup.freeze
+        vector = klass.new([first, last])
+
+        assert_same vector[1], vector.delete("same")
+        assert_empty vector
+        vector = klass.new([first, last], compare_by_identity: true)
+
+        assert_nil vector.delete("same".dup)
+        assert_same vector[0], vector.delete(first)
+        assert_equal [last], vector.to_a
+      end
+    end
+
+    def test_delete_if_is_sized_and_returns_self
+      each_vector([1, 2, 3, 4]) do |vector|
+        enumerator = vector.delete_if
+
+        assert_instance_of Enumerator, enumerator
+        assert_equal 4, enumerator.size
+        assert_same(vector, enumerator.each(&:even?))
+        assert_equal [1, 3], vector.to_a
+        assert_same(vector, vector.delete_if { false })
+        assert_same(vector, vector.delete_if { true })
+        assert_empty vector
+      end
+    end
+
+    def test_failed_deletion_preserves_entries_and_releases_update_access
+      each_vector([1, 2, 3]) do |vector|
+        assert_raises(RuntimeError) do
+          vector.delete_if do |value|
+            raise "failed predicate" if value == 2
+            true
+          end
+        end
+        assert_equal [1, 2, 3], vector.to_a
+        vector.push(4)
+
+        assert_equal [1, 2, 3, 4], vector.to_a
+      end
+    end
+
+    def test_deletion_rejects_frozen_vectors
+      each_vector([1, 2]) do |vector|
+        next unless vector.respond_to?(:freeze)
+        vector.freeze
+
+        assert_instance_of Enumerator, vector.delete_if
+        assert_raises(FrozenError) { vector.delete(9) }
+        assert_raises(FrozenError) { vector.delete_if { flunk "frozen predicate" } }
+      end
+    end
+
+    def test_freezing_during_deletion_preserves_entries
+      each_vector([1, 2]) do |vector|
+        next unless vector.respond_to?(:freeze)
+        assert_raises(FrozenError) do
+          vector.delete_if do
+            vector.freeze
+            true
+          end
+        end
+        assert_equal [1, 2], vector.to_a
+      end
+    end
+
+    def test_deletion_keeps_managed_survivors_without_transferring_them_again
+      %i[copy local move].each do |mode|
+        vector = Vector.new([+"remove", +"keep"], mode:)
+        retained = vector[1]
+
+        assert_same(vector, vector.delete_if { it == "remove" })
+        assert_same retained, vector[0]
+        assert_equal ["keep"], vector.to_ary
+      end
+    end
+
+    def test_deletion_reserves_writes_while_reads_observe_original_entries
+      VECTOR_CLASSES.reject { it == Local::Vector }.each do |klass|
+        vector = klass.new([1, 2, 3])
+        entered = Thread::Queue.new
+        release = Thread::Queue.new
+        writer_started = Thread::Queue.new
+        deletion = Thread.new do
+          vector.delete_if do |value|
+            if value == 1
+              entered << true
+              release.pop
+            end
+            value.odd?
+          end
+        end
+        entered.pop
+        writer = Thread.new do
+          writer_started << true
+          vector.push(4)
+        end
+        writer_started.pop
+
+        assert_equal [1, 2, 3], vector.to_a
+        release << true
+
+        assert_same vector, deletion.value
+        writer.value
+
+        assert_equal [2, 4], vector.to_a
+      ensure
+        release << true if release
+        deletion&.join
+        writer&.join
+      end
+    end
+
+    def test_transactional_deletion_and_conversion
+      VECTOR_CLASSES.each do |klass|
+        vector = klass.new([1, 2, 1, 3])
+        view = nil
+
+        assert(Farce.transaction do |tx|
+          view = tx[vector]
+
+          assert_equal 1, view.delete(1)
+          assert_same(view, view.delete_if { it == 3 })
+          assert_equal [2], [].concat(view)
+          assert_equal [1, 2, 1, 3], vector.to_a
+        end)
+        assert_equal [2], vector.to_a
+        assert_raises(Farce::Transaction::ClosedError) { view.to_ary }
+      end
+    end
+
+    def test_transactional_deletion_uses_logical_values_and_poisoned_attempts_do_not_commit
+      VECTOR_CLASSES.each do |klass|
+        first = "same".dup.freeze
+        last = "same".dup.freeze
+        vector = klass.new([first, last, "keep"], compare_by_identity: true)
+
+        assert(Farce.transaction do |tx|
+          view = tx[vector]
+
+          assert_nil view.delete("same".dup)
+          assert_equal first, view.delete(first)
+          assert_equal [last, "keep"], view.to_a
+        end)
+        assert_equal [last, "keep"], vector.to_a
+
+        refute(Farce.transaction(retries: 0) do |tx|
+          view = tx[vector]
+          view.push(:staged)
+          assert_raises(RuntimeError) { view.delete_if { raise "failed" } }
+        end)
+        assert_equal [last, "keep"], vector.to_a
+      end
+      vector = Vector.new([+"same", +"same", +"keep"])
+
+      assert(Farce.transaction do |tx|
+        assert_equal "same", tx[vector].delete("same")
+      end)
+      assert_equal ["keep"], vector.to_a
+    end
+
+    def test_deletion_from_another_ractor
+      [Vector, Strict::Vector].each do |klass|
+        vector = klass.new([1, 2, 1, 3])
+        worker = Ractor.new(vector) do |shared|
+          deleted = shared.delete(1)
+          shared.delete_if(&:odd?)
+          [deleted, shared.to_ary]
+        end
+
+        assert_equal [1, [2]], ractor_value(worker)
+        assert_equal [2], vector.to_a
       end
     end
 

@@ -252,6 +252,28 @@ module Farce
         finish_update if reservation
       end
 
+      # Yield private storage and publish it only after the block finishes.
+      # The yielded Array is never retained. Callbacks run outside the mutex.
+      def batch_update(timeout: nil)
+        raise LocalJumpError, "no block given" unless block_given?
+        check_frozen!
+        completed, values = reserve(timeout_deadline(timeout)) do
+          snapshot = @values.dup
+          @updating = true
+          snapshot
+        end
+        return false unless completed
+        yield values
+        replacement = values.dup
+        @mutex.synchronize do
+          check_frozen_locked!
+          @values = replacement
+        end
+        true
+      ensure
+        finish_update if completed
+      end
+
       def wait_until_changed(index, expected, timeout: nil)
         wait_for_value(convert_index(index), expected, timeout_deadline(timeout), non_nil: false)
       end
@@ -272,11 +294,16 @@ module Farce
 
       def with_available(deadline)
         while true
-          generation        = @signal.generation
-          completed, result = @mutex.synchronize do
-            @updating ? [false, nil] : [true, yield]
+          generation = nil
+          result = @mutex.synchronize do
+            if @updating
+              generation = @signal.generation
+              nil
+            else
+              [true, yield]
+            end
           end
-          return [true, result] if completed
+          return result if result
           return [false, nil] unless wait_for_signal(generation, deadline)
         end
       end

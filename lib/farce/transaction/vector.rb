@@ -18,7 +18,12 @@ module Farce
 
       # (see Abstract::Vector#[])
       # @see Abstract::Vector#[]
-      def [](index) = access { unwrap_stored(@working[index]) }
+      def [](index, length = UNDEFINED)
+        access do
+          next unwrap_stored(@working[index]) if length.equal?(UNDEFINED) && !index.is_a?(Range)
+          slice(index, length)
+        end
+      end
 
       # (see Abstract::Vector#get)
       # @see Abstract::Vector#get
@@ -34,8 +39,12 @@ module Farce
 
       # (see Abstract::Vector#[]=)
       # @see Abstract::Vector#[]=
-      def []=(index, value)
-        store(index, value)
+      def []=(index, value, replacement = UNDEFINED)
+        if replacement.equal?(UNDEFINED) && !index.is_a?(Range)
+          store(index, value)
+        else
+          write { assign_vector_slice(index, value, replacement) }
+        end
       end
 
       # (see Abstract::Vector#store)
@@ -52,15 +61,24 @@ module Farce
 
       # (see Abstract::Vector#push)
       # @see Abstract::Vector#push
-      def push(value, mode: nil)
-        write { @working.push(wrap(value, mode:)) }
+      def push(value = UNDEFINED, *rest, mode: nil)
+        write do
+          if rest.empty? && !value.equal?(UNDEFINED)
+            @working.push(wrap(value, mode:))
+          else
+            push_values(value.equal?(UNDEFINED) ? rest : [value, *rest], mode:)
+          end
+        end
         self
       end
-      alias << push
+
+      def <<(value) = push(value)
 
       # (see Abstract::Vector#pop)
       # @see Abstract::Vector#pop
-      def pop = write { unwrap_stored(@working.pop) }
+      def pop(count = UNDEFINED)
+        write { count.equal?(UNDEFINED) ? unwrap_stored(@working.pop) : pop_values(count) }
+      end
 
       # (see Abstract::Vector#clear)
       # @see Abstract::Vector#clear
@@ -120,6 +138,17 @@ module Farce
       def internal_vector = @working
       def logical_value(value) = unwrap_stored(value)
 
+      def deletion_comparison(value)
+        return value unless @manager
+        @manager.wrap(value, mode: compare_by_identity? ? :local : :copy)
+      end
+
+      def deletion_match?(stored, expected)
+        return super unless @manager
+        unwrap_stored(stored)
+        @manager.same_value?(stored, expected, identity: compare_by_identity?)
+      end
+
       # Slice helpers return independent data rather than another participant.
       # Use an ordinary vector that remains usable after the attempt ends.
       def build_derived_vector(values)
@@ -130,10 +159,15 @@ module Farce
 
       def inspect_value(inspector, value) = super(inspector, value, @manager)
       def derived_storage(value)          = wrap(value)
+      def prepare_vector_value(value, mode: nil) = wrap(value, mode:)
 
-      Wrapper.inherit(self, :each_index, :reverse_each, :to_a, :deconstruct, :to_h, :join, :dig, :assoc,
+      Wrapper.inherit(self, :each_index, :reverse_each, :to_a, :to_ary, :deconstruct, :to_h, :join, :dig, :assoc,
         :rassoc, :at, :fetch, :fetch_values, :values_at, :slice, :rfind, :bsearch, :bsearch_index, :pack,
-        :length, :count, :compare_by_identity?, :shareable_values?)
+        :length, :count, :compare_by_identity?, :shareable_values?, :flatten, :transpose, :product,
+        :combination, :repeated_combination, :permutation, :repeated_permutation, :<=>,
+        writes: %i[delete delete_if map! collect! keep_if select! filter! reject! compact! uniq!
+                   reverse! rotate! shuffle! sort! sort_by! flatten! shift unshift prepend insert delete_at slice!
+                   replace fill append])
     end
   end
 end

@@ -416,6 +416,23 @@ list.to_a # => [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 list.sum  # => 45
 ```
 
+There is one important difference to arrays: Bulk mutations, such as `Vector#map!` are atomic. Either the block succeeds for all entries, or if it raises an exception then none of the changes are applied. Such mutations may also not write to the same vector from within the block.
+
+```ruby
+list = Farce::Vector[1, 2, 3, 4]
+
+begin
+  list.map! do |value|
+    raise "error" if value == 2
+    value * 2
+  end
+rescue => e
+end
+
+# This would return 2 if list was an array
+list.first # => 1
+```
+
 #### Sets
 
 `Farce::Set` is to `Set` what `Farce::Map` is to `Hash`. It implements the same interface, with additional atomic operations.

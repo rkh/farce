@@ -72,6 +72,14 @@ module Farce
         end
       end
 
+      def batch_update(**)
+        raise LocalJumpError, "no block given" unless block_given?
+        super do |values|
+          yield values
+          values.each { check_value(it) }
+        end
+      end
+
       private
 
       def check_value(value)
