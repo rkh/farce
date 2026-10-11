@@ -39,6 +39,7 @@ Improved Array compatibility for `Vector`, `Strict::Vector`, `Unshared::Vector`,
 
 * Unshareable objects may now be frozen.
 * Trying to make an unshareable object shareable raises a better error message now (`Ractor::Error` with a descriptive message, instead of a `NoMethodError`).
+* Added a new transfer mode: `:marshal`, which will copy objects between Ractors using Ruby's [Marshal](https://docs.ruby-lang.org/en/4.0/Marshal.html) serialization.
 
 #### Bug Fixes
 

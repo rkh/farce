@@ -514,7 +514,8 @@ module Farce
 
     def test_envelopes_and_mode_managers_restore_public_contracts
       manager = ModeManager.new(mode: :local)
-      [Envelope::Copy.new([]), Envelope::Local.new([]), Envelope::Share.new([1].freeze)].each do |source|
+      envelopes = [Envelope::Copy.new([]), Envelope::Marshal.new([]), Envelope::Local.new([]), Envelope::Share.new([1].freeze)]
+      envelopes.each do |source|
         copy = round_trip(source)
 
         assert Ractor.shareable?(copy)

@@ -9,7 +9,7 @@ module Farce
     include Helpers::InternalTestHelpers
 
     TYPES = [WeakAtom, WeakMap, WeakValueMap].freeze
-    UNSUPPORTED_MODES = [:copy, :move, :local, :shareable_copy, :proxy, :invalid, false, 1].freeze
+    UNSUPPORTED_MODES = [:copy, :marshal, :move, :local, :shareable_copy, :proxy, :invalid, false, 1].freeze
 
     def test_defaults_and_shareability
       TYPES.each do |type|

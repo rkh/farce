@@ -704,6 +704,7 @@ These modes are:
 | Mode              | What happens to non-shareable data                                                   | A typical use                               |
 | ----------------- | ------------------------------------------------------------------------------------ | ------------------------------------------- |
 | `:copy` (default) | Transfers a copy and leaves the original usable. This is the default.                | Send a snapshot of a request.               |
+| `:marshal`        | Serializes a snapshot and reconstructs it once per receiving Ractor.               | Transfer an Unshared container.             |
 | `:move`           | Transfers ownership and makes the original inaccessible.                             | Hand a completed batch to a consumer.       |
 | `:local`          | Keeps the same object in its originating Ractor.                                     | Pass work between local threads or fibers.  |
 | `:make_shareable` | Calls `Ractor.make_shareable` on the original.                                       | Publish finished configuration.             |

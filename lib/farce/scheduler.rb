@@ -326,7 +326,7 @@ module Farce
     #
     # @param args [Array<Object>] Positional arguments passed to the task block.
     # @param mode [Symbol]
-    #   Argument transfer mode: `:copy`, `:move`, `:local`, `:make_shareable`, `:shareable_copy`, or `:raise`.
+    #   Argument transfer mode from {Farce::MODES}, including `:copy`, `:marshal`, and `:local`.
     #   See {ModeManager#wrap}.
     # @param auto_local [Boolean] Whether to override mode with `:local` in the owning Ractor.
     # @yield [*args] The task to execute.

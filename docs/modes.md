@@ -15,6 +15,7 @@ This improves over the default control via `Ractor::Port`'s `move:` option.
       - [What `move: true` does on `Ractor::Port`](#what-move-true-does-on-ractorport)
   - [Farce's Modes](#farces-modes)
     - [`:copy`: keep working with the original](#copy-keep-working-with-the-original)
+    - [`:marshal`: reconstruct a serialized snapshot](#marshal-reconstruct-a-serialized-snapshot)
     - [`:move`: hand off a finished batch](#move-hand-off-a-finished-batch)
     - [`:local`: preserve object identity](#local-preserve-object-identity)
     - [`:make_shareable`: publish the original](#make_shareable-publish-the-original)
@@ -76,7 +77,7 @@ port.receive # => [4, 5]
 port.close
 ```
 
-Farce extends this choice with nine named modes.
+Farce extends this choice with ten named modes.
 
 ## Farce's Modes
 
@@ -85,6 +86,7 @@ The following modes are accepted by `Farce::Port`. They apply to non-shareable v
 | Mode | What happens to non-shareable data | A typical use |
 | --- | --- | --- |
 | `:copy` (default) | Transfers a copy and leaves the original usable. This is the default. | Send a snapshot of a request. |
+| `:marshal` | Serializes a snapshot and reconstructs it once per receiving Ractor. | Transfer an Unshared container with fresh storage. |
 | `:move` | Transfers ownership and makes the original inaccessible. | Hand a completed batch to a consumer. |
 | `:local` | Keeps the same object in its originating Ractor. | Pass work between local threads or fibers. |
 | `:make_shareable` | Calls `Ractor.make_shareable` on the original. | Publish finished configuration. |
@@ -112,6 +114,27 @@ port.close
 ```
 
 Copying is not a way to serialize every Ruby object. Some objects cannot be copied across Ractors. Choose a mode that fits the value, or send ordinary data from which the receiver can build what it needs.
+
+### `:marshal`: reconstruct a serialized snapshot
+
+Use `:marshal` for values with a Marshal representation, including `Farce::Unshared` containers whose backends cannot be copied directly between native Ractors. Farce calls `Marshal.dump` when preparing the value. A shareable envelope holds the frozen bytes. The first read in each Ractor calls `Marshal.load`, then caches that Ractor's reconstructed value.
+
+```ruby
+port = Farce::Port.new(mode: :marshal)
+source = Farce::Unshared::Map.new({ jobs: [] })
+port.send(source)
+source[:jobs] << :sender_change
+
+received = port.receive
+received[:jobs] # => []
+received[:jobs] << :receiver_change
+source[:jobs]   # => [:sender_change]
+port.close
+```
+
+Farce's Marshal hooks rebuild containers from logical contents and settings. The receiver gets fresh backend storage and synchronization state. Repeated references and supported cycles within the serialized graph are preserved. A reconstructed Unshared container remains unshareable.
+
+Contents must support Marshal. Procs, anonymous classes, and live coordination objects such as queues and leases cannot be serialized. A serialization failure raises `TypeError` before the value is sent or stored. Unlike native Ractor copying, Marshal may also reconstruct nested shareable objects. Top-level shareable values still pass through unchanged.
 
 ### `:move`: hand off a finished batch
 
@@ -521,20 +544,23 @@ envelope.value[:ids]                  # => [1, 2]
 envelope.value.equal?(envelope.value) # => true
 ```
 
-`Envelope.new` defaults to `:copy` and accepts `:copy`, `:move`, or `:local`. These are envelope types, not the full set of manager modes. A shareable payload produces an `Envelope::Share`. The other manager modes either prepare shareable data directly or raise an error.
+`Envelope.new` defaults to `:copy` and accepts `:copy`, `:marshal`, `:move`, or `:local`. These are envelope types, not the full set of manager modes. A shareable payload produces an `Envelope::Share`. The other manager modes either prepare shareable data directly or raise an error.
 
 ### When copying and moving happen
 
 A copy envelope copies its non-shareable payload into internal storage when created. Each Ractor that opens it gets another copy, cached for that Ractor. A move envelope moves the payload into storage immediately, then moves it out when the winning Ractor first opens it. Forwarding either envelope does not add a payload copy or move at every hop.
 
+A Marshal envelope serializes its payload when created. Each Ractor that opens it reconstructs one value from the same frozen bytes and caches it. Forwarding the envelope does not serialize or reconstruct its payload again.
+
 | Envelope | Who can open it? | What repeated reads return |
 | --- | --- | --- |
 | `Envelope::Copy` | Any Ractor. | That Ractor's cached copy. |
+| `Envelope::Marshal` | Any Ractor. | That Ractor's cached reconstruction. |
 | `Envelope::Move` | The first Ractor to claim it. | The owning Ractor's received object. |
 | `Envelope::Local` | Its creating Ractor. | The original object. |
 | `Envelope::Share` | Any Ractor. | The shared payload. |
 
-A claim belongs to a Ractor, not a thread or fiber, and cannot be revoked. `claim` returns the envelope on success or `nil` if another Ractor owns it. `claim!` and `value` raise `Farce::Envelope::AlreadyClaimed` on failure. Use `claimed?` to ask whether it has an owner and `owned?` to ask whether the current Ractor can open it. Copy and share envelopes report both as true because every Ractor can open them.
+A claim belongs to a Ractor, not a thread or fiber, and cannot be revoked. `claim` returns the envelope on success or `nil` if another Ractor owns it. `claim!` and `value` raise `Farce::Envelope::AlreadyClaimed` on failure. Use `claimed?` to ask whether it has an owner and `owned?` to ask whether the current Ractor can open it. Copy, Marshal, and share envelopes report both as true because every Ractor can open them.
 
 ### Forward envelopes without opening them
 

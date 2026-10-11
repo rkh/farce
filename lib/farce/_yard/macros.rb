@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
+
 # @!macro unsafe
 #   @note
 #     Instances of this class are **not thread-safe** and should not be shared concurrently.
@@ -12,11 +16,15 @@
 # @!macro modes
 #   Valid modes are:
 #   * `:copy` - The value will be copied between Ractors. This is the default mode.
+#   * `:marshal` - The value will be serialized immediately and reconstructed once per Ractor
+#     with Ruby's Marshal protocol.
+#     Contents must support Marshal. Nested shareable values may be reconstructed too.
 #   * `:make_shareable` - The value will be made Ractor-shareable using {Ractor.make_shareable}.
 #   * `:move` - The value will be moved between Ractors. This saves memory compared to copying, and supports values
 #     that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
 #     that pushed it.
-#   * `:mutable` - A {Farce::Mutable} instance will be created for the value. This isn't done recursively and thus will fail for nested unshareable values.
+#   * `:mutable` - A {Farce::Mutable} instance will be created for the value.
+#     This isn't done recursively and thus will fail for nested unshareable values.
 #   * `:local` - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
 #     get an error. Useful for usage contained within a single Ractor.
 #   * `:proxy` - The value will be wrapped in a `Farce::Proxy` that executes calls in the original Ractor.
@@ -40,7 +48,8 @@
 #     Converts incoming keys to their canonical stored form:
 #     * If a `Symbol` is provided, it will be used as a method name to call on each key.
 #     * If a `Proc` is provided, it will be called with each key and should return the normalized key.
-#     * If a `Hash` or {Farce::Abstract::Map Map} is provided, it will be used to look up the normalized key for each incoming key.
+#     * If a `Hash` or {Farce::Abstract::Map Map} is provided, it will be used to look up
+#       the normalized key for each incoming key.
 
 # @!macro map_initialization
 #   Create a map with optional initial entries.

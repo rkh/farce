@@ -753,7 +753,7 @@ module Farce
       def prepare_mode_entry(element, requested_mode)
         if identity_membership?(element) && !Ractor.shareable?(element)
           case requested_mode
-          when :copy
+          when :copy, :marshal
             raise ArgumentError, "identity comparison cannot copy a non-shareable element"
           when :shareable_copy, :make_shareable
             payload = @manager.wrap(element, mode: requested_mode)
@@ -812,9 +812,10 @@ module Farce
 
       def stored_mode(entry)
         case entry.payload
-        when Envelope::Copy  then :copy
-        when Envelope::Local then :local
-        when Envelope::Move  then :move
+        when Envelope::Copy    then :copy
+        when Envelope::Marshal then :marshal
+        when Envelope::Local   then :local
+        when Envelope::Move    then :move
         else @manager.mode
         end
       end

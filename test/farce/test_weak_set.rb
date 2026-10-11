@@ -15,7 +15,7 @@ module Farce
       assert_equal :raise, set.mode
       assert_predicate set, :weak?
       assert Ractor.shareable?(set)
-      [:copy, :move, :local, :shareable_copy, :proxy, :invalid, false, 1].each do |mode|
+      [:copy, :marshal, :move, :local, :shareable_copy, :proxy, :invalid, false, 1].each do |mode|
         assert_raises(ArgumentError) { WeakSet.new(mode:) }
         assert_raises(ArgumentError) { WeakSet.new([nil], mode:) }
         assert_raises(ArgumentError) { set.add(nil, mode:) }

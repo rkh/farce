@@ -54,7 +54,9 @@ module Farce
 
   # The valid transfer modes for values that are not Ractor-shareable.
   # @return [::Set<Symbol>]
-  MODES = ::Set[:copy, :move, :local, :make_shareable, :mutable, :raise, :shareable_copy, :dedup, :proxy].freeze
+  MODES = ::Set[
+    :copy, :marshal, :move, :local, :make_shareable, :mutable, :raise, :shareable_copy, :dedup, :proxy,
+  ].freeze
 
   UNDEFINED = Internal::Undefined.new("UNDEFINED")
 

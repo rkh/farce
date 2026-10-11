@@ -5,8 +5,7 @@
 module Farce
   # An envelope can be used to wrap an unshareable value in a shareable object.
   #
-  # Once created, the envelope can be shared between Ractors without any objects being moved or copied until the
-  # envelope is opened.
+  # Once created, the envelope can be shared between Ractors. Its payload is retrieved when the envelope is opened.
   #
   # When a Ractor attempts to open an envelope, it attempts "claim" it. Some envelopes may only be claimed by a single
   # Ractor, others can be claimed by any Ractor. Claims cannot be taken back.
@@ -109,6 +108,53 @@ module Farce
       end
 
       def vault_key = defined?(@vault_key) ? @vault_key : self
+    end
+
+    # An envelope that serializes its contents with Ruby's Marshal protocol.
+    # The snapshot is created immediately and reconstructed once per Ractor that opens it.
+    # Farce containers rebuild their storage from logical snapshots.
+    # Contents must support Marshal. Nested shareable values may be reconstructed too.
+    #
+    # @example Transfer an Unshared map
+    #   source = Farce::Unshared::Map.new({ jobs: [] })
+    #   envelope = Farce::Envelope.new(source, mode: :marshal)
+    #   envelope.value[:jobs] << :ready
+    #   source[:jobs] # => []
+    class Marshal < Farce::Envelope
+      include Copyable
+
+      # @param value [BasicObject] the value to serialize
+      # @param auto_unwrap [ModeManager, nil] the manager that may automatically open this envelope
+      # @raise [TypeError] if the value cannot be marshaled
+      def initialize(value, auto_unwrap = nil)
+        @dump = ::Marshal.dump(value).freeze
+        super
+      end
+
+      # @api private
+      def marshal_dump = [1, value, auto_unwrap]
+
+      # @api private
+      def marshal_load(data)
+        value, manager = Internal::MarshalSupport.payload(data, 2)
+        initialize(value, manager)
+        Internal::Storage.ractor[self] = value
+      end
+
+      # (see Envelope#claim)
+      def claim = self
+
+      # (see Envelope#claimed?)
+      def claimed? = true
+
+      # (see Envelope#owned?)
+      def owned? = true
+
+      protected
+
+      # The bytes are created by this envelope from its caller's value.
+      # rubocop:disable-next Security/MarshalLoad
+      def retrieve = ::Marshal.load(@dump)
     end
 
     # An envelope that moves its contents. Can only be opened by a single Ractor.
@@ -253,7 +299,7 @@ module Farce
     #
     # @overload new(value, mode:)
     #   @param value [BasicObject] The value to wrap in the envelope.
-    #   @param mode [Symbol, nil] The type of envelope to create. Can be `:move`, `:copy`, or `:local`.
+    #   @param mode [Symbol, nil] The type of envelope to create. Can be `:move`, `:copy`, `:marshal`, or `:local`.
     #   @return [Envelope] A new envelope wrapping the given value.
     #
     # @return [Envelope] A new envelope wrapping the given value.
@@ -265,10 +311,11 @@ module Farce
 
     def self.subclass_for(move: false, local: false, mode: nil)
       case mode
-      when :move  then Move
-      when :copy  then Copy
-      when :local then Local
-      when nil    then local ? Local : (move ? Move : Copy)
+      when :move    then Move
+      when :copy    then Copy
+      when :marshal then Marshal
+      when :local   then Local
+      when nil      then local ? Local : (move ? Move : Copy)
       else raise ArgumentError, "invalid mode: #{mode.inspect}"
       end
     end

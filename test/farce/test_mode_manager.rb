@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../setup"
 
@@ -33,7 +35,9 @@ module Farce
     end
 
     def test_accepts_every_documented_mode
-      expected = ::Set[:copy, :move, :local, :make_shareable, :mutable, :raise, :shareable_copy, :dedup, :proxy]
+      expected = ::Set[
+        :copy, :marshal, :move, :local, :make_shareable, :mutable, :raise, :shareable_copy, :dedup, :proxy,
+      ]
 
       assert_equal expected, Farce::MODES
       expected.each do |mode|

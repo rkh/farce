@@ -89,6 +89,7 @@ module Farce
 
       case mode || self.mode
       when :copy           then Envelope::Copy.new(value, self)
+      when :marshal        then Envelope::Marshal.new(value, self)
       when :dedup          then Ractor.make_shareable(Farce.dedup(value))
       when :local          then Envelope::Local.new(value, self)
       when :make_shareable then Ractor.make_shareable(value)
