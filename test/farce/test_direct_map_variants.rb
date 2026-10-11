@@ -182,7 +182,9 @@ module Farce
         assert_same value, map[key]
         refute_predicate map, :ractor_shareable?
         refute Ractor.shareable?(map)
-        assert_raises(NoMethodError) { map.freeze }
+        assert_same map, map.freeze
+        assert_predicate map, :frozen?
+        assert_raises(FrozenError) { map[key] = :replacement }
       end
     end
 

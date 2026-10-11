@@ -24,8 +24,12 @@ module Farce
     #   atom.value.equal?(replacement)              # => true
     class WeakAtom < Abstract::WeakAtom
       include Unshareable
+      include Internal::Freeze::Delegated
 
-      private def internal_atom_class = Internal::UnsharedWeakAtom
+      private
+
+      def internal_atom_class = Internal::UnsharedWeakAtom
+      def freeze_backend      = @atom
     end
   end
 end

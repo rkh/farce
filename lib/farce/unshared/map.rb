@@ -12,6 +12,7 @@ module Farce
     # `dup` and `clone` copy entries into independent storage while sharing stored values.
     class Map < Abstract::ConcurrentMap
       include Unshareable
+      include Internal::Freeze::Delegated
 
       # @!macro map_initialization
       #
@@ -44,6 +45,8 @@ module Farce
       end
 
       Internal.prepare_map_access(self, :unshared)
+
+      private def freeze_backend = @map
     end
   end
 end

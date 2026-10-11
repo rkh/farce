@@ -15,6 +15,20 @@ module Farce
     module Wrapper
       include Internal::MarshalSupport::Reject
 
+      # Freezing an attempt view must not freeze its staged data or participant.
+      module Unfreezable
+        def append_features(mod)
+          super
+          if mod.is_a?(Class)
+            mod.class_eval { undef freeze if method_defined?(:freeze) }
+          else
+            mod.extend(Unfreezable)
+          end
+        end
+      end
+      private_constant :Unfreezable
+      extend Unfreezable
+
       # Wrappers inherit abstract container classes for their interfaces, but
       # must not initialize another ordinary container. This constructor ends
       # Unshareable's super chain after binding the existing transaction snapshot.

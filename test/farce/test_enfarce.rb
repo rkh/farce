@@ -9,7 +9,6 @@ module Farce
     include Helpers::InternalTestHelpers
 
     NAMESPACES = [Farce, Local, Strict, Unsafe, Unshared].freeze
-    FREEZABLE_NAMESPACES = [Farce, Local, Strict].freeze
 
     class HashSubclass < ::Hash; end
     class ArraySubclass < ::Array; end
@@ -86,7 +85,7 @@ module Farce
     end
 
     def test_preserves_source_freezing_by_default
-      FREEZABLE_NAMESPACES.each do |namespace|
+      NAMESPACES.each do |namespace|
         source = { frozen: [{ value: 1 }.freeze].freeze, mutable: [{ value: 2 }] }
         result = namespace.enfarce(source.freeze)
 
@@ -99,7 +98,7 @@ module Farce
     end
 
     def test_freeze_option_applies_to_every_converted_container
-      FREEZABLE_NAMESPACES.product([true, false]).each do |namespace, freeze|
+      NAMESPACES.product([true, false]).each do |namespace, freeze|
         source = { values: [{ value: 1 }.freeze].freeze }.freeze
         result = namespace.enfarce(source, freeze:)
 
@@ -110,8 +109,8 @@ module Farce
       end
     end
 
-    def test_freezes_sets_in_namespaces_that_support_freezing
-      FREEZABLE_NAMESPACES.each do |namespace|
+    def test_freezes_sets_in_each_namespace
+      NAMESPACES.each do |namespace|
         result = namespace.enfarce(::Set[1].freeze)
 
         assert_predicate result, :frozen?
@@ -121,14 +120,14 @@ module Farce
       end
     end
 
-    def test_unshared_containers_retain_their_rejection_of_freezing
+    def test_frozen_unshared_containers_remain_unshareable
       [Unshared, Unsafe].product([{ value: 1 }, [1], ::Set[1]]).each do |namespace, source|
-        assert_raises(NoMethodError) { namespace.enfarce(source, freeze: true) }
-        assert_raises(NoMethodError) { namespace.enfarce(source.freeze) }
-        result = namespace.enfarce(source, freeze: false)
+        result = namespace.enfarce(source, freeze: true)
 
-        refute_respond_to result, :freeze
+        assert_predicate result, :frozen?
+        refute_predicate result, :ractor_shareable?
         assert_equal 1, result.size
+        assert_raises(Ractor::Error) { Ractor.make_shareable(result) } if Internal.native_ractors?
       end
     end
 
@@ -142,7 +141,7 @@ module Farce
     end
 
     def test_frozen_cycles_are_filled_before_freezing
-      FREEZABLE_NAMESPACES.product([nil, true]).each do |namespace, freeze|
+      NAMESPACES.product([nil, true]).each do |namespace, freeze|
         source = []
         source << source << 1
         source.freeze if freeze.nil?

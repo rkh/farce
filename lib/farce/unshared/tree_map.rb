@@ -14,8 +14,12 @@ module Farce
     #   map[2].equal?(value) # => true
     class TreeMap < Abstract::TreeMap
       include Unshareable
+      include Internal::Freeze::Delegated
 
-      private def new_tree_map(...) = Internal::TreeMap.new(...)
+      private
+
+      def new_tree_map(...) = Internal::TreeMap.new(...)
+      def freeze_backend    = @map
     end
   end
 end

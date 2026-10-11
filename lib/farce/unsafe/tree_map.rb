@@ -8,12 +8,14 @@ module Farce
     # A {Abstract::TreeMap tree map} that is not thread-safe and cannot be shared between Ractors.
     class TreeMap < Abstract::TreeMap
       include Unshareable
+      include Internal::Freeze::Delegated
 
       undef_method :transaction_wrapper
 
       private
 
       def new_tree_map(...)   = Internal::UnsafeTreeMap.new(...)
+      def freeze_backend      = @map
       def new_key_locks       = nil
       def with_key_lock(_key) = yield
     end

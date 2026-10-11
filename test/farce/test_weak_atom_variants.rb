@@ -232,7 +232,9 @@ module Farce
       assert_same value, atom.value
       refute_predicate atom, :ractor_shareable?
       refute Ractor.shareable?(atom)
-      assert_raises(NoMethodError) { atom.freeze }
+      assert_same atom, atom.freeze
+      assert_predicate atom, :frozen?
+      assert_raises(FrozenError) { atom.store(:replacement) }
     end
 
     private

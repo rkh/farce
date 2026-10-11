@@ -419,7 +419,7 @@ module Farce
     end
 
     def test_nonempty_frozen_collections_restore_frozen_backends
-      NAMESPACES.reject { it == Unshared || it == Unsafe }.each do |namespace|
+      NAMESPACES.each do |namespace|
         collections = [namespace::Vector.new([1]), namespace::Map.new({ value: 1 }),
                        namespace::TreeMap.new({ 1 => 2 }), namespace::LRUMap.new({ a: 1 }, max_size: 2),
                        namespace::LFUMap.new({ a: 1 }, max_size: 2), namespace::Set.new([1]),

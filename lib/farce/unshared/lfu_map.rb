@@ -7,10 +7,12 @@ module Farce
     # A thread-safe LFU map for mutable keys and values used within one Ractor.
     class LFUMap < Abstract::LFUMap
       include Unshareable
+      include Internal::Freeze::Delegated
 
       private
 
       def new_bounded_map(...) = Internal::LFUMap.new(...)
+      def freeze_backend = @map
 
       def new_key_locks(compare_keys_by_identity:)
         Internal::KeyLockMap.new(registry_class: Farce::Unshared::Map, compare_keys_by_identity:)

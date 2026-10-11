@@ -661,7 +661,9 @@ module Farce
 
       refute_predicate pool, :ractor_shareable?
       refute Ractor.shareable?(pool)
-      assert_raises(NoMethodError) { pool.freeze }
+      assert_same pool, pool.freeze
+      assert_predicate pool, :frozen?
+      refute Ractor.shareable?(pool)
     end
 
     def test_top_level_pool_transfers_a_resource_across_ractors

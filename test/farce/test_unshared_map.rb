@@ -21,7 +21,9 @@ module Farce
       refute_predicate map, :shareable_keys?
       refute_predicate map, :shareable_values?
       refute_predicate map, :ractor_shareable?
-      assert_raises(NoMethodError) { map.freeze }
+      assert_same map, map.freeze
+      assert_predicate map, :frozen?
+      assert_raises(FrozenError) { map[:key] = :value }
     end
 
     def test_native_backend_remains_unshareable_when_weak_maps_load
@@ -52,6 +54,24 @@ module Farce
 
       assert_equal :done, ractor_value(worker)
       assert_same value, movable[:key]
+    end
+
+    def test_make_shareable_rejects_the_backend_after_freezing_the_facade
+      return unless Internal.native_ractors?
+
+      [false, true].each do |frozen|
+        map = Unshared::Map.new({ key: :value })
+        map.freeze if frozen
+
+        error = assert_raises(Ractor::Error) { Ractor.make_shareable(map) }
+
+        refute_includes error.message, "#freeze does not freeze object correctly"
+        assert_includes error.message, "Farce::Internal::UnsharedMap"
+        assert Object.instance_method(:frozen?).bind_call(map)
+        refute Ractor.shareable?(map)
+        assert_equal :value, map[:key]
+        assert_raises(FrozenError) { map[:key] = :changed }
+      end
     end
 
     def test_native_backend_compacts_mutable_references_during_an_update

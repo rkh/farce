@@ -35,6 +35,11 @@ Improved Array compatibility for `Vector`, `Strict::Vector`, `Unshared::Vector`,
 * Added `flatten`, `transpose`, `product`, `combination`, `repeated_combination`, `permutation`, and `repeated_permutation`.
 * Added lexicographic `<=>`. Equality and hashing continue to use object identity.
 
+##### Miscellaneous
+
+* Unshareable objects may now be frozen.
+* Trying to make an unshareable object shareable raises a better error message now (`Ractor::Error` with a descriptive message, instead of a `NoMethodError`).
+
 #### Bug Fixes
 
 * Improve compatibility with other gems modifying `Kernel#require`, work around an issue with Ruby 4.0's runtime ractor require patch and alias methods chains not working nicely with `Module#prepend`.

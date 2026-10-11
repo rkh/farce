@@ -7,6 +7,7 @@ module Farce
     # A thread-safe set maintained in ascending order within one Ractor.
     class SortedSet < Farce::Abstract::SortedSet
       include Unshareable
+      include Internal::Freeze::Delegated
 
       class MutableTreeMap < Farce::Unshared::TreeMap # :nodoc:
         private

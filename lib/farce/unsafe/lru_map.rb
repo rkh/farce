@@ -10,6 +10,7 @@ module Farce
     # does not coordinate competing callers, including callers loading the same key.
     class LRUMap < Abstract::LRUMap
       include Unshareable
+      include Internal::Freeze::Delegated
 
       # @!method store_if_absent(key)
       #   Read an existing value or construct and store a value for an absent key.
@@ -29,6 +30,7 @@ module Farce
       private
 
       def new_bounded_map(...) = Internal::LRUMap.new(...)
+      def freeze_backend       = @map
       def new_key_locks(**)    = nil
       def with_key_lock(_key)  = yield
     end

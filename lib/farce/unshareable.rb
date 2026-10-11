@@ -4,7 +4,7 @@
 
 module Farce
   # Mixin that makes sure instances cannot be shared between Ractors.
-  # @note Mixin in this module will remove the `freeze` method from the class.
+  # Instances may be frozen without becoming Ractor-shareable.
   #
   # @example
   #   class MyClass
@@ -12,26 +12,10 @@ module Farce
   #   end
   #
   #   object = MyClass.new
-  #   object.freeze # this would normally make it shareable
+  #   object.freeze # Preserves the Ractor restrictions.
   #
   #   Ractor.shareable?(object) # => false
   module Unshareable
-    # @api private
-    module UndefFreeze # :nodoc: all
-      # @api private
-      def append_features(mod)
-        super
-        if mod.is_a?(Class)
-          mod.class_eval { undef freeze if method_defined?(:freeze) }
-        else
-          mod.extend(UndefFreeze)
-        end
-      end
-    end
-
-    private_constant :UndefFreeze
-    extend UndefFreeze
-
     # Mixin for classes that cannot be shared across Ractors, but may be moved between them.
     module Movable
       include Unshareable
@@ -58,7 +42,12 @@ module Farce
     def pin_unshareable
       return unless Internal.native_ractors?
       case self
-      when Movable  then Internal::Unshareable.prevent_copyable(self) unless is_a?(Copyable)
+      when Movable
+        if is_a?(Copyable)
+          Internal::Unshareable.prevent_shareable(self)
+        else
+          Internal::Unshareable.prevent_copyable(self)
+        end
       when Copyable then Internal::Unshareable.prevent_movable(self)
       else Internal::Unshareable.pin_to_current_ractor(self)
       end

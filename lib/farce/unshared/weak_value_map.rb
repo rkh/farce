@@ -15,6 +15,7 @@ module Farce
     #   value = nil
     class WeakValueMap < Abstract::WeakValueMap
       include Unshareable
+      include Internal::Freeze::Delegated
 
       def initialize(
         initial_mapping = nil,
@@ -38,6 +39,8 @@ module Farce
         Internal::KeyNormalizer.install_concurrent(self, normalizer) if restoring
         super()
       end
+
+      private def freeze_backend = @map
     end
   end
 end

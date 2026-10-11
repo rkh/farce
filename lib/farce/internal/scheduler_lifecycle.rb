@@ -15,7 +15,7 @@ module Farce
     module SchedulerLifecycle
       include Farce::Unshareable
 
-      # Prepending bypasses Unshareable's include hook, so remove freeze here.
+      # A live scheduler must keep updating its own lifecycle state.
       def self.prepended(scheduler)
         scheduler.undef_method(:freeze)
       end

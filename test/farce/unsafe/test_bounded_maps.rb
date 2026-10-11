@@ -146,7 +146,9 @@ module Farce
 
           refute_predicate map, :ractor_shareable?
           refute Ractor.shareable?(map)
-          assert_raises(NoMethodError) { map.freeze }
+          assert_same map, map.freeze
+          assert_predicate map, :frozen?
+          assert_raises(FrozenError) { map[:key] = :value }
           assert_transfer_rejected { klass.new(max_size: 1) } if Internal.native_ractors?
         end
       end

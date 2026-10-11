@@ -89,6 +89,35 @@ module Farce
       assert_frozen_mutations(vector, vector_mutations(vector))
     end
 
+    def test_unshared_containers_freeze_their_storage_and_preserve_copy_states
+      [Unshared::Atom, Unshared::WeakAtom].each do |type|
+        atom = type.new(:initial)
+
+        assert_frozen_copy_states(atom, read: lambda(&:value), mutate: ->(copy) { copy.store(:changed) })
+        assert Object.instance_method(:frozen?).bind_call(atom)
+        assert_frozen_mutations(atom, atom_mutations(atom))
+      end
+
+      vector = Unshared::Vector.new([:initial])
+
+      assert_frozen_copy_states(vector, read: lambda(&:to_a), mutate: ->(copy) { copy.push(:changed) })
+      assert Object.instance_method(:frozen?).bind_call(vector)
+      assert_frozen_mutations(vector, vector_mutations(vector))
+
+      [Unshared::Map, Unshared::WeakMap, Unshared::WeakKeyMap, Unshared::WeakValueMap,
+       Unshared::TreeMap, Unshared::LRUMap, Unshared::LFUMap,
+       Unsafe::TreeMap, Unsafe::LRUMap, Unsafe::LFUMap].each do |type|
+        options = type < Abstract::BoundedMap ? { max_size: 2 } : {}
+        map = type.new({ key: :initial }, **options)
+
+        assert_frozen_copy_states(map, read: lambda(&:to_h), mutate: ->(copy) { copy[:key] = :changed })
+        assert Object.instance_method(:frozen?).bind_call(map)
+        assert_raises(FrozenError) { map[:key] = :replacement }
+        assert_raises(FrozenError) { map.clear }
+        refute_predicate map, :ractor_shareable?
+      end
+    end
+
     def test_callback_reentrancy_cannot_commit_after_freezing
       atom = Atom.new(:original)
       assert_raises(FrozenError) do

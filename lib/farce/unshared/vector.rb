@@ -7,6 +7,7 @@ module Farce
     # A thread-safe vector for mutable values used within one Ractor.
     class Vector < Abstract::Vector
       include Unshareable
+      include Internal::Freeze::Delegated
 
       # @param source [Array, nil] Initial values. Values are retained directly.
       # @param compare_by_identity [Boolean] Whether values are compared by identity.
@@ -14,6 +15,8 @@ module Farce
         @vector = Internal::UnsharedVector.new(source, compare_by_identity:)
         super()
       end
+
+      private def freeze_backend = @vector
     end
   end
 end

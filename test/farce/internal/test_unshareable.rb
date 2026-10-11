@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 return unless RUBY_ENGINE == "ruby"
 require_relative "../../setup"
@@ -15,9 +17,34 @@ module Farce
         assert_respond_to Unshareable, :pin_to_current_ractor
         assert_respond_to Unshareable, :prevent_copyable
         assert_respond_to Unshareable, :prevent_movable
+        assert_respond_to Unshareable, :prevent_shareable
         refute_respond_to Internal, :pin_to_current_ractor
         refute_respond_to Internal, :prevent_copyable
         refute_respond_to Internal, :prevent_movable
+        refute_respond_to Internal, :prevent_shareable
+      end
+
+      def test_transfer_marker_factories_report_the_owner_class
+        %i[NoncopyableMarker NonmovableMarker UnshareableMarker].each do |name|
+          marker = Unshareable.const_get(name).new(TestUnshareable)
+
+          error = assert_raises(Ractor::Error) { marker.freeze }
+
+          assert_equal "#{TestUnshareable} cannot be made Ractor-shareable", error.message
+          refute_predicate marker, :frozen?
+        end
+      end
+
+      def test_native_marker_retains_its_owner_class_through_gc_and_compaction
+        marker = Unshareable.const_get(:NonmovableMarker).new(Class.new.set_temporary_name("marker owner"))
+        GC.start
+        GC.compact
+
+        [marker, marker.dup].each do |copy|
+          error = assert_raises(Ractor::Error) { copy.freeze }
+
+          assert_equal "marker owner cannot be made Ractor-shareable", error.message
+        end
       end
 
       def test_pin_returns_same_object_and_is_idempotent
@@ -39,11 +66,12 @@ module Farce
 
       def test_can_apply_guards_inside_another_ractor
         worker = Ractor.new do
-          objects = [Object.new, Object.new, Object.new]
+          objects = [Object.new, Object.new, Object.new, Object.new]
           returned = [
             Internal::Unshareable.pin_to_current_ractor(objects[0]),
             Internal::Unshareable.prevent_copyable(objects[1]),
-            Internal::Unshareable.prevent_movable(objects[2])
+            Internal::Unshareable.prevent_movable(objects[2]),
+            Internal::Unshareable.prevent_shareable(objects[3])
           ]
           [
             returned.zip(objects).all? { |result, object| result.equal?(object) },
@@ -170,7 +198,7 @@ module Farce
 
         assert_equal count, objects.length # Keep every guarded owner alive through this collection.
         markers = objects.values_at(0, count / 2, count - 1).map do |object|
-          ObjectSpace.reachable_objects_from(object).find { |value| value.instance_of?(IO) }
+          ObjectSpace.reachable_objects_from(object).find { |value| value.is_a?(IO) }
         end
 
         assert_predicate markers, :all?
@@ -202,16 +230,12 @@ module Farce
         assert_empty move_guarded.instance_variables
       end
 
-      def test_prevent_copyable_shareability_is_version_dependent
+      def test_prevent_copyable_rejects_make_shareable_after_freezing
         object = Unshareable.prevent_copyable(Object.new)
 
-        if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("4.1")
-          assert_raises(Ractor::Error) { Ractor.make_shareable(object) }
-          refute Ractor.shareable?(object)
-        else
-          assert_same object, Ractor.make_shareable(object)
-          assert Ractor.shareable?(object)
-        end
+        assert_same object, object.freeze
+        assert_raises(Ractor::Error) { Ractor.make_shareable(object) }
+        refute Ractor.shareable?(object)
       end
 
       def test_prevent_movable_allows_copy_and_the_copy_remains_non_movable
@@ -237,11 +261,23 @@ module Farce
         assert_instance_of Object, object
       end
 
-      def test_prevent_movable_does_not_prevent_make_shareable
+      def test_prevent_movable_rejects_make_shareable_after_freezing
         object = Unshareable.prevent_movable(Object.new)
 
-        assert_same object, Ractor.make_shareable(object)
-        assert Ractor.shareable?(object)
+        assert_same object, object.freeze
+        assert_raises(Ractor::Error) { Ractor.make_shareable(object) }
+        refute Ractor.shareable?(object)
+      end
+
+      def test_prevent_shareable_is_idempotent_and_hidden
+        object = Object.new
+
+        assert_same object, Unshareable.prevent_shareable(object)
+        assert_same object, Unshareable.prevent_shareable(object)
+        assert_empty object.instance_variables
+        assert_same object, object.freeze
+        assert_raises(Ractor::Error) { Ractor.make_shareable(object) }
+        refute Ractor.shareable?(object)
       end
 
       def test_pin_satisfies_the_narrower_guards_without_extra_markers
@@ -249,11 +285,12 @@ module Farce
 
         assert_same object, Unshareable.prevent_copyable(object)
         assert_same object, Unshareable.prevent_movable(object)
+        assert_same object, Unshareable.prevent_shareable(object)
         assert_empty object.instance_variables
       end
 
       def test_guards_reject_immediate_frozen_and_already_shareable_objects
-        methods = %i[pin_to_current_ractor prevent_copyable prevent_movable]
+        methods = %i[pin_to_current_ractor prevent_copyable prevent_movable prevent_shareable]
 
         methods.each do |method|
           assert_raises(TypeError) { Unshareable.public_send(method, 1) }

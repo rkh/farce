@@ -13,7 +13,7 @@ module Farce
       assert_same value, atom.value
       assert_same value, atom.get
       refute_predicate atom, :ractor_shareable?
-      refute_respond_to atom, :freeze
+      assert_respond_to atom, :freeze
       assert_equal :stored, atom.store(:stored)
       assert_equal :stored, atom.swap(:swapped)
       assert atom.compare_and_set(:swapped, :compared)
@@ -40,6 +40,19 @@ module Farce
 
       assert equality.compare_and_set(equal, :right)
       assert_raises(ArgumentError) { Unshared::Atom.new(compare_by_identity: nil) }
+    end
+
+    def test_freezing_rejects_updates_without_freezing_the_value
+      value = []
+      atom = Unshared::Atom.new(value)
+
+      assert_same atom, atom.freeze
+      assert_predicate atom, :frozen?
+      assert_raises(FrozenError) { atom.store(:replacement) }
+      assert_raises(FrozenError) { atom.update { flunk } }
+      assert_same value, atom.value
+      refute_predicate value, :frozen?
+      refute_predicate atom, :ractor_shareable?
     end
 
     def test_failed_update_preserves_the_value

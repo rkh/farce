@@ -287,7 +287,12 @@ module Farce
       assert_same value, record.items
       assert_instance_of Unshared::Atom, record.items_atom
       refute_predicate record, :ractor_shareable?
-      refute_respond_to record, :freeze
+      assert_same record, record.freeze
+      assert_predicate record, :frozen?
+      refute_predicate value, :frozen?
+      refute_predicate record, :ractor_shareable?
+      assert_raises(FrozenError) { record.items = [] }
+      assert_raises(FrozenError) { record.items_atom.store([]) }
     end
 
     def test_fields_accept_basic_objects

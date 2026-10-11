@@ -431,7 +431,9 @@ module Farce
 
       refute_predicate lease, :ractor_shareable?
       refute Ractor.shareable?(lease)
-      assert_raises(NoMethodError) { lease.freeze }
+      assert_same lease, lease.freeze
+      assert_predicate lease, :frozen?
+      refute Ractor.shareable?(lease)
     end
 
     def test_top_level_lease_transfers_repeatedly_across_ractors

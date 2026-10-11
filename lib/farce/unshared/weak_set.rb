@@ -7,6 +7,7 @@ module Farce
     # A thread-safe set that retains mutable elements weakly within one Ractor.
     class WeakSet < Farce::Abstract::WeakSet
       include Unshareable
+      include Internal::Freeze::Delegated
 
       private def new_map(...) = Farce::Unshared::WeakMap.new(...)
     end

@@ -130,7 +130,8 @@ module Farce
         assert_raises(RuntimeError) { raw.__send__(:initialize) }
         assert_raises(TypeError) { raw.dup }
         assert_raises(TypeError) { raw.clone }
-        assert_raises(NoMethodError) { raw.freeze }
+        assert_same raw, raw.freeze
+        assert_predicate raw, :frozen?
         refute Ractor.shareable?(raw)
         assert_raises(Ractor::Error) { Ractor.make_shareable(raw) }
         worker = Ractor.new { Ractor.receive }

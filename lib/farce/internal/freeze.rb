@@ -4,7 +4,7 @@
 
 module Farce
   module Internal
-    # Shared implementation for the explicit frozen-state policies in {Shareable}.
+    # Frozen-state policies for wrappers with separate backing storage.
     module Freeze
       # Structurally freeze a Ruby facade, then validate and publish its object graph.
       # This deliberately bypasses an override that controls logical frozen state.
@@ -20,14 +20,14 @@ module Farce
         raise FrozenError.new("can't modify frozen #{object.class}", receiver: object)
       end
 
-      # Delegate logical frozen state to storage owned by the wrapper.
+      # Freeze owned storage and the facade without freezing stored values.
       module Delegated
         def freeze
           backend = freeze_backend
           raise "#{self.class} is not initialized" unless backend
 
           backend.freeze
-          self
+          Object.instance_method(:freeze).bind_call(self)
         end
 
         def frozen?
@@ -38,6 +38,11 @@ module Farce
         private
 
         def check_frozen! = Internal::Freeze.check(self)
+
+        def initialize_clone(other, freeze: nil)
+          super
+          self.freeze if is_a?(Farce::Unshareable) && (freeze.nil? ? other.frozen? : freeze)
+        end
 
         def publish_shareable_copy(other, operation:, freeze: nil)
           logically_frozen = operation == :clone && (freeze.nil? ? other.frozen? : freeze)

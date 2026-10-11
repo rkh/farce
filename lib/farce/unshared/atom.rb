@@ -12,6 +12,7 @@ module Farce
     #   atom.update { |items| items + [:job] }
     class Atom < Abstract::Atom
       include Unshareable
+      include Internal::Freeze::Delegated
 
       # @param value [BasicObject, nil] the initial value
       # @param compare_by_identity [Boolean] whether comparisons use object identity
@@ -19,6 +20,8 @@ module Farce
         @atom = Internal::UnsharedAtom.new(value, compare_by_identity:)
         super()
       end
+
+      private def freeze_backend = @atom
     end
   end
 end

@@ -89,7 +89,7 @@ module Farce
       value = Unshared::Queue.new
       reference = WeakValue.new(value)
 
-      error_class = Internal.native_ractors? ? NoMethodError : Ractor::IsolationError
+      error_class = Ractor::Error
 
       assert_raises(error_class) { reference.freeze }
       refute_predicate reference, :frozen?

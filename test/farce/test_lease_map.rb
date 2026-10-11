@@ -764,7 +764,9 @@ module Farce
 
       refute_predicate map, :ractor_shareable?
       refute Ractor.shareable?(map)
-      assert_raises(NoMethodError) { map.freeze }
+      assert_same map, map.freeze
+      assert_predicate map, :frozen?
+      refute Ractor.shareable?(map)
     end
 
     def test_top_level_map_transfers_entries_across_ractors
