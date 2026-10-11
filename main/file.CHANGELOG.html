@@ -72,8 +72,36 @@
       <div id="content"><div id='filecontents'><h1 id="changelog">Changelog<a href="#changelog" aria-label="Link to heading 'Changelog'" data-heading-content="Changelog" class="anchor"></a></h1>
 <p>Farce follows <a href="http://semver.org/">Semantic Versioning 2.0</a>. Any public method on any public class or module documented in the README or via YARD and not declared private is part of the public API.</p>
 <h2 id="upcoming-releases">Upcoming Releases<a href="#upcoming-releases" aria-label="Link to heading 'Upcoming Releases'" data-heading-content="Upcoming Releases" class="anchor"></a></h2>
-<h3 id="farce-011-unreleased">Farce 0.1.1 (Unreleased)<a href="#farce-011-unreleased" aria-label="Link to heading 'Farce 0.1.1 (Unreleased)'" data-heading-content="Farce 0.1.1 (Unreleased)" class="anchor"></a></h3>
-<h4 id="rework-cruby-native-extension">Rework CRuby native extension<a href="#rework-cruby-native-extension" aria-label="Link to heading 'Rework CRuby native extension'" data-heading-content="Rework CRuby native extension" class="anchor"></a></h4>
+<h3 id="farce-020-unreleased">Farce 0.2.0 (Unreleased)<a href="#farce-020-unreleased" aria-label="Link to heading 'Farce 0.2.0 (Unreleased)'" data-heading-content="Farce 0.2.0 (Unreleased)" class="anchor"></a></h3>
+<h4 id="new-features">New Features<a href="#new-features" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
+<h5 id="waiting-on-flags">Waiting on Flags<a href="#waiting-on-flags" aria-label="Link to heading 'Waiting on Flags'" data-heading-content="Waiting on Flags" class="anchor"></a></h5>
+<p>You can now wait for a <code>Farce::Flag</code> or <code>Farce::Local::Flag</code> to change its value:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_flag'>flag</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Flag.html" title="Farce::Flag (class)">Flag</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Flag.html#initialize-instance_method" title="Farce::Flag#initialize (method)">new</a></span></span>
+
+<span class='const'>Thread</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_flag'>flag</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_set'>wait_until_set</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Flag has been activated!</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_flag'>flag</span><span class='period'>.</span><span class='id identifier rubyid_set'>set</span>
+</code></pre>
+<h5 id="expanded-vector-functionality">Expanded Vector Functionality<a href="#expanded-vector-functionality" aria-label="Link to heading 'Expanded Vector Functionality'" data-heading-content="Expanded Vector Functionality" class="anchor"></a></h5>
+<p>Improved Array compatibility for <code>Vector</code>, <code>Strict::Vector</code>, <code>Unshared::Vector</code>, and <code>Local::Vector</code>:</p>
+<ul>
+<li>Added <code>to_ary</code>, <code>delete</code>, and <code>delete_if</code>.</li>
+<li>Added range and start/length indexing, slice assignment, multiple-value <code>push</code> and <code>append</code>, and <code>pop(count)</code>.</li>
+<li>Added <code>shift</code>, <code>unshift</code>, <code>prepend</code>, <code>insert</code>, <code>delete_at</code>, <code>slice!</code>, <code>replace</code>, and <code>fill</code>.</li>
+<li>Added <code>map!</code>, <code>collect!</code>, <code>keep_if</code>, <code>select!</code>, <code>filter!</code>, <code>reject!</code>, <code>compact!</code>, and <code>uniq!</code>.</li>
+<li>Added <code>reverse!</code>, <code>rotate!</code>, <code>shuffle!</code>, <code>sort!</code>, <code>sort_by!</code>, and <code>flatten!</code>.</li>
+<li>Added <code>flatten</code>, <code>transpose</code>, <code>product</code>, <code>combination</code>, <code>repeated_combination</code>, <code>permutation</code>, and <code>repeated_permutation</code>.</li>
+<li>Added lexicographic <code>&lt;=&gt;</code>. Equality and hashing continue to use object identity.</li>
+</ul>
+<h4 id="bug-fixes">Bug Fixes<a href="#bug-fixes" aria-label="Link to heading 'Bug Fixes'" data-heading-content="Bug Fixes" class="anchor"></a></h4>
+<ul>
+<li>Improve compatibility with other gems modifying <code>Kernel#require</code>, work around an issue with Ruby 4.0's runtime ractor require patch and alias methods chains not working nicely with <code>Module#prepend</code>.</li>
+</ul>
+<h4 id="performance-improvements">Performance Improvements<a href="#performance-improvements" aria-label="Link to heading 'Performance Improvements'" data-heading-content="Performance Improvements" class="anchor"></a></h4>
+<h5 id="rework-cruby-native-extension">Rework CRuby native extension<a href="#rework-cruby-native-extension" aria-label="Link to heading 'Rework CRuby native extension'" data-heading-content="Rework CRuby native extension" class="anchor"></a></h5>
 <p>Incorporated the advice from <a href="https://github.com/ruby/ruby/blob/master/doc/efficient_extensions.md">&quot;Tips for updating Ruby C extensions for efficiently using Ruby 4 VM APIs&quot;</a>.</p>
 <p>With this change, all long-living Farce objects can be compacted and moved to old GC generations. This was not the case previously for maps and vectors that had snapshots taken of them (either for iteration or for transactions). These ended up being permanently kept in young generations. A long-living map or vector would therefore cause frequent GC runs to be quite expensive.</p>
 <table>
@@ -128,7 +156,6 @@
 <ul>
 <li>Avoid circular require warnings when automatically loading third-party integrations.</li>
 <li>Do not install a require hook if automatic integration loading is disabled.</li>
-<li>Improve compatibility with other gems modifying <code>Kernel#require</code>, work around an issue with Ruby 4.0's runtime ractor require patch and alias methods chains not working nicely with <code>Module#prepend</code>.</li>
 </ul>
 <h2 id="development-releases">Development Releases<a href="#development-releases" aria-label="Link to heading 'Development Releases'" data-heading-content="Development Releases" class="anchor"></a></h2>
 <h3 id="farce-010-2026-10-09">Farce 0.1.0 (2026-10-09)<a href="#farce-010-2026-10-09" aria-label="Link to heading 'Farce 0.1.0 (2026-10-09)'" data-heading-content="Farce 0.1.0 (2026-10-09)" class="anchor"></a></h3>
@@ -136,7 +163,7 @@
 </div></div>
 
       <div id="footer">
-  Generated on Sun Oct 11 11:46:36 2026 by
+  Generated on Sun Oct 11 12:32:42 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

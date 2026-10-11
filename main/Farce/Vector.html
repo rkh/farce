@@ -162,7 +162,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#[]-instance_method" title="#[] (instance method)">#<strong>[]</strong>(index)  &#x21d2; BasicObject<sup>?</sup> </a>
+      <a href="#[]-instance_method" title="#[] (instance method)">#<strong>[]</strong>(index, length = UNDEFINED)  &#x21d2; BasicObject, ... </a>
     
 
     
@@ -176,7 +176,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Read an index without waiting for atomic-update access.</p>
+    <span class="summary_desc"><div class='inline'><p>Read an index without waiting for atomic-update access, or return a slice snapshot.</p>
 </div></span>
   
 </li>
@@ -185,7 +185,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#[]=-instance_method" title="#[]= (instance method)">#<strong>[]=</strong>(index, value)  &#x21d2; BasicObject </a>
+      <a href="#[]=-instance_method" title="#[]= (instance method)">#<strong>[]=</strong>(index, value, replacement = UNDEFINED)  &#x21d2; BasicObject </a>
     
 
     
@@ -199,7 +199,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Store a value, growing the vector if necessary.</p>
+    <span class="summary_desc"><div class='inline'><p>Store a value or replace a slice atomically, growing the vector if necessary.</p>
 </div></span>
   
 </li>
@@ -208,7 +208,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#append-instance_method" title="#append (instance method)">#<strong>append</strong>(value, mode: nil, timeout: nil)  &#x21d2; self, false </a>
+      <a href="#append-instance_method" title="#append (instance method)">#<strong>append</strong>(*values, mode: nil, timeout: nil)  &#x21d2; self, false </a>
     
 
     
@@ -222,7 +222,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Append one value using the same options as <span class='object_link'><a href="#push-instance_method" title="Farce::Vector#push (method)">#push</a></span>.</p>
+    <span class="summary_desc"><div class='inline'><p>Append values using the same options as <span class='object_link'><a href="#push-instance_method" title="Farce::Vector#push (method)">#push</a></span>.</p>
 </div></span>
   
 </li>
@@ -348,7 +348,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#pop-instance_method" title="#pop (instance method)">#<strong>pop</strong>(timeout: nil)  &#x21d2; BasicObject<sup>?</sup> </a>
+      <a href="#pop-instance_method" title="#pop (instance method)">#<strong>pop</strong>(count = UNDEFINED, timeout: nil)  &#x21d2; BasicObject, ... </a>
     
 
     
@@ -362,7 +362,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Remove and return the last value.</p>
+    <span class="summary_desc"><div class='inline'><p>Remove and return the last value, or a Vector of the last count values, atomically.</p>
 </div></span>
   
 </li>
@@ -371,7 +371,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#push-instance_method" title="#push (instance method)">#<strong>push</strong>(value, mode: nil, timeout: nil)  &#x21d2; self, false </a>
+      <a href="#push-instance_method" title="#push (instance method)">#<strong>push</strong>(value = UNDEFINED, *rest, mode: nil, timeout: nil)  &#x21d2; self, false </a>
     
 
     
@@ -385,7 +385,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Append a single value.</p>
+    <span class="summary_desc"><div class='inline'><p>Append values atomically.</p>
 </div></span>
   
 </li>
@@ -610,7 +610,7 @@ Values stored through this vector's mode manager are automatically unwrapped.</p
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Abstract/Vector.html" title="Farce::Abstract::Vector (class)">Abstract::Vector</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Abstract/Vector.html#&-instance_method" title="Farce::Abstract::Vector#&amp; (method)">#&</a></span>, <span class='object_link'><a href="Abstract/Vector.html#*-instance_method" title="Farce::Abstract::Vector#* (method)">#*</a></span>, <span class='object_link'><a href="Abstract/Vector.html#%2B-instance_method" title="Farce::Abstract::Vector#+ (method)">#+</a></span>, <span class='object_link'><a href="Abstract/Vector.html#--instance_method" title="Farce::Abstract::Vector#- (method)">#-</a></span>, <span class='object_link'><a href="Abstract/Vector.html#<<-instance_method" title="Farce::Abstract::Vector#&lt;&lt; (method)">#<<</a></span>, <span class='object_link'><a href="Abstract/Vector.html#as_extended_json-instance_method" title="Farce::Abstract::Vector#as_extended_json (method)">#as_extended_json</a></span>, <span class='object_link'><a href="Abstract/Vector.html#as_json-instance_method" title="Farce::Abstract::Vector#as_json (method)">#as_json</a></span>, <span class='object_link'><a href="Abstract/Vector.html#assoc-instance_method" title="Farce::Abstract::Vector#assoc (method)">#assoc</a></span>, <span class='object_link'><a href="Abstract/Vector.html#at-instance_method" title="Farce::Abstract::Vector#at (method)">#at</a></span>, <span class='object_link'><a href="Abstract/Vector.html#bsearch-instance_method" title="Farce::Abstract::Vector#bsearch (method)">#bsearch</a></span>, <span class='object_link'><a href="Abstract/Vector.html#bsearch_index-instance_method" title="Farce::Abstract::Vector#bsearch_index (method)">#bsearch_index</a></span>, <span class='object_link'><a href="Abstract/Vector.html#bson_type-instance_method" title="Farce::Abstract::Vector#bson_type (method)">#bson_type</a></span>, <span class='object_link'><a href="Abstract/Vector.html#chunk-instance_method" title="Farce::Abstract::Vector#chunk (method)">#chunk</a></span>, <span class='object_link'><a href="Abstract/Vector.html#chunk_while-instance_method" title="Farce::Abstract::Vector#chunk_while (method)">#chunk_while</a></span>, <span class='object_link'><a href="Abstract/Vector.html#clear-instance_method" title="Farce::Abstract::Vector#clear (method)">#clear</a></span>, <span class='object_link'><a href="Abstract/Vector.html#compact-instance_method" title="Farce::Abstract::Vector#compact (method)">#compact</a></span>, <span class='object_link'><a href="Abstract/Vector.html#compact_blank-instance_method" title="Farce::Abstract::Vector#compact_blank (method)">#compact_blank</a></span>, <span class='object_link'><a href="Abstract/Vector.html#concat-instance_method" title="Farce::Abstract::Vector#concat (method)">#concat</a></span>, <span class='object_link'><a href="Abstract/Vector.html#deconstruct-instance_method" title="Farce::Abstract::Vector#deconstruct (method)">#deconstruct</a></span>, <span class='object_link'><a href="Abstract/Vector.html#deep_dup-instance_method" title="Farce::Abstract::Vector#deep_dup (method)">#deep_dup</a></span>, <span class='object_link'><a href="Abstract/Vector.html#difference-instance_method" title="Farce::Abstract::Vector#difference (method)">#difference</a></span>, <span class='object_link'><a href="Abstract/Vector.html#dig-instance_method" title="Farce::Abstract::Vector#dig (method)">#dig</a></span>, <span class='object_link'><a href="Abstract/Vector.html#drop-instance_method" title="Farce::Abstract::Vector#drop (method)">#drop</a></span>, <span class='object_link'><a href="Abstract/Vector.html#drop_while-instance_method" title="Farce::Abstract::Vector#drop_while (method)">#drop_while</a></span>, <span class='object_link'><a href="Abstract/Vector.html#each-instance_method" title="Farce::Abstract::Vector#each (method)">#each</a></span>, <span class='object_link'><a href="Abstract/Vector.html#each_cons-instance_method" title="Farce::Abstract::Vector#each_cons (method)">#each_cons</a></span>, <span class='object_link'><a href="Abstract/Vector.html#each_index-instance_method" title="Farce::Abstract::Vector#each_index (method)">#each_index</a></span>, <span class='object_link'><a href="Abstract/Vector.html#each_slice-instance_method" title="Farce::Abstract::Vector#each_slice (method)">#each_slice</a></span>, <span class='object_link'><a href="Abstract/Vector.html#entries-instance_method" title="Farce::Abstract::Vector#entries (method)">#entries</a></span>, <span class='object_link'><a href="Abstract/Vector.html#excluding-instance_method" title="Farce::Abstract::Vector#excluding (method)">#excluding</a></span>, <span class='object_link'><a href="Abstract/Vector.html#fetch-instance_method" title="Farce::Abstract::Vector#fetch (method)">#fetch</a></span>, <span class='object_link'><a href="Abstract/Vector.html#fetch_values-instance_method" title="Farce::Abstract::Vector#fetch_values (method)">#fetch_values</a></span>, <span class='object_link'><a href="Abstract/Vector.html#fifth-instance_method" title="Farce::Abstract::Vector#fifth (method)">#fifth</a></span>, <span class='object_link'><a href="Abstract/Vector.html#filter_map-instance_method" title="Farce::Abstract::Vector#filter_map (method)">#filter_map</a></span>, <span class='object_link'><a href="Abstract/Vector.html#first-instance_method" title="Farce::Abstract::Vector#first (method)">#first</a></span>, <span class='object_link'><a href="Abstract/Vector.html#flat_map-instance_method" title="Farce::Abstract::Vector#flat_map (method)">#flat_map</a></span>, <span class='object_link'><a href="Abstract/Vector.html#forty_two-instance_method" title="Farce::Abstract::Vector#forty_two (method)">#forty_two</a></span>, <span class='object_link'><a href="Abstract/Vector.html#fourth-instance_method" title="Farce::Abstract::Vector#fourth (method)">#fourth</a></span>, <span class='object_link'><a href="Abstract/Vector.html#from-instance_method" title="Farce::Abstract::Vector#from (method)">#from</a></span>, <span class='object_link'><a href="Abstract/Vector.html#grep-instance_method" title="Farce::Abstract::Vector#grep (method)">#grep</a></span>, <span class='object_link'><a href="Abstract/Vector.html#grep_v-instance_method" title="Farce::Abstract::Vector#grep_v (method)">#grep_v</a></span>, <span class='object_link'><a href="Abstract/Vector.html#group_by-instance_method" title="Farce::Abstract::Vector#group_by (method)">#group_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#in_groups-instance_method" title="Farce::Abstract::Vector#in_groups (method)">#in_groups</a></span>, <span class='object_link'><a href="Abstract/Vector.html#in_groups_of-instance_method" title="Farce::Abstract::Vector#in_groups_of (method)">#in_groups_of</a></span>, <span class='object_link'><a href="Abstract/Vector.html#in_order_of-instance_method" title="Farce::Abstract::Vector#in_order_of (method)">#in_order_of</a></span>, <span class='object_link'><a href="Abstract/Vector.html#include%3F-instance_method" title="Farce::Abstract::Vector#include? (method)">#include?</a></span>, <span class='object_link'><a href="Abstract/Vector.html#including-instance_method" title="Farce::Abstract::Vector#including (method)">#including</a></span>, <span class='object_link'><a href="Abstract/Vector.html#index-instance_method" title="Farce::Abstract::Vector#index (method)">#index</a></span>, <span class='object_link'><a href="Abstract/Vector.html#inquiry-instance_method" title="Farce::Abstract::Vector#inquiry (method)">#inquiry</a></span>, <span class='object_link'><a href="Abstract/Vector.html#intersect%3F-instance_method" title="Farce::Abstract::Vector#intersect? (method)">#intersect?</a></span>, <span class='object_link'><a href="Abstract/Vector.html#intersection-instance_method" title="Farce::Abstract::Vector#intersection (method)">#intersection</a></span>, <span class='object_link'><a href="Abstract/Vector.html#last-instance_method" title="Farce::Abstract::Vector#last (method)">#last</a></span>, <span class='object_link'><a href="Abstract/Vector.html#map-instance_method" title="Farce::Abstract::Vector#map (method)">#map</a></span>, <span class='object_link'><a href="Abstract/Vector.html#max-instance_method" title="Farce::Abstract::Vector#max (method)">#max</a></span>, <span class='object_link'><a href="Abstract/Vector.html#max_by-instance_method" title="Farce::Abstract::Vector#max_by (method)">#max_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#maximum-instance_method" title="Farce::Abstract::Vector#maximum (method)">#maximum</a></span>, <span class='object_link'><a href="Abstract/Vector.html#min-instance_method" title="Farce::Abstract::Vector#min (method)">#min</a></span>, <span class='object_link'><a href="Abstract/Vector.html#min_by-instance_method" title="Farce::Abstract::Vector#min_by (method)">#min_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#minimum-instance_method" title="Farce::Abstract::Vector#minimum (method)">#minimum</a></span>, <span class='object_link'><a href="Abstract/Vector.html#minmax-instance_method" title="Farce::Abstract::Vector#minmax (method)">#minmax</a></span>, <span class='object_link'><a href="Abstract/Vector.html#minmax_by-instance_method" title="Farce::Abstract::Vector#minmax_by (method)">#minmax_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#pack-instance_method" title="Farce::Abstract::Vector#pack (method)">#pack</a></span>, <span class='object_link'><a href="Abstract/Vector.html#partition-instance_method" title="Farce::Abstract::Vector#partition (method)">#partition</a></span>, <span class='object_link'><a href="Abstract/Vector.html#pick-instance_method" title="Farce::Abstract::Vector#pick (method)">#pick</a></span>, <span class='object_link'><a href="Abstract/Vector.html#pluck-instance_method" title="Farce::Abstract::Vector#pluck (method)">#pluck</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rassoc-instance_method" title="Farce::Abstract::Vector#rassoc (method)">#rassoc</a></span>, <span class='object_link'><a href="Abstract/Vector.html#reject-instance_method" title="Farce::Abstract::Vector#reject (method)">#reject</a></span>, <span class='object_link'><a href="Abstract/Vector.html#reverse-instance_method" title="Farce::Abstract::Vector#reverse (method)">#reverse</a></span>, <span class='object_link'><a href="Abstract/Vector.html#reverse_each-instance_method" title="Farce::Abstract::Vector#reverse_each (method)">#reverse_each</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rfind-instance_method" title="Farce::Abstract::Vector#rfind (method)">#rfind</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rindex-instance_method" title="Farce::Abstract::Vector#rindex (method)">#rindex</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rotate-instance_method" title="Farce::Abstract::Vector#rotate (method)">#rotate</a></span>, <span class='object_link'><a href="Abstract/Vector.html#sample-instance_method" title="Farce::Abstract::Vector#sample (method)">#sample</a></span>, <span class='object_link'><a href="Abstract/Vector.html#second-instance_method" title="Farce::Abstract::Vector#second (method)">#second</a></span>, <span class='object_link'><a href="Abstract/Vector.html#second_to_last-instance_method" title="Farce::Abstract::Vector#second_to_last (method)">#second_to_last</a></span>, <span class='object_link'><a href="Abstract/Vector.html#select-instance_method" title="Farce::Abstract::Vector#select (method)">#select</a></span>, <span class='object_link'><a href="Abstract/Vector.html#shuffle-instance_method" title="Farce::Abstract::Vector#shuffle (method)">#shuffle</a></span>, <span class='object_link'><a href="Abstract/Vector.html#size-instance_method" title="Farce::Abstract::Vector#size (method)">#size</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice-instance_method" title="Farce::Abstract::Vector#slice (method)">#slice</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice_after-instance_method" title="Farce::Abstract::Vector#slice_after (method)">#slice_after</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice_before-instance_method" title="Farce::Abstract::Vector#slice_before (method)">#slice_before</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice_when-instance_method" title="Farce::Abstract::Vector#slice_when (method)">#slice_when</a></span>, <span class='object_link'><a href="Abstract/Vector.html#sort-instance_method" title="Farce::Abstract::Vector#sort (method)">#sort</a></span>, <span class='object_link'><a href="Abstract/Vector.html#sort_by-instance_method" title="Farce::Abstract::Vector#sort_by (method)">#sort_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#split-instance_method" title="Farce::Abstract::Vector#split (method)">#split</a></span>, <span class='object_link'><a href="Abstract/Vector.html#take-instance_method" title="Farce::Abstract::Vector#take (method)">#take</a></span>, <span class='object_link'><a href="Abstract/Vector.html#take_while-instance_method" title="Farce::Abstract::Vector#take_while (method)">#take_while</a></span>, <span class='object_link'><a href="Abstract/Vector.html#third-instance_method" title="Farce::Abstract::Vector#third (method)">#third</a></span>, <span class='object_link'><a href="Abstract/Vector.html#third_to_last-instance_method" title="Farce::Abstract::Vector#third_to_last (method)">#third_to_last</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to-instance_method" title="Farce::Abstract::Vector#to (method)">#to</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_a-instance_method" title="Farce::Abstract::Vector#to_a (method)">#to_a</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_bson-instance_method" title="Farce::Abstract::Vector#to_bson (method)">#to_bson</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_bson_normalized_value-instance_method" title="Farce::Abstract::Vector#to_bson_normalized_value (method)">#to_bson_normalized_value</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_cbor-instance_method" title="Farce::Abstract::Vector#to_cbor (method)">#to_cbor</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_fs-instance_method" title="Farce::Abstract::Vector#to_fs (method)">#to_fs</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_h-instance_method" title="Farce::Abstract::Vector#to_h (method)">#to_h</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_json-instance_method" title="Farce::Abstract::Vector#to_json (method)">#to_json</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_msgpack-instance_method" title="Farce::Abstract::Vector#to_msgpack (method)">#to_msgpack</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_param-instance_method" title="Farce::Abstract::Vector#to_param (method)">#to_param</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_query-instance_method" title="Farce::Abstract::Vector#to_query (method)">#to_query</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_sentence-instance_method" title="Farce::Abstract::Vector#to_sentence (method)">#to_sentence</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_xml-instance_method" title="Farce::Abstract::Vector#to_xml (method)">#to_xml</a></span>, <span class='object_link'><a href="Abstract/Vector.html#union-instance_method" title="Farce::Abstract::Vector#union (method)">#union</a></span>, <span class='object_link'><a href="Abstract/Vector.html#uniq-instance_method" title="Farce::Abstract::Vector#uniq (method)">#uniq</a></span>, <span class='object_link'><a href="Abstract/Vector.html#values_at-instance_method" title="Farce::Abstract::Vector#values_at (method)">#values_at</a></span>, <span class='object_link'><a href="Abstract/Vector.html#wait_until-instance_method" title="Farce::Abstract::Vector#wait_until (method)">#wait_until</a></span>, <span class='object_link'><a href="Abstract/Vector.html#wait_until_match-instance_method" title="Farce::Abstract::Vector#wait_until_match (method)">#wait_until_match</a></span>, <span class='object_link'><a href="Abstract/Vector.html#wait_until_value-instance_method" title="Farce::Abstract::Vector#wait_until_value (method)">#wait_until_value</a></span>, <span class='object_link'><a href="Abstract/Vector.html#wait_while-instance_method" title="Farce::Abstract::Vector#wait_while (method)">#wait_while</a></span>, <span class='object_link'><a href="Abstract/Vector.html#wait_while_match-instance_method" title="Farce::Abstract::Vector#wait_while_match (method)">#wait_while_match</a></span>, <span class='object_link'><a href="Abstract/Vector.html#wait_while_value-instance_method" title="Farce::Abstract::Vector#wait_while_value (method)">#wait_while_value</a></span>, <span class='object_link'><a href="Abstract/Vector.html#zip-instance_method" title="Farce::Abstract::Vector#zip (method)">#zip</a></span>, <span class='object_link'><a href="Abstract/Vector.html#%7C-instance_method" title="Farce::Abstract::Vector#| (method)">#|</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Vector.html#&-instance_method" title="Farce::Abstract::Vector#&amp; (method)">#&</a></span>, <span class='object_link'><a href="Abstract/Vector.html#*-instance_method" title="Farce::Abstract::Vector#* (method)">#*</a></span>, <span class='object_link'><a href="Abstract/Vector.html#%2B-instance_method" title="Farce::Abstract::Vector#+ (method)">#+</a></span>, <span class='object_link'><a href="Abstract/Vector.html#--instance_method" title="Farce::Abstract::Vector#- (method)">#-</a></span>, <span class='object_link'><a href="Abstract/Vector.html#<<-instance_method" title="Farce::Abstract::Vector#&lt;&lt; (method)">#<<</a></span>, <span class='object_link'><a href="Abstract/Vector.html#<=>-instance_method" title="Farce::Abstract::Vector#&lt;=&gt; (method)">#<=></a></span>, <span class='object_link'><a href="Abstract/Vector.html#as_extended_json-instance_method" title="Farce::Abstract::Vector#as_extended_json (method)">#as_extended_json</a></span>, <span class='object_link'><a href="Abstract/Vector.html#as_json-instance_method" title="Farce::Abstract::Vector#as_json (method)">#as_json</a></span>, <span class='object_link'><a href="Abstract/Vector.html#assoc-instance_method" title="Farce::Abstract::Vector#assoc (method)">#assoc</a></span>, <span class='object_link'><a href="Abstract/Vector.html#at-instance_method" title="Farce::Abstract::Vector#at (method)">#at</a></span>, <span class='object_link'><a href="Abstract/Vector.html#bsearch-instance_method" title="Farce::Abstract::Vector#bsearch (method)">#bsearch</a></span>, <span class='object_link'><a href="Abstract/Vector.html#bsearch_index-instance_method" title="Farce::Abstract::Vector#bsearch_index (method)">#bsearch_index</a></span>, <span class='object_link'><a href="Abstract/Vector.html#bson_type-instance_method" title="Farce::Abstract::Vector#bson_type (method)">#bson_type</a></span>, <span class='object_link'><a href="Abstract/Vector.html#chunk-instance_method" title="Farce::Abstract::Vector#chunk (method)">#chunk</a></span>, <span class='object_link'><a href="Abstract/Vector.html#chunk_while-instance_method" title="Farce::Abstract::Vector#chunk_while (method)">#chunk_while</a></span>, <span class='object_link'><a href="Abstract/Vector.html#clear-instance_method" title="Farce::Abstract::Vector#clear (method)">#clear</a></span>, <span class='object_link'><a href="Abstract/Vector.html#combination-instance_method" title="Farce::Abstract::Vector#combination (method)">#combination</a></span>, <span class='object_link'><a href="Abstract/Vector.html#compact-instance_method" title="Farce::Abstract::Vector#compact (method)">#compact</a></span>, <span class='object_link'><a href="Abstract/Vector.html#compact!-instance_method" title="Farce::Abstract::Vector#compact! (method)">#compact!</a></span>, <span class='object_link'><a href="Abstract/Vector.html#compact_blank-instance_method" title="Farce::Abstract::Vector#compact_blank (method)">#compact_blank</a></span>, <span class='object_link'><a href="Abstract/Vector.html#concat-instance_method" title="Farce::Abstract::Vector#concat (method)">#concat</a></span>, <span class='object_link'><a href="Abstract/Vector.html#deconstruct-instance_method" title="Farce::Abstract::Vector#deconstruct (method)">#deconstruct</a></span>, <span class='object_link'><a href="Abstract/Vector.html#deep_dup-instance_method" title="Farce::Abstract::Vector#deep_dup (method)">#deep_dup</a></span>, <span class='object_link'><a href="Abstract/Vector.html#delete-instance_method" title="Farce::Abstract::Vector#delete (method)">#delete</a></span>, <span class='object_link'><a href="Abstract/Vector.html#delete_at-instance_method" title="Farce::Abstract::Vector#delete_at (method)">#delete_at</a></span>, <span class='object_link'><a href="Abstract/Vector.html#delete_if-instance_method" title="Farce::Abstract::Vector#delete_if (method)">#delete_if</a></span>, <span class='object_link'><a href="Abstract/Vector.html#difference-instance_method" title="Farce::Abstract::Vector#difference (method)">#difference</a></span>, <span class='object_link'><a href="Abstract/Vector.html#dig-instance_method" title="Farce::Abstract::Vector#dig (method)">#dig</a></span>, <span class='object_link'><a href="Abstract/Vector.html#drop-instance_method" title="Farce::Abstract::Vector#drop (method)">#drop</a></span>, <span class='object_link'><a href="Abstract/Vector.html#drop_while-instance_method" title="Farce::Abstract::Vector#drop_while (method)">#drop_while</a></span>, <span class='object_link'><a href="Abstract/Vector.html#each-instance_method" title="Farce::Abstract::Vector#each (method)">#each</a></span>, <span class='object_link'><a href="Abstract/Vector.html#each_cons-instance_method" title="Farce::Abstract::Vector#each_cons (method)">#each_cons</a></span>, <span class='object_link'><a href="Abstract/Vector.html#each_index-instance_method" title="Farce::Abstract::Vector#each_index (method)">#each_index</a></span>, <span class='object_link'><a href="Abstract/Vector.html#each_slice-instance_method" title="Farce::Abstract::Vector#each_slice (method)">#each_slice</a></span>, <span class='object_link'><a href="Abstract/Vector.html#entries-instance_method" title="Farce::Abstract::Vector#entries (method)">#entries</a></span>, <span class='object_link'><a href="Abstract/Vector.html#excluding-instance_method" title="Farce::Abstract::Vector#excluding (method)">#excluding</a></span>, <span class='object_link'><a href="Abstract/Vector.html#fetch-instance_method" title="Farce::Abstract::Vector#fetch (method)">#fetch</a></span>, <span class='object_link'><a href="Abstract/Vector.html#fetch_values-instance_method" title="Farce::Abstract::Vector#fetch_values (method)">#fetch_values</a></span>, <span class='object_link'><a href="Abstract/Vector.html#fifth-instance_method" title="Farce::Abstract::Vector#fifth (method)">#fifth</a></span>, <span class='object_link'><a href="Abstract/Vector.html#fill-instance_method" title="Farce::Abstract::Vector#fill (method)">#fill</a></span>, <span class='object_link'><a href="Abstract/Vector.html#filter_map-instance_method" title="Farce::Abstract::Vector#filter_map (method)">#filter_map</a></span>, <span class='object_link'><a href="Abstract/Vector.html#first-instance_method" title="Farce::Abstract::Vector#first (method)">#first</a></span>, <span class='object_link'><a href="Abstract/Vector.html#flat_map-instance_method" title="Farce::Abstract::Vector#flat_map (method)">#flat_map</a></span>, <span class='object_link'><a href="Abstract/Vector.html#flatten-instance_method" title="Farce::Abstract::Vector#flatten (method)">#flatten</a></span>, <span class='object_link'><a href="Abstract/Vector.html#flatten!-instance_method" title="Farce::Abstract::Vector#flatten! (method)">#flatten!</a></span>, <span class='object_link'><a href="Abstract/Vector.html#forty_two-instance_method" title="Farce::Abstract::Vector#forty_two (method)">#forty_two</a></span>, <span class='object_link'><a href="Abstract/Vector.html#fourth-instance_method" title="Farce::Abstract::Vector#fourth (method)">#fourth</a></span>, <span class='object_link'><a href="Abstract/Vector.html#from-instance_method" title="Farce::Abstract::Vector#from (method)">#from</a></span>, <span class='object_link'><a href="Abstract/Vector.html#grep-instance_method" title="Farce::Abstract::Vector#grep (method)">#grep</a></span>, <span class='object_link'><a href="Abstract/Vector.html#grep_v-instance_method" title="Farce::Abstract::Vector#grep_v (method)">#grep_v</a></span>, <span class='object_link'><a href="Abstract/Vector.html#group_by-instance_method" title="Farce::Abstract::Vector#group_by (method)">#group_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#in_groups-instance_method" title="Farce::Abstract::Vector#in_groups (method)">#in_groups</a></span>, <span class='object_link'><a href="Abstract/Vector.html#in_groups_of-instance_method" title="Farce::Abstract::Vector#in_groups_of (method)">#in_groups_of</a></span>, <span class='object_link'><a href="Abstract/Vector.html#in_order_of-instance_method" title="Farce::Abstract::Vector#in_order_of (method)">#in_order_of</a></span>, <span class='object_link'><a href="Abstract/Vector.html#include%3F-instance_method" title="Farce::Abstract::Vector#include? (method)">#include?</a></span>, <span class='object_link'><a href="Abstract/Vector.html#including-instance_method" title="Farce::Abstract::Vector#including (method)">#including</a></span>, <span class='object_link'><a href="Abstract/Vector.html#index-instance_method" title="Farce::Abstract::Vector#index (method)">#index</a></span>, <span class='object_link'><a href="Abstract/Vector.html#inquiry-instance_method" title="Farce::Abstract::Vector#inquiry (method)">#inquiry</a></span>, <span class='object_link'><a href="Abstract/Vector.html#insert-instance_method" title="Farce::Abstract::Vector#insert (method)">#insert</a></span>, <span class='object_link'><a href="Abstract/Vector.html#intersect%3F-instance_method" title="Farce::Abstract::Vector#intersect? (method)">#intersect?</a></span>, <span class='object_link'><a href="Abstract/Vector.html#intersection-instance_method" title="Farce::Abstract::Vector#intersection (method)">#intersection</a></span>, <span class='object_link'><a href="Abstract/Vector.html#keep_if-instance_method" title="Farce::Abstract::Vector#keep_if (method)">#keep_if</a></span>, <span class='object_link'><a href="Abstract/Vector.html#last-instance_method" title="Farce::Abstract::Vector#last (method)">#last</a></span>, <span class='object_link'><a href="Abstract/Vector.html#map-instance_method" title="Farce::Abstract::Vector#map (method)">#map</a></span>, <span class='object_link'><a href="Abstract/Vector.html#map!-instance_method" title="Farce::Abstract::Vector#map! (method)">#map!</a></span>, <span class='object_link'><a href="Abstract/Vector.html#max-instance_method" title="Farce::Abstract::Vector#max (method)">#max</a></span>, <span class='object_link'><a href="Abstract/Vector.html#max_by-instance_method" title="Farce::Abstract::Vector#max_by (method)">#max_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#maximum-instance_method" title="Farce::Abstract::Vector#maximum (method)">#maximum</a></span>, <span class='object_link'><a href="Abstract/Vector.html#min-instance_method" title="Farce::Abstract::Vector#min (method)">#min</a></span>, <span class='object_link'><a href="Abstract/Vector.html#min_by-instance_method" title="Farce::Abstract::Vector#min_by (method)">#min_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#minimum-instance_method" title="Farce::Abstract::Vector#minimum (method)">#minimum</a></span>, <span class='object_link'><a href="Abstract/Vector.html#minmax-instance_method" title="Farce::Abstract::Vector#minmax (method)">#minmax</a></span>, <span class='object_link'><a href="Abstract/Vector.html#minmax_by-instance_method" title="Farce::Abstract::Vector#minmax_by (method)">#minmax_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#pack-instance_method" title="Farce::Abstract::Vector#pack (method)">#pack</a></span>, <span class='object_link'><a href="Abstract/Vector.html#partition-instance_method" title="Farce::Abstract::Vector#partition (method)">#partition</a></span>, <span class='object_link'><a href="Abstract/Vector.html#permutation-instance_method" title="Farce::Abstract::Vector#permutation (method)">#permutation</a></span>, <span class='object_link'><a href="Abstract/Vector.html#pick-instance_method" title="Farce::Abstract::Vector#pick (method)">#pick</a></span>, <span class='object_link'><a href="Abstract/Vector.html#pluck-instance_method" title="Farce::Abstract::Vector#pluck (method)">#pluck</a></span>, <span class='object_link'><a href="Abstract/Vector.html#product-instance_method" title="Farce::Abstract::Vector#product (method)">#product</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rassoc-instance_method" title="Farce::Abstract::Vector#rassoc (method)">#rassoc</a></span>, <span class='object_link'><a href="Abstract/Vector.html#reject-instance_method" title="Farce::Abstract::Vector#reject (method)">#reject</a></span>, <span class='object_link'><a href="Abstract/Vector.html#reject!-instance_method" title="Farce::Abstract::Vector#reject! (method)">#reject!</a></span>, <span class='object_link'><a href="Abstract/Vector.html#repeated_combination-instance_method" title="Farce::Abstract::Vector#repeated_combination (method)">#repeated_combination</a></span>, <span class='object_link'><a href="Abstract/Vector.html#repeated_permutation-instance_method" title="Farce::Abstract::Vector#repeated_permutation (method)">#repeated_permutation</a></span>, <span class='object_link'><a href="Abstract/Vector.html#replace-instance_method" title="Farce::Abstract::Vector#replace (method)">#replace</a></span>, <span class='object_link'><a href="Abstract/Vector.html#reverse-instance_method" title="Farce::Abstract::Vector#reverse (method)">#reverse</a></span>, <span class='object_link'><a href="Abstract/Vector.html#reverse!-instance_method" title="Farce::Abstract::Vector#reverse! (method)">#reverse!</a></span>, <span class='object_link'><a href="Abstract/Vector.html#reverse_each-instance_method" title="Farce::Abstract::Vector#reverse_each (method)">#reverse_each</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rfind-instance_method" title="Farce::Abstract::Vector#rfind (method)">#rfind</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rindex-instance_method" title="Farce::Abstract::Vector#rindex (method)">#rindex</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rotate-instance_method" title="Farce::Abstract::Vector#rotate (method)">#rotate</a></span>, <span class='object_link'><a href="Abstract/Vector.html#rotate!-instance_method" title="Farce::Abstract::Vector#rotate! (method)">#rotate!</a></span>, <span class='object_link'><a href="Abstract/Vector.html#sample-instance_method" title="Farce::Abstract::Vector#sample (method)">#sample</a></span>, <span class='object_link'><a href="Abstract/Vector.html#second-instance_method" title="Farce::Abstract::Vector#second (method)">#second</a></span>, <span class='object_link'><a href="Abstract/Vector.html#second_to_last-instance_method" title="Farce::Abstract::Vector#second_to_last (method)">#second_to_last</a></span>, <span class='object_link'><a href="Abstract/Vector.html#select-instance_method" title="Farce::Abstract::Vector#select (method)">#select</a></span>, <span class='object_link'><a href="Abstract/Vector.html#select!-instance_method" title="Farce::Abstract::Vector#select! (method)">#select!</a></span>, <span class='object_link'><a href="Abstract/Vector.html#shift-instance_method" title="Farce::Abstract::Vector#shift (method)">#shift</a></span>, <span class='object_link'><a href="Abstract/Vector.html#shuffle-instance_method" title="Farce::Abstract::Vector#shuffle (method)">#shuffle</a></span>, <span class='object_link'><a href="Abstract/Vector.html#shuffle!-instance_method" title="Farce::Abstract::Vector#shuffle! (method)">#shuffle!</a></span>, <span class='object_link'><a href="Abstract/Vector.html#size-instance_method" title="Farce::Abstract::Vector#size (method)">#size</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice-instance_method" title="Farce::Abstract::Vector#slice (method)">#slice</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice!-instance_method" title="Farce::Abstract::Vector#slice! (method)">#slice!</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice_after-instance_method" title="Farce::Abstract::Vector#slice_after (method)">#slice_after</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice_before-instance_method" title="Farce::Abstract::Vector#slice_before (method)">#slice_before</a></span>, <span class='object_link'><a href="Abstract/Vector.html#slice_when-instance_method" title="Farce::Abstract::Vector#slice_when (method)">#slice_when</a></span>, <span class='object_link'><a href="Abstract/Vector.html#sort-instance_method" title="Farce::Abstract::Vector#sort (method)">#sort</a></span>, <span class='object_link'><a href="Abstract/Vector.html#sort!-instance_method" title="Farce::Abstract::Vector#sort! (method)">#sort!</a></span>, <span class='object_link'><a href="Abstract/Vector.html#sort_by-instance_method" title="Farce::Abstract::Vector#sort_by (method)">#sort_by</a></span>, <span class='object_link'><a href="Abstract/Vector.html#sort_by!-instance_method" title="Farce::Abstract::Vector#sort_by! (method)">#sort_by!</a></span>, <span class='object_link'><a href="Abstract/Vector.html#split-instance_method" title="Farce::Abstract::Vector#split (method)">#split</a></span>, <span class='object_link'><a href="Abstract/Vector.html#take-instance_method" title="Farce::Abstract::Vector#take (method)">#take</a></span>, <span class='object_link'><a href="Abstract/Vector.html#take_while-instance_method" title="Farce::Abstract::Vector#take_while (method)">#take_while</a></span>, <span class='object_link'><a href="Abstract/Vector.html#third-instance_method" title="Farce::Abstract::Vector#third (method)">#third</a></span>, <span class='object_link'><a href="Abstract/Vector.html#third_to_last-instance_method" title="Farce::Abstract::Vector#third_to_last (method)">#third_to_last</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to-instance_method" title="Farce::Abstract::Vector#to (method)">#to</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_a-instance_method" title="Farce::Abstract::Vector#to_a (method)">#to_a</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_ary-instance_method" title="Farce::Abstract::Vector#to_ary (method)">#to_ary</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_bson-instance_method" title="Farce::Abstract::Vector#to_bson (method)">#to_bson</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_bson_normalized_value-instance_method" title="Farce::Abstract::Vector#to_bson_normalized_value (method)">#to_bson_normalized_value</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_cbor-instance_method" title="Farce::Abstract::Vector#to_cbor (method)">#to_cbor</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_fs-instance_method" title="Farce::Abstract::Vector#to_fs (method)">#to_fs</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_h-instance_method" title="Farce::Abstract::Vector#to_h (method)">#to_h</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_json-instance_method" title="Farce::Abstract::Vector#to_json (method)">#to_json</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_msgpack-instance_method" title="Farce::Abstract::Vector#to_msgpack (method)">#to_msgpack</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_param-instance_method" title="Farce::Abstract::Vector#to_param (method)">#to_param</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_query-instance_method" title="Farce::Abstract::Vector#to_query (method)">#to_query</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_sentence-instance_method" title="Farce::Abstract::Vector#to_sentence (method)">#to_sentence</a></span>, <span class='object_link'><a href="Abstract/Vector.html#to_xml-instance_method" title="Farce::Abstract::Vector#to_xml (method)">#to_xml</a></span>, <span class='object_link'><a href="Abstract/Vector.html#transpose-instance_method" title="Farce::Abstract::Vector#transpose (method)">#transpose</a></span>, <span class='object_link'><a href="Abstract/Vector.html#union-instance_method" title="Farce::Abstract::Vector#union (method)">#union</a></span>, <span class='object_link'><a href="Abstract/Vector.html#uniq-instance_method" title="Farce::Abstract::Vector#uniq (method)">#uniq</a></span>, <span class='object_link'><a href="Abstract/Vector.html#uniq!-instance_method" title="Farce::Abstract::Vector#uniq! (method)">#uniq!</a></span>, <span class='object_link'><a href="Abstract/Vector.html#unshift-instance_method" title="Farce::Abstract::Vector#unshift (method)">#unshift</a></span>, <span class='object_link'><a href="Abstract/Vector.html#values_at-instance_method" title="Farce::Abstract::Vector#values_at (method)">#values_at</a></span>, <span class='object_link'><a href="Abstract/Vector.html#wait_until-instance_method" title="Farce::Abstract::Vector#wait_until (method)">#wait_until</a></span>, <span class='object_link'><a href="Abstract/Vector.html#wait_until_match-instance_method" title="Farce::Abstract::Vector#wait_until_match (method)">#wait_until_match</a></span>, <span class='object_link'><a href="Abstract/Vector.html#wait_until_value-instance_method" title="Farce::Abstract::Vector#wait_until_value (method)">#wait_until_value</a></span>, <span class='object_link'><a href="Abstract/Vector.html#wait_while-instance_method" title="Farce::Abstract::Vector#wait_while (method)">#wait_while</a></span>, <span class='object_link'><a href="Abstract/Vector.html#wait_while_match-instance_method" title="Farce::Abstract::Vector#wait_while_match (method)">#wait_while_match</a></span>, <span class='object_link'><a href="Abstract/Vector.html#wait_while_value-instance_method" title="Farce::Abstract::Vector#wait_while_value (method)">#wait_while_value</a></span>, <span class='object_link'><a href="Abstract/Vector.html#zip-instance_method" title="Farce::Abstract::Vector#zip (method)">#zip</a></span>, <span class='object_link'><a href="Abstract/Vector.html#%7C-instance_method" title="Farce::Abstract::Vector#| (method)">#|</a></span></p>
 
   
   
@@ -790,7 +790,7 @@ This may update and freeze the original. Already-shareable values pass through u
       <div class="method_details first">
   <h3 class="signature first" id="[]-instance_method">
   
-    #<strong>[]</strong>(index)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+    #<strong>[]</strong>(index, length = UNDEFINED)  &#x21d2; <tt>BasicObject</tt>, ... 
   
 
   
@@ -798,7 +798,7 @@ This may update and freeze the original. Already-shareable values pass through u
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Read an index without waiting for atomic-update access.</p>
+    <p>Read an index without waiting for atomic-update access, or return a slice snapshot.</p>
 
 
   </div>
@@ -812,12 +812,29 @@ This may update and freeze the original. Already-shareable values pass through u
         <span class='name'>index</span>
       
       
-        <span class='type'>(<tt>Integer</tt>)</span>
+        <span class='type'>(<tt>Integer</tt>, <tt>Range</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+        <div class='inline'><p>The index, start index, or range. Negative indexes count from the end.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>length</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>UNDEFINED</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The slice length. Omit for a single index or range.</p>
 </div>
       
     </li>
@@ -830,12 +847,12 @@ This may update and freeze the original. Already-shareable values pass through u
     <li>
       
       
-        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+        <span class='type'>(<tt>BasicObject</tt>, <tt><span class='object_link'><a href="" title="Farce::Vector (class)">Vector</a></span></tt>, <tt>nil</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'><p>The value, or nil for an index outside the vector.</p>
+        <div class='inline'><p>The logical value, a slice Vector, or nil if absent.</p>
 </div>
       
     </li>
@@ -848,12 +865,18 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-67</pre>
+67
+68
+69
+70</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 67</span>
 
-<span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span><span class='rparen'>)</span></pre>
+<span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_length'>length</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_index'>index</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Range</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_slice'>slice</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_length'>length</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -862,7 +885,7 @@ This may update and freeze the original. Already-shareable values pass through u
       <div class="method_details ">
   <h3 class="signature " id="[]=-instance_method">
   
-    #<strong>[]=</strong>(index, value)  &#x21d2; <tt>BasicObject</tt> 
+    #<strong>[]=</strong>(index, value, replacement = UNDEFINED)  &#x21d2; <tt>BasicObject</tt> 
   
 
   
@@ -870,7 +893,8 @@ This may update and freeze the original. Already-shareable values pass through u
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Store a value, growing the vector if necessary.</p>
+    <p>Store a value or replace a slice atomically, growing the vector if necessary.
+Slice replacements accept a Vector, Array-like object, or one scalar value.</p>
 
 
   </div>
@@ -884,12 +908,12 @@ This may update and freeze the original. Already-shareable values pass through u
         <span class='name'>index</span>
       
       
-        <span class='type'>(<tt>Integer</tt>)</span>
+        <span class='type'>(<tt>Integer</tt>, <tt>Range</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'><p>The index. Negative indexes count from the end.</p>
+        <div class='inline'><p>The index, start index, or range.</p>
 </div>
       
     </li>
@@ -899,12 +923,29 @@ This may update and freeze the original. Already-shareable values pass through u
         <span class='name'>value</span>
       
       
-        <span class='type'>(<tt>BasicObject</tt>)</span>
+        <span class='type'>(<tt>BasicObject</tt>, <tt>Integer</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'><p>The value to store.</p>
+        <div class='inline'><p>The assigned value, or the slice length for three arguments.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>replacement</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>UNDEFINED</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The replacement for the three-argument form.</p>
 </div>
       
     </li>
@@ -922,7 +963,7 @@ This may update and freeze the original. Already-shareable values pass through u
       
       
         &mdash;
-        <div class='inline'><p>The assigned value.</p>
+        <div class='inline'><p>The assigned value or replacement sequence.</p>
 </div>
       
     </li>
@@ -935,19 +976,27 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-70
-71
-72
 73
-74</pre>
+74
+75
+76
+77
+78
+79
+80
+81</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 70</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 73</span>
 
-<span class='kw'>def</span> <span class='op'>[]=</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
-  <span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_value'>value</span>
+<span class='kw'>def</span> <span class='op'>[]=</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_index'>index</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Range</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+    <span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>else</span>
+    <span class='id identifier rubyid_assign_vector_slice'>assign_vector_slice</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -957,7 +1006,7 @@ This may update and freeze the original. Already-shareable values pass through u
       <div class="method_details ">
   <h3 class="signature " id="append-instance_method">
   
-    #<strong>append</strong>(value, mode: nil, timeout: nil)  &#x21d2; <tt>self</tt>, <tt>false</tt> 
+    #<strong>append</strong>(*values, mode: nil, timeout: nil)  &#x21d2; <tt>self</tt>, <tt>false</tt> 
   
 
   
@@ -965,7 +1014,7 @@ This may update and freeze the original. Already-shareable values pass through u
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Append one value using the same options as <span class='object_link'><a href="#push-instance_method" title="Farce::Vector#push (method)">#push</a></span>.</p>
+    <p>Append values using the same options as <span class='object_link'><a href="#push-instance_method" title="Farce::Vector#push (method)">#push</a></span>.</p>
 
 
   </div>
@@ -976,15 +1025,15 @@ This may update and freeze the original. Already-shareable values pass through u
   
     <li>
       
-        <span class='name'>value</span>
+        <span class='name'>values</span>
       
       
-        <span class='type'>(<tt>BasicObject</tt>)</span>
+        <span class='type'>(<tt>Array&lt;BasicObject&gt;</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'><p>The value to append.</p>
+        <div class='inline'><p>The values to append.</p>
 </div>
       
     </li>
@@ -1257,7 +1306,32 @@ This may update and freeze the original. Already-shareable values pass through u
 224
 225
 226
-227</pre>
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 19</span>
@@ -1310,13 +1384,20 @@ This may update and freeze the original. Already-shareable values pass through u
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>true</span>
 
   <span class='comment'># (see Farce::Abstract::Vector#[])
-</span>  <span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span><span class='rparen'>)</span>
+</span>  <span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_length'>length</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_index'>index</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Range</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_slice'>slice</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_length'>length</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># (see Farce::Abstract::Vector#[]=)
-</span>  <span class='kw'>def</span> <span class='op'>[]=</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
-    <span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_value'>value</span>
+</span>  <span class='kw'>def</span> <span class='op'>[]=</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_index'>index</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Range</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+      <span class='ivar'>@vector</span><span class='lbracket'>[</span><span class='id identifier rubyid_index'>index</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_value'>value</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_assign_vector_slice'>assign_vector_slice</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
   <span class='kw'>end</span>
 
   <span class='comment'># (see Farce::Abstract::Vector#get)
@@ -1331,13 +1412,21 @@ This may update and freeze the original. Already-shareable values pass through u
 
   <span class='comment'># (see Farce::Abstract::Vector#push)
 </span>  <span class='comment'># @param mode [Symbol, nil] The transfer mode, or nil to use the default.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
-    <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='kw'>self</span> <span class='op'>:</span> <span class='kw'>false</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_rest'>rest</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_rest'>rest</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+      <span class='id identifier rubyid_stored'>stored</span> <span class='op'>=</span> <span class='id identifier rubyid_mode'>mode</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_completed'>completed</span> <span class='op'>=</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_stored'>stored</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_stored'>stored</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
+      <span class='kw'>return</span> <span class='id identifier rubyid_completed'>completed</span> <span class='op'>?</span> <span class='kw'>self</span> <span class='op'>:</span> <span class='kw'>false</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_push_values'>push_values</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='id identifier rubyid_rest'>rest</span> <span class='op'>:</span> <span class='lbracket'>[</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_rest'>rest</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 
   <span class='comment'># (see Farce::Abstract::Vector#pop)
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span> <span class='op'>:</span> <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_count'>count</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pop_values'>pop_values</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='comment'># (see Farce::Abstract::Vector#swap)
 </span>  <span class='comment'># @!macro modes
@@ -1429,7 +1518,9 @@ This may update and freeze the original. Already-shareable values pass through u
 
   <span class='id identifier rubyid_protected'>protected</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_logical_value'>logical_value</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_logical_value'>logical_value</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>              <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_deletion_comparison'>deletion_comparison</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>        <span class='op'>=</span> <span class='id identifier rubyid_wrap_comparison'>wrap_comparison</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_deletion_match?'>deletion_match?</span><span class='lparen'>(</span><span class='id identifier rubyid_stored'>stored</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_values_equal?'>values_equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_stored'>stored</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_build_derived_vector'>build_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_values'>values</span><span class='rparen'>)</span>
     <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_allocate'>allocate</span><span class='period'>.</span><span class='id identifier rubyid_initialize_derived_vector'>initialize_derived_vector</span><span class='lparen'>(</span><span class='id identifier rubyid_values'>values</span><span class='comma'>,</span> <span class='ivar'>@manager</span><span class='comma'>,</span> <span class='ivar'>@compare_by_identity</span><span class='rparen'>)</span>
@@ -1452,11 +1543,19 @@ This may update and freeze the original. Already-shareable values pass through u
 
   <span class='id identifier rubyid_private'>private</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='ivar'>@manager</span><span class='rparen'>)</span>
-  <span class='kw'>def</span> <span class='id identifier rubyid_derived_storage'>derived_storage</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>          <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
-  <span class='kw'>def</span> <span class='id identifier rubyid_freeze_backend'>freeze_backend</span>                  <span class='op'>=</span> <span class='ivar'>@vector</span>
-  <span class='kw'>def</span> <span class='id identifier rubyid_wrap_comparison'>wrap_comparison</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>          <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>?</span> <span class='symbol'>:local</span> <span class='op'>:</span> <span class='symbol'>:copy</span><span class='rparen'>)</span>
-  <span class='kw'>def</span> <span class='id identifier rubyid_values_equal?'>values_equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_left'>left</span><span class='comma'>,</span> <span class='id identifier rubyid_right'>right</span><span class='rparen'>)</span>      <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_same_value?'>same_value?</span><span class='lparen'>(</span><span class='id identifier rubyid_left'>left</span><span class='comma'>,</span> <span class='id identifier rubyid_right'>right</span><span class='comma'>,</span> <span class='label'>identity:</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_inspect_value'>inspect_value</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>        <span class='op'>=</span> <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_inspector'>inspector</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='ivar'>@manager</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_derived_storage'>derived_storage</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>                 <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_prepare_vector_value'>prepare_vector_value</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span>
+
+  <span class='comment'># Expanded descendants have no independent envelope to reuse. Copy them rather than
+</span>  <span class='comment'># moving them out of a retained parent Array or another sequence&#39;s storage.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_prepare_sequence_value'>prepare_sequence_value</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:move</span> <span class='op'>?</span> <span class='symbol'>:copy</span> <span class='op'>:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_freeze_backend'>freeze_backend</span>             <span class='op'>=</span> <span class='ivar'>@vector</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_wrap_comparison'>wrap_comparison</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>     <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>?</span> <span class='symbol'>:local</span> <span class='op'>:</span> <span class='symbol'>:copy</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_values_equal?'>values_equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_left'>left</span><span class='comma'>,</span> <span class='id identifier rubyid_right'>right</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_same_value?'>same_value?</span><span class='lparen'>(</span><span class='id identifier rubyid_left'>left</span><span class='comma'>,</span> <span class='id identifier rubyid_right'>right</span><span class='comma'>,</span> <span class='label'>identity:</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span><span class='rparen'>)</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_timeout_deadline'>timeout_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
     <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
@@ -1618,27 +1717,27 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-150
-151
-152
-153
-154
-155
-156
-157
-158
-159
-160
-161
-162
-163
-164
 165
 166
-167</pre>
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 150</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 165</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -1794,10 +1893,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-77</pre>
+84</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 77</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 84</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -1861,7 +1960,7 @@ This may update and freeze the original. Already-shareable values pass through u
       <div class="method_details ">
   <h3 class="signature " id="pop-instance_method">
   
-    #<strong>pop</strong>(timeout: nil)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+    #<strong>pop</strong>(count = UNDEFINED, timeout: nil)  &#x21d2; <tt>BasicObject</tt>, ... 
   
 
   
@@ -1869,7 +1968,7 @@ This may update and freeze the original. Already-shareable values pass through u
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Remove and return the last value.
+    <p>Remove and return the last value, or a Vector of the last count values, atomically.
 This does not wait for an empty vector to become nonempty.</p>
 
 
@@ -1878,6 +1977,23 @@ This does not wait for an empty vector to become nonempty.</p>
 <div class="tags">
   <p class="tag_title">Parameters:</p>
 <ul class="param">
+  
+    <li>
+      
+        <span class='name'>count</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>UNDEFINED</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum number of values. Omit to return one value.</p>
+</div>
+      
+    </li>
   
     <li>
       
@@ -1904,12 +2020,12 @@ This does not wait for an empty vector to become nonempty.</p>
     <li>
       
       
-        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+        <span class='type'>(<tt>BasicObject</tt>, <tt><span class='object_link'><a href="" title="Farce::Vector (class)">Vector</a></span></tt>, <tt>nil</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'><p>The last value, or nil if empty or timed out.</p>
+        <div class='inline'><p>Removed values, or nil if empty without a count or timed out.</p>
 </div>
       
     </li>
@@ -1922,12 +2038,18 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-94</pre>
+106
+107
+108
+109</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 94</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 106</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
+<span class='kw'>def</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span> <span class='op'>:</span> <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_count'>count</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_pop_values'>pop_values</span><span class='lparen'>(</span><span class='id identifier rubyid_count'>count</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -1936,7 +2058,7 @@ This does not wait for an empty vector to become nonempty.</p>
       <div class="method_details ">
   <h3 class="signature " id="push-instance_method">
   
-    #<strong>push</strong>(value, mode: nil, timeout: nil)  &#x21d2; <tt>self</tt>, <tt>false</tt> 
+    #<strong>push</strong>(value = UNDEFINED, *rest, mode: nil, timeout: nil)  &#x21d2; <tt>self</tt>, <tt>false</tt> 
   
 
   
@@ -1944,7 +2066,7 @@ This does not wait for an empty vector to become nonempty.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Append a single value.</p>
+    <p>Append values atomically. Calls with one value use the scalar backend path.</p>
 
 
   </div>
@@ -1961,9 +2083,26 @@ This does not wait for an empty vector to become nonempty.</p>
         <span class='type'>(<tt>BasicObject</tt>)</span>
       
       
+        <em class="default">(defaults to: <tt>UNDEFINED</tt>)</em>
+      
       
         &mdash;
-        <div class='inline'><p>The value to append.</p>
+        <div class='inline'><p>The first value. Omit to leave contents unchanged.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>rest</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;BasicObject&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Additional values to append.</p>
 </div>
       
     </li>
@@ -2028,17 +2167,27 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-88
-89
-90
-91</pre>
+95
+96
+97
+98
+99
+100
+101
+102
+103</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 88</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 95</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
-  <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='kw'>self</span> <span class='op'>:</span> <span class='kw'>false</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='const'>UNDEFINED</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_rest'>rest</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_rest'>rest</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+    <span class='id identifier rubyid_stored'>stored</span> <span class='op'>=</span> <span class='id identifier rubyid_mode'>mode</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_completed'>completed</span> <span class='op'>=</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_stored'>stored</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_stored'>stored</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_completed'>completed</span> <span class='op'>?</span> <span class='kw'>self</span> <span class='op'>:</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_push_values'>push_values</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='const'>UNDEFINED</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='id identifier rubyid_rest'>rest</span> <span class='op'>:</span> <span class='lbracket'>[</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_rest'>rest</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -2208,13 +2357,13 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-81
-82
-83
-84</pre>
+88
+89
+90
+91</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 81</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 88</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -2354,18 +2503,18 @@ This does not wait for an empty vector to become nonempty.</p>
       <pre class="lines">
 
 
-106
-107
-108
-109
-110
-111
-112
-113
-114</pre>
+121
+122
+123
+124
+125
+126
+127
+128
+129</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 106</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 121</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -2507,13 +2656,13 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-99
-100
-101
-102</pre>
+114
+115
+116
+117</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 99</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 114</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_swap'>swap</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -2688,18 +2837,18 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-119
-120
-121
-122
-123
-124
-125
-126
-127</pre>
+134
+135
+136
+137
+138
+139
+140
+141
+142</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 119</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 134</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -2894,23 +3043,23 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
-145</pre>
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 132</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 147</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_initial'>initial</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -3024,19 +3173,19 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-170
-171
-172
-173
-174
-175
-176
-177
-178
-179</pre>
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 170</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 185</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_timeout_deadline'>timeout_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
@@ -3131,10 +3280,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-182</pre>
+197</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 182</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/vector.rb', line 197</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='ivar'>@vector</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span><span class='rparen'>)</span></pre>
     </td>
@@ -3147,7 +3296,7 @@ This may update and freeze the original. Already-shareable values pass through u
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 11:46:39 2026 by
+  Generated on Sun Oct 11 12:32:45 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
