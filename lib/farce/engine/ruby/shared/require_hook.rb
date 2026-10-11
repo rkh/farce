@@ -2,7 +2,8 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
-# Ruby 4.0 prepends its Ractor-aware require to Kernel when Ractors activate.
+# Ruby 3.4.11 and 4.0 prepend a Ractor-aware require to Kernel on activation.
+# Detect that wrapper so versions that install it on Object need no relocation.
 # A later Kernel alias captures that wrapper and loses its super target.
 # Keep the original implementation above Object so aliases capture Kernel's
 # underlying require while secondary Ractors still use Ruby's loader service.
