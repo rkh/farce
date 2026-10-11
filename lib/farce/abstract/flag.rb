@@ -41,6 +41,14 @@ module Farce
     #   @return [Boolean] whether the replacement succeeded
     #   @raise [ArgumentError] if either argument is not true or false
     #
+    # @!method wait_until_changed(expected, timeout: nil)
+    #   Wait until the current value differs from the expected value.
+    #   @param expected [Boolean] the value to wait to change from
+    #   @param timeout [Numeric, nil] the total seconds available
+    #   @yield called when the timeout expires
+    #   @return [Boolean, BasicObject, nil] the changed value or timeout fallback
+    #   @raise [ArgumentError] if expected is not true or false
+    #
     # @!method toggle
     #   Atomically invert the value.
     #   @return [Boolean] the new value
@@ -50,6 +58,71 @@ module Farce
       include Value
       include Internal::ValueSerialization
       include Internal::Inspect
+
+      # Wait until the flag becomes true.
+      # @param timeout [Numeric, nil] the total seconds available
+      # @yield called when the timeout expires
+      # @return [Boolean, BasicObject, nil] the changed value or timeout fallback
+      def wait_until_set(timeout: nil, &) = wait_until_changed(false, timeout:, &)
+      alias wait_until_true  wait_until_set
+      alias wait_while_unset wait_until_set
+      alias wait_while_false wait_until_set
+
+      # Wait until the flag becomes false.
+      # @param timeout [Numeric, nil] the total seconds available
+      # @yield called when the timeout expires
+      # @return [Boolean, BasicObject, nil] the changed value or timeout fallback
+      def wait_until_unset(timeout: nil, &) = wait_until_changed(true, timeout:, &)
+      alias wait_until_false wait_until_unset
+      alias wait_while_set   wait_until_unset
+      alias wait_while_true  wait_until_unset
+
+      # Wait until a block condition matches the current value.
+      # One timeout budget covers all checks and waits. The block is not interrupted.
+      # @yieldparam value [Boolean] the current value
+      # @yieldreturn [Boolean] whether the value matches
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Boolean, nil] the matching value, or nil on timeout
+      # @raise [LocalJumpError] if no block is given
+      def wait_until(timeout: nil, &) = Internal.wait_until(self, timeout:, &)
+
+      # Wait while the block returns a truthy value.
+      # @yieldparam value [Boolean] the current value
+      # @yieldreturn [BasicObject] a truthy value to keep waiting, or nil or false to stop
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Boolean, nil] the value when the condition becomes false, or nil on timeout
+      # @raise [LocalJumpError] if no block is given
+      def wait_while(timeout: nil)
+        raise LocalJumpError, "no block given" unless block_given?
+        wait_until(timeout:) { |value| !yield(value) }
+      end
+
+      # Wait while `object === value` is true.
+      # @param object [#===] the pattern to stop matching
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Boolean, nil] the first nonmatching value, or nil on timeout
+      def wait_while_match(object, timeout: nil)
+        wait_while(timeout:) { |value| object === value } # rubocop:disable Style/CaseEquality
+      end
+
+      # (see #wait_until_changed)
+      def wait_while_value(...) = wait_until_changed(...)
+
+      # Wait until `object == value` is true.
+      # @param object [BasicObject] the value to compare with the current value
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Boolean, nil] the matching value, or nil on timeout
+      def wait_until_value(object, timeout: nil)
+        wait_until(timeout:) { |value| object == value }
+      end
+
+      # Wait until `object === value` is true.
+      # @param object [#===] the pattern to match
+      # @param timeout [Numeric, nil] the total seconds available
+      # @return [Boolean, nil] the matching value, or nil on timeout
+      def wait_until_match(object, timeout: nil)
+        wait_until(timeout:) { |value| object === value } # rubocop:disable Style/CaseEquality
+      end
 
       # @api private
       def inspect_with(inspector)

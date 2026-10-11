@@ -28,7 +28,7 @@ module Farce
           :expired
         }
         assert_equal 1, calls
-        assert_equal 0, flag.change_signal.num_waiting
+        assert_equal 0, wait_signal(flag).num_waiting
       end
 
       def test_wait_until_changed_validates_arguments
@@ -55,13 +55,13 @@ module Farce
         operations.each do |initial, change|
           flag = flag_class.new(initial)
           waiters = 3.times.map { Thread.new { flag.wait_until_changed(initial, timeout: 5) } }
-          Timeout.timeout(5) { Thread.pass until flag.change_signal.num_waiting == waiters.size }
+          Timeout.timeout(5) { Thread.pass until wait_signal(flag).num_waiting == waiters.size }
           change.call(flag)
           waiters.each do |waiter|
             assert waiter.join(5), "flag change did not wake waiter"
             assert_equal !initial, waiter.value
           end
-          assert_equal 0, flag.change_signal.num_waiting
+          assert_equal 0, wait_signal(flag).num_waiting
         ensure
           waiters&.each { |waiter| waiter.kill.join }
         end
@@ -70,7 +70,7 @@ module Farce
       def test_wait_until_changed_does_not_return_for_unchanged_writes
         flag = flag_class.new
         writer = Thread.new do
-          Timeout.timeout(5) { Thread.pass until flag.change_signal.num_waiting == 1 }
+          Timeout.timeout(5) { Thread.pass until wait_signal(flag).num_waiting == 1 }
           flag.set if flag.compare_and_set(true, true)
           flag.store(false)
         end
@@ -84,7 +84,7 @@ module Farce
       def test_copies_have_independent_wait_signals
         flag = flag_class.new
         [flag.dup, flag.clone].each do |copy|
-          refute_same flag.change_signal, copy.change_signal
+          refute_same wait_signal(flag), wait_signal(copy)
           copy.set
 
           refute flag.value
@@ -96,7 +96,7 @@ module Farce
         return unless Internal.native_ractors?
         flag = flag_class.new
         worker = Ractor.new(flag) { |shared| shared.wait_until_changed(false, timeout: 5) }
-        Timeout.timeout(5) { Thread.pass until flag.change_signal.num_waiting == 1 }
+        Timeout.timeout(5) { Thread.pass until wait_signal(flag).num_waiting == 1 }
         flag.set
 
         assert ractor_value(worker)
@@ -112,7 +112,7 @@ module Farce
         Fiber.set_scheduler(scheduler)
         Fiber.schedule { events << flag.wait_until_changed(false, timeout: 5) }
         Fiber.schedule do
-          events << flag.change_signal.num_waiting
+          events << wait_signal(flag).num_waiting
           flag.set
         end
         Fiber.set_scheduler(nil)
@@ -122,7 +122,10 @@ module Farce
         Fiber.set_scheduler(nil) if Fiber.respond_to?(:set_scheduler)
       end
 
-      private def flag_class = Flag
+      private
+
+      def flag_class = Flag
+      def wait_signal(flag) = flag.send(:change_signal)
     end
   end
 

@@ -35,6 +35,9 @@ module Farce
       # @return [Boolean] the new value
       def store(value) = scoped_value.store(value)
 
+      # (see Abstract::Flag#wait_until_changed)
+      def wait_until_changed(...) = scoped_value.wait_until_changed(...)
+
       alias value= store
 
       # Replace the value and return its previous state.
@@ -60,6 +63,7 @@ module Farce
       end
 
       def new_scoped_value(...) = Internal::Flag.new(...)
+      def change_signal         = scoped_value.change_signal
     end
   end
 end

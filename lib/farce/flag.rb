@@ -23,5 +23,7 @@ module Farce
   class Flag < Internal::Flag
     include Abstract::Flag
     include Shareable::Native
+
+    private :change_signal
   end
 end
