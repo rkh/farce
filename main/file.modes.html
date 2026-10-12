@@ -46,7 +46,6 @@
 </nav>
 <!-- farce-versions:end -->
 
-
       <div id="header">
         <div id="menu">
   
@@ -539,7 +538,12 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <td>Task arguments, with automatic local transfer enabled by default.</td>
 </tr>
 <tr>
-<td><code>Farce::ThreadScheduler</code></td>
+<td><code>Farce::Unshared::Scheduler</code>, <code>Farce::Local::Scheduler</code></td>
+<td><code>schedule</code>, <code>execute</code></td>
+<td>Always local. With <code>auto_local: false</code>, only <code>:local</code> and smart modes are accepted.</td>
+</tr>
+<tr>
+<td><code>Farce::ThreadExecutor</code></td>
 <td><code>schedule</code>, <code>execute</code></td>
 <td>Accepts scheduler options but always keeps arguments local.</td>
 </tr>
@@ -547,6 +551,11 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <td><code>Farce::Pool</code></td>
 <td><code>schedule</code></td>
 <td>Task arguments. <code>:local</code> is rejected.</td>
+</tr>
+<tr>
+<td><code>Farce::Unshared::Pool</code>, <code>Farce::Local::Pool</code></td>
+<td><code>schedule</code>, <code>execute</code></td>
+<td>Always local. With <code>auto_local: false</code>, only <code>:local</code> and smart modes are accepted.</td>
 </tr>
 </tbody>
 </table>
@@ -654,7 +663,7 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 <p>For containers that retain values, <code>:copy</code> gives each Ractor its own copy of a stored envelope's contents. Repeated reads in the same Ractor reuse that copy. Mutating it does not publish an update to other Ractors. Prefer explicit replacement operations for shared state. Similarly, <code>:move</code> is usually better suited to a handoff than to a value many Ractors need to read.</p>
 <h3 id="pass-task-data-as-arguments">Pass task data as arguments<a href="#pass-task-data-as-arguments" aria-label="Link to heading 'Pass task data as arguments'" data-heading-content="Pass task data as arguments" class="anchor"></a></h3>
 <p><code>Scheduler#schedule</code> and <code>Pool#schedule</code> accept <code>mode:</code> for task arguments. Pass mutable data as arguments instead of capturing it from the surrounding scope. A non-local task's block must be convertible to a shareable proc.</p>
-<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_pool'>pool</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Pool.html" title="Farce::Pool (class)">Pool</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Pool.html#initialize-instance_method" title="Farce::Pool#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>max_size:</span> <span class='int'>2</span><span class='rparen'>)</span>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_pool'>pool</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Pool.html" title="Farce::Pool (class)">Pool</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>max_size:</span> <span class='int'>2</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_results'>results</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Port.html" title="Farce::Port (class)">Port</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:raise</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_batch'>batch</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='int'>2</span><span class='comma'>,</span> <span class='int'>4</span><span class='comma'>,</span> <span class='int'>6</span><span class='rbracket'>]</span>
 
@@ -666,7 +675,7 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 </span><span class='id identifier rubyid_pool'>pool</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
 <span class='id identifier rubyid_results'>results</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
 </code></pre>
-<p>A scheduler defaults to <code>auto_local: true</code>, preserving the block and its arguments when scheduling from its owning Ractor. Set <code>auto_local: false</code> to enforce the requested mode there. A pool may choose another Ractor for any task, so it rejects <code>:local</code> and does not apply automatic local transfer.</p>
+<p>A scheduler defaults to <code>auto_local: true</code>, preserving the block and its arguments when scheduling from its owning Ractor. Set <code>auto_local: false</code> to enforce the requested mode there. <code>Farce::Pool</code> may choose another Ractor for any task, so it rejects <code>:local</code> and does not apply automatic local transfer. If you want a Pool with <code>local</code> support, use <code>Farce::Unshared::Pool</code> or <code>Farce::Local::Pool</code> instead.</p>
 <h2 id="under-the-hood">Under the hood<a href="#under-the-hood" aria-label="Link to heading 'Under the hood'" data-heading-content="Under the hood" class="anchor"></a></h2>
 <h3 id="envelopes-separate-transport-from-access">Envelopes separate transport from access<a href="#envelopes-separate-transport-from-access" aria-label="Link to heading 'Envelopes separate transport from access'" data-heading-content="Envelopes separate transport from access" class="anchor"></a></h3>
 <p>A <code>Farce::Envelope</code> is a shareable wrapper around a value. Passing the envelope around does not require opening it. Calling <code>value</code> opens it and retrieves the payload according to the envelope's ownership rules.</p>
@@ -798,7 +807,7 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 </div></div>
 
       <div id="footer">
-  Generated on Sun Oct 11 21:37:45 2026 by
+  Generated on Mon Oct 12 13:14:45 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

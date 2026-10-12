@@ -46,7 +46,6 @@
 </nav>
 <!-- farce-versions:end -->
 
-
       <div id="header">
         <div id="menu">
   
@@ -95,7 +94,7 @@
   
   <dl>
     <dt>Included in:</dt>
-    <dd><span class='object_link'><a href="Lazy.html" title="Farce::Local::Lazy (class)">Lazy</a></span>, <span class='object_link'><a href="Lease.html" title="Farce::Local::Lease (class)">Lease</a></span>, <span class='object_link'><a href="LeaseMap.html" title="Farce::Local::LeaseMap (class)">LeaseMap</a></span>, <span class='object_link'><a href="LeasePool.html" title="Farce::Local::LeasePool (class)">LeasePool</a></span>, <span class='object_link'><a href="PriorityQueue.html" title="Farce::Local::PriorityQueue (class)">PriorityQueue</a></span>, <span class='object_link'><a href="Queue.html" title="Farce::Local::Queue (class)">Queue</a></span>, <span class='object_link'><a href="TimerQueue.html" title="Farce::Local::TimerQueue (class)">TimerQueue</a></span></dd>
+    <dd><span class='object_link'><a href="Lazy.html" title="Farce::Local::Lazy (class)">Lazy</a></span>, <span class='object_link'><a href="Lease.html" title="Farce::Local::Lease (class)">Lease</a></span>, <span class='object_link'><a href="LeaseMap.html" title="Farce::Local::LeaseMap (class)">LeaseMap</a></span>, <span class='object_link'><a href="LeasePool.html" title="Farce::Local::LeasePool (class)">LeasePool</a></span>, <span class='object_link'><a href="Pool.html" title="Farce::Local::Pool (class)">Pool</a></span>, <span class='object_link'><a href="PriorityQueue.html" title="Farce::Local::PriorityQueue (class)">PriorityQueue</a></span>, <span class='object_link'><a href="Queue.html" title="Farce::Local::Queue (class)">Queue</a></span>, <span class='object_link'><a href="Scheduler.html" title="Farce::Local::Scheduler (class)">Scheduler</a></span>, <span class='object_link'><a href="TimerQueue.html" title="Farce::Local::TimerQueue (class)">TimerQueue</a></span></dd>
   </dl>
   
 
@@ -296,7 +295,7 @@ Valid scopes are:</p>
 <li><code>:thread</code> - The value is shared by all fibers within the same thread.</li>
 <li><code>:fiber_storage</code> - The value is shared by all fibers using the same storage.
 Unless explicitly specified, storage is inherited from the parent fiber for blocking fibers,
-but not for non-blocking fibers (such as those created by <span class='object_link'><a href="../Scheduler.html#schedule-instance_method" title="Farce::Scheduler#schedule (method)">Scheduler#schedule</a></span>).</li>
+but not for non-blocking fibers (such as those created by <span class='object_link'><a href="Scheduler.html#schedule-instance_method" title="Farce::Local::Scheduler#schedule (method)">Farce::Local::Scheduler#schedule</a></span>).</li>
 <li><code>:fiber</code> - Each fiber has its own independent value.</li>
 </ul>
 
@@ -383,7 +382,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 11 21:37:46 2026 by
+  Generated on Mon Oct 12 13:14:46 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

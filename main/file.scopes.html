@@ -46,7 +46,6 @@
 </nav>
 <!-- farce-versions:end -->
 
-
       <div id="header">
         <div id="menu">
   
@@ -307,7 +306,7 @@
 </span></code></pre>
 <p>Pass the needed data as task arguments when crossing an execution boundary. Use <code>:fiber</code> when each task fiber should get its own state regardless of inherited storage.</p>
 <h2 id="classes-that-support-scopes">Classes that support scopes<a href="#classes-that-support-scopes" aria-label="Link to heading 'Classes that support scopes'" data-heading-content="Classes that support scopes" class="anchor"></a></h2>
-<p>These classes accept the same five scopes. The scope determines which backing container or resource an operation uses. Each class retains its own behavior, such as queue ordering or weak references.</p>
+<p>The classes in this table accept the same five scopes. The scope determines which backing container or resource an operation uses. Each class retains its own behavior, such as queue ordering or weak references.</p>
 <table>
 <thead>
 <tr>
@@ -411,6 +410,14 @@
 <tr>
 <td><code>Farce::Local::LeasePool</code></td>
 <td>A pool with its own resources and capacity.</td>
+</tr>
+<tr>
+<td><code>Farce::Local::Scheduler</code></td>
+<td>A task scheduler with its own worker and lifecycle.</td>
+</tr>
+<tr>
+<td><code>Farce::Local::Pool</code></td>
+<td>An elastic pool of thread workers with independent scaling and lifecycle.</td>
 </tr>
 </tbody>
 </table>
@@ -582,7 +589,7 @@
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_context'>context</span>              <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Local.html" title="Farce::Local (module)">Local</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Local/Map.html" title="Farce::Local::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Local/Map.html#initialize-instance_method" title="Farce::Local::Map#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>scope:</span> <span class='symbol'>:fiber</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_context'>context</span><span class='lbracket'>[</span><span class='symbol'>:request_id</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='symbol'>:caller</span>
 <span class='id identifier rubyid_results'>results</span>              <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Port.html" title="Farce::Port (class)">Port</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
-<span class='id identifier rubyid_scheduler'>scheduler</span>            <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Scheduler.html" title="Farce::Scheduler (class)">Scheduler</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Scheduler.html#initialize-instance_method" title="Farce::Scheduler#initialize (method)">new</a></span></span>
+<span class='id identifier rubyid_scheduler'>scheduler</span>            <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Scheduler.html" title="Farce::Scheduler (class)">Scheduler</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span>
 <span class='id identifier rubyid_worker'>worker</span>               <span class='op'>=</span> <span class='id identifier rubyid_scheduler'>scheduler</span><span class='period'>.</span><span class='id identifier rubyid_launch_thread'>launch_thread</span>
 
 <span class='lbracket'>[</span><span class='symbol'>:upload</span><span class='comma'>,</span> <span class='symbol'>:download</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_request_id'>request_id</span><span class='op'>|</span>
@@ -731,7 +738,7 @@
 </div></div>
 
       <div id="footer">
-  Generated on Sun Oct 11 21:37:45 2026 by
+  Generated on Mon Oct 12 13:14:45 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

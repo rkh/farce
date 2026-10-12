@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: Farce::Local::Scheduler
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="../../css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "Farce::Local::Scheduler";
+  relpath = '../../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="../../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../index.html" selected>main</option>
+<option value="../../../version/v0.2.0/index.html">v0.2.0</option>
+<option value="../../../version/v0.1.0/index.html">v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../../_index.html">Index (S)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Local.html" title="Farce::Local (module)">Local</a></span></span>
+     &raquo; 
+    <span class="title">Scheduler</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: Farce::Local::Scheduler
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName"><span class='object_link'><a href="../Abstract/Scheduler.html" title="Farce::Abstract::Scheduler (class)">Abstract::Scheduler</a></span></span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next"><span class='object_link'><a href="../Abstract/Executor.html" title="Farce::Abstract::Executor (class)">Abstract::Executor</a></span></li>
+          
+            <li class="next"><span class='object_link'><a href="../Abstract/Scheduler.html" title="Farce::Abstract::Scheduler (class)">Abstract::Scheduler</a></span></li>
+          
+            <li class="next">Farce::Local::Scheduler</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  <dl>
+      <dt>Includes:</dt>
+      <dd><span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span>, <span class='object_link'><a href="../Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Shareable::Unfreezable</a></span>, Internal::LocalExecutorMethods</dd>
+  </dl>
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/farce/local/scheduler.rb
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>A shareable handle with an independent task scheduler in each scope.</p>
+<p>new leaves each scheduler unstarted. Launch it with <span class='object_link'><a href="../Abstract/Scheduler.html#launch_thread-instance_method" title="Farce::Abstract::Scheduler#launch_thread (method)">Abstract::Scheduler#launch_thread</a></span>, or
+install it with <code>Fiber.set_scheduler</code>. <span class='object_link'><a href="#create-class_method" title="Farce::Local::Scheduler.create (method)">Scheduler.create</a></span> starts a worker thread in
+each scope when that scope is first used. The default scope is <code>:ractor</code>.</p>
+<p>Tasks retain their blocks and argument references. <span class='object_link'><a href="../Abstract/Executor.html#execute-instance_method" title="Farce::Abstract::Executor#execute (method)">Abstract::Executor#execute</a></span> runs directly
+in the calling fiber. A fiber scheduler
+constructor must be convertible to a shareable proc for use in each Ractor.
+<span class='object_link'><a href="#close-instance_method" title="Farce::Local::Scheduler#close (method)">#close</a></span> closes the current scope. <span class='object_link'><a href="#close_all-instance_method" title="Farce::Local::Scheduler#close_all (method)">#close_all</a></span> closes all scopes and prevents
+new schedulers from starting. <span class='object_link'><a href="#current-class_method" title="Farce::Local::Scheduler.current (method)">Scheduler.current</a></span> returns an <span class='object_link'><a href="../Unshared/Scheduler.html" title="Farce::Unshared::Scheduler (class)">Unshared::Scheduler</a></span>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Start one worker in each Ractor</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_scheduler'>scheduler</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Local.html" title="Farce::Local (module)">Local</a></span></span><span class='op'>::</span><span class='const'>Scheduler</span><span class='period'>.</span><span class='id identifier rubyid_create'><span class='object_link'><a href="#create-class_method" title="Farce::Local::Scheduler.create (method)">create</a></span></span>
+<span class='id identifier rubyid_results'>results</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Unshared.html" title="Farce::Unshared (module)">Unshared</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Unshared/Queue.html" title="Farce::Unshared::Queue (class)">Queue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Unshared/Queue.html#initialize-instance_method" title="Farce::Unshared::Queue#initialize (method)">new</a></span></span>
+<span class='id identifier rubyid_scheduler'>scheduler</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_results'>results</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='symbol'>:done</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_results'>results</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span> <span class='comment'># =&gt; :done
+</span><span class='id identifier rubyid_scheduler'>scheduler</span><span class='period'>.</span><span class='id identifier rubyid_close_all'>close_all</span></code></pre>
+    
+  </div>
+
+
+</div>
+
+
+
+
+
+  <h2>Instance Attribute Summary</h2>
+  
+  <h3 class="inherited">Attributes included from <span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Scoped.html#scope-instance_method" title="Farce::Local::Scoped#scope (method)">#scope</a></span></p>
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#create-class_method" title="create (class method)">.<strong>create</strong>(executor = Thread, name: nil, priority: nil)  &#x21d2; Scheduler </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Starts a worker in this scope and retains the launch settings for other scopes.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#current-class_method" title="current (class method)">.<strong>current</strong>  &#x21d2; Unshared::Scheduler<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the current thread's unshared scheduler, or nil when none is installed.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#alive%3F-instance_method" title="#alive? (instance method)">#<strong>alive?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether the current scope is dispatching tasks.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#close-instance_method" title="#close (instance method)">#<strong>close</strong>  &#x21d2; self </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Closes the current scope and rejects new submissions there.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#close_all-instance_method" title="#close_all (instance method)">#<strong>close_all</strong>  &#x21d2; self </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Requests shutdown in every scope and Ractor and rejects future scopes.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#closed%3F-instance_method" title="#closed? (instance method)">#<strong>closed?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether the current scope rejects new tasks.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#error-instance_method" title="#error (instance method)">#<strong>error</strong>  &#x21d2; Exception<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The current scope's scheduler error.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#external_scheduler-instance_method" title="#external_scheduler (instance method)">#<strong>external_scheduler</strong>  &#x21d2; Object<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The fiber scheduler in the current scope, when supplied by a constructor.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(capacity: 1024, backend: Farce.config.io_backend, scope: :ractor, &amp;constructor)  &#x21d2; Scheduler </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Creates a handle whose scoped schedulers remain unstarted.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#launch-instance_method" title="#launch (instance method)">#<strong>launch</strong>(executor = Thread, name: nil, priority: nil)  &#x21d2; Thread, Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Starts a worker for the current scope.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#owner-instance_method" title="#owner (instance method)">#<strong>owner</strong>  &#x21d2; Ractor </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The current scope's owning Ractor.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#owner=-instance_method" title="#owner= (instance method)">#<strong>owner=</strong>(value)  &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#schedule-instance_method" title="#schedule (instance method)">#<strong>schedule</strong>(mode: :smart, auto_local: true, &amp;block)  &#x21d2; self </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Enqueue a task in the current scope, preserving its block and arguments.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#state-instance_method" title="#state (instance method)">#<strong>state</strong>  &#x21d2; Symbol </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The current scope's scheduler state.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#wraps_external%3F-instance_method" title="#wraps_external? (instance method)">#<strong>wraps_external?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether a fiber scheduler constructor was supplied.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/Scheduler.html" title="Farce::Abstract::Scheduler (class)">Abstract::Scheduler</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/Scheduler.html#launch_ractor-instance_method" title="Farce::Abstract::Scheduler#launch_ractor (method)">#launch_ractor</a></span>, <span class='object_link'><a href="../Abstract/Scheduler.html#launch_thread-instance_method" title="Farce::Abstract::Scheduler#launch_thread (method)">#launch_thread</a></span>, <span class='object_link'><a href="../Abstract/Scheduler.html#local%3F-instance_method" title="Farce::Abstract::Scheduler#local? (method)">#local?</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/Executor.html" title="Farce::Abstract::Executor (class)">Abstract::Executor</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/Executor.html#execute-instance_method" title="Farce::Abstract::Executor#execute (method)">#execute</a></span>, <span class='object_link'><a href="../Abstract/Executor.html#local%3F-instance_method" title="Farce::Abstract::Executor#local? (method)">#local?</a></span>, <span class='object_link'><a href="../Abstract/Executor.html#ractor_shareable%3F-instance_method" title="Farce::Abstract::Executor#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Internal::Noncopyable</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Internal/Noncopyable.html#duplicable%3F-instance_method" title="Farce::Internal::Noncopyable#duplicable? (method)">#duplicable?</a></span></p>
+<div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    #<strong>initialize</strong>(capacity: 1024, backend: Farce.config.io_backend, scope: :ractor, &amp;constructor)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Local::Scheduler (class)">Scheduler</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Creates a handle whose scoped schedulers remain unstarted.
+The constructor block builds the fiber scheduler when a scope is launched or installed.
+Valid scopes are:</p>
+<ul>
+<li><code>:ractor</code> - The value is shared by all threads within the same Ractor.</li>
+<li><code>:thread_group</code> - The value is shared by all threads within the same thread group.</li>
+<li><code>:thread</code> - The value is shared by all fibers within the same thread.</li>
+<li><code>:fiber_storage</code> - The value is shared by all fibers using the same storage.
+Unless explicitly specified, storage is inherited from the parent fiber for blocking fibers,
+but not for non-blocking fibers (such as those created by <span class='object_link'><a href="#schedule-instance_method" title="Farce::Local::Scheduler#schedule (method)">#schedule</a></span>).</li>
+<li><code>:fiber</code> - Each fiber has its own independent value.</li>
+</ul>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>capacity</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>1024</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Pending-task capacity, or nil for an unbounded queue in each scope.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>backend</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>Farce.config.io_backend</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>IO backend for the built-in scheduler.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>scope</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>:ractor</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The scheduler scope. Defaults to :ractor.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Object</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Fiber scheduler to install in each scope.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 56</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>capacity:</span> <span class='int'>1024</span><span class='comma'>,</span> <span class='label'>backend:</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>FROZEN_CONFIG</span><span class='period'>.</span><span class='id identifier rubyid_io_backend'>io_backend</span><span class='comma'>,</span> <span class='label'>scope:</span> <span class='symbol'>:ractor</span><span class='comma'>,</span>
+               <span class='label'>worker:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_constructor'>constructor</span><span class='rparen'>)</span>
+  <span class='ivar'>@constructor</span>        <span class='op'>=</span> <span class='id identifier rubyid_prepare_constructor'>prepare_constructor</span><span class='lparen'>(</span><span class='id identifier rubyid_constructor'>constructor</span> <span class='op'>||</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>FROZEN_CONFIG</span><span class='period'>.</span><span class='id identifier rubyid_fiber_scheduler_constructor'>fiber_scheduler_constructor</span><span class='rparen'>)</span>
+  <span class='ivar'>@backend</span>            <span class='op'>=</span> <span class='id identifier rubyid_backend'>backend</span>
+  <span class='ivar'>@worker</span>             <span class='op'>=</span> <span class='id identifier rubyid_worker'>worker</span>
+  <span class='ivar'>@schedulers</span>         <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Strict.html" title="Farce::Strict (module)">Strict</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Strict/Map.html" title="Farce::Strict::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Strict/Map.html#initialize-instance_method" title="Farce::Strict::Map#initialize (method)">new</a></span></span>
+  <span class='ivar'>@closed_all</span>         <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Flag</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='kw'>false</span><span class='rparen'>)</span>
+  <span class='ivar'>@initialization_key</span> <span class='op'>=</span> <span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='ivar'>@registration_key</span>   <span class='op'>=</span> <span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>super</span><span class='lparen'>(</span><span class='label'>scope:</span><span class='comma'>,</span> <span class='label'>capacity:</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_capacity'>capacity</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='label'>backend:</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="create-class_method">
+  
+    .<strong>create</strong>(executor = Thread, name: nil, priority: nil)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Local::Scheduler (class)">Scheduler</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Starts a worker in this scope and retains the launch settings for other scopes.
+Additional options and the block are forwarded to <span class='object_link'><a href="#initialize-instance_method" title="Farce::Local::Scheduler#initialize (method)">#initialize</a></span>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>executor</span>
+      
+      
+        <span class='type'>(<tt>Class</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>Thread</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Thread or a custom executor that stays in each Ractor.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>name</span>
+      
+      
+        <span class='type'>(<tt>String</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Optional worker name.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>priority</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Optional worker thread priority.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Object</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Fiber scheduler to install in each worker.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="" title="Farce::Local::Scheduler (class)">Scheduler</a></span></tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>ArgumentError</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+42
+43
+44
+45
+46</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 42</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_create'>create</span><span class='lparen'>(</span><span class='id identifier rubyid_executor'>executor</span> <span class='op'>=</span> <span class='const'>Thread</span><span class='comma'>,</span> <span class='label'>name:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>priority:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Local schedulers cannot launch Ractor workers</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_executor'>executor</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_executor'>executor</span> <span class='op'>&lt;=</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span>
+  <span class='id identifier rubyid_worker'>worker</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='id identifier rubyid_executor'>executor</span> <span class='op'>||</span> <span class='const'>Thread</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span> <span class='op'>&amp;&amp;</span> <span class='op'>-</span><span class='const'>String</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='id identifier rubyid_priority'>priority</span> <span class='op'>&amp;&amp;</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_priority'>priority</span><span class='rparen'>)</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>**</span><span class='comma'>,</span> <span class='label'>worker:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="current-class_method">
+  
+    .<strong>current</strong>  &#x21d2; <tt><span class='object_link'><a href="../Unshared/Scheduler.html" title="Farce::Unshared::Scheduler (class)">Unshared::Scheduler</a></span></tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the current thread's unshared scheduler, or nil when none is installed.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="../Unshared/Scheduler.html" title="Farce::Unshared::Scheduler (class)">Unshared::Scheduler</a></span></tt>, <tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+33</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 33</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_current'>current</span><span class='lparen'>(</span><span class='op'>**</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Unshared.html" title="Farce::Unshared (module)">Unshared</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Unshared/Scheduler.html" title="Farce::Unshared::Scheduler (class)">Scheduler</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current'><span class='object_link'><a href="../Abstract/Scheduler.html#current-class_method" title="Farce::Abstract::Scheduler.current (method)">current</a></span></span><span class='lparen'>(</span><span class='op'>**</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="alive?-instance_method">
+  
+    #<strong>alive?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns Whether the current scope is dispatching tasks.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether the current scope is dispatching tasks.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+126</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 126</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_alive?'>alive?</span> <span class='op'>=</span> <span class='id identifier rubyid_current_scheduler'>current_scheduler</span><span class='op'>&amp;.</span><span class='id identifier rubyid_alive?'>alive?</span> <span class='op'>||</span> <span class='kw'>false</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="close-instance_method">
+  
+    #<strong>close</strong>  &#x21d2; <tt>self</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Closes the current scope and rejects new submissions there.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+97
+98
+99
+100</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 97</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_close'>close</span>
+  <span class='id identifier rubyid_current_scheduler'>current_scheduler</span><span class='op'>&amp;.</span><span class='id identifier rubyid_close'>close</span>
+  <span class='kw'>self</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="close_all-instance_method">
+  
+    #<strong>close_all</strong>  &#x21d2; <tt>self</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Requests shutdown in every scope and Ractor and rejects future scopes.
+Does not wait for queued or running tasks to finish.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 105</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_close_all'>close_all</span>
+  <span class='kw'>return</span> <span class='kw'>self</span> <span class='kw'>unless</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+  <span class='ivar'>@schedulers</span><span class='period'>.</span><span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_scheduler'>scheduler</span><span class='comma'>,</span> <span class='id identifier rubyid_queue'>queue</span><span class='op'>|</span>
+    <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='lbracket'>[</span><span class='id identifier rubyid_scheduler'>scheduler</span><span class='comma'>,</span> <span class='symbol'>:close</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span><span class='comma'>,</span> <span class='label'>clock:</span> <span class='int'>0</span><span class='rparen'>)</span>
+  <span class='kw'>rescue</span> <span class='const'><span class='object_link'><a href="../../Farce.html#ClosedQueueError-constant" title="Farce::ClosedQueueError (constant)">ClosedQueueError</a></span></span>
+    <span class='comment'># The owning Ractor may already have shut down its supervisor.
+</span>    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_close'>close</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="closed?-instance_method">
+  
+    #<strong>closed?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns Whether the current scope rejects new tasks.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether the current scope rejects new tasks.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+123</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 123</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>=</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>||</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_closed?'>closed?</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="error-instance_method">
+  
+    #<strong>error</strong>  &#x21d2; <tt>Exception</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns The current scope's scheduler error.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Exception</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The current scope's scheduler error.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+120</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 120</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_error'>error</span> <span class='op'>=</span> <span class='id identifier rubyid_current_scheduler'>current_scheduler</span><span class='op'>&amp;.</span><span class='id identifier rubyid_error'>error</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="external_scheduler-instance_method">
+  
+    #<strong>external_scheduler</strong>  &#x21d2; <tt>Object</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns The fiber scheduler in the current scope, when supplied by a constructor.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Object</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The fiber scheduler in the current scope, when supplied by a constructor.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+141</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 141</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_external_scheduler'>external_scheduler</span> <span class='op'>=</span> <span class='id identifier rubyid_current_scheduler'>current_scheduler</span><span class='op'>&amp;.</span><span class='id identifier rubyid_external_scheduler'>external_scheduler</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="launch-instance_method">
+  
+    #<strong>launch</strong>(executor = Thread, name: nil, priority: nil)  &#x21d2; <tt>Thread</tt>, <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Starts a worker for the current scope. Other scopes retain their creation behavior.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>executor</span>
+      
+      
+        <span class='type'>(<tt>Class</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>Thread</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Thread or a custom executor that stays in this Ractor.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>name</span>
+      
+      
+        <span class='type'>(<tt>String</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Optional worker name.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>priority</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Optional worker thread priority.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Thread</tt>, <tt>Object</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The worker.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>ArgumentError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>If a Ractor executor is supplied.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+89
+90
+91
+92
+93</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 89</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_launch'>launch</span><span class='lparen'>(</span><span class='id identifier rubyid_executor'>executor</span> <span class='op'>=</span> <span class='const'>Thread</span><span class='comma'>,</span> <span class='label'>name:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>priority:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Local schedulers cannot launch Ractor workers</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_executor'>executor</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_executor'>executor</span> <span class='op'>&lt;=</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Scheduler may not be reused</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
+  <span class='id identifier rubyid_active_scoped_value'>active_scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_launch'>launch</span><span class='lparen'>(</span><span class='id identifier rubyid_executor'>executor</span><span class='comma'>,</span> <span class='label'>name:</span><span class='comma'>,</span> <span class='label'>priority:</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="owner-instance_method">
+  
+    #<strong>owner</strong>  &#x21d2; <tt><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns The current scope's owning Ractor.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The current scope's owning Ractor.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+129</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 129</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_owner'>owner</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current'><span class='object_link'><a href="../Ractor.html#current-class_method" title="Farce::Ractor.current (method)">current</a></span></span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="owner=-instance_method">
+  
+    #<strong>owner=</strong>(value)  &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The current Ractor.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>ArgumentError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>If another owner is supplied.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+133
+134
+135</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 133</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_owner='>owner=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>owner must be the current Ractor</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current'><span class='object_link'><a href="../Ractor.html#current-class_method" title="Farce::Ractor.current (method)">current</a></span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="schedule-instance_method">
+  
+    #<strong>schedule</strong>(mode: :smart, auto_local: true, &amp;block)  &#x21d2; <tt>self</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Enqueue a task in the current scope, preserving its block and arguments.
+<code>mode</code> is ignored when <code>auto_local</code> is true. Otherwise, only local and smart modes are accepted.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>args</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;Object&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Positional arguments passed to the task block.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>mode</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>:smart</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Argument transfer mode from <span class='object_link'><a href="../../Farce.html#MODES-constant" title="Farce::MODES (constant)">MODES</a></span>, including <code>:copy</code>, <code>:marshal</code>, and <code>:local</code>.
+See <span class='object_link'><a href="../ModeManager.html#wrap-instance_method" title="Farce::ModeManager#wrap (method)">ModeManager#wrap</a></span>.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>auto_local</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>true</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether to override mode with <code>:local</code> in the owning Ractor.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 72</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot schedule task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
+  <span class='id identifier rubyid_scheduler'>scheduler</span> <span class='op'>=</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot schedule task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_scheduler'>scheduler</span><span class='period'>.</span><span class='id identifier rubyid_closed?'>closed?</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Cannot schedule without a block</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block'>block</span>
+  <span class='id identifier rubyid_validate_local_mode'>validate_local_mode</span><span class='lparen'>(</span><span class='id identifier rubyid_mode'>mode</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_local'>auto_local</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_register_scheduler'>register_scheduler</span><span class='lparen'>(</span><span class='id identifier rubyid_scheduler'>scheduler</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_scheduler'>scheduler</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
+  <span class='kw'>self</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="state-instance_method">
+  
+    #<strong>state</strong>  &#x21d2; <tt>Symbol</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns The current scope's scheduler state.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The current scope's scheduler state.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+117</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 117</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_state'>state</span> <span class='op'>=</span> <span class='id identifier rubyid_current_scheduler'>current_scheduler</span><span class='op'>&amp;.</span><span class='id identifier rubyid_state'>state</span> <span class='op'>||</span> <span class='symbol'>:closed</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="wraps_external?-instance_method">
+  
+    #<strong>wraps_external?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns Whether a fiber scheduler constructor was supplied.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether a fiber scheduler constructor was supplied.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+138</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/scheduler.rb', line 138</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_wraps_external?'>wraps_external?</span> <span class='op'>=</span> <span class='op'>!</span><span class='ivar'>@constructor</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Mon Oct 12 13:14:54 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>
