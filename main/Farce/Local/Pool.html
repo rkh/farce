@@ -298,29 +298,6 @@ across all scopes and Ractors, and prevents new pools from starting.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#schedule-instance_method" title="#schedule (instance method)">#<strong>schedule</strong> {|*args| ... } &#x21d2; Pool </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'><p>Enqueue a task for any worker in the pool.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#size-instance_method" title="#size (instance method)">#<strong>size</strong>  &#x21d2; Integer </a>
     
 
@@ -407,7 +384,7 @@ across all scopes and Ractors, and prevents new pools from starting.</p>
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/Pool.html" title="Farce::Abstract::Pool (class)">Abstract::Pool</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="../Abstract/Pool.html#at_max_size%3F-instance_method" title="Farce::Abstract::Pool#at_max_size? (method)">#at_max_size?</a></span>, <span class='object_link'><a href="../Abstract/Pool.html#closing%3F-instance_method" title="Farce::Abstract::Pool#closing? (method)">#closing?</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/Pool.html#at_max_size%3F-instance_method" title="Farce::Abstract::Pool#at_max_size? (method)">#at_max_size?</a></span>, <span class='object_link'><a href="../Abstract/Pool.html#closing%3F-instance_method" title="Farce::Abstract::Pool#closing? (method)">#closing?</a></span>, <span class='object_link'><a href="../Abstract/Pool.html#schedule-instance_method" title="Farce::Abstract::Pool#schedule (method)">#schedule</a></span>, <span class='object_link'><a href="../Abstract/Pool.html#try_schedule-instance_method" title="Farce::Abstract::Pool#try_schedule (method)">#try_schedule</a></span></p>
 
   
   
@@ -420,7 +397,7 @@ across all scopes and Ractors, and prevents new pools from starting.</p>
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/Executor.html" title="Farce::Abstract::Executor (class)">Abstract::Executor</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="../Abstract/Executor.html#execute-instance_method" title="Farce::Abstract::Executor#execute (method)">#execute</a></span>, <span class='object_link'><a href="../Abstract/Executor.html#local%3F-instance_method" title="Farce::Abstract::Executor#local? (method)">#local?</a></span>, <span class='object_link'><a href="../Abstract/Executor.html#ractor_shareable%3F-instance_method" title="Farce::Abstract::Executor#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/Executor.html#execute-instance_method" title="Farce::Abstract::Executor#execute (method)">#execute</a></span>, <span class='object_link'><a href="../Abstract/Executor.html#local%3F-instance_method" title="Farce::Abstract::Executor#local? (method)">#local?</a></span>, <span class='object_link'><a href="../Abstract/Executor.html#ractor_shareable%3F-instance_method" title="Farce::Abstract::Executor#ractor_shareable? (method)">#ractor_shareable?</a></span>, <span class='object_link'><a href="../Abstract/Executor.html#schedule-instance_method" title="Farce::Abstract::Executor#schedule (method)">#schedule</a></span>, <span class='object_link'><a href="../Abstract/Executor.html#try_schedule-instance_method" title="Farce::Abstract::Executor#try_schedule (method)">#try_schedule</a></span></p>
 
   
   
@@ -707,14 +684,14 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-51
-52
-53
-54
-55</pre>
+44
+45
+46
+47
+48</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 51</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 44</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_close'>close</span>
   <span class='id identifier rubyid_pool'>pool</span> <span class='op'>=</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>?</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='comma'>,</span> <span class='label'>scope:</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span>
@@ -765,19 +742,19 @@ Future scopes also reject submissions. Does not wait for running tasks.</p>
       <pre class="lines">
 
 
+53
+54
+55
+56
+57
+58
+59
 60
 61
-62
-63
-64
-65
-66
-67
-68
-69</pre>
+62</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 60</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 53</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_close_all'>close_all</span>
   <span class='kw'>return</span> <span class='kw'>self</span> <span class='kw'>unless</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
@@ -836,10 +813,10 @@ Future scopes also reject submissions. Does not wait for running tasks.</p>
       <pre class="lines">
 
 
-81</pre>
+74</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 81</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 74</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>=</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>||</span> <span class='kw'>super</span></pre>
     </td>
@@ -889,184 +866,12 @@ Future scopes also reject submissions. Does not wait for running tasks.</p>
       <pre class="lines">
 
 
-78</pre>
+71</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 78</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 71</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_error'>error</span> <span class='op'>=</span> <span class='id identifier rubyid_current_pool'>current_pool</span><span class='op'>&amp;.</span><span class='id identifier rubyid_error'>error</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="schedule-instance_method">
-  
-    #<strong>schedule</strong> {|*args| ... } &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Local::Pool (class)">Pool</a></span></tt> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    <p>Enqueue a task for any worker in the pool.</p>
-<p>Ractor pools reject local transfer. Thread pools preserve the block and
-arguments. With <code>auto_local: false</code>, they accept only local or smart modes.</p>
-<p>Valid modes are:</p>
-<ul>
-<li><code>:smart</code> - Applies smart rules or a dedicated proxy. Raises for unsupported values.
-This is the default for most mode-backed classes.</li>
-<li><code>:smart_raise</code> - Applies smart rules or a dedicated proxy, with a raising fallback.</li>
-<li><code>:smart_copy</code> - Applies smart rules or a dedicated proxy, then falls back to copying or Marshal.
-This is the default for <span class='object_link'><a href="../Port.html" title="Farce::Port (class)">Port</a></span>.</li>
-<li><code>:smart_move</code> - Applies smart rules or a dedicated proxy, then falls back to moving.</li>
-<li><code>:copy</code> - The value will be copied between Ractors.</li>
-<li><code>:marshal</code> - The value will be serialized immediately and reconstructed once per Ractor
-with Ruby's Marshal protocol.
-Contents must support Marshal. Nested shareable values may be reconstructed too.</li>
-<li><code>:make_shareable</code> - The value will be made Ractor-shareable using <span class='object_link'><a href="../Ractor.html#make_shareable-class_method" title="Farce::Ractor.make_shareable (method)">Ractor.make_shareable</a></span>.</li>
-<li><code>:move</code> - The value will be moved between Ractors. This saves memory compared to copying, and supports values
-that can't be copied but moved (like IO objects). However, the value will no longer be accessible on the Ractor
-that pushed it.</li>
-<li><code>:mutable</code> - A <span class='object_link'><a href="../Mutable.html" title="Farce::Mutable (class)">Mutable</a></span> instance will be created for the value.
-This isn't done recursively and thus will fail for nested unshareable values.</li>
-<li><code>:local</code> - The value will be kept local to the Ractor that pushed it. Another ractor trying to receive it will
-get an error. Useful for usage contained within a single Ractor.</li>
-<li><code>:proxy</code> - The value will be wrapped in a <code>Farce::Proxy</code> that executes calls in the original Ractor.</li>
-<li><code>:raise</code> - An error will be raised if the value is not Ractor-shareable. Useful for enforcing shareability.</li>
-<li><code>:dedup</code> - The value will be deduplicated using <span class='object_link'><a href="../../Farce.html#dedup-class_method" title="Farce.dedup (method)">Farce.dedup</a></span>, then made Ractor-shareable.
-This may update and freeze the original. Already-shareable values pass through unchanged.</li>
-<li><code>:shareable_copy</code> - The value will be copied and the copy will be made Ractor-shareable.</li>
-</ul>
-
-
-  </div>
-</div>
-<div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
-  
-    <li>
-      
-        <span class='name'>args</span>
-      
-      
-        <span class='type'>(<tt>Array&lt;Object&gt;</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>Positional arguments passed to the task block.</p>
-</div>
-      
-    </li>
-  
-    <li>
-      
-        <span class='name'>mode</span>
-      
-      
-        <span class='type'>(<tt>Symbol</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>Argument transfer mode.</p>
-</div>
-      
-    </li>
-  
-    <li>
-      
-        <span class='name'>auto_local</span>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>Whether to use local transfer in a thread pool.</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-<p class="tag_title">Yields:</p>
-<ul class="yield">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>*args</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>Task to execute.</p>
-</div>
-      
-    </li>
-  
-</ul>
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt><span class='object_link'><a href="" title="Farce::Local::Pool (class)">Pool</a></span></tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>self.</p>
-</div>
-      
-    </li>
-  
-</ul>
-<p class="tag_title">Raises:</p>
-<ul class="raise">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt><span class='object_link'><a href="../../Farce.html#PoolClosedError-constant" title="Farce::PoolClosedError (constant)">PoolClosedError</a></span></tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>If the pool is closing or closed.</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-43
-44
-45
-46
-47</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 43</span>
-
-<span class='kw'>def</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#PoolClosedError-constant" title="Farce::PoolClosedError (constant)">PoolClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot schedule task on a closed pool</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
-  <span class='id identifier rubyid_scoped_value'>scoped_value</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
-  <span class='kw'>self</span>
-<span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -1114,10 +919,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-72</pre>
+65</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 72</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 65</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>=</span> <span class='id identifier rubyid_current_pool'>current_pool</span><span class='op'>&amp;.</span><span class='id identifier rubyid_size'>size</span> <span class='op'>||</span> <span class='int'>0</span></pre>
     </td>
@@ -1167,10 +972,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-75</pre>
+68</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 75</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 68</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_state'>state</span> <span class='op'>=</span> <span class='id identifier rubyid_current_pool'>current_pool</span><span class='op'>&amp;.</span><span class='id identifier rubyid_state'>state</span> <span class='op'>||</span> <span class='symbol'>:closed</span></pre>
     </td>
@@ -1183,7 +988,7 @@ This may update and freeze the original. Already-shareable values pass through u
 </div>
 
       <div id="footer">
-  Generated on Mon Oct 12 13:14:50 2026 by
+  Generated on Mon Oct 12 19:30:51 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
