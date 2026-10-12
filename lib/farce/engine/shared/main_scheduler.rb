@@ -4,13 +4,13 @@
 
 module Farce
   module Internal # :nodoc: all
-    class MainThreadScheduler < ThreadScheduler
+    class MainThreadExecutor < ThreadExecutor
       # Enter the main emulated Ractor without starting another thread.
       def execute(...) = FakeRactor.with_current(Ractor.main) { super }
       def local?(wait: true) = Ractor.main? # rubocop:disable Lint/UnusedMethodArgument
     end
 
-    MainScheduler = MainThreadScheduler.new do |*args, &block|
+    MainScheduler = MainThreadExecutor.new do |*args, &block|
       Thread.new do
         ThreadGroup::Default.add(Thread.current)
         block.call(*args)

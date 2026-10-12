@@ -7,7 +7,7 @@ module Farce
     class ProxyOwner
       include ProxyOwnerNotifications
 
-      class OwnerScheduler < Farce::ThreadScheduler
+      class OwnerScheduler < Farce::ThreadExecutor
         def initialize
           @threads = Thread::Queue.new
           super

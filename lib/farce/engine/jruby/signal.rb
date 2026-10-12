@@ -48,10 +48,13 @@ module Farce
         timeout = parse_timeout(timeout)
         observed ||= generation
 
-        scheduler = Fiber.current_scheduler if Fiber.respond_to?(:current_scheduler)
-        # JRuby may run a later scheduled fiber on a backing thread where this is nil.
-        scheduler ||= Fiber.scheduler if !Fiber.current.blocking? && Fiber.respond_to?(:scheduler)
-        return wait_with_scheduler(scheduler, observed, timeout) { yield if block_given? } if scheduler
+        # During shutdown JRuby can expose a scheduler to a blocking fiber.
+        unless Fiber.current.blocking?
+          scheduler = Fiber.current_scheduler if Fiber.respond_to?(:current_scheduler)
+          # JRuby may run a later scheduled fiber on a backing thread where this is nil.
+          scheduler ||= Fiber.scheduler if Fiber.respond_to?(:scheduler)
+          return wait_with_scheduler(scheduler, observed, timeout) { yield if block_given? } if scheduler
+        end
 
         wait_with_phaser(observed, timeout) { yield if block_given? }
       end

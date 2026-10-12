@@ -274,7 +274,7 @@ module Farce
           :done
         ensure
           scheduler ||= internal::Storage[:local_scheduler]
-          if scheduler && !scheduler.is_a?(Farce::ThreadScheduler)
+          if scheduler && !scheduler.is_a?(Farce::ThreadExecutor)
             scheduler.close
             Thread.pass until scheduler.state == :closed
           end

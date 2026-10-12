@@ -152,7 +152,8 @@ class TestConfig < Test
     return if RUBY_ENGINE == "truffleruby"
 
     ["c.fiber_scheduler = CustomScheduler", "c.fiber_scheduler { CustomScheduler.new }"].each do |setting|
-      %i[thread pool].product([false, true]).each do |executor, override|
+      %i[thread unshared_thread local_thread pool unshared_pool
+         local_pool].product([false, true]).each do |executor, override|
         assert_configured_constructor(setting, executor, override)
       end
     end
@@ -267,7 +268,11 @@ class TestConfig < Test
       config = Farce.config
       abort "configuration frozen by require" if config.frozen?
       Farce::Scheduler
+      Farce::Unshared::Scheduler
+      Farce::Local::Scheduler
       Farce::Pool
+      Farce::Local::Pool
+      Farce::Unshared::Pool
       abort "configuration frozen by class loading" if config.frozen?
       Farce.config do |c|
         c.fiber_scheduler = :select
@@ -347,6 +352,10 @@ class TestConfig < Test
   private
 
   def assert_configured_constructor(setting, executor, override)
+    pool_class = { pool: "Farce::Pool", unshared_pool: "Farce::Unshared::Pool",
+                   local_pool: "Farce::Local::Pool" }.fetch(executor, "Farce::Pool")
+    scheduler_class = { unshared_thread: "Farce::Unshared::Scheduler", local_thread: "Farce::Local::Scheduler" }
+      .fetch(executor, "Farce::Scheduler")
     output, error, status = ruby_isolated(<<~CODE)
       require "farce"
       class CustomScheduler
@@ -362,16 +371,16 @@ class TestConfig < Test
       Farce.config { |c| #{setting} }
       results = Farce::Queue.new
       constructor = proc { OverrideScheduler.new } if #{override}
-      if #{executor == :thread}
+      if #{%i[thread unshared_thread local_thread].include?(executor)}
         if #{override}
-          scheduler = Farce::Scheduler.create(Thread, &constructor)
+          scheduler = #{scheduler_class}.create(Thread, &constructor)
         else
-          scheduler = Farce::Scheduler.new
+          scheduler = #{scheduler_class}.new
           worker = scheduler.launch_thread
         end
         abort "custom scheduler not recognized" unless scheduler.wraps_external?
       else
-        scheduler = Farce::Pool.new(max_size: 1, shrink_after: nil, &constructor)
+        scheduler = #{pool_class}.new(max_size: 1, shrink_after: nil, &constructor)
       end
       scheduler.schedule(results) do |queue|
         current = Fiber.scheduler

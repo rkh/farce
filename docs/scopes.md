@@ -238,7 +238,7 @@ Pass the needed data as task arguments when crossing an execution boundary. Use 
 
 ## Classes that support scopes
 
-These classes accept the same five scopes. The scope determines which backing container or resource an operation uses. Each class retains its own behavior, such as queue ordering or weak references.
+The classes in this table accept the same five scopes. The scope determines which backing container or resource an operation uses. Each class retains its own behavior, such as queue ordering or weak references.
 
 | Class | What each scope gets |
 | --- | --- |
@@ -266,6 +266,8 @@ These classes accept the same five scopes. The scope determines which backing co
 | `Farce::Local::Lease` | An independently initialized resource to borrow. |
 | `Farce::Local::LeaseMap` | An independently initialized set of named resources. |
 | `Farce::Local::LeasePool` | A pool with its own resources and capacity. |
+| `Farce::Local::Scheduler` | A task scheduler with its own worker and lifecycle. |
+| `Farce::Local::Pool` | An elastic pool of thread workers with independent scaling and lifecycle. |
 
 ### Count within each scope
 

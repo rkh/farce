@@ -20,7 +20,7 @@ module Farce
     def test_custom_scheduler_resumes_dispatcher_after_starting_a_task
       return if RUBY_ENGINE == "truffleruby"
       require "helpers/queue_test_scheduler"
-      pool = Pool.new(max_size: 1, shrink_after: nil) { Helpers::QueueTestScheduler.new }
+      pool = pool_class.new(max_size: 1, shrink_after: nil) { Helpers::QueueTestScheduler.new }
       results = Queue.new
       pool.schedule(results) { |queue| queue << :first }
       pool.schedule(results) { |queue| queue << :second }
@@ -36,20 +36,21 @@ module Farce
     end
 
     def test_initialization_starts_the_minimum_size
-      pool = Pool.new(min_size: 2, max_size: 3, shrink_after: nil)
+      pool = pool_class.new(min_size: 2, max_size: 3, shrink_after: nil)
 
       assert_equal :running, pool.state
       assert_equal 2, pool.size
       assert_nil pool.error
       refute_predicate pool, :closed?
       refute_predicate pool, :frozen?
-      assert Ractor.shareable?(pool)
+      assert_kind_of Abstract::Pool, pool
+      assert_equal pool.ractor_shareable?, Ractor.shareable?(pool)
     ensure
       close_pool(pool)
     end
 
     def test_default_minimum_is_zero
-      pool = Pool.new
+      pool = pool_class.new
 
       assert_equal 0, pool.min_size
       assert_equal 0, pool.size
@@ -61,7 +62,7 @@ module Farce
     end
 
     def test_first_worker_starts_without_waiting_for_growth
-      pool = Pool.new(grow_after: 60, shrink_after: nil)
+      pool = pool_class.new(grow_after: 60, shrink_after: nil)
       result = Queue.new
 
       pool.schedule(result, mode: :raise) { |queue| queue << :done }
@@ -73,7 +74,7 @@ module Farce
     end
 
     def test_idle_pool_retires_to_zero_and_restarts_immediately
-      pool = Pool.new(grow_after: 60, shrink_after: 0.02)
+      pool = pool_class.new(grow_after: 60, shrink_after: 0.02)
       result = Queue.new
 
       pool.schedule(result, mode: :raise) { |queue| queue << :first }
@@ -89,8 +90,8 @@ module Farce
       close_pool(pool)
     end
 
-    def test_schedule_uses_smart_rules_by_default
-      pool = Pool.new(max_size: 1, shrink_after: nil)
+    def test_schedule_uses_default_transfer_rules
+      pool = pool_class.new(max_size: 1, shrink_after: nil)
       result = Queue.new
       source = [:ready]
       pool.schedule(source, result) { |value, output| output << value.frozen? }
@@ -103,7 +104,7 @@ module Farce
     end
 
     def test_schedule_dispatches_to_a_worker
-      pool = Pool.new(max_size: 1, shrink_after: nil)
+      pool = pool_class.new(max_size: 1, shrink_after: nil)
       result = Queue.new
 
       assert_same pool, pool.schedule(result, :done, mode: :raise) { |queue, value| queue << value }
@@ -113,13 +114,13 @@ module Farce
     end
 
     def test_queue_wait_grows_the_pool
-      pool = Pool.new(max_size: 2, max_inflight: 1, grow_after: 0.01, shrink_after: nil)
-      started = Queue.new
-      result = Queue.new
+      pool = pool_class.new(max_size: 2, max_inflight: 1, grow_after: 0.01, shrink_after: nil)
+      started = pool.local? ? Unshared::Queue.new : Queue.new
+      result = pool.local? ? Unshared::Queue.new : Queue.new
       gate = Atom.new(false, mode: :raise)
 
-      pool.schedule(started, gate, mode: :raise) do |queue, wait|
-        queue << Ractor.current
+      pool.schedule(started, gate, pool.local?, mode: :raise) do |queue, wait, local|
+        queue << (local ? Thread.current : Ractor.current)
         # Hold this worker's scheduler without competing for CPU with pool startup.
         Fiber.new(blocking: true) { wait.wait_until_changed(false) }.resume
       end
@@ -127,15 +128,17 @@ module Farce
 
       refute_nil first, "the first pool worker did not start"
 
-      pool.schedule(result, mode: :raise) { |queue| queue << Ractor.current }
+      pool.schedule(result, pool.local?, mode: :raise) do |queue, local|
+        queue << (local ? Thread.current : Ractor.current)
+      end
       second = result.pop(timeout: 2)
 
       refute_nil second, lambda {
         "the second task did not run within 2 seconds " \
           "(pool state: #{pool.state}, workers: #{pool.size}, " \
-          "queued tasks: #{pool.instance_variable_get(:@queue).size}, error: #{pool.error.inspect})"
+          "queued tasks: #{pool_queue(pool).size}, error: #{pool.error.inspect})"
       }
-      refute_same first, second if Helpers::Internal.native_ractors?
+      refute_same first, second if Helpers::Internal.native_ractors? || pool.local?
 
       assert_nil pool.error
       assert_equal 2, pool.size
@@ -145,7 +148,7 @@ module Farce
     end
 
     def test_inflight_limit_is_relaxed_at_maximum_size
-      pool = Pool.new(max_size: 1, max_inflight: 1, shrink_after: nil)
+      pool = pool_class.new(max_size: 1, max_inflight: 1, shrink_after: nil)
       gate = Queue.new
       result = Queue.new
 
@@ -159,7 +162,7 @@ module Farce
     end
 
     def test_idle_extra_worker_retires
-      pool = Pool.new(min_size: 1, max_size: 2, max_inflight: 1, grow_after: 0.005, shrink_after: 0.02)
+      pool = pool_class.new(min_size: 1, max_size: 2, max_inflight: 1, grow_after: 0.005, shrink_after: 0.02)
       started = Queue.new
       gate = Atom.new(false, mode: :raise)
       extra_gate = Queue.new
@@ -185,7 +188,7 @@ module Farce
     end
 
     def test_close_drains_work_and_rejects_submissions
-      pool = Pool.new(max_size: 1, shrink_after: nil)
+      pool = pool_class.new(max_size: 1, shrink_after: nil)
       result = Queue.new
       pool.schedule(result, mode: :raise) { |queue| queue << :done }
 
@@ -202,7 +205,7 @@ module Farce
     def test_close_rejects_a_submission_blocked_by_capacity
       # Hold admission below max_size so the queue stays full with thread-based tasks too.
       # Delay growth until after this test, since reaching max_size relaxes the inflight limit.
-      pool = Pool.new(max_size: 2, max_inflight: 1, capacity: 1, grow_after: 60, shrink_after: nil)
+      pool = pool_class.new(max_size: 2, max_inflight: 1, capacity: 1, grow_after: 60, shrink_after: nil)
       started = Queue.new
       gate = Atom.new(false, mode: :raise)
       pool.schedule(started, gate, mode: :raise) do |queue, wait|
@@ -217,7 +220,7 @@ module Farce
       rescue PoolClosedError => e
         e
       end
-      queue = pool.instance_variable_get(:@queue)
+      queue = pool_queue(pool)
       Timeout.timeout(2) { Thread.pass until queue.num_waiting.positive? }
       pool.close
 
@@ -230,7 +233,7 @@ module Farce
     end
 
     def test_zero_minimum_still_drains_on_close
-      pool = Pool.new(min_size: 0, max_size: 1, grow_after: 1, shrink_after: nil)
+      pool = pool_class.new(min_size: 0, max_size: 1, grow_after: 1, shrink_after: nil)
       result = Queue.new
       pool.schedule(result, mode: :raise) { |queue| queue << :done }
 
@@ -244,8 +247,8 @@ module Farce
       close_pool(pool)
     end
 
-    def test_local_transfer_is_rejected
-      pool = Pool.new(max_size: 1, shrink_after: nil)
+    def test_explicit_local_transfer_follows_pool_locality
+      pool = pool_class.new(max_size: 1, shrink_after: nil)
 
       error = assert_raises(ArgumentError) { pool.schedule(mode: :local) { nil } }
       assert_equal "local transfer is not supported by a pool", error.message
@@ -254,17 +257,17 @@ module Farce
     end
 
     def test_invalid_sizes_are_rejected
-      assert_raises(ArgumentError) { Pool.new(min_size: -1) }
-      assert_raises(ArgumentError) { Pool.new(max_size: 0) }
-      assert_raises(ArgumentError) { Pool.new(min_size: 2, max_size: 1) }
-      assert_raises(ArgumentError) { Pool.new(max_inflight: 0) }
-      assert_raises(ArgumentError) { Pool.new(grow_after: -1) }
+      assert_raises(ArgumentError) { pool_class.new(min_size: -1) }
+      assert_raises(ArgumentError) { pool_class.new(max_size: 0) }
+      assert_raises(ArgumentError) { pool_class.new(min_size: 2, max_size: 1) }
+      assert_raises(ArgumentError) { pool_class.new(max_inflight: 0) }
+      assert_raises(ArgumentError) { pool_class.new(grow_after: -1) }
     end
 
     def test_scheduler_insight_method_is_detected_once
       return if RUBY_ENGINE == "truffleruby"
       before = InsightScheduler::CHECKS.value
-      pool = Pool.new(max_size: 1, shrink_after: nil) { InsightScheduler.new }
+      pool = pool_class.new(max_size: 1, shrink_after: nil) { InsightScheduler.new }
       result = Queue.new
 
       3.times { pool.schedule(result, mode: :raise) { |queue| queue << true } }
@@ -277,6 +280,13 @@ module Farce
     end
 
     private
+
+    def pool_class = Pool
+
+    def pool_queue(pool)
+      pool = Helpers::Internal::Storage[pool] if pool.is_a?(Local::Pool)
+      pool.instance_variable_get(:@queue)
+    end
 
     def close_pool(pool)
       return unless pool

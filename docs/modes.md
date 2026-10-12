@@ -401,8 +401,10 @@ The same choices appear in several Farce APIs. Containers normally default to `:
 | `Farce::LRUMap` | `new` | Values only. Individual value hits and writes update eviction order. |
 | `Farce::LFUMap` | `new` | Values only. Individual value hits and writes update eviction frequency. |
 | `Farce::Scheduler` | `schedule` | Task arguments, with automatic local transfer enabled by default. |
-| `Farce::ThreadScheduler` | `schedule`, `execute` | Accepts scheduler options but always keeps arguments local. |
+| `Farce::Unshared::Scheduler`, `Farce::Local::Scheduler` | `schedule`, `execute` | Always local. With `auto_local: false`, only `:local` and smart modes are accepted. |
+| `Farce::ThreadExecutor` | `schedule`, `execute` | Accepts scheduler options but always keeps arguments local. |
 | `Farce::Pool` | `schedule` | Task arguments. `:local` is rejected. |
+| `Farce::Unshared::Pool`, `Farce::Local::Pool` | `schedule`, `execute` | Always local. With `auto_local: false`, only `:local` and smart modes are accepted. |
 
 `Farce::Lazy` runs its shareable factory once and applies the mode to the result. With
 `:copy`, each Ractor receives its own cached copy. Use `Farce::Strict::Lazy` when the
@@ -557,7 +559,7 @@ pool.close
 results.close
 ```
 
-A scheduler defaults to `auto_local: true`, preserving the block and its arguments when scheduling from its owning Ractor. Set `auto_local: false` to enforce the requested mode there. A pool may choose another Ractor for any task, so it rejects `:local` and does not apply automatic local transfer.
+A scheduler defaults to `auto_local: true`, preserving the block and its arguments when scheduling from its owning Ractor. Set `auto_local: false` to enforce the requested mode there. `Farce::Pool` may choose another Ractor for any task, so it rejects `:local` and does not apply automatic local transfer. If you want a Pool with `local` support, use `Farce::Unshared::Pool` or `Farce::Local::Pool` instead.
 
 ## Under the hood
 

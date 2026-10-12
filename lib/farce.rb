@@ -360,7 +360,7 @@ module Farce
   # This allows scheduling without blocking the current thread.
   #
   # On JRuby and TruffleRuby, blocks run inline because there is no native Ractor isolation.
-  # The returned {ThreadScheduler} starts a new thread for each scheduled task.
+  # The returned {ThreadExecutor} starts a new thread for each scheduled task.
   #
   # @example
   #   $results = []
@@ -408,9 +408,9 @@ module Farce
   #
   # @overload on_main
   #   Returns a scheduler that executes tasks on the main ractor.
-  #   @return [Abstract::Scheduler]
+  #   @return [Abstract::Executor]
   #
-  # @return [Abstract::Scheduler, nil]
+  # @return [Abstract::Executor, nil]
   # @see .in_parallel
   def self.on_main(*args, mode: UNDEFINED, &)
     unless block_given?
@@ -448,9 +448,9 @@ module Farce
   #   @return [nil]
   #
   # @overload in_parallel
-  #   @return [Abstract::Scheduler] The shared scheduler.
+  #   @return [Abstract::Executor] The shared scheduler.
   #
-  # @return [Abstract::Scheduler, nil]
+  # @return [Abstract::Executor, nil]
   # @see .on_main
   def self.in_parallel(*args, mode: UNDEFINED, &)
     unless block_given?
@@ -503,7 +503,7 @@ module Farce
     scheduler ||=
       if mode == :local
         Internal::Storage.store_if_absent(:local_scheduler) do
-          Internal.native_ractors? ? Scheduler.create(Thread) : ThreadScheduler.new
+          Internal.native_ractors? ? Scheduler.create(Thread) : ThreadExecutor.new
         end
       else
         Internal::ParallelScheduler

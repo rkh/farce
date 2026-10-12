@@ -80,7 +80,7 @@ module Farce
         assert_raises(TypeError) { object.clone(freeze: false) }
       end
     ensure
-      objects&.each { it.close if it.is_a?(Abstract::Scheduler) || it.is_a?(Port) }
+      objects&.each { it.close if it.is_a?(Abstract::Executor) || it.is_a?(Port) }
     end
 
     def test_lock_copies_are_fresh_unlocked_instances

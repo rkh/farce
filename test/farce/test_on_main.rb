@@ -40,7 +40,7 @@ module Farce
         if Farce::Ractor.builtin?
           abort "scheduler started by include" unless Farce.const_get(:Internal).autoload?(:MainScheduler)
         else
-          abort "wrong scheduler" unless Farce.on_main.is_a?(Farce::ThreadScheduler)
+          abort "wrong scheduler" unless Farce.on_main.is_a?(Farce::ThreadExecutor)
         end
         puts "internal"
       RUBY
@@ -55,7 +55,7 @@ module Farce
       if Ractor.builtin?
         assert_same Ractor.main, Farce.on_main.owner
       else
-        assert_kind_of ThreadScheduler, Farce.on_main
+        assert_kind_of ThreadExecutor, Farce.on_main
       end
     end
 

@@ -529,7 +529,7 @@ module Farce
     end
 
     def test_stateless_services_restore_without_live_caches
-      scheduler = round_trip(ThreadScheduler.new)
+      scheduler = round_trip(ThreadExecutor.new)
 
       assert Ractor.shareable?(scheduler)
       result = nil
@@ -537,7 +537,7 @@ module Farce
       assert_same(scheduler, scheduler.execute { result = :value })
       assert_equal :value, result
       factory = Ractor.shareable_proc { Thread.new { :value } }
-      assert_raises(TypeError) { ::Marshal.dump(ThreadScheduler.new(&factory)) }
+      assert_raises(TypeError) { ::Marshal.dump(ThreadExecutor.new(&factory)) }
 
       source = Deduper.new.store(Range).skip(Array)
       copy = round_trip(source)

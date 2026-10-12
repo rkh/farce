@@ -101,6 +101,7 @@ module Farce
     def prepare_mutable_numeric(_)        = nil
     def prepare_map_access(_klass, _kind) = nil
     def finalize_engine                   = nil
+    def with_scheduler_thread_group       = yield(ThreadGroup.new)
 
     def delegate(from, to, *methods)
       methods.each do |method|

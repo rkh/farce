@@ -13,6 +13,15 @@ module Farce
   module Internal # :nodoc: all
     include Autoloads["#{__dir__}/shared"]
 
+    # Keep thread-only scheduler workers and their tasks in their emulated Ractor.
+    def with_scheduler_thread_group
+      group = ThreadGroup.new
+      FakeRactor::GROUPS[group] = Ractor.current
+      yield group
+    ensure
+      FakeRactor::GROUPS.delete(group)
+    end
+
     # @api private
     # The shim's shareable? can delegate to a lazy or weak value and change its state.
     # Snapshot metadata uses only structural properties on engines without Ractors.

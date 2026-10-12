@@ -3,11 +3,11 @@
 # warn_indent: true
 
 module Farce
-  # A scheduler that starts a new thread for each scheduled task. Executes synchronous tasks inline.
+  # A task executor that starts a new thread for each scheduled task. Executes synchronous tasks inline.
   # Creating an instance starts no threads. Blocks and arguments stay local to the caller.
-  # Tasks are not tracked, and closing this stateless scheduler has no effect.
+  # Tasks are not tracked, and closing this stateless executor has no effect.
   # Default instances support Marshal. Instances with a custom thread factory reject dumping.
-  class ThreadScheduler < Farce::Abstract::Scheduler
+  class ThreadExecutor < Farce::Abstract::Executor
     include Shareable::Immutable
     include Internal::Inspect
 
@@ -18,7 +18,7 @@ module Farce
 
     # @api private
     def marshal_dump
-      raise TypeError, "scheduler factories cannot be marshaled" if @factory
+      raise TypeError, "thread factories cannot be marshaled" if @factory
       [1]
     end
 
@@ -32,7 +32,7 @@ module Farce
     #
     # @overload schedule(*args, **options)
     #   @param args [Array<Object>] Arguments passed to the block.
-    #   @param options [Hash] Scheduler options are ignored. All tasks use local arguments.
+    #   @param options [Hash] Execution options are ignored. All tasks use local arguments.
     #   @yield [*args] The task to run.
     #   @return [self]
     def schedule(*, **, &)
@@ -45,7 +45,7 @@ module Farce
     #
     # @overload execute(*args, **options)
     #   @param args [Array<Object>] Arguments passed to the block.
-    #   @param options [Hash] Scheduler options are ignored. All tasks use local arguments.
+    #   @param options [Hash] Execution options are ignored. All tasks use local arguments.
     #   @yield [*args] The task to run.
     #   @return [self]
     def execute(*, **)
@@ -57,7 +57,7 @@ module Farce
     # @return [self] Does not wait for or stop task threads.
     def close = self
 
-    # @return [false] This stateless scheduler is always available.
+    # @return [false] This stateless executor is always available.
     def closed? = false
 
     # @return [Symbol] Always `:running`.

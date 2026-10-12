@@ -216,7 +216,7 @@ module Farce
       new(object, register:, scheduler:)
     end
 
-    def self.owner_scheduler = ::Farce::ThreadScheduler.new { |*args, &block| ::Farce::Ractor.new(*args, &block) }
+    def self.owner_scheduler = ::Farce::ThreadExecutor.new { |*args, &block| ::Farce::Ractor.new(*args, &block) }
     private_class_method :owner_scheduler
 
     def self.schedule_initializer(scheduler, *)
@@ -254,7 +254,7 @@ module Farce
 
     # @param object [BasicObject] the object to be managed by the proxy
     # @param register [Farce::Proxy::Register, nil] the register to use
-    # @param scheduler [Farce::Abstract::Scheduler, nil] the scheduler to use
+    # @param scheduler [Farce::Abstract::Executor, nil] the scheduler to use
     def initialize(object, register: nil, scheduler: nil)
       @token        = ::Object.new.freeze # cross-ractor finalizers don't work reliably across Ruby versions
       @supervisor   = Supervisor.new(register || REGISTER, scheduler || ::Farce, ::Farce::WeakValue.new(@token))

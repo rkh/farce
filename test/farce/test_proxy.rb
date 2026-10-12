@@ -41,7 +41,7 @@ module Farce
       def answer = 42
     end
 
-    class DormantScheduler < ThreadScheduler
+    class DormantScheduler < ThreadExecutor
       def schedule(*, **, &) = self
     end
 
@@ -306,7 +306,7 @@ module Farce
     end
 
     def test_create_uses_supplied_scheduler_without_installing_a_fiber_scheduler
-      scheduler = ThreadScheduler.new
+      scheduler = ThreadExecutor.new
       result = Proxy.create(scheduler:) { !::Fiber.respond_to?(:scheduler) || ::Fiber.scheduler.nil? }
 
       assert result
@@ -327,7 +327,7 @@ module Farce
       output = Strict::Queue.new
       release = Strict::Queue.new
       owner = Ractor.new(output, release) do |out, gate|
-        proxy = Proxy.new(Target.new, scheduler: ThreadScheduler.new)
+        proxy = Proxy.new(Target.new, scheduler: ThreadExecutor.new)
         proxy.nothing # Ensure the request handler has started.
         out << proxy
         gate.pop
@@ -346,7 +346,7 @@ module Farce
     def test_calls_fail_when_owner_exits_before_handler_starts
       output = Strict::Queue.new
       owner = Ractor.new(output) do |out|
-        out << Proxy.new(Target.new, scheduler: ThreadScheduler.new)
+        out << Proxy.new(Target.new, scheduler: ThreadExecutor.new)
         :done
       end
       proxy = output.pop(timeout: 5)
@@ -364,7 +364,7 @@ module Farce
       release = Strict::Queue.new
       ready = Strict::Queue.new
       owner = Ractor.new(output, release) do |out, gate|
-        out << Proxy.new(Target.new, scheduler: ThreadScheduler.new)
+        out << Proxy.new(Target.new, scheduler: ThreadExecutor.new)
         gate.pop
       end
       proxy = output.pop(timeout: 5)
@@ -383,7 +383,7 @@ module Farce
     end
 
     def test_owner_exit_wakes_callers_blocked_on_a_full_queue
-      assert_blocked_callers_wake(ThreadScheduler)
+      assert_blocked_callers_wake(ThreadExecutor)
     end
 
     def test_owner_exit_wakes_callers_before_handler_starts
@@ -416,7 +416,7 @@ module Farce
         release = Farce::Strict::Queue.new
         GC.start
         owner = Farce::Ractor.new(output, release) do |out, gate|
-          scheduler = Farce::ThreadScheduler.new do |*args, &task|
+          scheduler = Farce::ThreadExecutor.new do |*args, &task|
             Farce::Ractor[:proxy_worker] = Thread.new(*args, &task)
           end
           proxy = Farce::Proxy.new(Target.new, scheduler:)
@@ -478,7 +478,7 @@ module Farce
         rescue Ractor::RemoteError => e
           e
         end
-        assert ready.pop(timeout: 5) if index.zero? && scheduler_class == ThreadScheduler
+        assert ready.pop(timeout: 5) if index.zero? && scheduler_class == ThreadExecutor
       end
 
       Timeout.timeout(5) do
@@ -495,7 +495,7 @@ module Farce
     end
 
     def proxy_for(object, **)
-      proxy = Proxy.new(object, scheduler: ThreadScheduler.new, **)
+      proxy = Proxy.new(object, scheduler: ThreadExecutor.new, **)
       @proxies << proxy
       proxy
     end

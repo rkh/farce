@@ -5,7 +5,7 @@
 module Farce
   # @!visibility private
   module Internal # :nodoc: all
-    # Coordinates lazy Lease construction without running user code under a storage lock.
+    # Coordinates lazy construction without running user code under a storage lock.
     class LeaseInitialization
       def initialize
         @mutex        = Mutex.new

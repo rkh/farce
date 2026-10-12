@@ -147,7 +147,7 @@ module Farce
         assert_operator scheduler.io_wait_calls, :>=, 1
       end
 
-      def test_exchange_uses_thread_scheduler_when_current_scheduler_is_unavailable
+      def test_exchange_uses_thread_executor_when_current_scheduler_is_unavailable
         return unless RUBY_ENGINE == "jruby"
 
         scheduler = Helpers::QueueTestScheduler.new

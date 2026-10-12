@@ -5,20 +5,20 @@
 require_relative "../setup"
 
 module Farce
-  class TestThreadScheduler < Test
+  class TestThreadExecutor < Test
     def setup
-      @scheduler = ThreadScheduler.new
+      @scheduler = ThreadExecutor.new
     end
 
     def test_construction_starts_no_threads_or_freezes_configuration
       output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         threads = Thread.list
-        scheduler = Farce::ThreadScheduler.new
+        scheduler = Farce::ThreadExecutor.new
         abort "started a thread" unless Thread.list == threads
         abort "configuration frozen" if Farce.config.frozen?
         unless Farce::Ractor.builtin?
-          abort "wrong main scheduler" unless Farce.on_main.is_a?(Farce::ThreadScheduler)
+          abort "wrong main scheduler" unless Farce.on_main.is_a?(Farce::ThreadExecutor)
         end
         puts "idle"
       RUBY
@@ -91,6 +91,7 @@ module Farce
       assert Ractor.shareable?(@scheduler)
       assert_predicate @scheduler, :local?
       assert_same @scheduler, @scheduler.close
+      assert_same @scheduler, @scheduler.close_all
       refute_predicate @scheduler, :closed?
       assert_equal :running, @scheduler.state
       assert_same(@scheduler, @scheduler.execute { :still_available })

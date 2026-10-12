@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 return unless RUBY_ENGINE == "jruby"
 require_relative "../../setup"
 require "socket"
@@ -133,6 +135,37 @@ module Farce
           buffer.free
         end
         @scheduler.run
+      end
+
+      def test_signal_wait_in_a_blocking_fiber_during_shutdown
+        output, error, status = ruby_isolated(<<~RUBY)
+          require "farce"
+          internal = Farce.const_get(:Internal)
+          scheduler = internal::FiberScheduler.new
+          Fiber.set_scheduler(scheduler)
+          signal = internal::Signal.new
+          results = []
+          original = Fiber.method(:current_scheduler)
+          Fiber.schedule do
+            scheduler.kernel_sleep(0.001)
+            blocking = Fiber.new(blocking: true) do
+              results << signal.wait(timeout: 0.05) { :timed_out }
+            end
+            # JRuby can expose the installed scheduler to a blocking fiber during shutdown.
+            Fiber.define_singleton_method(:current_scheduler) do
+              Fiber.current.equal?(blocking) ? scheduler : original.call
+            end
+            blocking.resume
+          end
+          Fiber.set_scheduler(nil)
+          abort "wait did not time out" unless results == [:timed_out]
+          abort "waiter leaked" unless signal.num_waiting == 0
+          puts "ok"
+        RUBY
+
+        assert_predicate status, :success?, error
+        assert_equal "ok\n", output
+        assert_empty error
       end
 
       def test_runtime_sleep_order_matches_hook_dispatch

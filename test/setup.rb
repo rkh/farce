@@ -56,7 +56,7 @@ Minitest.after_run do
   %i[ParallelScheduler MainScheduler].each do |name|
     next if internal.autoload?(name)
     scheduler = internal.const_get(name)
-    next if scheduler.is_a?(Farce::ThreadScheduler)
+    next if scheduler.is_a?(Farce::ThreadExecutor)
 
     require "timeout"
     scheduler.close

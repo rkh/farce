@@ -175,6 +175,15 @@ end
       <td align="center" style="text-align: center">✅</td> <!-- Transaction -->
     </tr>
     <tr>
+      <td><tt>Pool</tt></td>
+      <td align="center" style="text-align: center">✅</td> <!-- Farce -->
+      <td align="center" style="text-align: center">➖</td> <!-- Strict -->
+      <td align="center" style="text-align: center">✅</td> <!-- Local -->
+      <td align="center" style="text-align: center">✅</td> <!-- Unshared -->
+      <td align="center" style="text-align: center">🔗</td> <!-- Unsafe -->
+      <td align="center" style="text-align: center">➖</td> <!-- Transaction -->
+    </tr>
+    <tr>
       <td><tt>Port</tt></td>
       <td align="center" style="text-align: center">✅</td> <!-- Farce -->
       <td align="center" style="text-align: center">✅</td> <!-- Strict -->
@@ -196,6 +205,15 @@ end
       <td><tt>Queue</tt></td>
       <td align="center" style="text-align: center">✅</td> <!-- Farce -->
       <td align="center" style="text-align: center">✅</td> <!-- Strict -->
+      <td align="center" style="text-align: center">✅</td> <!-- Local -->
+      <td align="center" style="text-align: center">✅</td> <!-- Unshared -->
+      <td align="center" style="text-align: center">🔗</td> <!-- Unsafe -->
+      <td align="center" style="text-align: center">➖</td> <!-- Transaction -->
+    </tr>
+    <tr>
+      <td><tt>Scheduler</tt></td>
+      <td align="center" style="text-align: center">✅</td> <!-- Farce -->
+      <td align="center" style="text-align: center">➖</td> <!-- Strict -->
       <td align="center" style="text-align: center">✅</td> <!-- Local -->
       <td align="center" style="text-align: center">✅</td> <!-- Unshared -->
       <td align="center" style="text-align: center">🔗</td> <!-- Unsafe -->
