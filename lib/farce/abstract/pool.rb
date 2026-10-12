@@ -69,25 +69,23 @@ module Farce
       # Ractor pools reject local transfer. Thread pools preserve the block and
       # arguments. With `auto_local: false`, they accept only local or smart modes.
       #
-      # @!macro modes
-      # @param args [Array<Object>] Positional arguments passed to the task block.
-      # @param mode [Symbol] Argument transfer mode.
-      # @param auto_local [Boolean] Whether to use local transfer in a thread pool.
-      # @yield [*args] Task to execute.
-      # @return [Pool] self.
-      # @raise [PoolClosedError] If the pool is closing or closed.
-      def schedule(*args, mode: :smart, auto_local: true, &block)
-        raise PoolClosedError, "cannot schedule task on a closed pool" if closed?
-        raise LocalJumpError, "Cannot schedule without a block" unless block
+      # @overload schedule(*args, mode: :smart, auto_local: true)
+      #   @!macro modes
+      #   @param args [Array<Object>] Positional arguments passed to the task block.
+      #   @param mode [Symbol] Argument transfer mode.
+      #   @param auto_local [Boolean] Whether to use local transfer in a thread pool.
+      #   @yield [*args] Task to execute.
+      #   @return [Pool] self.
+      #   @raise [PoolClosedError] If the pool is closing or closed.
+      def schedule(...) = enqueue_task(false, ...)
 
-        task = prepare_task(args, block, mode, auto_local)
-        @queue.push(task)
-        arm_scaler
-        self
-      rescue ClosedQueueError
-        raise unless closed?
-        raise PoolClosedError, "cannot schedule task on a closed pool"
-      end
+      # Enqueues a task without waiting for queue space.
+      # Arguments and transfer modes follow {#schedule}.
+      #
+      # @overload try_schedule(*args, mode: :smart, auto_local: true)
+      #   @param (see Farce::Abstract::Executor#schedule)
+      #   @return [self, nil] self when submitted, or nil when the queue is full.
+      def try_schedule(...) = enqueue_task(true, ...)
 
       # Stop accepting tasks and drain queued work.
       #
@@ -215,6 +213,19 @@ module Farce
       end
 
       private
+
+      def enqueue_task(non_block, *args, mode: :smart, auto_local: true, &block)
+        raise PoolClosedError, "cannot schedule task on a closed pool" if closed?
+        raise LocalJumpError, "Cannot schedule without a block" unless block
+
+        task = prepare_task(args, block, mode, auto_local)
+        return unless non_block ? @queue.try_push(task) : @queue.push(task)
+        arm_scaler
+        self
+      rescue ClosedQueueError
+        raise unless closed?
+        raise PoolClosedError, "cannot schedule task on a closed pool"
+      end
 
       def initialize_configuration(min_size:, max_size:, max_inflight:, grow_after:, shrink_after:, backend:)
         @min_size     = Integer(min_size)

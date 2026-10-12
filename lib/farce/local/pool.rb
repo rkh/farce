@@ -39,13 +39,6 @@ module Farce
               grow_after: @grow_after, shrink_after: @shrink_after, capacity:, backend:)
       end
 
-      # (see Farce::Abstract::Pool#schedule)
-      def schedule(...)
-        raise PoolClosedError, "cannot schedule task on a closed pool" if @closed_all.value
-        scoped_value.schedule(...)
-        self
-      end
-
       # Stop accepting work in this scope and drain its queued tasks.
       # @return [self]
       def close
@@ -84,6 +77,13 @@ module Farce
         :admission_changed, :task_taken, :retire_worker, :worker_stopped, :scale_if_needed)
 
       private
+
+      def enqueue_task(non_block, ...)
+        raise PoolClosedError, "cannot schedule task on a closed pool" if @closed_all.value
+        pool = scoped_value
+        submitted = non_block ? pool.try_schedule(...) : pool.schedule(...)
+        submitted && self
+      end
 
       def current_pool
         @closed_all.value ? Internal::Storage[self, scope:] : scoped_value

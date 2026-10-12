@@ -73,6 +73,52 @@ module Farce
       close_pool(pool)
     end
 
+    def test_try_schedule_starts_the_first_worker_without_waiting_for_growth
+      pool = pool_class.new(grow_after: 60, shrink_after: nil)
+      result = Queue.new
+
+      assert_same(pool, pool.try_schedule(result, mode: :raise) { |queue| queue << :done })
+      assert_equal :done, result.pop(timeout: 2)
+      assert_equal 1, pool.size
+    ensure
+      close_pool(pool)
+    end
+
+    def test_try_schedule_observes_queue_capacity
+      [1, nil].each do |capacity|
+        pool = pool_class.new(capacity:, max_size: 2, max_inflight: 1, grow_after: 60, shrink_after: nil)
+        started = Queue.new
+        results = Queue.new
+        gate = Atom.new(false, mode: :raise)
+        pool.schedule(started, gate, mode: :raise) do |queue, wait|
+          queue << true
+          Fiber.new(blocking: true) { wait.wait_until_changed(false) }.resume
+        end
+
+        assert started.pop(timeout: 2)
+        assert_same(pool, pool.try_schedule(results, :queued, mode: :raise) { |queue, value| queue << value })
+        extra = pool.try_schedule(results, :extra, mode: :raise) { |queue, value| queue << value }
+        if capacity
+          assert_nil extra
+        else
+          assert_same pool, extra
+        end
+        gate.value = true
+
+        assert_equal :queued, results.pop(timeout: 2)
+        assert_equal :extra, results.pop(timeout: 2) unless capacity
+
+        assert_same(pool, pool.try_schedule(results, :later, mode: :raise) { |queue, value| queue << value })
+        assert_equal :later, results.pop(timeout: 2)
+        close_pool(pool)
+
+        assert_nil results.try_pop
+      ensure
+        gate&.value = true
+        close_pool(pool)
+      end
+    end
+
     def test_idle_pool_retires_to_zero_and_restarts_immediately
       pool = pool_class.new(grow_after: 60, shrink_after: 0.02)
       result = Queue.new
@@ -128,9 +174,11 @@ module Farce
 
       refute_nil first, "the first pool worker did not start"
 
-      pool.schedule(result, pool.local?, mode: :raise) do |queue, local|
+      submitted = pool.try_schedule(result, pool.local?, mode: :raise) do |queue, local|
         queue << (local ? Thread.current : Ractor.current)
       end
+
+      assert_same pool, submitted
       second = result.pop(timeout: 2)
 
       refute_nil second, lambda {

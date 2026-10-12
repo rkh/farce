@@ -24,7 +24,7 @@ module Farce
     #   Enqueue a task while retaining its block and argument references.
     #   `mode` is ignored when `auto_local` is true. Otherwise, only local and
     #   smart modes are accepted.
-    #   @param (see Abstract::Scheduler#schedule)
+    #   @param (see Farce::Abstract::Executor#schedule)
     #   @return [self]
     class Scheduler < Abstract::Scheduler
       include Unshareable

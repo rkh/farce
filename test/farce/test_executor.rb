@@ -13,8 +13,8 @@ module Farce
       end
     end
 
-    def test_close_all_rejects_new_tasks_for_unscoped_executors
-      [Scheduler, Unshared::Scheduler, Pool, Unshared::Pool].each do |type|
+    def test_close_all_rejects_new_tasks
+      [Scheduler, Unshared::Scheduler, Local::Scheduler, Pool, Unshared::Pool, Local::Pool].each do |type|
         executor = type.new
         error = type <= Abstract::Pool ? PoolClosedError : SchedulerClosedError
 
@@ -22,9 +22,20 @@ module Farce
         assert_same executor, executor.close_all
         assert_predicate executor, :closed?
         assert_raises(error) { executor.schedule { nil } }
+        assert_raises(error) { executor.try_schedule { nil } }
         assert_raises(SchedulerClosedError) { executor.execute { nil } }
       ensure
         executor&.close
+      end
+    end
+
+    def test_try_schedule_rejects_missing_blocks
+      [Scheduler, Unshared::Scheduler, Local::Scheduler, Pool, Unshared::Pool, Local::Pool].each do |type|
+        executor = type.new
+
+        assert_raises(LocalJumpError) { executor.try_schedule }
+      ensure
+        executor&.close_all
       end
     end
 

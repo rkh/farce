@@ -400,11 +400,11 @@ The same choices appear in several Farce APIs. Containers normally default to `:
 | `Farce::TreeMap` | `new` | Values only. Keys follow the tree map's own rules. |
 | `Farce::LRUMap` | `new` | Values only. Individual value hits and writes update eviction order. |
 | `Farce::LFUMap` | `new` | Values only. Individual value hits and writes update eviction frequency. |
-| `Farce::Scheduler` | `schedule` | Task arguments, with automatic local transfer enabled by default. |
-| `Farce::Unshared::Scheduler`, `Farce::Local::Scheduler` | `schedule`, `execute` | Always local. With `auto_local: false`, only `:local` and smart modes are accepted. |
-| `Farce::ThreadExecutor` | `schedule`, `execute` | Accepts scheduler options but always keeps arguments local. |
-| `Farce::Pool` | `schedule` | Task arguments. `:local` is rejected. |
-| `Farce::Unshared::Pool`, `Farce::Local::Pool` | `schedule`, `execute` | Always local. With `auto_local: false`, only `:local` and smart modes are accepted. |
+| `Farce::Scheduler` | `schedule`, `try_schedule` | Task arguments, with automatic local transfer enabled by default. |
+| `Farce::Unshared::Scheduler`, `Farce::Local::Scheduler` | `schedule`, `try_schedule`, `execute` | Always local. With `auto_local: false`, only `:local` and smart modes are accepted. |
+| `Farce::ThreadExecutor` | `schedule`, `try_schedule`, `execute` | Accepts scheduler options but always keeps arguments local. |
+| `Farce::Pool` | `schedule`, `try_schedule` | Task arguments. `:local` is rejected. |
+| `Farce::Unshared::Pool`, `Farce::Local::Pool` | `schedule`, `try_schedule`, `execute` | Always local. With `auto_local: false`, only `:local` and smart modes are accepted. |
 
 `Farce::Lazy` runs its shareable factory once and applies the mode to the result. With
 `:copy`, each Ractor receives its own cached copy. Use `Farce::Strict::Lazy` when the
@@ -543,7 +543,7 @@ For containers that retain values, `:copy` gives each Ractor its own copy of a s
 
 ### Pass task data as arguments
 
-`Scheduler#schedule` and `Pool#schedule` accept `mode:` for task arguments. Pass mutable data as arguments instead of capturing it from the surrounding scope. A non-local task's block must be convertible to a shareable proc.
+Schedulers and pools accept `mode:` for task arguments in `schedule` and `try_schedule`. Pass mutable data as arguments instead of capturing it from the surrounding scope. A non-local task's block must be convertible to a shareable proc.
 
 ```ruby
 pool = Farce::Pool.new(max_size: 2)

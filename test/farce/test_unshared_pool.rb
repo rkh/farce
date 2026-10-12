@@ -47,11 +47,13 @@ module Farce
       pool = pool_class.new(max_size: 1, shrink_after: nil)
       source = []
       results = Unshared::Queue.new
-      [*Farce::MODES, :unknown, nil].each do |mode|
-        pool.schedule(source, mode:) { |value| results << value }
+      %i[schedule try_schedule].each do |submission|
+        [*Farce::MODES, :unknown, nil].each do |mode|
+          pool.public_send(submission, source, mode:) { |value| results << value }
 
-        assert_same source, results.pop(timeout: 2)
-        assert_same(pool, pool.execute(source, mode:) { |value| assert_same source, value })
+          assert_same source, results.pop(timeout: 2)
+          assert_same(pool, pool.execute(source, mode:) { |value| assert_same source, value })
+        end
       end
 
       refute_predicate source, :frozen?
@@ -65,15 +67,19 @@ module Farce
       source = Unshared::Map.new
       accepted = %i[local smart smart_raise smart_move smart_copy]
       accepted.each do |mode|
-        pool.schedule(source, mode:, auto_local: false) { |value| results << [value, self] }
-        value, receiver = results.pop(timeout: 2)
+        %i[schedule try_schedule].each do |submission|
+          pool.public_send(submission, source, mode:, auto_local: false) { |value| results << [value, self] }
+          value, receiver = results.pop(timeout: 2)
 
-        assert_same source, value
-        assert_same self, receiver
+          assert_same source, value
+          assert_same self, receiver
+        end
         assert_same(pool, pool.execute(source, mode:, auto_local: false) { |arg| assert_same source, arg })
       end
       (Farce::MODES.to_a - accepted + [:unknown, nil]).each do |mode|
-        assert_raises(ArgumentError) { pool.schedule(source, mode:, auto_local: false) { nil } }
+        %i[schedule try_schedule].each do |submission|
+          assert_raises(ArgumentError) { pool.public_send(submission, source, mode:, auto_local: false) { nil } }
+        end
         assert_raises(ArgumentError) { pool.execute(source, mode:, auto_local: false) { nil } }
       end
 

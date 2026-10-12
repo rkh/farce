@@ -54,6 +54,76 @@ module Farce
         assert_equal "cannot schedule task on a closed scheduler", error.message
       end
 
+      def test_try_schedule_rejects_full_queues_and_resumes_after_space_is_available
+        scheduler = scheduler_class.new(capacity: 1)
+        scheduler.owner = Ractor.current
+        results = Unshared::Queue.new
+        caller_self = self
+
+        assert_same(scheduler, scheduler.try_schedule(:first) { |value| results << [value, self] })
+        assert_nil(scheduler.try_schedule { results << :rejected })
+        worker = scheduler.launch_thread
+
+        assert_equal [:first, caller_self], results.pop(timeout: 5)
+        assert_same(scheduler, scheduler.try_schedule(:second) { |value| results << [value, self] })
+        assert_equal [:second, caller_self], results.pop(timeout: 5)
+        scheduler.close
+
+        assert worker.join(5), "scheduler worker did not stop"
+        assert_nil results.try_pop
+      ensure
+        scheduler&.close
+        worker&.join(5) || worker&.kill&.join
+      end
+
+      def test_try_schedule_accepts_multiple_tasks_with_unbounded_capacity
+        scheduler = scheduler_class.new(capacity: nil)
+        scheduler.owner = Ractor.current
+        results = Unshared::Queue.new
+
+        3.times do |value|
+          assert_same(scheduler, scheduler.try_schedule(value) { |arg| results << arg })
+        end
+        worker = scheduler.launch_thread
+        scheduler.close
+
+        assert worker.join(5), "scheduler worker did not drain its queue"
+        assert_equal [0, 1, 2], 3.times.map { results.pop(timeout: 5) }.sort
+      ensure
+        scheduler&.close
+        worker&.join(5) || worker&.kill&.join
+      end
+
+      def test_concurrent_try_schedule_calls_respect_capacity
+        scheduler = scheduler_class.new(capacity: 1)
+        scheduler.owner = Ractor.current
+        release = Thread::Queue.new
+        results = Unshared::Queue.new
+        submitters = 8.times.map do |value|
+          Thread.new do
+            release.pop
+            scheduler.try_schedule(value) { |arg| results << arg }
+          end
+        end
+        8.times { release << true }
+
+        submitters.each { |thread| assert thread.join(5), "try_schedule waited for queue space" }
+
+        assert_equal(1, submitters.count { |thread| thread.value.equal?(scheduler) })
+        assert_equal(7, submitters.count { |thread| thread.value.nil? })
+        worker = scheduler.launch_thread
+        scheduler.close
+
+        assert worker.join(5), "scheduler worker did not stop"
+        assert_kind_of Integer, results.pop(timeout: 5)
+        assert_nil results.try_pop
+      ensure
+        release&.close
+        submitters&.each { |thread| thread.kill.join }
+        scheduler&.close
+        worker&.join(5) || worker&.kill&.join
+      end
+
       def test_installing_as_fiber_scheduler_dispatches_tasks
         return if RUBY_ENGINE == "truffleruby"
         return unless Fiber.respond_to?(:set_scheduler)

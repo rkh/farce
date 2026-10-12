@@ -67,14 +67,16 @@ module Farce
       scheduler = scheduler_class.new
       queue = backend_scheduler(scheduler).instance_variable_get(:@queue)
       values = Unshared::Map.new
-      [*Farce::MODES, :unknown, nil].each do |mode|
-        returned = scheduler.schedule(values, mode:) { |value| [value, self] }
-        value, receiver = queue.pop.to_proc.call
+      %i[schedule try_schedule].each do |submission|
+        [*Farce::MODES, :unknown, nil].each do |mode|
+          returned = scheduler.public_send(submission, values, mode:) { |value| [value, self] }
+          value, receiver = queue.pop.to_proc.call
 
-        assert_same scheduler, returned
-        assert_same values, value
-        assert_same self, receiver
-        assert_same(scheduler, scheduler.execute(values, mode:) { |value| assert_same values, value })
+          assert_same scheduler, returned
+          assert_same values, value
+          assert_same self, receiver
+          assert_same(scheduler, scheduler.execute(values, mode:) { |value| assert_same values, value })
+        end
       end
 
       refute_predicate values, :frozen?
@@ -86,17 +88,21 @@ module Farce
       values = Unshared::Map.new
       accepted = %i[local smart smart_raise smart_move smart_copy]
       accepted.each do |mode|
-        scheduler.schedule(values, mode:, auto_local: false) { |value| [value, self] }
-        value, receiver = queue.pop.to_proc.call
+        %i[schedule try_schedule].each do |submission|
+          scheduler.public_send(submission, values, mode:, auto_local: false) { |value| [value, self] }
+          value, receiver = queue.pop.to_proc.call
 
-        assert_same values, value
-        assert_same self, receiver
+          assert_same values, value
+          assert_same self, receiver
+        end
         assert_same(scheduler, scheduler.execute(values, mode:, auto_local: false) do |value|
           assert_same values, value
         end)
       end
       (Farce::MODES.to_a - accepted + [:unknown, nil]).each do |mode|
-        assert_raises(ArgumentError) { scheduler.schedule(values, mode:, auto_local: false) { nil } }
+        %i[schedule try_schedule].each do |submission|
+          assert_raises(ArgumentError) { scheduler.public_send(submission, values, mode:, auto_local: false) { nil } }
+        end
         assert_raises(ArgumentError) { scheduler.execute(values, mode:, auto_local: false) { nil } }
       end
 

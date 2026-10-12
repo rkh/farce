@@ -305,28 +305,28 @@ module Farce
       # Otherwise, the block must be convertible to a Ractor-shareable proc.
       # Pass task data as arguments so the selected transfer mode can be applied to it.
       #
-      # @!macro modes
+      # @overload schedule(*args, mode: :smart, auto_local: true)
+      #   @!macro modes
       #
-      # @param args [Array<Object>] Positional arguments passed to the task block.
-      # @param mode [Symbol]
-      #   Argument transfer mode from {Farce::MODES}, including `:copy`, `:marshal`, and `:local`.
-      #   See {ModeManager#wrap}.
-      # @param auto_local [Boolean] Whether to override mode with `:local` in the owning Ractor.
-      # @yield [*args] The task to execute.
-      # @return [Scheduler] self.
-      # @raise [SchedulerClosedError] If the handle is closing, closed, or in an error state.
-      # @see Ractor.shareable_proc
-      def schedule(*args, mode: :smart, auto_local: true, &block)
-        raise SchedulerClosedError, "cannot schedule task on a closed scheduler" if closed?
+      #   @param args [Array<Object>] Positional arguments passed to the task block.
+      #   @param mode [Symbol]
+      #     Argument transfer mode from {Farce::MODES}, including `:copy`, `:marshal`, and `:local`.
+      #     See {ModeManager#wrap}.
+      #   @param auto_local [Boolean] Whether to override mode with `:local` in the owning Ractor.
+      #   @yield [*args] The task to execute.
+      #   @return [Scheduler] self.
+      #   @raise [SchedulerClosedError] If the handle is closing, closed, or in an error state.
+      #   @see Ractor.shareable_proc
+      def schedule(...) = enqueue_task(false, ...)
 
-        raise LocalJumpError, "Cannot schedule without a block" unless block
-
-        @queue.push(prepare_task(args, block, mode, auto_local))
-        self
-      rescue ClosedQueueError
-        raise unless closed?
-        raise SchedulerClosedError, "cannot schedule task on a closed scheduler"
-      end
+      # Enqueues a task without waiting for queue space.
+      # Arguments and transfer modes follow {#schedule}. With `auto_local` enabled,
+      # it still waits for ownership to be assigned.
+      #
+      # @overload try_schedule(*args, mode: :smart, auto_local: true)
+      #   @param (see Farce::Abstract::Executor#schedule)
+      #   @return [self, nil] self when submitted, or nil when the queue is full.
+      def try_schedule(...) = enqueue_task(true, ...)
 
       # (see Farce::Abstract::Executor#local?)
       def local?(wait: true)
@@ -417,6 +417,19 @@ module Farce
       end
 
       private
+
+      def enqueue_task(non_block, *args, mode: :smart, auto_local: true, &block)
+        raise SchedulerClosedError, "cannot schedule task on a closed scheduler" if closed?
+
+        raise LocalJumpError, "Cannot schedule without a block" unless block
+
+        task = prepare_task(args, block, mode, auto_local)
+        return unless non_block ? @queue.try_push(task) : @queue.push(task)
+        self
+      rescue ClosedQueueError
+        raise unless closed?
+        raise SchedulerClosedError, "cannot schedule task on a closed scheduler"
+      end
 
       def new_queue(capacity:) = Internal::Queue.new(capacity:)
 

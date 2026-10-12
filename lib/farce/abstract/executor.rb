@@ -81,6 +81,13 @@ module Farce
       # @return [Boolean] Whether the executor is local for the current Ractor.
       def local?(wait: true) = false # rubocop:disable Lint/UnusedMethodArgument
 
+      # Attempts to submit a task. Queue-based executors return `nil` when full
+      # instead of waiting for space. Other executors behave like {#schedule}.
+      #
+      # @param (see #schedule)
+      # @return [self, nil] self when submitted, or nil when the queue is full.
+      def try_schedule(...) = schedule(...)
+
       # Closes the executor in every scope.
       # For executors without scopes, this behaves like {#close}.
       #

@@ -34,8 +34,8 @@ module Farce
       workers = []
       values = []
       caller_self = self
-      2.times do
-        returned = @scheduler.schedule(values, mode: :move, auto_local: false) do |array|
+      %i[schedule try_schedule].each do |submission|
+        returned = @scheduler.public_send(submission, values, mode: :move, auto_local: false) do |array|
           started << [Thread.current, self, array]
           release.pop
         end
@@ -85,6 +85,7 @@ module Farce
 
     def test_schedule_requires_a_block
       assert_raises(LocalJumpError) { @scheduler.schedule }
+      assert_raises(LocalJumpError) { @scheduler.try_schedule }
     end
 
     def test_stateless_scheduler_is_shareable_and_close_is_a_noop
