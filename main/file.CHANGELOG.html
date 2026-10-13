@@ -73,8 +73,45 @@
       <div id="content"><div id='filecontents'><h1 id="changelog">Changelog<a href="#changelog" aria-label="Link to heading 'Changelog'" data-heading-content="Changelog" class="anchor"></a></h1>
 <p>Farce follows <a href="http://semver.org/">Semantic Versioning 2.0</a>. Any public method on any public class or module documented in the README or via YARD and not declared private is part of the public API.</p>
 <h2 id="development-releases">Development Releases<a href="#development-releases" aria-label="Link to heading 'Development Releases'" data-heading-content="Development Releases" class="anchor"></a></h2>
-<h3 id="farce-020-2026-10-11">Farce 0.2.0 (2026-10-11)<a href="#farce-020-2026-10-11" aria-label="Link to heading 'Farce 0.2.0 (2026-10-11)'" data-heading-content="Farce 0.2.0 (2026-10-11)" class="anchor"></a></h3>
+<h3 id="farce-030-2026-10-13">Farce 0.3.0 (2026-10-13)<a href="#farce-030-2026-10-13" aria-label="Link to heading 'Farce 0.3.0 (2026-10-13)'" data-heading-content="Farce 0.3.0 (2026-10-13)" class="anchor"></a></h3>
 <h4 id="new-features">New Features<a href="#new-features" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
+<h5 id="breaking-changes">Breaking Changes<a href="#breaking-changes" aria-label="Link to heading 'Breaking Changes'" data-heading-content="Breaking Changes" class="anchor"></a></h5>
+<ul>
+<li><code>Abstract::Scheduler</code> is no longer a superclass of <code>Pool</code>. Use <code>Abstract::Executor</code> instead.</li>
+</ul>
+<h5 id="executor-improvements">Executor Improvements<a href="#executor-improvements" aria-label="Link to heading 'Executor Improvements'" data-heading-content="Executor Improvements" class="anchor"></a></h5>
+<p><code>Scheduler</code> and <code>Pool</code> have the following improvements:</p>
+<ul>
+<li>They now support <code>try_schedule</code>, which discards tasks and returns <code>nil</code> when their internal queues are at capacity.</li>
+<li>They now have <code>Unshared</code> and <code>Local</code> variants, running in a Ractor-local context (Pool will manage a Thread pool instead of a Ractor pool).</li>
+</ul>
+<p>Creates a thread pool with a maximum size of 2 and a queue capacity of 10:</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># A thread pool local to the current Ractor
+</span><span class='id identifier rubyid_thread_pool'>thread_pool</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Unshared.html" title="Farce::Unshared (module)">Unshared</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Unshared/Pool.html" title="Farce::Unshared::Pool (class)">Pool</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Unshareable.html#initialize-instance_method" title="Farce::Unshareable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>max_size:</span> <span class='int'>2</span><span class='comma'>,</span> <span class='label'>capacity:</span> <span class='int'>10</span><span class='rparen'>)</span>
+
+<span class='comment'># this should only run approximately 10 tasks on CRuby
+</span><span class='int'>500</span><span class='period'>.</span><span class='id identifier rubyid_times'>times</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_thread_pool'>thread_pool</span><span class='period'>.</span><span class='id identifier rubyid_try_schedule'>try_schedule</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Task executed</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span> <span class='rbrace'>}</span>
+</code></pre>
+<h5 id="tasks">Tasks<a href="#tasks" aria-label="Link to heading 'Tasks'" data-heading-content="Tasks" class="anchor"></a></h5>
+<p>A new class, <code>Task</code>, has been introduced to represent asynchronous tasks that can be scheduled and executed within Farce's executor framework,
+executed manually, or handed off to any other executor supporting procs or callable objects.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_task'>task</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Task.html" title="Farce::Task (class)">Task</a></span></span><span class='period'>.</span><span class='id identifier rubyid_schedule'><span class='object_link'><a href="Farce/Task.html#schedule-class_method" title="Farce::Task.schedule (method)">schedule</a></span></span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Task started</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span>
+  <span class='symbol'>:success</span>
+<span class='kw'>ensure</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Task finished</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_alive?'>alive?</span> <span class='comment'># =&gt; true
+</span><span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>  <span class='comment'># =&gt; :success (blocks until the task completes)
+</span></code></pre>
+<h4 id="bug-fixes">Bug Fixes<a href="#bug-fixes" aria-label="Link to heading 'Bug Fixes'" data-heading-content="Bug Fixes" class="anchor"></a></h4>
+<ul>
+<li>Calling <code>wait_*</code> methods on atoms on JRuby no longer blocks a fiber scheduler.</li>
+</ul>
+<h3 id="farce-020-2026-10-11">Farce 0.2.0 (2026-10-11)<a href="#farce-020-2026-10-11" aria-label="Link to heading 'Farce 0.2.0 (2026-10-11)'" data-heading-content="Farce 0.2.0 (2026-10-11)" class="anchor"></a></h3>
+<h4 id="new-features-1">New Features<a href="#new-features-1" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
 <h5 id="waiting-on-flags">Waiting on Flags<a href="#waiting-on-flags" aria-label="Link to heading 'Waiting on Flags'" data-heading-content="Waiting on Flags" class="anchor"></a></h5>
 <p>You can now wait for a <code>Farce::Flag</code> or <code>Farce::Local::Flag</code> to change its value:</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_flag'>flag</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Flag.html" title="Farce::Flag (class)">Flag</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Flag.html#initialize-instance_method" title="Farce::Flag#initialize (method)">new</a></span></span>
@@ -110,7 +147,7 @@ This allows you to cancel a scheduled value using the returned entry:</p>
 <li>Trying to make an unshareable object shareable raises a better error message now (<code>Ractor::Error</code> with a descriptive message, instead of a <code>NoMethodError</code>).</li>
 <li>Added a new transfer mode: <code>:marshal</code>, which will copy objects between Ractors using Ruby's <a href="https://docs.ruby-lang.org/en/4.0/Marshal.html">Marshal</a> serialization.</li>
 </ul>
-<h4 id="bug-fixes">Bug Fixes<a href="#bug-fixes" aria-label="Link to heading 'Bug Fixes'" data-heading-content="Bug Fixes" class="anchor"></a></h4>
+<h4 id="bug-fixes-1">Bug Fixes<a href="#bug-fixes-1" aria-label="Link to heading 'Bug Fixes'" data-heading-content="Bug Fixes" class="anchor"></a></h4>
 <ul>
 <li>Improve compatibility with other gems modifying <code>Kernel#require</code>, work around an issue with Ruby 4.0's runtime ractor require patch and alias methods chains not working nicely with <code>Module#prepend</code>.</li>
 </ul>
@@ -176,7 +213,7 @@ This allows you to cancel a scheduled value using the returned entry:</p>
 </div></div>
 
       <div id="footer">
-  Generated on Tue Oct 13 11:30:36 2026 by
+  Generated on Tue Oct 13 11:59:50 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
