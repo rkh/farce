@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: Farce::Local::Pool
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="../../css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "Farce::Local::Pool";
+  relpath = '../../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="../../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../../../main/index.html">main</option>
+<option value="../../index.html" selected>v0.3.0</option>
+<option value="../../../v0.2.0/index.html">v0.2.0</option>
+<option value="../../../v0.1.0/index.html">v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../../_index.html">Index (P)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Local.html" title="Farce::Local (module)">Local</a></span></span>
+     &raquo; 
+    <span class="title">Pool</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: Farce::Local::Pool
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName"><span class='object_link'><a href="../Abstract/Pool.html" title="Farce::Abstract::Pool (class)">Abstract::Pool</a></span></span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next"><span class='object_link'><a href="../Abstract/Executor.html" title="Farce::Abstract::Executor (class)">Abstract::Executor</a></span></li>
+          
+            <li class="next"><span class='object_link'><a href="../Abstract/Pool.html" title="Farce::Abstract::Pool (class)">Abstract::Pool</a></span></li>
+          
+            <li class="next">Farce::Local::Pool</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  <dl>
+      <dt>Includes:</dt>
+      <dd><span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span>, <span class='object_link'><a href="../Shareable/Unfreezable.html" title="Farce::Shareable::Unfreezable (module)">Shareable::Unfreezable</a></span>, Internal::LocalExecutorMethods</dd>
+  </dl>
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/farce/local/pool.rb
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>A shareable handle with an independent thread pool in each scope.</p>
+<p>Each pool uses the scaling settings and fiber scheduler configured at
+construction. Tasks always keep their block and argument references. Only
+local and smart modes are accepted when <code>auto_local</code> is false. A scheduler
+constructor must be convertible to a shareable proc for use in each Ractor.
+<span class='object_link'><a href="#close-instance_method" title="Farce::Local::Pool#close (method)">#close</a></span> drains only the current scope's pool. <span class='object_link'><a href="#close_all-instance_method" title="Farce::Local::Pool#close_all (method)">#close_all</a></span> drains every pool
+across all scopes and Ractors, and prevents new pools from starting.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Keep task state within each Ractor</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_pool'>pool</span>    <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Local.html" title="Farce::Local (module)">Local</a></span></span><span class='op'>::</span><span class='const'>Pool</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="Farce::Local::Pool#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>max_size:</span> <span class='int'>2</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_results'>results</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Unshared.html" title="Farce::Unshared (module)">Unshared</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Unshared/Queue.html" title="Farce::Unshared::Queue (class)">Queue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Unshared/Queue.html#initialize-instance_method" title="Farce::Unshared::Queue#initialize (method)">new</a></span></span>
+<span class='id identifier rubyid_pool'>pool</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_results'>results</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='symbol'>:done</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_results'>results</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span> <span class='comment'># =&gt; :done
+</span><span class='id identifier rubyid_pool'>pool</span><span class='period'>.</span><span class='id identifier rubyid_close_all'>close_all</span></code></pre>
+    
+  </div>
+
+
+</div>
+
+
+
+
+
+  <h2>Instance Attribute Summary</h2>
+  
+  <h3 class="inherited">Attributes included from <span class='object_link'><a href="Scoped.html" title="Farce::Local::Scoped (module)">Scoped</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Scoped.html#scope-instance_method" title="Farce::Local::Scoped#scope (method)">#scope</a></span></p>
+
+  
+  
+  <h3 class="inherited">Attributes inherited from <span class='object_link'><a href="../Abstract/Pool.html" title="Farce::Abstract::Pool (class)">Abstract::Pool</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/Pool.html#grow_after-instance_method" title="Farce::Abstract::Pool#grow_after (method)">#grow_after</a></span>, <span class='object_link'><a href="../Abstract/Pool.html#max_inflight-instance_method" title="Farce::Abstract::Pool#max_inflight (method)">#max_inflight</a></span>, <span class='object_link'><a href="../Abstract/Pool.html#max_size-instance_method" title="Farce::Abstract::Pool#max_size (method)">#max_size</a></span>, <span class='object_link'><a href="../Abstract/Pool.html#min_size-instance_method" title="Farce::Abstract::Pool#min_size (method)">#min_size</a></span>, <span class='object_link'><a href="../Abstract/Pool.html#shrink_after-instance_method" title="Farce::Abstract::Pool#shrink_after (method)">#shrink_after</a></span></p>
+
+
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#close-instance_method" title="#close (instance method)">#<strong>close</strong>  &#x21d2; self </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Stop accepting work in this scope and drain its queued tasks.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#close_all-instance_method" title="#close_all (instance method)">#<strong>close_all</strong>  &#x21d2; self </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Stop accepting work in every scope and Ractor and request draining.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#closed%3F-instance_method" title="#closed? (instance method)">#<strong>closed?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether this scope rejects new tasks.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#error-instance_method" title="#error (instance method)">#<strong>error</strong>  &#x21d2; Exception<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The first worker error in this scope.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(min_size: 0, max_size: 4, max_inflight: 64, grow_after: 0.005, shrink_after: 30, capacity: 1024, scope: :ractor, backend: Internal::FROZEN_CONFIG.io_backend, &amp;constructor)  &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Create and start an elastic pool using the configured fiber scheduler.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#size-instance_method" title="#size (instance method)">#<strong>size</strong>  &#x21d2; Integer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Running and starting workers in this scope.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#state-instance_method" title="#state (instance method)">#<strong>state</strong>  &#x21d2; Symbol </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The current scope's pool state.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Shareable</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/Pool.html" title="Farce::Abstract::Pool (class)">Abstract::Pool</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/Pool.html#at_max_size%3F-instance_method" title="Farce::Abstract::Pool#at_max_size? (method)">#at_max_size?</a></span>, <span class='object_link'><a href="../Abstract/Pool.html#closing%3F-instance_method" title="Farce::Abstract::Pool#closing? (method)">#closing?</a></span>, <span class='object_link'><a href="../Abstract/Pool.html#schedule-instance_method" title="Farce::Abstract::Pool#schedule (method)">#schedule</a></span>, <span class='object_link'><a href="../Abstract/Pool.html#try_schedule-instance_method" title="Farce::Abstract::Pool#try_schedule (method)">#try_schedule</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/Executor.html" title="Farce::Abstract::Executor (class)">Abstract::Executor</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/Executor.html#execute-instance_method" title="Farce::Abstract::Executor#execute (method)">#execute</a></span>, <span class='object_link'><a href="../Abstract/Executor.html#local%3F-instance_method" title="Farce::Abstract::Executor#local? (method)">#local?</a></span>, <span class='object_link'><a href="../Abstract/Executor.html#ractor_shareable%3F-instance_method" title="Farce::Abstract::Executor#ractor_shareable? (method)">#ractor_shareable?</a></span>, <span class='object_link'><a href="../Abstract/Executor.html#schedule-instance_method" title="Farce::Abstract::Executor#schedule (method)">#schedule</a></span>, <span class='object_link'><a href="../Abstract/Executor.html#try_schedule-instance_method" title="Farce::Abstract::Executor#try_schedule (method)">#try_schedule</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Internal::Noncopyable</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Internal/Noncopyable.html#duplicable%3F-instance_method" title="Farce::Internal::Noncopyable#duplicable? (method)">#duplicable?</a></span></p>
+<div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    #<strong>initialize</strong>(min_size: 0, max_size: 4, max_inflight: 64, grow_after: 0.005, shrink_after: 30, capacity: 1024, scope: :ractor, backend: Internal::FROZEN_CONFIG.io_backend, &amp;constructor)  &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Create and start an elastic pool using the configured fiber scheduler.
+An explicit constructor block overrides the configured default.</p>
+<p><code>max_inflight</code> is a soft limit. A worker may exceed it when its scheduler
+has no runnable fibers or when the pool has reached <code>max_size</code>.</p>
+<p>Valid scopes are:</p>
+<ul>
+<li><code>:ractor</code> - The value is shared by all threads within the same Ractor.</li>
+<li><code>:thread_group</code> - The value is shared by all threads within the same thread group.</li>
+<li><code>:thread</code> - The value is shared by all fibers within the same thread.</li>
+<li><code>:fiber_storage</code> - The value is shared by all fibers using the same storage.
+Unless explicitly specified, storage is inherited from the parent fiber for blocking fibers,
+but not for non-blocking fibers (such as those created by <span class='object_link'><a href="Scheduler.html#schedule-instance_method" title="Farce::Local::Scheduler#schedule (method)">Scheduler#schedule</a></span>).</li>
+<li><code>:fiber</code> - Each fiber has its own independent value.</li>
+</ul>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>min_size</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>0</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Workers started immediately and retained while open.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>max_size</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>4</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Maximum workers allowed.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>max_inflight</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>64</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Soft task limit for each worker.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>grow_after</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>0.005</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Queue wait before adding another worker.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>shrink_after</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>30</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Idle time before an extra worker retires.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>capacity</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>1024</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Pending-task capacity.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>backend</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>Internal::FROZEN_CONFIG.io_backend</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>IO backend for the built-in scheduler.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>scope</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>:ractor</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The scope of the pool. Defaults to <code>:ractor</code>.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Object</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Fiber scheduler constructed in each worker.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 30</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>min_size:</span> <span class='int'>0</span><span class='comma'>,</span> <span class='label'>max_size:</span> <span class='int'>4</span><span class='comma'>,</span> <span class='label'>max_inflight:</span> <span class='int'>64</span><span class='comma'>,</span>
+               <span class='label'>grow_after:</span> <span class='float'>0.005</span><span class='comma'>,</span> <span class='label'>shrink_after:</span> <span class='int'>30</span><span class='comma'>,</span> <span class='label'>capacity:</span> <span class='int'>1024</span><span class='comma'>,</span> <span class='label'>scope:</span> <span class='symbol'>:ractor</span><span class='comma'>,</span>
+               <span class='label'>backend:</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>FROZEN_CONFIG</span><span class='period'>.</span><span class='id identifier rubyid_io_backend'>io_backend</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_constructor'>constructor</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_initialize_configuration'>initialize_configuration</span><span class='lparen'>(</span><span class='label'>min_size:</span><span class='comma'>,</span> <span class='label'>max_size:</span><span class='comma'>,</span> <span class='label'>max_inflight:</span><span class='comma'>,</span> <span class='label'>grow_after:</span><span class='comma'>,</span> <span class='label'>shrink_after:</span><span class='comma'>,</span> <span class='label'>backend:</span><span class='rparen'>)</span>
+  <span class='ivar'>@constructor</span> <span class='op'>=</span> <span class='id identifier rubyid_prepare_constructor'>prepare_constructor</span><span class='lparen'>(</span><span class='id identifier rubyid_constructor'>constructor</span> <span class='op'>||</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>FROZEN_CONFIG</span><span class='period'>.</span><span class='id identifier rubyid_fiber_scheduler_constructor'>fiber_scheduler_constructor</span><span class='rparen'>)</span>
+  <span class='ivar'>@pools</span>       <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Strict.html" title="Farce::Strict (module)">Strict</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Strict/Map.html" title="Farce::Strict::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Strict/Map.html#initialize-instance_method" title="Farce::Strict::Map#initialize (method)">new</a></span></span>
+  <span class='ivar'>@closed_all</span>  <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Flag</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='kw'>false</span><span class='rparen'>)</span>
+  <span class='ivar'>@initialization_key</span> <span class='op'>=</span> <span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span>
+  <span class='kw'>super</span><span class='lparen'>(</span><span class='label'>scope:</span><span class='comma'>,</span> <span class='label'>min_size:</span> <span class='ivar'>@min_size</span><span class='comma'>,</span> <span class='label'>max_size:</span> <span class='ivar'>@max_size</span><span class='comma'>,</span> <span class='label'>max_inflight:</span> <span class='ivar'>@max_inflight</span><span class='comma'>,</span>
+        <span class='label'>grow_after:</span> <span class='ivar'>@grow_after</span><span class='comma'>,</span> <span class='label'>shrink_after:</span> <span class='ivar'>@shrink_after</span><span class='comma'>,</span> <span class='label'>capacity:</span><span class='comma'>,</span> <span class='label'>backend:</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="close-instance_method">
+  
+    #<strong>close</strong>  &#x21d2; <tt>self</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Stop accepting work in this scope and drain its queued tasks.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+44
+45
+46
+47
+48</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 44</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_close'>close</span>
+  <span class='id identifier rubyid_pool'>pool</span> <span class='op'>=</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>?</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='comma'>,</span> <span class='label'>scope:</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span>
+  <span class='id identifier rubyid_pool'>pool</span><span class='op'>&amp;.</span><span class='id identifier rubyid_close'>close</span>
+  <span class='kw'>self</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="close_all-instance_method">
+  
+    #<strong>close_all</strong>  &#x21d2; <tt>self</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Stop accepting work in every scope and Ractor and request draining.
+Future scopes also reject submissions. Does not wait for running tasks.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 53</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_close_all'>close_all</span>
+  <span class='kw'>return</span> <span class='kw'>self</span> <span class='kw'>unless</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+  <span class='ivar'>@pools</span><span class='period'>.</span><span class='id identifier rubyid_each_pair'>each_pair</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_pool'>pool</span><span class='comma'>,</span> <span class='id identifier rubyid_queue'>queue</span><span class='op'>|</span>
+    <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='lbracket'>[</span><span class='id identifier rubyid_pool'>pool</span><span class='comma'>,</span> <span class='symbol'>:close</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span><span class='comma'>,</span> <span class='label'>clock:</span> <span class='int'>0</span><span class='rparen'>)</span>
+  <span class='kw'>rescue</span> <span class='const'><span class='object_link'><a href="../../Farce.html#ClosedQueueError-constant" title="Farce::ClosedQueueError (constant)">ClosedQueueError</a></span></span>
+    <span class='comment'># The owning Ractor may already have shut down its supervisor.
+</span>    <span class='kw'>nil</span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_close'>close</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="closed?-instance_method">
+  
+    #<strong>closed?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns Whether this scope rejects new tasks.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether this scope rejects new tasks.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+74</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 74</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>=</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>||</span> <span class='kw'>super</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="error-instance_method">
+  
+    #<strong>error</strong>  &#x21d2; <tt>Exception</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns The first worker error in this scope.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Exception</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The first worker error in this scope.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+71</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 71</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_error'>error</span> <span class='op'>=</span> <span class='id identifier rubyid_current_pool'>current_pool</span><span class='op'>&amp;.</span><span class='id identifier rubyid_error'>error</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="size-instance_method">
+  
+    #<strong>size</strong>  &#x21d2; <tt>Integer</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns Running and starting workers in this scope.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Running and starting workers in this scope.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+65</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 65</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>=</span> <span class='id identifier rubyid_current_pool'>current_pool</span><span class='op'>&amp;.</span><span class='id identifier rubyid_size'>size</span> <span class='op'>||</span> <span class='int'>0</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="state-instance_method">
+  
+    #<strong>state</strong>  &#x21d2; <tt>Symbol</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns The current scope's pool state.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The current scope's pool state.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+68</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 68</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_state'>state</span> <span class='op'>=</span> <span class='id identifier rubyid_current_pool'>current_pool</span><span class='op'>&amp;.</span><span class='id identifier rubyid_state'>state</span> <span class='op'>||</span> <span class='symbol'>:closed</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Tue Oct 13 12:00:37 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>
