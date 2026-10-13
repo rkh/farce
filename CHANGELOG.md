@@ -4,6 +4,53 @@ Farce follows [Semantic Versioning 2.0](http://semver.org/). Any public method o
 
 ## Development Releases
 
+### Farce 0.3.0 (2026-10-13)
+
+#### New Features
+
+##### Breaking Changes
+
+* `Abstract::Scheduler` is no longer a superclass of `Pool`. Use `Abstract::Executor` instead.
+
+##### Executor Improvements
+
+`Scheduler` and `Pool` have the following improvements:
+
+* They now support `try_schedule`, which discards tasks and returns `nil` when their internal queues are at capacity.
+* They now have `Unshared` and `Local` variants, running in a Ractor-local context (Pool will manage a Thread pool instead of a Ractor pool).
+
+Creates a thread pool with a maximum size of 2 and a queue capacity of 10:
+
+```ruby
+# A thread pool local to the current Ractor
+thread_pool = Farce::Unshared::Pool.new(max_size: 2, capacity: 10)
+
+# this should only run approximately 10 tasks on CRuby
+500.times { thread_pool.try_schedule { puts "Task executed" } }
+```
+
+##### Tasks
+
+A new class, `Task`, has been introduced to represent asynchronous tasks that can be scheduled and executed within Farce's executor framework,
+executed manually, or handed off to any other executor supporting procs or callable objects.
+
+```ruby
+task = Farce::Task.schedule do
+  puts "Task started"
+  sleep 1
+  :success
+ensure
+  puts "Task finished"
+end
+
+task.alive? # => true
+task.value  # => :success (blocks until the task completes)
+```
+
+#### Bug Fixes
+
+* Calling `wait_*` methods on atoms on JRuby no longer blocks a fiber scheduler.
+
 ### Farce 0.2.0 (2026-10-11)
 
 #### New Features
