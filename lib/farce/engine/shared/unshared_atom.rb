@@ -17,7 +17,7 @@ module Farce
         @value               = value
         @compare_by_identity = compare_by_identity
         @mutex               = Mutex.new
-        @signal              = ConditionVariable.new
+        @signal              = Signal.new
         @updating            = false
         @updating_fiber      = nil
         @updating_thread     = nil
@@ -224,13 +224,14 @@ module Farce
       end
 
       def wait_for_signal(deadline)
-        return @signal.wait(@mutex) unless deadline
-
-        remaining = deadline - Clock.now
-        return false unless remaining.positive?
-
-        @signal.wait(@mutex, remaining)
-        true
+        # Snapshot while holding the state lock so a change during registration is not missed.
+        generation = @signal.generation
+        begin
+          @mutex.unlock
+          ReservationWaiting.wait(@signal, generation, deadline)
+        ensure
+          @mutex.lock unless @mutex.owned?
+        end
       end
 
       def reject_update_wait!

@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../../setup"
 
@@ -399,7 +401,7 @@ module Farce
       end
 
       def test_wait_does_not_block_a_fiber_scheduler
-        return unless RUBY_ENGINE == "ruby"
+        return if RUBY_ENGINE == "truffleruby"
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
         atom = atom_class.new
@@ -422,7 +424,7 @@ module Farce
       end
 
       def test_value_setter_contention_does_not_block_a_fiber_scheduler
-        return unless RUBY_ENGINE == "ruby"
+        return if RUBY_ENGINE == "truffleruby"
 
         scheduler = Helpers::QueueTestScheduler.new
         Fiber.set_scheduler(scheduler)
@@ -432,7 +434,7 @@ module Farce
         Fiber.schedule do
           events << :updating
           atom.update do |old|
-            Fiber.scheduler.kernel_sleep(0.01)
+            scheduler.kernel_sleep(0.01)
             events << :update_finished
             old + 1
           end
