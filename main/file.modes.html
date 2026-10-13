@@ -488,6 +488,11 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <td>The result computed once by the factory.</td>
 </tr>
 <tr>
+<td><code>Farce::Task</code></td>
+<td><code>new</code>, <code>schedule</code>, <code>try_schedule</code>, <code>in_parallel</code>, <code>on_main</code>, <code>add_argument</code></td>
+<td>Arguments and the successful result. <code>add_argument</code> overrides the mode for one argument. Scheduling can select local mode automatically.</td>
+</tr>
+<tr>
 <td><code>Farce::Molecule</code></td>
 <td><code>define</code>, <code>new</code></td>
 <td>Newly created field atoms.</td>
@@ -807,7 +812,7 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 </div></div>
 
       <div id="footer">
-  Generated on Mon Oct 12 19:30:45 2026 by
+  Generated on Tue Oct 13 11:30:36 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

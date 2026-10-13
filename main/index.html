@@ -206,6 +206,7 @@
 <li><a href="#farceschedule"><code>Farce.schedule</code></a></li>
 <li><a href="#schedulers">Schedulers</a></li>
 <li><a href="#ractor-pools">Ractor Pools</a></li>
+<li><a href="#tasks">Tasks</a></li>
 <li><a href="#third-party-fiber-schedulers">Third-Party Fiber Schedulers</a></li>
 </ul>
 </li>
@@ -1208,6 +1209,33 @@ For maps, this is only supported for values. Keys must be shareable.</li>
 </span><span class='id identifier rubyid_pool'>pool</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Pool.html" title="Farce::Pool (class)">Pool</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>min_size:</span> <span class='int'>4</span><span class='comma'>,</span> <span class='label'>max_size:</span> <span class='int'>10</span><span class='comma'>,</span> <span class='label'>grow_after:</span> <span class='float'>0.1</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_pool'>pool</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Hello from the pool!</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
 </code></pre>
+<h4 id="tasks">Tasks<a href="#tasks" aria-label="Link to heading 'Tasks'" data-heading-content="Tasks" class="anchor"></a></h4>
+<p>If you want to retrieve the result of an asynchronous operation, or monitor if it is still running, you can use <code>Farce::Task</code>:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_task'>task</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Task.html" title="Farce::Task (class)">Task</a></span></span><span class='period'>.</span><span class='id identifier rubyid_schedule'><span class='object_link'><a href="Farce/Task.html#schedule-class_method" title="Farce::Task.schedule (method)">schedule</a></span></span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_a'>a</span><span class='comma'>,</span> <span class='id identifier rubyid_b'>b</span><span class='op'>|</span>
+  <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span> <span class='comment'># simulate intense computation
+</span>  <span class='id identifier rubyid_a'>a</span> <span class='op'>+</span> <span class='id identifier rubyid_b'>b</span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_alive?'>alive?</span> <span class='comment'># =&gt; true
+</span><span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>  <span class='comment'># =&gt; 3 (after approximately 1 second)
+</span><span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>   <span class='comment'># would block, but doesn&#39;t, as the task has already completed
+</span></code></pre>
+<p>Tasks can also be created without immediately scheduling them, allowing you to control when and how they are executed:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_task'>task</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Task.html" title="Farce::Task (class)">Task</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Task.html#initialize-instance_method" title="Farce::Task#initialize (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='symbol'>:success</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_alive?'>alive?</span>     <span class='comment'># =&gt; true
+</span><span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='lparen'>(</span><span class='float'>0.1</span><span class='rparen'>)</span> <span class='comment'># =&gt; nil (after 100 milliseconds)
+</span>
+<span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_schedule'><span class='object_link'><a href="Farce.html#schedule-class_method" title="Farce.schedule (method)">schedule</a></span></span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_task'>task</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='comment'># =&gt; :success
+</span></code></pre>
+<p>This allows you to use third-party executors:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_require'>require</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>concurrent</span><span class='tstring_end'>&quot;</span></span>
+<span class='id identifier rubyid_executor'>executor</span> <span class='op'>=</span> <span class='const'>Concurrent</span><span class='period'>.</span><span class='id identifier rubyid_global_fast_executor'>global_fast_executor</span>
+<span class='id identifier rubyid_task'>task</span>     <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Task.html" title="Farce::Task (class)">Task</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Task.html#initialize-instance_method" title="Farce::Task#initialize (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='symbol'>:success</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_executor'>executor</span><span class='period'>.</span><span class='id identifier rubyid_post'>post</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_task'>task</span><span class='rparen'>)</span>
+
+<span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='comment'># =&gt; :success
+</span></code></pre>
 <h4 id="third-party-fiber-schedulers">Third-Party Fiber Schedulers<a href="#third-party-fiber-schedulers" aria-label="Link to heading 'Third-Party Fiber Schedulers'" data-heading-content="Third-Party Fiber Schedulers" class="anchor"></a></h4>
 <p>Both <code>Farce::Scheduler</code> and <code>Farce::Pool</code> run a Fiber scheduler under the hood to execute tasks. This is a Farce-internal scheduler by default, but you can replace it with your own if you want:</p>
 <pre class="code ruby"><code class="ruby"><span class='comment'># Use the fiber scheduler from the carbon_fiber gem.
@@ -1532,7 +1560,7 @@ need to specifically load any particular file.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Mon Oct 12 19:30:45 2026 by
+  Generated on Tue Oct 13 11:30:36 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
