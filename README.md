@@ -7,9 +7,9 @@ Farce provides mutable data structures and coordination tools for Ruby code that
 ```ruby
 require "farce"
 
-counts = Farce::Map.new
+counts  = Farce::Map.new
 workers = 4.times.map do
-  Farce::Ractor.new(counts) do |counts|
+  Farce.in_parallel(counts) do |counts|
     100.times do
       counts.upsert(:completed, 1) { |count| count + 1 }
     end
