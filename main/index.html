@@ -76,9 +76,9 @@
 <p><strong>Here's a taste:</strong> four workers updating the same map, without losing increments or managing a lock.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_require'>require</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>farce</span><span class='tstring_end'>&quot;</span></span>
 
-<span class='id identifier rubyid_counts'>counts</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Map.html" title="Farce::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Map.html#initialize-instance_method" title="Farce::Map#initialize (method)">new</a></span></span>
+<span class='id identifier rubyid_counts'>counts</span>  <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Map.html" title="Farce::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Map.html#initialize-instance_method" title="Farce::Map#initialize (method)">new</a></span></span>
 <span class='id identifier rubyid_workers'>workers</span> <span class='op'>=</span> <span class='int'>4</span><span class='period'>.</span><span class='id identifier rubyid_times'>times</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='kw'>do</span>
-  <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_counts'>counts</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_counts'>counts</span><span class='op'>|</span>
+  <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_in_parallel'><span class='object_link'><a href="Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">in_parallel</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_counts'>counts</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_counts'>counts</span><span class='op'>|</span>
     <span class='int'>100</span><span class='period'>.</span><span class='id identifier rubyid_times'>times</span> <span class='kw'>do</span>
       <span class='id identifier rubyid_counts'>counts</span><span class='period'>.</span><span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='symbol'>:completed</span><span class='comma'>,</span> <span class='int'>1</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_count'>count</span><span class='op'>|</span> <span class='id identifier rubyid_count'>count</span> <span class='op'>+</span> <span class='int'>1</span> <span class='rbrace'>}</span>
     <span class='kw'>end</span>
@@ -265,7 +265,7 @@
 </div></div>
 
       <div id="footer">
-  Generated on Tue Oct 13 12:51:20 2026 by
+  Generated on Tue Oct 13 12:53:05 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
