@@ -205,7 +205,7 @@ Adapt existing data without rebuilding it by hand:
 
 ```ruby
 config = Farce.enfarce({ retries: [1, 2, 3] })
-config.class          # => Farce::Map
+config.class           # => Farce::Map
 config[:retries].class # => Farce::Vector
 ```
 
