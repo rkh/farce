@@ -274,13 +274,13 @@ Both the Ruby core library, and other libraries, like the very popular [concurre
       <td>HashMap, AtomicInteger</td>
       <td>⚠️ CRuby only</td>
       <td>⚠️ CRuby only</td>
-      <td>✅ supported</td>
+      <td>⚠️ CRuby only</td>
     </tr>
     <tr>
       <td>Queue</td>
       <td>⚠️ CRuby only</td>
       <td>❌ <b>not supported</b></td>
-      <td>✅ supported</td>
+      <td>⚠️ CRuby only</td>
     </tr>
   </tbody>
 </table>
