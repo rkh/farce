@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: Sharing Unshareable Data
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "sharing";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="index.html" selected>main</option>
+<option value="../version/v0.3.0/index.html">v0.3.0</option>
+<option value="../version/v0.2.0/index.html">v0.2.0</option>
+<option value="../version/v0.1.0/index.html">v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: Sharing Unshareable Data</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="sharing-unshareable-data">Sharing Unshareable Data<a href="#sharing-unshareable-data" aria-label="Link to heading 'Sharing Unshareable Data'" data-heading-content="Sharing Unshareable Data" class="anchor"></a></h1>
+<p>Ruby's <code>Ractor::Port#send</code> and related methods share Ruby objects between Ractors with this logic:</p>
+<ol>
+<li>If the object is Ractor shareable, pass it by reference.</li>
+<li>If the object isn't Ractor shareable and the <code>move</code> option hasn't been set to <code>true</code>, pass it by value (copy it).</li>
+<li>Otherwise move it from the sending Ractor to the receiving Ractor, invalidating any previous references.</li>
+</ol>
+<p>This is a great start but has some complications:</p>
+<ul>
+<li>Copying can lead to a lot of data duplication, as large object trees may be copied between Ractors over and over again.</li>
+<li>Moving may invalidate nested references unexpectedly, breaking code in the sending Ractor.</li>
+<li>If you want to prevent sending unshareable objects to other Ractors, you have to manually check them every time.</li>
+</ul>
+<p>Farce has mechanisms and tools to improve the situation.</p>
+<h2 id="sharing-modes">Sharing Modes<a href="#sharing-modes" aria-label="Link to heading 'Sharing Modes'" data-heading-content="Sharing Modes" class="anchor"></a></h2>
+<div class="markdown-alert markdown-alert-tip">
+<p class="markdown-alert-title">Tip</p>
+<p>Learn more in the dedicated  <a href="file.modes.html" title="modes documentation">modes documentation</a>.</p>
+</div>
+<p>The <a href="file.variants-and-scopes.html#variants-and-scopes" title="default variants">default variants</a> of most <a href="file.data-structures.html#data-structures" title="data structures">data structures</a>, as well as <a href="file.shims.html#port" title="&lt;code&gt;Farce::Port&lt;/code&gt;"><code>Farce::Port</code></a>, implement a range of sharing modes, typically as a keyword argument for initialization as well as for methods that modify their content.</p>
+<p>These modes are:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>What happens to non-shareable data</th>
+<th>A typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:smart</code> (default)</td>
+<td>Applies smart rules or a dedicated proxy, raising for unsupported values.</td>
+<td>Share supported values with less copying.</td>
+</tr>
+<tr>
+<td><code>:smart_raise</code></td>
+<td>Applies smart rules or a dedicated proxy, with a raising fallback.</td>
+<td>Reject unsupported transfers.</td>
+</tr>
+<tr>
+<td><code>:smart_copy</code></td>
+<td>Applies smart rules or a dedicated proxy, then tries copying and Marshal. Default for <code>Farce::Port</code>.</td>
+<td>Send values with a copying fallback.</td>
+</tr>
+<tr>
+<td><code>:smart_move</code></td>
+<td>Applies smart rules or a dedicated proxy, then tries moving.</td>
+<td>Hand off unsupported values.</td>
+</tr>
+<tr>
+<td><code>:copy</code></td>
+<td>Transfers a copy and leaves the original usable.</td>
+<td>Send a snapshot of a request.</td>
+</tr>
+<tr>
+<td><code>:marshal</code></td>
+<td>Serializes a snapshot and reconstructs it once per receiving Ractor.</td>
+<td>Transfer an Unshared container.</td>
+</tr>
+<tr>
+<td><code>:move</code></td>
+<td>Transfers ownership and makes the original inaccessible.</td>
+<td>Hand a completed batch to a consumer.</td>
+</tr>
+<tr>
+<td><code>:local</code></td>
+<td>Keeps the same object in its originating Ractor.</td>
+<td>Pass work between local threads or fibers.</td>
+</tr>
+<tr>
+<td><code>:make_shareable</code></td>
+<td>Calls <code>Ractor.make_shareable</code> on the original.</td>
+<td>Publish finished configuration.</td>
+</tr>
+<tr>
+<td><code>:mutable</code></td>
+<td>Copies non-shareable objects into a <a href="#mutables"><code>Farce::Mutable</code></a>.</td>
+<td>Synchronize mutations across Ractors.</td>
+</tr>
+<tr>
+<td><code>:shareable_copy</code></td>
+<td>Makes a shareable copy and leaves the original alone.</td>
+<td>Publish a snapshot of an editable document.</td>
+</tr>
+<tr>
+<td><code>:dedup</code></td>
+<td>Deduplicates the value, then makes it shareable. May update and freeze the original.</td>
+<td>Reuse repeated message contents.</td>
+</tr>
+<tr>
+<td><code>:proxy</code></td>
+<td>Creates a <a href="#proxies"><code>Farce::Proxy</code></a> that executes calls in the original Ractor.</td>
+<td>Share access to a mutable object.</td>
+</tr>
+<tr>
+<td><code>:raise</code></td>
+<td>Raises <code>Ractor::IsolationError</code>.</td>
+<td>Enforce a shareable-data boundary.</td>
+</tr>
+</tbody>
+</table>
+<p>Here's an example:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_map'>map</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Map.html" title="Farce::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Map.html#initialize-instance_method" title="Farce::Map#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:mutable</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='symbol'>:content</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Hi there!</span><span class='tstring_end'>&quot;</span></span>
+
+<span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_it'>it</span><span class='lbracket'>[</span><span class='symbol'>:content</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> How are you doing?</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+
+<span class='comment'># Hi there! How are you doing?
+</span><span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='symbol'>:content</span><span class='rbracket'>]</span>
+</code></pre>
+<h2 id="envelopes">Envelopes<a href="#envelopes" aria-label="Link to heading 'Envelopes'" data-heading-content="Envelopes" class="anchor"></a></h2>
+<p>Farce allows you to explicitly wrap an object in an envelope. This is useful if you want to pass a value around between multiple Ractors (or multiple times between the same Ractors) without copying, wrapping, converting, or moving it every single time.</p>
+<p>Instead, you can wrap it in an envelope, and then later explicitly retrieve the value again.</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># We don&#39;t want to copy this over and over again.
+</span><span class='id identifier rubyid_big_array'>big_array</span> <span class='op'>=</span> <span class='int'>10_000</span><span class='period'>.</span><span class='id identifier rubyid_times'>times</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_rand'>rand</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_envelope'>envelope</span>  <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Envelope.html" title="Farce::Envelope (class)">Envelope</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Envelope.html#new-class_method" title="Farce::Envelope.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_big_array'>big_array</span><span class='rparen'>)</span> <span class='comment'># copied in once, copied out on demand
+</span>
+<span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_envelope'>envelope</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_envelope'>envelope</span><span class='op'>|</span>
+  <span class='comment'># we have a reference to envelope, but not a copy of its data
+</span>  <span class='comment'># this allows us to pass it on easily
+</span>  <span class='id identifier rubyid_queue'>queue</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Queue.html" title="Farce::Queue (class)">Queue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Queue.html#initialize-instance_method" title="Farce::Queue#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:raise</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_envelope'>envelope</span><span class='rparen'>)</span> <span class='comment'># this is okay, the envelope is shareable
+</span>
+  <span class='comment'># We can pass the envelope by other means, like a queue!
+</span>  <span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_queue'>queue</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_queue'>queue</span><span class='op'>|</span>
+    <span class='id identifier rubyid_message'>message</span> <span class='op'>=</span> <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span>
+    <span class='comment'># okay, let&#39;s get the copy, bypassing the outer ractor
+</span>    <span class='id identifier rubyid_copy_of_array'>copy_of_array</span> <span class='op'>=</span> <span class='id identifier rubyid_message'>message</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
+    <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Size of the array: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_copy_of_array'>copy_of_array</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span>
+</code></pre>
+<p>Envelopes support <code>copy</code>, <code>move</code>, <code>local</code>, as well as a dummy envelope for wrapping shareable objects.</p>
+<h2 id="mutables">Mutables<a href="#mutables" aria-label="Link to heading 'Mutables'" data-heading-content="Mutables" class="anchor"></a></h2>
+<p>Mutables are special wrappers for Ruby objects that are Ractor-shareable when frozen but can be modified when not.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_mutable'>mutable</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Mutable.html" title="Farce::Mutable (class)">Mutable</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Mutable.html#initialize-instance_method" title="Farce::Mutable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>content</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+<span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_mutable'>mutable</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_it'>it</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> &amp; additional content</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+<span class='id identifier rubyid_mutable'>mutable</span> <span class='comment'># =&gt; #&lt;Farce::Mutable[String] &quot;content &amp; additional content&quot;&gt;
+</span></code></pre>
+<p>They expose a mutable API by keeping a frozen snapshot of the wrapped object, atomically unfreezing, mutating, and freezing it whenever a method otherwise throws a <code>FrozenError</code>. This means non-mutating methods have almost no additional cost, and in contrast to <a href="#proxies">proxies</a>, method calls do not have to be dispatched across Ractors, even when modifying the object. However, mutating methods will copy the wrapped object's content. This may be fine, but could be expensive when used repeatedly on large objects.</p>
+<h2 id="proxies">Proxies<a href="#proxies" aria-label="Link to heading 'Proxies'" data-heading-content="Proxies" class="anchor"></a></h2>
+<p>A proxy mimics the API of another object, executing method calls within the Ractor that created it. This is an easy way to have drop-in replacements for objects that cannot be shared across Ractors.</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># Mutable arrays aren&#39;t Ractor-shareable
+</span><span class='id identifier rubyid_array'>array</span>   <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+<span class='id identifier rubyid_proxied'>proxied</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+<span class='id identifier rubyid_proxy'>proxy</span>   <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Proxy.html" title="Farce::Proxy (class)">Proxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Proxy.html#initialize-instance_method" title="Farce::Proxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_proxied'>proxied</span><span class='rparen'>)</span>
+
+<span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_array'>array</span><span class='comma'>,</span> <span class='id identifier rubyid_proxy'>proxy</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='op'>*</span><span class='id identifier rubyid_list'>list</span><span class='op'>|</span>
+  <span class='id identifier rubyid_list'>list</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_it'>it</span> <span class='op'>&lt;&lt;</span> <span class='int'>42</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+
+<span class='comment'># The array got copied instead of being modified in place
+</span><span class='id identifier rubyid_array'>array</span> <span class='comment'># =&gt; []
+</span>
+<span class='comment'># The proxy didn&#39;t get copied
+</span><span class='id identifier rubyid_proxied'>proxied</span> <span class='comment'># =&gt; [42]
+</span></code></pre>
+<p>Use this for very large objects, where copying the object would be more expensive than the Ractor-coordination overhead, or objects that can not be moved or copied between Ractors.</p>
+<p>The downside is a dispatch to another Ractor on every method call.
+If copying on writes is an option, consider <a href="#mutables"><code>Farce::Mutable</code></a> instead.
+If the object may be moved across Ractors, maybe a <a href="#leases"><code>Farce::Lease</code></a> is a better option.</p>
+<p>There is an advanced <a href="https://rkh.github.io/farce/main/Farce/Proxy.html">customization API</a>, which allows fine-tuning and reducing overhead.</p>
+<h2 id="mode-managers">Mode Managers<a href="#mode-managers" aria-label="Link to heading 'Mode Managers'" data-heading-content="Mode Managers" class="anchor"></a></h2>
+<p>You can use a mode manager if you want to support sharing modes for a custom object.</p>
+<p>The mode manager might wrap objects in an envelope. It also exposes a method to unwrap objects again, which will only do so for envelopes created by the specific mode manager. That's why we were able to pass an envelope through the queue in the <a href="#envelopes">example above</a> without it getting opened automatically.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_manager'>manager</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/ModeManager.html" title="Farce::ModeManager (class)">ModeManager</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/ModeManager.html#initialize-instance_method" title="Farce::ModeManager#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:move</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_payload'>payload</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>inside a mutable array</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>
+<span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Farce/Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_payload'>payload</span><span class='rparen'>)</span> <span class='comment'># =&gt; false
+</span>
+<span class='id identifier rubyid_shareable'>shareable</span> <span class='op'>=</span> <span class='id identifier rubyid_manager'>manager</span><span class='period'>.</span><span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_payload'>payload</span><span class='rparen'>)</span> <span class='comment'># =&gt; #&lt;Farce::Envelope::Move&gt;
+</span><span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Farce/Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_shareable'>shareable</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
+</span>
+<span class='id identifier rubyid_payload'>payload</span> <span class='op'>=</span> <span class='id identifier rubyid_shareable'>shareable</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
+<span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="Farce/Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_payload'>payload</span><span class='rparen'>)</span> <span class='comment'># =&gt; false
+</span></code></pre>
+<h2 id="leases">Leases<a href="#leases" aria-label="Link to heading 'Leases'" data-heading-content="Leases" class="anchor"></a></h2>
+<p>You can think of a <code>Farce::Lease</code> as a reusable <code>move</code> envelope. Or <a href="https://hackage-content.haskell.org/package/base-4.22.0.0/docs/Control-Concurrent-MVar.html">Haskell's MVar</a> if that's more your jam.</p>
+<p>You can store any object in it, including non-shareable ones (if they are movable). A Ractor can check objects out (at which point they get moved into that Ractor), work with them, and move them back into the lease container. The checkout call will block while another Ractor holds the lease, serializing any operations.</p>
+<p>This is very useful for objects that can be moved but can't be copied, especially IO-based objects like database connections.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_file_lease'>file_lease</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Lease.html" title="Farce::Lease (class)">Lease</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>example.txt</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>w</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+
+<span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_file_lease'>file_lease</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_file_lease'>file_lease</span><span class='op'>|</span>
+  <span class='id identifier rubyid_file_lease'>file_lease</span><span class='period'>.</span><span class='id identifier rubyid_checkout'>checkout</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_file'>file</span><span class='op'>|</span>
+    <span class='id identifier rubyid_file'>file</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Written from another Ractor!</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+
+<span class='comment'># make sure we close the file
+</span><span class='id identifier rubyid_file_lease'>file_lease</span><span class='period'>.</span><span class='id identifier rubyid_checkout'>checkout</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:close</span><span class='rparen'>)</span>
+
+<span class='comment'># dereference the lease so it can be garbage collected
+</span><span class='id identifier rubyid_file_lease'>file_lease</span> <span class='op'>=</span> <span class='kw'>nil</span>
+</code></pre>
+<p>However, this might not be enough for handling database connections, where you'd usually have a pool of connections. You can use <code>Farce::LeasePool</code> which will manage multiple objects, only blocking on <code>checkout</code> if all objects have been leased.</p>
+<p>Moreover, it can generate these objects for you on demand (until a certain number has been reached).</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># db connections are created on demand if there are fewer than five
+</span><span class='id identifier rubyid_pool'>pool</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/LeasePool.html" title="Farce::LeasePool (class)">LeasePool</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>max_size:</span> <span class='int'>5</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='const'>DB</span><span class='period'>.</span><span class='id identifier rubyid_connect'>connect</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_pool'>pool</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span>     <span class='comment'># =&gt; 0
+</span><span class='id identifier rubyid_pool'>pool</span><span class='period'>.</span><span class='id identifier rubyid_max_size'>max_size</span> <span class='comment'># =&gt; 5
+</span>
+<span class='id identifier rubyid_pool'>pool</span><span class='period'>.</span><span class='id identifier rubyid_checkout'>checkout</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_db'>db</span><span class='op'>|</span>
+  <span class='comment'># ... do something with db ...
+</span><span class='kw'>end</span>
+</code></pre>
+<p>Or, if you want to associate leasable values with keys, you can use a <code>LeaseMap</code>:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_leases'>leases</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/LeaseMap.html" title="Farce::LeaseMap (class)">LeaseMap</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='lbrace'>{</span> <span class='label'>primary:</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='label'>replica:</span> <span class='lbracket'>[</span><span class='rbracket'>]</span> <span class='rbrace'>}</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_leases'>leases</span><span class='period'>.</span><span class='id identifier rubyid_checkout'>checkout</span><span class='lparen'>(</span><span class='symbol'>:primary</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_items'>items</span><span class='op'>|</span> <span class='id identifier rubyid_items'>items</span> <span class='op'>&lt;&lt;</span> <span class='symbol'>:updated</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_leases'>leases</span><span class='period'>.</span><span class='id identifier rubyid_checkout'>checkout</span><span class='lparen'>(</span><span class='symbol'>:primary</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='symbol'>:dup</span><span class='rparen'>)</span> <span class='comment'># =&gt; [:updated]
+</span></code></pre>
+<p>At first glance, this looks just like a <a href="file.data-structures.html#maps" title="map">map</a> of <code>Lease</code> instances. And it pretty much is, except it has some nice tooling on top of it, where it can automatically check values out and back in:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_leases'>leases</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/LeaseMap.html" title="Farce::LeaseMap (class)">LeaseMap</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='lbrace'>{</span> <span class='label'>primary:</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='label'>replica:</span> <span class='lbracket'>[</span><span class='rbracket'>]</span> <span class='rbrace'>}</span> <span class='rbrace'>}</span>
+
+<span class='id identifier rubyid_leases'>leases</span><span class='period'>.</span><span class='id identifier rubyid_auto_lease'>auto_lease</span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_leases'>leases</span><span class='lbracket'>[</span><span class='symbol'>:primary</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='symbol'>:updated</span>
+  <span class='id identifier rubyid_leases'>leases</span><span class='lbracket'>[</span><span class='symbol'>:replica</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='symbol'>:replicated</span>
+  <span class='id identifier rubyid_leases'>leases</span><span class='lbracket'>[</span><span class='symbol'>:primary</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='symbol'>:verified</span> <span class='comment'># Reuses the same checkout
+</span><span class='kw'>end</span>
+
+<span class='comment'># Both resources are checked back in when the block exits, even on an exception.
+</span><span class='id identifier rubyid_leases'>leases</span><span class='period'>.</span><span class='id identifier rubyid_available?'>available?</span><span class='lparen'>(</span><span class='symbol'>:primary</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
+</span><span class='id identifier rubyid_leases'>leases</span><span class='period'>.</span><span class='id identifier rubyid_checkout'>checkout</span><span class='lparen'>(</span><span class='symbol'>:primary</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='symbol'>:dup</span><span class='rparen'>)</span> <span class='comment'># =&gt; [:updated, :verified]
+</span></code></pre>
+<h2 id="read-next">Read Next<a href="#read-next" aria-label="Link to heading 'Read Next'" data-heading-content="Read Next" class="anchor"></a></h2>
+<p><a href="index.html#features" title="README">README</a> · <a href="file.modes.html" title="Transfer modes">Transfer modes</a> · <a href="file.data-structures.html" title="Data Structures">Data Structures</a></p>
+</div></div>
+
+      <div id="footer">
+  Generated on Tue Oct 13 12:51:21 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>
