@@ -54,6 +54,19 @@ module Farce
       new_self
     end
 
+    # @api private
+    # @return [Abstract::Executor, Fiber::Scheduler, nil]
+    def local_scheduler(create: false)
+      if Fiber.respond_to?(:scheduler) && fiber_scheduler = Fiber.scheduler
+        return fiber_scheduler
+      end
+      return Internal::MainScheduler if Ractor.main?
+      return Internal::Storage[:local_scheduler] unless create
+      Internal::Storage.store_if_absent(:local_scheduler) do
+        Internal.native_ractors? ? Scheduler.create(Thread) : ThreadExecutor.new
+      end
+    end
+
     def timeout_deadline(timeout)
       return if timeout.nil?
 

@@ -117,6 +117,7 @@ puts output
       - [`Farce.schedule`](#farceschedule)
       - [Schedulers](#schedulers)
       - [Ractor Pools](#ractor-pools)
+      - [Tasks](#tasks)
       - [Third-Party Fiber Schedulers](#third-party-fiber-schedulers)
     - [Integrations](#integrations)
       - [Active Support](#active-support)
@@ -1220,6 +1221,43 @@ Scheduler instances are Ractor-shareable.
 # At least two Ractors, up to four. Launch a new one if a task waits longer than 100 milliseconds.
 pool = Farce::Pool.new(min_size: 4, max_size: 10, grow_after: 0.1)
 pool.schedule { puts "Hello from the pool!" }
+```
+
+#### Tasks
+
+If you want to retrieve the result of an asynchronous operation, or monitor if it is still running, you can use `Farce::Task`:
+
+```ruby
+task = Farce::Task.schedule(1, 2) do |a, b|
+  sleep 1 # simulate intense computation
+  a + b
+end
+
+task.alive? # => true
+task.value  # => 3 (after approximately 1 second)
+task.join   # would block, but doesn't, as the task has already completed
+```
+
+Tasks can also be created without immediately scheduling them, allowing you to control when and how they are executed:
+
+```ruby
+task = Farce::Task.new { :success }
+task.alive?     # => true
+task.value(0.1) # => nil (after 100 milliseconds)
+
+Farce.schedule(&task)
+task.value # => :success
+```
+
+This allows you to use third-party executors:
+
+```ruby
+require "concurrent"
+executor = Concurrent.global_fast_executor
+task     = Farce::Task.new { :success }
+executor.post(&task)
+
+task.value # => :success
 ```
 
 #### Third-Party Fiber Schedulers

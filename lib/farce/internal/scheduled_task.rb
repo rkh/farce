@@ -12,7 +12,7 @@ module Farce
       MANAGER = ModeManager.new
 
       def initialize(args, block, mode)
-        @block  = Ractor.shareable_proc(&block)
+        @block  = Ractor.shareable?(block) ? block : Ractor.shareable_proc(&block)
         @unwrap = false
         @args   = args.map! do |arg|
           wrapped = MANAGER.wrap(arg, mode:)

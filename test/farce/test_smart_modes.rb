@@ -63,6 +63,7 @@ module Farce
       [LRUMap, LFUMap].each { |type| assert_equal :smart, type.new(max_size: 2).mode }
       assert_equal :smart, ModeManager.new.mode
       assert_equal :smart, Lazy.new { :value }.mode
+      assert_equal :smart, Task.new { :value }.mode
       assert_equal :smart, Molecule.define(:item).default_mode
       assert_equal :smart, Molecule.define(:item).new.mode
       assert_equal :smart_copy, Port.new.mode

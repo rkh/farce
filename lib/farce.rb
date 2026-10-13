@@ -493,22 +493,14 @@ module Farce
     raise LocalJumpError, "no block given" unless block_given?
 
     if auto_local || mode == :local
-      if Fiber.respond_to?(:scheduler) && fiber_scheduler = Fiber.scheduler
-        fiber_scheduler.fiber(**) { yield(*) }
+      scheduler = Internal.local_scheduler(create: mode == :local)
+      if scheduler && !scheduler.is_a?(Abstract::Executor)
+        scheduler.fiber(**) { yield(*) }
         return
       end
-      scheduler = Ractor.main? ? Internal::MainScheduler : Internal::Storage[:local_scheduler]
     end
 
-    scheduler ||=
-      if mode == :local
-        Internal::Storage.store_if_absent(:local_scheduler) do
-          Internal.native_ractors? ? Scheduler.create(Thread) : ThreadExecutor.new
-        end
-      else
-        Internal::ParallelScheduler
-      end
-
+    scheduler ||= Internal::ParallelScheduler
     scheduler.schedule(*, mode:, auto_local:, **, &)
     nil
   end
