@@ -30,7 +30,7 @@ jobs:
           ruby-version: '4.0'
           bundler-cache: true
 
-      - name: Validate release tag
+      - name: Validate release tag and changelog
         run: bundle exec rake release:validate
 
       - name: Select all release platforms
@@ -89,7 +89,7 @@ jobs:
     runs-on: ubuntu-24.04
     environment: rubygems
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       - uses: actions/checkout@v6
@@ -108,8 +108,10 @@ jobs:
           path: pkg
           merge-multiple: true
 
-      - name: Publish all release gems
+      - name: Publish all release gems and create GitHub release
         uses: rubygems/release-gem@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           # rubygems-await 0.5.4 is incompatible with the current RubyGems compact index API.
           await-release: false
