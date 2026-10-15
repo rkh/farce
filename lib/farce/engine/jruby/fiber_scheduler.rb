@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 module Farce
   module Internal
@@ -17,6 +19,7 @@ module Farce
     class FiberScheduler
       include SelectScheduler
       prepend SchedulerLifecycle
+      prepend SchedulerSynchronization
 
       def initialize(backend: :auto)
         raise ArgumentError, "unavailable JVM driver: #{backend}" unless %i[auto nio].include?(backend)

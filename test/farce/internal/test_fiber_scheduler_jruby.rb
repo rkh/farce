@@ -123,6 +123,136 @@ module Farce
         refute_predicate task, :alive?
       end
 
+      def test_mutex_notification_before_registration_is_consumed_once
+        mutex = Mutex.new
+        results = []
+        Fiber.schedule do
+          fiber = Fiber.current
+
+          assert(Fiber.blocking { Thread.new { @scheduler.unblock(mutex, fiber) }.value })
+          results << @scheduler.block(mutex, 0)
+          results << @scheduler.block(mutex, 0)
+        end
+        @scheduler.run
+
+        assert_equal [true, false], results
+        assert_predicate @scheduler, :idle?
+      end
+
+      def test_early_mutex_notification_does_not_resume_a_different_blocker
+        first = Mutex.new
+        second = Mutex.new
+        results = []
+        Fiber.schedule do
+          assert @scheduler.unblock(first, Fiber.current)
+          results << @scheduler.block(second, 0)
+          results << @scheduler.block(first, 0)
+        end
+        @scheduler.run
+
+        assert_equal [false, false], results
+      end
+
+      def test_io_wait_retires_an_early_mutex_notification
+        reader, writer = IO.pipe
+        @resources.push(reader, writer)
+        mutex = Mutex.new
+        result = nil
+        Fiber.schedule do
+          assert @scheduler.unblock(mutex, Fiber.current)
+          assert_equal 0, @scheduler.io_wait(reader, IO::READABLE, 0.001)
+          result = @scheduler.block(mutex, 0)
+        end
+        @scheduler.run
+
+        refute result
+      end
+
+      def test_late_mutex_notification_does_not_interrupt_an_io_wait
+        reader, writer = IO.pipe
+        @resources.push(reader, writer)
+        result = nil
+        fiber = Fiber.schedule { result = @scheduler.io_wait(reader, IO::READABLE) }
+        accepted = @scheduler.unblock(Mutex.new, fiber)
+        writer.write("ready")
+        @scheduler.run
+
+        refute accepted
+        assert_equal IO::READABLE, result
+      end
+
+      def test_duplicate_mutex_notifications_cannot_resume_a_later_wait
+        mutex = Mutex.new
+        results = []
+        fiber = Fiber.schedule do
+          results << @scheduler.block(mutex)
+          results << @scheduler.block(mutex, 0)
+        end
+        Thread.new { 100.times { @scheduler.unblock(mutex, fiber) } }.join
+        @scheduler.run
+
+        assert_equal [true, false], results
+      end
+
+      def test_finished_fibers_release_early_mutex_notifications
+        mutex = Mutex.new
+        fiber = Fiber.schedule { assert @scheduler.unblock(mutex, Fiber.current) }
+
+        refute @scheduler.unblock(mutex, fiber)
+        refute @scheduler.unblock(mutex, Fiber.current)
+        assert_empty @scheduler.instance_variable_get(:@mutex_wakeups)
+      end
+
+      def test_cancelled_fibers_release_early_mutex_notifications
+        mutex = Mutex.new
+        interrupted = false
+        fiber = Fiber.schedule do
+          assert @scheduler.unblock(mutex, Fiber.current)
+          @scheduler.block(:other)
+        rescue IOError
+          interrupted = true
+        end
+
+        assert @scheduler.fiber_interrupt(fiber, IOError.new("cancel wait"))
+        @scheduler.run
+
+        assert interrupted
+        refute @scheduler.unblock(mutex, fiber)
+        assert_empty @scheduler.instance_variable_get(:@mutex_wakeups)
+      end
+
+      def test_close_discards_early_mutex_notifications
+        mutex = Mutex.new
+        fiber = Fiber.schedule do
+          assert @scheduler.unblock(mutex, Fiber.current)
+          @scheduler.block(:other)
+        end
+        @scheduler.send(:shutdown)
+        @scheduler.close
+
+        refute_predicate fiber, :alive?
+        refute @scheduler.unblock(mutex, fiber)
+        assert_empty @scheduler.instance_variable_get(:@mutex_wakeups)
+      end
+
+      def test_wait_registry_mutex_does_not_invoke_scheduler_callbacks
+        mutex = @scheduler.instance_variable_get(:@wait_mutex)
+        states = []
+        Fiber.schedule do
+          states << Fiber.current.blocking?
+
+          assert_equal(:locked, mutex.synchronize do
+            states << Fiber.current.blocking?
+            :locked
+          end)
+          states << Fiber.current.blocking?
+          assert_raises(IOError) { mutex.synchronize { raise IOError, "release lock" } }
+          refute_predicate mutex, :locked?
+        end
+
+        assert_equal [false, true, false], states
+      end
+
       def test_timeout_unlocks_borrowed_buffer
         a, b = Socket.pair(:UNIX, :STREAM, 0)
         @resources.push(a, b)

@@ -82,15 +82,13 @@ module Farce
 
       def unblock(_blocker, fiber) # rubocop:disable Naming/PredicateMethod
         return false if @closed || !(token = current_wait(fiber))
-        @mailbox << Completion.new(token, true, nil).freeze
-        wakeup
+        complete_wait(token, true)
         true
       end
 
       def fiber_interrupt(fiber, exception) # rubocop:disable Naming/PredicateMethod
         return false if @closed || !(token = current_wait(fiber))
-        @mailbox << Completion.new(token, nil, exception).freeze
-        wakeup
+        complete_wait(token, nil, exception)
         true
       end
 
@@ -201,6 +199,11 @@ module Farce
       end
 
       private
+
+      def complete_wait(token, value, error = nil)
+        @mailbox << Completion.new(token, value, error).freeze
+        wakeup
+      end
 
       def finish_close
         return if @closed
