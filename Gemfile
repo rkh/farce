@@ -56,7 +56,7 @@ group :compatibility do
 
   platforms :mri_40, :mri_41 do
     gem "ractor-sharing"
-    gem "ractor-tmvar", ">= 0.3.0"
+    gem "ractor-tmvar", ">= 0.4.0"
   end
 
   platform :mri do

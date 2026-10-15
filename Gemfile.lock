@@ -244,7 +244,7 @@ DEPENDENCIES
   pqueue
   priority_queue_cxx
   ractor-sharing
-  ractor-tmvar (>= 0.3.0)
+  ractor-tmvar (>= 0.4.0)
   ractor_queue
   ractor_safe
   rake

@@ -36,7 +36,7 @@ module Farce
 
     def test_mixed_publication_with_tvar_native_and_portable_participants
       pending = ::Ractor::TMVar.new(10)
-      empty = ::Ractor::TMVar.new(::Ractor::TMVar::EMPTY)
+      empty = ::Ractor::TMVar.new
       variable = ::Ractor::TVar.new(0)
       atom = Strict::Atom.new(0)
       vector = Unshared::Vector.new([0])
@@ -72,8 +72,8 @@ module Farce
 
     def test_unavailable_operations_retry_within_the_farce_limit
       { read: [], take: [], swap: [2], put: [2] }.each do |operation, arguments|
-        value = operation == :put ? 1 : ::Ractor::TMVar::EMPTY
-        variable = ::Ractor::TMVar.new(value)
+        variable = operation == :put ? ::Ractor::TMVar.new(1) : ::Ractor::TMVar.new
+        baseline = variable.instance_variable_get(:@tvar).value
         atom = Strict::Atom.new(0)
         attempts = 0
 
@@ -84,12 +84,16 @@ module Farce
         end)
         assert_equal 3, attempts
         assert_equal 0, atom.value
-        assert_equal value, variable.instance_variable_get(:@tvar).value
+        if baseline.nil?
+          assert_nil variable.instance_variable_get(:@tvar).value
+        else
+          assert_same baseline, variable.instance_variable_get(:@tvar).value
+        end
       end
     end
 
     def test_retry_takes_a_fresh_snapshot_and_discards_previous_farce_writes
-      variable = ::Ractor::TMVar.new(::Ractor::TMVar::EMPTY)
+      variable = ::Ractor::TMVar.new
       atom = Strict::Atom.new(0)
       vector = Unshared::Vector.new([0])
       attempts = 0
@@ -109,7 +113,7 @@ module Farce
     end
 
     def test_rescued_retry_condition_still_discards_the_attempt
-      variable = ::Ractor::TMVar.new(::Ractor::TMVar::EMPTY)
+      variable = ::Ractor::TMVar.new
       atom = Strict::Atom.new(0)
 
       refute(Transaction.run(retries: 0) do |tx|
@@ -125,7 +129,7 @@ module Farce
     end
 
     def test_try_operations_allow_other_writes_to_commit
-      empty = ::Ractor::TMVar.new(::Ractor::TMVar::EMPTY)
+      empty = ::Ractor::TMVar.new
       full = ::Ractor::TMVar.new(1)
       atom = Strict::Atom.new(0)
 
@@ -141,7 +145,7 @@ module Farce
     end
 
     def test_nil_is_a_full_value
-      variable = ::Ractor::TMVar.new
+      variable = ::Ractor::TMVar.new(nil)
 
       assert(Transaction.run do |tx|
         refute_predicate tx[variable], :empty?
@@ -154,19 +158,75 @@ module Farce
       assert_nil variable.read
     end
 
+    def test_explicit_filled_constructor_preserves_nil
+      variable = ::Ractor::TMVar.new_filled(nil)
+
+      assert(Transaction.run do |tx|
+        refute_predicate tx[variable], :empty?
+        assert_nil tx[variable].read
+      end)
+      refute_predicate variable, :empty?
+    end
+
+    def test_try_operation_blocks_distinguish_stored_values_from_empty
+      %i[try_read try_take].product([nil, false, 3]).each do |operation, value|
+        variable = ::Ractor::TMVar.new(value)
+        result = Object.new
+
+        assert(Transaction.run do |tx|
+          wrapped = tx[variable]
+
+          assert_same(result, wrapped.public_send(operation) do |stored|
+            assert_equal [value], [stored]
+            assert_equal operation == :try_take, wrapped.empty?
+            result
+          end)
+          refute_predicate variable, :empty?
+          assert_equal [value], [variable.read]
+        end)
+        assert_equal operation == :try_take, variable.empty?
+      end
+
+      assert(Transaction.run do |tx|
+        wrapped = tx[::Ractor::TMVar.new]
+
+        assert_nil(wrapped.try_read { flunk "empty read yielded" })
+        assert_nil(wrapped.try_take { flunk "empty take yielded" })
+      end)
+    end
+
+    def test_try_operation_callback_errors_discard_staged_changes
+      %i[try_read try_take].each do |operation|
+        variable = ::Ractor::TMVar.new(1)
+        atom = Strict::Atom.new(0)
+
+        refute(Transaction.run do |tx|
+          wrapped = tx[variable]
+          wrapped.swap(2)
+          assert_raises(RuntimeError) do
+            wrapped.public_send(operation) do |value|
+              tx[atom].value = value
+              raise "discard callback changes"
+            end
+          end
+        end)
+        assert_equal [1, 0], [variable.read, atom.value]
+      end
+    end
+
     def test_underlying_tvar_and_tmvar_share_enrollment
       variable = ::Ractor::TMVar.new(1)
       storage = variable.instance_variable_get(:@tvar)
 
       assert(Transaction.run do |tx|
-        tx[storage].value = 2
+        tx[storage].value = [2]
 
         assert_equal 2, tx[variable].take
-        assert_equal ::Ractor::TMVar::EMPTY, tx[storage].value
-        tx[storage].value = 3
+        assert_nil tx[storage].value
+        tx[storage].value = [3]
 
         assert_equal 3, tx[variable].swap(4)
-        assert_equal 4, tx[storage].value
+        assert_equal [4], tx[storage].value
       end)
       assert_equal 4, variable.read
     end
@@ -213,7 +273,7 @@ module Farce
     end
 
     def test_replacements_are_made_shareable_and_conversion_errors_poison_attempts
-      variable = ::Ractor::TMVar.new(::Ractor::TMVar::EMPTY)
+      variable = ::Ractor::TMVar.new
       value = [1]
       atom = Strict::Atom.new(0)
 
@@ -236,11 +296,21 @@ module Farce
       assert(Transaction.run do |tx|
         wrapper = tx[variable]
         assert_raises(Transaction::OwnershipError) { Fiber.new { wrapper.read }.resume }
+        %i[try_read try_take].each do |operation|
+          assert_raises(Transaction::OwnershipError) do
+            Fiber.new { wrapper.public_send(operation) { flunk "foreign access yielded" } }.resume
+          end
+        end
       end)
       { read: [], try_read: [], take: [], try_take: [], empty?: [], put: [2], try_put: [2], swap: [2] }
         .each do |operation, arguments|
           assert_raises(Transaction::ClosedError) { wrapper.public_send(operation, *arguments) }
         end
+      %i[try_read try_take].each do |operation|
+        assert_raises(Transaction::ClosedError) do
+          wrapper.public_send(operation) { flunk "closed access yielded" }
+        end
+      end
       assert_equal 1, variable.read
     end
 

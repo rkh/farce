@@ -13,7 +13,10 @@ module Farce
     # Take, put, and swap operate on the value staged in this attempt.
     # An empty read, take, or swap, or a put into a full TMVar fails the
     # attempt. Farce.transaction retries these conditions within its retry limit.
-    # The try_* methods return nil or false without failing the attempt.
+    # The try_* methods return nil or false when unavailable without failing
+    # the attempt. Blocks passed to try_read and try_take run only when full,
+    # including for stored nil, and return the block's result.
+    # Create an empty TMVar with Ractor::TMVar.new and a full nil with .new(nil).
     # Assigned values are made shareable, matching Ractor::TVar's setter.
     #
     # Run outside Ractor.atomically, as required by {RactorTVar}.

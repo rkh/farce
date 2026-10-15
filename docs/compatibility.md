@@ -27,7 +27,7 @@ Farce should be compatible with these versions:
 
 | Gem               | Minimum Version | Release Date |
 |-------------------|-----------------|--------------|
-| `ractor-tmvar`    | 0.3.0           | 2026-10-06   |
+| `ractor-tmvar`    | 0.4.0           | 2026-10-11   |
 | `msgpack`         | 1.7.0           | 2023-03-29   |
 | `concurrent-ruby` | 1.1.8           | 2021-01-20   |
 | `dry-types`       | 1.0.0           | 2019-04-23   |
