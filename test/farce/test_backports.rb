@@ -43,7 +43,8 @@ module Farce
         ractor.monitor(port)
 
         result = port.receive
-        raise "monitor failed" unless result == :exited
+        result = result.last if result.is_a? Array
+        raise "monitor failed: " + result.inspect unless result == :exited
       RUBY
 
       assert_predicate status, :success?, "#{output}\n#{error}"
