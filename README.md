@@ -67,6 +67,7 @@ cache.key?(:a) # => false, the least recently used entry was evicted
 - **`Farce::Ractor`** uses native Ractors on CRuby and threads on JRuby and TruffleRuby.
 - **`Farce::Port`** adds transfer modes, receive timeouts, and Fiber scheduler support.
 - **`Farce::WeakRef` and `Farce::Resolv`** work outside the main Ractor.
+- **`Farce::Backports`** backports newer `Ractor` and `Ractor::Port` features to older Ruby versions. Can be invoked directly, used with refinements, or installed globally.
 
 Send a result back from a worker:
 

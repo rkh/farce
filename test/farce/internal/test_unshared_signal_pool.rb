@@ -182,7 +182,8 @@ class TestUnsharedSignalPool < Test
   def test_active_slots_are_distinct_and_idle_retention_is_bounded
     signal = Signal.new
     results = []
-    count = Gem.win_platform? ? 60 : 100
+    # Each waiter owns a pipe. Leave room for other tests under low descriptor limits.
+    count = 10
     count.times { Fiber.schedule { results << signal.wait } }
 
     assert_equal count, signal.num_waiting
@@ -195,6 +196,9 @@ class TestUnsharedSignalPool < Test
     assert_equal(2, @scheduler.handles.count { !it.closed? })
     assert_equal count - 2, @scheduler.handles.count(&:closed?)
     assert_equal 0, signal.num_waiting
+  ensure
+    # An allocation or assertion failure must not leave teardown draining blocked fibers.
+    signal&.broadcast
   end
 
   def test_repeated_timeouts_do_not_accumulate_slots

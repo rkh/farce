@@ -53,6 +53,7 @@ Other classes Farce provides include:
 * `Clock`: Timing functions based on a monotonic clock rather than on `Time`.
 * `Deduper`: Create your own deduplication cache. Direct usage isn't recommended, use [`Farce.dedup`](#top-level-methods) instead.
 * `Exchanger`: A synchronization point for two-way data swapping between Threads, Ractors, and/or Fibers. Drop-in replacement for concurrent-ruby's exchanger.
+* `Extension`: Defines extensions for existing classes that can either be activated globally or used as refinements.
 * `Lazy`: Lazily initialized value.
 * `LazyRef`: A [reference](data-structures.md#references) for a lazily initialized value.
 * `ThreadExecutor`: A [task executor](scheduling.md#scheduling-code) creating a new thread for each unit of work. Used on TruffleRuby.

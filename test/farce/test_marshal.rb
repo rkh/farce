@@ -618,7 +618,7 @@ module Farce
 
           if Class === type
             # Standard exceptions retain Ruby's message and backtrace format.
-            next if type <= Exception || type == Ractor::MovedObject
+            next if type <= Exception || type < Module || type == Ractor::MovedObject
             # This is an unchanged alias to a standard resolver with a live mutex.
             if type == Resolv::Hosts
               assert_raises(TypeError) { ::Marshal.dump(type.new) }

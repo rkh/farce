@@ -34,6 +34,12 @@ module Farce
       # simplecov:enable
     end
 
+    begin
+      require "#{ENGINE_PATH}/patch"
+    rescue LoadError => e
+      raise e unless e.path == "#{ENGINE_PATH}/patch"
+    end
+
     unless const_defined?(:NATIVE_WEAK_MAPS, false) && NATIVE_WEAK_MAPS
       autoload :WeakMap,      "farce/engine/ruby/shared/weak_map"
       autoload :WeakKeyMap,   "farce/engine/ruby/shared/weak_map"

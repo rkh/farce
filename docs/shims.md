@@ -42,6 +42,78 @@ port.send(object)
 port.receive.equal?(object) # => true
 ```
 
+## Backports
+
+While Farce includes `Farce::Ractor` and `Farce::Port`, it does not backport any methods to the standard `Ractor` class.
+
+Instead, backports are provided by `Farce::Backports`.
+
+### Available Backports
+
+#### From Ruby 4.0
+
+The following methods are added to `Ractor` on Ruby versions prior to 4.0:
+
+- [`default_port`](https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-default_port)
+- [`monitor`](https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-monitor)
+- [`unmonitor`](https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-unmonitor)
+- [`join`](https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-join)
+
+### Without Activating Backports
+
+You can call these methods on `Farce::Backports`, directly, passing in the Ractor instance as a first argument.
+
+```ruby
+ractor     = Farce::Ractor.new { sleep 1; raise "I'm not happy!" }
+supervisor = Farce::Ractor.new { puts "status: #{receive}" }
+port       = Farce::Backports.default_port(supervisor)
+
+# This will print "status: aborted" in approximately one second
+Farce::Backports.monitor(ractor, port)
+
+# Wait for the supervisor to receive the status
+Farce::Backports.join(supervisor)
+```
+
+### Using Backports via Refinements
+
+You can activate the backports for a lexical scope (within a file, or even just within a module within a file, or starting with Ruby 4.1 for an individual block) using them as a [refinement](https://docs.ruby-lang.org/en/master/syntax/refinements_rdoc.html):
+
+```ruby
+# only activates the backports for the current file
+using Farce::Backports
+
+# Refinements can't install constants, so we still need to use Farce::Ractor for JRuby/TruffleRuby
+# If you know you're on CRuby, you can replace Farce::Ractor with Ractor
+ractor     = Farce::Ractor.new { sleep 1; raise "I'm not happy!" }
+supervisor = Farce::Ractor.new { puts "status: #{receive}" }
+
+# These methods now work regardless of whether you used Ractor or Farce::Ractor
+port = supervisor.default_port
+ractor.monitor(port)
+supervisor.join
+```
+
+### Activating Backports Globally
+
+You can activate backports globally. As these don't override built-in methods, doing so should only cause issues for code expecting these methods not to be defined based on the `RUBY_VERSION` string.
+
+Anywhere before executing your code, like an initializer:
+
+```ruby
+Farce::Backports.install
+```
+
+Now you can do this in any file:
+
+```ruby
+# After installing backports globally, Ractor will always be defined
+ractor     = Ractor.new { sleep 1; raise "I'm not happy!" }
+supervisor = Ractor.new { puts "status: #{receive}" }
+ractor.monitor(supervisor.default_port)
+supervisor.join
+```
+
 ## WeakRef
 
 `Farce::WeakRef` is a drop-in replacement for Ruby's [`WeakRef`](https://docs.ruby-lang.org/en/4.0/WeakRef.html), which at the time of writing cannot be used outside of the main Ractor at all.

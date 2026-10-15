@@ -107,15 +107,15 @@ module Farce
 
       def self.new(source = UNDEFINED)
         case source
-        when UNDEFINED then super(QueueReader.new)
-        when ::Ractor  then super(RactorReader.new(source))
+        when UNDEFINED then super(QueueReader.new, ::Ractor.current)
+        when ::Ractor  then super(RactorReader.new(source), source)
         when Port      then source
         else raise ArgumentError, "wrong number of arguments (given 1, expected 0)"
         end
       end
 
-      def initialize(reader)
-        @owner  = ::Ractor.current
+      def initialize(reader, owner)
+        @owner  = owner
         @reader = reader
         Freeze.publish(self)
       end
