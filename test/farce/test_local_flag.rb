@@ -6,6 +6,25 @@ require_relative "internal/test_flag"
 
 module Farce
   class TestLocalFlag < Internal::TestFlag
+    def test_set_and_unset_predicates_follow_the_current_value
+      [false, true].each do |initial|
+        flag = flag_class.new(initial)
+
+        assert_equal initial, flag.set?
+        assert_equal !initial, flag.unset?
+
+        flag.set
+
+        assert_predicate flag, :set?
+        refute_predicate flag, :unset?
+
+        flag.unset
+
+        refute_predicate flag, :set?
+        assert_predicate flag, :unset?
+      end
+    end
+
     def test_public_type_and_scope_validation
       flag = flag_class.new
 

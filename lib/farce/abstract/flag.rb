@@ -59,6 +59,12 @@ module Farce
       include Internal::ValueSerialization
       include Internal::Inspect
 
+      # @return [Boolean] whether the flag is set
+      def set? = value
+
+      # @return [Boolean] whether the flag is unset
+      def unset? = !value
+
       # Wait until the flag becomes true.
       # @param timeout [Numeric, nil] the total seconds available
       # @yield called when the timeout expires
