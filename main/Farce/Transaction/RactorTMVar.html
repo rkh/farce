@@ -122,7 +122,10 @@
 <p>Take, put, and swap operate on the value staged in this attempt.
 An empty read, take, or swap, or a put into a full TMVar fails the
 attempt. Farce.transaction retries these conditions within its retry limit.
-The try_* methods return nil or false without failing the attempt.
+The try_* methods return nil or false when unavailable without failing
+the attempt. Blocks passed to try_read and try_take run only when full,
+including for stored nil, and return the block's result.
+Create an empty TMVar with Ractor::TMVar.new and a full nil with .new(nil).
 Assigned values are made shareable, matching Ractor::TVar's setter.</p>
 <p>Run outside Ractor.atomically, as required by <span class='object_link'><a href="RactorTVar.html" title="Farce::Transaction::RactorTVar (class)">RactorTVar</a></span>.
 Calls from other Ractors require Ractor-safe TVar methods from ractor-sharing.</p>
@@ -289,15 +292,15 @@ Calls from other Ractors require Ractor-safe TVar methods from ractor-sharing.</
       <pre class="lines">
 
 
-34
-35
-36
 37
 38
-39</pre>
+39
+40
+41
+42</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/ractor_tmvar.rb', line 34</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/ractor_tmvar.rb', line 37</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_transaction'>transaction</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
   <span class='kw'>super</span>
@@ -326,7 +329,7 @@ Calls from other Ractors require Ractor-safe TVar methods from ractor-sharing.</
 </div>
 
       <div id="footer">
-  Generated on Thu Oct 15 13:34:15 2026 by
+  Generated on Thu Oct 15 14:18:18 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
