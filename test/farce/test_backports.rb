@@ -61,8 +61,8 @@ module Farce
                 <<~RUBY
                   Farce::Backports.install
                   raise "installation is not idempotent" if Farce::Backports.install
-                  raise "Ractor missing" unless defined?(::Ractor)
-                  raise "Port missing" unless defined?(::Ractor::Port)
+                  raise "Ractor missing" unless Ractor
+                  raise "Port missing" unless Ractor::Port
                 RUBY
               end
       dispatch = if activation == :direct
