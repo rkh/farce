@@ -59,6 +59,12 @@ The following methods are added to `Ractor` on Ruby versions prior to 4.0:
 - [`unmonitor`](https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-unmonitor)
 - [`join`](https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-join)
 
+#### From Ruby 4.1
+
+The following methods are added to `Ractor` on Ruby versions prior to 4.1:
+
+- [`alive?`](https://docs.ruby-lang.org/en/master/Ractor.html#method-i-alive-3F)
+
 ### Without Activating Backports
 
 You can call these methods on `Farce::Backports`, directly, passing in the Ractor instance as a first argument.

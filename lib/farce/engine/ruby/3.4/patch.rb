@@ -27,6 +27,7 @@ module Farce
         end
       end
 
+      def alive?          = @state.value.nil?
       def join            = @state.wait_until_non_nil
       def unmonitor(port) = @lock.synchronize { @monitors.delete(port) }
 

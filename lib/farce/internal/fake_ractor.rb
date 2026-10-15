@@ -21,6 +21,7 @@ module Farce
         INSTANCE     = Freeze.publish(new)
         DEFAULT_PORT = BasePort.new
 
+        def alive?       = true
         def default_port = DEFAULT_PORT
         def inspect      = "#<Farce::Ractor#1 running>"
         def join         = sleep
@@ -96,6 +97,8 @@ module Farce
           raise "Cannot set ractor local storage for non-current ractor" unless self == FakeRactor.current
           Farce::Ractor[key] = value
         end
+
+        def alive? = STATES[self].status == :running
 
         def monitor(port) # rubocop:disable Naming/PredicateMethod
           state = STATES[self]

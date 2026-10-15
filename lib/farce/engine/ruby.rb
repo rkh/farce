@@ -72,6 +72,7 @@ module Farce
 
     autoload :BasePort,       "#{ENGINE_PATH}/port"
     autoload :Port,           "#{ENGINE_PATH}/port"
+    autoload :NullPort,       "#{ENGINE_PATH}/null_port"
     autoload :RactorMethods,  "#{ENGINE_PATH}/ractor_methods"
     autoload :Vault,          "#{ENGINE_PATH}/vault"
 

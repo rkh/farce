@@ -47,6 +47,16 @@ module Farce
   # @example Calling methods on `Farce::Backports` directly
   #   port = Farce::Backports.default_port(Ractor.current)
   #
+  # @!method alive?(ractor)
+  #   @scope class
+  #   Backport for {https://docs.ruby-lang.org/en/master/Ractor.html#method-i-alive-3F Ractor#alive?}
+  #   @example
+  #     using Farce::Backports
+  #     ractor = Ractor.new { sleep 10 }
+  #     ractor.alive? # => true
+  #   @param ractor [Ractor] the ractor to check
+  #   @return [Boolean] whether the ractor is alive
+  #
   # @!method default_port(ractor)
   #   @scope class
   #   Backport for {https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-default_port Ractor.default_port}
@@ -100,52 +110,76 @@ module Farce
     private_constant :Extension
     include Extension
 
-    if Internal.native_ractors? && !Internal.native_ports?
-      Extension.define(::Ractor) do
-        def default_port    = Backports.default_port(self)
-        def monitor(port)   = Backports.monitor(self, port)
-        def unmonitor(port) = Backports.unmonitor(self, port)
-        def join            = Backports.join(self)
-      end
+    if Internal.native_ractors?
+      if Internal.native_ports?
+        unless ::Ractor.method_defined?(:alive?)
+          Extension.define(::Ractor) do
+            def alive? = Backports.alive?(self)
+          end
 
-      def self.default_port(ractor) = Farce::Ractor::Port.new(ractor)
-
-      def self.monitor(ractor, port)
-        return true if Ractor.main == ractor
-
-        state = Internal::RactorState.for(ractor)
-        return state.monitor(port) if state
-
-        raise Ractor::Error, "#{ractor.inspect} cannot be monitored" unless ractor.inspect.end_with?("terminated>")
-
-        success = true
-
-        begin
-          ractor.take
-        rescue Ractor::ClosedError
-          # no-op
-        rescue Ractor::RemoteError
-          success = false
+          def self.alive?(ractor)
+            ractor.monitor(NULL_PORT)
+          ensure
+            ractor.unmonitor(NULL_PORT)
+          end
+        end
+      else
+        Extension.define(::Ractor) do
+          def alive?          = Backports.alive?(self)
+          def default_port    = Backports.default_port(self)
+          def join            = Backports.join(self)
+          def monitor(port)   = Backports.monitor(self, port)
+          def unmonitor(port) = Backports.unmonitor(self, port)
         end
 
-        port.send(success ? :exited : :aborted)
-        false
-      end
+        def self.default_port(ractor) = Farce::Ractor::Port.new(ractor)
 
-      def self.unmonitor(ractor, port)
-        Internal::RactorState.for(ractor)&.unmonitor(port)
-        ractor
-      end
+        def self.alive?(ractor)
+          return true if Ractor.main == ractor
+          state = Internal::RactorState.for(ractor)
+          return state.alive? if state
+          !ractor.inspect.end_with?("terminated>")
+        end
 
-      def self.join(ractor)
-        Internal::RactorState.for(ractor)&.join
-        ractor
+        def self.join(ractor)
+          Internal::RactorState.for(ractor)&.join
+          ractor
+        end
+
+        def self.monitor(ractor, port)
+          return true if Ractor.main == ractor
+
+          state = Internal::RactorState.for(ractor)
+          return state.monitor(port) if state
+
+          raise Ractor::Error, "#{ractor.inspect} cannot be monitored" unless ractor.inspect.end_with?("terminated>")
+
+          success = true
+
+          begin
+            ractor.take
+          rescue Ractor::ClosedError
+            # no-op
+          rescue Ractor::RemoteError
+            success = false
+          end
+
+          port.send(success ? :exited : :aborted)
+          false
+        end
+
+        def self.unmonitor(ractor, port)
+          Internal::RactorState.for(ractor)&.unmonitor(port)
+          ractor
+        end
       end
-    else
-      def self.default_port(ractor)    = ractor.default_port
-      def self.monitor(ractor, port)   = ractor.monitor(port)
-      def self.unmonitor(ractor, port) = ractor.unmonitor(port)
-      def self.join(ractor)            = ractor.join
+    end
+
+    %i[default_port join monitor unmonitor alive?].each do |method|
+      next if respond_to?(method)
+      class_eval <<~RUBY, __FILE__, __LINE__ + 1
+        def self.#{method}(ractor, ...) = ractor.#{method}(...)
+      RUBY
     end
 
     # Installs the Farce backports for Ractor and Ractor::Port globally.

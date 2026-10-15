@@ -84,6 +84,7 @@ And also mixins to prevent them from being shareable:
 ## Constants
 
 * `Farce::MODES`: List of supported [sharing modes](sharing.md#sharing-modes).
+* `Farce::NULL_PORT`: A special `Ractor::Port` that acts as a sink for messages and never closes.
 * `Farce::SCOPES`: List of [provided scopes](variants-and-scopes.md#provided-scopes).
 * `Farce::VERSION`: The current version.
 

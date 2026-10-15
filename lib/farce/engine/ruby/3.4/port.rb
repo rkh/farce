@@ -109,6 +109,7 @@ module Farce
         case source
         when UNDEFINED then super(QueueReader.new, ::Ractor.current)
         when ::Ractor  then super(RactorReader.new(source), source)
+        when nil       then super(nil, false)
         when Port      then source
         else raise ArgumentError, "wrong number of arguments (given 1, expected 0)"
         end
@@ -122,17 +123,17 @@ module Farce
 
       def ==(other) = other.is_a?(Port) && @reader == other.reader
 
-      def closed? = @reader.closed? || RactorReader.status(@owner) == "terminated"
+      def closed? = @reader&.closed? || RactorReader.status(@owner) == "terminated"
 
       def close
         check_owner!
-        @reader.close
+        @reader&.close
         self
       end
 
       def send(message, move: false)
         raise ::Ractor::ClosedError, "The port was already closed" if closed?
-        @reader.send(message, move:)
+        @reader&.send(message, move:)
         self
       end
 
@@ -140,11 +141,11 @@ module Farce
 
       def receive(timeout: nil)
         check_owner!
-        raise ::Ractor::ClosedError, "The port was already closed" if @reader.closed?
+        raise ::Ractor::ClosedError, "The port was already closed" if @reader&.closed?
         if selector = RactorSelector.for_call(self)
           selector.ractor_receive(self, timeout:)
         else
-          @reader.receive(timeout:)
+          @reader&.receive(timeout:)
         end
       end
 
@@ -153,8 +154,8 @@ module Farce
         @reader.selector_source if @reader.is_a?(RactorReader)
       end
 
-      def selector_watch(...) = @reader.selector_watch(...)
-      def selector_poll(&) = @reader.selector_poll(&)
+      def selector_watch(...) = @reader&.selector_watch(...)
+      def selector_poll(&) = @reader&.selector_poll(&)
 
       def inspect
         class_name = instance_of?(Port) ? "Farce::Ractor::Port" : self.class.name
@@ -177,7 +178,7 @@ module Farce
 
       def check_owner!
         return true if @owner.nil? || ::Ractor.current == @owner
-        raise ::Ractor::Error, "only allowed from the creator ::Ractor of this port"
+        raise ::Ractor::Error, "only allowed from the creator Ractor of this port"
       end
     end
 

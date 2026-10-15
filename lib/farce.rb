@@ -46,7 +46,7 @@ require "farce/system"
 # defined?(VERSION) # => false
 # ```
 module Farce
-  include Internal::Autoloads
+  include Internal::Autoloads[null_port: :NULL_PORT]
 
   # The valid storage scopes for local values and collections.
   # @return [::Set<Symbol>]

@@ -143,7 +143,7 @@ module Farce
     private
 
     def check_state!(allow_frozen: false)
-      raise Ractor::IsolationError, "must be called from main Ractor" unless Ractor.main?
+      raise Ractor::IsolationError, "must be called from main Ractor" if Internal.native_ractors? && !Ractor.main?
       Internal::Freeze.check(self) unless allow_frozen
     end
   end

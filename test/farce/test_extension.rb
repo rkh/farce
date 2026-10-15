@@ -20,6 +20,19 @@ module Farce
       def self.answer(target) = target.answer
     end
 
+    def test_creation_from_another_ractor
+      worker = Ractor.new do
+        Farce::Extension.new
+        :created
+      rescue Ractor::IsolationError
+        :rejected
+      end
+      result = worker.respond_to?(:value) ? worker.value : worker.take
+      expected = Ractor.builtin? ? :rejected : :created
+
+      assert_equal expected, result
+    end
+
     def test_refinements_are_scoped
       assert_equal 40, Refined.answer(Target.new)
       assert_equal 20, Target.new.answer
