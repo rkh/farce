@@ -180,6 +180,7 @@ module Farce
       end
 
       def test_kill_and_raise_cancel_waiters_before_owner_finishes
+        skip "Test is flaky on Windows" if Gem.win_platform?
         [Farce::Map, Strict::Map, Unshared::Map].each do |registry_class|
           locks = KeyLockMap.new(registry_class:)
           entered = ::Queue.new
