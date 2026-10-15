@@ -34,7 +34,7 @@ module Farce
         require "zeitwerk" rescue nil
 
         ractor = Ractor.new { true }
-        ractor.take
+        ractor.respond_to?(:take) ? ractor.take : ractor.join
 
         require "farce"
         Farce::Backports.install
