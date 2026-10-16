@@ -136,6 +136,35 @@ module Farce
       assert_equal :done, value(ractor)
     end
 
+    def test_shim_monitor_notification_matches_ruby_version
+      return if native_ractors?
+
+      output, error, status = ruby_isolated(<<~'RUBY')
+        require "farce"
+
+        { "4.0.0" => false, "4.1.0.dev" => true, "4.1.0" => true }.each do |version, include_ractor|
+          Farce::System.define_singleton_method(:ruby_version) { Gem::Version.new(version) }
+          port = Farce::Port.new
+          ractor = Farce::Ractor.new { receive }
+          expected = include_ractor ? [ractor, :exited] : :exited
+
+          abort "#{version}: monitor did not register" unless ractor.monitor(port)
+          ractor.send(:done)
+          notification = port.receive
+          abort "#{version}: incorrect exit notification" unless notification == expected
+          abort "#{version}: mutable exit notification" unless notification.frozen?
+          ractor.join
+
+          abort "#{version}: monitor registered after termination" if ractor.monitor(port)
+          notification = port.receive
+          abort "#{version}: incorrect terminated notification" unless notification == expected
+          abort "#{version}: mutable terminated notification" unless notification.frozen?
+        end
+      RUBY
+
+      assert_predicate status, :success?, "#{output}\n#{error}"
+    end
+
     def test_ractor_unmonitor_stops_exit_notification
       return if RUBY_ENGINE == "ruby" && RUBY_VERSION < "4"
       ractor = Ractor.new { Ractor.receive }
@@ -191,8 +220,7 @@ module Farce
     private
 
     def assert_monitor_notification(ractor, status, notification)
-      # Newer Ruby 4.1 builds include the monitored Ractor in the notification.
-      if native_ractors? && RUBY_VERSION >= "4.1" && notification.is_a?(Array)
+      if RUBY_VERSION >= "4.1"
         assert_equal 2, notification.size
         assert_same ractor, notification.first
         assert_equal status, notification.last

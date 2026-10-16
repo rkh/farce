@@ -7,8 +7,16 @@ require "etc"
 module Farce
   # Information about the system running Farce.
   module System
-    WINDOWS = Gem.win_platform?
-    private_constant :WINDOWS
+    ruby_version = Gem.ruby_version.release
+    ruby_version = ::Ractor.make_shareable(ruby_version, copy: true) if defined?(::Ractor)
+    RUBY_VERSION = ruby_version
+    WINDOWS      = Gem.win_platform?
+    private_constant :RUBY_VERSION, :WINDOWS
+
+    # A Version object representing the current Ruby version.
+    # Safe to call from any Ractor.
+    # @return [#<=>, #to_s]
+    def self.ruby_version = RUBY_VERSION
 
     # Whether the current operating system is Windows.
     # Safe to call from any Ractor.

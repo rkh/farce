@@ -65,6 +65,8 @@ The following methods are added to `Ractor` on Ruby versions prior to 4.1:
 
 - [`alive?`](https://docs.ruby-lang.org/en/master/Ractor.html#method-i-alive-3F)
 
+No breaking changes are backported. This includes the updated [`monitor`](https://docs.ruby-lang.org/en/master/Ractor.html#method-i-monitor) behavior. The [polyfill](#ractor) will choose its `monitor` implementation based on `RUBY_VERSION` (so that any code checking the Ruby version will see the behavior it should).
+
 ### Without Activating Backports
 
 You can call these methods on `Farce::Backports`, directly, passing in the Ractor instance as a first argument.

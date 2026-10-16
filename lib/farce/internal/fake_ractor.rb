@@ -79,7 +79,7 @@ module Farce
           ensure
             state.mutex.synchronize do
               state.monitors.each do |monitor|
-                monitor << state.status
+                FakeRactor.send_status(monitor, self, state.status)
               end
               state.monitors = nil
             end
@@ -111,7 +111,7 @@ module Farce
             end
           end
 
-          port << state.status
+          FakeRactor.send_status(port, self, state.status)
           false
         end
 
@@ -149,6 +149,11 @@ module Farce
 
         undef dup
         undef clone
+      end
+
+      def self.send_status(port, ractor, status)
+        payload = System.ruby_version > "4.1" ? [ractor, status].freeze : status
+        port << payload
       end
 
       def self.current
