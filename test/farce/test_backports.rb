@@ -30,6 +30,35 @@ module Farce
       assert_alive_backports :global
     end
 
+    def test_value_direct_calls
+      assert_value_backports :direct
+    end
+
+    def test_value_refinements
+      assert_value_backports :refined
+    end
+
+    def test_value_global_installation
+      assert_value_backports :global
+    end
+
+    def test_value_retains_backported_results
+      return unless RUBY_ENGINE == "ruby" && RUBY_VERSION < "4"
+
+      [42, nil, false, ["result"]].each do |expected|
+        ractor = Farce::Ractor.new(expected) { |value| value }
+        result = Backports.value(ractor)
+
+        2.times do
+          if result.nil?
+            assert_nil Backports.value(ractor)
+          else
+            assert_same result, Backports.value(ractor)
+          end
+        end
+      end
+    end
+
     def test_autoloads_from_shim_ractor
       return unless RUBY_ENGINE == "jruby"
 
@@ -100,6 +129,48 @@ module Farce
     end
 
     private
+
+    def assert_value_backports(activation)
+      setup = case activation
+              when :refined then "using Farce::Backports"
+              when :global then "Farce::Backports.install"
+              end
+      value = activation == :direct ? "Farce::Backports.value(ractor)" : "ractor.value"
+      output, error, status = ruby_isolated(<<~RUBY)
+        require "farce"
+        require "farce/backports"
+        #{setup}
+
+        events = Farce::Ractor::Port.new
+        [42, nil, false, ["result"]].each do |expected|
+          ractor = Farce::Ractor.new(events) do |events|
+            events.send(:ready)
+            Farce::Ractor.receive
+          end
+          reader = Thread.new { #{value} }
+          raise "Ractor did not start" unless events.receive == :ready
+          raise "value returned before the Ractor finished" if reader.join(0)
+          ractor.send(expected)
+          result = reader.value
+          raise "wrong Ractor value" unless result == expected
+        end
+        events.close
+
+        ractor = Farce::Ractor.new do
+          Thread.current.report_on_exception = false
+          raise "expected failure"
+        end
+        begin
+          #{value}
+          raise "missing Ractor failure"
+        rescue Farce::Ractor::RemoteError, RuntimeError => error
+          failure = error.cause || error
+          raise unless failure.message == "expected failure"
+        end
+      RUBY
+
+      assert_predicate status, :success?, "#{output}\n#{error}"
+    end
 
     def assert_alive_backports(activation)
       setup = case activation

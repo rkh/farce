@@ -68,6 +68,16 @@ module Farce
   #   @param ractor [Ractor] the ractor for which to obtain the default port
   #   @return [Ractor::Port] the default port of the given ractor
   #
+  # @!method join(ractor)
+  #   @scope class
+  #   Backport for {https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-join Ractor#join}
+  #   @example
+  #     using Farce::Backports
+  #     ractor = Ractor.new { sleep 10 }
+  #     ractor.join # blocks until the ractor exits
+  #   @param ractor [Ractor] the ractor to join
+  #   @return [Ractor] the joined ractor
+  #
   # @!method monitor(ractor, port)
   #   @scope class
   #   Backport for {https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-monitor Ractor#monitor}
@@ -95,15 +105,15 @@ module Farce
   #   @param port [Ractor::Port] the port to unmonitor the ractor with
   #   @return [Ractor] the unmonitored ractor
   #
-  # @!method join(ractor)
+  # @!method value(ractor)
   #   @scope class
-  #   Backport for {https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-join Ractor#join}
+  #   Backport for {https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-value Ractor#value}
   #   @example
   #     using Farce::Backports
-  #     ractor = Ractor.new { sleep 10 }
-  #     ractor.join # blocks until the ractor exits
-  #   @param ractor [Ractor] the ractor to join
-  #   @return [Ractor] the joined ractor
+  #     ractor = Ractor.new { 42 }
+  #     ractor.value # => 42
+  #   @param ractor [Ractor] the ractor to obtain the value from
+  #   @return [Object] the value of the given ractor
   module Backports
     # @!visibility private
     Extension = Farce::Extension.new
@@ -130,6 +140,7 @@ module Farce
           def join            = Backports.join(self)
           def monitor(port)   = Backports.monitor(self, port)
           def unmonitor(port) = Backports.unmonitor(self, port)
+          def value           = Backports.value(self)
         end
 
         def self.default_port(ractor) = Farce::Ractor::Port.new(ractor)
@@ -172,10 +183,18 @@ module Farce
           Internal::RactorState.for(ractor)&.unmonitor(port)
           ractor
         end
+
+        def self.value(ractor)
+          Internal::RactorState.for(ractor)&.join
+          values = ::Ractor.store_if_absent("Ractor#value") { ObjectSpace::WeakKeyMap.new }
+          entry  = values[ractor] ||= [Mutex.new]
+          entry.first.synchronize { entry << ractor.take if entry.size == 1 }
+          entry[1]
+        end
       end
     end
 
-    %i[default_port join monitor unmonitor alive?].each do |method|
+    %i[alive? default_port join monitor unmonitor value].each do |method|
       next if respond_to?(method)
       class_eval <<~RUBY, __FILE__, __LINE__ + 1
         def self.#{method}(ractor, ...) = ractor.#{method}(...)

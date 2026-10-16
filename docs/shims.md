@@ -55,9 +55,10 @@ Instead, backports are provided by `Farce::Backports`.
 The following methods are added to `Ractor` on Ruby versions prior to 4.0:
 
 - [`default_port`](https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-default_port)
+- [`join`](https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-join)
 - [`monitor`](https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-monitor)
 - [`unmonitor`](https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-unmonitor)
-- [`join`](https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-join)
+- [`value`](https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-value)
 
 #### From Ruby 4.1
 
