@@ -224,13 +224,12 @@ module Farce
     end
 
     def assert_select_backports(activation)
-      skip "RactorMethods#select is not implemented on non-CRuby" unless RUBY_ENGINE == "ruby"
-
       setup = case activation
               when :refined then "using Farce::Backports"
               when :global then "Farce::Backports.install"
               end
-      select = activation == :direct ? "Farce::Backports.select" : "::Ractor.select"
+      ractor = RUBY_ENGINE == "ruby" || activation == :global ? "::Ractor" : "Farce::Ractor"
+      select = activation == :direct ? "Farce::Backports.select" : "#{ractor}.select"
       output, error, status = ruby_isolated(<<~RUBY)
         require "farce"
         require "farce/backports"

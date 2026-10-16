@@ -63,8 +63,8 @@ module Farce
         with_storage(name) { _1[_2] = value }
       end
 
-      def select(...)
-        raise "TODO: not implemented"
+      def select(*sources, timeout: nil)
+        RactorSelector.new.select(*sources, timeout:)
       end
 
       alias recv receive
