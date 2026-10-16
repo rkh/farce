@@ -142,8 +142,8 @@ module Farce
       output, error, status = ruby_isolated(<<~'RUBY')
         require "farce"
 
-        { "4.0.0" => false, "4.1.0.dev" => true, "4.1.0" => true }.each do |version, include_ractor|
-          Farce::System.define_singleton_method(:ruby_version) { Gem::Version.new(version) }
+        { "4.0.0" => false, "4.0.7" => false, "4.1.0.dev" => true, "4.1.0" => true, "4.1.1" => true }.each do |version, include_ractor|
+          Farce::System.define_singleton_method(:ruby_version) { Gem::Version.new(version).release }
           port = Farce::Port.new
           ractor = Farce::Ractor.new { receive }
           expected = include_ractor ? [ractor, :exited] : :exited

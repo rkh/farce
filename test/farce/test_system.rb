@@ -6,6 +6,28 @@ require_relative "../setup"
 
 module Farce
   class TestSystem < Test
+    def test_ruby_version_matches_the_current_release
+      assert_equal Gem.ruby_version.release, System.ruby_version
+      refute_predicate System.ruby_version, :prerelease?
+    end
+
+    def test_ruby_version_normalizes_prereleases_before_publication
+      output, error, status = ruby_isolated(<<~RUBY)
+        require "rubygems"
+        Gem.define_singleton_method(:ruby_version) { Gem::Version.new("4.1.0.dev") }
+        require "farce"
+
+        expected = Gem::Version.new("4.1")
+        abort "incorrect release" unless Farce::System.ruby_version == expected
+        abort "release boundary excluded" unless Farce::System.ruby_version >= "4.1"
+        worker = Farce::Ractor.new { Farce::System.ruby_version }
+        actual = worker.respond_to?(:value) ? worker.value : worker.take
+        abort "incorrect release in another Ractor" unless actual == expected
+      RUBY
+
+      assert_predicate status, :success?, "#{output}\n#{error}"
+    end
+
     def test_cpu_count_defaults_to_all_cpus
       assert_equal Etc.nprocessors, System.cpu_count
       assert_equal System.cpu_count, System.cpu_count(nil)

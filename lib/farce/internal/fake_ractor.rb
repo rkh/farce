@@ -152,7 +152,7 @@ module Farce
       end
 
       def self.send_status(port, ractor, status)
-        payload = System.ruby_version > "4.1" ? [ractor, status].freeze : status
+        payload = System.ruby_version >= "4.1" ? [ractor, status].freeze : status
         port << payload
       end
 

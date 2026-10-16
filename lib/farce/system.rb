@@ -13,7 +13,7 @@ module Farce
     WINDOWS      = Gem.win_platform?
     private_constant :RUBY_VERSION, :WINDOWS
 
-    # A Version object representing the current Ruby version.
+    # A Version object representing the current Ruby release, without prerelease suffixes.
     # Safe to call from any Ractor.
     # @return [#<=>, #to_s]
     def self.ruby_version = RUBY_VERSION

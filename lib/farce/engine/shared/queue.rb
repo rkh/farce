@@ -12,10 +12,10 @@ module Farce
       attr_reader :capacity
 
       def initialize(capacity: 1024, track_age: false)
-        @queue    = capacity ? Thread::SizedQueue.new(capacity) : Thread::Queue.new
-        @capacity = capacity
-        @signal   = Signal.new
-        @tracking = track_age ? { lock: Mutex.new, timestamps: [], generation: 0 } : nil
+        @queue     = capacity ? Thread::SizedQueue.new(capacity) : Thread::Queue.new
+        @capacity  = capacity
+        @signal    = Signal.new
+        @tracking  = track_age ? { lock: Mutex.new, timestamps: [], generation: 0 } : nil
         @lifecycle = { lock: Mutex.new, hard_closed: false }
         Freeze.publish(self)
       end
