@@ -66,6 +66,12 @@ The following methods are added to `Ractor` on Ruby versions prior to 4.1:
 
 - [`alive?`](https://docs.ruby-lang.org/en/master/Ractor.html#method-i-alive-3F)
 
+It also extends the following methods with optional timeout support:
+
+- [`Ractor.select`](https://docs.ruby-lang.org/en/master/Ractor.html#method-c-select)
+- [`Ractor#receive`](https://docs.ruby-lang.org/en/master/Ractor.html#method-i-receive)
+- [`Ractor::Port#receive`](https://docs.ruby-lang.org/en/master/Ractor/Port.html#method-i-receive)
+
 No breaking changes are backported. This includes the updated [`monitor`](https://docs.ruby-lang.org/en/master/Ractor.html#method-i-monitor) behavior. The [polyfill](#ractor) will choose its `monitor` implementation based on `RUBY_VERSION` (so that any code checking the Ruby version will see the behavior it should).
 
 ### Without Activating Backports

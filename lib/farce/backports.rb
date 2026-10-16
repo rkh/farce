@@ -105,6 +105,25 @@ module Farce
   #   @param port [Ractor::Port] the port to unmonitor the ractor with
   #   @return [Ractor] the unmonitored ractor
   #
+  # @!method receive(ractor_or_port, timeout: nil)
+  #   @scope class
+  #   Backport for the optional timeout parameter of
+  #   {https://docs.ruby-lang.org/en/master/Ractor.html#method-i-receive Ractor#receive} and
+  #   {https://docs.ruby-lang.org/en/master/Ractor/Port.html#method-i-receive Ractor::Port#receive}
+  #   @example
+  #     using Farce::Backports
+  #     port = Farce::Ractor::Port.new
+  #     port.send("message")
+  #     Farce::Backports.receive(port, timeout: 0.1) # => "message"
+  #   @param ractor_or_port [Ractor, Ractor::Port] the ractor or port to receive from
+  #   @param timeout [Numeric, nil] the timeout for receiving
+  #   @return [Object] the received value
+  #
+  # @!method select(*ractors_and_ports, timeout: nil)
+  #   @scope class
+  #   Backport for the optional timeout parameter of
+  #   {https://docs.ruby-lang.org/en/master/Ractor.html#method-c-select Ractor.select}
+  #
   # @!method value(ractor)
   #   @scope class
   #   Backport for {https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-value Ractor#value}
@@ -121,16 +140,47 @@ module Farce
     include Extension
 
     if Internal.native_ractors?
+      if needs_timeouts = ::Ractor.instance_method(:receive).arity.zero?
+        Extension.define(::Ractor) do
+          def receive(timeout: nil)
+            return super() if timeout.nil?
+            Internal::RactorSelector.current.ractor_receive(self, timeout:)
+          end
+        end
+
+        Extension.define(::Ractor.singleton_class) do
+          def select(*sources, timeout: nil, **)
+            # The selector helper must reach Ruby's native wait without reentering itself.
+            return super(*sources, **) if timeout.nil? && (Internal.native_ports? || sources.all?(::Ractor))
+            Farce::Ractor.select(*sources, timeout:, **)
+          end
+        end
+
+        def self.receive(ractor_or_port, timeout: nil)
+          ractor_or_port = default_port(ractor_or_port) if ractor_or_port.is_a?(Ractor)
+          return ractor_or_port.receive if timeout.nil?
+          return ractor_or_port.receive(timeout:) unless Internal.native_ports?
+          Internal::RactorSelector.current.ractor_receive(ractor_or_port, timeout:)
+        end
+      end
+
       if Internal.native_ports?
         unless ::Ractor.method_defined?(:alive?)
-          Extension.define(::Ractor) do
-            def alive? = Backports.alive?(self)
-          end
+          Extension.define(::Ractor) { def alive? = Backports.alive?(self) }
 
           def self.alive?(ractor)
             ractor.monitor(NULL_PORT)
           ensure
             ractor.unmonitor(NULL_PORT)
+          end
+        end
+
+        if needs_timeouts
+          Extension.define(::Ractor::Port) do
+            def receive(timeout: nil)
+              return super() if timeout.nil?
+              Internal::RactorSelector.current.ractor_receive(self, timeout:)
+            end
           end
         end
       else
@@ -143,14 +193,14 @@ module Farce
           def value           = Backports.value(self)
         end
 
-        def self.default_port(ractor) = Farce::Ractor::Port.new(ractor)
-
         def self.alive?(ractor)
           return true if Ractor.main == ractor
           state = Internal::RactorState.for(ractor)
           return state.alive? if state
           !ractor.inspect.end_with?("terminated>")
         end
+
+        def self.default_port(ractor) = Farce::Ractor::Port.new(ractor)
 
         def self.join(ractor)
           Internal::RactorState.for(ractor)&.join
@@ -200,6 +250,15 @@ module Farce
         def self.#{method}(ractor, ...) = ractor.#{method}(...)
       RUBY
     end
+
+    unless respond_to?(:receive)
+      def self.receive(ractor_or_port, timeout: nil)
+        ractor_or_port = default_port(ractor_or_port) if ractor_or_port.is_a?(Ractor)
+        timeout.nil? ? ractor_or_port.receive : ractor_or_port.receive(timeout:)
+      end
+    end
+
+    def self.select(...) = Farce::Ractor.select(...)
 
     # Installs the Farce backports for Ractor and Ractor::Port globally.
     def self.install

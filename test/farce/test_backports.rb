@@ -42,6 +42,42 @@ module Farce
       assert_value_backports :global
     end
 
+    def test_port_receive_direct_calls
+      assert_receive_backports :direct, :port
+    end
+
+    def test_port_receive_refinements
+      assert_receive_backports :refined, :port
+    end
+
+    def test_port_receive_global_installation
+      assert_receive_backports :global, :port
+    end
+
+    def test_ractor_receive_direct_calls
+      assert_receive_backports :direct, :ractor
+    end
+
+    def test_ractor_receive_refinements
+      assert_receive_backports :refined, :ractor
+    end
+
+    def test_ractor_receive_global_installation
+      assert_receive_backports :global, :ractor
+    end
+
+    def test_select_direct_calls
+      assert_select_backports :direct
+    end
+
+    def test_select_refinements
+      assert_select_backports :refined
+    end
+
+    def test_select_global_installation
+      assert_select_backports :global
+    end
+
     def test_value_retains_backported_results
       return unless RUBY_ENGINE == "ruby" && RUBY_VERSION < "4"
 
@@ -129,6 +165,108 @@ module Farce
     end
 
     private
+
+    def assert_receive_backports(activation, source)
+      setup = case activation
+              when :refined then "using Farce::Backports"
+              when :global then "Farce::Backports.install"
+              end
+      receiver = source == :port ? "source.receive" : "receive"
+      receive = if activation == :direct
+                  ->(args) { "Farce::Backports.receive(source#{args})" }
+                else
+                  ->(args) { "#{receiver}(#{args.delete_prefix(", ")})" }
+                end
+      checks = <<~RUBY
+        raise "zero timeout did not expire" unless #{receive.call(", timeout: 0")}.nil?
+        started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        raise "positive timeout did not expire" unless #{receive.call(", timeout: 0.01")}.nil?
+        elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
+        raise "receive returned before its timeout" if elapsed < 0.01
+
+        [false, nil, :message].each do |expected|
+          source.send(expected)
+          source.send(:sentinel)
+          raise "wrong received value" unless #{receive.call(", timeout: 1")} == expected
+          raise "receive consumed the next message" unless #{receive.call(", timeout: 0")} == :sentinel
+        end
+
+        source.send(:without_timeout)
+        raise "receive without timeout failed" unless #{receive.call("")} == :without_timeout
+        source.send(:nil_timeout)
+        raise "receive with nil timeout failed" unless #{receive.call(", timeout: nil")} == :nil_timeout
+      RUBY
+      body = if source == :port
+               <<~RUBY
+                 port_class = defined?(::Ractor::Port) ? ::Ractor::Port : Farce::Ractor::Port
+                 source = port_class.new
+                 #{checks}
+                 source.close
+               RUBY
+             else
+               <<~RUBY
+                 worker = Farce::Ractor.new do
+                   source = Farce::Ractor.current
+                   #{checks}
+                   :passed
+                 end
+                 raise "Ractor receive checks failed" unless Farce::Backports.value(worker) == :passed
+               RUBY
+             end
+      output, error, status = ruby_isolated(<<~RUBY)
+        require "farce"
+        require "farce/backports"
+        #{setup}
+        #{body}
+      RUBY
+
+      assert_predicate status, :success?, "#{output}\n#{error}"
+    end
+
+    def assert_select_backports(activation)
+      skip "RactorMethods#select is not implemented on non-CRuby" unless RUBY_ENGINE == "ruby"
+
+      setup = case activation
+              when :refined then "using Farce::Backports"
+              when :global then "Farce::Backports.install"
+              end
+      select = activation == :direct ? "Farce::Backports.select" : "::Ractor.select"
+      output, error, status = ruby_isolated(<<~RUBY)
+        require "farce"
+        require "farce/backports"
+        #{setup}
+
+        port_class = defined?(::Ractor::Port) ? ::Ractor::Port : Farce::Ractor::Port
+        first = port_class.new
+        second = port_class.new
+        raise "zero timeout did not expire" unless #{select}(first, second, timeout: 0).nil?
+        started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        raise "positive timeout did not expire" unless #{select}(first, second, timeout: 0.01).nil?
+        elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
+        raise "select returned before its timeout" if elapsed < 0.01
+
+        [false, nil, :message].each do |expected|
+          second.send(expected)
+          raise "wrong selected source or value" unless #{select}(first, second, timeout: 1) == [second, expected]
+          first.send(:sentinel)
+          raise "select consumed the next message" unless #{select}(first, second, timeout: 0) == [first, :sentinel]
+        end
+
+        first.send(:without_timeout)
+        raise "select without timeout failed" unless #{select}(first, second) == [first, :without_timeout]
+        second.send(:nil_timeout)
+        raise "select with nil timeout failed" unless #{select}(first, second, timeout: nil) == [second, :nil_timeout]
+
+        worker = Farce::Ractor.new { Farce::Ractor.receive }
+        raise "waiting Ractor did not time out" unless #{select}(worker, first, timeout: 0).nil?
+        worker.send(:result)
+        raise "wrong Ractor result" unless #{select}(worker, first, timeout: 5) == [worker, :result]
+        first.close
+        second.close
+      RUBY
+
+      assert_predicate status, :success?, "#{output}\n#{error}"
+    end
 
     def assert_value_backports(activation)
       setup = case activation

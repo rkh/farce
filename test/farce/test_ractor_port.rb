@@ -86,7 +86,7 @@ module Farce
         [e.class.name, e.message]
       end
 
-      assert_equal ["Ractor::Error", "only allowed from the creator ::Ractor of this port"], ractor_value(ractor)
+      assert_equal ["Ractor::Error", "only allowed from the creator Ractor of this port"], ractor_value(ractor)
     end
 
     def test_fallback_uninitialized_inspect_falls_back
