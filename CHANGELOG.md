@@ -4,6 +4,50 @@ Farce follows [Semantic Versioning 2.0](http://semver.org/). Any public method o
 
 ## Development Releases
 
+### Farce 0.4.0 (2026-10-16)
+
+#### New Features
+
+##### Ractor Backports
+
+`Farce::Backports` makes newer Ractor APIs available on older Ruby versions:
+
+* Added `Ractor#default_port`, `#join`, `#monitor`, `#unmonitor`, and `#value` on Ruby versions prior to 4.0.
+* Added `Ractor#alive?` on Ruby versions prior to 4.1.
+* Added optional `timeout:` support for `Ractor.select`, `Ractor#receive`, and `Ractor::Port#receive` on Ruby versions prior to 4.1.
+
+You can activate the backports for a lexical scope with `using Farce::Backports`, install them globally with `Farce::Backports.install`, or call methods on `Farce::Backports` directly.
+Global installation also defines `Ractor` and `Ractor::Port` when they are not natively available.
+
+```ruby
+using Farce::Backports
+
+ractor = Farce::Ractor.new { 42 }
+ractor.join
+ractor.value # => 42
+```
+
+##### Ractor Improvements
+
+* `Farce::Ractor.select` is now implemented on JRuby and TruffleRuby. It supports selecting from Ractors and ports, optional timeouts, and waiting without blocking a Fiber scheduler.
+* The Ractor polyfill now supports `alive?` and follows Ruby 4.1's `monitor` notification format when running on Ruby 4.1 or later.
+
+##### Miscellaneous
+
+* Added `set?` and `unset?` predicates to `Flag` and `Local::Flag`.
+* Added `Farce::NULL_PORT`, a write-only port that discards messages and can be used to ignore Ractor exit notifications.
+* Added `Farce::System.ruby_version`, which returns the current Ruby release as a version object without prerelease suffixes. It can be called from any Ractor.
+* Added `Farce::Extension` to easily define modules that can be used both as refinements or installed globally into existing classes, used by `Farce::Backports`.
+
+#### Bug Fixes
+
+* Work around a JRuby synchronization race that could lose a mutex wakeup and leave a scheduled Fiber blocked.
+
+#### Other changes
+
+* Reorganized the README into a shorter introduction with topic-specific guides in the docs directory.
+* Updated compatibility documentation and tests for `ractor-tmvar` 0.4.0.
+
 ### Farce 0.3.0 (2026-10-13)
 
 #### New Features
