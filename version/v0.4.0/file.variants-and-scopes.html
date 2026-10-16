@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: Variants and Scopes
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "variants-and-scopes";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../main/index.html">main</option>
+<option value="index.html" selected>v0.4.0</option>
+<option value="../v0.3.0/index.html">v0.3.0</option>
+<option value="../v0.2.0/index.html">v0.2.0</option>
+<option value="../v0.1.0/index.html">v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: Variants and Scopes</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="variants-and-scopes">Variants and Scopes<a href="#variants-and-scopes" aria-label="Link to heading 'Variants and Scopes'" data-heading-content="Variants and Scopes" class="anchor"></a></h1>
+<p>Many classes, including all <a href="file.data-structures.html#data-structures" title="data structures">data structures</a>, implement multiple variants as separate subclasses within module namespaces.</p>
+<p><code>Farce::Map</code>, <code>Farce::Strict::Map</code>, <code>Farce::Local::Map</code>, and <code>Farce::Unshared::Map</code> all support the same API, except that:</p>
+<ul>
+<li><code>Farce::Map</code> accepts an optional <code>mode</code> keyword for its initializer and many methods.</li>
+<li><code>Farce::Strict::Map</code> will not allow any non-shareable data to be stored in it. It is slightly faster than <code>Farce::Map</code>.</li>
+<li><code>Farce::Local::Map</code> will accept an optional <code>scope</code>  keyword for its initializer, and will have different content for each <a href="#provided-scopes">scope</a>.</li>
+<li><code>Farce::Unshared::Map</code> cannot be shared across Ractors, but in turn can store any Ruby object directly, including unshareable objects. It is as fast as <code>Farce::Strict::Map</code>.</li>
+</ul>
+<h2 id="available-variants">Available Variants<a href="#available-variants" aria-label="Link to heading 'Available Variants'" data-heading-content="Available Variants" class="anchor"></a></h2>
+<div class="markdown-alert markdown-alert-tip">
+<p class="markdown-alert-title">Tip</p>
+<p>Learn more in the dedicated <a href="file.variants.html" title="variants documentation">variants documentation</a>.</p>
+</div>
+<p>These variants are provided by Farce:</p>
+<ol>
+<li><strong>Default</strong> variants, under the <code>Farce</code> namespace:
+<ul>
+<li>Can <strong>store unshareable values</strong>, usually via <a href="file.sharing.html#sharing-modes" title="modes">modes</a>.
+For maps, this is only supported for values. Keys must be shareable.</li>
+<li>Instances are <strong>Ractor-shareable</strong>.</li>
+<li>The data structure is <strong>thread-safe</strong>.</li>
+</ul>
+</li>
+<li><strong>Strict</strong> variants, under the <code>Farce::Strict</code> namespace:
+<ul>
+<li><strong>Forbid unshareable values</strong></li>
+<li>Instances are <strong>Ractor-shareable</strong>.</li>
+<li>The data structure is <strong>thread-safe</strong>.</li>
+<li>May provide performance benefits over the default variant.</li>
+</ul>
+</li>
+<li><strong>Local</strong> variants, under the <code>Farce::Local</code> namespace:
+<ul>
+<li>Will have <strong>different content</strong> for each <a href="#provided-scopes">scope</a>.</li>
+<li>Can <strong>store unshareable values</strong>, including unshareable map keys.</li>
+<li>Instances are <strong>Ractor-shareable</strong>.</li>
+<li>The data structure is <strong>thread-safe</strong>.</li>
+</ul>
+</li>
+<li><strong>Unshared</strong> variants, under <code>Farce::Unshared</code> namespace:
+<ul>
+<li>Can <strong>store unshareable values</strong>, including unshareable map keys.</li>
+<li>Instances are <strong><u>not</u> Ractor-shareable</strong>.</li>
+<li>The data structure is <strong>thread-safe</strong>.</li>
+<li>May provide performance benefits over the default variant.</li>
+</ul>
+</li>
+<li><strong>Unsafe</strong> variants, under <code>Farce::Unsafe</code> namespace:
+<ul>
+<li>Same as Unshared, except they do <strong><u>not</u> guarantee thread-safety</strong></li>
+<li>May provide performance benefits over all other variants.</li>
+</ul>
+</li>
+<li><strong>Transaction</strong> variants, under <code>Farce::Transaction</code> namespace:
+<ul>
+<li>Created as mirrors of another object within a <a href="file.concurrency.html#transactions" title="transaction">transaction</a>.</li>
+<li>Should not be shared across transaction boundaries.</li>
+<li>Should not be initialized directly.</li>
+</ul>
+</li>
+</ol>
+<p>The following is true for all variants:</p>
+<ul>
+<li>Blocking operations will suspend a non-blocking fiber, but not block the underlying scheduler.</li>
+<li>The return value of <code>frozen?</code> will correctly reflect whether an instance is mutable or not.</li>
+</ul>
+<p>However, keep the following in mind:</p>
+<ul>
+<li>Not all classes implement all variants. Check out the <a href="file.variants.html#classes-implementing-variants" title="full list">full list</a></li>
+<li>Other classes that don't implement variants are also nested under the <code>Farce</code> namespace.</li>
+</ul>
+<h2 id="provided-scopes">Provided scopes<a href="#provided-scopes" aria-label="Link to heading 'Provided scopes'" data-heading-content="Provided scopes" class="anchor"></a></h2>
+<div class="markdown-alert markdown-alert-tip">
+<p class="markdown-alert-title">Tip</p>
+<p>Learn more in the dedicated <a href="file.scopes.html" title="scopes documentation">scopes documentation</a>.</p>
+</div>
+<p>Local variants support scopes:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_map'>map</span>      <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Local.html" title="Farce::Local (module)">Local</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Local/Map.html" title="Farce::Local::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Local/Map.html#initialize-instance_method" title="Farce::Local::Map#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>scope:</span> <span class='symbol'>:thread</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='symbol'>:id</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='int'>1</span>
+
+<span class='const'>Thread</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='symbol'>:id</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='int'>2</span>
+  <span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='symbol'>:id</span><span class='rbracket'>]</span> <span class='comment'># =&gt; 2
+</span><span class='kw'>end</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+
+<span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='symbol'>:id</span><span class='rbracket'>]</span> <span class='comment'># =&gt; 1
+</span></code></pre>
+<p>The following scopes are available:</p>
+<table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ractor</code> (default)</td>
+<td>Content varies by <a href="https://docs.ruby-lang.org/en/4.0/Ractor.html">Ractor</a></td>
+</tr>
+<tr>
+<td><code>thread_group</code></td>
+<td>Content varies by <a href="https://docs.ruby-lang.org/en/4.0/ThreadGroup.html">ThreadGroup</a></td>
+</tr>
+<tr>
+<td><code>thread</code></td>
+<td>Content varies by <a href="https://docs.ruby-lang.org/en/4.0/Thread.html">Thread</a></td>
+</tr>
+<tr>
+<td><code>fiber_storage</code></td>
+<td>Content varies by <a href="https://docs.ruby-lang.org/en/4.0/Fiber.html#method-i-storage">Fiber storage</a></td>
+</tr>
+<tr>
+<td><code>fiber</code></td>
+<td>Content varies by <a href="https://docs.ruby-lang.org/en/4.0/Fiber.html">Fiber</a></td>
+</tr>
+</tbody>
+</table>
+<p>Fiber storage is typically inherited by a blocking fiber from the fiber creating it.</p>
+<h2 id="read-next">Read Next<a href="#read-next" aria-label="Link to heading 'Read Next'" data-heading-content="Read Next" class="anchor"></a></h2>
+<p><a href="index.html#features" title="README">README</a> · <a href="file.variants.html" title="Variants">Variants</a> · <a href="file.scopes.html" title="Local scopes">Local scopes</a> · <a href="file.sharing.html" title="Sharing Unshareable Data">Sharing Unshareable Data</a></p>
+</div></div>
+
+      <div id="footer">
+  Generated on Fri Oct 16 13:46:39 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>

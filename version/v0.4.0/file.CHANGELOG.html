@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: CHANGELOG
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "CHANGELOG";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../main/index.html">main</option>
+<option value="index.html" selected>v0.4.0</option>
+<option value="../v0.3.0/index.html">v0.3.0</option>
+<option value="../v0.2.0/index.html">v0.2.0</option>
+<option value="../v0.1.0/index.html">v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: CHANGELOG</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="changelog">Changelog<a href="#changelog" aria-label="Link to heading 'Changelog'" data-heading-content="Changelog" class="anchor"></a></h1>
+<p>Farce follows <a href="http://semver.org/">Semantic Versioning 2.0</a>. Any public method on any public class or module documented in the README or via YARD and not declared private is part of the public API.</p>
+<h2 id="development-releases">Development Releases<a href="#development-releases" aria-label="Link to heading 'Development Releases'" data-heading-content="Development Releases" class="anchor"></a></h2>
+<h3 id="farce-040-2026-10-16">Farce 0.4.0 (2026-10-16)<a href="#farce-040-2026-10-16" aria-label="Link to heading 'Farce 0.4.0 (2026-10-16)'" data-heading-content="Farce 0.4.0 (2026-10-16)" class="anchor"></a></h3>
+<h4 id="new-features">New Features<a href="#new-features" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
+<h5 id="ractor-backports">Ractor Backports<a href="#ractor-backports" aria-label="Link to heading 'Ractor Backports'" data-heading-content="Ractor Backports" class="anchor"></a></h5>
+<p><code>Farce::Backports</code> makes newer Ractor APIs available on older Ruby versions:</p>
+<ul>
+<li>Added <code>Ractor#default_port</code>, <code>#join</code>, <code>#monitor</code>, <code>#unmonitor</code>, and <code>#value</code> on Ruby versions prior to 4.0.</li>
+<li>Added <code>Ractor#alive?</code> on Ruby versions prior to 4.1.</li>
+<li>Added optional <code>timeout:</code> support for <code>Ractor.select</code>, <code>Ractor#receive</code>, and <code>Ractor::Port#receive</code> on Ruby versions prior to 4.1.</li>
+</ul>
+<p>You can activate the backports for a lexical scope with <code>using Farce::Backports</code>, install them globally with <code>Farce::Backports.install</code>, or call methods on <code>Farce::Backports</code> directly.
+Global installation also defines <code>Ractor</code> and <code>Ractor::Port</code> when they are not natively available.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_using'>using</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Backports.html" title="Farce::Backports (module)">Backports</a></span></span>
+
+<span class='id identifier rubyid_ractor'>ractor</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='int'>42</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_ractor'>ractor</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+<span class='id identifier rubyid_ractor'>ractor</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='comment'># =&gt; 42
+</span></code></pre>
+<h5 id="ractor-improvements">Ractor Improvements<a href="#ractor-improvements" aria-label="Link to heading 'Ractor Improvements'" data-heading-content="Ractor Improvements" class="anchor"></a></h5>
+<ul>
+<li><code>Farce::Ractor.select</code> is now implemented on JRuby and TruffleRuby. It supports selecting from Ractors and ports, optional timeouts, and waiting without blocking a Fiber scheduler.</li>
+<li>The Ractor polyfill now supports <code>alive?</code> and follows Ruby 4.1's <code>monitor</code> notification format when running on Ruby 4.1 or later.</li>
+</ul>
+<h5 id="miscellaneous">Miscellaneous<a href="#miscellaneous" aria-label="Link to heading 'Miscellaneous'" data-heading-content="Miscellaneous" class="anchor"></a></h5>
+<ul>
+<li>Added <code>set?</code> and <code>unset?</code> predicates to <code>Flag</code> and <code>Local::Flag</code>.</li>
+<li>Added <code>Farce::NULL_PORT</code>, a write-only port that discards messages and can be used to ignore Ractor exit notifications.</li>
+<li>Added <code>Farce::System.ruby_version</code>, which returns the current Ruby release as a version object without prerelease suffixes. It can be called from any Ractor.</li>
+<li>Added <code>Farce::Extension</code> to easily define modules that can be used both as refinements or installed globally into existing classes, used by <code>Farce::Backports</code>.</li>
+</ul>
+<h4 id="bug-fixes">Bug Fixes<a href="#bug-fixes" aria-label="Link to heading 'Bug Fixes'" data-heading-content="Bug Fixes" class="anchor"></a></h4>
+<ul>
+<li>Work around a JRuby synchronization race that could lose a mutex wakeup and leave a scheduled Fiber blocked.</li>
+</ul>
+<h4 id="other-changes">Other changes<a href="#other-changes" aria-label="Link to heading 'Other changes'" data-heading-content="Other changes" class="anchor"></a></h4>
+<ul>
+<li>Reorganized the README into a shorter introduction with topic-specific guides in the docs directory.</li>
+<li>Updated compatibility documentation and tests for <code>ractor-tmvar</code> 0.4.0.</li>
+</ul>
+<h3 id="farce-030-2026-10-13">Farce 0.3.0 (2026-10-13)<a href="#farce-030-2026-10-13" aria-label="Link to heading 'Farce 0.3.0 (2026-10-13)'" data-heading-content="Farce 0.3.0 (2026-10-13)" class="anchor"></a></h3>
+<h4 id="new-features-1">New Features<a href="#new-features-1" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
+<h5 id="breaking-changes">Breaking Changes<a href="#breaking-changes" aria-label="Link to heading 'Breaking Changes'" data-heading-content="Breaking Changes" class="anchor"></a></h5>
+<ul>
+<li><code>Abstract::Scheduler</code> is no longer a superclass of <code>Pool</code>. Use <code>Abstract::Executor</code> instead.</li>
+</ul>
+<h5 id="executor-improvements">Executor Improvements<a href="#executor-improvements" aria-label="Link to heading 'Executor Improvements'" data-heading-content="Executor Improvements" class="anchor"></a></h5>
+<p><code>Scheduler</code> and <code>Pool</code> have the following improvements:</p>
+<ul>
+<li>They now support <code>try_schedule</code>, which discards tasks and returns <code>nil</code> when their internal queues are at capacity.</li>
+<li>They now have <code>Unshared</code> and <code>Local</code> variants, running in a Ractor-local context (Pool will manage a Thread pool instead of a Ractor pool).</li>
+</ul>
+<p>Creates a thread pool with a maximum size of 2 and a queue capacity of 10:</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># A thread pool local to the current Ractor
+</span><span class='id identifier rubyid_thread_pool'>thread_pool</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Unshared.html" title="Farce::Unshared (module)">Unshared</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Unshared/Pool.html" title="Farce::Unshared::Pool (class)">Pool</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Unshareable.html#initialize-instance_method" title="Farce::Unshareable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>max_size:</span> <span class='int'>2</span><span class='comma'>,</span> <span class='label'>capacity:</span> <span class='int'>10</span><span class='rparen'>)</span>
+
+<span class='comment'># this should only run approximately 10 tasks on CRuby
+</span><span class='int'>500</span><span class='period'>.</span><span class='id identifier rubyid_times'>times</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_thread_pool'>thread_pool</span><span class='period'>.</span><span class='id identifier rubyid_try_schedule'>try_schedule</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Task executed</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span> <span class='rbrace'>}</span>
+</code></pre>
+<h5 id="tasks">Tasks<a href="#tasks" aria-label="Link to heading 'Tasks'" data-heading-content="Tasks" class="anchor"></a></h5>
+<p>A new class, <code>Task</code>, has been introduced to represent asynchronous tasks that can be scheduled and executed within Farce's executor framework,
+executed manually, or handed off to any other executor supporting procs or callable objects.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_task'>task</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Task.html" title="Farce::Task (class)">Task</a></span></span><span class='period'>.</span><span class='id identifier rubyid_schedule'><span class='object_link'><a href="Farce/Task.html#schedule-class_method" title="Farce::Task.schedule (method)">schedule</a></span></span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Task started</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span>
+  <span class='symbol'>:success</span>
+<span class='kw'>ensure</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Task finished</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_alive?'>alive?</span> <span class='comment'># =&gt; true
+</span><span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>  <span class='comment'># =&gt; :success (blocks until the task completes)
+</span></code></pre>
+<h4 id="bug-fixes-1">Bug Fixes<a href="#bug-fixes-1" aria-label="Link to heading 'Bug Fixes'" data-heading-content="Bug Fixes" class="anchor"></a></h4>
+<ul>
+<li>Calling <code>wait_*</code> methods on atoms on JRuby no longer blocks a fiber scheduler.</li>
+</ul>
+<h3 id="farce-020-2026-10-11">Farce 0.2.0 (2026-10-11)<a href="#farce-020-2026-10-11" aria-label="Link to heading 'Farce 0.2.0 (2026-10-11)'" data-heading-content="Farce 0.2.0 (2026-10-11)" class="anchor"></a></h3>
+<h4 id="new-features-2">New Features<a href="#new-features-2" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
+<h5 id="waiting-on-flags">Waiting on Flags<a href="#waiting-on-flags" aria-label="Link to heading 'Waiting on Flags'" data-heading-content="Waiting on Flags" class="anchor"></a></h5>
+<p>You can now wait for a <code>Farce::Flag</code> or <code>Farce::Local::Flag</code> to change its value:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_flag'>flag</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Flag.html" title="Farce::Flag (class)">Flag</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Flag.html#initialize-instance_method" title="Farce::Flag#initialize (method)">new</a></span></span>
+
+<span class='const'>Thread</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_flag'>flag</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_set'>wait_until_set</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Flag has been activated!</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_flag'>flag</span><span class='period'>.</span><span class='id identifier rubyid_set'>set</span>
+</code></pre>
+<h5 id="timer-queue-entries">Timer Queue Entries<a href="#timer-queue-entries" aria-label="Link to heading 'Timer Queue Entries'" data-heading-content="Timer Queue Entries" class="anchor"></a></h5>
+<p><code>TimerQueue#push</code> and <code>TimerQueue#try_push</code> now return a <code>TimerQueue::Entry</code> object on a successful push.
+This allows you to cancel a scheduled value using the returned entry:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_queue'>queue</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/TimerQueue.html" title="Farce::TimerQueue (class)">TimerQueue</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/TimerQueue.html#initialize-instance_method" title="Farce::TimerQueue#initialize (method)">new</a></span></span>
+<span class='id identifier rubyid_entry'>entry</span> <span class='op'>=</span> <span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='symbol'>:work</span><span class='comma'>,</span> <span class='label'>delay:</span> <span class='int'>60</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_entry'>entry</span><span class='period'>.</span><span class='id identifier rubyid_delete'>delete</span> <span class='comment'># =&gt; true
+</span></code></pre>
+<h5 id="expanded-vector-functionality">Expanded Vector Functionality<a href="#expanded-vector-functionality" aria-label="Link to heading 'Expanded Vector Functionality'" data-heading-content="Expanded Vector Functionality" class="anchor"></a></h5>
+<p>Improved Array compatibility for <code>Vector</code>, <code>Strict::Vector</code>, <code>Unshared::Vector</code>, and <code>Local::Vector</code>:</p>
+<ul>
+<li>Added <code>to_ary</code>, <code>delete</code>, and <code>delete_if</code>.</li>
+<li>Added range and start/length indexing, slice assignment, multiple-value <code>push</code> and <code>append</code>, and <code>pop(count)</code>.</li>
+<li>Added <code>shift</code>, <code>unshift</code>, <code>prepend</code>, <code>insert</code>, <code>delete_at</code>, <code>slice!</code>, <code>replace</code>, and <code>fill</code>.</li>
+<li>Added <code>map!</code>, <code>collect!</code>, <code>keep_if</code>, <code>select!</code>, <code>filter!</code>, <code>reject!</code>, <code>compact!</code>, and <code>uniq!</code>.</li>
+<li>Added <code>reverse!</code>, <code>rotate!</code>, <code>shuffle!</code>, <code>sort!</code>, <code>sort_by!</code>, and <code>flatten!</code>.</li>
+<li>Added <code>flatten</code>, <code>transpose</code>, <code>product</code>, <code>combination</code>, <code>repeated_combination</code>, <code>permutation</code>, and <code>repeated_permutation</code>.</li>
+<li>Added lexicographic <code>&lt;=&gt;</code>. Equality and hashing continue to use object identity.</li>
+</ul>
+<h5 id="miscellaneous-1">Miscellaneous<a href="#miscellaneous-1" aria-label="Link to heading 'Miscellaneous'" data-heading-content="Miscellaneous" class="anchor"></a></h5>
+<ul>
+<li>Unshareable objects may now be frozen.</li>
+<li>Trying to make an unshareable object shareable raises a better error message now (<code>Ractor::Error</code> with a descriptive message, instead of a <code>NoMethodError</code>).</li>
+<li>Added a new transfer mode: <code>:marshal</code>, which will copy objects between Ractors using Ruby's <a href="https://docs.ruby-lang.org/en/4.0/Marshal.html">Marshal</a> serialization.</li>
+</ul>
+<h4 id="bug-fixes-2">Bug Fixes<a href="#bug-fixes-2" aria-label="Link to heading 'Bug Fixes'" data-heading-content="Bug Fixes" class="anchor"></a></h4>
+<ul>
+<li>Improve compatibility with other gems modifying <code>Kernel#require</code>, work around an issue with Ruby 4.0's runtime ractor require patch and alias methods chains not working nicely with <code>Module#prepend</code>.</li>
+</ul>
+<h4 id="performance-improvements">Performance Improvements<a href="#performance-improvements" aria-label="Link to heading 'Performance Improvements'" data-heading-content="Performance Improvements" class="anchor"></a></h4>
+<h5 id="rework-cruby-native-extension">Rework CRuby native extension<a href="#rework-cruby-native-extension" aria-label="Link to heading 'Rework CRuby native extension'" data-heading-content="Rework CRuby native extension" class="anchor"></a></h5>
+<p>Incorporated the advice from <a href="https://github.com/ruby/ruby/blob/master/doc/efficient_extensions.md">&quot;Tips for updating Ruby C extensions for efficiently using Ruby 4 VM APIs&quot;</a>.</p>
+<p>With this change, all long-living Farce objects can be compacted and moved to old GC generations. This was not the case previously for maps and vectors that had snapshots taken of them (either for iteration or for transactions). These ended up being permanently kept in young generations. A long-living map or vector would therefore cause frequent GC runs to be quite expensive.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Before</th>
+<th>After</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Map#each</code> over 1024 entries</td>
+<td>34.1 μs</td>
+<td>35.2 μs</td>
+<td>3% slower</td>
+</tr>
+<tr>
+<td>Transaction with a map with 16 entries</td>
+<td>25.2 μs</td>
+<td>25.3 μs</td>
+<td>0.4% slower</td>
+</tr>
+<tr>
+<td>Transaction with a map with 1024 entries</td>
+<td>26.7 μs</td>
+<td>29.2 μs</td>
+<td>9% slower</td>
+</tr>
+<tr>
+<td>Transaction with a vector with 10,000 entries</td>
+<td>26.1 μs</td>
+<td>29.4 μs</td>
+<td>13% slower</td>
+</tr>
+<tr>
+<td>GC while keeping a vector with 10,000 entries alive</td>
+<td>67.6 μs</td>
+<td>28.6 μs</td>
+<td>58% faster</td>
+</tr>
+</tbody>
+</table>
+<p>Beyond these specific cases:</p>
+<ul>
+<li>Other iteration methods will have a similar performance impact to <code>Map#each</code> (for instance, <code>Map#transform_values</code>).</li>
+<li>Methods not involving iterations, like reading or writing a specific map entry, do not show any measurable performance impact.</li>
+</ul>
+<p>Measurements were taken on CRuby 4.0.7 (arm64-darwin23) with YJIT enabled. Measurements taken against Ruby's main branch show similar results.</p>
+<h4 id="other-changes-1">Other changes<a href="#other-changes-1" aria-label="Link to heading 'Other changes'" data-heading-content="Other changes" class="anchor"></a></h4>
+<ul>
+<li>Avoid circular require warnings when automatically loading third-party integrations.</li>
+<li>Do not install a require hook if automatic integration loading is disabled.</li>
+</ul>
+<h3 id="farce-010-2026-10-09">Farce 0.1.0 (2026-10-09)<a href="#farce-010-2026-10-09" aria-label="Link to heading 'Farce 0.1.0 (2026-10-09)'" data-heading-content="Farce 0.1.0 (2026-10-09)" class="anchor"></a></h3>
+<p>Initial release.</p>
+</div></div>
+
+      <div id="footer">
+  Generated on Fri Oct 16 13:46:39 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: Shims, Polyfills, and Extensions
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "shims";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../main/index.html">main</option>
+<option value="index.html" selected>v0.4.0</option>
+<option value="../v0.3.0/index.html">v0.3.0</option>
+<option value="../v0.2.0/index.html">v0.2.0</option>
+<option value="../v0.1.0/index.html">v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: Shims, Polyfills, and Extensions</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="shims-polyfills-and-extensions">Shims, Polyfills, and Extensions<a href="#shims-polyfills-and-extensions" aria-label="Link to heading 'Shims, Polyfills, and Extensions'" data-heading-content="Shims, Polyfills, and Extensions" class="anchor"></a></h1>
+<p>Farce adapts Ruby APIs for use across Ractors and with Fiber schedulers. Its Ractor and Port implementations also provide fallbacks on Ruby engines without native Ractors.</p>
+<h2 id="ractor">Ractor<a href="#ractor" aria-label="Link to heading 'Ractor'" data-heading-content="Ractor" class="anchor"></a></h2>
+<p>Farce includes <code>Farce::Ractor</code>, which will either delegate to <code>Ractor</code> or supply a polyfill for it.</p>
+<p>On platforms that don't support Ractors, a Thread-based implementation is provided that tracks Ractor-membership via Thread
+groups.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_ractor'>ractor</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_receive'>receive</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Received </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_ractor'>ractor</span><span class='period'>.</span><span class='id identifier rubyid_send'>send</span> <span class='int'>42</span>
+</code></pre>
+<h2 id="port">Port<a href="#port" aria-label="Link to heading 'Port'" data-heading-content="Port" class="anchor"></a></h2>
+<p>Farce includes <code>Farce::Port</code>, which is either an extended subclass of <code>Ractor::Port</code> if it is available, or a polyfill if it isn't.</p>
+<p>In addition to <code>Ractor::Port</code> it supports the following features:</p>
+<ul>
+<li><a href="file.sharing.html#sharing-modes" title="Sharing modes">Sharing modes</a> both for <code>.new</code> and <code>#send</code>.</li>
+<li>Opt-in auto-local sharing: If the port belongs to the current Ractor, any object can be sent to it without copying or moving it.</li>
+<li><code>#receive</code> supports a <code>timeout</code> option on all Ruby implementations and versions, not just CRuby 4.1+</li>
+<li>You can use <code>#owned?</code> to check if the current Ractor owns a port.</li>
+<li><code>#receive</code> does not block a Fiber scheduler when called from a non-blocking Fiber.</li>
+</ul>
+<pre class="code ruby"><code class="ruby"><span class='comment'># reject unshareable values except if they are being sent from the ractor owning the port
+</span><span class='id identifier rubyid_port'>port</span>   <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Port.html" title="Farce::Port (class)">Port</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='symbol'>:raise</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='const'>Object</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
+
+<span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_send'>send</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_receive'>receive</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
+</span></code></pre>
+<h2 id="backports">Backports<a href="#backports" aria-label="Link to heading 'Backports'" data-heading-content="Backports" class="anchor"></a></h2>
+<p>While Farce includes <code>Farce::Ractor</code> and <code>Farce::Port</code>, it does not backport any methods to the standard <code>Ractor</code> class.</p>
+<p>Instead, backports are provided by <code>Farce::Backports</code>.</p>
+<h3 id="available-backports">Available Backports<a href="#available-backports" aria-label="Link to heading 'Available Backports'" data-heading-content="Available Backports" class="anchor"></a></h3>
+<h4 id="from-ruby-40">From Ruby 4.0<a href="#from-ruby-40" aria-label="Link to heading 'From Ruby 4.0'" data-heading-content="From Ruby 4.0" class="anchor"></a></h4>
+<p>The following methods are added to <code>Ractor</code> on Ruby versions prior to 4.0:</p>
+<ul>
+<li><a href="https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-default_port"><code>default_port</code></a></li>
+<li><a href="https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-join"><code>join</code></a></li>
+<li><a href="https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-monitor"><code>monitor</code></a></li>
+<li><a href="https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-unmonitor"><code>unmonitor</code></a></li>
+<li><a href="https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-value"><code>value</code></a></li>
+</ul>
+<h4 id="from-ruby-41">From Ruby 4.1<a href="#from-ruby-41" aria-label="Link to heading 'From Ruby 4.1'" data-heading-content="From Ruby 4.1" class="anchor"></a></h4>
+<p>The following methods are added to <code>Ractor</code> on Ruby versions prior to 4.1:</p>
+<ul>
+<li><a href="https://docs.ruby-lang.org/en/master/Ractor.html#method-i-alive-3F"><code>alive?</code></a></li>
+</ul>
+<p>It also extends the following methods with optional timeout support:</p>
+<ul>
+<li><a href="https://docs.ruby-lang.org/en/master/Ractor.html#method-c-select"><code>Ractor.select</code></a></li>
+<li><a href="https://docs.ruby-lang.org/en/master/Ractor.html#method-i-receive"><code>Ractor#receive</code></a></li>
+<li><a href="https://docs.ruby-lang.org/en/master/Ractor/Port.html#method-i-receive"><code>Ractor::Port#receive</code></a></li>
+</ul>
+<p>No breaking changes are backported. This includes the updated <a href="https://docs.ruby-lang.org/en/master/Ractor.html#method-i-monitor"><code>monitor</code></a> behavior. The <a href="#ractor">polyfill</a> will choose its <code>monitor</code> implementation based on <code>RUBY_VERSION</code> (so that any code checking the Ruby version will see the behavior it should).</p>
+<h3 id="without-activating-backports">Without Activating Backports<a href="#without-activating-backports" aria-label="Link to heading 'Without Activating Backports'" data-heading-content="Without Activating Backports" class="anchor"></a></h3>
+<p>You can call these methods on <code>Farce::Backports</code>, directly, passing in the Ractor instance as a first argument.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_ractor'>ractor</span>     <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span><span class='semicolon'>;</span> <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>I&#39;m not happy!</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_supervisor'>supervisor</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>status: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_receive'>receive</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_port'>port</span>       <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Backports.html" title="Farce::Backports (module)">Backports</a></span></span><span class='period'>.</span><span class='id identifier rubyid_default_port'><span class='object_link'><a href="Farce/Backports.html#default_port-class_method" title="Farce::Backports.default_port (method)">default_port</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_supervisor'>supervisor</span><span class='rparen'>)</span>
+
+<span class='comment'># This will print &quot;status: aborted&quot; in approximately one second
+</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Backports.html" title="Farce::Backports (module)">Backports</a></span></span><span class='period'>.</span><span class='id identifier rubyid_monitor'><span class='object_link'><a href="Farce/Backports.html#monitor-class_method" title="Farce::Backports.monitor (method)">monitor</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_ractor'>ractor</span><span class='comma'>,</span> <span class='id identifier rubyid_port'>port</span><span class='rparen'>)</span>
+
+<span class='comment'># Wait for the supervisor to receive the status
+</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Backports.html" title="Farce::Backports (module)">Backports</a></span></span><span class='period'>.</span><span class='id identifier rubyid_join'><span class='object_link'><a href="Farce/Backports.html#join-class_method" title="Farce::Backports.join (method)">join</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_supervisor'>supervisor</span><span class='rparen'>)</span>
+</code></pre>
+<h3 id="using-backports-via-refinements">Using Backports via Refinements<a href="#using-backports-via-refinements" aria-label="Link to heading 'Using Backports via Refinements'" data-heading-content="Using Backports via Refinements" class="anchor"></a></h3>
+<p>You can activate the backports for a lexical scope (within a file, or even just within a module within a file, or starting with Ruby 4.1 for an individual block) using them as a <a href="https://docs.ruby-lang.org/en/master/syntax/refinements_rdoc.html">refinement</a>:</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># only activates the backports for the current file
+</span><span class='id identifier rubyid_using'>using</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Backports.html" title="Farce::Backports (module)">Backports</a></span></span>
+
+<span class='comment'># Refinements can&#39;t install constants, so we still need to use Farce::Ractor for JRuby/TruffleRuby
+</span><span class='comment'># If you know you&#39;re on CRuby, you can replace Farce::Ractor with Ractor
+</span><span class='id identifier rubyid_ractor'>ractor</span>     <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span><span class='semicolon'>;</span> <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>I&#39;m not happy!</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_supervisor'>supervisor</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>status: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_receive'>receive</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
+
+<span class='comment'># These methods now work regardless of whether you used Ractor or Farce::Ractor
+</span><span class='id identifier rubyid_port'>port</span> <span class='op'>=</span> <span class='id identifier rubyid_supervisor'>supervisor</span><span class='period'>.</span><span class='id identifier rubyid_default_port'>default_port</span>
+<span class='id identifier rubyid_ractor'>ractor</span><span class='period'>.</span><span class='id identifier rubyid_monitor'>monitor</span><span class='lparen'>(</span><span class='id identifier rubyid_port'>port</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_supervisor'>supervisor</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+</code></pre>
+<h3 id="activating-backports-globally">Activating Backports Globally<a href="#activating-backports-globally" aria-label="Link to heading 'Activating Backports Globally'" data-heading-content="Activating Backports Globally" class="anchor"></a></h3>
+<p>You can activate backports globally. As these don't override built-in methods, doing so should only cause issues for code expecting these methods not to be defined based on the <code>RUBY_VERSION</code> string.</p>
+<p>Anywhere before executing your code, like an initializer:</p>
+<pre class="code ruby"><code class="ruby"><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Backports.html" title="Farce::Backports (module)">Backports</a></span></span><span class='period'>.</span><span class='id identifier rubyid_install'><span class='object_link'><a href="Farce/Backports.html#install-class_method" title="Farce::Backports.install (method)">install</a></span></span>
+</code></pre>
+<p>Now you can do this in any file:</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># After installing backports globally, Ractor will always be defined
+</span><span class='id identifier rubyid_ractor'>ractor</span>     <span class='op'>=</span> <span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span><span class='semicolon'>;</span> <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>I&#39;m not happy!</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_supervisor'>supervisor</span> <span class='op'>=</span> <span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>status: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_receive'>receive</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_ractor'>ractor</span><span class='period'>.</span><span class='id identifier rubyid_monitor'>monitor</span><span class='lparen'>(</span><span class='id identifier rubyid_supervisor'>supervisor</span><span class='period'>.</span><span class='id identifier rubyid_default_port'>default_port</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_supervisor'>supervisor</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+</code></pre>
+<h2 id="weakref">WeakRef<a href="#weakref" aria-label="Link to heading 'WeakRef'" data-heading-content="WeakRef" class="anchor"></a></h2>
+<p><code>Farce::WeakRef</code> is a drop-in replacement for Ruby's <a href="https://docs.ruby-lang.org/en/4.0/WeakRef.html"><code>WeakRef</code></a>, which at the time of writing cannot be used outside of the main Ractor at all.</p>
+<p>Farce implements a version based on weak <a href="file.data-structures.html#atoms" title="atoms">atoms</a>. Not only can it be used on non-main Ractors, <code>Farce::WeakRef</code> instances themselves are Ractor-shareable if the value they reference is also Ractor-shareable (or has been garbage collected). Moreover, calling <code>Ractor.make_shareable(weak_ref)</code> will propagate through to the referenced value.</p>
+<h2 id="resolv">Resolv<a href="#resolv" aria-label="Link to heading 'Resolv'" data-heading-content="Resolv" class="anchor"></a></h2>
+<p><code>Farce::Resolv</code> is a version of Ruby's <a href="https://docs.ruby-lang.org/en/4.0/Resolv.html"><code>Resolv</code></a>, using <a href="file.data-structures.html#counters" title="counters">counters</a> instead of a global instance variable, and can therefore be used outside the main Ractor.</p>
+<h2 id="read-next">Read Next<a href="#read-next" aria-label="Link to heading 'Read Next'" data-heading-content="Read Next" class="anchor"></a></h2>
+<p><a href="index.html#features" title="README">README</a> · <a href="file.sharing.html" title="Sharing Unshareable Data">Sharing Unshareable Data</a> · <a href="file.scheduling.html" title="Scheduling Code">Scheduling Code</a></p>
+</div></div>
+
+      <div id="footer">
+  Generated on Fri Oct 16 13:46:39 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>

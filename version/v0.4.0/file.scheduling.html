@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: Scheduling Code
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "scheduling";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../main/index.html">main</option>
+<option value="index.html" selected>v0.4.0</option>
+<option value="../v0.3.0/index.html">v0.3.0</option>
+<option value="../v0.2.0/index.html">v0.2.0</option>
+<option value="../v0.1.0/index.html">v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: Scheduling Code</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="scheduling-code">Scheduling Code<a href="#scheduling-code" aria-label="Link to heading 'Scheduling Code'" data-heading-content="Scheduling Code" class="anchor"></a></h1>
+<p>Use Farce to schedule background work, reuse workers for parallel computation, or dispatch calls to the main Ractor. Tasks retain results, while schedulers and pools control where work runs.</p>
+<h2 id="farceon_main"><code>Farce.on_main</code><a href="#farceon_main" aria-label="Link to heading 'Farce.on_main'" data-heading-content="Farce.on_main" class="anchor"></a></h2>
+<p>Some code has to be executed on the main Ractor, especially when working with legacy code that doesn't support Ractors.</p>
+<p>You can pass a block to <code>Farce.on_main</code> to run code on the main Ractor. The method call will block until the code has been executed.</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># most of concurrent-ruby is not usable outside of the main-ractor
+</span><span class='gvar'>$tvar</span> <span class='op'>=</span> <span class='const'>Concurrent</span><span class='op'>::</span><span class='const'>TVar</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='int'>0</span><span class='rparen'>)</span>
+
+<span class='comment'># let&#39;s run computation outside of the main ractor
+</span><span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_compute_expensive_value'>compute_expensive_value</span>
+
+  <span class='comment'># need to report back to the main ractor
+</span>  <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_on_main'><span class='object_link'><a href="Farce.html#on_main-class_method" title="Farce.on_main (method)">on_main</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='gvar'>$tvar</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_it'>it</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span>
+</code></pre>
+<p>Sometimes you don't need to wait for the code to be done running on the main Ractor. In such cases, you can use <code>schedule</code>, as <code>on_main</code> returns a <a href="#schedulers">scheduler</a> instance when called without a block:</p>
+<pre class="code ruby"><code class="ruby"><span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span> <span class='kw'>do</span>
+  <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_on_main'><span class='object_link'><a href="Farce.html#on_main-class_method" title="Farce.on_main (method)">on_main</a></span></span><span class='period'>.</span><span class='id identifier rubyid_schedule'><span class='object_link'><a href="Farce/Abstract/Executor.html#schedule-instance_method" title="Farce::Abstract::Executor#schedule (method)">schedule</a></span></span> <span class='kw'>do</span>
+    <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span>
+    <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Hello from the main Ractor</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Hello from the nested Ractor</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_sleep'>sleep</span> <span class='float'>1.1</span>
+</code></pre>
+<h2 id="farcein_parallel"><code>Farce.in_parallel</code><a href="#farcein_parallel" aria-label="Link to heading 'Farce.in_parallel'" data-heading-content="Farce.in_parallel" class="anchor"></a></h2>
+<p>As you can see in the <a href="file.introduction.html#example" title="shared-state example">shared-state example</a>, creating Ractors ad hoc because you want to run something in parallel is quite expensive.</p>
+<p>Use <code>Farce.in_parallel</code> to schedule parallel work. On CRuby, it manages a shared <a href="#ractor-pools">Ractor pool</a>, starting workers when the current ones cannot keep up with the load, up to the number of CPU cores. It shuts unused workers down after some inactivity. On JRuby and TruffleRuby, it starts a new thread for each task.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_input'>input</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>this is my input</span><span class='tstring_end'>&quot;</span></span>
+<span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_in_parallel'><span class='object_link'><a href="Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">in_parallel</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_input'>input</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_expensive_computation'>expensive_computation</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+</code></pre>
+<p>Like most of Farce, this is completely opt-in. If you never use this feature, no pool is being set up and no extra Ractors are created.</p>
+<h2 id="farceschedule"><code>Farce.schedule</code><a href="#farceschedule" aria-label="Link to heading 'Farce.schedule'" data-heading-content="Farce.schedule" class="anchor"></a></h2>
+<p><code>Farce.in_parallel</code> might not always be what you want. Maybe you are working on a library and don't want to dictate a concurrency model?</p>
+<p>You can use <code>Farce.schedule</code>, which will automatically figure out how to run code off-band. You can use <code>mode: :local</code> to force execution inside the current Ractor (which it will prefer by default if there already is some scheduler running, but not enforce).</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># just run this asynchronously, don&#39;t care how
+</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_schedule'><span class='object_link'><a href="Farce.html#schedule-class_method" title="Farce.schedule (method)">schedule</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>hello</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_message'>message</span><span class='op'>|</span> <span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_message'>message</span><span class='period'>.</span><span class='id identifier rubyid_upcase'>upcase</span> <span class='rbrace'>}</span>
+</code></pre>
+<p>&quot;Some scheduler?&quot; you might say? Some scheduler! It will automatically detect if there is a local scheduler. This can either be a Fiber scheduler, like <a href="https://socketry.github.io/async/">async</a> or <a href="https://yaroslav.io/opensource/carbon_fiber">Carbon Fiber</a>, or an internal scheduler created by Farce:</p>
+<pre class="code ruby"><code class="ruby"><span class='const'>Async</span> <span class='kw'>do</span>
+  <span class='comment'># this is basically the same as calling Async { do_something }
+</span>  <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_schedule'><span class='object_link'><a href="Farce.html#schedule-class_method" title="Farce.schedule (method)">schedule</a></span></span> <span class='lbrace'>{</span> <span class='id identifier rubyid_do_something'>do_something</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span>
+</code></pre>
+<h2 id="schedulers">Schedulers<a href="#schedulers" aria-label="Link to heading 'Schedulers'" data-heading-content="Schedulers" class="anchor"></a></h2>
+<p>You can create your own <code>Farce::Scheduler</code>, running on a dedicated Ractor:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_scheduler'>scheduler</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Scheduler.html" title="Farce::Scheduler (class)">Scheduler</a></span></span><span class='period'>.</span><span class='id identifier rubyid_create'><span class='object_link'><a href="Farce/Abstract/Scheduler.html#create-class_method" title="Farce::Abstract::Scheduler.create (method)">create</a></span></span>
+<span class='id identifier rubyid_scheduler'>scheduler</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>hello</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_message'>message</span><span class='op'>|</span> <span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_message'>message</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_scheduler'>scheduler</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span> <span class='comment'># we&#39;re done, shut it down
+</span></code></pre>
+<p>Or you can set one up as a Fiber scheduler for the current Thread:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_scheduler'>scheduler</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Scheduler.html" title="Farce::Scheduler (class)">Scheduler</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span>
+<span class='const'>Fiber</span><span class='period'>.</span><span class='id identifier rubyid_set_scheduler'>set_scheduler</span><span class='lparen'>(</span><span class='id identifier rubyid_scheduler'>scheduler</span><span class='rparen'>)</span>
+<span class='const'>Fiber</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Hello from the scheduler!</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_scheduler'>scheduler</span><span class='period'>.</span><span class='id identifier rubyid_close'>close</span>
+<span class='const'>Fiber</span><span class='period'>.</span><span class='id identifier rubyid_set_scheduler'>set_scheduler</span><span class='lparen'>(</span><span class='kw'>nil</span><span class='rparen'>)</span> <span class='comment'># drain scheduled work and detach the scheduler
+</span></code></pre>
+<p>Scheduler instances are Ractor-shareable.</p>
+<h2 id="ractor-pools">Ractor Pools<a href="#ractor-pools" aria-label="Link to heading 'Ractor Pools'" data-heading-content="Ractor Pools" class="anchor"></a></h2>
+<p><code>Farce::Pool</code> implements the same scheduling interface, but manages a pool of Ractors. This is what <a href="#farcein_parallel"><code>in_parallel</code></a> uses under the hood.</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># At least four Ractors, up to ten. Launch a new one if a task waits longer than 100 milliseconds.
+</span><span class='id identifier rubyid_pool'>pool</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Pool.html" title="Farce::Pool (class)">Pool</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>min_size:</span> <span class='int'>4</span><span class='comma'>,</span> <span class='label'>max_size:</span> <span class='int'>10</span><span class='comma'>,</span> <span class='label'>grow_after:</span> <span class='float'>0.1</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_pool'>pool</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Hello from the pool!</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
+</code></pre>
+<h2 id="tasks">Tasks<a href="#tasks" aria-label="Link to heading 'Tasks'" data-heading-content="Tasks" class="anchor"></a></h2>
+<p>If you want to retrieve the result of an asynchronous operation, or monitor if it is still running, you can use <code>Farce::Task</code>:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_task'>task</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Task.html" title="Farce::Task (class)">Task</a></span></span><span class='period'>.</span><span class='id identifier rubyid_schedule'><span class='object_link'><a href="Farce/Task.html#schedule-class_method" title="Farce::Task.schedule (method)">schedule</a></span></span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_a'>a</span><span class='comma'>,</span> <span class='id identifier rubyid_b'>b</span><span class='op'>|</span>
+  <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span> <span class='comment'># simulate intense computation
+</span>  <span class='id identifier rubyid_a'>a</span> <span class='op'>+</span> <span class='id identifier rubyid_b'>b</span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_alive?'>alive?</span> <span class='comment'># =&gt; true
+</span><span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>  <span class='comment'># =&gt; 3 (after approximately 1 second)
+</span><span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>   <span class='comment'># would block, but doesn&#39;t, as the task has already completed
+</span></code></pre>
+<p>Tasks can also be created without immediately scheduling them, allowing you to control when and how they are executed:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_task'>task</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Task.html" title="Farce::Task (class)">Task</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Task.html#initialize-instance_method" title="Farce::Task#initialize (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='symbol'>:success</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_alive?'>alive?</span>     <span class='comment'># =&gt; true
+</span><span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='lparen'>(</span><span class='float'>0.1</span><span class='rparen'>)</span> <span class='comment'># =&gt; nil (after 100 milliseconds)
+</span>
+<span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_schedule'><span class='object_link'><a href="Farce.html#schedule-class_method" title="Farce.schedule (method)">schedule</a></span></span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_task'>task</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='comment'># =&gt; :success
+</span></code></pre>
+<p>This allows you to use third-party executors:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_require'>require</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>concurrent</span><span class='tstring_end'>&quot;</span></span>
+<span class='id identifier rubyid_executor'>executor</span> <span class='op'>=</span> <span class='const'>Concurrent</span><span class='period'>.</span><span class='id identifier rubyid_global_fast_executor'>global_fast_executor</span>
+<span class='id identifier rubyid_task'>task</span>     <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Task.html" title="Farce::Task (class)">Task</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Task.html#initialize-instance_method" title="Farce::Task#initialize (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='symbol'>:success</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_executor'>executor</span><span class='period'>.</span><span class='id identifier rubyid_post'>post</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_task'>task</span><span class='rparen'>)</span>
+
+<span class='id identifier rubyid_task'>task</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='comment'># =&gt; :success
+</span></code></pre>
+<h2 id="third-party-fiber-schedulers">Third-Party Fiber Schedulers<a href="#third-party-fiber-schedulers" aria-label="Link to heading 'Third-Party Fiber Schedulers'" data-heading-content="Third-Party Fiber Schedulers" class="anchor"></a></h2>
+<p>Both <code>Farce::Scheduler</code> and <code>Farce::Pool</code> run a Fiber scheduler under the hood to execute tasks. This is a Farce-internal scheduler by default, but you can replace it with your own if you want:</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># Use the fiber scheduler from the carbon_fiber gem.
+</span><span class='id identifier rubyid_pool'>pool</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Pool.html" title="Farce::Pool (class)">Pool</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Shareable.html#initialize-instance_method" title="Farce::Shareable#initialize (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='const'>CarbonFiber</span><span class='op'>::</span><span class='const'>Scheduler</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_pool'>pool</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>⚡️ Running Carbon Fiber on a pool of Ractors! ⚡️</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
+</code></pre>
+<p>You can also use a different fiber scheduler as the default (in which case it will be picked up by <code>in_parallel</code> and <code>on_main</code> as well) by setting the <code>FARCE_FIBER_SCHEDULER</code> environment variable or using the <code>fiber_scheduler</code> configuration setting:</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># This needs to happen before the first scheduler call.
+</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_configure'><span class='object_link'><a href="Farce.html#configure-class_method" title="Farce.configure (method)">configure</a></span></span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_config'>config</span><span class='op'>|</span>
+  <span class='id identifier rubyid_config'>config</span><span class='period'>.</span><span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span> <span class='op'>=</span> <span class='symbol'>:carbon_fiber</span>
+
+  <span class='comment'># or, alternatively:
+</span>  <span class='id identifier rubyid_config'>config</span><span class='period'>.</span><span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span> <span class='lbrace'>{</span> <span class='const'>CarbonFiber</span><span class='op'>::</span><span class='const'>Scheduler</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span>
+
+<span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_in_parallel'><span class='object_link'><a href="Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">in_parallel</a></span></span> <span class='kw'>do</span>
+  <span class='const'>Fiber</span><span class='period'>.</span><span class='id identifier rubyid_scheduler'>scheduler</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span> <span class='comment'># =&gt; CarbonFiber::Scheduler
+</span><span class='kw'>end</span>
+</code></pre>
+<p>If a string or symbol is provided (like <code>carbon_fiber</code>), it will first resolve this to a constant (i.e., <code>CarbonFiber</code>). If that constant is a class, it will use that for creating the fiber scheduler. If it is a module, it will look for a <code>Scheduler</code> constant inside it, which matches the established pattern implemented by most gems, including <code>farce</code>, <code>async</code>, <code>carbon_fiber</code>, <code>libev_scheduler</code> (use <code>libev</code> as value), <code>itsi_scheduler</code> (use <code>itsi</code> as value), but it also works for gems that define their scheduler class at top level, like <code>fiber_scheduler</code>.</p>
+<p>Note that most of these are outdated and don't work with any recent Ruby version, with the notable exception of <code>async</code> and <code>carbon_fiber</code>.</p>
+<h2 id="read-next">Read Next<a href="#read-next" aria-label="Link to heading 'Read Next'" data-heading-content="Read Next" class="anchor"></a></h2>
+<p><a href="index.html#features" title="README">README</a> · <a href="file.concurrency.html" title="Concurrency">Concurrency</a> · <a href="file.shims.html" title="Shims, Polyfills, and Extensions">Shims, Polyfills, and Extensions</a></p>
+</div></div>
+
+      <div id="footer">
+  Generated on Fri Oct 16 13:46:39 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>
