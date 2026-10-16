@@ -17,7 +17,6 @@ module Farce
         selector ? selector.ractor_select(*sources, timeout:, **) : ::Ractor.select(*sources, **)
       end
 
-      # TODO: Wrapper/Extension to add #default_port, etc.
       def new(...) = ::Ractor.new(...)
       def current  = ::Ractor.current
       def main     = ::Ractor.main
