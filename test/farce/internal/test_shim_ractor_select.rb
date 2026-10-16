@@ -143,7 +143,7 @@ module Farce
           worker.join
 
           2.times { assert_equal [worker, value], Ractor.select(worker, timeout: 0) }
-          assert_empty FakeRactor::STATES[worker].monitors
+          assert_nil FakeRactor::STATES[worker].monitors
         end
       end
 
@@ -155,7 +155,7 @@ module Farce
         error = assert_raises(RuntimeError) { Ractor.select(worker) }
 
         assert_equal "selection failure", error.message
-        assert_empty FakeRactor::STATES[worker].monitors
+        assert_nil FakeRactor::STATES[worker].monitors
       end
 
       def test_invalid_sources_do_not_consume_ready_messages

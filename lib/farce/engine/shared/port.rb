@@ -21,7 +21,7 @@ module Farce
       def close
         @select_mutex.synchronize do
           @queue.close
-          @select_waiters.each { it << true }
+          @select_waiters.each(&:broadcast)
         end
         self
       end
@@ -73,7 +73,7 @@ module Farce
       private
 
       def notify_selectors
-        @select_mutex.synchronize { @select_waiters.each { it << true } }
+        @select_mutex.synchronize { @select_waiters.each(&:broadcast) }
       end
     end
 

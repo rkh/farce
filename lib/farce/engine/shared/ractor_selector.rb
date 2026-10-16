@@ -51,19 +51,19 @@ module Farce
       end
 
       def wait(ports, deadline)
-        wakeup = Thread::Queue.new
+        wakeup = Signal.new
         ports.each { it.register_selector(wakeup) }
-        loop do
-          # Clear before checking readiness. A concurrent send either appears
-          # in that check or leaves a notification for the following wait.
-          wakeup.clear
+        while true
+          # Observe before checking readiness so a send during that check
+          # changes the generation and prevents the following wait from parking.
+          generation = wakeup.generation
           ports.each do |port|
             result = port.select_receive
             return result if result
           end
           remaining = deadline - Clock.now if deadline
           return if remaining && !remaining.positive?
-          return unless wakeup.pop(timeout: remaining)
+          return unless ReservationWaiting.wait(wakeup, generation, deadline)
         end
       ensure
         ports.each { it.unregister_selector(wakeup) }

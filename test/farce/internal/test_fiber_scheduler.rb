@@ -59,7 +59,8 @@ module Farce
         queue = Queue.new
         events = []
 
-        Fiber.schedule { events << queue.pop(timeout: 0.01) }
+        # Leave time for JRuby's first wait to reach the scheduler under GC or JIT load.
+        Fiber.schedule { events << queue.pop(timeout: 1) }
         Fiber.schedule { events << :other_fiber }
         Fiber.set_scheduler(nil)
 
