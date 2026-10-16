@@ -109,10 +109,23 @@ groups.</p>
 <p>The following methods are added to <code>Ractor</code> on Ruby versions prior to 4.0:</p>
 <ul>
 <li><a href="https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-default_port"><code>default_port</code></a></li>
+<li><a href="https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-join"><code>join</code></a></li>
 <li><a href="https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-monitor"><code>monitor</code></a></li>
 <li><a href="https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-unmonitor"><code>unmonitor</code></a></li>
-<li><a href="https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-join"><code>join</code></a></li>
+<li><a href="https://docs.ruby-lang.org/en/4.0/Ractor.html#method-i-value"><code>value</code></a></li>
 </ul>
+<h4 id="from-ruby-41">From Ruby 4.1<a href="#from-ruby-41" aria-label="Link to heading 'From Ruby 4.1'" data-heading-content="From Ruby 4.1" class="anchor"></a></h4>
+<p>The following methods are added to <code>Ractor</code> on Ruby versions prior to 4.1:</p>
+<ul>
+<li><a href="https://docs.ruby-lang.org/en/master/Ractor.html#method-i-alive-3F"><code>alive?</code></a></li>
+</ul>
+<p>It also extends the following methods with optional timeout support:</p>
+<ul>
+<li><a href="https://docs.ruby-lang.org/en/master/Ractor.html#method-c-select"><code>Ractor.select</code></a></li>
+<li><a href="https://docs.ruby-lang.org/en/master/Ractor.html#method-i-receive"><code>Ractor#receive</code></a></li>
+<li><a href="https://docs.ruby-lang.org/en/master/Ractor/Port.html#method-i-receive"><code>Ractor::Port#receive</code></a></li>
+</ul>
+<p>No breaking changes are backported. This includes the updated <a href="https://docs.ruby-lang.org/en/master/Ractor.html#method-i-monitor"><code>monitor</code></a> behavior. The <a href="#ractor">polyfill</a> will choose its <code>monitor</code> implementation based on <code>RUBY_VERSION</code> (so that any code checking the Ruby version will see the behavior it should).</p>
 <h3 id="without-activating-backports">Without Activating Backports<a href="#without-activating-backports" aria-label="Link to heading 'Without Activating Backports'" data-heading-content="Without Activating Backports" class="anchor"></a></h3>
 <p>You can call these methods on <code>Farce::Backports</code>, directly, passing in the Ractor instance as a first argument.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_ractor'>ractor</span>     <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span> <span class='lbrace'>{</span> <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span><span class='semicolon'>;</span> <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>I&#39;m not happy!</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
@@ -162,7 +175,7 @@ groups.</p>
 </div></div>
 
       <div id="footer">
-  Generated on Thu Oct 15 14:47:15 2026 by
+  Generated on Fri Oct 16 07:25:18 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
