@@ -112,7 +112,7 @@ containers_signal_memsize(const void *pointer)
 }
 
 static const rb_data_type_t containers_signal_type = {
-    .wrap_struct_name = "Ractor::Containers::Signal",
+    .wrap_struct_name = "Farce::Internal::Signal",
     .function = {
         .dmark = NULL,
         .dfree = containers_signal_free,

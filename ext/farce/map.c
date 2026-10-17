@@ -260,7 +260,7 @@ map_memsize(const void *pointer)
 }
 
 static const rb_data_type_t map_type = {
-    .wrap_struct_name = "Ractor::Containers::Map",
+    .wrap_struct_name = "Farce::Internal::Map",
     .function = {
         .dmark = map_mark,
         .dfree = map_free,

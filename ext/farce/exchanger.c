@@ -140,7 +140,7 @@ exchanger_memsize(const void *pointer)
 }
 
 static const rb_data_type_t exchanger_type = {
-    .wrap_struct_name = "Ractor::Containers::Exchanger",
+    .wrap_struct_name = "Farce::Internal::Exchanger",
     .function = {
         .dmark = NULL,
         .dfree = exchanger_free,

@@ -55,7 +55,7 @@ RUBY_REFERENCES(counter_references) = {
 };
 
 static const rb_data_type_t counter_type = {
-    .wrap_struct_name = "Ractor::Containers::Counter",
+    .wrap_struct_name = "Farce::Internal::Counter",
     .function = {
         .dmark = RUBY_REFS_LIST_PTR(counter_references),
         .dfree = counter_free,

@@ -40,7 +40,7 @@ containers_marker_size(const void *pointer)
 }
 
 static const rb_data_type_t containers_pin_marker_type = {
-    .wrap_struct_name = "Ractor::Containers pin marker",
+    .wrap_struct_name = "Farce pin marker",
     .function = {
         .dmark = containers_marker_mark,
         .dfree = RUBY_TYPED_DEFAULT_FREE,

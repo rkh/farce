@@ -49,7 +49,7 @@ RUBY_REFERENCES(flag_references) = {
 };
 
 static const rb_data_type_t flag_type = {
-    .wrap_struct_name = "Ractor::Containers::Flag",
+    .wrap_struct_name = "Farce::Internal::Flag",
     .function = {
         .dmark = RUBY_REFS_LIST_PTR(flag_references),
         .dfree = flag_free,

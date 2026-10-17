@@ -104,7 +104,7 @@ RUBY_REFERENCES(containers_lock_references) = {
 };
 
 static const rb_data_type_t containers_lock_type = {
-    .wrap_struct_name = "Ractor::Containers::Lock",
+    .wrap_struct_name = "Farce::Internal::Lock",
     .function = {
         .dmark = RUBY_REFS_LIST_PTR(containers_lock_references),
         .dfree = containers_lock_free,

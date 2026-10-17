@@ -250,7 +250,7 @@ weak_map_memsize(const void *pointer)
 }
 
 static const rb_data_type_t weak_map_type = {
-    .wrap_struct_name = "Ractor::Containers::WeakMap",
+    .wrap_struct_name = "Farce::Internal::WeakMap",
     .function = {
         .dmark = weak_map_mark,
         .dfree = weak_map_free,

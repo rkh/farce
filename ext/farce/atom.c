@@ -201,7 +201,7 @@ atom_memsize(const void *pointer)
 }
 
 static const rb_data_type_t atom_type = {
-    .wrap_struct_name = "Ractor::Containers::Atom",
+    .wrap_struct_name = "Farce::Internal::Atom",
     .function = {
         .dmark = atom_mark,
         .dfree = atom_free,

@@ -85,7 +85,7 @@ vector_memsize(const void *pointer)
 }
 
 static const rb_data_type_t vector_type = {
-    .wrap_struct_name = "Ractor::Containers::Vector",
+    .wrap_struct_name = "Farce::Internal::Vector",
     .function = {
         .dmark = vector_mark,
         .dfree = vector_free,

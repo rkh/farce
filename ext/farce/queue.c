@@ -224,7 +224,7 @@ queue_memsize(const void *pointer)
 }
 
 static const rb_data_type_t queue_type = {
-    .wrap_struct_name = "Ractor::Containers::Queue",
+    .wrap_struct_name = "Farce::Internal::Queue",
     .function = {
         .dmark = queue_mark,
         .dfree = queue_free,
