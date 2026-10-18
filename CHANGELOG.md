@@ -4,6 +4,12 @@ Farce follows [Semantic Versioning 2.0](http://semver.org/). Any public method o
 
 ## Development Releases
 
+### Farce 0.4.1 (2026-10-16)
+
+* Make sure prebuilt Linux binaries include liburing support.
+* Use a Futex for efficient fiber synchronization if possible.
+* Consistent `wrap_struct_name` across the native extension for debugging.
+
 ### Farce 0.4.0 (2026-10-16)
 
 #### New Features
