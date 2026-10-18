@@ -75,6 +75,12 @@
       <div id="content"><div id='filecontents'><h1 id="changelog">Changelog<a href="#changelog" aria-label="Link to heading 'Changelog'" data-heading-content="Changelog" class="anchor"></a></h1>
 <p>Farce follows <a href="http://semver.org/">Semantic Versioning 2.0</a>. Any public method on any public class or module documented in the README or via YARD and not declared private is part of the public API.</p>
 <h2 id="development-releases">Development Releases<a href="#development-releases" aria-label="Link to heading 'Development Releases'" data-heading-content="Development Releases" class="anchor"></a></h2>
+<h3 id="farce-041-2026-10-16">Farce 0.4.1 (2026-10-16)<a href="#farce-041-2026-10-16" aria-label="Link to heading 'Farce 0.4.1 (2026-10-16)'" data-heading-content="Farce 0.4.1 (2026-10-16)" class="anchor"></a></h3>
+<ul>
+<li>Make sure prebuilt Linux binaries include liburing support.</li>
+<li>Use a Futex for efficient fiber synchronization if possible.</li>
+<li>Consistent <code>wrap_struct_name</code> across the native extension for debugging.</li>
+</ul>
 <h3 id="farce-040-2026-10-16">Farce 0.4.0 (2026-10-16)<a href="#farce-040-2026-10-16" aria-label="Link to heading 'Farce 0.4.0 (2026-10-16)'" data-heading-content="Farce 0.4.0 (2026-10-16)" class="anchor"></a></h3>
 <h4 id="new-features">New Features<a href="#new-features" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
 <h5 id="ractor-backports">Ractor Backports<a href="#ractor-backports" aria-label="Link to heading 'Ractor Backports'" data-heading-content="Ractor Backports" class="anchor"></a></h5>
@@ -253,7 +259,7 @@ This allows you to cancel a scheduled value using the returned entry:</p>
 </div></div>
 
       <div id="footer">
-  Generated on Sun Oct 18 15:09:24 2026 by
+  Generated on Sun Oct 18 15:31:16 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
