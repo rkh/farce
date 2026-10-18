@@ -1,6 +1,7 @@
 #ifndef FARCE_FIBER_REACTOR_H
 #define FARCE_FIBER_REACTOR_H
 #include "containers.h"
+#include "futex.h"
 #include <ruby/io.h>
 #include <ruby/io/buffer.h>
 #include <ruby/thread.h>
@@ -21,6 +22,8 @@
 #define FS_WRITE 4
 #define FS_EVENTS 1024
 #define FS_RECEIVE (UINT64_C(1) << 63)
+#define FS_FUTEX (UINT64_C(1) << 62)
+#define FS_OPERATION (FS_RECEIVE | FS_FUTEX)
 #define FS_SLOT_BITS 20
 #define FS_SLOT_MASK ((1U << FS_SLOT_BITS) - 1)
 
@@ -45,7 +48,7 @@ struct fs_reg {
 struct fs_wait {
     VALUE token, fiber, value, error, groups, ios;
     uint32_t slot;
-    int status, events, selected, queued, native_error, receive_pending;
+    int status, events, selected, queued, native_error, receive_pending, futex_pending;
     fs_wait *ready_next, *ready_prev;
     fs_watch *watches;
     fs_watch first_watch;
@@ -62,7 +65,7 @@ typedef struct {
     size_t pending;
     uint64_t serial, generation, suspensions;
     unsigned immediate;
-    int selected_pending, receive_disabled;
+    int selected_pending, receive_disabled, futex_supported;
     int driver, descriptor, wake[2], closed;
     pthread_mutex_t wake_mutex;
 #ifdef FARCE_URING
@@ -85,6 +88,7 @@ static inline fs_state *fs_get(VALUE self) {
 int fs_driver_init(fs_state *s, int driver);
 int fs_driver_update(fs_state *s, fs_reg *reg, int events);
 int fs_driver_receive(fs_state *s, fs_wait *w, int fd, void *buffer, size_t size);
+int fs_driver_futex(fs_state *s, fs_wait *w, containers_futex_t *word);
 void fs_cancel_receive(VALUE self, fs_wait *w);
 void fs_driver_close(fs_state *s);
 void *fs_driver_poll(void *data);

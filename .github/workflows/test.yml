@@ -60,6 +60,104 @@ jobs:
           TEST_TIMEOUT: ${{ matrix.ruby.test_timeout || 300 }}
           TEST_SUBPROCESS_TIMEOUT: ${{ matrix.ruby.subprocess_timeout || 15 }}
 
+  futex:
+    name: Linux / required io_uring futex / Ruby ${{ matrix.ruby.name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - name: "4.0"
+            version: "4.0"
+          - name: 4.1-dev
+            version: head
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby.version }}
+      - name: Build pinned liburing with futex helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          futex_archive="$RUNNER_TEMP/liburing-2.6.tar.gz"
+          futex_prefix="$RUNNER_TEMP/futex-liburing"
+          curl --fail --location --retry 3 https://github.com/axboe/liburing/archive/refs/tags/liburing-2.6.tar.gz -o "$futex_archive"
+          echo "682f06733e6db6402c1f904cbbe12b94942a49effc872c9e01db3d7b180917cc  $futex_archive" | sha256sum --check
+          tar -xzf "$futex_archive" -C "$RUNNER_TEMP"
+          cd "$RUNNER_TEMP/liburing-liburing-2.6"
+          ./configure --prefix="$futex_prefix"
+          make -j2
+          make install
+          echo "CPATH=$futex_prefix/include${CPATH:+:$CPATH}" >> "$GITHUB_ENV"
+          echo "LIBRARY_PATH=$futex_prefix/lib${LIBRARY_PATH:+:$LIBRARY_PATH}" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$futex_prefix/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> "$GITHUB_ENV"
+          echo "PKG_CONFIG_PATH=$futex_prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}" >> "$GITHUB_ENV"
+      - run: bundle install
+      - run: bundle exec rake compile
+      - name: Record Linux futex environment
+        run: |
+          uname -a
+          ldd --version
+          pkg-config --modversion liburing
+          ruby -v
+          cat /proc/sys/kernel/io_uring_disabled
+      - name: Require native and io_uring futex coverage without skips
+        shell: bash
+        run: |
+          set -o pipefail
+          bundle exec rake test 2>&1 | tee futex-tests.log
+          grep -Eq '[1-9][0-9]* tests, [1-9][0-9]* assertions, 0 failures, 0 errors, 0 skips' futex-tests.log
+        env:
+          TEST: test/farce/internal/test_futex.rb
+          FARCE_FIBER_SCHEDULER: io_uring
+          BACKEND: io_uring
+          REQUIRE_FUTEX: "1"
+      - name: Run synchronization and scheduler regressions
+        run: bundle exec rake test
+        env:
+          TEST: test/farce/internal/test_signal.rb,test/farce/test_signal.rb,test/farce/test_lock.rb,test/farce/internal/test_atom.rb,test/farce/internal/test_map.rb,test/farce/internal/test_vector.rb,test/farce/internal/test_tree_map.rb,test/farce/test_priority_queue.rb,test/farce/internal/test_fiber_scheduler_lifetime.rb
+          FARCE_FIBER_SCHEDULER: io_uring
+          BACKEND: io_uring
+          REQUIRE_FUTEX: "1"
+
+  futex-fallback:
+    name: Linux / forced futex fallback / Ruby 4.0
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0"
+      - name: Install io_uring headers
+        run: sudo apt-get update && sudo apt-get install -y liburing-dev
+      - run: bundle install
+      - name: Compile with futex support disabled
+        run: bundle exec rake compile
+        env:
+          CONFIGURE_ARGS: --disable-futex
+      - name: Require forced-fallback coverage without skips
+        shell: bash
+        run: |
+          set -o pipefail
+          bundle exec rake test 2>&1 | tee futex-fallback-tests.log
+          grep -Eq '[1-9][0-9]* tests, [1-9][0-9]* assertions, 0 failures, 0 errors, 0 skips' futex-fallback-tests.log
+        env:
+          TEST: test/farce/internal/test_futex.rb
+          TESTOPTS: --name=/TestFutexFallback/
+          FARCE_FIBER_SCHEDULER: io_uring
+          BACKEND: io_uring
+          REQUIRE_FUTEX: "0"
+      - name: Run fallback synchronization and scheduler regressions
+        run: bundle exec rake test
+        env:
+          TEST: test/farce/internal/test_signal.rb,test/farce/test_signal.rb,test/farce/test_lock.rb,test/farce/internal/test_atom.rb,test/farce/internal/test_map.rb,test/farce/internal/test_vector.rb,test/farce/internal/test_tree_map.rb,test/farce/test_priority_queue.rb,test/farce/internal/test_fiber_scheduler_lifetime.rb
+          FARCE_FIBER_SCHEDULER: io_uring
+          BACKEND: io_uring
+          REQUIRE_FUTEX: "0"
+
   windows:
     name: Windows / Ruby ${{ matrix.ruby }}
     runs-on: windows-2025

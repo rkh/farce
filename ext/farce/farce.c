@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "futex.h"
 #include "transaction.h"
 #include "shareable.h"
 #include "ruby/fiber/scheduler.h"
@@ -306,6 +307,12 @@ containers_raise_key_error(VALUE receiver, VALUE key)
 }
 
 static VALUE
+farce_futex_supported(VALUE namespace)
+{
+    return containers_futex_available() ? Qtrue : Qfalse;
+}
+
+static VALUE
 farce_load_native_fiber_scheduler(VALUE namespace)
 {
     farce_init_fiber_scheduler(namespace);
@@ -338,6 +345,7 @@ Init_farce(void)
         farce_load_native_fiber_scheduler,
         0
     );
+    rb_define_private_method(singleton, "futex_supported?", farce_futex_supported, 0);
     containers_init_transaction(mInternal);
     containers_init_atom(mInternal);
     containers_init_counter(mInternal);

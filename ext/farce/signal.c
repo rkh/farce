@@ -1,21 +1,16 @@
 #include "containers.h"
-#include "ruby/io.h"
+#include "native_wait.h"
 
-#include <errno.h>
-#include <fcntl.h>
 #include <math.h>
 #include <stdint.h>
 #include <time.h>
-#include <unistd.h>
 
 static VALUE cSignal;
 
 typedef struct containers_signal_waiter containers_signal_waiter_t;
 
 struct containers_signal_waiter {
-    int read_fd;
-    int write_fd;
-    bool notified;
+    containers_waiter_t notification;
     containers_signal_waiter_t *next;
 };
 
@@ -66,34 +61,13 @@ containers_signal_parse_timeout(VALUE value)
     return timeout;
 }
 
-static void
-containers_signal_set_fd_flags(int fd)
-{
-#ifdef _WIN32
-    (void)fd;
-#else
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-    flags = fcntl(fd, F_GETFD, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
-#endif
-}
-
-/* Called with signal->lock held. Each waiter has a separate descriptor, so a
- * single broadcast makes every scheduled Fiber or native thread runnable. */
+/* Called with signal->lock held. The notification remains latched while
+ * the waiting caller selects its parking backend outside the state mutex. */
 static void
 containers_signal_notify_waiters_locked(containers_signal_t *signal)
 {
-    unsigned char byte = 1;
     for (containers_signal_waiter_t *waiter = signal->waiters; waiter; waiter = waiter->next) {
-        if (waiter->notified) continue;
-        ssize_t result;
-        do {
-            result = write(waiter->write_fd, &byte, 1);
-        } while (result < 0 && errno == EINTR);
-        if (result == 1 || (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
-            waiter->notified = true;
-        }
+        (void)containers_waiter_notify(&waiter->notification);
     }
 }
 
@@ -184,26 +158,14 @@ containers_signal_new(void)
     return containers_signal_initialize(signal);
 }
 
-static bool
-containers_signal_wait_for_descriptor(int fd, containers_signal_timeout_t *timeout)
-{
-    VALUE wait_timeout = Qnil;
-    if (timeout->finite) {
-        double remaining = timeout->deadline - containers_signal_monotonic_now();
-        if (remaining <= 0) return false;
-        wait_timeout = DBL2NUM(remaining);
-    }
-
-    return containers_wait_for_readable(fd, wait_timeout);
-}
-
 static VALUE
 containers_signal_wait_body(VALUE opaque)
 {
     containers_signal_wait_context_t *context = (containers_signal_wait_context_t *)opaque;
-    return containers_signal_wait_for_descriptor(context->waiter.read_fd, context->timeout)
-        ? Qtrue
-        : Qfalse;
+    return containers_waiter_wait(
+        &context->waiter.notification, &context->signal->lock,
+        context->timeout->finite, context->timeout->deadline, NULL
+    ) ? Qtrue : Qfalse;
 }
 
 static VALUE
@@ -220,8 +182,7 @@ containers_signal_wait_cleanup(VALUE opaque)
         }
     }
     pthread_mutex_unlock(&context->signal->lock);
-    close(context->waiter.read_fd);
-    close(context->waiter.write_fd);
+    containers_waiter_close(&context->waiter.notification);
     return Qnil;
 }
 
@@ -232,24 +193,12 @@ containers_signal_wait_once(
     containers_signal_timeout_t *timeout
 )
 {
-    int descriptors[2];
-    if (pipe(descriptors) != 0) {
-        pthread_mutex_unlock(&signal->lock);
-        rb_sys_fail("pipe");
-    }
-    containers_signal_set_fd_flags(descriptors[0]);
-    containers_signal_set_fd_flags(descriptors[1]);
-
     containers_signal_wait_context_t context = {
         .signal = signal,
-        .waiter = {
-            .read_fd = descriptors[0],
-            .write_fd = descriptors[1],
-            .notified = false,
-            .next = signal->waiters,
-        },
+        .waiter = {.next = signal->waiters},
         .timeout = timeout,
     };
+    containers_waiter_init(&context.waiter.notification);
     signal->waiters = &context.waiter;
     pthread_mutex_unlock(&signal->lock);
     return RTEST(rb_ensure(
@@ -329,6 +278,10 @@ containers_signal_wait(int argc, VALUE *argv, VALUE self)
             uint64_t generation = signal->generation;
             pthread_mutex_unlock(&signal->lock);
             return ULL2NUM(generation);
+        }
+        if (timeout.finite && timeout.deadline <= containers_signal_monotonic_now()) {
+            pthread_mutex_unlock(&signal->lock);
+            return containers_signal_timeout_result();
         }
         bool awakened = containers_signal_wait_once(signal, &timeout);
         pthread_mutex_lock(&signal->lock);

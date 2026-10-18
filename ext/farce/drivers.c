@@ -5,6 +5,9 @@
 #include <limits.h>
 #include <fcntl.h>
 #include <math.h>
+#ifdef FARCE_HAVE_URING_FUTEX
+#include <linux/futex.h>
+#endif
 #ifdef HAVE_SYS_EPOLL_H
 #include <sys/epoll.h>
 #endif
@@ -38,6 +41,13 @@ int fs_driver_init(fs_state *s, int driver) {
         int result = io_uring_queue_init(1024, &s->ring, 0);
         if (result < 0) return -result;
         s->ring_live = 1;
+#ifdef FARCE_HAVE_URING_FUTEX
+        struct io_uring_probe *probe = io_uring_get_probe_ring(&s->ring);
+        if (probe) {
+            s->futex_supported = io_uring_opcode_supported(probe, IORING_OP_FUTEX_WAIT);
+            io_uring_free_probe(probe);
+        }
+#endif
         return 0;
     }
 #endif
@@ -69,6 +79,28 @@ int fs_driver_receive(fs_state *s, fs_wait *w, int fd, void *buffer, size_t size
     w->receive_pending = 1;
     // Consume every queued SQE while holding the GVL, before Ruby can close or
     // reopen this fd. SQPOLL is not enabled. The kernel then owns its file ref.
+    while (io_uring_sq_ready(&s->ring)) {
+        int result = io_uring_submit(&s->ring);
+        if (result < 0 && result != -EINTR) return -result;
+    }
+    return 0;
+#else
+    return ENOSYS;
+#endif
+}
+
+// Submit one private 32-bit futex wait. The caller retains the word until the
+// original completion has been consumed, including after timeout or cancellation.
+int fs_driver_futex(fs_state *s, fs_wait *w, containers_futex_t *word) {
+#ifdef FARCE_HAVE_URING_FUTEX
+    struct io_uring_sqe *entry = sqe(s);
+    if (!entry) return errno;
+    io_uring_prep_futex_wait(entry, (uint32_t *)&word->value, 0,
+        FUTEX_BITSET_MATCH_ANY, FUTEX_32 | FUTEX_PRIVATE_FLAG, 0);
+    entry->user_data = FS_FUTEX | NUM2ULL(w->token);
+    w->futex_pending = 1;
+    // Submit before yielding. Once queued, cleanup must drain the original CQE
+    // even if submission fails after making some progress.
     while (io_uring_sq_ready(&s->ring)) {
         int result = io_uring_submit(&s->ring);
         if (result < 0 && result != -EINTR) return -result;
@@ -210,13 +242,13 @@ void *fs_driver_poll(void *data) {
             consumed++;
             if (cqe->user_data && cqe->user_data != LIBURING_UDATA_TIMEOUT) {
                 int e = cqe->res, mask = 0;
-                if (!(cqe->user_data & FS_RECEIVE) && e >= 0) {
+                if (!(cqe->user_data & FS_OPERATION) && e >= 0) {
                     if (e & (POLLIN | POLLHUP | POLLERR)) mask |= FS_READ;
                     if (e & (POLLOUT | POLLHUP | POLLERR)) mask |= FS_WRITE;
                     if (e & POLLPRI) mask |= FS_PRI;
                 }
                 s->events[s->event_count++] = (fs_event){cqe->user_data, mask,
-                    cqe->user_data & FS_RECEIVE ? e : e < 0 && e != -ECANCELED ? -e : 0};
+                    cqe->user_data & FS_OPERATION ? e : e < 0 && e != -ECANCELED ? -e : 0};
             }
         }
         io_uring_cq_advance(&s->ring, consumed);

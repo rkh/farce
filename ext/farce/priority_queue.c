@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "native_wait.h"
 #include "unshared_wait.h"
 #include <ruby/atomic.h>
 #include <ruby/fiber/scheduler.h>
@@ -348,9 +349,7 @@ priority_queue_bucket_unlink(
 }
 
 typedef struct priority_queue_lock_waiter {
-    int read_fd;
-    int write_fd;
-    bool notified;
+    containers_waiter_t notification;
     struct priority_queue_lock_waiter *next;
 } priority_queue_lock_waiter_t;
 
@@ -753,19 +752,6 @@ priority_queue_get(VALUE self)
     return queue;
 }
 
-static void
-priority_queue_lock_set_fd_flags(int fd)
-{
-#ifdef _WIN32
-    (void)fd;
-#else
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-    flags = fcntl(fd, F_GETFD, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
-#endif
-}
-
 /* Called with queue->lock held. A logical unlock only needs to make one
  * waiter runnable. The selected waiter remains linked until ensure cleanup. */
 static void
@@ -777,20 +763,9 @@ priority_queue_lock_notify_one_locked(priority_queue_t *queue)
          * next waiter. Reentrant operations can register for a later unlock. */
         farce_unshared_wait_notify_all(&queue->unshared_lock_waiters);
     }
-    unsigned char byte = 1;
-    priority_queue_lock_waiter_t *waiter;
-
-    for (waiter = queue->waiters; waiter; waiter = waiter->next) {
-        ssize_t result;
-        if (waiter->notified) continue;
-        do {
-            result = write(waiter->write_fd, &byte, 1);
-        } while (result < 0 && errno == EINTR);
-        if (result == 1 ||
-            (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
-            waiter->notified = true;
-            return;
-        }
+    for (priority_queue_lock_waiter_t *waiter = queue->waiters; waiter; waiter = waiter->next) {
+        if (waiter->notification.notified) continue;
+        if (containers_waiter_notify(&waiter->notification)) return;
     }
 }
 
@@ -799,18 +774,16 @@ typedef struct {
     priority_queue_lock_waiter_t waiter;
 } priority_queue_lock_wait_context_t;
 
-static bool
-priority_queue_lock_wait_for_descriptor(int fd)
-{
-    return containers_wait_for_readable(fd, Qnil);
-}
-
 static VALUE
 priority_queue_lock_wait_body(VALUE opaque)
 {
     priority_queue_lock_wait_context_t *context =
         (priority_queue_lock_wait_context_t *)opaque;
-    bool awakened = priority_queue_lock_wait_for_descriptor(context->waiter.read_fd);
+    bool awakened = containers_waiter_wait(
+        &context->waiter.notification,
+        context->queue->shared ? &context->queue->lock : NULL,
+        false, 0, NULL
+    );
     return awakened ? Qtrue : Qfalse;
 }
 
@@ -835,10 +808,10 @@ priority_queue_lock_wait_cleanup(VALUE opaque)
     }
     /* A notification only makes this waiter runnable; it does not reserve
      * ownership. Pass the baton whenever a notified waiter leaves while the
-     * queue is still ownerless. This covers both interruption inside rb_io_wait
+     * queue is still ownerless. This covers both interruption while waiting
      * and cancellation after a normal wake but before the acquisition loop can
      * claim ownership, so later waiters cannot be stranded. */
-    if (context->waiter.notified &&
+    if (context->waiter.notification.notified &&
         NIL_P(context->queue->owner_fiber) &&
         !priority_queue_publication_busy(
             RUBY_ATOMIC_LOAD(context->queue->publication_state)
@@ -846,8 +819,7 @@ priority_queue_lock_wait_cleanup(VALUE opaque)
         priority_queue_lock_notify_one_locked(context->queue);
     }
     priority_queue_mutex_unlock(context->queue);
-    close(context->waiter.read_fd);
-    close(context->waiter.write_fd);
+    containers_waiter_close(&context->waiter.notification);
     return Qnil;
 }
 
@@ -859,25 +831,11 @@ priority_queue_lock_wait_once(priority_queue_t *queue)
         (void)farce_unshared_wait(&queue->unshared_lock_waiters, queue->unshared_self, false, 0);
         return;
     }
-    int descriptors[2];
-    priority_queue_lock_wait_context_t context;
-
-    if (pipe(descriptors) != 0) {
-        priority_queue_mutex_unlock(queue);
-        rb_sys_fail("pipe");
-    }
-    priority_queue_lock_set_fd_flags(descriptors[0]);
-    priority_queue_lock_set_fd_flags(descriptors[1]);
-
-    context = (priority_queue_lock_wait_context_t){
+    priority_queue_lock_wait_context_t context = {
         .queue = queue,
-        .waiter = {
-            .read_fd = descriptors[0],
-            .write_fd = descriptors[1],
-            .notified = false,
-            .next = NULL,
-        },
+        .waiter = {.next = NULL},
     };
+    containers_waiter_init(&context.waiter.notification);
     if (queue->last_waiter) queue->last_waiter->next = &context.waiter;
     else queue->waiters = &context.waiter;
     queue->last_waiter = &context.waiter;

@@ -1,14 +1,12 @@
 #include "containers.h"
+#include "native_wait.h"
 #include "transaction.h"
 #include "ruby/fiber/scheduler.h"
-#include "ruby/io.h"
 
 #include <errno.h>
-#include <fcntl.h>
 #include <math.h>
 #include <stdint.h>
 #include <time.h>
-#include <unistd.h>
 
 static VALUE cAtom;
 #ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
@@ -24,9 +22,7 @@ bool rb_gc_handle_weak_references_alive_p(VALUE object);
 typedef struct atom_waiter atom_waiter_t;
 
 struct atom_waiter {
-    int read_fd;
-    int write_fd;
-    bool notified;
+    containers_waiter_t notification;
     atom_waiter_t *next;
 };
 
@@ -105,35 +101,13 @@ atom_parse_timeout(VALUE timeout)
     return parsed;
 }
 
-static void
-atom_set_fd_flags(int fd)
-{
-#ifdef _WIN32
-    (void)fd;
-#else
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-    flags = fcntl(fd, F_GETFD, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
-#endif
-}
-
-/* Called with atom->lock held. Every waiter owns a separate descriptor, so a
- * single state transition can wake all waiters without consuming a shared
- * notification. */
+/* Called with atom->lock held. Every registration owns an independent
+ * notification so a transition can wake all waiters. */
 static void
 atom_notify_waiters(atom_t *atom)
 {
-    unsigned char byte = 1;
     for (atom_waiter_t *waiter = atom->waiters; waiter; waiter = waiter->next) {
-        if (waiter->notified) continue;
-        ssize_t result;
-        do {
-            result = write(waiter->write_fd, &byte, 1);
-        } while (result < 0 && errno == EINTR);
-        if (result == 1 || (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
-            waiter->notified = true;
-        }
+        (void)containers_waiter_notify(&waiter->notification);
     }
 }
 
@@ -352,23 +326,24 @@ typedef struct {
     atom_timeout_t *timeout;
 } atom_wait_context_t;
 
-static bool
-atom_wait_for_descriptor(int fd, atom_timeout_t *timeout)
-{
-    VALUE wait_timeout = Qnil;
-    if (timeout->finite) {
-        double remaining = timeout->deadline - atom_monotonic_now();
-        if (remaining <= 0) return false;
-        wait_timeout = DBL2NUM(remaining);
-    }
-    return containers_wait_for_readable(fd, wait_timeout);
-}
-
 static VALUE
 atom_wait_body(VALUE opaque)
 {
     atom_wait_context_t *context = (atom_wait_context_t *)opaque;
-    return atom_wait_for_descriptor(context->waiter.read_fd, context->timeout) ? Qtrue : Qfalse;
+    atom_timeout_t *timeout = context->timeout;
+    int error = 0;
+    bool awakened = containers_waiter_wait(
+        &context->waiter.notification, &context->atom->lock,
+        timeout->finite, timeout->deadline, &error
+    );
+    if (error) {
+        double seconds = timeout->finite ? timeout->deadline - atom_monotonic_now() : 0;
+        if ((error == EMFILE || error == ENFILE) && timeout->finite && seconds <= 0) return Qfalse;
+        VALUE remaining = timeout->finite ? DBL2NUM(seconds) : Qnil;
+        containers_wait_without_descriptor(error, "pipe", &timeout->collected, remaining);
+        return Qtrue;
+    }
+    return awakened ? Qtrue : Qfalse;
 }
 
 static VALUE
@@ -385,8 +360,7 @@ atom_wait_cleanup(VALUE opaque)
         }
     }
     pthread_mutex_unlock(&context->atom->lock);
-    close(context->waiter.read_fd);
-    close(context->waiter.write_fd);
+    containers_waiter_close(&context->waiter.notification);
     return Qnil;
 }
 
@@ -394,29 +368,12 @@ atom_wait_cleanup(VALUE opaque)
 static bool
 atom_wait_once(atom_t *atom, atom_timeout_t *timeout)
 {
-    int descriptors[2];
-    if (pipe(descriptors) != 0) {
-        int error = errno;
-        pthread_mutex_unlock(&atom->lock);
-        double seconds = timeout->finite ? timeout->deadline - atom_monotonic_now() : 0;
-        if ((error == EMFILE || error == ENFILE) && timeout->finite && seconds <= 0) return false;
-        VALUE remaining = timeout->finite ? DBL2NUM(seconds) : Qnil;
-        containers_wait_without_descriptor(error, "pipe", &timeout->collected, remaining);
-        return true;
-    }
-    atom_set_fd_flags(descriptors[0]);
-    atom_set_fd_flags(descriptors[1]);
-
     atom_wait_context_t context = {
         .atom = atom,
-        .waiter = {
-            .read_fd = descriptors[0],
-            .write_fd = descriptors[1],
-            .notified = false,
-            .next = atom->waiters,
-        },
+        .waiter = {.next = atom->waiters},
         .timeout = timeout,
     };
+    containers_waiter_init(&context.waiter.notification);
     atom->waiters = &context.waiter;
     pthread_mutex_unlock(&atom->lock);
     return RTEST(rb_ensure(atom_wait_body, (VALUE)&context, atom_wait_cleanup, (VALUE)&context));

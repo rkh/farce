@@ -345,6 +345,9 @@ void fs_watch_io(fs_state *s, fs_wait *w, int fd, int events, int group, long in
     }
 }
 
+// Cancel the outstanding futex operation before its caller releases the word.
+static void fs_cancel_futex(VALUE self, fs_wait *w);
+
 // Finish a wait and remove its watches and ready-queue entry.
 // A pending receive must stop using the buffer before cleanup can continue.
 // Clear Ruby references and keep the fiber's slot available for its next wait.
@@ -352,6 +355,12 @@ VALUE fs_retire(VALUE self, VALUE token) {
     fs_state *s = fs_get(self); fs_wait *w = fs_lookup(s, token);
     if (!w) return Qnil;
     if (w->receive_pending) fs_cancel_receive(self, w);
+    if (w->futex_pending) {
+        // Logical cancellation must not discard the lookup required by the CQE.
+        // Suppress resumption first, then consume the original completion.
+        w->status = 2;
+        fs_cancel_futex(self, w);
+    }
     ready_remove(s, w);
     fs_watch *watch = w->watches;
     while (watch) {
@@ -379,6 +388,56 @@ VALUE fs_retire(VALUE self, VALUE token) {
     w->watches = NULL;
     memset(&w->first_watch, 0, sizeof(w->first_watch));
     return Qnil;
+}
+
+// Select asynchronous futex parking only for an installed, live native ring.
+// External schedulers require a later integration instead of a duck-typed hook.
+bool containers_futex_scheduler_supported(VALUE scheduler) {
+#ifdef FARCE_HAVE_URING_FUTEX
+    if (NIL_P(scheduler) || !rb_typeddata_is_kind_of(scheduler, &fs_type)) return false;
+    fs_state *s = fs_get(scheduler);
+    return s->driver == FS_URING_DRIVER && s->ring_live && s->futex_supported &&
+        !s->closed && !s->stopping && s->owner == rb_thread_current() &&
+        s->active == rb_fiber_current() && rb_fiber_scheduler_get() == scheduler &&
+        containers_futex_available();
+#else
+    return false;
+#endif
+}
+
+typedef struct {
+    VALUE self, token, timeout;
+    containers_futex_t *word;
+} fs_futex_wait;
+
+// Submit and park using one suspension. The surrounding ensure retains the word
+// until the kernel request has completed, even if timer setup or parking raises.
+static VALUE futex_wait_body(VALUE data) {
+    fs_futex_wait *wait = (fs_futex_wait *)data;
+    fs_state *s = fs_get(wait->self);
+    fs_wait *w = fs_lookup(s, wait->token);
+    int error = fs_driver_futex(s, w, wait->word);
+    if (error) rb_syserr_fail(error, "scheduler futex submission");
+    return rb_funcall(wait->self, rb_intern("wait_with_timeout"), 3,
+        wait->token, wait->timeout, Qfalse);
+}
+
+static VALUE futex_wait_cleanup(VALUE data) {
+    fs_futex_wait *wait = (fs_futex_wait *)data;
+    return fs_retire(wait->self, wait->token);
+}
+
+bool containers_futex_scheduler_wait(VALUE scheduler, containers_futex_t *word, VALUE timeout) {
+    if (!containers_futex_scheduler_supported(scheduler)) return true;
+    fs_futex_wait wait = {scheduler, fs_arm(scheduler), timeout, word};
+    return RTEST(rb_ensure(futex_wait_body, (VALUE)&wait, futex_wait_cleanup, (VALUE)&wait));
+}
+
+// Expose the backend capability privately so native-path validation cannot pass
+// by silently exercising a descriptor fallback.
+static VALUE futex_supported(VALUE self) {
+    fs_state *s = fs_get(self);
+    return !s->closed && !s->stopping && s->futex_supported && containers_futex_available() ? Qtrue : Qfalse;
 }
 
 // Switch from the root to a ready fiber.
@@ -600,6 +659,27 @@ static int snapshot_fallback(st_data_t key, st_data_t value, st_data_t arg) {
 // Wake-pipe events ask the dispatcher to return to Ruby policy code.
 static void accept_event(VALUE self, fs_event *e) {
     fs_state *s = fs_get(self);
+    if (e->generation & FS_FUTEX) {
+        fs_wait *w = fs_lookup(s, ULL2NUM(e->generation & ~FS_OPERATION));
+        if (!w) return;
+        w->futex_pending = 0;
+        int error = e->error < 0 ? -e->error : 0;
+        if (error == ENOSYS || error == EOPNOTSUPP) s->futex_supported = 0;
+        if (!w->status) {
+            if (error == ENOSYS || error == EOPNOTSUPP) {
+                // Retry with the now-disabled capability, rather than reporting
+                // a timeout to consumers that have not reached their deadline.
+                fs_resume(self, w->token, Qtrue, Qnil);
+            } else {
+                // Early notification is reported as EAGAIN. Other interruptions
+                // also return to the container's condition/deadline check.
+                if (error != EAGAIN && error != EINTR && error != ECANCELED)
+                    w->native_error = error;
+                fs_resume(self, w->token, Qtrue, Qnil);
+            }
+        }
+        return;
+    }
     if (e->generation & FS_RECEIVE) {
         fs_wait *w = fs_lookup(s, ULL2NUM(e->generation & ~FS_RECEIVE));
         if (!w) return;
@@ -660,34 +740,42 @@ static void poll_ready(VALUE self) {
     if (s->poll_error || s->selected_pending) s->policy_pending = 1;
 }
 
-// Cancel an io_uring receive and wait until the original operation has finished.
-// Keep the caller's buffer locked throughout, because a cancellation reply alone
-// does not prove the kernel has stopped writing to it.
-void fs_cancel_receive(VALUE self, fs_wait *w) {
+// Cancel an operation and consume its original CQE before releasing storage.
+// Cancellation acknowledgements use zero userdata, so a delayed acknowledgement
+// cannot refer to an operation record or a subsequently reused suspension.
+static void cancel_operation(VALUE self, fs_wait *w, uint64_t kind, int *pending) {
 #ifdef FARCE_URING
     fs_state *s = fs_get(self);
     struct io_uring_sqe *entry = io_uring_get_sqe(&s->ring);
     if (!entry) {
         int result;
         do { result = io_uring_submit(&s->ring); } while (result == -EINTR);
-        if (result < 0) rb_bug("cannot submit pending scheduler receive");
+        if (result < 0) rb_bug("cannot submit pending scheduler operation");
         entry = io_uring_get_sqe(&s->ring);
         if (!entry) rb_bug("cannot reserve scheduler cancellation");
     }
-    io_uring_prep_cancel64(entry, FS_RECEIVE | NUM2ULL(w->token), 0);
+    io_uring_prep_cancel64(entry, kind | NUM2ULL(w->token), 0);
     entry->user_data = 0;
-    // Wait for the original receive CQE, not just the cancellation CQE. No Ruby
-    // fiber runs here, and the caller's buffer remains locked throughout.
-    while (w->receive_pending) {
+    // Do not run fibers here. The caller's buffer or futex word stays alive
+    // until the original completion, rather than just the cancellation reply.
+    while (*pending) {
         int result = io_uring_submit_and_wait(&s->ring, 1);
-        if (result < 0 && result != -EINTR) rb_bug("cannot acknowledge scheduler receive cancellation");
+        if (result < 0 && result != -EINTR) rb_bug("cannot acknowledge scheduler cancellation");
         s->timeout = 0;
         fs_driver_poll(s);
-        if (s->poll_error && s->poll_error != EINTR) rb_bug("cannot drain scheduler receive cancellation");
+        if (s->poll_error && s->poll_error != EINTR) rb_bug("cannot drain scheduler cancellation");
         for (int i = 0; i < s->event_count; i++) accept_event(self, &s->events[i]);
         rearm_events(s);
     }
 #endif
+}
+
+void fs_cancel_receive(VALUE self, fs_wait *w) {
+    cancel_operation(self, w, FS_RECEIVE, &w->receive_pending);
+}
+
+static void fs_cancel_futex(VALUE self, fs_wait *w) {
+    cancel_operation(self, w, FS_FUTEX, &w->futex_pending);
 }
 
 // Call a helper for every active wait, skipping empty slots and idle fibers.
@@ -836,6 +924,7 @@ void farce_init_fiber_scheduler(VALUE internal) {
     rb_define_private_method(klass, "retire_wait", fs_retire, 1);
     rb_define_private_method(klass, "register_select", register_select, 3);
     rb_define_private_method(klass, "ready?", ready, 0);
+    rb_define_private_method(klass, "futex_supported?", futex_supported, 0);
     rb_define_private_method(klass, "pending?", pending, 0);
     rb_define_private_method(klass, "pending_count", pending_count, 0);
     rb_define_private_method(klass, "wakeup", wakeup, 0);

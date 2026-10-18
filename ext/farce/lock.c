@@ -1,19 +1,13 @@
 #include "containers.h"
+#include "native_wait.h"
 #include "ruby/fiber/scheduler.h"
-#include "ruby/io.h"
-
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
 
 static VALUE cLock;
 
 typedef struct containers_lock_waiter containers_lock_waiter_t;
 
 struct containers_lock_waiter {
-    int read_fd;
-    int write_fd;
-    bool notified;
+    containers_waiter_t notification;
     containers_lock_waiter_t *next;
 };
 
@@ -29,7 +23,6 @@ typedef struct {
 typedef struct {
     containers_lock_t *lock;
     containers_lock_waiter_t waiter;
-    bool completed;
 } containers_lock_wait_context_t;
 
 typedef struct {
@@ -51,35 +44,14 @@ typedef struct {
     VALUE opaque;
 } containers_lock_call_context_t;
 
-static void
-containers_lock_set_fd_flags(int fd)
-{
-#ifdef _WIN32
-    (void)fd;
-#else
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-    flags = fcntl(fd, F_GETFD, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
-#endif
-}
-
-/* Called with lock->guard held. Mutex wakeups only need to make one waiter
- * runnable; the selected waiter remains linked until its ensure cleanup. */
+/* Called with lock->guard held. The selected waiter remains linked until
+ * ensure cleanup, and its notification latches before backend selection. */
 static void
 containers_lock_notify_one_locked(containers_lock_t *lock)
 {
-    unsigned char byte = 1;
     for (containers_lock_waiter_t *waiter = lock->waiters; waiter; waiter = waiter->next) {
-        if (waiter->notified) continue;
-        ssize_t result;
-        do {
-            result = write(waiter->write_fd, &byte, 1);
-        } while (result < 0 && errno == EINTR);
-        if (result == 1 || (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
-            waiter->notified = true;
-            return;
-        }
+        if (waiter->notification.notified) continue;
+        if (containers_waiter_notify(&waiter->notification)) return;
     }
 }
 
@@ -188,19 +160,13 @@ containers_lock_initialize_copy(VALUE self, VALUE other)
     return containers_publish_native_with_references(self, containers_lock_validate_references);
 }
 
-static bool
-containers_lock_wait_for_descriptor(int fd)
-{
-    return containers_wait_for_readable(fd, Qnil);
-}
-
 static VALUE
 containers_lock_wait_body(VALUE opaque)
 {
     containers_lock_wait_context_t *context = (containers_lock_wait_context_t *)opaque;
-    bool awakened = containers_lock_wait_for_descriptor(context->waiter.read_fd);
-    context->completed = true;
-    return awakened ? Qtrue : Qfalse;
+    return containers_waiter_wait(
+        &context->waiter.notification, &context->lock->guard, false, 0, NULL
+    ) ? Qtrue : Qfalse;
 }
 
 static VALUE
@@ -221,12 +187,13 @@ containers_lock_wait_cleanup(VALUE opaque)
         }
         previous = *link;
     }
-    if (!context->completed && context->waiter.notified && NIL_P(context->lock->owner)) {
+    /* A wake does not reserve ownership. Pass the baton even on a normal
+     * return, since cancellation can arrive before the caller claims the lock. */
+    if (context->waiter.notification.notified && NIL_P(context->lock->owner)) {
         containers_lock_notify_one_locked(context->lock);
     }
     pthread_mutex_unlock(&context->lock->guard);
-    close(context->waiter.read_fd);
-    close(context->waiter.write_fd);
+    containers_waiter_close(&context->waiter.notification);
     return Qnil;
 }
 
@@ -234,24 +201,11 @@ containers_lock_wait_cleanup(VALUE opaque)
 static void
 containers_lock_wait_once(containers_lock_t *lock)
 {
-    int descriptors[2];
-    if (pipe(descriptors) != 0) {
-        pthread_mutex_unlock(&lock->guard);
-        rb_sys_fail("pipe");
-    }
-    containers_lock_set_fd_flags(descriptors[0]);
-    containers_lock_set_fd_flags(descriptors[1]);
-
     containers_lock_wait_context_t context = {
         .lock = lock,
-        .waiter = {
-            .read_fd = descriptors[0],
-            .write_fd = descriptors[1],
-            .notified = false,
-            .next = NULL,
-        },
-        .completed = false,
+        .waiter = {.next = NULL},
     };
+    containers_waiter_init(&context.waiter.notification);
     if (lock->last_waiter) lock->last_waiter->next = &context.waiter;
     else lock->waiters = &context.waiter;
     lock->last_waiter = &context.waiter;

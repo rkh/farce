@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require "mkmf"
 require_relative "../ext_helper"
@@ -44,11 +46,36 @@ end
 
 have_func("sysctlbyname", "sys/sysctl.h") if have_header("sys/sysctl.h")
 
+futex = false
+if enable_config("futex", true) && RUBY_PLATFORM.include?("linux") &&
+    have_header("linux/futex.h") && have_header("sys/syscall.h")
+  futex = try_compile(<<~SOURCE)
+    #include <linux/futex.h>
+    #include <sys/syscall.h>
+    #include <stdint.h>
+    #include <stdatomic.h>
+    #include <time.h>
+    #include <unistd.h>
+
+    _Static_assert(sizeof(_Atomic(uint32_t)) == 4, "32-bit futex word");
+    _Static_assert(_Alignof(_Atomic(uint32_t)) >= 4, "aligned futex word");
+    int main(void) {
+        _Atomic(uint32_t) word = 1;
+        struct timespec now;
+        (void)clock_gettime(CLOCK_MONOTONIC, &now);
+        (void)syscall(SYS_futex, &word, FUTEX_WAIT_PRIVATE, 0, 0, 0, 0);
+        (void)syscall(SYS_futex, &word, FUTEX_WAKE_PRIVATE, 1, 0, 0, 0);
+        return 0;
+    }
+  SOURCE
+end
+$defs << "-DFARCE_HAVE_FUTEX" if futex
+
 epoll = have_header("sys/epoll.h")
 kqueue = have_header("sys/event.h")
 $srcs = %w[
-  atom.c bounded_map.c counter.c darwin.c dict.c exchanger.c farce.c flag.c lock.c map.c priority_queue.c
-  queue.c signal.c transaction.c tree_map.c trie.c unshareable.c unshared_signal.c vector.c weak_map.c
+  atom.c bounded_map.c counter.c darwin.c dict.c exchanger.c farce.c flag.c futex.c lock.c map.c native_wait.c
+  priority_queue.c queue.c signal.c transaction.c tree_map.c trie.c unshareable.c unshared_signal.c vector.c weak_map.c
 ]
 $srcs.concat(epoll || kqueue ? %w[drivers.c io.c reactor.c] : ["unsupported.c"])
 
@@ -57,6 +84,20 @@ if epoll || kqueue
   have_func("rb_io_timeout", "ruby/io.h")
   if enable_config("io-uring", true) && have_header("liburing.h") && have_library("uring", "io_uring_queue_init")
     $defs << "-DFARCE_HAVE_LIBURING"
+    if futex && try_compile(<<~SOURCE)
+      #include <linux/futex.h>
+      #include <liburing.h>
+
+      int main(void) {
+          struct io_uring_sqe sqe;
+          uint32_t word = 0;
+          io_uring_prep_futex_wait(&sqe, &word, 0, FUTEX_BITSET_MATCH_ANY,
+              FUTEX_32 | FUTEX_PRIVATE_FLAG, 0);
+          return IORING_OP_FUTEX_WAIT == 0;
+      }
+    SOURCE
+      $defs << "-DFARCE_HAVE_URING_FUTEX"
+    end
   end
 end
 

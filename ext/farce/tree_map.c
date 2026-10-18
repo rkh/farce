@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "native_wait.h"
 #include "transaction.h"
 #include <ruby/atomic.h>
 #include <ruby/fiber/scheduler.h>
@@ -558,9 +559,7 @@ tc_map_store_unlocked(VALUE self, tc_map *map, VALUE key, VALUE value,
 typedef struct tc_core_map_waiter tc_core_map_waiter;
 
 struct tc_core_map_waiter {
-    int read_fd;
-    int write_fd;
-    bool notified;
+    containers_waiter_t notification;
     tc_core_map_waiter *next;
 };
 
@@ -787,40 +786,14 @@ typedef struct {
     tc_core_map_waiter waiter;
 } tc_core_map_fiber_wait;
 
-static void
-tc_core_map_set_fd_flags(int fd)
-{
-#ifdef _WIN32
-    (void)fd;
-#else
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-    flags = fcntl(fd, F_GETFD, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
-#endif
-}
-
 /* Called with core->lock held. The waiter remains linked until its ensure
  * cleanup so an interrupt cannot leave a dangling stack pointer behind. */
 static void
 tc_core_map_notify_one_locked(tc_core_map *core)
 {
-    unsigned char byte = 1;
-
-    for (tc_core_map_waiter *waiter = core->waiters;
-         waiter != NULL;
-         waiter = waiter->next) {
-        ssize_t result;
-
-        if (waiter->notified) continue;
-        do {
-            result = write(waiter->write_fd, &byte, 1);
-        } while (result < 0 && errno == EINTR);
-        if (result == 1 ||
-            (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
-            waiter->notified = true;
-            return;
-        }
+    for (tc_core_map_waiter *waiter = core->waiters; waiter; waiter = waiter->next) {
+        if (waiter->notification.notified) continue;
+        if (containers_waiter_notify(&waiter->notification)) return;
     }
 }
 
@@ -828,7 +801,9 @@ static VALUE
 tc_core_map_fiber_wait_body(VALUE opaque)
 {
     tc_core_map_fiber_wait *wait = (tc_core_map_fiber_wait *)opaque;
-    return containers_wait_for_readable(wait->waiter.read_fd, Qnil) ? Qtrue : Qfalse;
+    return containers_waiter_wait(
+        &wait->waiter.notification, &wait->core->lock, false, 0, NULL
+    ) ? Qtrue : Qfalse;
 }
 
 static VALUE
@@ -851,9 +826,9 @@ tc_core_map_fiber_wait_cleanup(VALUE opaque)
     }
     /* Notification makes a waiter runnable, but does not reserve ownership.
      * Always pass the baton if a notified waiter leaves while ownerless,
-     * including cancellation after rb_io_wait returned but before the lock
+     * including cancellation after a wait returned but before the lock
      * acquisition loop claimed ownership. */
-    if (wait->waiter.notified &&
+    if (wait->waiter.notification.notified &&
         NIL_P(wait->core->owner_fiber) &&
         !tc_core_map_publication_busy(
             RUBY_ATOMIC_LOAD(wait->core->publication_state)
@@ -862,8 +837,7 @@ tc_core_map_fiber_wait_cleanup(VALUE opaque)
     }
     pthread_mutex_unlock(&wait->core->lock);
 
-    close(wait->waiter.read_fd);
-    close(wait->waiter.write_fd);
+    containers_waiter_close(&wait->waiter.notification);
     return Qnil;
 }
 
@@ -871,24 +845,11 @@ tc_core_map_fiber_wait_cleanup(VALUE opaque)
 static void
 tc_core_map_wait_once(tc_core_map *core)
 {
-    int descriptors[2];
-
-    if (pipe(descriptors) != 0) {
-        pthread_mutex_unlock(&core->lock);
-        rb_sys_fail("pipe");
-    }
-    tc_core_map_set_fd_flags(descriptors[0]);
-    tc_core_map_set_fd_flags(descriptors[1]);
-
     tc_core_map_fiber_wait wait = {
         .core = core,
-        .waiter = {
-            .read_fd = descriptors[0],
-            .write_fd = descriptors[1],
-            .notified = false,
-            .next = NULL,
-        },
+        .waiter = {.next = NULL},
     };
+    containers_waiter_init(&wait.waiter.notification);
 
     if (core->last_waiter != NULL) core->last_waiter->next = &wait.waiter;
     else core->waiters = &wait.waiter;
@@ -904,8 +865,8 @@ tc_core_map_wait_once(tc_core_map *core)
 }
 
 /* CRuby needs logical Fiber ownership rather than pthread ownership: multiple
- * scheduled Fibers can contend on the same native thread. Descriptor waits
- * let rb_io_wait park only the current Fiber while its owner resumes. */
+ * scheduled Fibers can contend on the same native thread. Native notifications
+ * park only the current Fiber while its owner resumes. */
 static void
 tc_core_map_lock(VALUE self, tc_core_map *core)
 {

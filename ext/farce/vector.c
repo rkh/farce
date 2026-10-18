@@ -1,15 +1,13 @@
 #include "containers.h"
+#include "native_wait.h"
 #include "transaction.h"
-#include "ruby/io.h"
 #include "ruby/fiber/scheduler.h"
 
 #include <errno.h>
-#include <fcntl.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
 
 #define VECTOR_INITIAL_CAPACITY 16
 static VALUE cVector;
@@ -19,9 +17,7 @@ static VALUE vector_transaction_marker;
 typedef struct vector_waiter vector_waiter_t;
 
 struct vector_waiter {
-    int read_fd;
-    int write_fd;
-    bool notified;
+    containers_waiter_t notification;
     vector_waiter_t *next;
 };
 
@@ -214,35 +210,14 @@ vector_timeout_keyword(VALUE keywords)
     return timeout;
 }
 
-static void
-vector_set_fd_flags(int fd)
-{
-#ifdef _WIN32
-    (void)fd;
-#else
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-    flags = fcntl(fd, F_GETFD, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
-#endif
-}
-
-/* Called with vector->lock held. Each waiter has an independent pipe, so a
- * transition wakes every waiting thread or scheduled fiber. */
+/* Called with vector->lock held. A transition wakes every registered
+ * thread or fiber without sharing a consumable notification. */
 static void
 vector_notify_waiters_locked(vector_t *vector)
 {
-    unsigned char byte = 1;
     vector->generation++;
     for (vector_waiter_t *waiter = vector->waiters; waiter; waiter = waiter->next) {
-        if (waiter->notified) continue;
-        ssize_t result;
-        do {
-            result = write(waiter->write_fd, &byte, 1);
-        } while (result < 0 && errno == EINTR);
-        if (result == 1 || (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
-            waiter->notified = true;
-        }
+        (void)containers_waiter_notify(&waiter->notification);
     }
 }
 
@@ -259,23 +234,14 @@ typedef struct {
     vector_timeout_t *timeout;
 } vector_wait_context_t;
 
-static bool
-vector_wait_for_descriptor(int fd, vector_timeout_t *timeout)
-{
-    VALUE wait_timeout = Qnil;
-    if (timeout->finite) {
-        double remaining = timeout->deadline - vector_monotonic_now();
-        if (remaining <= 0) return false;
-        wait_timeout = DBL2NUM(remaining);
-    }
-    return containers_wait_for_readable(fd, wait_timeout);
-}
-
 static VALUE
 vector_wait_body(VALUE opaque)
 {
     vector_wait_context_t *context = (vector_wait_context_t *)opaque;
-    return vector_wait_for_descriptor(context->waiter.read_fd, context->timeout) ? Qtrue : Qfalse;
+    return containers_waiter_wait(
+        &context->waiter.notification, &context->vector->lock,
+        context->timeout->finite, context->timeout->deadline, NULL
+    ) ? Qtrue : Qfalse;
 }
 
 static VALUE
@@ -292,8 +258,7 @@ vector_wait_cleanup(VALUE opaque)
         }
     }
     pthread_mutex_unlock(&context->vector->lock);
-    close(context->waiter.read_fd);
-    close(context->waiter.write_fd);
+    containers_waiter_close(&context->waiter.notification);
     return Qnil;
 }
 
@@ -303,24 +268,12 @@ vector_wait_cleanup(VALUE opaque)
 static bool
 vector_wait_once(vector_t *vector, vector_timeout_t *timeout)
 {
-    int descriptors[2];
-    if (pipe(descriptors) != 0) {
-        pthread_mutex_unlock(&vector->lock);
-        rb_sys_fail("pipe");
-    }
-    vector_set_fd_flags(descriptors[0]);
-    vector_set_fd_flags(descriptors[1]);
-
     vector_wait_context_t context = {
         .vector = vector,
-        .waiter = {
-            .read_fd = descriptors[0],
-            .write_fd = descriptors[1],
-            .notified = false,
-            .next = vector->waiters,
-        },
+        .waiter = {.next = vector->waiters},
         .timeout = timeout,
     };
+    containers_waiter_init(&context.waiter.notification);
     vector->waiters = &context.waiter;
     pthread_mutex_unlock(&vector->lock);
     return RTEST(rb_ensure(vector_wait_body, (VALUE)&context, vector_wait_cleanup, (VALUE)&context));

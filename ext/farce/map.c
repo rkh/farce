@@ -1,16 +1,14 @@
 #include "containers.h"
+#include "native_wait.h"
 #include "transaction.h"
 #include "ruby/fiber/scheduler.h"
-#include "ruby/io.h"
 
 #include <errno.h>
-#include <fcntl.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdatomic.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
 
 #define MAP_INITIAL_CAPACITY 16
 
@@ -42,9 +40,7 @@ typedef struct {
 } map_slot_t;
 
 typedef struct map_waiter {
-    int read_fd;
-    int write_fd;
-    bool notified;
+    containers_waiter_t notification;
     struct map_waiter *next;
 } map_waiter_t;
 
@@ -142,45 +138,11 @@ map_parse_timeout(VALUE timeout)
 }
 
 static void
-map_set_fd_flags(int fd)
-{
-#ifdef _WIN32
-    (void)fd;
-#else
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-    flags = fcntl(fd, F_GETFD, 0);
-    if (flags >= 0) (void)fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
-#endif
-}
-
-static void
-map_waiter_initialize(map_waiter_t *waiter)
-{
-    int descriptors[2];
-    if (pipe(descriptors) != 0) rb_sys_fail("pipe");
-    waiter->read_fd = descriptors[0];
-    waiter->write_fd = descriptors[1];
-    waiter->notified = false;
-    waiter->next = NULL;
-    map_set_fd_flags(waiter->read_fd);
-    map_set_fd_flags(waiter->write_fd);
-}
-
-static void
 map_notify_waiters_locked(map_t *map)
 {
-    unsigned char byte = 1;
     map->generation++;
     for (map_waiter_t *waiter = map->waiters; waiter; waiter = waiter->next) {
-        if (waiter->notified) continue;
-        ssize_t result;
-        do {
-            result = write(waiter->write_fd, &byte, 1);
-        } while (result < 0 && errno == EINTR);
-        if (result == 1 || (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) {
-            waiter->notified = true;
-        }
+        (void)containers_waiter_notify(&waiter->notification);
     }
 }
 
@@ -430,13 +392,10 @@ static VALUE
 map_wait_body(VALUE opaque)
 {
     map_wait_context_t *context = (map_wait_context_t *)opaque;
-    VALUE wait_timeout = Qnil;
-    if (context->timeout->finite) {
-        double remaining = context->timeout->deadline - map_monotonic_now();
-        if (remaining <= 0) return Qfalse;
-        wait_timeout = DBL2NUM(remaining);
-    }
-    return containers_wait_for_readable(context->waiter->read_fd, wait_timeout) ? Qtrue : Qfalse;
+    return containers_waiter_wait(
+        &context->waiter->notification, &context->map->lock,
+        context->timeout->finite, context->timeout->deadline, NULL
+    ) ? Qtrue : Qfalse;
 }
 
 static VALUE
@@ -451,8 +410,7 @@ map_wait_cleanup(VALUE opaque)
         pthread_mutex_unlock(&context->map->lock);
         context->registered = false;
     }
-    close(context->waiter->read_fd);
-    close(context->waiter->write_fd);
+    containers_waiter_close(&context->waiter->notification);
     return Qnil;
 }
 
@@ -460,13 +418,11 @@ static bool
 map_wait_once(map_t *map, uint64_t generation, map_timeout_t *timeout)
 {
     map_waiter_t waiter;
-    map_waiter_initialize(&waiter);
+    containers_waiter_init(&waiter.notification);
 
     pthread_mutex_lock(&map->lock);
     if (map->generation != generation) {
         pthread_mutex_unlock(&map->lock);
-        close(waiter.read_fd);
-        close(waiter.write_fd);
         return true;
     }
     waiter.next = map->waiters;
