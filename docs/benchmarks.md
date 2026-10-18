@@ -133,7 +133,7 @@ The below numbers compare non-blocking APIs, as only Farce implements a blocking
   </thead>
   <tbody>
     <tr>
-      <td colspan="2">farce 0.1.0</td>
+      <td colspan="2">farce 0.4.1</td>
       <td>fastest</td>
       <td>fastest</td>
       <td>fastest</td>
@@ -161,7 +161,7 @@ The below numbers compare non-blocking APIs, as only Farce implements a blocking
       <td>1.1x slower</td>
     </tr>
     <tr>
-      <td colspan="2"><a href="https://github.com/socketry/io-event">io-event</a> 1.22.1</td>
+      <td colspan="2"><a href="https://github.com/socketry/io-event">io-event</a> 1.22.3</td>
       <td>4.5x slower</td>
       <td>9.6x slower</td>
       <td>1.3x slower</td>
