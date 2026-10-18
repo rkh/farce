@@ -126,9 +126,9 @@ The below numbers compare non-blocking APIs, as only Farce implements a blocking
       <th>↓ Gem</th>
       <th>Insertion order →</th>
       <th>Random</th>
-      <th>Descending</th>
+      <th>Sorted</th>
       <th>Random</th>
-      <th>Descending</th>
+      <th>Sorted</th>
     </tr>
   </thead>
   <tbody>
@@ -141,43 +141,57 @@ The below numbers compare non-blocking APIs, as only Farce implements a blocking
     </tr>
     <tr>
       <td colspan="2"><a href="https://github.com/mame/rbtree">rbtree</a> 0.4.7</td>
-      <td>1.1x slower</td>
-      <td>1.2x  slower</td>
+      <td>1.6x slower</td>
+      <td>2.9x  slower</td>
       <td>–</td>
       <td>–</td>
     </tr>
     <tr>
       <td colspan="2"><a href="https://github.com/boborbt/priority_queue_cxx">priority_queue_cxx</a> 0.3.7</td>
-      <td>1.7x slower</td>
-      <td>1.7x slower</td>
+      <td>2.7x slower</td>
+      <td>4.0x slower</td>
       <td>–</td>
       <td>–</td>
     </tr>
     <tr>
-      <td colspan="2"><a href="https://github.com/socketry/io-event">io-event</a> 1.21.1</td>
-      <td>2.6x slower</td>
-      <td>3.9x slower</td>
+      <td colspan="2"><a href="https://github.com/mhib/pairing_heap">pairing_heap</a> 3.1.2 (simple)</td>
+      <td>3.0x slower</td>
+      <td>1.3x slower</td>
+      <td>2.3x slower</td>
+      <td>1.1x slower</td>
+    </tr>
+    <tr>
+      <td colspan="2"><a href="https://github.com/socketry/io-event">io-event</a> 1.22.1</td>
+      <td>4.5x slower</td>
+      <td>9.6x slower</td>
       <td>1.3x slower</td>
       <td>1.7x slower</td>
     </tr>
     <tr>
+      <td colspan="2"><a href="https://github.com/mhib/pairing_heap">pairing_heap</a> 3.1.2</td>
+      <td>5.6x slower</td>
+      <td>4.1x slower</td>
+      <td>3.6x slower</td>
+      <td>1.9x slower</td>
+    </tr>
+    <tr>
       <td colspan="2"><a href="https://github.com/rubyworks/pqueue">pqueue</a> 2.2.0</td>
-      <td>9.5x slower</td>
-      <td>8.0x slower</td>
+      <td>15.1x slower</td>
+      <td>19.7x slower</td>
       <td>2.2x slower</td>
       <td>1.9x slower</td>
     </tr>
     <tr>
       <td colspan="2"><a href="https://github.com/matiasbattocchia/lazy-priority-queue">lazy_priority_queue</a> 0.1.1</td>
       <td>9.9x slower</td>
-      <td>7.9x slower</td>
+      <td>20x slower</td>
       <td>3.9x slower</td>
       <td>3.2x slower</td>
     </tr>
     <tr>
       <td colspan="2"><a href="https://github.com/philiprehberger/rb-priority-queue">philiprehberger-priority_queue</a> 0.5.0</td>
       <td>13x slower</td>
-      <td>19x slower</td>
+      <td>48x slower</td>
       <td>7.6x slower</td>
       <td>11x slower</td>
     </tr>

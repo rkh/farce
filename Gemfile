@@ -70,6 +70,7 @@ group :benchmark do
   gem "benchmark"
   gem "benchmark-ips"
   gem "lazy_priority_queue"
+  gem "pairing_heap"
   gem "philiprehberger-priority_queue"
   gem "pqueue"
 

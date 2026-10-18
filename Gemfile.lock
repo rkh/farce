@@ -109,6 +109,7 @@ GEM
       bigdecimal (>= 3.0)
       ostruct (>= 0.2)
     ostruct (0.6.3)
+    pairing_heap (3.1.2)
     parallel (2.3.0)
     parser (3.3.12.0)
       ast (~> 2.4.1)
@@ -240,6 +241,7 @@ DEPENDENCIES
   msgpack (>= 1.8)
   nio4r
   oj
+  pairing_heap
   philiprehberger-priority_queue
   pqueue
   priority_queue_cxx
@@ -323,6 +325,7 @@ CHECKSUMS
   nio4r (2.7.5) sha256=6c90168e48fb5f8e768419c93abb94ba2b892a1d0602cb06eef16d8b7df1dca1
   oj (3.17.7) sha256=7a21d3ac8e544a850f1cdaf711b0c8144ba587d14d3e4917c0855fd7b0483db7
   ostruct (0.6.3) sha256=95a2ed4a4bd1d190784e666b47b2d3f078e4a9efda2fccf18f84ddc6538ed912
+  pairing_heap (3.1.2) sha256=b78986e392cf9d6d67c51d434289bcc78656ce6254d637c04ee35b185ebf015b
   parallel (2.3.0) sha256=f75a3e904101ce6a1ccb6b8dc800cbafd42166d83330192438dcf29395167a6f
   parser (3.3.12.0) sha256=21a6d7f755d5a24dfbdc6e6b772e4e879a52e7631a88bc5a3a134606052c9828
   philiprehberger-priority_queue (0.5.0) sha256=78d8b745a588045b9910b30183b6458821819fdfdb75978007a57439e781798b

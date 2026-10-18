@@ -58,6 +58,20 @@ competitors = {
       ->(queue) { queue.pop },
     )
   end],
+  "PairingHeap::MinPriorityQueue"          => ["pairing_heap", "pairing_heap", lambda do
+    Implementation.new(
+      -> { PairingHeap::MinPriorityQueue.new },
+      ->(queue, entry) { queue.push(entry, entry.priority) },
+      ->(queue) { queue.pop },
+    )
+  end],
+  "PairingHeap::SimplePairingHeap"         => ["pairing_heap", "pairing_heap", lambda do
+    Implementation.new(
+      -> { PairingHeap::SimplePairingHeap.new },
+      ->(queue, entry) { queue.push(entry, entry.priority) },
+      ->(queue) { queue.pop },
+    )
+  end],
   "Philiprehberger::PriorityQueue::Queue" => [
     "philiprehberger-priority_queue", "philiprehberger/priority_queue", lambda do
       Implementation.new(
