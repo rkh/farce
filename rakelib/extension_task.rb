@@ -1,7 +1,10 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require "rake/extensiontask"
 require_relative "../ext/ext_helper"
+require_relative "liburing"
 
 class ExtensionTask < Rake::ExtensionTask
   private
@@ -16,6 +19,16 @@ class ExtensionTask < Rake::ExtensionTask
   # assemble the gem from tmp/<platform>/stage only.
   def define_compile_tasks(for_platform = nil, ruby_ver = RUBY_VERSION)
     super unless for_platform.nil? && no_native
+  end
+
+  # Build with the same target configuration that extconf will use.
+  def make_makefile_cmd(root_path, tmp_path, extconf, cross_platform)
+    command = super
+    return command unless @name == "farce" && cross_platform&.include?("-linux-")
+
+    prefix = File.expand_path("tmp/#{cross_platform}/liburing-#{Liburing::VERSION}", root_path)
+    sh Gem.ruby, File.join(root_path, "rakelib/liburing.rb"), File.expand_path("#{tmp_path}/fake.rb", root_path), prefix
+    command + ["--with-uring-dir=#{prefix}", "--enable-uring-static"]
   end
 
   # Version with custom lib_dir adjustment

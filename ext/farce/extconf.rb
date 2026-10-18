@@ -80,10 +80,12 @@ $srcs = %w[
 $srcs.concat(epoll || kqueue ? %w[drivers.c io.c reactor.c] : ["unsupported.c"])
 
 if epoll || kqueue
+  dir_config("uring")
   have_func("epoll_pwait2", "sys/epoll.h") if epoll
   have_func("rb_io_timeout", "ruby/io.h")
   if enable_config("io-uring", true) && have_header("liburing.h") && have_library("uring", "io_uring_queue_init")
     $defs << "-DFARCE_HAVE_LIBURING"
+    $DLDFLAGS << " -Wl,--exclude-libs,liburing.a" if enable_config("uring-static", false)
     if futex && try_compile(<<~SOURCE)
       #include <linux/futex.h>
       #include <liburing.h>

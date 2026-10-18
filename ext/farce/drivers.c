@@ -15,6 +15,16 @@
 #include <sys/event.h>
 #endif
 
+// Keep compiled backends identifiable when static dependency symbols are hidden.
+#ifdef FARCE_URING
+RUBY_FUNC_EXPORTED const char farce_backend_io_uring[];
+const char farce_backend_io_uring[] = "io_uring";
+#endif
+#ifdef HAVE_SYS_EVENT_H
+RUBY_FUNC_EXPORTED const char farce_backend_kqueue[];
+const char farce_backend_kqueue[] = "kqueue";
+#endif
+
 static struct timespec relative_time(double seconds) {
     struct timespec t;
     t.tv_sec = (time_t)seconds;

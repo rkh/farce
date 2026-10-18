@@ -1,0 +1,87 @@
+name: Update liburing
+
+on:
+  schedule:
+    - cron: '23 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-liburing
+  cancel-in-progress: false
+
+env:
+  UPDATE_BRANCH: codex/update-liburing
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: read
+    outputs:
+      open: ${{ steps.existing.outputs.open }}
+    steps:
+      - name: Check for an existing update PR
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pull_request=$(gh api --method GET "repos/$GITHUB_REPOSITORY/pulls" \
+            -f state=open -f "head=$GITHUB_REPOSITORY_OWNER:$UPDATE_BRANCH" \
+            --jq '.[0].number // empty')
+          if [[ -n "$pull_request" ]]; then
+            echo "open=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping the update because PR #$pull_request is already open."
+          else
+            echo "open=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  update:
+    needs: check
+    if: needs.check.outputs.open == 'false'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+
+      - name: Update the version and checksum
+        id: pin
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ruby rakelib/update_liburing.rb
+
+      - name: Open the update PR
+        if: steps.pin.outputs.changed == 'true'
+        id: pr
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: ${{ env.UPDATE_BRANCH }}
+          base: ${{ github.event.repository.default_branch }}
+          add-paths: rakelib/liburing.rb
+          commit-message: Update liburing to ${{ steps.pin.outputs.version }}
+          title: Update liburing to ${{ steps.pin.outputs.version }}
+          body: |
+            Update the liburing version and SHA256 used by Linux gem builds and futex CI.
+
+            Upstream release: https://github.com/axboe/liburing/releases/tag/liburing-${{ steps.pin.outputs.version }}
+
+            The Linux gem matrix will run on this branch after PR creation.
+
+      # Explicit dispatch starts checks on the PR commit without a separate bot token.
+      - name: Run the Linux gem matrix on the PR branch
+        if: steps.pr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run linux-gems.yml --repo "$GITHUB_REPOSITORY" --ref "$UPDATE_BRANCH"

@@ -81,12 +81,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          futex_archive="$RUNNER_TEMP/liburing-2.6.tar.gz"
+          read -r futex_version futex_sha256 < <(ruby -r./rakelib/liburing -e 'puts [Liburing::VERSION, Liburing::SHA256].join(" ")')
+          futex_archive="$RUNNER_TEMP/liburing-$futex_version.tar.gz"
           futex_prefix="$RUNNER_TEMP/futex-liburing"
-          curl --fail --location --retry 3 https://github.com/axboe/liburing/archive/refs/tags/liburing-2.6.tar.gz -o "$futex_archive"
-          echo "682f06733e6db6402c1f904cbbe12b94942a49effc872c9e01db3d7b180917cc  $futex_archive" | sha256sum --check
+          curl --fail --location --retry 3 https://github.com/axboe/liburing/archive/refs/tags/liburing-$futex_version.tar.gz -o "$futex_archive"
+          echo "$futex_sha256  $futex_archive" | sha256sum --check
           tar -xzf "$futex_archive" -C "$RUNNER_TEMP"
-          cd "$RUNNER_TEMP/liburing-liburing-2.6"
+          cd "$RUNNER_TEMP/liburing-liburing-$futex_version"
           ./configure --prefix="$futex_prefix"
           make -j2
           make install

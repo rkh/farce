@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../ext/ext_helper"
 require_relative "java_extension"
@@ -25,7 +27,7 @@ module GemVerifier
     "x86_64-darwin"      => ["bundle", "Mach-O 64-bit x86_64"],
     "x86_64-linux-gnu"   => ["so",     "ELF 64-bit x86_64 GNU libc"],
     "x86_64-linux-musl"  => ["so",     "ELF 64-bit x86_64 musl libc"],
-  }.freeze
+  }
 
   # JVM targets share portable bytecode, with no native binaries or install-time compiler.
   JVM_PLATFORMS = { "jruby" => "java" }.freeze
@@ -85,6 +87,9 @@ module GemVerifier
         raise Error, "ships #{path} but required_ruby_version (#{spec.required_ruby_version}) excludes #{abi}"
       end
       checks[path] = found
+      next unless path.end_with?("/farce.#{dlext}")
+      backend = verify_scheduler_backend(files.fetch(path), path:, platform:)
+      checks["#{path} backend"] = backend if backend
     end
 
     checks
@@ -123,6 +128,25 @@ module GemVerifier
   end
 
   private
+
+  # Compiled markers also cover static liburing builds with hidden dependency symbols.
+  def verify_scheduler_backend(content, path:, platform:)
+    backend, marker, symbols =
+      if platform.include?("-linux-")
+        ["io_uring", "farce_backend_io_uring", %w[io_uring_queue_init io_uring_queue_exit]]
+      elsif platform.end_with?("-darwin")
+        ["kqueue", "_farce_backend_kqueue", %w[_kqueue _kevent]]
+      else
+        return
+      end
+
+    return backend if content.include?("\0#{marker}\0".b)
+
+    # Older gems predate the markers but retain the backend's function symbols.
+    missing = symbols.reject { content.include?("\0#{it}\0".b) }
+    raise Error, "#{path}: missing #{backend} support (missing #{missing.join(", ")})" if missing.any?
+    backend
+  end
 
   def verify_java_extensions(files)
     JavaExtension::JARS.to_h do |path|

@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 return if RUBY_ENGINE == "truffleruby" || ENV["FARCE_SKIP_GEM_VERIFIER"] == "true"
 
@@ -11,7 +13,7 @@ require "tmpdir"
 class TestGemVerifier < Test
   ABIS       = ["4.0.2", "3.4.9"].freeze
   NAMES      = %w[farce rebind].freeze
-  EXTENSIONS = NAMES.map { "ext/#{it}/extconf.rb" }.freeze
+  EXTENSIONS = NAMES.map { "ext/#{it}/extconf.rb".freeze }.freeze
 
   def test_verifies_every_extension_in_the_source_gem
     spec = Gem::Specification.load(File.expand_path("../farce.gemspec", __dir__))
@@ -23,6 +25,7 @@ class TestGemVerifier < Test
     assert_equal ["MIT", "LicenseRef-Kazlib-1.20"], spec.licenses
     assert_includes spec.files, "ext/farce/dict.c"
     assert_includes spec.files, "ext/farce/dict.h"
+    assert_includes spec.files, "ext/farce/LIBURING-LICENSE"
     assert_includes spec.files, "ext/farce/priority_queue.c"
     assert_includes spec.files, "ext/farce/reactor.c"
     assert_includes spec.files, "ext/farce/tree_map.c"
@@ -46,7 +49,10 @@ class TestGemVerifier < Test
   def test_accepts_gem_whose_binaries_all_match_the_target_platform
     gem_file = gem_for("arm-linux-gnu", arm_binaries)
 
-    verify(gem_file, "arm-linux-gnu")
+    checks = verify(gem_file, "arm-linux-gnu")
+
+    assert_equal "io_uring", checks["lib/farce/engine/ruby/4.0/farce.so backend"]
+    assert_equal "io_uring", checks["lib/farce/engine/ruby/3.4/farce.so backend"]
   end
 
   def test_accepts_musl_gem_whose_binaries_match_the_target_architecture
@@ -75,9 +81,78 @@ class TestGemVerifier < Test
   end
 
   def test_accepts_darwin_gem_carrying_mach_o_bundles
-    gem_file = gem_for("arm64-darwin", ext_paths("bundle").to_h { [it, mach_o(cputype: 0x0100000c)] })
+    { "arm64-darwin" => 0x0100000c, "x86_64-darwin" => 0x01000007 }.each do |platform, cputype|
+      gem_file = gem_for(platform, darwin_binaries(cputype:))
+      checks = verify(gem_file, platform)
 
-    verify(gem_file, "arm64-darwin")
+      assert_equal "kqueue", checks["lib/farce/engine/ruby/4.0/farce.bundle backend"]
+      assert_equal "kqueue", checks["lib/farce/engine/ruby/3.4/farce.bundle backend"]
+    end
+  end
+
+  def test_accepts_linux_gem_with_private_static_liburing_symbols
+    binaries = arm_binaries.transform_values do |content|
+      content.sub("io_uring_queue_init\0io_uring_queue_exit\0", "farce_backend_io_uring\0")
+    end
+    gem_file = gem_for("arm-linux-gnu", binaries)
+    checks = verify(gem_file, "arm-linux-gnu")
+
+    assert_equal "io_uring", checks["lib/farce/engine/ruby/4.0/farce.so backend"]
+    assert_equal "io_uring", checks["lib/farce/engine/ruby/3.4/farce.so backend"]
+  end
+
+  def test_accepts_darwin_gem_with_compiled_kqueue_markers
+    binaries = darwin_binaries(cputype: 0x0100000c).transform_values do |content|
+      content.sub("_kqueue\0_kevent\0", "_farce_backend_kqueue\0")
+    end
+    gem_file = gem_for("arm64-darwin", binaries)
+    checks = verify(gem_file, "arm64-darwin")
+
+    assert_equal "kqueue", checks["lib/farce/engine/ruby/4.0/farce.bundle backend"]
+    assert_equal "kqueue", checks["lib/farce/engine/ruby/3.4/farce.bundle backend"]
+  end
+
+  def test_rejects_linux_gem_missing_io_uring_in_any_ruby_abi
+    %i[gnu musl].product(%w[4.0 3.4]).each do |libc, abi|
+      path = "lib/farce/engine/ruby/#{abi}/farce.so"
+      binaries = arm_binaries(libc:).merge(path => "#{elf(bits: 32, machine: 0x28, libc:)}io_uring\0")
+      gem_file = gem_for("arm-linux-#{libc}", binaries)
+
+      error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-#{libc}") }
+
+      assert_includes error.message, path
+      assert_includes error.message, "missing io_uring support"
+    end
+  end
+
+  def test_rejects_io_uring_symbols_present_only_in_another_extension
+    binaries = arm_binaries
+    binaries.each do |path, content|
+      binaries[path] = content.sub("io_uring_queue_init", "unrelated_function") if path.end_with?("/farce.so")
+    end
+    binaries["lib/farce/engine/ruby/4.0/rebind.so"] +=
+      "\0farce_backend_io_uring\0io_uring_queue_init\0io_uring_queue_exit\0"
+    gem_file = gem_for("arm-linux-gnu", binaries)
+
+    error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm-linux-gnu") }
+
+    assert_includes error.message, "lib/farce/engine/ruby/4.0/farce.so"
+    assert_includes error.message, "io_uring_queue_init"
+  end
+
+  def test_rejects_darwin_gem_missing_kqueue_functions_in_any_ruby_abi
+    %w[4.0 3.4].product(%w[_kqueue _kevent]).each do |abi, symbol|
+      path = "lib/farce/engine/ruby/#{abi}/farce.bundle"
+      binaries = darwin_binaries(cputype: 0x0100000c)
+      binaries[path] = binaries.fetch(path).sub(symbol, "unrelated_function")
+      gem_file = gem_for("arm64-darwin", binaries)
+
+      error = assert_raises(GemVerifier::Error) { verify(gem_file, "arm64-darwin") }
+
+      assert_includes error.message, path
+      assert_includes error.message, "missing kqueue support"
+      assert_includes error.message, symbol
+    end
   end
 
   def test_rejects_windows_gem_whose_binary_is_built_for_another_architecture
@@ -298,7 +373,19 @@ class TestGemVerifier < Test
   end
 
   def arm_binaries(libc: :gnu)
-    ext_paths("so").to_h { [it, elf(bits: 32, machine: 0x28, libc:)] }
+    ext_paths("so").to_h do |path|
+      content = elf(bits: 32, machine: 0x28, libc:)
+      content += "\0io_uring_queue_init\0io_uring_queue_exit\0" if path.end_with?("/farce.so")
+      [path, content]
+    end
+  end
+
+  def darwin_binaries(cputype:)
+    ext_paths("bundle").to_h do |path|
+      content = mach_o(cputype:)
+      content += "\0_kqueue\0_kevent\0" if path.end_with?("/farce.bundle")
+      [path, content]
+    end
   end
 
   def gem_for(platform, files, extensions: [], required_ruby_version: [">= 3.4", "< 4.1.dev"])
