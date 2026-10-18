@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: Concurrency
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "concurrency";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../main/index.html">main</option>
+<option value="index.html" selected>v0.4.1</option>
+<option value="../v0.4.0/index.html">v0.4.0</option>
+<option value="../v0.3.0/index.html">v0.3.0</option>
+<option value="../v0.2.0/index.html">v0.2.0</option>
+<option value="../v0.1.0/index.html">v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: Concurrency</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="concurrency">Concurrency<a href="#concurrency" aria-label="Link to heading 'Concurrency'" data-heading-content="Concurrency" class="anchor"></a></h1>
+<p>Farce is built for concurrent and parallel code execution.</p>
+<h2 id="locks">Locks<a href="#locks" aria-label="Link to heading 'Locks'" data-heading-content="Locks" class="anchor"></a></h2>
+<p>Farce ships with two lock classes:</p>
+<ul>
+<li><code>Lock</code> is a drop-in replacement for Ruby's <code>Mutex</code>.</li>
+<li><code>ReadWriteLock</code> exposes <code>with_read_lock</code>/<code>with_write_lock</code> to allow multiple concurrent reads, but exclusive write access.</li>
+</ul>
+<p>However, Farce exposes many APIs to eliminate the need for locks altogether.</p>
+<h2 id="atomic-operations">Atomic Operations<a href="#atomic-operations" aria-label="Link to heading 'Atomic Operations'" data-heading-content="Atomic Operations" class="anchor"></a></h2>
+<p>Farce's <a href="file.data-structures.html#data-structures" title="data structures">data structures</a> all expose a range of methods for atomic operations:</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># A Hash-like object
+</span><span class='id identifier rubyid_map'>map</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Map.html" title="Farce::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Map.html#initialize-instance_method" title="Farce::Map#initialize (method)">new</a></span></span>
+
+<span class='comment'># Atomically store something for :key if it hasn&#39;t been set
+</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='symbol'>:key</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>initial value</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span>
+
+<span class='comment'># Atomically update :key
+</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='symbol'>:key</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='symbol'>:upcase</span><span class='rparen'>)</span>
+
+<span class='comment'># An Array-like object
+</span><span class='id identifier rubyid_list'>list</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Vector.html" title="Farce::Vector (class)">Vector</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Vector.html#initialize-instance_method" title="Farce::Vector#initialize (method)">new</a></span></span>
+<span class='id identifier rubyid_list'>list</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='int'>42</span>
+
+<span class='comment'># Atomically replace list[0] with 256 if the value is still 42
+</span><span class='id identifier rubyid_list'>list</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='int'>0</span><span class='comma'>,</span> <span class='int'>42</span><span class='comma'>,</span> <span class='int'>256</span><span class='rparen'>)</span>
+</code></pre>
+<h2 id="observability-and-signaling">Observability and Signaling<a href="#observability-and-signaling" aria-label="Link to heading 'Observability and Signaling'" data-heading-content="Observability and Signaling" class="anchor"></a></h2>
+<p>All the <a href="file.data-structures.html#data-structures" title="data structures">data structures</a> come with extra observability methods, which eliminate the need for using <a href="https://docs.ruby-lang.org/en/4.0/Thread/ConditionVariable.html">condition variables</a> and <a href="https://docs.ruby-lang.org/en/4.0/Thread/Mutex.html">mutexes</a>.</p>
+<p>Even setting aside that these don't work across ractors, this drastically reduces the risk of race conditions (very easy to do if you <u>don't</u> use the same mutex everywhere) or blocking code you don't need to block (very easy to do if you <u>do</u> use the same mutex everywhere).</p>
+<p>So instead of sharing locks you can simply wait for a change to happen!</p>
+<pre class="code ruby"><code class="ruby"><span class='comment'># block until the stored value for :key is greater than 10
+</span><span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='symbol'>:key</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_it'>it</span> <span class='op'>&gt;</span> <span class='int'>10</span> <span class='rbrace'>}</span>
+
+<span class='comment'># block until the value for an atom is no longer :initial
+</span><span class='id identifier rubyid_atom'>atom</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='symbol'>:initial</span><span class='rparen'>)</span>
+
+<span class='comment'># block until a counter has reached at least 20
+</span><span class='id identifier rubyid_counter'>counter</span><span class='period'>.</span><span class='id identifier rubyid_wait_while_below'>wait_while_below</span><span class='lparen'>(</span><span class='int'>20</span><span class='rparen'>)</span>
+</code></pre>
+<p>If these conditions are met right away, these never block.</p>
+<p>But what about more complex conditions, involving multiple variables, or objects from other libraries that don't implement similar methods? No need to reach for a lock! You can use a Signal!</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_signal'>signal</span>  <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Signal.html" title="Farce::Signal (class)">Signal</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Signal.html#initialize-instance_method" title="Farce::Signal#initialize (method)">new</a></span></span>
+<span class='id identifier rubyid_target'>target</span>  <span class='op'>=</span> <span class='int'>100</span>
+<span class='id identifier rubyid_counter'>counter</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Counter.html" title="Farce::Counter (class)">Counter</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Counter.html#initialize-instance_method" title="Farce::Counter#initialize (method)">new</a></span></span>
+
+<span class='comment'># A Thread that keeps reducing the target value every 20 milliseconds
+</span><span class='const'>Thread</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='kw'>do</span>
+  <span class='kw'>while</span> <span class='id identifier rubyid_target'>target</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span>
+    <span class='id identifier rubyid_sleep'>sleep</span> <span class='float'>0.02</span>
+    <span class='id identifier rubyid_target'>target</span> <span class='op'>-=</span> <span class='int'>1</span>
+    <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_broadcast'>broadcast</span> <span class='comment'># notify everyone else
+</span>  <span class='kw'>end</span>
+<span class='kw'>end</span>
+
+<span class='comment'># A Ractor that counts up in 10 millisecond intervals
+</span><span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_counter'>counter</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_counter'>counter</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='op'>|</span>
+  <span class='kw'>while</span> <span class='id identifier rubyid_counter'>counter</span> <span class='op'>&lt;</span> <span class='int'>100</span>
+    <span class='id identifier rubyid_sleep'>sleep</span> <span class='float'>0.01</span>
+    <span class='id identifier rubyid_counter'>counter</span><span class='period'>.</span><span class='id identifier rubyid_increment'>increment</span>
+    <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_broadcast'>broadcast</span> <span class='comment'># notify everyone else
+</span>  <span class='kw'>end</span>
+<span class='kw'>end</span>
+
+<span class='comment'># wait until the counter is at or above the target
+</span><span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_counter'>counter</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_target'>target</span> <span class='rbrace'>}</span>
+</code></pre>
+<h2 id="transactions">Transactions<a href="#transactions" aria-label="Link to heading 'Transactions'" data-heading-content="Transactions" class="anchor"></a></h2>
+<p>This all sounds great. But you still might want to reach for a lock if you want to modify more than one data structure, if their state is tightly coupled (i.e., updating one without yet updating the other would leave your code in an invalid state).</p>
+<p>And a lock is an acceptable solution here. Again, you might want to wrap all the read access in a lock, as there will still be an invalid state. And you also want to roll back any changes already made while holding the lock, if an exception occurs. That is the standard approach in a lot of Ruby code.</p>
+<p>Farce offers an alternative. It implements <a href="https://en.wikipedia.org/wiki/Software_transactional_memory">STM-style transactions</a>. You supply a block of code that makes changes to multiple data structures. These changes are only written to these data structures in a commit phase after the block finishes, and they either all succeed or all fail, and they only succeed if the values you've read from any of these data structures haven't changed.</p>
+<p>Otherwise the block is rerun.</p>
+<p>And this isn't limited to special <code>TVar</code> containers, like the APIs provided by concurrent-ruby or ractor-sharing. It supports Farce's main data structures, including <a href="file.data-structures.html#maps" title="maps">maps</a>, <a href="file.data-structures.html#vectors" title="vectors">vectors</a>, <a href="file.data-structures.html#sets" title="sets">sets</a>, <a href="file.data-structures.html#atoms" title="atoms">atoms</a>, and <a href="file.data-structures.html#molecules" title="molecules">molecules</a>. Moreover, it also supports <a href="file.sharing.html#mutables" title="mutables">mutables</a>, meaning you can turn most Ruby objects into something transaction compatible fairly easily!</p>
+<p>In contrast to other implementations mentioned above, there is no implicit tracking. You need to explicitly add an object to a transaction. This also avoids any uncertainty around nested transactions and unexpected rollbacks.</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_accounts'>accounts</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Map.html" title="Farce::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Map.html#initialize-instance_method" title="Farce::Map#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='lbrace'>{</span><span class='label'>a:</span> <span class='int'>100</span><span class='comma'>,</span> <span class='label'>b:</span> <span class='int'>200</span><span class='rbrace'>}</span><span class='rparen'>)</span>
+
+<span class='comment'># transfer 80 from :b to :a, but only if both succeed
+</span><span class='id identifier rubyid_success'>success</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_transaction'><span class='object_link'><a href="Farce.html#transaction-class_method" title="Farce.transaction (method)">transaction</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_accounts'>accounts</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_tx'>tx</span><span class='comma'>,</span> <span class='id identifier rubyid_accounts'>accounts</span><span class='op'>|</span>
+  <span class='id identifier rubyid_tx'>tx</span><span class='period'>.</span><span class='id identifier rubyid_abort!'>abort!</span> <span class='kw'>if</span> <span class='id identifier rubyid_accounts'>accounts</span><span class='lbracket'>[</span><span class='symbol'>:b</span><span class='rbracket'>]</span> <span class='op'>&lt;</span> <span class='int'>80</span>
+  <span class='id identifier rubyid_accounts'>accounts</span><span class='lbracket'>[</span><span class='symbol'>:a</span><span class='rbracket'>]</span> <span class='op'>+=</span> <span class='int'>80</span>
+  <span class='id identifier rubyid_accounts'>accounts</span><span class='lbracket'>[</span><span class='symbol'>:b</span><span class='rbracket'>]</span> <span class='op'>-=</span> <span class='int'>80</span>
+<span class='kw'>end</span>
+
+<span class='kw'>if</span> <span class='id identifier rubyid_success'>success</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Transaction succeeded</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>else</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Transaction failed</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span>
+</code></pre>
+<p>In the above example, <code>accounts</code> was added to the transaction right away. But you can also add new objects to the transaction programmatically by calling <code>tx[object]</code>. All reads and writes need to happen through the wrapper object returned by that call (or passed to the block).</p>
+<h3 id="maps-and-sets">Maps and Sets<a href="#maps-and-sets" aria-label="Link to heading 'Maps and Sets'" data-heading-content="Maps and Sets" class="anchor"></a></h3>
+<p>Maps and sets use fine-grained transaction tracking. In the above example, if accounts had another entry, <code>:c</code>, its value changing would not impact the transaction at all.</p>
+<p>Similarly, if your transaction uses <code>Transaction::Map#size</code> as input, only a change in size would trigger a rerun, not a change in content.</p>
+<p>This is ideal for scenarios where you use maps as a general data store and sets to track whether an operation was performed on an object (a common pattern to prevent infinite recursion).</p>
+<h3 id="tvars">TVars<a href="#tvars" aria-label="Link to heading 'TVars'" data-heading-content="TVars" class="anchor"></a></h3>
+<p>Farce doesn't come with a <code>TVar</code> class. You can just use an <a href="file.data-structures.html#atoms" title="atom">atom</a> instead.</p>
+<p>But it does come with built-in support for <a href="https://ruby-concurrency.github.io/concurrent-ruby/master/Concurrent/TVar.html"><code>Concurrent::TVar</code></a> and <a href="https://github.com/ko1/ractor-sharing/blob/main/docs/tvar.md"><code>Ractor::TVar</code></a> (assuming you also load these libraries, see <a href="file.integrations.html#integrations" title="integrations">integrations</a>).</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_tvar'>tvar</span> <span class='op'>=</span> <span class='const'>Concurrent</span><span class='op'>::</span><span class='const'>TVar</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='int'>50</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_map'>map</span>  <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Map.html" title="Farce::Map (class)">Map</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Map.html#initialize-instance_method" title="Farce::Map#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='lbrace'>{</span><span class='label'>a:</span> <span class='int'>100</span><span class='comma'>,</span> <span class='label'>b:</span> <span class='int'>200</span><span class='rbrace'>}</span><span class='rparen'>)</span>
+
+<span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_transaction'><span class='object_link'><a href="Farce.html#transaction-class_method" title="Farce.transaction (method)">transaction</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_map'>map</span><span class='comma'>,</span> <span class='id identifier rubyid_tvar'>tvar</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid__'>_</span><span class='comma'>,</span> <span class='id identifier rubyid_map'>map</span><span class='comma'>,</span> <span class='id identifier rubyid_tvar'>tvar</span><span class='op'>|</span>
+  <span class='comment'># subtract tvar&#39;s value from a and b, then set tvar to 0
+</span>  <span class='comment'># no invalid in-between state is ever visible to anything outside of this transaction
+</span>  <span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='symbol'>:a</span><span class='rbracket'>]</span> <span class='op'>-=</span> <span class='id identifier rubyid_tvar'>tvar</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
+  <span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='symbol'>:b</span><span class='rbracket'>]</span> <span class='op'>-=</span> <span class='id identifier rubyid_tvar'>tvar</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
+  <span class='id identifier rubyid_tvar'>tvar</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='int'>0</span>
+<span class='kw'>end</span>
+</code></pre>
+<h2 id="read-next">Read Next<a href="#read-next" aria-label="Link to heading 'Read Next'" data-heading-content="Read Next" class="anchor"></a></h2>
+<p><a href="index.html#features" title="README">README</a> · <a href="file.data-structures.html" title="Data Structures">Data Structures</a> · <a href="file.scheduling.html" title="Scheduling Code">Scheduling Code</a></p>
+</div></div>
+
+      <div id="footer">
+  Generated on Sun Oct 18 15:31:58 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>

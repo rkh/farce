@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: Compatibility and Dependencies
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "compatibility";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../main/index.html">main</option>
+<option value="index.html" selected>v0.4.1</option>
+<option value="../v0.4.0/index.html">v0.4.0</option>
+<option value="../v0.3.0/index.html">v0.3.0</option>
+<option value="../v0.2.0/index.html">v0.2.0</option>
+<option value="../v0.1.0/index.html">v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: Compatibility and Dependencies</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="compatibility-and-dependencies">Compatibility and Dependencies<a href="#compatibility-and-dependencies" aria-label="Link to heading 'Compatibility and Dependencies'" data-heading-content="Compatibility and Dependencies" class="anchor"></a></h1>
+<p>Farce has no mandatory dependencies beyond Ruby itself.</p>
+<h2 id="ruby">Ruby<a href="#ruby" aria-label="Link to heading 'Ruby'" data-heading-content="Ruby" class="anchor"></a></h2>
+<p>Each Farce release is expected to be compatible with:</p>
+<ul>
+<li>The <a href="https://www.ruby-lang.org/en/downloads/releases/">latest patch release</a> for each <a href="https://www.ruby-lang.org/en/">CRuby</a> version <a href="https://www.ruby-lang.org/en/downloads/branches/">still receiving bug fixes</a>.</li>
+<li>Ruby's <a href="https://github.com/ruby/ruby/tree/master">master branch</a> at the time of release (i.e., the upcoming major version of CRuby).</li>
+<li>The latest stable release of <a href="https://www.jruby.org/">JRuby</a> and <a href="https://truffleruby.dev/">TruffleRuby</a> (both in native and GraalVM modes).</li>
+</ul>
+<p>Moreover:</p>
+<ul>
+<li>Dropping support for a CRuby version is only done in major releases.</li>
+<li>If support for an older CRuby version is dropped, Farce will still backport security fixes for at least as long as that CRuby version is <a href="https://www.ruby-lang.org/en/downloads/branches/">still receiving security fixes</a>.</li>
+</ul>
+<h2 id="optional-dependencies">Optional Dependencies<a href="#optional-dependencies" aria-label="Link to heading 'Optional Dependencies'" data-heading-content="Optional Dependencies" class="anchor"></a></h2>
+<p>Farce's optional <a href="file.integrations.html#integrations" title="integrations">integrations</a> depend on external libraries. Automated tests only run against recent versions of these libraries, but the code is written to be compatible with as wide a range as possible.</p>
+<p>Farce should be compatible with these versions:</p>
+<table>
+<thead>
+<tr>
+<th>Gem</th>
+<th>Minimum Version</th>
+<th>Release Date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ractor-tmvar</code></td>
+<td>0.4.0</td>
+<td>2026-10-11</td>
+</tr>
+<tr>
+<td><code>msgpack</code></td>
+<td>1.7.0</td>
+<td>2023-03-29</td>
+</tr>
+<tr>
+<td><code>concurrent-ruby</code></td>
+<td>1.1.8</td>
+<td>2021-01-20</td>
+</tr>
+<tr>
+<td><code>dry-types</code></td>
+<td>1.0.0</td>
+<td>2019-04-23</td>
+</tr>
+<tr>
+<td><code>activesupport</code></td>
+<td>5.1.0</td>
+<td>2017-04-27</td>
+</tr>
+<tr>
+<td><code>oj</code></td>
+<td>2.8.1</td>
+<td>2014-04-21</td>
+</tr>
+<tr>
+<td><code>bson</code></td>
+<td>2.0.0</td>
+<td>2013-12-02</td>
+</tr>
+<tr>
+<td><code>psych</code></td>
+<td>1.1.0</td>
+<td>2011-03-30</td>
+</tr>
+</tbody>
+</table>
+<p>Any version of <code>cbor</code>, <code>json</code>, <code>ractor-sharing</code>, <code>sorted_set</code>, and <code>weakref</code> should be supported.</p>
+<p>If you want to use any of these in a version that is incompatible with Farce, you can <a href="file.integrations.html#disable-automatic-loading" title="disable automatic integration loading">disable automatic integration loading</a>.</p>
+<h2 id="similar-projects">Similar Projects<a href="#similar-projects" aria-label="Link to heading 'Similar Projects'" data-heading-content="Similar Projects" class="anchor"></a></h2>
+<ul>
+<li><a href="https://github.com/eregon/ractor-shim/">ractor-shim</a> provides similar functionality to <code>Farce::Ractor</code>. See <a href="file.ractor-shim.html" title="the comparison document">the comparison document</a> for more details.</li>
+<li><a href="https://github.com/ruby-concurrency/concurrent-ruby">concurrent-ruby</a> provides a more complete set of concurrency primitives than Farce, but is not compatible with Ractors.</li>
+<li><a href="https://mperham.github.io/ratomic/">ratomic</a> has overlapping functionality with Farce for basic data structures like maps, counters, and queues.</li>
+<li><a href="https://github.com/jhawthorn/ractor_safe/">ractor_safe</a> has overlapping functionality with Farce for basic data structures like maps, counters, and queues.</li>
+<li><a href="https://github.com/ko1/ractor-sharing">ractor-sharing</a> has overlapping functionality with Farce for basic data structures like maps, counters, queues, as well as software transactional memory.</li>
+</ul>
+<p>All of the above projects can safely be used alongside Farce in the same application.</p>
+<h2 id="known-issues-and-limitations">Known Issues and Limitations<a href="#known-issues-and-limitations" aria-label="Link to heading 'Known Issues and Limitations'" data-heading-content="Known Issues and Limitations" class="anchor"></a></h2>
+<h3 id="possible-discrepancy-regarding-frozen-state-in-ruby-and-c">Possible discrepancy regarding frozen state in Ruby and C<a href="#possible-discrepancy-regarding-frozen-state-in-ruby-and-c" aria-label="Link to heading 'Possible discrepancy regarding frozen state in Ruby and C'" data-heading-content="Possible discrepancy regarding frozen state in Ruby and C" class="anchor"></a></h3>
+<blockquote>
+<p>I agree that <strong>freezing means the object's own state is immutable</strong>, not just its instance variables, so we should not freeze [<em>shareable, mutable object</em>]. Forbidding instance variables on them is the right approach. [...] <strong>A shareable object that is not frozen never has instance variables</strong>. This should also hold when C extensions define such objects in the future.
+— <em>Yukihiro Matsumoto</em> (Ruby Issue <a href="https://bugs.ruby-lang.org/issues/22291#note-4">#22291</a>, emphasis added)</p>
+</blockquote>
+<p>In Ruby, Farce objects reflect their frozen state accurately. If a map returns <code>true</code> for <code>frozen?</code>, you cannot add, remove, or replace its entries.</p>
+<p>There are some technical challenges implementing this behavior: From within Ruby, you cannot mark an object as Ractor shareable without freezing it first. This is possible from a C-extension, but then instance variables can no longer be used, so state tracking needs to happen purely at the C level or outside of the Ruby object.</p>
+<p>To work around this, Farce follows a hybrid approach, marking objects with state purely defined in a C extension as Ractor shareable without freezing them, and reimplementing freezing behavior in Ruby for objects where this isn't safely possible.</p>
+<p>This means:</p>
+<ul>
+<li><code>frozen?</code> and <code>freeze</code> will behave as expected for all Farce classes.</li>
+<li><code>Kernel.instance_method(:frozen?).bind_call(object)</code> might report a different value from <code>object.frozen?</code></li>
+<li>C-level checks for frozen state, such as <code>RB_OBJ_FROZEN</code>, might differ from what Ruby-level methods report.</li>
+</ul>
+<h2 id="read-next">Read Next<a href="#read-next" aria-label="Link to heading 'Read Next'" data-heading-content="Read Next" class="anchor"></a></h2>
+<p><a href="index.html#features" title="README">README</a> · <a href="file.installation.html" title="Installation">Installation</a> · <a href="file.integrations.html" title="Integrations">Integrations</a></p>
+</div></div>
+
+      <div id="footer">
+  Generated on Sun Oct 18 15:31:58 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>
