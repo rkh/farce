@@ -429,7 +429,9 @@ module Farce
   end
 
   # Schedules work without waiting for the block to finish.
-  # On CRuby, uses a shared Ractor pool with at most {System.cpu_count} workers.
+  # On CRuby, uses a shared Ractor pool with at most {System.cpu_count} workers by default.
+  # Set {Config}'s `parallel_pool_*` options before creating a scheduler to configure
+  # its worker limits, growth and shrink delays, per-worker task limit, and queue capacity.
   # On JRuby and TruffleRuby, starts a new thread for each task.
   #
   # Without a block, returns the shared scheduler. The CRuby pool starts workers

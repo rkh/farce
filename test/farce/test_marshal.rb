@@ -575,6 +575,12 @@ module Farce
         config.main_thread_pool_size = 7
         config.additional_thread_pool_size = 3
         config.fiber_scheduler = :select
+        config.parallel_pool_max_size = 3
+        config.parallel_pool_min_size = 2
+        config.parallel_pool_max_inflight = nil
+        config.parallel_pool_grow_after = 0.02
+        config.parallel_pool_shrink_after = nil
+        config.parallel_pool_capacity = nil
       end
       copy = round_trip(source)
 
@@ -582,8 +588,31 @@ module Farce
       assert_equal 7, copy.main_thread_pool_size
       assert_equal 3, copy.additional_thread_pool_size
       assert_equal :select, copy.fiber_scheduler
+      assert_equal 2, copy.parallel_pool_min_size
+      assert_equal 3, copy.parallel_pool_max_size
+      assert_nil copy.parallel_pool_max_inflight
+      assert_in_delta(0.02, copy.parallel_pool_grow_after)
+      assert_nil copy.parallel_pool_shrink_after
+      assert_nil copy.parallel_pool_capacity
       refute_predicate copy, :frozen?
       assert_predicate round_trip(source.freeze), :frozen?
+    end
+
+    def test_config_restores_snapshots_without_parallel_pool_settings
+      copy = Config.allocate
+      copy.marshal_load([1, false, :select, 7, 3, true])
+
+      refute copy.autoload_integrations
+      assert_equal :select, copy.fiber_scheduler
+      assert_equal 7, copy.main_thread_pool_size
+      assert_equal 3, copy.additional_thread_pool_size
+      assert_equal 0, copy.parallel_pool_min_size
+      assert_nil copy.parallel_pool_max_size
+      assert_equal 64, copy.parallel_pool_max_inflight
+      assert_in_delta(0.005, copy.parallel_pool_grow_after)
+      assert_equal 30, copy.parallel_pool_shrink_after
+      assert_equal 1024, copy.parallel_pool_capacity
+      assert_predicate copy, :frozen?
     end
 
     def test_trie_builders_restore_semantic_entries_and_shared_tokens

@@ -9,15 +9,54 @@ module Farce
       include Freeze::Unfreezable
 
       NIL_VALUE = Object.new.freeze
-      attr_reader :capacity
 
       def initialize(capacity: 1024, track_age: false)
         @queue     = capacity ? Thread::SizedQueue.new(capacity) : Thread::Queue.new
-        @capacity  = capacity
         @signal    = Signal.new
         @tracking  = track_age ? { lock: Mutex.new, timestamps: [], generation: 0 } : nil
-        @lifecycle = { lock: Mutex.new, hard_closed: false }
+        @lifecycle = { lock: Mutex.new, hard_closed: false, token: nil, generation: -1 }
         Freeze.publish(self)
+      end
+
+      def capacity = @queue.is_a?(Thread::SizedQueue) ? @queue.max : nil
+
+      def capacity=(value)
+        value = Integer(value) unless value.nil?
+        raise ArgumentError, "capacity must be positive or nil" if value && !value.positive?
+        if value.nil? != capacity.nil?
+          raise ArgumentError, "cannot switch between bounded and unbounded queues on this Ruby engine"
+        end
+        @queue.max = value if value
+        broadcast
+        value
+      end
+
+      def interrupt(token, generation)
+        @lifecycle[:lock].synchronize do
+          return self if generation <= @lifecycle[:generation]
+          @lifecycle[:token] = token
+          @lifecycle[:generation] = generation
+        end
+        broadcast
+        self
+      end
+
+      def pop_interruptible(token, timeout)
+        timeout_at = timeout_at(timeout)
+        loop do
+          return false unless @lifecycle[:lock].synchronize { @lifecycle[:token].equal?(token) }
+          begin
+            result = tracked_pop
+            raise ThreadError if nil.equal?(result) && @queue.closed?
+            broadcast
+            return NIL_VALUE.equal?(result) ? nil : result
+          rescue ThreadError
+            ready = wait(remaining_timeout(timeout_at)) do
+              !@lifecycle[:lock].synchronize { @lifecycle[:token].equal?(token) } || size.positive?
+            end
+            return block_given? ? yield : nil unless ready
+          end
+        end
       end
 
       def pop(timeout: nil)

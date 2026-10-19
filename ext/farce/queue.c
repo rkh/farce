@@ -33,6 +33,8 @@ typedef struct {
 #endif
 } readiness_signal_t;
 
+typedef struct queue_wait_context queue_wait_context_t;
+
 typedef struct {
     pthread_mutex_t lock;
     VALUE *values;
@@ -44,8 +46,14 @@ typedef struct {
     size_t tail;
     size_t pop_waiters;
     size_t push_waiters;
+    VALUE interrupt_token;
+    uint64_t interrupt_generation;
+    size_t interrupt_pending;
+    queue_wait_context_t *interrupt_waiters;
     readiness_signal_t can_pop;
     readiness_signal_t can_push;
+    readiness_signal_t interrupts_drained;
+    size_t interrupt_drain_waiters;
     farce_unshared_wait_list_t unshared_pop_waiters;
     farce_unshared_wait_list_t unshared_push_waiters;
     bool bounded;
@@ -160,12 +168,16 @@ queue_update_readiness(queue_t *queue)
     }
     readiness_set(
         &queue->can_pop,
-        queue->pop_waiters > 0 && (queue->closed || queue->size > 0)
+        queue->pop_waiters > 0 && (queue->closed || queue->size > 0 || queue->interrupt_pending > 0)
     );
     readiness_set(
         &queue->can_push,
         queue->push_waiters > 0 &&
             (queue->sealed || !queue->bounded || queue->size < queue->limit)
+    );
+    readiness_set(
+        &queue->interrupts_drained,
+        queue->interrupt_drain_waiters > 0 && (queue->closed || queue->interrupt_pending == 0)
     );
     if (!queue->shared) {
         /* Keep the slow path until both waiter mechanisms and every pending
@@ -173,7 +185,8 @@ queue_update_readiness(queue_t *queue)
          * flag set, which is harmless and corrected by the next mutation. */
         queue->unshared_notifications_needed = queue->pop_waiters || queue->push_waiters ||
             queue->unshared_pop_waiters.count || queue->unshared_push_waiters.count ||
-            queue->can_pop.set || queue->can_push.set;
+            queue->can_pop.set || queue->can_push.set ||
+            queue->interrupt_drain_waiters || queue->interrupts_drained.set;
     }
 }
 
@@ -181,6 +194,7 @@ static void
 queue_mark(void *pointer)
 {
     queue_t *queue = pointer;
+    rb_gc_mark_movable(queue->interrupt_token);
     farce_unshared_wait_mark(&queue->unshared_pop_waiters);
     farce_unshared_wait_mark(&queue->unshared_push_waiters);
     if (!queue->values) return;
@@ -195,6 +209,7 @@ static void
 queue_compact(void *pointer)
 {
     queue_t *queue = pointer;
+    containers_gc_update(&queue->interrupt_token);
     if (!queue->values) return;
     size_t index = queue->head;
     for (size_t remaining = queue->size; remaining > 0; remaining--) {
@@ -212,6 +227,7 @@ queue_free(void *pointer)
     free(queue->enqueued_at);
     readiness_close(&queue->can_pop);
     readiness_close(&queue->can_push);
+    readiness_close(&queue->interrupts_drained);
     ruby_xfree(queue);
 }
 
@@ -277,8 +293,14 @@ queue_allocate_type(VALUE klass, bool shared)
     queue->tail = 0;
     queue->pop_waiters = 0;
     queue->push_waiters = 0;
+    queue->interrupt_token = Qnil;
+    queue->interrupt_generation = 0;
+    queue->interrupt_pending = 0;
+    queue->interrupt_waiters = NULL;
     queue->can_pop = (readiness_signal_t){.read_fd = -1, .write_fd = -1, .set = false};
     queue->can_push = (readiness_signal_t){.read_fd = -1, .write_fd = -1, .set = false};
+    queue->interrupts_drained = (readiness_signal_t){.read_fd = -1, .write_fd = -1, .set = false};
+    queue->interrupt_drain_waiters = 0;
     queue->unshared_pop_waiters = (farce_unshared_wait_list_t){0};
     queue->unshared_push_waiters = (farce_unshared_wait_list_t){0};
     queue->bounded = true;
@@ -384,6 +406,8 @@ typedef struct {
     bool finite;
     bool collected;
     double deadline;
+    bool interruptible;
+    VALUE token;
 } queue_timeout_t;
 
 static double
@@ -449,13 +473,44 @@ queue_wait_for_descriptor(int fd, queue_timeout_t *timeout)
     return containers_wait_for_readable(fd, wait_timeout);
 }
 
-typedef struct {
+struct queue_wait_context {
     queue_t *queue;
     readiness_signal_t *signal;
     size_t *waiter_count;
     queue_timeout_t *timeout;
     int wait_fd;
-} queue_wait_context_t;
+    bool linked;
+    uint64_t generation;
+    queue_wait_context_t *previous;
+    queue_wait_context_t *next;
+};
+
+/* Keep a wakeup readable until every interrupted descriptor waiter has left.
+ * Registration and removal happen under the same queue lock as publication. */
+static void
+queue_register_interrupt_waiter(queue_wait_context_t *context)
+{
+    if (!context->timeout->interruptible || context->signal != &context->queue->can_pop) return;
+    queue_t *queue = context->queue;
+    context->generation = queue->interrupt_generation;
+    context->previous = NULL;
+    context->next = queue->interrupt_waiters;
+    if (context->next) context->next->previous = context;
+    queue->interrupt_waiters = context;
+    context->linked = true;
+}
+
+static void
+queue_remove_interrupt_waiter(queue_wait_context_t *context)
+{
+    if (!context->linked) return;
+    queue_t *queue = context->queue;
+    if (context->previous) context->previous->next = context->next;
+    else queue->interrupt_waiters = context->next;
+    if (context->next) context->next->previous = context->previous;
+    if (context->generation != queue->interrupt_generation) queue->interrupt_pending--;
+    context->linked = false;
+}
 
 static VALUE
 queue_wait_body(VALUE opaque)
@@ -527,6 +582,7 @@ queue_wait_cleanup(VALUE opaque)
     queue_wait_context_t *context = (queue_wait_context_t *)opaque;
     if (context->wait_fd >= 0) close(context->wait_fd);
     queue_lock(context->queue);
+    queue_remove_interrupt_waiter(context);
     (*context->waiter_count)--;
     queue_update_readiness(context->queue);
     if (context->queue->closed && *context->waiter_count == 0) {
@@ -588,8 +644,16 @@ queue_wait(VALUE self, queue_t *queue, readiness_signal_t *signal, size_t *waite
         queue_unlock(queue);
         return false;
     }
+    /* A fresh wait must not repeatedly consume readiness reserved for older
+     * interrupted fibers on the same scheduler. Wait for their acknowledgments
+     * on a separate signal, without joining the interrupted generation. */
+    if (signal == &queue->can_pop && queue->interrupt_pending > 0) {
+        signal = &queue->interrupts_drained;
+        waiter_count = &queue->interrupt_drain_waiters;
+    }
     if (!queue->shared) queue->unshared_notifications_needed = true;
-    if (!queue->shared && (!queue->unshared_fiber_io || NIL_P(rb_fiber_scheduler_current()))) {
+    if (signal != &queue->interrupts_drained && !queue->shared &&
+        (!queue->unshared_fiber_io || NIL_P(rb_fiber_scheduler_current()))) {
         farce_unshared_wait_list_t *list = signal == &queue->can_pop ?
             &queue->unshared_pop_waiters : &queue->unshared_push_waiters;
         return farce_unshared_wait(list, self, timeout->finite, timeout->deadline);
@@ -611,6 +675,7 @@ queue_wait(VALUE self, queue_t *queue, readiness_signal_t *signal, size_t *waite
             .timeout = timeout,
             .wait_fd = -1,
         };
+        queue_register_interrupt_waiter(&context);
         (*waiter_count)++;
         queue_update_readiness(queue);
         queue_unlock(queue);
@@ -632,6 +697,7 @@ queue_wait(VALUE self, queue_t *queue, readiness_signal_t *signal, size_t *waite
         .timeout = timeout,
         .wait_fd = wait_fd,
     };
+    queue_register_interrupt_waiter(&context);
     (*waiter_count)++;
     queue_update_readiness(queue);
     queue_unlock(queue);
@@ -664,7 +730,54 @@ static VALUE
 queue_capacity(VALUE self)
 {
     queue_t *queue = get_queue(self);
-    return queue->bounded ? SIZET2NUM(queue->limit) : Qnil;
+    queue_lock(queue);
+    bool bounded = queue->bounded;
+    size_t limit = queue->limit;
+    queue_unlock(queue);
+    return bounded ? SIZET2NUM(limit) : Qnil;
+}
+
+static VALUE
+queue_set_capacity(VALUE self, VALUE value)
+{
+    size_t limit = 0;
+    if (!NIL_P(value)) {
+        long long converted = NUM2LL(rb_to_int(value));
+        if (converted <= 0) rb_raise(rb_eArgError, "capacity must be positive or nil");
+        if ((unsigned long long)converted > SIZE_MAX / sizeof(VALUE)) rb_raise(rb_eArgError, "capacity is too large");
+        limit = (size_t)converted;
+    }
+    queue_t *queue = get_queue(self);
+    queue_lock(queue);
+    queue->bounded = !NIL_P(value);
+    queue->limit = limit;
+    queue_update_readiness(queue);
+    queue_unlock(queue);
+    return value;
+}
+
+static VALUE
+queue_interrupt(VALUE self, VALUE token, VALUE generation_value)
+{
+    queue_t *queue = get_queue(self);
+    if (queue->shared) containers_check_shareable(token);
+    uint64_t generation = NUM2ULL(generation_value);
+    queue_lock(queue);
+    /* Concurrent writers can finish their notifications out of order. */
+    if (!NIL_P(queue->interrupt_token) && generation <= queue->interrupt_generation) {
+        queue_unlock(queue);
+        return self;
+    }
+    RB_OBJ_WRITE(self, &queue->interrupt_token, token);
+    queue->interrupt_generation = generation;
+    queue->interrupt_pending = 0;
+    for (queue_wait_context_t *waiter = queue->interrupt_waiters; waiter; waiter = waiter->next) {
+        if (waiter->generation != generation) queue->interrupt_pending++;
+    }
+    if (!queue->shared) farce_unshared_wait_notify_all(&queue->unshared_pop_waiters);
+    queue_update_readiness(queue);
+    queue_unlock(queue);
+    return self;
 }
 
 /* Called with queue->lock held. The queue is unchanged if allocation fails.
@@ -719,7 +832,7 @@ queue_num_waiting(VALUE self)
     queue_t *queue = get_queue(self);
     size_t num_waiting;
     queue_lock(queue);
-    num_waiting = queue->pop_waiters + queue->push_waiters +
+    num_waiting = queue->pop_waiters + queue->push_waiters + queue->interrupt_drain_waiters +
         queue->unshared_pop_waiters.count + queue->unshared_push_waiters.count;
     queue_unlock(queue);
     return SIZET2NUM(num_waiting);
@@ -848,6 +961,7 @@ queue_close(VALUE self)
         queue_update_readiness(queue);
         if (queue->pop_waiters == 0) readiness_close(&queue->can_pop);
         if (queue->push_waiters == 0) readiness_close(&queue->can_push);
+        if (queue->interrupt_drain_waiters == 0) readiness_close(&queue->interrupts_drained);
     }
     queue_unlock(queue);
     return self;
@@ -862,6 +976,7 @@ queue_release_wait_descriptors(VALUE self)
     queue_lock(queue);
     if (queue->pop_waiters == 0) readiness_close(&queue->can_pop);
     if (queue->push_waiters == 0) readiness_close(&queue->can_push);
+    if (queue->interrupt_drain_waiters == 0) readiness_close(&queue->interrupts_drained);
     queue_unlock(queue);
     return self;
 }
@@ -871,6 +986,10 @@ queue_pop_with_timeout(VALUE self, queue_t *queue, queue_timeout_t timeout)
 {
     for (;;) {
         queue_lock(queue);
+        if (timeout.interruptible && timeout.token != queue->interrupt_token) {
+            queue_unlock(queue);
+            return Qfalse;
+        }
         if (queue->closed) {
             queue_unlock(queue);
             raise_queue_closed();
@@ -900,6 +1019,18 @@ queue_pop(int argc, VALUE *argv, VALUE self)
     queue_timeout_t timeout = {.finite = false, .deadline = 0};
     if (argc > 0) timeout = parse_timeout(extract_timeout(argc, argv));
     return queue_pop_with_timeout(self, queue, timeout);
+}
+
+/* Pool dispatch uses positional arguments to avoid another keyword hash. */
+static VALUE
+queue_pop_interruptible(VALUE self, VALUE token, VALUE timeout_value)
+{
+    queue_timeout_t timeout = parse_timeout(timeout_value);
+    timeout.interruptible = true;
+    timeout.token = token;
+    VALUE result = queue_pop_with_timeout(self, get_queue(self), timeout);
+    RB_GC_GUARD(token);
+    return result;
 }
 
 static VALUE
@@ -1042,6 +1173,9 @@ containers_init_queue(VALUE namespace)
     rb_define_method(unshared, "fiber_wait", unshared_queue_fiber_wait, 0);
     rb_define_method(cQueue, "initialize", queue_initialize, -1);
     rb_define_method(cQueue, "capacity", queue_capacity, 0);
+    rb_define_method(cQueue, "capacity=", queue_set_capacity, 1);
+    rb_define_method(cQueue, "interrupt", queue_interrupt, 2);
+    rb_define_method(cQueue, "pop_interruptible", queue_pop_interruptible, 2);
     rb_define_method(cQueue, "size", queue_size, 0);
     rb_define_method(cQueue, "num_waiting", queue_num_waiting, 0);
     rb_define_method(cQueue, "clear", queue_clear, 0);

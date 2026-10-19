@@ -11,8 +11,11 @@ module Farce
     #
     # Queues have a blocking and non-blocking interface.
     #
-    # @!attribute [r] capacity
-    #   @abstract
+    # @!attribute [rw] capacity
+    #   Assign a positive limit, or `nil` for an unbounded queue.
+    #   Changes preserve queued values. Local queues change only the current scope.
+    #   On JRuby and TruffleRuby, normal FIFO queues retain their initial bounded or unbounded choice.
+    #   Switching between these states may raise `ArgumentError`. Priority and timer queues support both.
     #   @return [Integer, nil] The maximum number of items the queue can hold.
     #
     # @!attribute [r] num_waiting
@@ -173,9 +176,32 @@ module Farce
 
       # Whether the queue is at capacity.
       # @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-      def full? = capacity && size >= capacity
+      def full?
+        limit = capacity
+        limit && size >= limit
+      end
 
       def capacity = internal_queue.capacity
+
+      # Change the limit without discarding queued values. Returns immediately.
+      #
+      # New pushes wait while the queue is at or above the new limit.
+      # Increasing or removing the limit wakes blocked producers.
+      #
+      # Local queues change only the current scope. New scopes retain the constructor limit.
+      #
+      # Priority and timer queues support bounded and unbounded transitions on every engine.
+      #
+      # FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+      #
+      # @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+      # @return [Integer, nil] the new capacity
+      # @raise [ArgumentError] if the capacity is not positive
+      # @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+      #   between bounded and unbounded states
+      def capacity=(value)
+        internal_queue.capacity = value.nil? ? nil : Integer(value)
+      end
 
       def clear
         internal_queue.clear

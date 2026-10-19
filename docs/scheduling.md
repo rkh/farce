@@ -43,7 +43,7 @@ sleep 1.1
 
 As you can see in the [shared-state example](introduction.md#example), creating Ractors ad hoc because you want to run something in parallel is quite expensive.
 
-Use `Farce.in_parallel` to schedule parallel work. On CRuby, it manages a shared [Ractor pool](#ractor-pools), starting workers when the current ones cannot keep up with the load, up to the number of CPU cores. It shuts unused workers down after some inactivity. On JRuby and TruffleRuby, it starts a new thread for each task.
+Use `Farce.in_parallel` to schedule parallel work. On CRuby, it manages a shared [Ractor pool](#ractor-pools), starting workers when the current ones cannot keep up with the load, up to the number of CPU cores by default. It shuts unused workers down after some inactivity. On JRuby and TruffleRuby, it starts a new thread for each task.
 
 ```ruby
 input = "this is my input"
@@ -51,6 +51,21 @@ Farce.in_parallel(input) { expensive_computation(it) }
 ```
 
 Like most of Farce, this is completely opt-in. If you never use this feature, no pool is being set up and no extra Ractors are created.
+
+Configure the CRuby pool before creating any scheduler:
+
+```ruby
+Farce.config do |config|
+  config.parallel_pool_min_size     = 0
+  config.parallel_pool_max_size     = 8
+  config.parallel_pool_max_inflight = 64
+  config.parallel_pool_grow_after   = 0.005
+  config.parallel_pool_shrink_after = 30
+  config.parallel_pool_capacity     = 1024
+end
+```
+
+These are the defaults, except `parallel_pool_max_size` defaults to `nil` to use the CPU count. Set `parallel_pool_capacity` to `nil` for an unbounded queue, `parallel_pool_max_inflight` to `nil` to disable the per-worker task limit, or `parallel_pool_shrink_after` to `nil` to retain idle workers. A positive `parallel_pool_min_size` starts workers when the pool is created. These options are ignored on JRuby and TruffleRuby.
 
 ## `Farce.schedule`
 
@@ -97,6 +112,23 @@ Scheduler instances are Ractor-shareable.
 ## Ractor Pools
 
 `Farce::Pool` implements the same scheduling interface, but manages a pool of Ractors. This is what [`in_parallel`](#farcein_parallel) uses under the hood.
+
+You can change a pool's settings while it runs:
+
+```ruby
+pool = Farce::Pool.new
+pool.max_size     = 8
+pool.min_size     = 2
+pool.max_inflight = 32
+pool.grow_after   = 0.01
+pool.shrink_after = 10
+pool.capacity     = 2048
+```
+
+Increasing `min_size` starts workers immediately. Lowering `max_size` retires excess workers as they become idle. Busy workers continue servicing queued work so running tasks can wait for tasks queued on the same pool. The size can remain above the new maximum while workers stay busy. Running tasks are never interrupted. `min_size` must not exceed `max_size`. Changes to growth and idle delays recheck queued work and restart idle waits. Setting `max_inflight` or `shrink_after` to `nil` disables that limit.
+
+On CRuby, these settings are also available through `Farce.in_parallel`, such as `Farce.in_parallel.max_size = 8`. Its initial values come from `Farce::Config`. `Farce::Unshared::Pool` supports the same setters. Changes to `Farce::Local::Pool` affect only the current scope. New scopes retain the constructor settings.
+
 
 ```ruby
 # At least four Ractors, up to ten. Launch a new one if a task waits longer than 100 milliseconds.

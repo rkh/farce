@@ -7,7 +7,8 @@ module Farce
     # A shareable handle with an independent thread pool in each scope.
     #
     # Each pool uses the scaling settings and fiber scheduler configured at
-    # construction. Tasks always keep their block and argument references. Only
+    # construction. Changing settings tunes the current scope's pool. New scopes
+    # use the constructor settings. Tasks always keep their block and argument references. Only
     # local and smart modes are accepted when `auto_local` is false. A scheduler
     # constructor must be convertible to a shareable proc for use in each Ractor.
     # {#close} drains only the current scope's pool. {#close_all} drains every pool
@@ -31,12 +32,43 @@ module Farce
                      grow_after: 0.005, shrink_after: 30, capacity: 1024, scope: :ractor,
                      backend: Internal::FROZEN_CONFIG.io_backend, &constructor)
         initialize_configuration(min_size:, max_size:, max_inflight:, grow_after:, shrink_after:, backend:)
-        @constructor = prepare_constructor(constructor || Internal::FROZEN_CONFIG.fiber_scheduler_constructor)
-        @pools       = Strict::Map.new
-        @closed_all  = Internal::Flag.new(false)
+        @capacity           = capacity && Integer(capacity)
+        @constructor        = prepare_constructor(constructor || Internal::FROZEN_CONFIG.fiber_scheduler_constructor)
+        @pools              = Strict::Map.new
+        @closed_all         = Internal::Flag.new(false)
         @initialization_key = Object.new.freeze
         super(scope:, min_size: @min_size, max_size: @max_size, max_inflight: @max_inflight,
               grow_after: @grow_after, shrink_after: @shrink_after, capacity:, backend:)
+      end
+
+      # Settings changes affect only the current scope. New scopes use constructor defaults.
+      # @api private
+      def settings = (pool = current_pool) ? pool.settings : @settings.value
+
+      def capacity = (pool = current_pool) ? pool.capacity : @capacity
+
+      def min_size=(value)
+        scoped_value.min_size = value
+      end
+
+      def max_size=(value)
+        scoped_value.max_size = value
+      end
+
+      def max_inflight=(value)
+        scoped_value.max_inflight = value
+      end
+
+      def grow_after=(value)
+        scoped_value.grow_after = value
+      end
+
+      def shrink_after=(value)
+        scoped_value.shrink_after = value
+      end
+
+      def capacity=(value)
+        scoped_value.capacity = value
       end
 
       # Stop accepting work in this scope and drain its queued tasks.
@@ -74,7 +106,8 @@ module Farce
       def closed? = @closed_all.value || super
 
       Internal.delegate(self, :scoped_value, :drained?, :admission_generation, :wait_for_admission,
-        :admission_changed, :task_taken, :retire_worker, :worker_stopped, :scale_if_needed)
+        :admission_changed, :task_taken, :retire_worker, :wake_retiring_workers,
+        :worker_retired, :worker_stopped, :scale_if_needed)
 
       private
 

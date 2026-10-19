@@ -56,6 +56,7 @@ module Farce
       def initialize(capacity: 1024, backend: Internal::FROZEN_CONFIG.io_backend, scope: :ractor,
                      worker: nil, &constructor)
         @constructor        = prepare_constructor(constructor || Internal::FROZEN_CONFIG.fiber_scheduler_constructor)
+        @capacity           = capacity && Integer(capacity)
         @backend            = backend
         @worker             = worker
         @schedulers         = Strict::Map.new
@@ -63,6 +64,15 @@ module Farce
         @initialization_key = Object.new.freeze
         @registration_key   = Object.new.freeze
         super(scope:, capacity: capacity && Integer(capacity), backend:)
+      end
+
+      # Pending-task capacity in this scope. New scopes retain the constructor value.
+      def capacity = (scheduler = current_scheduler) ? scheduler.capacity : @capacity
+
+      # Resize the queue in this scope without starting a worker.
+      def capacity=(value)
+        raise SchedulerClosedError, "cannot configure a closed scheduler" if @closed_all.value
+        scoped_value.capacity = value
       end
 
       # Enqueue a task in the current scope, preserving its block and arguments.

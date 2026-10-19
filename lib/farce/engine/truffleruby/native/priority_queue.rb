@@ -23,8 +23,8 @@ module Farce
       private_constant :Bucket, :TrackedItem
 
       class State
-        attr_accessor :size, :sealed, :closed, :generation, :operation_owner
-        attr_reader :buckets, :capacity, :signal, :lock, :tracked_items, :track_age
+        attr_accessor :size, :sealed, :closed, :generation, :operation_owner, :capacity
+        attr_reader :buckets, :signal, :lock, :tracked_items, :track_age
 
         def initialize(capacity:, signal:, lock:, track_age:)
           @buckets = []
@@ -139,7 +139,18 @@ module Farce
         with_queue_operation(state) { state.size.zero? } # rubocop:disable Style/ZeroLengthPredicate
       end
 
-      def capacity = initialized_state.capacity
+      def capacity
+        state = initialized_state
+        with_queue_operation(state) { state.capacity }
+      end
+
+      def capacity=(value)
+        state = initialized_state
+        value = normalize_capacity(value)
+        with_queue_operation(state) do
+          notify_and_commit(state) { state.capacity = value }
+        end
+      end
 
       def clear
         state = initialized_state
@@ -262,7 +273,10 @@ module Farce
 
       def normalize_capacity(capacity)
         return nil if capacity.nil?
-        capacity = capacity.to_int unless primitive_is_a?(capacity, Integer)
+        unless primitive_is_a?(capacity, Integer)
+          raise TypeError, "capacity must be an Integer or nil" unless capacity.respond_to?(:to_int)
+          capacity = capacity.to_int
+        end
         raise TypeError, "capacity must be an Integer or nil" unless primitive_is_a?(capacity, Integer)
         raise ArgumentError, "capacity must be positive or nil" unless capacity.positive?
         capacity

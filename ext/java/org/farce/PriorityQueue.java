@@ -54,7 +54,8 @@ public final class PriorityQueue {
     private final Consumer<Runnable> committer;
     private final QueueSignal signal;
     private final BooleanSupplier scheduled;
-    private final long capacity;
+    private long capacity;
+    private Object rubyCapacity;
     private final boolean trackAge;
     private long size;
     private long generation;
@@ -70,7 +71,7 @@ public final class PriorityQueue {
                          BiPredicate<Object, Object> identical,
                          BiPredicate<Object, Object> match,
                          Consumer<Runnable> committer,
-                         BooleanSupplier scheduled, long capacity, QueueSignal signal,
+                         BooleanSupplier scheduled, long capacity, Object rubyCapacity, QueueSignal signal,
                          boolean trackAge) {
         this.tree = new TreeMap<>(comparator);
         this.snapshot = snapshot;
@@ -82,6 +83,7 @@ public final class PriorityQueue {
         this.signal = signal;
         this.scheduled = scheduled;
         this.capacity = capacity;
+        this.rubyCapacity = rubyCapacity;
         this.trackAge = trackAge;
     }
 
@@ -300,6 +302,20 @@ public final class PriorityQueue {
                 }
             }
         }
+    }
+
+    public Object getCapacity() {
+        enter();
+        try { return rubyCapacity; } finally { lock.unlock(); }
+    }
+
+    public void setCapacity(long capacity, Object rubyCapacity) {
+        enter();
+        try { commit(() -> {
+            this.capacity = capacity;
+            this.rubyCapacity = rubyCapacity;
+        }); }
+        finally { lock.unlock(); }
     }
 
     public long size() {

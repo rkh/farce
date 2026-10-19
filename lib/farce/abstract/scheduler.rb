@@ -169,6 +169,15 @@ module Farce
         super()
       end
 
+      # Pending-task capacity. Nil means the queue is unbounded.
+      def capacity = @queue.capacity
+
+      # Resize the pending queue without discarding tasks.
+      # JRuby and TruffleRuby cannot switch between bounded and unbounded queues.
+      def capacity=(value)
+        @queue.capacity = value.nil? ? nil : Integer(value)
+      end
+
       # @return [Exception, nil] The error encountered by the scheduler, if any.
       def error
         value = @error.value
@@ -493,18 +502,25 @@ module Farce
         failure = nil
         @state.compare_and_set(:setup, :running)
         while keep_processing?
-          break if @pool_worker && !@pool_worker.wait_for_admission(scheduler, runnable_count)
+          if @pool_worker
+            settings = @pool_worker.settings
+            settings = @pool_worker.wait_for_admission(scheduler, runnable_count, settings)
+            break unless settings
+          end
           timed_out = false
-          timeout = @pool_worker&.idle_timeout
-          task = @queue.pop(timeout:) { timed_out = true }
+          task = if @pool_worker
+                   @queue.pop_interruptible(settings, settings.shrink_after) { timed_out = true }
+                 else
+                   @queue.pop { timed_out = true }
+                 end
           if timed_out
-            break if @pool_worker&.retire?
+            break if @pool_worker&.retire?(expected: settings)
             next
           end
           next unless task
           task = task.value if task.is_a?(Envelope)
           if task
-            @pool_worker&.task_started
+            @pool_worker&.task_started(settings)
             yield task
           end
         end

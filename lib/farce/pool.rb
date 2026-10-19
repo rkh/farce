@@ -11,6 +11,11 @@ module Farce
   # `min_size` retire after `shrink_after` without queued or running work.
   # By default, the pool starts with no workers and can shrink back to zero.
   #
+  # Worker limits, task limits, scaling delays, and queue capacity can change while
+  # the pool runs. Lowering `max_size` retires extra workers as they become idle.
+  # Busy workers keep queued work runnable. Raising `min_size` starts workers
+  # immediately. Queued tasks are retained.
+  #
   # Most importantly, it exposes a {#schedule} method compatible with {Scheduler#schedule}.
   #
   # @example

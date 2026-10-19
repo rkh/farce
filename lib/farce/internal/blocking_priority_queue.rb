@@ -32,7 +32,8 @@ module Farce
 
         wait(timeout) do
           raise_unwritable if sealed?
-          size < capacity
+          limit = capacity
+          !limit || size < limit
         end
       end
 

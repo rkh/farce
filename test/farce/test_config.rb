@@ -225,6 +225,109 @@ class TestConfig < Test
     end
   end
 
+  def test_parallel_pool_defaults_and_explicit_nil_values
+    config = Farce::Config.new
+
+    assert_equal 0, config.parallel_pool_min_size
+    assert_nil config.parallel_pool_max_size
+    assert_equal 64, config.parallel_pool_max_inflight
+    assert_in_delta(0.005, config.parallel_pool_grow_after)
+    assert_equal 30, config.parallel_pool_shrink_after
+    assert_equal 1024, config.parallel_pool_capacity
+
+    config = Farce::Config.new do |c|
+      c.parallel_pool_max_size = 3
+      c.parallel_pool_min_size = 2
+      c.parallel_pool_max_inflight = nil
+      c.parallel_pool_grow_after = 0
+      c.parallel_pool_shrink_after = nil
+      c.parallel_pool_capacity = nil
+    end
+
+    assert_equal 2, config.parallel_pool_min_size
+    assert_equal 3, config.parallel_pool_max_size
+    assert_nil config.parallel_pool_max_inflight
+    assert_equal 0, config.parallel_pool_grow_after
+    assert_nil config.parallel_pool_shrink_after
+    assert_nil config.parallel_pool_capacity
+  end
+
+  def test_parallel_pool_sizes_validate_before_changing
+    config = Farce::Config.new
+    %i[max_size max_inflight capacity].each do |option|
+      name = :"parallel_pool_#{option}"
+      config.public_send(:"#{name}=", "5")
+
+      assert_equal 5, config.public_send(name)
+      [0, -1, "0", "-1", "", "invalid", "2.5", 2.5, false].each do |value|
+        assert_raises(ArgumentError) { config.public_send(:"#{name}=", value) }
+        assert_equal 5, config.public_send(name)
+      end
+      config.public_send(:"#{name}=", nil)
+
+      assert_nil config.public_send(name)
+    end
+    config.parallel_pool_min_size = "2"
+
+    assert_equal 2, config.parallel_pool_min_size
+    [-1, nil, false, 2.5, "invalid"].each do |value|
+      assert_raises(ArgumentError) { config.parallel_pool_min_size = value }
+      assert_equal 2, config.parallel_pool_min_size
+    end
+    assert_raises(ArgumentError) { config.parallel_pool_max_size = 1 }
+    assert_nil config.parallel_pool_max_size
+    config.parallel_pool_max_size = 3
+
+    assert_raises(ArgumentError) { config.parallel_pool_min_size = 4 }
+    assert_equal 2, config.parallel_pool_min_size
+  end
+
+  def test_parallel_pool_delays_validate_before_changing
+    config = Farce::Config.new
+    %i[grow_after shrink_after].each do |option|
+      name = :"parallel_pool_#{option}"
+      config.public_send(:"#{name}=", "0.25")
+
+      assert_in_delta(0.25, config.public_send(name))
+      [-1, Float::INFINITY, -Float::INFINITY, Float::NAN, false, "invalid"].each do |value|
+        assert_raises(ArgumentError) { config.public_send(:"#{name}=", value) }
+        assert_in_delta(0.25, config.public_send(name))
+      end
+    end
+    assert_raises(ArgumentError) { config.parallel_pool_grow_after = nil }
+    config.parallel_pool_shrink_after = nil
+
+    assert_nil config.parallel_pool_shrink_after
+  end
+
+  def test_parallel_pool_configuration_can_be_loaded_before_farce_and_freezes
+    output, error, status = ruby_isolated(<<~RUBY)
+      require "farce/config"
+      config = Farce.config do |c|
+        c.parallel_pool_max_size = 2
+        c.parallel_pool_min_size = 1
+        c.parallel_pool_capacity = nil
+      end
+      abort "loaded core" if Farce.const_defined?(:Vector, false)
+      abort "configuration frozen" if config.frozen?
+      require "farce"
+      abort "configuration replaced" unless config.equal?(Farce.config)
+      config.freeze
+      %i[min_size max_size max_inflight grow_after shrink_after capacity].each do |name|
+        begin
+          config.public_send(:"parallel_pool_\#{name}=", config.public_send(:"parallel_pool_\#{name}"))
+          abort "frozen setting changed"
+        rescue FrozenError
+        end
+      end
+      puts "ok"
+    RUBY
+
+    assert_predicate status, :success?, error
+    assert_equal "ok\n", output
+    assert_empty error
+  end
+
   def detected_implementation
     case RUBY_ENGINE
     when "ruby" then RUBY_PLATFORM.match?(/linux|darwin|bsd/) ? :native : :select

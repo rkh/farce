@@ -61,11 +61,11 @@ module Farce
         native_signal = signal if RUBY_ENGINE == "jruby" &&
           JVMContainers.identical?(JVMContainers::OBJECT_CLASS_METHOD.bind_call(signal), Signal)
         core = JVMExtension::PriorityQueue.new(COMPARATOR, SNAPSHOT, IDENTITY, EQUAL,
-          IDENTICAL, MATCH, committer, SCHEDULED, java_capacity, native_signal, track_age ? true : false)
+          IDENTICAL, MATCH, committer, SCHEDULED, java_capacity, Box.new(parsed_capacity), native_signal,
+          track_age ? true : false)
         INITIALIZATION_LOCK.synchronize do
           Thread.handle_interrupt(INTERRUPT_MASK) do
             check_initialization
-            @capacity = parsed_capacity
             @core = core
             JVMContainers.freeze_object(self)
           end
@@ -112,8 +112,18 @@ module Farce
       def empty? = size.zero?
 
       def capacity
-        storage
-        @capacity
+        storage.getCapacity.value
+      rescue JVMExtension::QueueFailure => e
+        raise_failure(e)
+      end
+
+      def capacity=(value)
+        value = normalize_capacity(value)
+        java_capacity = value ? [value, JAVA_CAPACITY_MAX].min : 0
+        storage.setCapacity(java_capacity, Box.new(value))
+        value
+      rescue JVMExtension::QueueFailure => e
+        raise_failure(e)
       end
 
       def closed?

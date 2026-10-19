@@ -36,7 +36,7 @@ module Farce
         Internal::LocalScheduledTask.new(args, block)
       end
 
-      def schedule_scaler(started, delay = @grow_after)
+      def schedule_scaler(started, delay = settings.grow_after)
         Internal::ThreadPoolSupervisor.current.schedule(self, started, delay)
       end
     end

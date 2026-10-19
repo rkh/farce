@@ -1965,10 +1965,54 @@ priority_queue_oldest_age(VALUE self)
 }
 
 static VALUE
+priority_queue_capacity_body(VALUE opaque)
+{
+    priority_queue_self_operation_t *operation = (priority_queue_self_operation_t *)opaque;
+    return operation->queue->bounded ? SIZET2NUM(operation->queue->capacity) : Qnil;
+}
+
+static VALUE
 priority_queue_capacity(VALUE self)
 {
     priority_queue_t *queue = priority_queue_get(self);
-    return queue->bounded ? SIZET2NUM(queue->capacity) : Qnil;
+    priority_queue_self_operation_t operation = {.queue = queue, .self = self};
+    if (priority_queue_can_run_direct(queue)) return priority_queue_capacity_body((VALUE)&operation);
+    return priority_queue_call(self, queue, priority_queue_capacity_body, (VALUE)&operation);
+}
+
+typedef struct {
+    priority_queue_t *queue;
+    VALUE value;
+    size_t capacity;
+    bool bounded;
+} priority_queue_resize_t;
+
+static VALUE
+priority_queue_set_capacity_body(VALUE opaque)
+{
+    priority_queue_resize_t *resize = (priority_queue_resize_t *)opaque;
+    priority_queue_notify_before_commit(resize->queue);
+    resize->queue->capacity = resize->capacity;
+    resize->queue->bounded = resize->bounded;
+    return resize->value;
+}
+
+static VALUE
+priority_queue_set_capacity(VALUE self, VALUE value)
+{
+    priority_queue_t *queue = priority_queue_get(self);
+    priority_queue_resize_t resize = {.queue = queue, .value = value, .capacity = 0, .bounded = !NIL_P(value)};
+    if (resize.bounded) {
+        resize.value = rb_to_int(value);
+        long long capacity = NUM2LL(resize.value);
+        if (capacity <= 0) rb_raise(rb_eArgError, "capacity must be positive or nil");
+        if ((unsigned long long)capacity > (unsigned long long)SIZE_MAX) {
+            rb_raise(rb_eArgError, "capacity is too large");
+        }
+        resize.capacity = (size_t)capacity;
+    }
+    if (priority_queue_can_run_direct(queue)) return priority_queue_set_capacity_body((VALUE)&resize);
+    return priority_queue_call(self, queue, priority_queue_set_capacity_body, (VALUE)&resize);
 }
 
 static void
@@ -1999,6 +2043,7 @@ priority_queue_define_methods(VALUE klass)
     rb_define_method(klass, "oldest_enqueued_at", priority_queue_oldest_enqueued_at, 0);
     rb_define_method(klass, "oldest_age", priority_queue_oldest_age, 0);
     rb_define_method(klass, "capacity", priority_queue_capacity, 0);
+    rb_define_method(klass, "capacity=", priority_queue_set_capacity, 1);
     rb_define_method(klass, "freeze", priority_queue_freeze, 0);
     rb_define_method(klass, "frozen?", priority_queue_frozen_p, 0);
 }

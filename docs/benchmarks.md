@@ -101,13 +101,13 @@ In the producer/consumer workload in `benchmark/queue.rb`, Ruby's built-in `Thre
  Implementation                | Performance | Notes
 -------------------------------|-------------|-------------
  `Thread::Queue`               | Fastest     | no ractor support
- `Thread::SizedQueue`          | 1.4x slower | no ractor support
- `Farce::Strict::Queue`        | 1.5x slower | only allows sharable objects
- `Farce::Queue`                | 2.1x slower |
- `RactorSafe::Queue`           | 2.9x slower | only allows sharable objects
- `Ratomic::Queue`              | 9.8x slower | breaks ractor isolation
- `RactorQueue`                 | 30x slower  | breaks ractor isolation
- `Ractor::Port` (multiplexing) | 100x slower |
+ `Thread::SizedQueue`          | 1.5x slower | no ractor support
+ `Farce::Strict::Queue`        | 1.6x slower | only allows sharable objects
+ `Farce::Queue`                | 2.2x slower |
+ `RactorSafe::Queue`           | 2.8x slower | only allows sharable objects
+ `Ratomic::Queue`              | 12x slower  | breaks ractor isolation
+ `RactorQueue`                 | 29x slower  | breaks ractor isolation
+ `Ractor::Port` (multiplexing) | 110x slower |
 
 ## Priority queue performance
 
