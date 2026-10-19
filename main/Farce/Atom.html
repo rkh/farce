@@ -512,6 +512,29 @@ the stored values without claiming or opening their envelopes when possible.</p>
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#wait_until-instance_method" title="#wait_until (instance method)">#<strong>wait_until</strong>(timeout: nil) {|value| ... } &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Wait until a block condition matches the current value.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#wait_until_changed-instance_method" title="#wait_until_changed (instance method)">#<strong>wait_until_changed</strong>(expected, timeout: nil) { ... } &#x21d2; BasicObject<sup>?</sup> </a>
     
 
@@ -590,7 +613,7 @@ the stored values without claiming or opening their envelopes when possible.</p>
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Abstract/Atom.html" title="Farce::Abstract::Atom (class)">Farce::Abstract::Atom</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Abstract/Atom.html#wait_until-instance_method" title="Farce::Abstract::Atom#wait_until (method)">#wait_until</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_until_match-instance_method" title="Farce::Abstract::Atom#wait_until_match (method)">#wait_until_match</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_until_value-instance_method" title="Farce::Abstract::Atom#wait_until_value (method)">#wait_until_value</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_while-instance_method" title="Farce::Abstract::Atom#wait_while (method)">#wait_while</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_while_match-instance_method" title="Farce::Abstract::Atom#wait_while_match (method)">#wait_while_match</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_while_value-instance_method" title="Farce::Abstract::Atom#wait_while_value (method)">#wait_while_value</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Atom.html#wait_until_match-instance_method" title="Farce::Abstract::Atom#wait_until_match (method)">#wait_until_match</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_until_value-instance_method" title="Farce::Abstract::Atom#wait_until_value (method)">#wait_until_value</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_while-instance_method" title="Farce::Abstract::Atom#wait_while (method)">#wait_while</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_while_match-instance_method" title="Farce::Abstract::Atom#wait_while_match (method)">#wait_while_match</a></span>, <span class='object_link'><a href="Abstract/Atom.html#wait_while_value-instance_method" title="Farce::Abstract::Atom#wait_while_value (method)">#wait_while_value</a></span></p>
 
   
   
@@ -2257,6 +2280,142 @@ This may update and freeze the original. Already-shareable values pass through u
 </div>
     
       <div class="method_details ">
+  <h3 class="signature " id="wait_until-instance_method">
+  
+    #<strong>wait_until</strong>(timeout: nil) {|value| ... } &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Wait until a block condition matches the current value.
+One timeout budget covers all checks and waits. The block is not interrupted.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the total seconds available</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the current value</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>whether the value matches</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the matching value, or nil on timeout</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>LocalJumpError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>if no block is given</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+221
+222
+223
+224
+225</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 221</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+  <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='ivar'>@atom</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_current'>current</span><span class='op'>|</span> <span class='kw'>yield</span><span class='lparen'>(</span><span class='id identifier rubyid_unwrap_value'>unwrap_value</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+  <span class='id identifier rubyid_unwrap_value'>unwrap_value</span><span class='lparen'>(</span><span class='id identifier rubyid_result'>result</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
   <h3 class="signature " id="wait_until_changed-instance_method">
   
     #<strong>wait_until_changed</strong>(expected, timeout: nil) { ... } &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
@@ -2351,22 +2510,22 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-225
-226
-227
-228
-229
-230
-231
 232
 233
 234
 235
 236
-237</pre>
+237
+238
+239
+240
+241
+242
+243
+244</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 225</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 232</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_expected'>expected</span> <span class='op'>=</span> <span class='id identifier rubyid_wrap_comparison'>wrap_comparison</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span>
@@ -2466,10 +2625,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-243</pre>
+250</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 243</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 250</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -2482,7 +2641,7 @@ This may update and freeze the original. Already-shareable values pass through u
 </div>
 
       <div id="footer">
-  Generated on Mon Oct 19 14:05:06 2026 by
+  Generated on Mon Oct 19 14:56:16 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
