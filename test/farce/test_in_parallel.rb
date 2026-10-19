@@ -149,8 +149,10 @@ module Farce
           end
           abort "task did not start" unless events.pop(timeout: 5) == :started
           1025.times { abort "queue bounded" unless pool.try_schedule { :done } }
+          pool.schedule(events, mode: :raise) { |queue| queue << :drained }
           gate.value = true
           pool.close
+          abort "queue did not drain" unless events.pop(timeout: 5) == :drained
           Timeout.timeout(5) { sleep 0.001 until pool.state == :closed }
           raise pool.error if pool.error
         end
