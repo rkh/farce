@@ -1417,9 +1417,15 @@ map_modify_body(VALUE opaque)
 }
 
 static VALUE
-map_modify(VALUE self, VALUE key)
+map_modify(int argc, VALUE *argv, VALUE self)
 {
     rb_check_frozen(self);
+    VALUE key;
+    VALUE keywords = Qnil;
+    VALUE keyword_values[1] = {Qundef};
+    ID keyword_ids[] = {rb_intern("timeout")};
+    rb_scan_args(argc, argv, "1:", &key, &keywords);
+    if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
     rb_need_block();
     map_t *map = get_map(self);
     key = map_prepare_key(map, key);
@@ -1432,7 +1438,12 @@ map_modify(VALUE self, VALUE key)
     };
     operation.hash = map_key_hash(map, key);
     rb_check_frozen(self);
-    map_lock_for_key(map, key, operation.hash, &operation.execution);
+    map_timeout_t timeout = map_parse_timeout(
+        keyword_values[0] == Qundef ? Qnil : keyword_values[0]
+    );
+    if (!map_lock_for_key_with_timeout(
+        map, key, operation.hash, &timeout, &operation.execution
+    )) return Qfalse;
     bool found;
     size_t index = map_find_slot(map, key, operation.hash, &found, &operation.execution);
     if (RB_OBJ_FROZEN(self)) {
@@ -2151,7 +2162,7 @@ map_define_methods(VALUE klass)
     rb_define_method(klass, "store", map_store_with_timeout, -1);
     rb_define_method(klass, "swap", map_swap, -1);
     rb_define_method(klass, "update", map_update, -1);
-    rb_define_method(klass, "modify", map_modify, 1);
+    rb_define_method(klass, "modify", map_modify, -1);
     rb_define_method(klass, "wait_until_changed", map_wait_until_changed, -1);
     rb_define_method(klass, "wait_until_non_nil", map_wait_until_non_nil, -1);
     rb_define_method(klass, "store_if_absent", map_store_if_absent, -1);

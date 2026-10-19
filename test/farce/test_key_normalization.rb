@@ -300,6 +300,8 @@ module Farce
         wait_until wait_until_value wait_until_match
         wait_while wait_while_match wait_while_value
         delete_if reject! compact! keep_if select! filter! transform_values! merge!
+        get_and_set put compute_if_absent store_if_present compute_if_present replace_pair compute merge_pair
+        delete_pair fetch_or_store put_if_absent replace_if_exists
       ]
       backend_protocol = backend.class.public_instance_methods(false)
 

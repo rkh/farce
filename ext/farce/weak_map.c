@@ -1173,9 +1173,15 @@ weak_map_modify_body(VALUE opaque)
 }
 
 static VALUE
-weak_map_modify(VALUE self, VALUE key)
+weak_map_modify(int argc, VALUE *argv, VALUE self)
 {
     rb_check_frozen(self);
+    VALUE key;
+    VALUE keywords = Qnil;
+    VALUE keyword_values[1] = {Qundef};
+    ID keyword_ids[] = {rb_intern("timeout")};
+    rb_scan_args(argc, argv, "1:", &key, &keywords);
+    if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
     rb_need_block();
     weak_map_t *map = get_weak_map(self);
     key = weak_map_prepare_key(map, key);
@@ -1187,8 +1193,11 @@ weak_map_modify(VALUE self, VALUE key)
     };
     operation.hash = weak_map_key_hash(map, key);
     rb_check_frozen(self);
+    weak_map_timeout_t timeout = weak_map_parse_timeout(
+        keyword_values[0] == Qundef ? Qnil : keyword_values[0]
+    );
     weak_map_execution_context_t execution = {.self = self};
-    weak_map_lock_for_key(map, key, operation.hash, &execution);
+    if (!weak_map_lock_for_key_with_timeout(map, key, operation.hash, &timeout, &execution)) return Qfalse;
     bool found;
     size_t index = weak_map_find_slot(map, key, operation.hash, &found, &execution);
     if (RB_OBJ_FROZEN(self)) {
@@ -1675,7 +1684,7 @@ define_weak_map_methods(VALUE klass)
     rb_define_method(klass, "store", weak_map_store_with_timeout, -1);
     rb_define_method(klass, "swap", weak_map_swap, -1);
     rb_define_method(klass, "update", weak_map_update, -1);
-    rb_define_method(klass, "modify", weak_map_modify, 1);
+    rb_define_method(klass, "modify", weak_map_modify, -1);
     rb_define_method(klass, "wait_until_changed", weak_map_wait_until_changed, -1);
     rb_define_method(klass, "wait_until_non_nil", weak_map_wait_until_non_nil, -1);
     rb_define_method(klass, "store_if_absent", weak_map_store_if_absent, -1);

@@ -5,6 +5,9 @@
 module Farce
   module Abstract
     # @abstract Super class for {Map maps} with added concurrency features.
+    #
+    # Maps implement most of the interface provided by Hash,
+    # as well as `Concurrent::Map` from the `concurrent-ruby` gem.
     class ConcurrentMap < Map
       include DuplicableMap
 
@@ -34,6 +37,24 @@ module Farce
         end
       end
 
+      # Return an existing value or store a default for an absent key.
+      # A block takes precedence over the default and receives the original key.
+      # The lookup and store are separate operations. Concurrent writes can be overwritten.
+      # @param key [BasicObject] The key to look up or store.
+      # @param defaults [Array<BasicObject>] At most one default value to store when the key is absent.
+      # @see #store For supported transfer and timeout options.
+      # @yieldparam key [BasicObject] The original key.
+      # @yieldreturn [BasicObject] The value to store.
+      # @return [BasicObject, nil] The existing or newly stored value.
+      # @raise [KeyError] If the key is absent and neither a default nor a block is provided.
+      def fetch_or_store(key, *defaults, **)
+        if defaults.size > 1
+          raise ArgumentError, "wrong number of arguments (given #{defaults.size + 1}, expected 1..2)"
+        end
+        return fetch(key) if defaults.empty? && !block_given?
+        fetch(key) { store(key, block_given? ? yield(key) : defaults.first, **) }
+      end
+
       # Read the value associated with a key, waiting for atomic-update access if necessary.
       # @param key [BasicObject] The key to look up.
       # @param timeout [Numeric, nil] The maximum number of seconds to wait for access.
@@ -43,6 +64,12 @@ module Farce
       #   The associated value, nil if the key is absent, or the fallback result if the operation times out.
       def get(key, timeout: nil, &) = internal_map.get(key, timeout:, &)
 
+      # Sets a value and returns the previous value.
+      # @param key [BasicObject] The key to update.
+      # @param value [BasicObject] The value to store.
+      # @return [BasicObject, nil] The previous value, or nil if the key was absent.
+      def get_and_set(...) = swap(...)
+
       # Associate a value with a key, waiting for atomic-update access if necessary.
       # @param key [BasicObject] The key to store.
       # @param value [BasicObject] The value to store.
@@ -51,6 +78,9 @@ module Farce
       # @yieldreturn [BasicObject] The fallback value to return.
       # @return [BasicObject, nil] `value` on success, or the fallback result or nil on timeout.
       def store(key, value, timeout: nil, &) = internal_map.store(key, value, timeout:, &)
+
+      # (see #store)
+      def put(...) = store(...)
 
       # Replace the value associated with a key and return its previous value.
       # @param key [BasicObject] The key to update.
@@ -71,6 +101,69 @@ module Farce
       # @raise [LocalJumpError] If no block is given.
       def store_if_absent(key, timeout: nil, &) = internal_map.store_if_absent(key, timeout:, &)
 
+      # (see #store_if_absent)
+      def compute_if_absent(...) = store_if_absent(...)
+
+      # Atomically store a value only when the key is absent.
+      # Existing nil and false values are preserved.
+      # @param key [BasicObject] The key to look up or store.
+      # @param value [BasicObject] The value to store when the key is absent.
+      # @see #store_if_absent For supported transfer and timeout options.
+      # @return [BasicObject, nil] The existing value, or nil when a value was inserted or access timed out.
+      def put_if_absent(key, value, **)
+        inserted = false
+        previous = store_if_absent(key, **) do
+          inserted = true
+          value
+        end
+        inserted ? nil : previous
+      end
+
+      # Atomically replace an existing value and return its previous value.
+      # An absent key is left unchanged. Existing nil and false values can be replaced.
+      # @param key [BasicObject] The key to update.
+      # @param replacement [BasicObject] The value to store.
+      # @param timeout [Numeric, nil] The maximum number of seconds to wait for access.
+      # @see #store For supported transfer options.
+      # @return [BasicObject, nil] The previous value, or nil when the key is absent or access timed out.
+      def replace_if_exists(key, replacement, timeout: nil, **)
+        map = internal_map
+        previous = nil
+        changed = map.modify(key, timeout:) do |present, value|
+          next Internal::MAP_KEEP unless present
+          previous = value
+          map.check_mutation
+          wrap_value(replacement, **)
+        end
+        unwrap_value(previous) if changed
+      end
+
+      # Atomically replace the value associated with a key if it is present.
+      # The block receives the current value and should return the new value to store.
+      # The block is not called for an absent key. A stored nil is passed to the block.
+      # @param key [BasicObject] The key to update.
+      # @param timeout [Numeric, nil] The maximum number of seconds to wait for access.
+      # @yield [value] Called with the current value if the key is present.
+      # @yieldparam value [BasicObject] The current value.
+      # @yieldreturn [BasicObject] The new value to store.
+      # @return [BasicObject, nil] The newly stored value, or nil if the key was absent or the operation timed out.
+      # @raise [LocalJumpError] If no block is given.
+      def store_if_present(key, timeout: nil)
+        raise LocalJumpError, "no block given" unless block_given?
+        map = internal_map
+        result = nil
+        changed = map.modify(key, timeout:) do |present, value|
+          next Internal::MAP_KEEP unless present
+          replacement = yield(unwrap_value(value))
+          map.check_mutation
+          result = wrap_value(replacement)
+        end
+        unwrap_value(result) if changed
+      end
+
+      # (see #store_if_present)
+      def compute_if_present(...) = store_if_present(...)
+
       # Atomically replace a value if the key is present and its current value matches `expected`.
       # The configured value-comparison mode determines whether matching uses equality or identity.
       # @param key [BasicObject] The key to update.
@@ -80,6 +173,23 @@ module Farce
       # @return [Boolean] Whether the value was replaced. Returns false on timeout.
       def compare_and_set(key, expected, replacement, timeout: nil)
         internal_map.compare_and_set(key, expected, replacement, timeout:)
+      end
+
+      # (see #compare_and_set)
+      def replace_pair(...) = compare_and_set(...)
+
+      # Atomically remove a key if its current value matches `expected`.
+      # The configured value-comparison mode determines whether matching uses equality or identity.
+      # Missing keys and mismatched values are left unchanged.
+      # @param key [BasicObject] The key to remove.
+      # @param expected [BasicObject] The expected current value.
+      # @param timeout [Numeric, nil] The maximum number of seconds to wait for access.
+      # @return [Boolean] Whether the entry was removed. Returns false on timeout.
+      def delete_pair(key, expected, timeout: nil)
+        expected = wrap_comparison(expected)
+        internal_map.modify(key, timeout:) do |present, value|
+          present && values_equal?(value, expected) ? Internal::MAP_DELETE : Internal::MAP_KEEP
+        end
       end
 
       # Atomically replace the value associated with a key with the block result.
@@ -93,6 +203,9 @@ module Farce
       # @raise [LocalJumpError] If no block is given.
       def update(key, timeout: nil, &) = internal_map.update(key, timeout:, &)
 
+      # (see #update)
+      def compute(...) = update(...)
+
       # Atomically insert `initial` for an absent key or replace an existing value with the block result.
       # The block is not called when the key is absent.
       # @param key [BasicObject] The key to insert or update.
@@ -104,6 +217,9 @@ module Farce
       # @return [BasicObject, nil] The initial or replacement value, or nil on timeout.
       # @raise [LocalJumpError] If no block is given.
       def upsert(key, initial, timeout: nil, &) = internal_map.upsert(key, initial, timeout:, &)
+
+      # (see #upsert)
+      def merge_pair(...) = upsert(...)
 
       # Wait until a block condition matches the current value.
       # One timeout budget covers all checks and waits. The block is not interrupted.
@@ -343,6 +459,12 @@ module Farce
       end
 
       private
+
+      def wrap_comparison(value) = value
+
+      def values_equal?(left, right)
+        compare_values_by_identity? ? left.equal?(right) : left == right
+      end
 
       def modify_entry(key, canonical: false)
         map = internal_map

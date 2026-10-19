@@ -214,11 +214,11 @@ module Farce
       # Yield presence and value under the key reservation.
       # MAP_KEEP and MAP_DELETE are control results. Other results replace the value.
       # Return whether a change committed.
-      def modify(key) # rubocop:disable Naming/PredicateMethod
+      def modify(key, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
         check_frozen!
         wrapped = wrap_key(key)
-        _, result = with_mutating_key_operation(wrapped, nil) do |reservation|
+        completed, result = with_mutating_key_operation(wrapped, timeout_deadline(timeout)) do |reservation|
           present, current = native_operation { [concurrent_key?(wrapped), concurrent_get(wrapped)] }
           value = yield(present, current)
           next false if MAP_KEEP.equal?(value)
@@ -231,7 +231,7 @@ module Farce
             changed!
           end
         end
-        !!result
+        completed && !!result
       end
 
       def upsert(key, initial_value, timeout: nil)

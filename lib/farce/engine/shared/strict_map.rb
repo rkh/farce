@@ -67,6 +67,11 @@ module Farce
         super(check_key(key), **) { |value| check_value(yield(value)) }
       end
 
+      def modify(key, **)
+        raise LocalJumpError, "no block given" unless block_given?
+        super(check_key(key), **) { |present, value| check_value(yield(present, value)) }
+      end
+
       def upsert(key, initial, **)
         raise LocalJumpError, "no block given" unless block_given?
         super(check_key(key), check_value(initial), **) { |value| check_value(yield(value)) }

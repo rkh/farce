@@ -134,17 +134,19 @@ module Farce
       # Yield presence and value under the entry claim.
       # MAP_KEEP and MAP_DELETE are control results. Other results replace the value.
       # Return whether a change committed.
-      def modify(key)
+      def modify(key, timeout: nil)
         raise LocalJumpError, "no block given" unless block_given?
         check_frozen!
         key = canonical_key(key)
+        deadline = timeout_deadline(timeout)
         ticket = Object.new.freeze
         sent = finished = false
         begin
-          response = await_response(deadline: nil) do
+          response = await_response(deadline:) do
             sent = true
             request(:claim, key, ticket, true)
           end
+          return false if response.equal?(TIMED_OUT)
           present, current, signal = response[1], response[2], response[3]
           owners = claim_owners
           owners[signal] = Fiber.current

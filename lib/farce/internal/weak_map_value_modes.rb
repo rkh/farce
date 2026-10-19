@@ -24,6 +24,11 @@ module Farce
         super
       end
 
+      def replace_if_exists(key, replacement, mode: nil, **)
+        @manager.validate_mode!(mode)
+        super
+      end
+
       def store_if_absent(key, mode: nil, **)
         raise LocalJumpError, "no block given" unless block_given?
         @manager.validate_mode!(mode)

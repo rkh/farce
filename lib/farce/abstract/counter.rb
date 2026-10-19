@@ -24,6 +24,24 @@ module Farce
       include Value
       include Internal::ValueSerialization
 
+      # Pass the current value to the given block, replacing it with the block's result.
+      # May retry if the value changes during the block's execution.
+      #
+      # Provided for compatibility with `Concurrent::AtomicFixnum`.
+      #
+      # @yield [count] Calculate the new value based on the current value.
+      # @yieldparam count [Integer] the current value of the atomic fixnum.
+      # @yieldreturn [Integer] the new value to replace the current value.
+      # @return [Integer] the new value after the block has been applied.
+      def update
+        raise LocalJumpError, "no block given" unless block_given?
+        while true
+          current   = value
+          new_value = yield(current)
+          return new_value if compare_and_set(current, new_value)
+        end
+      end
+
       # Wait until the current value differs from the expected value.
       # @param expected [Integer] the value to wait to change from
       # @param timeout [Numeric, nil] the total seconds available

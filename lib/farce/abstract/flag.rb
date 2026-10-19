@@ -61,9 +61,21 @@ module Farce
 
       # @return [Boolean] whether the flag is set
       def set? = value
+      alias true? set?
 
       # @return [Boolean] whether the flag is unset
       def unset? = !value
+      alias false? unset?
+
+      # Explicitly sets the value to true.
+      # Provided for compatibility with `Concurrent::AtomicBoolean`.
+      # @return [Boolean] true if the value has changed
+      def make_true = compare_and_set(false, true)
+
+      # Explicitly sets the value to false.
+      # Provided for compatibility with `Concurrent::AtomicBoolean`.
+      # @return [Boolean] true if the value has changed
+      def make_false = compare_and_set(true, false)
 
       # Wait until the flag becomes true.
       # @param timeout [Numeric, nil] the total seconds available
