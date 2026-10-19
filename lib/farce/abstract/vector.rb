@@ -1290,7 +1290,7 @@ module Farce
       # @param timeout [Numeric, nil] the total seconds available
       # @return [BasicObject, nil] the matching value, or nil on timeout
       # @raise [LocalJumpError] if no block is given
-      def wait_until(index, timeout: nil, &) = Internal.wait_until(self, index, timeout:, &)
+      def wait_until(index, timeout: nil, &) = Internal.wait_until(internal_vector, index, timeout:, &)
 
       # Wait while the block returns a truthy value.
       # @yieldparam value [BasicObject, nil] the current value

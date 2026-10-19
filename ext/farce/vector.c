@@ -1002,7 +1002,7 @@ vector_wait_until_changed(int argc, VALUE *argv, VALUE self)
         uint64_t generation;
         size_t index;
         pthread_mutex_lock(&vector->lock);
-        if (!vector_wait_for_reservation_locked(vector, &timeout)) return Qnil;
+        if (!vector_wait_for_reservation_locked(vector, &timeout)) return rb_block_given_p() ? rb_yield(Qnil) : Qnil;
         VALUE current = vector_lookup_index(vector, raw, &index) ? vector->values[index] : Qnil;
         generation = vector->generation;
         pthread_mutex_unlock(&vector->lock);
@@ -1010,12 +1010,12 @@ vector_wait_until_changed(int argc, VALUE *argv, VALUE self)
         if (!vector_values_equal(vector, current, expected)) return current;
 
         pthread_mutex_lock(&vector->lock);
-        if (!vector_wait_for_reservation_locked(vector, &timeout)) return Qnil;
+        if (!vector_wait_for_reservation_locked(vector, &timeout)) return rb_block_given_p() ? rb_yield(Qnil) : Qnil;
         if (vector->generation != generation) {
             pthread_mutex_unlock(&vector->lock);
             continue;
         }
-        if (!vector_wait_once(vector, &timeout)) return Qnil;
+        if (!vector_wait_once(vector, &timeout)) return rb_block_given_p() ? rb_yield(Qnil) : Qnil;
     }
 }
 

@@ -71,7 +71,8 @@ module Farce
     end
 
     def test_lowering_maximum_finishes_running_tasks_and_preserves_queued_work
-      pool = pool_class.new(max_size: 3, max_inflight: 1, grow_after: 0, shrink_after: nil)
+      # Stay below the maximum so the soft inflight limit keeps the workers distinct.
+      pool = pool_class.new(min_size: 3, max_size: 4, max_inflight: 1, grow_after: 60, shrink_after: nil)
       events = Queue.new
       release = Queue.new
       3.times do
@@ -83,6 +84,7 @@ module Farce
       end
 
       3.times { assert_equal :started, events.pop(timeout: 5) }
+      pool.min_size = 0
       pool.max_size = 1
 
       assert_equal 3, pool.size
