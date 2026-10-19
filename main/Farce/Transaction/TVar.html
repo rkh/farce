@@ -125,7 +125,7 @@ directly is a side effect and cannot be rolled back.</p>
 <p>Enrollment holds the TVar mutex until the attempt finishes. A busy mutex
 fails the attempt so it can be retried. Once enrolled, access the TVar
 through its wrapper to avoid trying to acquire its mutex again.</p>
-<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_balance'>balance</span>  <span class='op'>=</span> <span class='const'>Concurrent</span><span class='op'>::</span><span class='const'>TVar</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='int'>10</span><span class='rparen'>)</span>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_balance'>balance</span>  <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Concurrent.html" title="Farce::Concurrent (module)">Concurrent</a></span></span><span class='op'>::</span><span class='const'>TVar</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='int'>10</span><span class='rparen'>)</span>
 <span class='id identifier rubyid_received'>received</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Atom.html" title="Farce::Atom (class)">Atom</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Atom.html#initialize-instance_method" title="Farce::Atom#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='int'>0</span><span class='rparen'>)</span>
 <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_transaction'><span class='object_link'><a href="../../Farce.html#transaction-class_method" title="Farce.transaction (method)">transaction</a></span></span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_tx'>tx</span><span class='op'>|</span>
   <span class='id identifier rubyid_tx'>tx</span><span class='lbracket'>[</span><span class='id identifier rubyid_balance'>balance</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>-=</span> <span class='int'>3</span>
@@ -388,7 +388,7 @@ through its wrapper to avoid trying to acquire its mutex again.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Oct 19 14:56:34 2026 by
+  Generated on Mon Oct 19 16:02:07 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

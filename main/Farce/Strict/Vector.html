@@ -289,14 +289,14 @@
         <span class='name'>source</span>
       
       
-        <span class='type'>(<tt>Array</tt>, <tt>nil</tt>)</span>
+        <span class='type'>(<tt>Array</tt>, <tt>Integer</tt>, <tt>nil</tt>)</span>
       
       
         <em class="default">(defaults to: <tt>nil</tt>)</em>
       
       
         &mdash;
-        <div class='inline'><p>Initial values. The source array is not retained.</p>
+        <div class='inline'><p>Initial values or a size filled with nil. The source array is not retained.</p>
 </div>
       
     </li>
@@ -320,6 +320,23 @@
   
 </ul>
 
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>ArgumentError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>If the size is negative.</p>
+</div>
+      
+    </li>
+  
+</ul>
 
 </div><table class="source_code">
   <tr>
@@ -327,16 +344,16 @@
       <pre class="lines">
 
 
-13
 14
 15
-16</pre>
+16
+17</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/strict/vector.rb', line 13</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/vector.rb', line 14</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_source'>source</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>compare_by_identity:</span> <span class='kw'>false</span><span class='rparen'>)</span>
-  <span class='ivar'>@vector</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Vector</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_source'>source</span><span class='comma'>,</span> <span class='label'>compare_by_identity:</span><span class='rparen'>)</span>
+  <span class='ivar'>@vector</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Vector</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_normalize_vector_source'>normalize_vector_source</span><span class='lparen'>(</span><span class='id identifier rubyid_source'>source</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='label'>compare_by_identity:</span><span class='rparen'>)</span>
   <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -393,10 +410,10 @@
       <pre class="lines">
 
 
-19</pre>
+20</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/strict/vector.rb', line 19</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/vector.rb', line 20</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
     </td>
@@ -409,7 +426,7 @@
 </div>
 
       <div id="footer">
-  Generated on Mon Oct 19 14:56:24 2026 by
+  Generated on Mon Oct 19 16:01:57 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

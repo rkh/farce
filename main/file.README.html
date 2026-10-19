@@ -124,6 +124,7 @@
 <li><strong><code>Farce::Port</code></strong> adds transfer modes, receive timeouts, and Fiber scheduler support.</li>
 <li><strong><code>Farce::WeakRef</code> and <code>Farce::Resolv</code></strong> work outside the main Ractor.</li>
 <li><strong><code>Farce::Backports</code></strong> backports newer <code>Ractor</code> and <code>Ractor::Port</code> features to older Ruby versions. Can be invoked directly, used with refinements, or installed globally.</li>
+<li><strong><code>Farce::Concurrent</code></strong> provides Ractor-friendly replacements for some classes provided by <code>concurrent-ruby</code>.</li>
 </ul>
 <p>Send a result back from a worker:</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_results'>results</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Port.html" title="Farce::Port (class)">Port</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
@@ -268,7 +269,7 @@
 </div></div>
 
       <div id="footer">
-  Generated on Mon Oct 19 14:56:14 2026 by
+  Generated on Mon Oct 19 16:01:46 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

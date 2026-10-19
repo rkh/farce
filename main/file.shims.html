@@ -172,12 +172,111 @@ groups.</p>
 <p>Farce implements a version based on weak <a href="file.data-structures.html#atoms" title="atoms">atoms</a>. Not only can it be used on non-main Ractors, <code>Farce::WeakRef</code> instances themselves are Ractor-shareable if the value they reference is also Ractor-shareable (or has been garbage collected). Moreover, calling <code>Ractor.make_shareable(weak_ref)</code> will propagate through to the referenced value.</p>
 <h2 id="resolv">Resolv<a href="#resolv" aria-label="Link to heading 'Resolv'" data-heading-content="Resolv" class="anchor"></a></h2>
 <p><code>Farce::Resolv</code> is a version of Ruby's <a href="https://docs.ruby-lang.org/en/4.0/Resolv.html"><code>Resolv</code></a>, using <a href="file.data-structures.html#counters" title="counters">counters</a> instead of a global instance variable, and can therefore be used outside the main Ractor.</p>
+<h2 id="concurrent">Concurrent<a href="#concurrent" aria-label="Link to heading 'Concurrent'" data-heading-content="Concurrent" class="anchor"></a></h2>
+<p><code>Farce::Concurrent</code> includes the following classes:</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Array</code></td>
+<td>Alias for <code>Farce::Vector</code></td>
+</tr>
+<tr>
+<td><code>Atom</code></td>
+<td>Alias for <code>Farce::Atom</code></td>
+</tr>
+<tr>
+<td><code>AtomicBoolean</code></td>
+<td>Alias for <code>Farce::Flag</code></td>
+</tr>
+<tr>
+<td><code>AtomicFixnum</code></td>
+<td>Alias for <code>Farce::Counter</code></td>
+</tr>
+<tr>
+<td><code>CountDownLatch</code></td>
+<td>Drop-in replacement for <code>concurrent-ruby</code>'s <code>CountDownLatch</code></td>
+</tr>
+<tr>
+<td><code>CyclicBarrier</code></td>
+<td>Replacement for <code>concurrent-ruby</code>'s <code>CyclicBarrier</code></td>
+</tr>
+<tr>
+<td><code>Event</code></td>
+<td>Drop-in replacement for <code>concurrent-ruby</code>'s <code>Event</code></td>
+</tr>
+<tr>
+<td><code>Exchanger</code></td>
+<td>Alias for <code>Farce::Exchanger</code></td>
+</tr>
+<tr>
+<td><code>FiberLocalVar</code></td>
+<td>Drop-in replacement for <code>concurrent-ruby</code>'s <code>FiberLocalVar</code></td>
+</tr>
+<tr>
+<td><code>Hash</code></td>
+<td>Alias for <code>Farce::Map</code></td>
+</tr>
+<tr>
+<td><code>Lock</code></td>
+<td>Alias for <code>Farce::Lock</code></td>
+</tr>
+<tr>
+<td><code>LockLocalVar</code></td>
+<td>Drop-in replacement for <code>concurrent-ruby</code>'s <code>LockLocalVar</code></td>
+</tr>
+<tr>
+<td><code>ReadWriteLock</code></td>
+<td>Alias for <code>Farce::ReadWriteLock</code></td>
+</tr>
+<tr>
+<td><code>ThreadLocalVar</code></td>
+<td>Drop-in replacement for <code>concurrent-ruby</code>'s <code>ThreadLocalVar</code></td>
+</tr>
+<tr>
+<td><code>Tuple</code></td>
+<td>Replacement for <code>concurrent-ruby</code>'s <code>Tuple</code></td>
+</tr>
+</tbody>
+</table>
+<p>The nice thing is that these are either always Ractor-shareable, or in the case of <code>FiberLocalVar</code> and <code>ThreadLocalVar</code>, are Ractor-shareable if their default values or blocks are.</p>
+<p>For instance, you can replace threads with ractors in concurrent-ruby's own <code>CountDownLatch</code> example:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_latch'>latch</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Concurrent.html" title="Farce::Concurrent (module)">Concurrent</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Concurrent/CountDownLatch.html" title="Farce::Concurrent::CountDownLatch (class)">CountDownLatch</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Concurrent/CountDownLatch.html#initialize-instance_method" title="Farce::Concurrent::CountDownLatch#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='int'>3</span><span class='rparen'>)</span>
+
+<span class='id identifier rubyid_waiter'>waiter</span> <span class='op'>=</span> <span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_latch'>latch</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_latch'>latch</span><span class='op'>|</span>
+  <span class='id identifier rubyid_latch'>latch</span><span class='period'>.</span><span class='id identifier rubyid_wait'>wait</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Waiter released</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_decrementer'>decrementer</span> <span class='op'>=</span> <span class='const'>Ractor</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Ractor.html#new-class_method" title="Farce::Ractor.new (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_latch'>latch</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_latch'>latch</span><span class='op'>|</span>
+  <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span>
+  <span class='id identifier rubyid_latch'>latch</span><span class='period'>.</span><span class='id identifier rubyid_count_down'>count_down</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_latch'>latch</span><span class='period'>.</span><span class='id identifier rubyid_count'>count</span>
+
+  <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span>
+  <span class='id identifier rubyid_latch'>latch</span><span class='period'>.</span><span class='id identifier rubyid_count_down'>count_down</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_latch'>latch</span><span class='period'>.</span><span class='id identifier rubyid_count'>count</span>
+
+  <span class='id identifier rubyid_sleep'>sleep</span> <span class='int'>1</span>
+  <span class='id identifier rubyid_latch'>latch</span><span class='period'>.</span><span class='id identifier rubyid_count_down'>count_down</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_latch'>latch</span><span class='period'>.</span><span class='id identifier rubyid_count'>count</span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_waiter'>waiter</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+<span class='id identifier rubyid_decrementer'>decrementer</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span>
+
+</code></pre>
 <h2 id="read-next">Read Next<a href="#read-next" aria-label="Link to heading 'Read Next'" data-heading-content="Read Next" class="anchor"></a></h2>
 <p><a href="index.html#features" title="README">README</a> · <a href="file.sharing.html" title="Sharing Unshareable Data">Sharing Unshareable Data</a> · <a href="file.scheduling.html" title="Scheduling Code">Scheduling Code</a></p>
 </div></div>
 
       <div id="footer">
-  Generated on Mon Oct 19 14:56:14 2026 by
+  Generated on Mon Oct 19 16:01:46 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
