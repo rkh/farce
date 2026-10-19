@@ -173,6 +173,52 @@ directly from the native flag and avoid delegation overhead.</p>
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#make_false-instance_method" title="#make_false (instance method)">#<strong>make_false</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Explicitly sets the value to false.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#make_true-instance_method" title="#make_true (instance method)">#<strong>make_true</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Explicitly sets the value to true.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#set-instance_method" title="#set (instance method)">#<strong>set</strong>  &#x21d2; true </a>
     
 
@@ -199,6 +245,8 @@ directly from the native flag and avoid delegation overhead.</p>
       <a href="#set%3F-instance_method" title="#set? (instance method)">#<strong>set?</strong>  &#x21d2; Boolean </a>
     
 
+    
+      (also: #true?)
     
   </span>
   
@@ -314,6 +362,8 @@ directly from the native flag and avoid delegation overhead.</p>
       <a href="#unset%3F-instance_method" title="#unset? (instance method)">#<strong>unset?</strong>  &#x21d2; Boolean </a>
     
 
+    
+      (also: #false?)
     
   </span>
   
@@ -822,7 +872,19 @@ directly from the native flag and avoid delegation overhead.</p>
 145
 146
 147
-148</pre>
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 55</span>
@@ -836,9 +898,21 @@ directly from the native flag and avoid delegation overhead.</p>
 
   <span class='comment'># @return [Boolean] whether the flag is set
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_set?'>set?</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_true?'>true?</span> <span class='id identifier rubyid_set?'>set?</span>
 
   <span class='comment'># @return [Boolean] whether the flag is unset
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_unset?'>unset?</span> <span class='op'>=</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_false?'>false?</span> <span class='id identifier rubyid_unset?'>unset?</span>
+
+  <span class='comment'># Explicitly sets the value to true.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_true'>make_true</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+
+  <span class='comment'># Explicitly sets the value to false.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_false'>make_false</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span>
 
   <span class='comment'># Wait until the flag becomes true.
 </span>  <span class='comment'># @param timeout [Numeric, nil] the total seconds available
@@ -921,6 +995,114 @@ directly from the native flag and avoid delegation overhead.</p>
     <span class='kw'>end</span>
   <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="make_false-instance_method">
+  
+    #<strong>make_false</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Explicitly sets the value to false.
+Provided for compatibility with <code>Concurrent::AtomicBoolean</code>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>true if the value has changed</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+78</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 78</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_make_false'>make_false</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="make_true-instance_method">
+  
+    #<strong>make_true</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Explicitly sets the value to true.
+Provided for compatibility with <code>Concurrent::AtomicBoolean</code>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>true if the value has changed</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+73</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 73</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_make_true'>make_true</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span></pre>
     </td>
   </tr>
 </table>
@@ -1057,7 +1239,19 @@ directly from the native flag and avoid delegation overhead.</p>
 145
 146
 147
-148</pre>
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 55</span>
@@ -1071,9 +1265,21 @@ directly from the native flag and avoid delegation overhead.</p>
 
   <span class='comment'># @return [Boolean] whether the flag is set
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_set?'>set?</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_true?'>true?</span> <span class='id identifier rubyid_set?'>set?</span>
 
   <span class='comment'># @return [Boolean] whether the flag is unset
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_unset?'>unset?</span> <span class='op'>=</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_false?'>false?</span> <span class='id identifier rubyid_unset?'>unset?</span>
+
+  <span class='comment'># Explicitly sets the value to true.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_true'>make_true</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+
+  <span class='comment'># Explicitly sets the value to false.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_false'>make_false</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span>
 
   <span class='comment'># Wait until the flag becomes true.
 </span>  <span class='comment'># @param timeout [Numeric, nil] the total seconds available
@@ -1167,6 +1373,10 @@ directly from the native flag and avoid delegation overhead.</p>
     #<strong>set?</strong>  &#x21d2; <tt>Boolean</tt> 
   
 
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='true?-instance_method'>true?</span></span>
+    </span>
   
 
   
@@ -1385,7 +1595,19 @@ directly from the native flag and avoid delegation overhead.</p>
 145
 146
 147
-148</pre>
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 55</span>
@@ -1399,9 +1621,21 @@ directly from the native flag and avoid delegation overhead.</p>
 
   <span class='comment'># @return [Boolean] whether the flag is set
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_set?'>set?</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_true?'>true?</span> <span class='id identifier rubyid_set?'>set?</span>
 
   <span class='comment'># @return [Boolean] whether the flag is unset
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_unset?'>unset?</span> <span class='op'>=</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_false?'>false?</span> <span class='id identifier rubyid_unset?'>unset?</span>
+
+  <span class='comment'># Explicitly sets the value to true.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_true'>make_true</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+
+  <span class='comment'># Explicitly sets the value to false.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_false'>make_false</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span>
 
   <span class='comment'># Wait until the flag becomes true.
 </span>  <span class='comment'># @param timeout [Numeric, nil] the total seconds available
@@ -1660,7 +1894,19 @@ directly from the native flag and avoid delegation overhead.</p>
 145
 146
 147
-148</pre>
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 55</span>
@@ -1674,9 +1920,21 @@ directly from the native flag and avoid delegation overhead.</p>
 
   <span class='comment'># @return [Boolean] whether the flag is set
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_set?'>set?</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_true?'>true?</span> <span class='id identifier rubyid_set?'>set?</span>
 
   <span class='comment'># @return [Boolean] whether the flag is unset
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_unset?'>unset?</span> <span class='op'>=</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_false?'>false?</span> <span class='id identifier rubyid_unset?'>unset?</span>
+
+  <span class='comment'># Explicitly sets the value to true.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_true'>make_true</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+
+  <span class='comment'># Explicitly sets the value to false.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_false'>make_false</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span>
 
   <span class='comment'># Wait until the flag becomes true.
 </span>  <span class='comment'># @param timeout [Numeric, nil] the total seconds available
@@ -1899,7 +2157,19 @@ directly from the native flag and avoid delegation overhead.</p>
 145
 146
 147
-148</pre>
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 55</span>
@@ -1913,9 +2183,21 @@ directly from the native flag and avoid delegation overhead.</p>
 
   <span class='comment'># @return [Boolean] whether the flag is set
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_set?'>set?</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_true?'>true?</span> <span class='id identifier rubyid_set?'>set?</span>
 
   <span class='comment'># @return [Boolean] whether the flag is unset
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_unset?'>unset?</span> <span class='op'>=</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_false?'>false?</span> <span class='id identifier rubyid_unset?'>unset?</span>
+
+  <span class='comment'># Explicitly sets the value to true.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_true'>make_true</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+
+  <span class='comment'># Explicitly sets the value to false.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_false'>make_false</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span>
 
   <span class='comment'># Wait until the flag becomes true.
 </span>  <span class='comment'># @param timeout [Numeric, nil] the total seconds available
@@ -2134,7 +2416,19 @@ directly from the native flag and avoid delegation overhead.</p>
 145
 146
 147
-148</pre>
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 55</span>
@@ -2148,9 +2442,21 @@ directly from the native flag and avoid delegation overhead.</p>
 
   <span class='comment'># @return [Boolean] whether the flag is set
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_set?'>set?</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_true?'>true?</span> <span class='id identifier rubyid_set?'>set?</span>
 
   <span class='comment'># @return [Boolean] whether the flag is unset
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_unset?'>unset?</span> <span class='op'>=</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_false?'>false?</span> <span class='id identifier rubyid_unset?'>unset?</span>
+
+  <span class='comment'># Explicitly sets the value to true.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_true'>make_true</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+
+  <span class='comment'># Explicitly sets the value to false.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_false'>make_false</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span>
 
   <span class='comment'># Wait until the flag becomes true.
 </span>  <span class='comment'># @param timeout [Numeric, nil] the total seconds available
@@ -2245,6 +2551,10 @@ directly from the native flag and avoid delegation overhead.</p>
   
 
   
+    <span class="aliases">Also known as:
+    <span class="names"><span id='false?-instance_method'>false?</span></span>
+    </span>
+  
 
   
 </h3><div class="docstring">
@@ -2280,10 +2590,10 @@ directly from the native flag and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-66</pre>
+67</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 66</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 67</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_unset?'>unset?</span> <span class='op'>=</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span></pre>
     </td>
@@ -2426,7 +2736,19 @@ directly from the native flag and avoid delegation overhead.</p>
 145
 146
 147
-148</pre>
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 55</span>
@@ -2440,9 +2762,21 @@ directly from the native flag and avoid delegation overhead.</p>
 
   <span class='comment'># @return [Boolean] whether the flag is set
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_set?'>set?</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_true?'>true?</span> <span class='id identifier rubyid_set?'>set?</span>
 
   <span class='comment'># @return [Boolean] whether the flag is unset
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_unset?'>unset?</span> <span class='op'>=</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_false?'>false?</span> <span class='id identifier rubyid_unset?'>unset?</span>
+
+  <span class='comment'># Explicitly sets the value to true.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_true'>make_true</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+
+  <span class='comment'># Explicitly sets the value to false.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_false'>make_false</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span>
 
   <span class='comment'># Wait until the flag becomes true.
 </span>  <span class='comment'># @param timeout [Numeric, nil] the total seconds available
@@ -2648,7 +2982,19 @@ directly from the native flag and avoid delegation overhead.</p>
 145
 146
 147
-148</pre>
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 55</span>
@@ -2662,9 +3008,21 @@ directly from the native flag and avoid delegation overhead.</p>
 
   <span class='comment'># @return [Boolean] whether the flag is set
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_set?'>set?</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_true?'>true?</span> <span class='id identifier rubyid_set?'>set?</span>
 
   <span class='comment'># @return [Boolean] whether the flag is unset
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_unset?'>unset?</span> <span class='op'>=</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_false?'>false?</span> <span class='id identifier rubyid_unset?'>unset?</span>
+
+  <span class='comment'># Explicitly sets the value to true.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_true'>make_true</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+
+  <span class='comment'># Explicitly sets the value to false.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_false'>make_false</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span>
 
   <span class='comment'># Wait until the flag becomes true.
 </span>  <span class='comment'># @param timeout [Numeric, nil] the total seconds available
@@ -2869,10 +3227,10 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-93</pre>
+105</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 93</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 105</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -3085,7 +3443,19 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
 145
 146
 147
-148</pre>
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 55</span>
@@ -3099,9 +3469,21 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
 
   <span class='comment'># @return [Boolean] whether the flag is set
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_set?'>set?</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_true?'>true?</span> <span class='id identifier rubyid_set?'>set?</span>
 
   <span class='comment'># @return [Boolean] whether the flag is unset
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_unset?'>unset?</span> <span class='op'>=</span> <span class='op'>!</span><span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>alias</span> <span class='id identifier rubyid_false?'>false?</span> <span class='id identifier rubyid_unset?'>unset?</span>
+
+  <span class='comment'># Explicitly sets the value to true.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_true'>make_true</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+
+  <span class='comment'># Explicitly sets the value to false.
+</span>  <span class='comment'># Provided for compatibility with `Concurrent::AtomicBoolean`.
+</span>  <span class='comment'># @return [Boolean] true if the value has changed
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_make_false'>make_false</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span>
 
   <span class='comment'># Wait until the flag becomes true.
 </span>  <span class='comment'># @param timeout [Numeric, nil] the total seconds available
@@ -3267,12 +3649,12 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-129
-130
-131</pre>
+141
+142
+143</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 129</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 141</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_match'>wait_until_match</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span> <span class='comment'># rubocop:disable Style/CaseEquality
@@ -3366,10 +3748,10 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-72</pre>
+84</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 72</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 84</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_set'>wait_until_set</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -3461,10 +3843,10 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-81</pre>
+93</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 81</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 93</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_unset'>wait_until_unset</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -3550,12 +3932,12 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-121
-122
-123</pre>
+133
+134
+135</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 121</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 133</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_value'>wait_until_value</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
@@ -3681,13 +4063,13 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-101
-102
-103
-104</pre>
+113
+114
+115
+116</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 101</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 113</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while'>wait_while</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -3776,12 +4158,12 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-110
-111
-112</pre>
+122
+123
+124</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 110</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 122</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while_match'>wait_while_match</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_wait_while'>wait_while</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span> <span class='comment'># rubocop:disable Style/CaseEquality
@@ -3901,10 +4283,10 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-115</pre>
+127</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 115</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/flag.rb', line 127</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while_value'>wait_while_value</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -3917,7 +4299,7 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 18 20:01:50 2026 by
+  Generated on Mon Oct 19 14:05:05 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

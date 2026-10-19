@@ -275,6 +275,29 @@ directly from the native counter and avoid delegation overhead.</p>
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#update-instance_method" title="#update (instance method)">#<strong>update</strong> {|count| ... } &#x21d2; Integer </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Pass the current value to the given block, replacing it with the block's result.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#wait_until-instance_method" title="#wait_until (instance method)">#<strong>wait_until</strong>(timeout: nil) {|value| ... } &#x21d2; Integer<sup>?</sup> </a>
     
 
@@ -589,10 +612,10 @@ directly from the native counter and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-189</pre>
+207</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 189</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 207</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_method_missing'>method_missing</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>              <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_public_send'>public_send</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -671,10 +694,10 @@ directly from the native counter and avoid delegation overhead.</p>
       <pre class="lines">
 
 
-172</pre>
+190</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 172</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 190</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_increment'>increment</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -744,22 +767,22 @@ The check and decrement happen atomically.</p>
       <pre class="lines">
 
 
-156
-157
-158
-159
-160
-161
-162
-163
-164
-165
-166
-167
-168</pre>
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 156</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 174</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_decrement_if_above'>decrement_if_above</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
 </span>  <span class='id identifier rubyid_floor'>floor</span>   <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span>
@@ -841,22 +864,22 @@ The check and increment happen atomically.</p>
       <pre class="lines">
 
 
-138
-139
-140
-141
-142
-143
-144
-145
-146
-147
-148
-149
-150</pre>
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 138</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 156</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_increment_if_below'>increment_if_below</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Naming/PredicateMethod
 </span>  <span class='id identifier rubyid_limit'>limit</span>   <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span>
@@ -918,17 +941,152 @@ The check and increment happen atomically.</p>
       <pre class="lines">
 
 
-129
-130
-131
-132</pre>
+147
+148
+149
+150</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 129</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 147</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_reset'>reset</span>
   <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_initial'>initial</span>
   <span class='kw'>self</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="update-instance_method">
+  
+    #<strong>update</strong> {|count| ... } &#x21d2; <tt>Integer</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Pass the current value to the given block, replacing it with the block's result.
+May retry if the value changes during the block's execution.</p>
+<p>Provided for compatibility with <code>Concurrent::AtomicFixnum</code>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>count</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Calculate the new value based on the current value.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>count</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the current value of the atomic fixnum.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the new value to replace the current value.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the new value after the block has been applied.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>LocalJumpError</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+36
+37
+38
+39
+40
+41
+42
+43</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 36</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_update'>update</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+  <span class='kw'>while</span> <span class='kw'>true</span>
+    <span class='id identifier rubyid_current'>current</span>   <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+    <span class='id identifier rubyid_new_value'>new_value</span> <span class='op'>=</span> <span class='kw'>yield</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_new_value'>new_value</span> <span class='kw'>if</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='comma'>,</span> <span class='id identifier rubyid_new_value'>new_value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -1052,10 +1210,10 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-50</pre>
+68</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 50</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 68</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -1141,13 +1299,13 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-104
-105
-106
-107</pre>
+122
+123
+124
+125</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 104</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 122</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_above'>wait_until_above</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_floor'>floor</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span>
@@ -1236,13 +1394,13 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-95
-96
-97
-98</pre>
+113
+114
+115
+116</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 95</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 113</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_below'>wait_until_below</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span>
@@ -1348,19 +1506,19 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41</pre>
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 32</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 50</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_signal'>signal</span> <span class='op'>=</span> <span class='id identifier rubyid_change_signal'>change_signal</span>
@@ -1455,12 +1613,12 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-87
-88
-89</pre>
+105
+106
+107</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 87</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 105</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_match'>wait_until_match</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span> <span class='comment'># rubocop:disable Style/CaseEquality
@@ -1549,12 +1707,12 @@ Counters compare integer values by equality.</p>
       <pre class="lines">
 
 
-79
-80
-81</pre>
+97
+98
+99</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 79</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 97</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_value'>wait_until_value</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>==</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
@@ -1680,13 +1838,13 @@ Counters compare integer values by equality.</p>
       <pre class="lines">
 
 
-58
-59
-60
-61</pre>
+76
+77
+78
+79</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 58</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 76</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while'>wait_while</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1775,13 +1933,13 @@ Counters compare integer values by equality.</p>
       <pre class="lines">
 
 
-113
-114
-115
-116</pre>
+131
+132
+133
+134</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 113</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 131</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while_above'>wait_while_above</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_limit'>limit</span><span class='rparen'>)</span>
@@ -1870,13 +2028,13 @@ Counters compare integer values by equality.</p>
       <pre class="lines">
 
 
-122
-123
-124
-125</pre>
+140
+141
+142
+143</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 122</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 140</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while_below'>wait_while_below</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_floor'>floor</span> <span class='op'>=</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_floor'>floor</span><span class='rparen'>)</span>
@@ -1965,12 +2123,12 @@ Counters compare integer values by equality.</p>
       <pre class="lines">
 
 
-67
-68
-69</pre>
+85
+86
+87</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 67</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 85</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while_match'>wait_while_match</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_wait_while'>wait_while</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_value'>value</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span> <span class='op'>===</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span> <span class='comment'># rubocop:disable Style/CaseEquality
@@ -2073,10 +2231,10 @@ Counters compare integer values by equality.</p>
       <pre class="lines">
 
 
-72</pre>
+90</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 72</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/counter.rb', line 90</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_while_value'>wait_while_value</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -2089,7 +2247,7 @@ Counters compare integer values by equality.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 18 20:01:50 2026 by
+  Generated on Mon Oct 19 14:05:05 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

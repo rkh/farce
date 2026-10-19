@@ -150,6 +150,87 @@ that snapshot is captured can still cause the attempt to fail.</p>
 
 
 
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#delete_pair-instance_method" title="#delete_pair (instance method)">#<strong>delete_pair</strong>(key, expected)  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Atomically remove a key if its current value matches <code>expected</code>.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#replace_if_exists-instance_method" title="#replace_if_exists (instance method)">#<strong>replace_if_exists</strong>(key, replacement, mode: nil)  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Atomically replace an existing value and return its previous value.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#store_if_present-instance_method" title="#store_if_present (instance method)">#<strong>store_if_present</strong>(key, mode: nil) {|value| ... } &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Atomically replace the value associated with a key if it is present.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
 
   
   
@@ -179,7 +260,7 @@ that snapshot is captured can still cause the attempt to fail.</p>
   
   
   
-  <h2>Method Summary</h2>
+  
   
   <h3 class="inherited">Methods included from <span class='object_link'><a href="../Unshareable.html" title="Farce::Unshareable (module)">Unshareable</a></span></h3>
   <p class="inherited"><span class='object_link'><a href="../Unshareable.html#initialize-instance_method" title="Farce::Unshareable#initialize (method)">#initialize</a></span>, <span class='object_link'><a href="../Unshareable.html#ractor_shareable%3F-instance_method" title="Farce::Unshareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
@@ -202,7 +283,7 @@ that snapshot is captured can still cause the attempt to fail.</p>
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="../Abstract/ConcurrentMap.html" title="Farce::Abstract::ConcurrentMap (class)">Abstract::ConcurrentMap</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="../Abstract/ConcurrentMap.html#[]-instance_method" title="Farce::Abstract::ConcurrentMap#[] (method)">#[]</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#[]=-instance_method" title="Farce::Abstract::ConcurrentMap#[]= (method)">#[]=</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#clear-instance_method" title="Farce::Abstract::ConcurrentMap#clear (method)">#clear</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compact!-instance_method" title="Farce::Abstract::ConcurrentMap#compact! (method)">#compact!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compact_blank!-instance_method" title="Farce::Abstract::ConcurrentMap#compact_blank! (method)">#compact_blank!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compare_and_set-instance_method" title="Farce::Abstract::ConcurrentMap#compare_and_set (method)">#compare_and_set</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compare_keys_by_identity%3F-instance_method" title="Farce::Abstract::ConcurrentMap#compare_keys_by_identity? (method)">#compare_keys_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compare_values_by_identity%3F-instance_method" title="Farce::Abstract::ConcurrentMap#compare_values_by_identity? (method)">#compare_values_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#delete-instance_method" title="Farce::Abstract::ConcurrentMap#delete (method)">#delete</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#delete_if-instance_method" title="Farce::Abstract::ConcurrentMap#delete_if (method)">#delete_if</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#each-instance_method" title="Farce::Abstract::ConcurrentMap#each (method)">#each</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#each_key-instance_method" title="Farce::Abstract::ConcurrentMap#each_key (method)">#each_key</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#each_value-instance_method" title="Farce::Abstract::ConcurrentMap#each_value (method)">#each_value</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#fetch-instance_method" title="Farce::Abstract::ConcurrentMap#fetch (method)">#fetch</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#get-instance_method" title="Farce::Abstract::ConcurrentMap#get (method)">#get</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#getkey-instance_method" title="Farce::Abstract::ConcurrentMap#getkey (method)">#getkey</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#keep_if-instance_method" title="Farce::Abstract::ConcurrentMap#keep_if (method)">#keep_if</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#key%3F-instance_method" title="Farce::Abstract::ConcurrentMap#key? (method)">#key?</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#keys-instance_method" title="Farce::Abstract::ConcurrentMap#keys (method)">#keys</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#merge!-instance_method" title="Farce::Abstract::ConcurrentMap#merge! (method)">#merge!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#reject!-instance_method" title="Farce::Abstract::ConcurrentMap#reject! (method)">#reject!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#reverse_merge!-instance_method" title="Farce::Abstract::ConcurrentMap#reverse_merge! (method)">#reverse_merge!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#select!-instance_method" title="Farce::Abstract::ConcurrentMap#select! (method)">#select!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#size-instance_method" title="Farce::Abstract::ConcurrentMap#size (method)">#size</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#store-instance_method" title="Farce::Abstract::ConcurrentMap#store (method)">#store</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#store_if_absent-instance_method" title="Farce::Abstract::ConcurrentMap#store_if_absent (method)">#store_if_absent</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#swap-instance_method" title="Farce::Abstract::ConcurrentMap#swap (method)">#swap</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#transform_values!-instance_method" title="Farce::Abstract::ConcurrentMap#transform_values! (method)">#transform_values!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#update-instance_method" title="Farce::Abstract::ConcurrentMap#update (method)">#update</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#upsert-instance_method" title="Farce::Abstract::ConcurrentMap#upsert (method)">#upsert</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#values-instance_method" title="Farce::Abstract::ConcurrentMap#values (method)">#values</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until (method)">#wait_until</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until_changed-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until_changed (method)">#wait_until_changed</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until_match-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until_match (method)">#wait_until_match</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until_non_nil-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until_non_nil (method)">#wait_until_non_nil</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until_value-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until_value (method)">#wait_until_value</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_while-instance_method" title="Farce::Abstract::ConcurrentMap#wait_while (method)">#wait_while</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_while_match-instance_method" title="Farce::Abstract::ConcurrentMap#wait_while_match (method)">#wait_while_match</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_while_value-instance_method" title="Farce::Abstract::ConcurrentMap#wait_while_value (method)">#wait_while_value</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="../Abstract/ConcurrentMap.html#[]-instance_method" title="Farce::Abstract::ConcurrentMap#[] (method)">#[]</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#[]=-instance_method" title="Farce::Abstract::ConcurrentMap#[]= (method)">#[]=</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#clear-instance_method" title="Farce::Abstract::ConcurrentMap#clear (method)">#clear</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compact!-instance_method" title="Farce::Abstract::ConcurrentMap#compact! (method)">#compact!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compact_blank!-instance_method" title="Farce::Abstract::ConcurrentMap#compact_blank! (method)">#compact_blank!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compare_and_set-instance_method" title="Farce::Abstract::ConcurrentMap#compare_and_set (method)">#compare_and_set</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compare_keys_by_identity%3F-instance_method" title="Farce::Abstract::ConcurrentMap#compare_keys_by_identity? (method)">#compare_keys_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compare_values_by_identity%3F-instance_method" title="Farce::Abstract::ConcurrentMap#compare_values_by_identity? (method)">#compare_values_by_identity?</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compute-instance_method" title="Farce::Abstract::ConcurrentMap#compute (method)">#compute</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compute_if_absent-instance_method" title="Farce::Abstract::ConcurrentMap#compute_if_absent (method)">#compute_if_absent</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#compute_if_present-instance_method" title="Farce::Abstract::ConcurrentMap#compute_if_present (method)">#compute_if_present</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#delete-instance_method" title="Farce::Abstract::ConcurrentMap#delete (method)">#delete</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#delete_if-instance_method" title="Farce::Abstract::ConcurrentMap#delete_if (method)">#delete_if</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#each-instance_method" title="Farce::Abstract::ConcurrentMap#each (method)">#each</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#each_key-instance_method" title="Farce::Abstract::ConcurrentMap#each_key (method)">#each_key</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#each_value-instance_method" title="Farce::Abstract::ConcurrentMap#each_value (method)">#each_value</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#fetch-instance_method" title="Farce::Abstract::ConcurrentMap#fetch (method)">#fetch</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#fetch_or_store-instance_method" title="Farce::Abstract::ConcurrentMap#fetch_or_store (method)">#fetch_or_store</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#get-instance_method" title="Farce::Abstract::ConcurrentMap#get (method)">#get</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#get_and_set-instance_method" title="Farce::Abstract::ConcurrentMap#get_and_set (method)">#get_and_set</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#getkey-instance_method" title="Farce::Abstract::ConcurrentMap#getkey (method)">#getkey</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#keep_if-instance_method" title="Farce::Abstract::ConcurrentMap#keep_if (method)">#keep_if</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#key%3F-instance_method" title="Farce::Abstract::ConcurrentMap#key? (method)">#key?</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#keys-instance_method" title="Farce::Abstract::ConcurrentMap#keys (method)">#keys</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#merge!-instance_method" title="Farce::Abstract::ConcurrentMap#merge! (method)">#merge!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#merge_pair-instance_method" title="Farce::Abstract::ConcurrentMap#merge_pair (method)">#merge_pair</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#put-instance_method" title="Farce::Abstract::ConcurrentMap#put (method)">#put</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#put_if_absent-instance_method" title="Farce::Abstract::ConcurrentMap#put_if_absent (method)">#put_if_absent</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#reject!-instance_method" title="Farce::Abstract::ConcurrentMap#reject! (method)">#reject!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#replace_pair-instance_method" title="Farce::Abstract::ConcurrentMap#replace_pair (method)">#replace_pair</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#reverse_merge!-instance_method" title="Farce::Abstract::ConcurrentMap#reverse_merge! (method)">#reverse_merge!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#select!-instance_method" title="Farce::Abstract::ConcurrentMap#select! (method)">#select!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#size-instance_method" title="Farce::Abstract::ConcurrentMap#size (method)">#size</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#store-instance_method" title="Farce::Abstract::ConcurrentMap#store (method)">#store</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#store_if_absent-instance_method" title="Farce::Abstract::ConcurrentMap#store_if_absent (method)">#store_if_absent</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#swap-instance_method" title="Farce::Abstract::ConcurrentMap#swap (method)">#swap</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#transform_values!-instance_method" title="Farce::Abstract::ConcurrentMap#transform_values! (method)">#transform_values!</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#update-instance_method" title="Farce::Abstract::ConcurrentMap#update (method)">#update</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#upsert-instance_method" title="Farce::Abstract::ConcurrentMap#upsert (method)">#upsert</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#values-instance_method" title="Farce::Abstract::ConcurrentMap#values (method)">#values</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until (method)">#wait_until</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until_changed-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until_changed (method)">#wait_until_changed</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until_match-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until_match (method)">#wait_until_match</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until_non_nil-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until_non_nil (method)">#wait_until_non_nil</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_until_value-instance_method" title="Farce::Abstract::ConcurrentMap#wait_until_value (method)">#wait_until_value</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_while-instance_method" title="Farce::Abstract::ConcurrentMap#wait_while (method)">#wait_while</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_while_match-instance_method" title="Farce::Abstract::ConcurrentMap#wait_while_match (method)">#wait_while_match</a></span>, <span class='object_link'><a href="../Abstract/ConcurrentMap.html#wait_while_value-instance_method" title="Farce::Abstract::ConcurrentMap#wait_while_value (method)">#wait_while_value</a></span></p>
 
   
   
@@ -242,10 +323,466 @@ that snapshot is captured can still cause the attempt to fail.</p>
 </div>
 
 
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="delete_pair-instance_method">
+  
+    #<strong>delete_pair</strong>(key, expected)  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Atomically remove a key if its current value matches <code>expected</code>.
+The configured value-comparison mode determines whether matching uses equality or identity.
+Missing keys and mismatched values are left unchanged.
+A failed comparison invalidates the transaction attempt.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to remove.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>expected</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The expected current value.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum number of seconds to wait for access.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether the entry was removed. Returns false on timeout.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+45
+46
+47
+48
+49
+50</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction/map.rb', line 45</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_delete_pair'>delete_pair</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_removed'>removed</span> <span class='op'>=</span> <span class='id identifier rubyid_modify_entry'>modify_entry</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_present'>present</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='op'>|</span>
+    <span class='id identifier rubyid_present'>present</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_values_equal?'>values_equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MAP_DELETE</span> <span class='op'>:</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MAP_KEEP</span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_compared'>compared</span><span class='lparen'>(</span><span class='id identifier rubyid_removed'>removed</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="replace_if_exists-instance_method">
+  
+    #<strong>replace_if_exists</strong>(key, replacement, mode: nil)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Atomically replace an existing value and return its previous value.
+An absent key is left unchanged. Existing nil and false values can be replaced.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to update.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>replacement</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to store.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum number of seconds to wait for access.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>mode</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The replacement's transfer mode, or nil to use the default.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The previous value, or nil when the key is absent or access timed out.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+  <p class="tag_title">See Also:</p>
+  <ul class="see">
+    
+      <li><span class='object_link'><a href="MapOperations.html#store-instance_method" title="Farce::Transaction::MapOperations#store (method)">For supported transfer options.</a></span></li>
+    
+  </ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+33
+34
+35
+36
+37
+38
+39
+40
+41</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction/map.rb', line 33</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_replace_if_exists'>replace_if_exists</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_write'>write</span> <span class='kw'>do</span>
+    <span class='id identifier rubyid_canonical'>canonical</span> <span class='op'>=</span> <span class='id identifier rubyid_prepare'>prepare</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
+    <span class='kw'>next</span> <span class='kw'>unless</span> <span class='ivar'>@working</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='id identifier rubyid_canonical'>canonical</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_previous'>previous</span> <span class='op'>=</span> <span class='ivar'>@working</span><span class='lbracket'>[</span><span class='id identifier rubyid_canonical'>canonical</span><span class='rbracket'>]</span>
+    <span class='id identifier rubyid_store_value'>store_value</span><span class='lparen'>(</span><span class='id identifier rubyid_canonical'>canonical</span><span class='comma'>,</span> <span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_unwrap_stored'>unwrap_stored</span><span class='lparen'>(</span><span class='id identifier rubyid_previous'>previous</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="store_if_present-instance_method">
+  
+    #<strong>store_if_present</strong>(key, mode: nil) {|value| ... } &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Atomically replace the value associated with a key if it is present.
+The block receives the current value and should return the new value to store.
+The block is not called for an absent key. A stored nil is passed to the block.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to update.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The maximum number of seconds to wait for access.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>mode</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The result's transfer mode, or nil to use the default.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>value</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Called with the current value if the key is present.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The current value.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The new value to store.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The newly stored value, or nil if the key was absent or the operation timed out.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>LocalJumpError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>If no block is given.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/transaction/map.rb', line 21</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_store_if_present'>store_if_present</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_require_block!'>require_block!</span><span class='lparen'>(</span><span class='id identifier rubyid_block_given?'>block_given?</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_write'>write</span> <span class='kw'>do</span>
+    <span class='id identifier rubyid_canonical'>canonical</span> <span class='op'>=</span> <span class='id identifier rubyid_prepare'>prepare</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
+    <span class='kw'>next</span> <span class='kw'>unless</span> <span class='ivar'>@working</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='id identifier rubyid_canonical'>canonical</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_replacement'>replacement</span> <span class='op'>=</span> <span class='kw'>yield</span><span class='lparen'>(</span><span class='id identifier rubyid_unwrap_stored'>unwrap_stored</span><span class='lparen'>(</span><span class='ivar'>@working</span><span class='lbracket'>[</span><span class='id identifier rubyid_canonical'>canonical</span><span class='rbracket'>]</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_unwrap_stored'>unwrap_stored</span><span class='lparen'>(</span><span class='id identifier rubyid_store_value'>store_value</span><span class='lparen'>(</span><span class='id identifier rubyid_canonical'>canonical</span><span class='comma'>,</span> <span class='id identifier rubyid_wrap'>wrap</span><span class='lparen'>(</span><span class='id identifier rubyid_replacement'>replacement</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
 </div>
 
       <div id="footer">
-  Generated on Sun Oct 18 20:02:02 2026 by
+  Generated on Mon Oct 19 14:05:15 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
