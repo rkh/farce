@@ -8,10 +8,11 @@ module Farce
     class Vector < Abstract::Vector
       include Shareable::Delegated
 
-      # @param source [Array, nil] Initial values. The source array is not retained.
+      # @param source [Array, Integer, nil] Initial values or a size filled with nil. The source array is not retained.
       # @param compare_by_identity [Boolean] Whether values are compared by identity.
+      # @raise [ArgumentError] If the size is negative.
       def initialize(source = nil, compare_by_identity: false)
-        @vector = Internal::Vector.new(source, compare_by_identity:)
+        @vector = Internal::Vector.new(normalize_vector_source(source), compare_by_identity:)
         super()
       end
 

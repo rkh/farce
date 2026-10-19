@@ -9,10 +9,11 @@ module Farce
       include Unshareable
       include Internal::Freeze::Delegated
 
-      # @param source [Array, nil] Initial values. Values are retained directly.
+      # @param source [Array, Integer, nil] Initial values or a size filled with nil. Values are retained directly.
       # @param compare_by_identity [Boolean] Whether values are compared by identity.
+      # @raise [ArgumentError] If the size is negative.
       def initialize(source = nil, compare_by_identity: false)
-        @vector = Internal::UnsharedVector.new(source, compare_by_identity:)
+        @vector = Internal::UnsharedVector.new(normalize_vector_source(source), compare_by_identity:)
         super()
       end
 

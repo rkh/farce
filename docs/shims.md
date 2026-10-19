@@ -139,6 +139,59 @@ Farce implements a version based on weak [atoms](data-structures.md#atoms). Not 
 
 `Farce::Resolv` is a version of Ruby's [`Resolv`](https://docs.ruby-lang.org/en/4.0/Resolv.html), using [counters](data-structures.md#counters) instead of a global instance variable, and can therefore be used outside the main Ractor.
 
+## Concurrent
+
+`Farce::Concurrent` includes the following classes:
+
+ Class            | Description
+------------------|---------------------------------------------------------------
+ `Array`          | Alias for `Farce::Vector`
+ `Atom`           | Alias for `Farce::Atom`
+ `AtomicBoolean`  | Alias for `Farce::Flag`
+ `AtomicFixnum`   | Alias for `Farce::Counter`
+ `CountDownLatch` | Drop-in replacement for `concurrent-ruby`'s `CountDownLatch`
+ `CyclicBarrier`  | Replacement for `concurrent-ruby`'s `CyclicBarrier`
+ `Event`          | Drop-in replacement for `concurrent-ruby`'s `Event`
+ `Exchanger`      | Alias for `Farce::Exchanger`
+ `FiberLocalVar`  | Drop-in replacement for `concurrent-ruby`'s `FiberLocalVar`
+ `Hash`           | Alias for `Farce::Map`
+ `Lock`           | Alias for `Farce::Lock`
+ `LockLocalVar`   | Drop-in replacement for `concurrent-ruby`'s `LockLocalVar`
+ `ReadWriteLock`  | Alias for `Farce::ReadWriteLock`
+ `ThreadLocalVar` | Drop-in replacement for `concurrent-ruby`'s `ThreadLocalVar`
+ `Tuple`          | Replacement for `concurrent-ruby`'s `Tuple`
+
+The nice thing is that these are either always Ractor-shareable, or in the case of `FiberLocalVar` and `ThreadLocalVar`, are Ractor-shareable if their default values or blocks are.
+
+For instance, you can replace threads with ractors in concurrent-ruby's own `CountDownLatch` example:
+
+```ruby
+latch = Farce::Concurrent::CountDownLatch.new(3)
+
+waiter = Ractor.new(latch) do |latch|
+  latch.wait
+  puts "Waiter released"
+end
+
+decrementer = Ractor.new(latch) do |latch|
+  sleep 1
+  latch.count_down
+  puts latch.count
+
+  sleep 1
+  latch.count_down
+  puts latch.count
+
+  sleep 1
+  latch.count_down
+  puts latch.count
+end
+
+waiter.join
+decrementer.join
+
+```
+
 ## Read Next
 
 [README](../README.md#features) · [Sharing Unshareable Data](sharing.md) · [Scheduling Code](scheduling.md)

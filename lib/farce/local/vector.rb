@@ -8,10 +8,11 @@ module Farce
     #
     # @!method initialize(source = nil, compare_by_identity: false, scope: :ractor)
     #   @!macro scopes
-    #   @param source [Array, nil] the initial values
+    #   @param source [Array, Integer, nil] Initial values or a size filled with nil.
     #   @param compare_by_identity [Boolean] whether values are compared by identity
     #   @param scope [Symbol] the scope of the vector
     #   @return [Vector]
+    #   @raise [ArgumentError] If the size is negative.
     class Vector < Abstract::Vector
       include Shareable::Tracked
       include Scoped::Tracked
@@ -24,7 +25,7 @@ module Farce
         self.class.new(values, compare_by_identity: compare_by_identity?, scope:)
       end
 
-      private def new_scoped_value(...) = Internal::UnsharedVector.new(...)
+      private def new_scoped_value(source = nil, **) = Internal::UnsharedVector.new(normalize_vector_source(source), **)
     end
   end
 end

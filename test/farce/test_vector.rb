@@ -48,6 +48,55 @@ module Farce
       end
     end
 
+    def test_initialization_with_integer_size
+      [*VECTOR_CLASSES, Local::Vector].each do |klass|
+        [0, 1, 5].each do |size|
+          vector = klass.new(size)
+
+          assert_equal size, vector.size
+          assert_equal Array.new(size), vector.to_a
+        end
+        vector = klass.new(5, compare_by_identity: true)
+
+        assert_predicate vector, :compare_by_identity?
+        assert vector.compare_and_set(4, nil, :last)
+        vector.push(:appended)
+
+        assert_equal [nil, nil, nil, nil, :last, :appended], vector.to_a
+      end
+    end
+
+    def test_initialization_rejects_invalid_sizes
+      [*VECTOR_CLASSES, Local::Vector].each do |klass|
+        assert_raises(ArgumentError) { klass.new(-1) }
+        [1.5, "5", Object.new].each do |source|
+          assert_raises(TypeError) { klass.new(source) }
+        end
+      end
+    end
+
+    def test_integer_size_preserves_transfer_options
+      vector = Vector.new(1, mode: :local, compare_by_identity: true)
+      value = Object.new
+      vector[0] = value
+
+      assert_equal :local, vector.mode
+      assert_predicate vector, :compare_by_identity?
+      assert_same value, vector[0]
+    end
+
+    def test_integer_size_initializes_each_local_scope
+      vector = Local::Vector.new(3, compare_by_identity: true, scope: :fiber)
+      vector[0] = :parent
+      Fiber.new do
+        assert_equal [nil, nil, nil], vector.to_a
+        assert_predicate vector, :compare_by_identity?
+        vector[1] = :child
+      end.resume
+
+      assert_equal [:parent, nil, nil], vector.to_a
+    end
+
     def test_push_pop_swap_and_clear
       VECTOR_CLASSES.each do |klass|
         vector = klass.new

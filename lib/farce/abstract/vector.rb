@@ -1390,6 +1390,8 @@ module Farce
 
       private
 
+      def normalize_vector_source(source) = source.is_a?(Integer) ? Array.new(source) : source
+
       def mutate_vector(timeout: nil)
         result = nil
         completed = internal_vector.batch_update(timeout:) { |values| result = yield values }
