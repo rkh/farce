@@ -163,17 +163,15 @@ The order is typically FIFO (first-in, first-out), but other orderings may be ap
   
   
     
-      <span class="note title readonly">readonly</span>
-    
     
   
   
-  <span class="abstract note title">abstract</span>
+  
   
   
 
   
-    <span class="summary_desc"><div class='inline'><p>The maximum number of items the queue can hold.</p>
+    <span class="summary_desc"><div class='inline'><p>Assign a positive limit, or <code>nil</code> for an unbounded queue.</p>
 </div></span>
   
 </li>
@@ -899,9 +897,6 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -1019,10 +1014,36 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -1052,9 +1073,32 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -1156,11 +1200,11 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
     <h2>Instance Attribute Details</h2>
     
       
-      <span id=""></span>
+      <span id="capacity=-instance_method"></span>
       <div class="method_details first">
   <h3 class="signature first" id="capacity-instance_method">
   
-    #<strong>capacity</strong>  &#x21d2; <tt>Integer</tt><sup>?</sup>  <span class="extras">(readonly)</span>
+    #<strong>capacity</strong>  &#x21d2; <tt>Integer</tt><sup>?</sup> 
   
 
   
@@ -1168,11 +1212,10 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <div class="note abstract">
-  <strong>This method is abstract.</strong>
-  <div class='inline'></div>
-</div>
-<p>Returns The maximum number of items the queue can hold.</p>
+    <p>Assign a positive limit, or <code>nil</code> for an unbounded queue.
+Changes preserve queued values. Local queues change only the current scope.
+On JRuby and TruffleRuby, normal FIFO queues retain their initial bounded or unbounded choice.
+Switching between these states may raise <code>ArgumentError</code>. Priority and timer queues support both.</p>
 
 
   </div>
@@ -1203,9 +1246,6 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -1323,10 +1363,36 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -1356,9 +1422,32 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -1494,9 +1583,6 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -1614,10 +1700,36 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -1647,9 +1759,32 @@ Most notably, priority and timer queues default to <code>nil</code>.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -1795,9 +1930,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -1915,10 +2047,36 @@ without modifying the queue.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -1948,9 +2106,32 @@ without modifying the queue.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -2094,9 +2275,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -2214,10 +2392,36 @@ without modifying the queue.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -2247,9 +2451,32 @@ without modifying the queue.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -2394,10 +2621,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-201</pre>
+227</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 201</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 227</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_age_tracking?'>age_tracking?</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_age_tracking?'>age_tracking?</span></pre>
     </td>
@@ -2447,9 +2674,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -2567,10 +2791,36 @@ without modifying the queue.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -2600,9 +2850,32 @@ without modifying the queue.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -2740,9 +3013,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -2860,10 +3130,36 @@ without modifying the queue.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -2893,9 +3189,32 @@ without modifying the queue.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -3037,9 +3356,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -3157,10 +3473,36 @@ without modifying the queue.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -3190,9 +3532,32 @@ without modifying the queue.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -3317,10 +3682,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-158</pre>
+161</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 158</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 161</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_deq'>deq</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_pop'>pop</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -3434,9 +3799,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -3554,10 +3916,36 @@ without modifying the queue.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -3587,9 +3975,32 @@ without modifying the queue.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -3714,10 +4125,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-163</pre>
+166</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 163</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 166</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_enq'>enq</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -3767,12 +4178,18 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-176</pre>
+179
+180
+181
+182</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 176</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 179</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span></pre>
+<span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+  <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+  <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+<span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -3820,10 +4237,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-204</pre>
+230</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 204</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 230</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_generation'>generation</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_generation'>generation</span></pre>
     </td>
@@ -3873,10 +4290,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-168</pre>
+171</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 168</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 171</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_length'>length</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span></pre>
     </td>
@@ -3926,10 +4343,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-172</pre>
+175</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 172</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 175</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_max'>max</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>||</span> <span class='const'>Float</span><span class='op'>::</span><span class='const'>INFINITY</span></pre>
     </td>
@@ -3979,10 +4396,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-211</pre>
+237</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 211</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 237</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_oldest_age'>oldest_age</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_oldest_age'>oldest_age</span></pre>
     </td>
@@ -4032,10 +4449,10 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-208</pre>
+234</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 208</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 234</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_oldest_enqueued_at'>oldest_enqueued_at</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_oldest_enqueued_at'>oldest_enqueued_at</span></pre>
     </td>
@@ -4068,9 +4485,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -4188,10 +4602,36 @@ without modifying the queue.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -4221,9 +4661,32 @@ without modifying the queue.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -4344,9 +4807,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -4464,10 +4924,36 @@ without modifying the queue.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -4497,9 +4983,32 @@ without modifying the queue.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -4633,9 +5142,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -4753,10 +5259,36 @@ without modifying the queue.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -4786,9 +5318,32 @@ without modifying the queue.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -4926,9 +5481,6 @@ without modifying the queue.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -5046,10 +5598,36 @@ without modifying the queue.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -5079,9 +5657,32 @@ without modifying the queue.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -5242,9 +5843,6 @@ If no item is available, the method will call the block if given, or return <cod
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -5362,10 +5960,36 @@ If no item is available, the method will call the block if given, or return <cod
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -5395,9 +6019,32 @@ If no item is available, the method will call the block if given, or return <cod
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -5608,9 +6255,6 @@ Returns <code>false</code> if the queue was at capacity and no block was given.<
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -5728,10 +6372,36 @@ Returns <code>false</code> if the queue was at capacity and no block was given.<
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -5761,9 +6431,32 @@ Returns <code>false</code> if the queue was at capacity and no block was given.<
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -5949,9 +6642,6 @@ If <code>0</code>, the method will not wait at all.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -6069,10 +6759,36 @@ If <code>0</code>, the method will not wait at all.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -6102,9 +6818,32 @@ If <code>0</code>, the method will not wait at all.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -6302,9 +7041,6 @@ If <code>0</code>, the method will not wait at all.</p>
       <pre class="lines">
 
 
-148
-149
-150
 151
 152
 153
@@ -6422,10 +7158,36 @@ If <code>0</code>, the method will not wait at all.</p>
 265
 266
 267
-268</pre>
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 148</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/queue.rb', line 151</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Queue (class)">Queue</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>MarshalSupport</span><span class='op'>::</span><span class='const'>Reject</span>
@@ -6455,9 +7217,32 @@ If <code>0</code>, the method will not wait at all.</p>
 
   <span class='comment'># Whether the queue is at capacity.
 </span>  <span class='comment'># @return [Boolean] `true` if the queue is at capacity, `false` otherwise.
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_full?'>full?</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>=</span> <span class='id identifier rubyid_capacity'>capacity</span>
+    <span class='id identifier rubyid_limit'>limit</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_limit'>limit</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span>
+
+  <span class='comment'># Change the limit without discarding queued values. Returns immediately.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># New pushes wait while the queue is at or above the new limit.
+</span>  <span class='comment'># Increasing or removing the limit wakes blocked producers.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Local queues change only the current scope. New scopes retain the constructor limit.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># Priority and timer queues support bounded and unbounded transitions on every engine.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># FIFO queues on JRuby and TruffleRuby retain their initial bounded or unbounded choice.
+</span>  <span class='comment'>#
+</span>  <span class='comment'># @param value [Integer, nil] the positive capacity, or `nil` to remove the limit
+</span>  <span class='comment'># @return [Integer, nil] the new capacity
+</span>  <span class='comment'># @raise [ArgumentError] if the capacity is not positive
+</span>  <span class='comment'># @raise [ArgumentError] on JRuby and TruffleRuby, normal FIFO queues may reject transitions
+</span>  <span class='comment'>#   between bounded and unbounded states
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='kw'>def</span> <span class='id identifier rubyid_clear'>clear</span>
     <span class='id identifier rubyid_internal_queue'>internal_queue</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span>
@@ -6558,7 +7343,7 @@ If <code>0</code>, the method will not wait at all.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Oct 19 16:01:57 2026 by
+  Generated on Mon Oct 19 17:44:58 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

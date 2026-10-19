@@ -242,6 +242,52 @@ drains queued tasks. A scheduler can only be launched or installed once.</p>
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#capacity-instance_method" title="#capacity (instance method)">#<strong>capacity</strong>  &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Pending-task capacity.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#capacity=-instance_method" title="#capacity= (instance method)">#<strong>capacity=</strong>(value)  &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Resize the pending queue without discarding tasks.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#close-instance_method" title="#close (instance method)">#<strong>close</strong>  &#x21d2; Scheduler </a>
     
 
@@ -1333,12 +1379,89 @@ that scheduler.</p>
       <pre class="lines">
 
 
-375</pre>
+384</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 375</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 384</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_alive?'>alive?</span> <span class='op'>=</span> <span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>==</span> <span class='symbol'>:running</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="capacity-instance_method">
+  
+    #<strong>capacity</strong>  &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Pending-task capacity. Nil means the queue is unbounded.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+173</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 173</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='ivar'>@queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="capacity=-instance_method">
+  
+    #<strong>capacity=</strong>(value)  &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Resize the pending queue without discarding tasks.
+JRuby and TruffleRuby cannot switch between bounded and unbounded queues.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+177
+178
+179</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 177</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_capacity='>capacity=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='ivar'>@queue</span><span class='period'>.</span><span class='id identifier rubyid_capacity'>capacity</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='const'>Integer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -1390,19 +1513,19 @@ close the underlying fiber scheduler.</p>
       <pre class="lines">
 
 
-344
-345
-346
-347
-348
-349
-350
-351
-352
-353</pre>
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 344</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 353</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_close'>close</span>
   <span class='kw'>until</span> <span class='id identifier rubyid_closed?'>closed?</span>
@@ -1472,10 +1595,10 @@ Does not imply all tasks have finished.</p>
       <pre class="lines">
 
 
-371</pre>
+380</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 371</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 380</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>=</span> <span class='const'>CLOSED_STATES</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span></pre>
     </td>
@@ -1525,13 +1648,13 @@ Does not imply all tasks have finished.</p>
       <pre class="lines">
 
 
-173
-174
-175
-176</pre>
+182
+183
+184
+185</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 173</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 182</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_error'>error</span>
   <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='ivar'>@error</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
@@ -1601,14 +1724,14 @@ Does not imply all tasks have finished.</p>
       <pre class="lines">
 
 
-290
-291
-292
-293
-294</pre>
+299
+300
+301
+302
+303</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 290</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 299</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_external_scheduler'>external_scheduler</span>
   <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_wraps_external?'>wraps_external?</span>
@@ -1767,15 +1890,6 @@ launching/setup states before returning. Returns the created worker instance.</p
       <pre class="lines">
 
 
-222
-223
-224
-225
-226
-227
-228
-229
-230
 231
 232
 233
@@ -1795,10 +1909,19 @@ launching/setup states before returning. Returns the created worker instance.</p
 247
 248
 249
-250</pre>
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 222</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 231</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_launch'>launch</span><span class='lparen'>(</span><span class='id identifier rubyid_executor'>executor</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>name:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>priority:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Scheduler may not be reused</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='symbol'>:initialized</span><span class='comma'>,</span> <span class='symbol'>:launching</span><span class='rparen'>)</span>
@@ -1925,10 +2048,10 @@ launching/setup states before returning. Returns the created worker instance.</p
       <pre class="lines">
 
 
-183</pre>
+192</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 183</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 192</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_launch_ractor'>launch_ractor</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_launch'>launch</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -2027,10 +2150,10 @@ launching/setup states before returning. Returns the created worker instance.</p
       <pre class="lines">
 
 
-190</pre>
+199</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 190</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 199</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_launch_thread'>launch_thread</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_launch'>launch</span><span class='lparen'>(</span><span class='const'>Thread</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -2101,13 +2224,13 @@ launching/setup states before returning. Returns the created worker instance.</p
       <pre class="lines">
 
 
-332
-333
-334
-335</pre>
+341
+342
+343
+344</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 332</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 341</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_local?'>local?</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='kw'>true</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_owner'>owner</span> <span class='op'>=</span> <span class='id identifier rubyid_wait'>wait</span> <span class='op'>?</span> <span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span> <span class='op'>:</span> <span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
@@ -2160,10 +2283,10 @@ launching/setup states before returning. Returns the created worker instance.</p
       <pre class="lines">
 
 
-253</pre>
+262</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 253</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 262</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_owner'>owner</span> <span class='op'>=</span> <span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span></pre>
     </td>
@@ -2248,15 +2371,15 @@ Setting the owner explicitly avoids blocking on ownership determination.</p>
       <pre class="lines">
 
 
-275
-276
-277
-278
-279
-280</pre>
+284
+285
+286
+287
+288
+289</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 275</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 284</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_owner='>owner=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>owner must be a Ractor</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>||</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='rparen'>)</span>
@@ -2450,10 +2573,10 @@ See <span class='object_link'><a href="../ModeManager.html#wrap-instance_method"
       <pre class="lines">
 
 
-320</pre>
+329</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 320</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 329</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_enqueue_task'>enqueue_task</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -2521,10 +2644,10 @@ See <span class='object_link'><a href="../ModeManager.html#wrap-instance_method"
       <pre class="lines">
 
 
-364</pre>
+373</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 364</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 373</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_state'>state</span> <span class='op'>=</span> <span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span></pre>
     </td>
@@ -2644,10 +2767,10 @@ May be ignored by some executors.</p>
       <pre class="lines">
 
 
-329</pre>
+338</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 329</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 338</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_try_schedule'>try_schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_enqueue_task'>enqueue_task</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -2697,10 +2820,10 @@ May be ignored by some executors.</p>
       <pre class="lines">
 
 
-283</pre>
+292</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 283</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 292</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wraps_external?'>wraps_external?</span> <span class='op'>=</span> <span class='ivar'>@external</span></pre>
     </td>
@@ -2713,7 +2836,7 @@ May be ignored by some executors.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Oct 19 16:02:03 2026 by
+  Generated on Mon Oct 19 17:45:04 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

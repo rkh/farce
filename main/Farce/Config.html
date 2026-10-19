@@ -220,6 +220,162 @@ shareable across Ractors.</p>
 </li>
 
     
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#parallel_pool_capacity-instance_method" title="#parallel_pool_capacity (instance method)">#<strong>parallel_pool_capacity</strong>  &#x21d2; Integer<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Pending-task capacity of <span class='object_link'><a href="../Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">in_parallel</a></span>'s CRuby pool.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#parallel_pool_grow_after-instance_method" title="#parallel_pool_grow_after (instance method)">#<strong>parallel_pool_grow_after</strong>  &#x21d2; Float </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Queue wait in seconds before <span class='object_link'><a href="../Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">in_parallel</a></span>'s CRuby pool adds a worker.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#parallel_pool_max_inflight-instance_method" title="#parallel_pool_max_inflight (instance method)">#<strong>parallel_pool_max_inflight</strong>  &#x21d2; Integer<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Soft task limit for each worker in <span class='object_link'><a href="../Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">in_parallel</a></span>'s CRuby pool.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#parallel_pool_max_size-instance_method" title="#parallel_pool_max_size (instance method)">#<strong>parallel_pool_max_size</strong>  &#x21d2; Integer<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Maximum workers used by <span class='object_link'><a href="../Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">in_parallel</a></span> on CRuby.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#parallel_pool_min_size-instance_method" title="#parallel_pool_min_size (instance method)">#<strong>parallel_pool_min_size</strong>  &#x21d2; Integer </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Minimum workers retained by <span class='object_link'><a href="../Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">in_parallel</a></span> on CRuby.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#parallel_pool_shrink_after-instance_method" title="#parallel_pool_shrink_after (instance method)">#<strong>parallel_pool_shrink_after</strong>  &#x21d2; Float<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Idle time in seconds before an extra worker in <span class='object_link'><a href="../Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">in_parallel</a></span>'s CRuby pool retires.</p>
+</div></span>
+  
+</li>
+
+    
   </ul>
 
 
@@ -474,16 +630,17 @@ shareable across Ractors.</p>
       <pre class="lines">
 
 
-41
-42
-43
-44
-45
-46
-47</pre>
+75
+76
+77
+78
+79
+80
+81
+82</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 75</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span>
   <span class='kw'>yield</span> <span class='kw'>self</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -491,6 +648,7 @@ shareable across Ractors.</p>
   <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span>       <span class='op'>=</span> <span class='const'>ENV</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>FARCE_FIBER_SCHEDULER</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='kw'>unless</span> <span class='id identifier rubyid_instance_variable_defined?'>instance_variable_defined?</span><span class='lparen'>(</span><span class='symbol'>:@fiber_scheduler</span><span class='rparen'>)</span>
   <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_main_thread_pool_size'>main_thread_pool_size</span>       <span class='op'>||=</span> <span class='const'>ENV</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>FARCE_MAIN_THREAD_POOL_SIZE</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='int'>4</span><span class='rparen'>)</span>
   <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_additional_thread_pool_size'>additional_thread_pool_size</span> <span class='op'>||=</span> <span class='const'>ENV</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>FARCE_ADDITIONAL_THREAD_POOL_SIZE</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_initialize_parallel_pool'>initialize_parallel_pool</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -645,6 +803,342 @@ Can also be set via <code>FARCE_MAIN_THREAD_POOL_SIZE</code>. Defaults to 4.</p>
 </table>
 </div>
     
+      
+      <span id="parallel_pool_capacity=-instance_method"></span>
+      <div class="method_details ">
+  <h3 class="signature " id="parallel_pool_capacity-instance_method">
+  
+    #<strong>parallel_pool_capacity</strong>  &#x21d2; <tt>Integer</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Pending-task capacity of <span class='object_link'><a href="../Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">Farce.in_parallel</a></span>'s CRuby pool.
+Defaults to 1024. Set to nil for an unbounded queue.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+67
+68
+69</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 67</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_parallel_pool_capacity'>parallel_pool_capacity</span>
+  <span class='ivar'>@parallel_pool_capacity</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id="parallel_pool_grow_after=-instance_method"></span>
+      <div class="method_details ">
+  <h3 class="signature " id="parallel_pool_grow_after-instance_method">
+  
+    #<strong>parallel_pool_grow_after</strong>  &#x21d2; <tt>Float</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Queue wait in seconds before <span class='object_link'><a href="../Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">Farce.in_parallel</a></span>'s CRuby pool adds a worker.
+Defaults to 0.005.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Float</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+57
+58
+59</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 57</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_parallel_pool_grow_after'>parallel_pool_grow_after</span>
+  <span class='ivar'>@parallel_pool_grow_after</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id="parallel_pool_max_inflight=-instance_method"></span>
+      <div class="method_details ">
+  <h3 class="signature " id="parallel_pool_max_inflight-instance_method">
+  
+    #<strong>parallel_pool_max_inflight</strong>  &#x21d2; <tt>Integer</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Soft task limit for each worker in <span class='object_link'><a href="../Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">Farce.in_parallel</a></span>'s CRuby pool.
+Defaults to 64. Set to nil to disable the limit.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+52
+53
+54</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 52</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_parallel_pool_max_inflight'>parallel_pool_max_inflight</span>
+  <span class='ivar'>@parallel_pool_max_inflight</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id="parallel_pool_max_size=-instance_method"></span>
+      <div class="method_details ">
+  <h3 class="signature " id="parallel_pool_max_size-instance_method">
+  
+    #<strong>parallel_pool_max_size</strong>  &#x21d2; <tt>Integer</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Maximum workers used by <span class='object_link'><a href="../Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">Farce.in_parallel</a></span> on CRuby.
+Defaults to nil, which uses <span class='object_link'><a href="System.html#cpu_count-class_method" title="Farce::System.cpu_count (method)">System.cpu_count</a></span> when the pool is created.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+47
+48
+49</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 47</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_parallel_pool_max_size'>parallel_pool_max_size</span>
+  <span class='ivar'>@parallel_pool_max_size</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id="parallel_pool_min_size=-instance_method"></span>
+      <div class="method_details ">
+  <h3 class="signature " id="parallel_pool_min_size-instance_method">
+  
+    #<strong>parallel_pool_min_size</strong>  &#x21d2; <tt>Integer</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Minimum workers retained by <span class='object_link'><a href="../Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">Farce.in_parallel</a></span> on CRuby. Defaults to 0.
+Configure before the first scheduler is created. Ignored on JRuby and TruffleRuby.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+42
+43
+44</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 42</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_parallel_pool_min_size'>parallel_pool_min_size</span>
+  <span class='ivar'>@parallel_pool_min_size</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id="parallel_pool_shrink_after=-instance_method"></span>
+      <div class="method_details ">
+  <h3 class="signature " id="parallel_pool_shrink_after-instance_method">
+  
+    #<strong>parallel_pool_shrink_after</strong>  &#x21d2; <tt>Float</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Idle time in seconds before an extra worker in <span class='object_link'><a href="../Farce.html#in_parallel-class_method" title="Farce.in_parallel (method)">Farce.in_parallel</a></span>'s CRuby pool retires.
+Defaults to 30. Set to nil to disable idle retirement.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Float</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+62
+63
+64</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 62</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_parallel_pool_shrink_after'>parallel_pool_shrink_after</span>
+  <span class='ivar'>@parallel_pool_shrink_after</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
   </div>
 
 
@@ -763,13 +1257,13 @@ Custom schedulers must support the executor used by the Pool or Scheduler.</p>
       <pre class="lines">
 
 
-98
-99
-100
-101</pre>
+140
+141
+142
+143</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 98</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 140</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_constructor'>constructor</span><span class='rparen'>)</span>
   <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_fiber_scheduler'>fiber_scheduler</span> <span class='op'>=</span> <span class='id identifier rubyid_constructor'>constructor</span> <span class='kw'>if</span> <span class='id identifier rubyid_constructor'>constructor</span>
@@ -819,13 +1313,13 @@ or assign a proc to configure construction. Invalid assignments preserve the old
       <pre class="lines">
 
 
-105
-106
-107
-108</pre>
+147
+148
+149
+150</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 105</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 147</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fiber_scheduler='>fiber_scheduler=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>FrozenError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>can&#39;t modify frozen Config</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
@@ -878,17 +1372,17 @@ or assign a proc to configure construction. Invalid assignments preserve the old
       <pre class="lines">
 
 
-112
-113
-114
-115
-116
-117
-118
-119</pre>
+154
+155
+156
+157
+158
+159
+160
+161</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 112</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 154</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fiber_scheduler_implementation'>fiber_scheduler_implementation</span>
   <span class='kw'>case</span> <span class='ivar'>@fiber_scheduler</span>
@@ -928,15 +1422,15 @@ or assign a proc to configure construction. Invalid assignments preserve the old
       <pre class="lines">
 
 
-153
-154
-155
-156
-157
-158</pre>
+234
+235
+236
+237
+238
+239</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 153</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 234</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_freeze'>freeze</span>
   <span class='kw'>return</span> <span class='kw'>self</span> <span class='kw'>if</span> <span class='id identifier rubyid_frozen?'>frozen?</span>
@@ -992,15 +1486,15 @@ Availability is checked when a scheduler is created.</p>
       <pre class="lines">
 
 
-124
-125
-126
-127
-128
-129</pre>
+166
+167
+168
+169
+170
+171</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 124</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 166</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_io_backend'>io_backend</span>
   <span class='kw'>case</span> <span class='ivar'>@fiber_scheduler</span>
@@ -1018,7 +1512,7 @@ Availability is checked when a scheduler is created.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Oct 19 16:01:50 2026 by
+  Generated on Mon Oct 19 17:44:50 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

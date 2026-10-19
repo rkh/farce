@@ -1130,13 +1130,13 @@ Cannot be read from, but does not accumulate messages in memory.</p>
       <pre class="lines">
 
 
-231
-232
-233
-234</pre>
+341
+342
+343
+344</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 231</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 341</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_config'>config</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_configure'>configure</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -1199,10 +1199,10 @@ Cannot be read from, but does not accumulate messages in memory.</p>
       <pre class="lines">
 
 
-227</pre>
+337</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 227</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/config.rb', line 337</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_configure'>configure</span> <span class='op'>=</span> <span class='kw'>yield</span> <span class='const'>CONFIG</span></pre>
     </td>
@@ -2006,7 +2006,9 @@ variables. Defaults to <code>freeze_modules</code>, but can be set independently
 </h3><div class="docstring">
   <div class="discussion">
     <p>Schedules work without waiting for the block to finish.
-On CRuby, uses a shared Ractor pool with at most <span class='object_link'><a href="Farce/System.html#cpu_count-class_method" title="Farce::System.cpu_count (method)">Farce::System.cpu_count</a></span> workers.
+On CRuby, uses a shared Ractor pool with at most <span class='object_link'><a href="Farce/System.html#cpu_count-class_method" title="Farce::System.cpu_count (method)">Farce::System.cpu_count</a></span> workers by default.
+Set <span class='object_link'><a href="Farce/Config.html" title="Farce::Config (class)">Config</a></span>'s <code>parallel_pool_*</code> options before creating a scheduler to configure
+its worker limits, growth and shrink delays, per-worker task limit, and queue capacity.
 On JRuby and TruffleRuby, starts a new thread for each task.</p>
 <p>Without a block, returns the shared scheduler. The CRuby pool starts workers
 when tasks arrive. Pass mutable task data as arguments so it can be transferred based on the given mode.</p>
@@ -2197,8 +2199,6 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-455
-456
 457
 458
 459
@@ -2206,10 +2206,12 @@ This may update and freeze the original. Already-shareable values pass through u
 461
 462
 463
-464</pre>
+464
+465
+466</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce.rb', line 455</span>
+      <pre class="code"><span class="info file"># File 'lib/farce.rb', line 457</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_in_parallel'>in_parallel</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='const'>UNDEFINED</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -3079,8 +3081,6 @@ it will not create a new ractor-local scheduler if one is not already available.
       <pre class="lines">
 
 
-492
-493
 494
 495
 496
@@ -3093,10 +3093,12 @@ it will not create a new ractor-local scheduler if one is not already available.
 503
 504
 505
-506</pre>
+506
+507
+508</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce.rb', line 492</span>
+      <pre class="code"><span class="info file"># File 'lib/farce.rb', line 494</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -3348,7 +3350,7 @@ Starts backing off after the specified number of attempts, up to the maximum del
 </div>
 
       <div id="footer">
-  Generated on Mon Oct 19 16:01:46 2026 by
+  Generated on Mon Oct 19 17:44:46 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

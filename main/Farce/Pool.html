@@ -133,6 +133,10 @@ when work arrives. A task that remains queued for <code>grow_after</code>
 causes the pool to add a worker until <code>max_size</code> is reached. Workers above
 <code>min_size</code> retire after <code>shrink_after</code> without queued or running work.
 By default, the pool starts with no workers and can shrink back to zero.</p>
+<p>Worker limits, task limits, scaling delays, and queue capacity can change while
+the pool runs. Lowering <code>max_size</code> retires extra workers as they become idle.
+Busy workers keep queued work runnable. Raising <code>min_size</code> starts workers
+immediately. Queued tasks are retained.</p>
 <p>Most importantly, it exposes a <span class='object_link'><a href="Abstract/Pool.html#schedule-instance_method" title="Farce::Abstract::Pool#schedule (method)">Abstract::Pool#schedule</a></span> method compatible with <span class='object_link'><a href="Abstract/Scheduler.html#schedule-instance_method" title="Farce::Abstract::Scheduler#schedule (method)">Abstract::Scheduler#schedule</a></span>.</p>
 
 
@@ -179,11 +183,6 @@ By default, the pool starts with no workers and can shrink back to zero.</p>
 
 
 
-  <h2>Instance Attribute Summary</h2>
-  
-  <h3 class="inherited">Attributes inherited from <span class='object_link'><a href="Abstract/Pool.html" title="Farce::Abstract::Pool (class)">Abstract::Pool</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Abstract/Pool.html#grow_after-instance_method" title="Farce::Abstract::Pool#grow_after (method)">#grow_after</a></span>, <span class='object_link'><a href="Abstract/Pool.html#max_inflight-instance_method" title="Farce::Abstract::Pool#max_inflight (method)">#max_inflight</a></span>, <span class='object_link'><a href="Abstract/Pool.html#max_size-instance_method" title="Farce::Abstract::Pool#max_size (method)">#max_size</a></span>, <span class='object_link'><a href="Abstract/Pool.html#min_size-instance_method" title="Farce::Abstract::Pool#min_size (method)">#min_size</a></span>, <span class='object_link'><a href="Abstract/Pool.html#shrink_after-instance_method" title="Farce::Abstract::Pool#shrink_after (method)">#shrink_after</a></span></p>
-
 
 
   
@@ -216,7 +215,7 @@ By default, the pool starts with no workers and can shrink back to zero.</p>
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Abstract/Pool.html" title="Farce::Abstract::Pool (class)">Abstract::Pool</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Abstract/Pool.html#at_max_size%3F-instance_method" title="Farce::Abstract::Pool#at_max_size? (method)">#at_max_size?</a></span>, <span class='object_link'><a href="Abstract/Pool.html#close-instance_method" title="Farce::Abstract::Pool#close (method)">#close</a></span>, <span class='object_link'><a href="Abstract/Pool.html#closed%3F-instance_method" title="Farce::Abstract::Pool#closed? (method)">#closed?</a></span>, <span class='object_link'><a href="Abstract/Pool.html#closing%3F-instance_method" title="Farce::Abstract::Pool#closing? (method)">#closing?</a></span>, <span class='object_link'><a href="Abstract/Pool.html#error-instance_method" title="Farce::Abstract::Pool#error (method)">#error</a></span>, <span class='object_link'><a href="Abstract/Pool.html#initialize-instance_method" title="Farce::Abstract::Pool#initialize (method)">#initialize</a></span>, <span class='object_link'><a href="Abstract/Pool.html#schedule-instance_method" title="Farce::Abstract::Pool#schedule (method)">#schedule</a></span>, <span class='object_link'><a href="Abstract/Pool.html#size-instance_method" title="Farce::Abstract::Pool#size (method)">#size</a></span>, <span class='object_link'><a href="Abstract/Pool.html#state-instance_method" title="Farce::Abstract::Pool#state (method)">#state</a></span>, <span class='object_link'><a href="Abstract/Pool.html#try_schedule-instance_method" title="Farce::Abstract::Pool#try_schedule (method)">#try_schedule</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Abstract/Pool.html#at_max_size%3F-instance_method" title="Farce::Abstract::Pool#at_max_size? (method)">#at_max_size?</a></span>, <span class='object_link'><a href="Abstract/Pool.html#capacity-instance_method" title="Farce::Abstract::Pool#capacity (method)">#capacity</a></span>, <span class='object_link'><a href="Abstract/Pool.html#capacity=-instance_method" title="Farce::Abstract::Pool#capacity= (method)">#capacity=</a></span>, <span class='object_link'><a href="Abstract/Pool.html#close-instance_method" title="Farce::Abstract::Pool#close (method)">#close</a></span>, <span class='object_link'><a href="Abstract/Pool.html#closed%3F-instance_method" title="Farce::Abstract::Pool#closed? (method)">#closed?</a></span>, <span class='object_link'><a href="Abstract/Pool.html#closing%3F-instance_method" title="Farce::Abstract::Pool#closing? (method)">#closing?</a></span>, <span class='object_link'><a href="Abstract/Pool.html#error-instance_method" title="Farce::Abstract::Pool#error (method)">#error</a></span>, <span class='object_link'><a href="Abstract/Pool.html#grow_after-instance_method" title="Farce::Abstract::Pool#grow_after (method)">#grow_after</a></span>, <span class='object_link'><a href="Abstract/Pool.html#grow_after=-instance_method" title="Farce::Abstract::Pool#grow_after= (method)">#grow_after=</a></span>, <span class='object_link'><a href="Abstract/Pool.html#initialize-instance_method" title="Farce::Abstract::Pool#initialize (method)">#initialize</a></span>, <span class='object_link'><a href="Abstract/Pool.html#max_inflight-instance_method" title="Farce::Abstract::Pool#max_inflight (method)">#max_inflight</a></span>, <span class='object_link'><a href="Abstract/Pool.html#max_inflight=-instance_method" title="Farce::Abstract::Pool#max_inflight= (method)">#max_inflight=</a></span>, <span class='object_link'><a href="Abstract/Pool.html#max_size-instance_method" title="Farce::Abstract::Pool#max_size (method)">#max_size</a></span>, <span class='object_link'><a href="Abstract/Pool.html#max_size=-instance_method" title="Farce::Abstract::Pool#max_size= (method)">#max_size=</a></span>, <span class='object_link'><a href="Abstract/Pool.html#min_size-instance_method" title="Farce::Abstract::Pool#min_size (method)">#min_size</a></span>, <span class='object_link'><a href="Abstract/Pool.html#min_size=-instance_method" title="Farce::Abstract::Pool#min_size= (method)">#min_size=</a></span>, <span class='object_link'><a href="Abstract/Pool.html#schedule-instance_method" title="Farce::Abstract::Pool#schedule (method)">#schedule</a></span>, <span class='object_link'><a href="Abstract/Pool.html#shrink_after-instance_method" title="Farce::Abstract::Pool#shrink_after (method)">#shrink_after</a></span>, <span class='object_link'><a href="Abstract/Pool.html#shrink_after=-instance_method" title="Farce::Abstract::Pool#shrink_after= (method)">#shrink_after=</a></span>, <span class='object_link'><a href="Abstract/Pool.html#size-instance_method" title="Farce::Abstract::Pool#size (method)">#size</a></span>, <span class='object_link'><a href="Abstract/Pool.html#state-instance_method" title="Farce::Abstract::Pool#state (method)">#state</a></span>, <span class='object_link'><a href="Abstract/Pool.html#try_schedule-instance_method" title="Farce::Abstract::Pool#try_schedule (method)">#try_schedule</a></span></p>
 
   
   
@@ -247,7 +246,7 @@ By default, the pool starts with no workers and can shrink back to zero.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Oct 19 16:01:49 2026 by
+  Generated on Mon Oct 19 17:44:49 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
