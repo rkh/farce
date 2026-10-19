@@ -53,6 +53,21 @@ module Farce
         self
       end
 
+      # @api private
+      def marshal_dump
+        [1, @tuple.to_a.map { Internal::MarshalSupport.value(it) }, frozen?]
+      end
+
+      # @api private
+      def marshal_load(data)
+        entries, frozen = Internal::MarshalSupport.payload(data, 2)
+        initialize(entries.length)
+        entries.each_with_index do |entry, index|
+          @tuple[index] = Internal::MarshalSupport.restore_value(entry)
+        end
+        Internal::MarshalSupport.freeze(self, frozen)
+      end
+
       private def freeze_backend = @tuple
     end
   end

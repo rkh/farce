@@ -212,6 +212,63 @@ module Farce
         assert_equal [nil, :value], tuple.to_a
       end
 
+      def test_marshal_restores_values_and_independent_shareable_storage
+        tuple = Tuple.new(4)
+        nested = Vector.new([1])
+        tuple.set(1, false)
+        tuple.set(2, "value")
+        tuple.set(3, nested)
+        copy = Marshal.load(Marshal.dump(tuple))
+
+        assert_instance_of Tuple, copy
+        assert_equal 4, copy.size
+        assert_equal [nil, false, "value"], copy.to_a.first(3)
+        assert_predicate copy.get(2), :frozen?
+        assert Ractor.shareable?(copy)
+        refute_predicate copy, :frozen?
+        assert copy.cas(1, false, true)
+        copy.set(0, :changed)
+        copy.get(3) << 2
+
+        assert_nil tuple.get(0)
+        assert_same false, tuple.get(1)
+        assert_equal [1], nested.to_a
+        assert_equal [1, 2], copy.get(3).to_a
+      end
+
+      def test_marshal_preserves_empty_and_frozen_tuples
+        [0, 1].each do |size|
+          tuple = Tuple.new(size).freeze
+          copy = Marshal.load(Marshal.dump(tuple))
+
+          assert_equal size, copy.size
+          assert_equal ::Array.new(size), copy.to_a
+          assert_predicate copy, :frozen?
+          assert Ractor.shareable?(copy)
+          next if size.zero?
+
+          assert_raises(FrozenError) { copy.set(0, :changed) }
+          assert_raises(FrozenError) { copy.cas(0, nil, :changed) }
+        end
+      end
+
+      def test_marshaled_tuple_can_be_loaded_and_used_in_another_ractor
+        tuple = Tuple.new(1)
+        tuple.set(0, :before)
+        worker = Ractor.new(Marshal.dump(tuple)) do |snapshot|
+          restored = Marshal.load(snapshot) # rubocop:disable Security/MarshalLoad
+          raise "tuple is not shareable" unless Ractor.shareable?(restored)
+          raise "CAS failed" unless restored.cas(0, :before, :after)
+          restored
+        end
+        copy = ractor_value(worker)
+
+        assert Ractor.shareable?(copy)
+        assert_equal :after, copy.get(0)
+        assert_equal :before, tuple.get(0)
+        assert copy.cas(0, :after, :main)
+      end
+
       def test_freezing_prevents_writes_and_allows_reads
         tuple = Tuple.new(1)
         tuple.set(0, :value)
