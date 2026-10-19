@@ -353,7 +353,7 @@ module Farce
           return fallback&.call if timed_out == :timed_out
 
           unless entry
-            return nil unless values_equal?(nil, expected)
+            return nil if Internal.value_changed?(nil, expected, compare_values_by_identity?)
             return fallback&.call unless signal_changed?(@index.change_signal, observed, deadline)
             next
           end
@@ -374,7 +374,8 @@ module Farce
           # lookup object. Otherwise GC could orphan the entry's change signal.
           key     = stored_key
           current = nil unless present
-          return current if non_nil ? !current.nil? : !values_equal?(current, expected)
+          return current if non_nil ? !current.nil? :
+            Internal.value_changed?(current, expected, compare_values_by_identity?)
           return fallback&.call unless entry.wait_for_change?(changed, deadline)
         end
       end

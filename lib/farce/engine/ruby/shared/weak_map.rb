@@ -334,7 +334,9 @@ module Farce
           key     = response[5] if response.first == :ok
           present = response.first == :ok && response[1]
           current = present ? response[2] : nil
-          return current if non_nil ? !current.nil? : !values_equal?(current, expected)
+
+          return current if non_nil ? !current.nil? :
+            Internal.value_changed?(current, expected, compare_values_by_identity?)
 
           signal = response.first == :ok ? response[3] : response[1]
           generation = response.first == :ok ? response[4] : response[2]

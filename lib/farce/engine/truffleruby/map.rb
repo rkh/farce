@@ -28,7 +28,8 @@ module Farce
         end
 
         def eql?(other)
-          result = other.is_a?(Key) && value.eql?(other.value)
+          result = other.is_a?(Key) &&
+            (BASIC_OBJECT_EQUAL_METHOD.bind_call(value, other.value) || value.eql?(other.value))
           owner = mutation_owner || (other.mutation_owner if other.is_a?(Key))
           Internal::Freeze.check(owner) if owner
           result
@@ -557,7 +558,8 @@ module Farce
             native_operation { concurrent_get(wrapped) }
           end
           return fallback&.call unless completed
-          ready = non_nil ? !current.nil? : !values_equal?(current, expected)
+          ready = non_nil ? !current.nil? :
+            Internal.value_changed?(current, expected, compare_values_by_identity?)
           return current if ready
           return fallback&.call unless wait_for_signal(@change_signal, generation, deadline)
         end

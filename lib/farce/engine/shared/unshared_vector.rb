@@ -345,7 +345,8 @@ module Farce
         while true
           generation = @signal.generation
           current    = @mutex.synchronize { @values[index] }
-          ready      = non_nil ? !current.nil? : !values_equal?(current, expected)
+          ready      = non_nil ? !current.nil? :
+            Internal.value_changed?(current, expected, compare_by_identity?)
           return current if ready
           return unless wait_for_signal(generation, deadline)
         end

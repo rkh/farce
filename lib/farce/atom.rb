@@ -217,6 +217,13 @@ module Farce
       unwrap_value(result)
     end
 
+    # (see Abstract::Atom#wait_until)
+    def wait_until(timeout: nil)
+      raise LocalJumpError, "no block given" unless block_given?
+      result = Internal.wait_until(@atom, timeout:) { |current| yield(unwrap_value(current)) }
+      unwrap_value(result)
+    end
+
     # Wait until the current value no longer matches an expected value.
     # @param expected [BasicObject, nil] the value to compare with the current value
     # @param timeout [Numeric, nil] the maximum number of seconds to wait

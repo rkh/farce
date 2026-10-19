@@ -102,6 +102,12 @@ module Farce
       end
     end
 
+    # An unchanged observation must permit waiting even when its equality is non-reflexive.
+    def value_changed?(current, expected, identity)
+      return false if BasicObject.instance_method(:equal?).bind_call(current, expected)
+      identity || !(current == expected) # rubocop:disable Style/InverseMethods -- != can be overridden independently.
+    end
+
     def garbage_collectable?(object)
       case object
       when Integer, Float, Complex, Rational, Symbol, true, false, nil then false

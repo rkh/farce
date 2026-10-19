@@ -396,20 +396,55 @@ module Farce
       assert map.available?(3)
     end
 
-    def test_compare_and_set_retries_read_the_current_map_value
-      klass = Class.new(Unshared::Map) do
-        def compare_and_set(key, expected, replacement, **)
-          unless @interfered
-            @interfered = true
-            self[key] = 10
-          end
-          super
+    def test_concurrent_replacements_are_transformed_without_holding_update_access
+      [Map, Strict::Map, Unshared::Map, Local::Map].each do |type|
+        map = type.new({ count: 1 })
+        entered = Thread::Queue.new
+        written = Thread::Queue.new
+        writer = Thread.new do
+          entered.pop
+          map[:count] = 10
+          written << true
         end
-      end
-      map = klass.new({ count: 1 })
+        result = Timeout.timeout(5) do
+          Walker.modify(map) do |object, walker|
+            if object == 1
+              entered << true
+              written.pop
+              2
+            elsif object == 10
+              map[:count] = 20
+              11
+            else
+              Integer === object ? object + 1 : walker.traverse
+            end
+          end
+        end
 
-      assert_same map, increment(map)
-      assert_equal 11, map[:count]
+        assert_same map, result
+        assert_equal 21, map[:count], type.name
+        writer.join
+      ensure
+        writer&.kill
+        writer&.join
+      end
+    end
+
+    def test_concurrently_deleted_map_values_are_not_reinserted
+      [Map, Strict::Map, Unshared::Map, Local::Map].each do |type|
+        map = type.new({ count: 1 })
+        result = Walker.modify(map) do |object, walker|
+          if object == 1
+            map.delete(:count)
+            2
+          else
+            walker.traverse
+          end
+        end
+
+        assert_same map, result
+        assert_empty map, type.name
+      end
     end
 
     def test_proc_receivers_can_be_replaced

@@ -181,6 +181,13 @@ module Farce
       end
     end
 
+    # (see Farce::Abstract::Vector#wait_until)
+    def wait_until(index, timeout: nil)
+      raise LocalJumpError, "no block given" unless block_given?
+      result = Internal.wait_until(@vector, index, timeout:) { |current| yield(@manager.unwrap(current)) }
+      @manager.unwrap(result)
+    end
+
     # (see Farce::Abstract::Vector#wait_until_changed)
     def wait_until_changed(index, expected, timeout: nil)
       deadline = timeout_deadline(timeout)

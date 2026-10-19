@@ -158,7 +158,8 @@ module Farce
         loop do
           generation = @changes.value
           current    = read_value
-          return current if non_nil ? !current.nil? : !values_equal?(current, expected)
+          return current if non_nil ? !current.nil? :
+            Internal.value_changed?(current, expected, compare_by_identity?)
           # Detect recursive waits without waiting for another owner's update.
           @lock.get(timeout: 0)
           return fallback&.call if remaining_timeout(deadline)&.zero?

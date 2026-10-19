@@ -307,6 +307,14 @@ containers_raise_key_error(VALUE receiver, VALUE key)
 }
 
 static VALUE
+farce_value_changed(VALUE namespace, VALUE current, VALUE expected, VALUE identity)
+{
+    if (current == expected) return Qfalse;
+    if (RTEST(identity)) return identity;
+    return RTEST(rb_equal(current, expected)) ? Qfalse : Qtrue;
+}
+
+static VALUE
 farce_futex_supported(VALUE namespace)
 {
     return containers_futex_available() ? Qtrue : Qfalse;
@@ -336,6 +344,7 @@ Init_farce(void)
     VALUE mInternal = rb_const_get(mFarce, rb_intern("Internal"));
     VALUE singleton = rb_singleton_class(mInternal);
     eIsolationError = rb_const_get(rb_cRactor, rb_intern("IsolationError"));
+    rb_define_singleton_method(mInternal, "value_changed?", farce_value_changed, 3);
 #if RUBY_API_VERSION_CODE == 30400
     rb_define_singleton_method(mInternal, "lock_native_thread", farce_lock_native_thread, 0);
 #endif

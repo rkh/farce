@@ -143,6 +143,13 @@ module Farce
         end
       end
 
+      # (see Abstract::ConcurrentMap#wait_until)
+      def wait_until(key, timeout: nil)
+        raise LocalJumpError, "no block given" unless block_given?
+        result = Internal.wait_until(@map, key, timeout:) { |current| yield(unwrap_value(current)) }
+        unwrap_value(result)
+      end
+
       def wait_until_changed(key, expected, timeout: nil, &)
         prepared_key = @map.normalize_external_key(key)
         expected = wrap_comparison(expected)

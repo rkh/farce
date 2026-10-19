@@ -118,8 +118,19 @@ module Farce
           if !key.equal?(new_key)
             entries << [key, new_key, result]
           elsif !value.equal?(result)
-            until target.compare_and_set(key, value, result)
-              value = target[key]
+            loop do
+              retry_update = false
+              send_to(target, :modify_entry, key, canonical: true) do |present, current|
+                next Internal::MAP_KEEP unless present
+                if Internal.value_changed?(current, value, true)
+                  value = current
+                  retry_update = true
+                  next Internal::MAP_KEEP
+                end
+                result
+              end
+              break unless retry_update
+              # Traverse replacements after releasing the key's update reservation.
               result = walker.visit(value)
             end
           end

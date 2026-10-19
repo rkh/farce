@@ -100,6 +100,9 @@ module Farce
       matched
     end
 
+    # (see Abstract::Atom#wait_until)
+    def wait_until(timeout: nil, &) = Internal.wait_until(@atom, timeout:, &)
+
     # (see Abstract::Atom#wait_until_changed)
     def wait_until_changed(expected, timeout: nil, &fallback)
       deadline = Internal.timeout_deadline(timeout)

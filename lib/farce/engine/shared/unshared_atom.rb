@@ -129,7 +129,7 @@ module Farce
 
         loop do
           current, version = @mutex.synchronize { [@value, @version] }
-          return current unless values_equal?(current, expected)
+          return current if Internal.value_changed?(current, expected, compare_by_identity?)
 
           result = @mutex.synchronize do
             next unless @version == version
