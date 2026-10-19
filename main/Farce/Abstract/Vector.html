@@ -19054,7 +19054,7 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/abstract/vector.rb', line 1293</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
+<span class='kw'>def</span> <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='id identifier rubyid_internal_vector'>internal_vector</span><span class='comma'>,</span> <span class='id identifier rubyid_index'>index</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
   </tr>
 </table>
@@ -20073,7 +20073,7 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
 </div>
 
       <div id="footer">
-  Generated on Mon Oct 19 18:08:11 2026 by
+  Generated on Mon Oct 19 18:32:10 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
