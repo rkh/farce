@@ -53,7 +53,16 @@ jobs:
           ruby-version: ${{ matrix.ruby.version }}
 
       - run: bundle install
-      - run: bundle exec rake ci
+      - name: Compile and test
+        run: |
+          if [[ "${{ matrix.ruby.version }}" == "3.4" ]]; then
+            # Reduce exposure to Ruby 3.4's unsynchronized shared fiber stack pool.
+            # https://github.com/ruby/ruby/commit/5b3f1c4c51480cbdbd1ace92b1767f14f9fff280
+            test_cpu=$(awk '/Cpus_allowed_list/ { sub(/[-,].*/, "", $2); print $2 }' /proc/self/status)
+            taskset --cpu-list "$test_cpu" bundle exec rake ci
+          else
+            bundle exec rake ci
+          fi
         env:
           FARCE_VERIFY_GEMS: ${{ matrix.ruby.verify_gems || false }}
           JRUBY_OPTS: ${{ matrix.ruby.jruby_opts || '' }}

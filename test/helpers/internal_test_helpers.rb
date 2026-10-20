@@ -66,6 +66,9 @@ module Helpers
           end
         end
         :done
+      ensure
+        # Ruby 3.4 can deliver the terminal result before closing the incoming port.
+        Ractor.current.close_incoming if Ractor.current.respond_to?(:close_incoming)
       end
       failure = nil
 
