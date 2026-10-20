@@ -7,6 +7,22 @@ module Farce
     # @abstract Common numeric interface and atomic operations for counters.
     # @note This is a module rather than a class so {Farce::Counter} can inherit
     #   directly from the native counter and avoid delegation overhead.
+    #
+    # @!method initial
+    #   @return [Integer] The initial value retained by reset and copies.
+    #
+    # @!method value
+    #   @return [Integer] The current value of the counter.
+    #
+    # @!method increment(by = 1)
+    #   Increment the counter by the given amount (default is 1).
+    #   @param [Numeric, String, #to_int] by The amount, converted to an Integer.
+    #   @return [self] Returns self for chaining.
+    #
+    # @!method decrement(by = 1)
+    #   Decrement the counter by the given amount (default is 1).
+    #   @param [Numeric, String, #to_int] by The amount, converted to an Integer.
+    #   @return [self] Returns self for chaining.
     module Counter
       include Internal::MarshalSupport::Counter
       include Internal::Copyable
