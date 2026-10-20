@@ -167,12 +167,19 @@
 <li><code>Kernel.instance_method(:frozen?).bind_call(object)</code> might report a different value from <code>object.frozen?</code></li>
 <li>C-level checks for frozen state, such as <code>RB_OBJ_FROZEN</code>, might differ from what Ruby-level methods report.</li>
 </ul>
+<h3 id="fiber-schedulers-and-ractors-dont-play-nice-on-ruby-34">Fiber schedulers and Ractors don't play nice on Ruby 3.4<a href="#fiber-schedulers-and-ractors-dont-play-nice-on-ruby-34" aria-label="Link to heading 'Fiber schedulers and Ractors don't play nice on Ruby 3.4'" data-heading-content="Fiber schedulers and Ractors don't play nice on Ruby 3.4" class="anchor"></a></h3>
+<p>Fiber schedulers running in a non-main Ractor have a chance of causing a segmentation fault on x86_64 Linux with Ruby 3.4.11 and earlier.</p>
+<p>This issue is <a href="https://gist.github.com/rkh/f330bd5c4accc9718f5ca227ae020c94">unrelated to Farce itself</a> and typically only surfaces irregularly under a high number of Ractor shutdowns.
+It does however surface from time to time when running the Farce test suite on affected Ruby versions and platforms.</p>
+<p>Installing and loading Farce, using Farce data structures, etc, does not increase the likelihood of encountering this issue.</p>
+<h3 id="gc-related-tests-are-flaky-in-certain-environments">GC related tests are flaky in certain environments<a href="#gc-related-tests-are-flaky-in-certain-environments" aria-label="Link to heading 'GC related tests are flaky in certain environments'" data-heading-content="GC related tests are flaky in certain environments" class="anchor"></a></h3>
+<p>Garbage collection related tests may exhibit flakiness on some Ruby versions and platforms. This can lead to unexpected failures when running the test suite.</p>
 <h2 id="read-next">Read Next<a href="#read-next" aria-label="Link to heading 'Read Next'" data-heading-content="Read Next" class="anchor"></a></h2>
 <p><a href="index.html#features" title="README">README</a> · <a href="file.installation.html" title="Installation">Installation</a> · <a href="file.integrations.html" title="Integrations">Integrations</a></p>
 </div></div>
 
       <div id="footer">
-  Generated on Tue Oct 20 12:12:05 2026 by
+  Generated on Tue Oct 20 12:27:34 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
