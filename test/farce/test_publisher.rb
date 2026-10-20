@@ -152,6 +152,30 @@ module Farce
       assert_same second_subscription, publisher.subscription_for(second)
     end
 
+    def test_local_counter_and_flag_subscribers
+      publisher = publisher_class.new
+      counter = Local::Counter.new
+      flag = Local::Flag.new
+      publisher.subscribe(counter)
+      publisher.subscribe(flag)
+      publisher.publish(:message)
+
+      assert_equal 1, counter.value
+      assert_predicate flag, :value
+    end
+
+    def test_internal_counter_and_flag_subscribers
+      publisher = publisher_class.new
+      counter = Internal::Counter.new
+      flag = Internal::Flag.new
+      publisher.subscribe(counter)
+      publisher.subscribe(flag)
+      publisher.publish(:message)
+
+      assert_equal 1, counter.value
+      assert_predicate flag, :value
+    end
+
     def test_closed_subscriber_is_removed_without_interrupting_other_deliveries
       closed = Queue.new
       open = Queue.new

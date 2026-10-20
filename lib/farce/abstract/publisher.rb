@@ -37,6 +37,7 @@ module Farce
 
       # @overload subscribe(subscriber)
       #   Adds a subscriber to the publisher.
+      #   Register additional subscriber classes with {Subscription.define}.
       #   Publisher subscribers forward messages synchronously to their own subscribers.
       #   Avoid subscribing publishers in a cycle.
       #
@@ -121,32 +122,10 @@ module Farce
           return existing if existing
           subscriber = subscriber.subscriber
         end
-
         return create_subscription(source: subscriber, &subscriber) if subscriber.is_a?(Proc)
-        map = self.map
 
-        map.store_if_absent(subscriber.__id__) do
-          case subscriber
-          when Internal::BasePort, Ractor
-            build_subscription(subscriber, map) { _1.send(_2) }
-          when Abstract::Publisher
-            build_subscription(subscriber, map) { _1.publish(_2) }
-          when Abstract::Queue
-            build_subscription(subscriber, map) { _1.try_push(_2) }
-          when Abstract::Counter
-            build_subscription(subscriber, map) { |c, _| c.increment }
-          when Abstract::Flag
-            build_subscription(subscriber, map) { |f, _| f.set }
-          when Abstract::Atom
-            build_subscription(subscriber, map) { _1.value = _2 }
-          when Abstract::Set, Abstract::Vector
-            build_subscription(subscriber, map) { _1 << _2 }
-          when Signal
-            build_subscription(subscriber, map) { |s, _| s.broadcast }
-          else
-            raise ArgumentError, "Unsupported subscriber type: #{subscriber.class}"
-          end
-        end
+        map = self.map
+        map.store_if_absent(subscriber.__id__) { build_subscription(subscriber, map) }
       end
 
       def create_subscription(*, capacity: nil, mode: nil, scheduler: nil, source: nil, &callback)
@@ -158,7 +137,7 @@ module Farce
         created     = false
         subscription = map.store_if_absent((source || queue).__id__) do
           created = true
-          build_subscription(queue, map, callback: true, source:) { _1.try_push(_2) }
+          build_subscription(queue, map, callback: true, source:)
         end
         return subscription unless created
 
@@ -185,7 +164,7 @@ module Farce
         end
       end
 
-      def build_subscription(...) = Subscription.__send__(:new, self, ...)
+      def build_subscription(...) = Subscription.build(self, ...)
     end
   end
 end

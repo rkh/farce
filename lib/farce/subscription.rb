@@ -12,6 +12,44 @@ module Farce
     # Raised when an operation is attempted on an unsubscribed subscription.
     UnsubscribedError = Class.new(StandardError)
 
+    REGISTER = ClassMirror.new(self)
+    private_constant :REGISTER
+
+    class << self
+      protected :new
+    end
+
+    # Register delivery behavior for subscriber classes from the main Ractor.
+    # Subclasses inherit the nearest registered delivery method.
+    #
+    # @example
+    #   Farce::Subscription.define(MyInbox) { |payload| subscriber.push(payload) }
+    #
+    # @param classes [Array<Class>] the subscriber classes to support
+    # @yieldparam payload [BasicObject] the published payload
+    # @yieldreceiver [Subscription] the subscription whose {#subscriber} receives the payload
+    # @note The block must be convertible to a shareable proc.
+    # @return [void]
+    def self.define(*classes, &)
+      raise LocalJumpError, "no block given" unless block_given?
+      definition = Internal.prepare_method_definition(&)
+      classes.each do |klass|
+        REGISTER.define(klass) do
+          define_method(:deliver, definition)
+          private :deliver
+        end
+      end
+    end
+
+    # @api private
+    def self.build(publisher, subscriber, ...)
+      handler = REGISTER[subscriber.class]
+      unless handler.private_method_defined?(:deliver)
+        raise ArgumentError, "Unsupported subscriber type: #{subscriber.class}"
+      end
+      handler.new(publisher, subscriber, ...)
+    end
+
     # @return [Publisher, Ractor::Port, Queue, Counter, Flag, Atom, Set, Vector, Signal, Proc]
     #   the subscriber associated with this subscription
     attr_reader :subscriber
@@ -23,26 +61,24 @@ module Farce
     attr_reader :key
 
     # @!visibility private
-    def initialize(publisher, subscriber, map, callback: false, source: nil, &)
-      @callback      = callback
-      @enabled       = Flag.new(true)
-      @key           = (source || subscriber).__id__
-      @map           = map
-      @publish       = Ractor.shareable_lambda(&)
-      @publisher     = publisher
-      @subscribed    = Flag.new(true)
-      @subscriber    = subscriber
+    def initialize(publisher, subscriber, map, callback: false, source: nil)
       # Keep Proc identities alive without making their captured state shareable.
-      @source        = source && Envelope.new(source, mode: :local)
+      @source     = source && Envelope.new(source, mode: :local)
+      @callback   = callback
+      @enabled    = Flag.new(true)
+      @key        = (source || subscriber).__id__
+      @map        = map
+      @publisher  = publisher
+      @subscribed = Flag.new(true)
+      @subscriber = subscriber
       super()
       __freeze__
     end
-    private_class_method :new
 
     # @api private
     def publish(payload)
       return unless enabled?
-      @publish.call(subscriber, payload)
+      deliver(payload)
       true
     rescue ClosedQueueError, Ractor::ClosedError, FrozenError
       unsubscribe
@@ -80,5 +116,7 @@ module Farce
     private
 
     define_method(:__freeze__, Kernel.instance_method(:freeze))
+
+    require "farce/subscription/definitions"
   end
 end
