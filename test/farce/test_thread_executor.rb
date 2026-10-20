@@ -79,6 +79,26 @@ module Farce
       assert_same failure, assert_raises(ArgumentError) { @scheduler.execute { raise failure } }
     end
 
+    def test_schedule_timeout_does_not_limit_task_execution
+      started = Thread::Queue.new
+      release = Thread::Queue.new
+      worker = nil
+
+      assert_same(@scheduler, @scheduler.schedule(timeout: 0) do
+        started << Thread.current
+        release.pop
+      end)
+      worker = Timeout.timeout(5) { started.pop }
+
+      assert_predicate worker, :alive?
+      release << true
+
+      assert worker.join(5)
+    ensure
+      release&.close
+      worker&.kill&.join
+    end
+
     def test_execute_requires_a_block
       assert_raises(LocalJumpError) { @scheduler.execute }
     end

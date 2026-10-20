@@ -20,12 +20,12 @@ module Farce
     #   results.pop # => :done
     #   scheduler.close
     #
-    # @!method schedule(*args, mode: :smart, auto_local: true)
+    # @!method schedule(*args, mode: :smart, auto_local: true, timeout: nil)
     #   Enqueue a task while retaining its block and argument references.
     #   `mode` is ignored when `auto_local` is true. Otherwise, only local and
     #   smart modes are accepted.
     #   @param (see Farce::Abstract::Executor#schedule)
-    #   @return [self]
+    #   @return [self, nil] self when submitted, or nil when the scheduling timeout expires.
     class Scheduler < Abstract::Scheduler
       include Unshareable
       include Internal::LocalExecutorMethods
@@ -80,7 +80,7 @@ module Farce
       def new_queue(capacity:)             = Internal::UnsharedQueue.new(capacity:)
       def launch_callback                  = ->(_scheduler, priority, name) { launch!(name, priority) }
 
-      def prepare_task(args, block, mode, auto_local)
+      def prepare_task(args, block, mode, auto_local, **)
         validate_local_mode(mode, auto_local)
         Internal::LocalScheduledTask.new(args, block)
       end

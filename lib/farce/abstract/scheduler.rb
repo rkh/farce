@@ -314,7 +314,10 @@ module Farce
       # Otherwise, the block must be convertible to a Ractor-shareable proc.
       # Pass task data as arguments so the selected transfer mode can be applied to it.
       #
-      # @overload schedule(*args, mode: :smart, auto_local: true)
+      # A `timeout` limits the combined wait for ownership and queue space.
+      # Expiry returns `nil` without enqueuing the task. Accepted tasks have no execution timeout.
+      #
+      # @overload schedule(*args, mode: :smart, auto_local: true, timeout: nil)
       #   @!macro modes
       #
       #   @param args [Array<Object>] Positional arguments passed to the task block.
@@ -322,8 +325,9 @@ module Farce
       #     Argument transfer mode from {Farce::MODES}, including `:copy`, `:marshal`, and `:local`.
       #     See {ModeManager#wrap}.
       #   @param auto_local [Boolean] Whether to override mode with `:local` in the owning Ractor.
+      #   @param timeout [Numeric, nil] Maximum scheduling wait in seconds. Nil waits indefinitely, zero polls.
       #   @yield [*args] The task to execute.
-      #   @return [Scheduler] self.
+      #   @return [self, nil] self when submitted, or nil when the scheduling timeout expires.
       #   @raise [SchedulerClosedError] If the handle is closing, closed, or in an error state.
       #   @see Ractor.shareable_proc
       def schedule(...) = enqueue_task(false, ...)
@@ -333,9 +337,13 @@ module Farce
       # it still waits for ownership to be assigned.
       #
       # @overload try_schedule(*args, mode: :smart, auto_local: true)
-      #   @param (see Farce::Abstract::Executor#schedule)
+      #   @param args (see Farce::Abstract::Executor#schedule)
+      #   @param mode (see Farce::Abstract::Executor#schedule)
+      #   @param auto_local (see Farce::Abstract::Executor#schedule)
       #   @return [self, nil] self when submitted, or nil when the queue is full.
-      def try_schedule(...) = enqueue_task(true, ...)
+      def try_schedule(*, mode: :smart, auto_local: true, &)
+        enqueue_task(true, *, mode:, auto_local:, &)
+      end
 
       # (see Farce::Abstract::Executor#local?)
       def local?(wait: true)
@@ -427,13 +435,15 @@ module Farce
 
       private
 
-      def enqueue_task(non_block, *args, mode: :smart, auto_local: true, &block)
+      def enqueue_task(non_block, *args, mode: :smart, auto_local: true, timeout: nil, &block)
         raise SchedulerClosedError, "cannot schedule task on a closed scheduler" if closed?
 
         raise LocalJumpError, "Cannot schedule without a block" unless block
 
-        task = prepare_task(args, block, mode, auto_local)
-        return unless non_block ? @queue.try_push(task) : @queue.push(task)
+        deadline = scheduling_deadline(timeout)
+        task     = prepare_task(args, block, mode, auto_local, timeout: Clock.remaining(deadline))
+        return unless task
+        return unless non_block ? @queue.try_push(task) : @queue.push(task, timeout: Clock.remaining(deadline))
         self
       rescue ClosedQueueError
         raise unless closed?
@@ -442,10 +452,11 @@ module Farce
 
       def new_queue(capacity:) = Internal::Queue.new(capacity:)
 
-      def prepare_task(args, block, mode, auto_local)
+      def prepare_task(args, block, mode, auto_local, timeout: nil)
         if auto_local
-          owner = @owner.wait_until_non_nil
+          owner = @owner.wait_until_non_nil(timeout:)
           raise SchedulerClosedError, "cannot schedule task on a closed scheduler" if closed?
+          return unless owner
           mode = :local if owner == Ractor.current
         elsif mode == :local && (owner = @owner.value) && owner != Ractor.current
           raise Ractor::IsolationError, "cannot schedule local task outside the owning Ractor"

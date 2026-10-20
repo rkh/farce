@@ -31,6 +31,18 @@ module Farce
     # @return [Float] the clock time in seconds
     def current = Process.clock_gettime(CLOCK_MONOTONIC) - MONOTONIC
 
+    # Returns the seconds left until a monotonic clock deadline.
+    # Expired deadlines return zero. Nil means there is no deadline and returns nil.
+    #
+    # @param deadline [Numeric, nil] a deadline from {#clock} or {#timeout}
+    # @raise [ArgumentError] if the deadline is NaN
+    # @return [Float, Integer, nil] the remaining seconds, zero, or nil
+    def remaining(deadline)
+      return if deadline.nil?
+      remaining = validate_timestamp(deadline - now)
+      remaining.positive? ? remaining : 0
+    end
+
     # Converts the given value to a monotonic clock time in seconds.
     #
     # @param value [nil, Numeric, Time, ActiveSupport::Duration, Hash]

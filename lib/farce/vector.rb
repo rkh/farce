@@ -178,7 +178,7 @@ module Farce
           replacement = @manager.wrap(replacement, mode:)
           wrapped = true
         end
-        return true if @vector.compare_and_set(index, current, replacement, timeout: remaining_timeout(deadline))
+        return true if @vector.compare_and_set(index, current, replacement, timeout: Clock.remaining(deadline))
         return false if nil.equal?(current) || (deadline && Clock.now >= deadline)
       end
     end
@@ -198,7 +198,7 @@ module Farce
         current = @vector[index]
         return @manager.unwrap(current) unless values_equal?(current, expected)
         return if deadline && Clock.now >= deadline
-        @vector.wait_until_changed(index, current, timeout: remaining_timeout(deadline))
+        @vector.wait_until_changed(index, current, timeout: Clock.remaining(deadline))
       end
     end
 
@@ -251,12 +251,6 @@ module Farce
       timeout = Float(timeout)
       raise ArgumentError, "timeout must be finite and non-negative" unless timeout.finite? && !timeout.negative?
       Clock.now + timeout
-    end
-
-    def remaining_timeout(deadline)
-      return unless deadline
-      remaining = deadline - Clock.now
-      remaining.negative? ? 0 : remaining
     end
   end
 end

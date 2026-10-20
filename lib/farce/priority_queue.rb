@@ -42,7 +42,7 @@ module Farce
         result = @reverse_order ? @queue.pop_last { empty = true } : @queue.pop { empty = true }
 
         return @manager.unwrap(result) unless empty
-        remaining = remaining_timeout(deadline)
+        remaining = Clock.remaining(deadline)
         return block_given? ? yield : nil unless wait_pop(timeout: remaining)
       end
     end

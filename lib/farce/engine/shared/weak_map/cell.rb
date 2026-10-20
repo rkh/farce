@@ -61,7 +61,7 @@ module Farce
       end
 
       def wait_for_change?(observed, deadline)
-        timeout = deadline - Clock.now if deadline
+        timeout = Clock.remaining(deadline)
         return false if timeout && !timeout.positive?
         !!@changes.wait(observed, timeout:) { false }
       end

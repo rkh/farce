@@ -118,14 +118,17 @@ module Farce
       #
       # Ractor pools reject local transfer. Thread pools preserve the block and
       # arguments. With `auto_local: false`, they accept only local or smart modes.
+      # A `timeout` limits waiting for queue space. Expiry returns `nil` without
+      # enqueuing the task. Accepted tasks have no execution timeout.
       #
-      # @overload schedule(*args, mode: :smart, auto_local: true)
+      # @overload schedule(*args, mode: :smart, auto_local: true, timeout: nil)
       #   @!macro modes
       #   @param args [Array<Object>] Positional arguments passed to the task block.
       #   @param mode [Symbol] Argument transfer mode.
       #   @param auto_local [Boolean] Whether to use local transfer in a thread pool.
+      #   @param timeout [Numeric, nil] Maximum scheduling wait in seconds. Nil waits indefinitely, zero polls.
       #   @yield [*args] Task to execute.
-      #   @return [Pool] self.
+      #   @return [self, nil] self when submitted, or nil when the scheduling timeout expires.
       #   @raise [PoolClosedError] If the pool is closing or closed.
       def schedule(...) = enqueue_task(false, ...)
 
@@ -133,9 +136,13 @@ module Farce
       # Arguments and transfer modes follow {#schedule}.
       #
       # @overload try_schedule(*args, mode: :smart, auto_local: true)
-      #   @param (see Farce::Abstract::Executor#schedule)
+      #   @param args (see Farce::Abstract::Executor#schedule)
+      #   @param mode (see Farce::Abstract::Executor#schedule)
+      #   @param auto_local (see Farce::Abstract::Executor#schedule)
       #   @return [self, nil] self when submitted, or nil when the queue is full.
-      def try_schedule(...) = enqueue_task(true, ...)
+      def try_schedule(*, mode: :smart, auto_local: true, &)
+        enqueue_task(true, *, mode:, auto_local:, &)
+      end
 
       # Stop accepting tasks and drain queued work.
       #
@@ -290,12 +297,13 @@ module Farce
 
       private
 
-      def enqueue_task(non_block, *args, mode: :smart, auto_local: true, &block)
+      def enqueue_task(non_block, *args, mode: :smart, auto_local: true, timeout: nil, &block)
         raise PoolClosedError, "cannot schedule task on a closed pool" if closed?
         raise LocalJumpError, "Cannot schedule without a block" unless block
 
+        deadline = scheduling_deadline(timeout)
         task = prepare_task(args, block, mode, auto_local)
-        return unless non_block ? @queue.try_push(task) : @queue.push(task)
+        return unless non_block ? @queue.try_push(task) : @queue.push(task, timeout: Clock.remaining(deadline))
         arm_scaler
         self
       rescue ClosedQueueError

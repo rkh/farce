@@ -381,7 +381,7 @@ module Farce
       end
 
       def signal_changed?(signal, observed, deadline)
-        timeout = deadline - Clock.now if deadline
+        timeout = Clock.remaining(deadline)
         return false if timeout && !timeout.positive?
 
         timed_out = Object.new

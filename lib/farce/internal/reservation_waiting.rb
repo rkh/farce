@@ -9,7 +9,7 @@ module Farce
     module ReservationWaiting
       def self.wait(signal, generation, deadline)
         while true
-          remaining = deadline - Clock.now if deadline
+          remaining = Clock.remaining(deadline)
           return false if remaining && !remaining.positive?
 
           # LeaseWaiting supplies the full remaining timeout on default engines

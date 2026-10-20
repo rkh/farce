@@ -94,6 +94,66 @@ module Farce
         worker&.join(5) || worker&.kill&.join
       end
 
+      def test_schedule_timeout_rejects_full_queues_without_running_the_task
+        scheduler = scheduler_class.new(capacity: 1)
+        scheduler.owner = Ractor.current
+        results = Unshared::Queue.new
+
+        assert_same(scheduler, scheduler.schedule(:accepted, timeout: 0) { |value| results << value })
+        started = Clock.now
+
+        assert_nil(scheduler.schedule(timeout: 0.02) { results << :rejected })
+        assert_operator Clock.now - started, :>=, 0.015
+        assert_nil(scheduler.schedule(timeout: 0) { results << :also_rejected })
+        worker = scheduler.launch_thread
+        scheduler.close
+
+        assert worker.join(5), "scheduler worker did not drain its queue"
+        assert_equal :accepted, results.pop(timeout: 5)
+        assert_nil results.try_pop
+      ensure
+        scheduler&.close_all
+        worker&.join(5) || worker&.kill&.join
+      end
+
+      def test_schedule_timeout_waits_for_space_and_preserves_local_arguments
+        scheduler = scheduler_class.new(capacity: 1)
+        scheduler.owner = Ractor.current
+        queue = backend_scheduler(scheduler).instance_variable_get(:@queue)
+        scheduler.schedule { nil }
+        results = Unshared::Queue.new
+        values = []
+        submitter = Thread.new do
+          scheduler.schedule(values, timeout: 5) { |array| results << array }
+        end
+        Timeout.timeout(5) { Thread.pass until queue.num_waiting.positive? }
+        worker = scheduler.launch_thread
+
+        assert submitter.join(5), "submission did not resume when space became available"
+        assert_same scheduler, submitter.value
+        assert_same values, results.pop(timeout: 5)
+      ensure
+        submitter&.kill&.join
+        scheduler&.close_all
+        worker&.join(5) || worker&.kill&.join
+      end
+
+      def test_schedule_timeout_accepts_unbounded_queues_and_rejects_invalid_durations
+        scheduler = scheduler_class.new(capacity: nil)
+        scheduler.owner = Ractor.current
+
+        assert_same(scheduler, scheduler.schedule(timeout: 0) { nil })
+        [-1, Float::INFINITY, Float::NAN].each do |timeout|
+          assert_raises(ArgumentError) { scheduler.schedule(timeout:) { nil } }
+        end
+        assert_raises(LocalJumpError) { scheduler.schedule(timeout: 0) }
+        scheduler.close_all
+
+        assert_raises(SchedulerClosedError) { scheduler.schedule(timeout: 0) { nil } }
+      ensure
+        scheduler&.close_all
+      end
+
       def test_concurrent_try_schedule_calls_respect_capacity
         scheduler = scheduler_class.new(capacity: 1)
         scheduler.owner = Ractor.current
@@ -122,6 +182,57 @@ module Farce
         submitters&.each { |thread| thread.kill.join }
         scheduler&.close
         worker&.join(5) || worker&.kill&.join
+      end
+
+      def test_schedule_timeout_parks_only_the_submitting_fiber
+        return if RUBY_ENGINE == "truffleruby"
+        return unless Fiber.respond_to?(:set_scheduler)
+        scheduler = scheduler_class.new(capacity: 1)
+        scheduler.owner = Ractor.current
+        scheduler.schedule { nil }
+        fiber_scheduler = Helpers::QueueTestScheduler.new
+        Fiber.set_scheduler(fiber_scheduler)
+        events = []
+
+        Fiber.schedule do
+          events << :submitting
+          events << scheduler.schedule(timeout: 0.02) { nil }
+        end
+        Fiber.schedule { events << :other_fiber }
+        Fiber.set_scheduler(nil)
+
+        assert_equal [:submitting, :other_fiber, nil], events
+      ensure
+        Fiber.set_scheduler(nil) if Fiber.respond_to?(:scheduler) && Fiber.scheduler
+        scheduler&.close_all
+      end
+
+      def test_close_releases_a_timed_submission_with_a_closed_error
+        scheduler = scheduler_class.new(capacity: 1)
+        scheduler.owner = Ractor.current
+        scheduler.schedule { nil }
+        queue = backend_scheduler(scheduler).instance_variable_get(:@queue)
+        submitter = Thread.new do
+          scheduler.schedule(timeout: 5) { nil }
+        rescue SchedulerClosedError => e
+          e
+        end
+        Timeout.timeout(5) { Thread.pass until queue.num_waiting.positive? }
+        scheduler.close
+
+        assert submitter.join(5), "timed submission remained blocked after close"
+        assert_instance_of SchedulerClosedError, submitter.value
+      ensure
+        scheduler&.close_all
+        submitter&.kill&.join
+      end
+
+      def test_try_schedule_does_not_accept_a_timeout
+        scheduler = scheduler_class.new
+
+        assert_raises(ArgumentError) { scheduler.try_schedule(timeout: 1) { nil } }
+      ensure
+        scheduler&.close_all
       end
 
       def test_installing_as_fiber_scheduler_dispatches_tasks
@@ -358,6 +469,41 @@ module Farce
     end
 
     include Contract
+
+    def test_schedule_timeout_limits_waiting_for_an_owner
+      scheduler = Scheduler.new(capacity: 1)
+
+      assert_nil(Timeout.timeout(5) { scheduler.schedule(timeout: 0.02) { nil } })
+      assert_nil scheduler.owner
+      assert_equal 0, scheduler.instance_variable_get(:@queue).size
+      assert_same(scheduler, scheduler.schedule(auto_local: false, timeout: 0) { nil })
+    ensure
+      scheduler&.close
+    end
+
+    def test_execute_returns_nil_when_scheduling_times_out
+      scheduler = Scheduler.new(capacity: 1)
+      scheduler.owner = Ractor.current
+      scheduler.schedule { nil }
+
+      assert_nil(scheduler.execute(auto_local: false, mode: :raise, timeout: 0.02) { nil })
+      assert_equal 1, scheduler.instance_variable_get(:@queue).size
+    ensure
+      scheduler&.close
+    end
+
+    def test_schedule_timeout_rejects_work_from_another_ractor_when_full
+      scheduler = Scheduler.new(capacity: 1)
+      scheduler.schedule(auto_local: false) { nil }
+      submitter = Ractor.new(scheduler) do |executor|
+        executor.schedule(auto_local: false, mode: :raise, timeout: 0.02) { nil }
+      end
+
+      assert_nil submitter.respond_to?(:value) ? submitter.value : submitter.take
+      assert_equal 1, scheduler.instance_variable_get(:@queue).size
+    ensure
+      scheduler&.close
+    end
 
     def test_initialization
       scheduler = Scheduler.new

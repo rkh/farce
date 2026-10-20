@@ -21,7 +21,7 @@ module Farce
           observed = signal.generation
           current = value
           return current unless expected == current
-          break unless signal.wait(observed, timeout: Internal.remaining_timeout(deadline))
+          break unless signal.wait(observed, timeout: Clock.remaining(deadline))
         end
         yield if block_given?
       end

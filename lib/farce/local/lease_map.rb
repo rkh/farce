@@ -35,10 +35,10 @@ module Farce
 
       def checkout_canonical(key, missing_key:, timeout: nil, &)
         deadline = timeout_deadline(timeout)
-        map      = scoped_lease_map(timeout: remaining_timeout(deadline))
+        map      = scoped_lease_map(timeout: Clock.remaining(deadline))
         raise TimeoutError, "lease checkout timed out" unless map
 
-        map.checkout(key, timeout: remaining_timeout(deadline), receiver: self, missing_key:, &)
+        map.checkout(key, timeout: Clock.remaining(deadline), receiver: self, missing_key:, &)
       end
 
       def try_checkout_canonical(key, missing_key:, &)
@@ -67,13 +67,6 @@ module Farce
           raise ArgumentError, "timeout must be a finite, non-negative number or nil"
         end
         Clock.now + timeout
-      end
-
-      def remaining_timeout(deadline)
-        return unless deadline
-
-        remaining = deadline - Clock.now
-        remaining.positive? ? remaining : 0
       end
     end
   end

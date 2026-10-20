@@ -87,7 +87,7 @@ module Helpers
       return 0 unless @ready.empty?
 
       deadline = @waiting.values.min
-      deadline && [deadline - Farce::Clock.now, 0].max
+      Farce::Clock.remaining(deadline)
     end
 
     def run

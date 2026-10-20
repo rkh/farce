@@ -61,7 +61,7 @@ module Farce
             result = port.select_receive
             return result if result
           end
-          remaining = deadline - Clock.now if deadline
+          remaining = Clock.remaining(deadline)
           return if remaining && !remaining.positive?
           return unless ReservationWaiting.wait(wakeup, generation, deadline)
         end

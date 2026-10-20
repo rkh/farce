@@ -16,10 +16,10 @@ module Farce
       # Run a task directly, preserving its block, arguments, and calling fiber.
       # `mode` and `auto_local` follow the same validation as {#schedule}.
       # @param (see Abstract::Executor#execute)
-      # @return [self]
-      def execute(*, mode: :smart, auto_local: true, &)
+      # @return [self, nil]
+      def execute(*, mode: :smart, auto_local: true, timeout: nil, &)
         validate_local_mode(mode, auto_local)
-        super(*, mode: :local, auto_local: true, &)
+        super(*, mode: :local, auto_local: true, timeout:, &)
       end
 
       private

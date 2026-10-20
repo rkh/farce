@@ -77,7 +77,7 @@ module Farce
       def wait_with_condition(waiter, deadline)
         @mutex.synchronize do
           until waiter.matched
-            remaining = deadline - Clock.now if deadline
+            remaining = Clock.remaining(deadline)
             return cancel(waiter) if remaining && !remaining.positive?
             waiter.condition.wait(@mutex, remaining)
           end
@@ -91,7 +91,7 @@ module Farce
             if waiter.matched
               [nil, waiter.received]
             else
-              remaining = deadline - Clock.now if deadline
+              remaining = Clock.remaining(deadline)
               remaining && !remaining.positive? ? [nil, cancel(waiter)] : [WAITING, remaining]
             end
           end

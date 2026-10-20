@@ -234,11 +234,11 @@ module Farce
       deadline = Internal.timeout_deadline(timeout)
 
       while true
-        current = @atom.get(timeout: Internal.remaining_timeout(deadline)) { TIMED_OUT }
+        current = @atom.get(timeout: Clock.remaining(deadline)) { TIMED_OUT }
         return unwrap_result(current, &) if TIMED_OUT.equal?(current)
         return unwrap_value(current) unless values_equal?(current, expected)
 
-        result = @atom.wait_until_changed(current, timeout: Internal.remaining_timeout(deadline)) { TIMED_OUT }
+        result = @atom.wait_until_changed(current, timeout: Clock.remaining(deadline)) { TIMED_OUT }
         return unwrap_result(result, &) if TIMED_OUT.equal?(result)
       end
     end

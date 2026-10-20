@@ -90,7 +90,7 @@ module Farce
             current = generation
             return current unless current == observed
 
-            remaining = deadline - Clock.now if deadline
+            remaining = Clock.remaining(deadline)
             return yield if remaining && !remaining.positive?
 
             # Java Phaser waits do not deliver Ruby cancellation until they return.
@@ -131,7 +131,7 @@ module Farce
           current = generation
           return current unless current == observed
 
-          remaining = deadline - Clock.now if deadline
+          remaining = Clock.remaining(deadline)
           return yield if remaining && !remaining.positive?
 
           scheduler.io_wait(reader, READABLE, remaining)

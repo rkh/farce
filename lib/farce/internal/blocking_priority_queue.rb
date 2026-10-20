@@ -77,7 +77,7 @@ module Farce
         while true
           return true if internal_queue.push(priority, value)
           raise ThreadError, "queue full" if non_block
-          return false unless wait_push(timeout: remaining_timeout(deadline))
+          return false unless wait_push(timeout: Clock.remaining(deadline))
         end
       end
 
@@ -99,7 +99,7 @@ module Farce
           generation = internal_signal.generation
           raise ::Farce::ClosedQueueError, "queue is closed" if closed?
           return true if yield
-          return false unless internal_signal.wait(generation, timeout: remaining_timeout(deadline))
+          return false unless internal_signal.wait(generation, timeout: Clock.remaining(deadline))
         end
       end
 
@@ -111,12 +111,6 @@ module Farce
 
       def timeout_at(timeout)
         Clock.timeout(normalize_timeout(timeout)) unless timeout.nil?
-      end
-
-      def remaining_timeout(timeout_at)
-        return unless timeout_at
-        timeout = timeout_at - Clock.now
-        timeout.positive? ? timeout : 0
       end
     end
   end

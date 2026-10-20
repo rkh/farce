@@ -43,7 +43,7 @@ module Farce
               current = generation
               break current unless current == observed
 
-              remaining = deadline - Clock.now if deadline
+              remaining = Clock.remaining(deadline)
               break TIMED_OUT if remaining && !remaining.positive?
               @num_waiting.set(@num_waiting.get + 1) unless waiting
               waiting = true

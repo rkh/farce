@@ -77,18 +77,12 @@ module Farce
       Clock.now + timeout
     end
 
-    def remaining_timeout(deadline)
-      return unless deadline
-      remaining = deadline - Clock.now
-      remaining.negative? ? 0 : remaining
-    end
-
     # Repeat with one timeout budget. Even a zero timeout permits the first check.
     def with_timeout(timeout)
       raise LocalJumpError, "no block given" unless block_given?
       deadline = timeout_deadline(timeout)
       loop do
-        yield remaining_timeout(deadline), deadline
+        yield Clock.remaining(deadline), deadline
         return if deadline && Clock.now >= deadline
       end
     end
@@ -98,7 +92,7 @@ module Farce
       with_timeout(timeout) do |_, deadline|
         current = keys.empty? ? receiver.value : receiver[*keys]
         return current if yield(current)
-        receiver.wait_until_changed(*keys, current, timeout: remaining_timeout(deadline)) { return }
+        receiver.wait_until_changed(*keys, current, timeout: Clock.remaining(deadline)) { return }
       end
     end
 

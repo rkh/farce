@@ -119,6 +119,57 @@ module Farce
       end
     end
 
+    def test_schedule_timeout_rejects_full_queues_and_accepts_work_after_space_opens
+      pool = pool_class.new(capacity: 1, max_size: 2, max_inflight: 1, grow_after: 60, shrink_after: nil)
+      started = Queue.new
+      results = Queue.new
+      gate = Atom.new(false, mode: :raise)
+
+      assert_same(pool, pool.schedule(started, gate, mode: :raise, timeout: 0) do |queue, wait|
+        queue << true
+        Fiber.new(blocking: true) { wait.wait_until_changed(false) }.resume
+      end)
+      assert started.pop(timeout: 5)
+      pool.schedule(results, :queued, mode: :raise, timeout: nil) { |queue, value| queue << value }
+
+      before = Clock.now
+
+      assert_nil(pool.schedule(results, mode: :raise, timeout: 0.02) { |queue| queue << :rejected })
+      assert_operator Clock.now - before, :>=, 0.015
+      assert_nil(pool.schedule(timeout: 0) { nil })
+      submitter = Thread.new do
+        pool.schedule(results, :later, mode: :raise, timeout: 5) { |queue, value| queue << value }
+      end
+      Timeout.timeout(5) { Thread.pass until submitter.status == "sleep" }
+      gate.value = true
+
+      assert submitter.join(5), "submission did not resume when space became available"
+      assert_same pool, submitter.value
+      close_pool(pool)
+
+      assert_equal(%i[queued later], 2.times.map { results.pop(timeout: 5) })
+      assert_nil results.try_pop
+    ensure
+      gate&.value = true
+      submitter&.kill&.join
+      close_pool(pool)
+    end
+
+    def test_schedule_timeout_validates_durations_and_preserves_submission_errors
+      pool = pool_class.new
+
+      [-1, Float::INFINITY, Float::NAN].each do |timeout|
+        assert_raises(ArgumentError) { pool.schedule(timeout:) { nil } }
+      end
+      assert_raises(LocalJumpError) { pool.schedule(timeout: 0) }
+      assert_raises(ArgumentError) { pool.try_schedule(timeout: 1) { nil } }
+      pool.close
+
+      assert_raises(PoolClosedError) { pool.schedule(timeout: 0) { nil } }
+    ensure
+      close_pool(pool)
+    end
+
     def test_idle_pool_retires_to_zero_and_restarts_immediately
       pool = pool_class.new(grow_after: 60, shrink_after: 0.02)
       result = Queue.new

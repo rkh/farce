@@ -107,10 +107,10 @@ module Farce
     def wait_until_changed(expected, timeout: nil, &fallback)
       deadline = Internal.timeout_deadline(timeout)
       while true
-        current = @atom.get(timeout: Internal.remaining_timeout(deadline)) { TIMED_OUT }
+        current = @atom.get(timeout: Clock.remaining(deadline)) { TIMED_OUT }
         return fallback&.call if TIMED_OUT.equal?(current)
         return current unless values_equal?(current, expected)
-        result = @atom.wait_until_changed(current, timeout: Internal.remaining_timeout(deadline)) { TIMED_OUT }
+        result = @atom.wait_until_changed(current, timeout: Clock.remaining(deadline)) { TIMED_OUT }
         return fallback&.call if TIMED_OUT.equal?(result)
       end
     end

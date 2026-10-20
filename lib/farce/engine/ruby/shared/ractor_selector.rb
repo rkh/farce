@@ -125,10 +125,7 @@ module Farce
         command(:add, request)
         request.ready&.pop
 
-        if deadline
-          remaining = deadline - Clock.now
-          remaining = 0 if remaining.negative?
-        end
+        remaining = Clock.remaining(deadline)
 
         delivery = request.reply.pop(timeout: remaining)
         if delivery

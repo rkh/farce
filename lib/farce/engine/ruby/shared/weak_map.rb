@@ -308,7 +308,7 @@ module Farce
 
           signal, generation = response[1], response[2]
           reject_recursive_wait!(signal)
-          timeout = remaining_timeout(deadline)
+          timeout = Clock.remaining(deadline)
           if timeout&.zero?
             return TIMED_OUT if checked_after_timeout
             checked_after_timeout = true
@@ -340,7 +340,7 @@ module Farce
 
           signal = response.first == :ok ? response[3] : response[1]
           generation = response.first == :ok ? response[4] : response[2]
-          changed = signal.wait_until_changed(generation, timeout: remaining_timeout(deadline)) { TIMED_OUT }
+          changed = signal.wait_until_changed(generation, timeout: Clock.remaining(deadline)) { TIMED_OUT }
           if changed.equal?(TIMED_OUT)
             return fallback&.call if checked_after_timeout
             checked_after_timeout = true
@@ -383,13 +383,6 @@ module Farce
           raise ArgumentError, "timeout must be a finite, non-negative number or nil"
         end
         Clock.now + timeout
-      end
-
-      def remaining_timeout(deadline)
-        return unless deadline
-
-        remaining = deadline - Clock.now
-        remaining.positive? ? remaining : 0
       end
 
       def validate_boolean(value, name)

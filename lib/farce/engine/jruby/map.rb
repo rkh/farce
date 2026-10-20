@@ -440,7 +440,7 @@ module Farce
       def wait_for_signal(signal, generation, deadline)
         return signal.wait(generation) unless deadline
 
-        remaining = deadline - Clock.now
+        remaining = Clock.remaining(deadline)
         return false unless remaining.positive?
         !signal.wait(generation, timeout: remaining).nil?
       end

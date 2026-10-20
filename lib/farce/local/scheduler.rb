@@ -77,13 +77,15 @@ module Farce
 
       # Enqueue a task in the current scope, preserving its block and arguments.
       # `mode` is ignored when `auto_local` is true. Otherwise, only local and smart modes are accepted.
-      # @overload schedule(*args, mode: :smart, auto_local: true)
+      # @overload schedule(*args, mode: :smart, auto_local: true, timeout: nil)
       #   @param (see Farce::Abstract::Executor#schedule)
-      #   @return [self]
+      #   @return [self, nil] self when submitted, or nil when the scheduling timeout expires.
       def schedule(...) = enqueue_task(false, ...)
 
       # (see Abstract::Scheduler#try_schedule)
-      def try_schedule(...) = enqueue_task(true, ...)
+      def try_schedule(*, mode: :smart, auto_local: true, &)
+        enqueue_task(true, *, mode:, auto_local:, &)
+      end
 
       # Starts a worker for the current scope. Other scopes retain their creation behavior.
       # @param executor [Class, nil] Thread or a custom executor that stays in this Ractor.
@@ -157,12 +159,13 @@ module Farce
 
       private
 
-      def enqueue_task(non_block, *, mode: :smart, auto_local: true, &block)
+      def enqueue_task(non_block, *, mode: :smart, auto_local: true, timeout: nil, &block)
         raise SchedulerClosedError, "cannot schedule task on a closed scheduler" if @closed_all.value
         scheduler = scoped_value
         raise SchedulerClosedError, "cannot schedule task on a closed scheduler" if scheduler.closed?
         raise LocalJumpError, "Cannot schedule without a block" unless block
 
+        deadline = scheduling_deadline(timeout)
         validate_local_mode(mode, auto_local)
         register_scheduler(scheduler)
 
@@ -170,7 +173,7 @@ module Farce
           if non_block
             scheduler.try_schedule(*, mode:, auto_local:, &block)
           else
-            scheduler.schedule(*, mode:, auto_local:, &block)
+            scheduler.schedule(*, mode:, auto_local:, timeout: Clock.remaining(deadline), &block)
           end
 
         submitted && self

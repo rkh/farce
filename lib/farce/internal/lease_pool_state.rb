@@ -108,7 +108,7 @@ module Farce
           return create_resource(factory) if reserve_creation
           return unless wait
 
-          remaining = deadline - Clock.now if deadline
+          remaining = Clock.remaining(deadline)
           raise TimeoutError, "lease pool checkout timed out" if remaining && !remaining.positive?
           interval = LeaseWaiting.wait_interval(remaining)
           changed  = Thread.handle_interrupt(Exception => :immediate) do

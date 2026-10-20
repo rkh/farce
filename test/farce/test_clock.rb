@@ -26,6 +26,31 @@ module Farce
       assert_current_offset(0) { Clock.clock(nil) }
     end
 
+    def test_remaining_returns_nil_without_a_deadline
+      assert_nil Clock.remaining(nil)
+    end
+
+    def test_remaining_returns_seconds_until_a_future_deadline
+      deadline = Clock.timeout(60)
+      before = deadline - Clock.current
+      actual = Clock.remaining(deadline)
+      after = deadline - Clock.current
+
+      assert_operator actual, :<=, before
+      assert_operator actual, :>=, after
+    end
+
+    def test_remaining_returns_zero_for_expired_deadlines
+      assert_equal 0, Clock.remaining(Clock.timeout(-1))
+      assert_equal 0, Clock.remaining(0)
+    end
+
+    def test_remaining_rejects_nan
+      error = assert_raises(ArgumentError) { Clock.remaining(Float::NAN) }
+
+      assert_equal "timestamp must not be NaN", error.message
+    end
+
     def test_parse_finishes_hash_iteration_before_calling_a_converter
       options = {}
       value = Object.new

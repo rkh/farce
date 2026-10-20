@@ -51,7 +51,7 @@ module Farce
         deadline = Internal.timeout_deadline(timeout)
         observed = @state.value
         return true if observed.odd?
-        !!@state.wait_until_changed(observed, timeout: Internal.remaining_timeout(deadline))
+        !!@state.wait_until_changed(observed, timeout: Clock.remaining(deadline))
       end
 
       private def freeze_backend = @state

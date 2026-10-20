@@ -156,18 +156,18 @@ module Farce
           timestamp = internal_queue.peek_priority
           wake_after = nil
           if timestamp
-            delay = timestamp - Clock.now
+            delay = Clock.remaining(timestamp)
             return timestamp unless delay.positive?
             wake_after = delay if delay.finite?
           end
 
-          remaining = remaining_timeout(deadline)
+          remaining = Clock.remaining(deadline)
 
           wait_for = wake_after && remaining ?
             (wake_after < remaining ? wake_after : remaining) :
             wake_after || remaining
           changed = internal_signal.wait(generation, timeout: wait_for)
-          return UNDEFINED if !changed && deadline && remaining_timeout(deadline).zero?
+          return UNDEFINED if !changed && deadline && Clock.remaining(deadline).zero?
         end
       end
     end

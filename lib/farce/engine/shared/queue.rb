@@ -262,8 +262,7 @@ module Farce
       def remaining_timeout(timeout_at)
         return unless timeout_at
         return 0 if timeout_at.zero?
-        timeout = timeout_at - Clock.now
-        timeout.positive? ? timeout : 0
+        Clock.remaining(timeout_at)
       end
 
       def broadcast = @signal.broadcast

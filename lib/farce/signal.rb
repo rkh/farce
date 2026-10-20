@@ -80,7 +80,7 @@ module Farce
         result   = yield
         return result if result
 
-        remaining = deadline - Clock.now if deadline
+        remaining = Clock.remaining(deadline)
         return if remaining && !remaining.positive?
         return unless wait(observed, timeout: remaining)
       end

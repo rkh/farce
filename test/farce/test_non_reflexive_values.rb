@@ -41,7 +41,7 @@ module Farce
     end
 
     def test_predicate_waits_stop_when_storage_times_out_before_the_outer_deadline
-      Internal.define_singleton_method(:remaining_timeout, Ractor.shareable_proc { |_deadline| 0 })
+      Clock.define_singleton_method(:remaining, Ractor.shareable_proc { |_deadline| 0 })
 
       each_subject(Float::NAN) do |subject, keys|
         checks = 0
@@ -55,7 +55,7 @@ module Farce
         assert_equal 1, checks, subject.class.name
       end
     ensure
-      Internal.singleton_class.remove_method(:remaining_timeout)
+      Clock.singleton_class.remove_method(:remaining)
     end
 
     def test_managed_predicate_waits_observe_envelopes_without_comparing_copies

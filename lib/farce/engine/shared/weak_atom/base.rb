@@ -146,7 +146,7 @@ module Farce
       def with_value(timeout)
         deadline = timeout_deadline(timeout)
         result = TIMED_OUT
-        @lock.update(timeout: remaining_timeout(deadline)) do
+        @lock.update(timeout: Clock.remaining(deadline)) do
           result = yield
           nil
         end
@@ -162,8 +162,8 @@ module Farce
             Internal.value_changed?(current, expected, compare_by_identity?)
           # Detect recursive waits without waiting for another owner's update.
           @lock.get(timeout: 0)
-          return fallback&.call if remaining_timeout(deadline)&.zero?
-          @changes.wait_until_changed(generation, timeout: remaining_timeout(deadline))
+          return fallback&.call if Clock.remaining(deadline)&.zero?
+          @changes.wait_until_changed(generation, timeout: Clock.remaining(deadline))
         end
       end
 
@@ -177,12 +177,6 @@ module Farce
         timeout = Float(timeout)
         raise ArgumentError, "timeout must be finite and non-negative" unless timeout.finite? && !timeout.negative?
         Clock.now + timeout
-      end
-
-      def remaining_timeout(deadline)
-        return unless deadline
-        remaining = deadline - Clock.now
-        remaining.negative? ? 0 : remaining
       end
     end
     private_constant :WeakAtomBase

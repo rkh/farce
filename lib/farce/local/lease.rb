@@ -34,10 +34,10 @@ module Farce
       # (see Farce::Abstract::Lease#checkout)
       def checkout(timeout: nil, &block)
         deadline = timeout_deadline(timeout)
-        lease    = scoped_lease(timeout: remaining_timeout(deadline))
+        lease    = scoped_lease(timeout: Clock.remaining(deadline))
         raise TimeoutError, "lease checkout timed out" unless lease
 
-        timeout = remaining_timeout(deadline)
+        timeout = Clock.remaining(deadline)
         block ? lease.checkout(timeout:, &block) : lease.checkout(timeout:)
       end
 
@@ -64,13 +64,6 @@ module Farce
           raise ArgumentError, "timeout must be a finite, non-negative number or nil"
         end
         Clock.now + timeout
-      end
-
-      def remaining_timeout(deadline)
-        return unless deadline
-
-        remaining = deadline - Clock.now
-        remaining.positive? ? remaining : 0
       end
     end
   end

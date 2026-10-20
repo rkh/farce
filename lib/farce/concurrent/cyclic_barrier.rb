@@ -79,7 +79,7 @@ module Farce
           Generation.new
         end
 
-        unless waiting.wait(Internal.remaining_timeout(deadline))
+        unless waiting.wait(Clock.remaining(deadline))
           update do |current|
             # A trip or reset may have won the race with this waiter's timeout.
             waiting.state = :broken if waiting.state == :waiting

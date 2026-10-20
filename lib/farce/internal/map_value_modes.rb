@@ -155,13 +155,13 @@ module Farce
         expected = wrap_comparison(expected)
         deadline = Internal.timeout_deadline(timeout)
         loop do
-          current = @map.get_prepared(prepared_key, timeout: Internal.remaining_timeout(deadline)) { TIMED_OUT }
+          current = @map.get_prepared(prepared_key, timeout: Clock.remaining(deadline)) { TIMED_OUT }
           return unwrap_result(current, &) if TIMED_OUT.equal?(current)
           return unwrap_value(current) unless values_equal?(nil.equal?(current) ? NIL_VALUE : current, expected)
           result = @map.wait_until_changed_prepared(
             prepared_key,
             current,
-            timeout: Internal.remaining_timeout(deadline),
+            timeout: Clock.remaining(deadline),
           ) { TIMED_OUT }
           return unwrap_result(result, &) if TIMED_OUT.equal?(result)
         end

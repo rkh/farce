@@ -31,7 +31,7 @@ module Farce
             reject_recursive_initialization!
             return unless wait
 
-            remaining = deadline - Clock.now if deadline
+            remaining = Clock.remaining(deadline)
             return if remaining && !remaining.positive?
             reject_unscheduled_fiber_wait!
             @signal.wait(observed, timeout: wait_interval(remaining))

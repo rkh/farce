@@ -156,7 +156,7 @@ module Farce
           resource = try_acquire(kind)
           return resource if resource
 
-          remaining = deadline - Clock.now if deadline
+          remaining = Clock.remaining(deadline)
           raise TimeoutError, "lease checkout timed out" if remaining && !remaining.positive?
           reject_unscheduled_fiber_wait!
           interval = wait_interval(remaining)
@@ -180,7 +180,7 @@ module Farce
           outcome  = try_acquire_block(block)
           return outcome.first if outcome
 
-          remaining = deadline - Clock.now if deadline
+          remaining = Clock.remaining(deadline)
           raise TimeoutError, "lease checkout timed out" if remaining && !remaining.positive?
           reject_unscheduled_fiber_wait!
           interval = wait_interval(remaining)
