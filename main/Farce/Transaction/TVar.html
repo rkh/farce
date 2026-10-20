@@ -296,10 +296,10 @@ through its wrapper to avoid trying to acquire its mutex again.</p>
       <pre class="lines">
 
 
-90</pre>
+95</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/concurrent.rb', line 90</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/concurrent.rb', line 95</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_access'>access</span> <span class='lbrace'>{</span> <span class='ivar'>@working</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span></pre>
     </td>
@@ -368,12 +368,12 @@ through its wrapper to avoid trying to acquire its mutex again.</p>
       <pre class="lines">
 
 
-95
-96
-97</pre>
+100
+101
+102</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/integrations/concurrent.rb', line 95</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/integrations/concurrent.rb', line 100</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value='>value=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_write'>write</span> <span class='lbrace'>{</span> <span class='ivar'>@working</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
@@ -388,7 +388,7 @@ through its wrapper to avoid trying to acquire its mutex again.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Oct 19 20:36:28 2026 by
+  Generated on Tue Oct 20 10:27:47 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -496,6 +496,11 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <td>Arguments and the successful result. <code>add_argument</code> overrides the mode for one argument. Scheduling can select local mode automatically.</td>
 </tr>
 <tr>
+<td><code>Farce::Publisher</code>, <code>Farce::Unshared::Publisher</code>, <code>Farce::Local::Publisher</code></td>
+<td><code>subscribe</code> with a block</td>
+<td>Callback arguments and queued payloads. Defaults to <code>:smart</code> for <code>Publisher</code> and <code>:local</code> for its Unshared and Local variants.</td>
+</tr>
+<tr>
 <td><code>Farce::Molecule</code></td>
 <td><code>define</code>, <code>new</code></td>
 <td>Newly created field atoms.</td>
@@ -815,7 +820,7 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 </div></div>
 
       <div id="footer">
-  Generated on Mon Oct 19 20:36:06 2026 by
+  Generated on Tue Oct 20 10:27:30 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
