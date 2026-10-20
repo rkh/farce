@@ -69,6 +69,19 @@ This means:
 * `Kernel.instance_method(:frozen?).bind_call(object)` might report a different value from `object.frozen?`
 * C-level checks for frozen state, such as `RB_OBJ_FROZEN`, might differ from what Ruby-level methods report.
 
+### Fiber schedulers and Ractors don't play nice on Ruby 3.4
+
+Fiber schedulers running in a non-main Ractor have a chance of causing a segmentation fault on x86_64 Linux with Ruby 3.4.11 and earlier.
+
+This issue is [unrelated to Farce itself](https://gist.github.com/rkh/f330bd5c4accc9718f5ca227ae020c94) and typically only surfaces irregularly under a high number of Ractor shutdowns.
+It does however surface from time to time when running the Farce test suite on affected Ruby versions and platforms.
+
+Installing and loading Farce, using Farce data structures, etc, does not increase the likelihood of encountering this issue.
+
+### GC related tests are flaky in certain environments
+
+Garbage collection related tests may exhibit flakiness on some Ruby versions and platforms. This can lead to unexpected failures when running the test suite.
+
 ## Read Next
 
 [README](../README.md#features) · [Installation](installation.md) · [Integrations](integrations.md)
