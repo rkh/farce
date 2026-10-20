@@ -298,7 +298,7 @@ and smart modes are accepted. All accepted modes keep tasks local.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#schedule-instance_method" title="#schedule (instance method)">#<strong>schedule</strong>(*args, mode: :smart, auto_local: true)  &#x21d2; self </a>
+      <a href="#schedule-instance_method" title="#schedule (instance method)">#<strong>schedule</strong>(*args, mode: :smart, auto_local: true, timeout: nil)  &#x21d2; self<sup>?</sup> </a>
     
 
     
@@ -884,7 +884,7 @@ Rejects Ractor executors before changing the scheduler's state.</p>
       <div class="method_details ">
   <h3 class="signature " id="schedule-instance_method">
   
-    #<strong>schedule</strong>(*args, mode: :smart, auto_local: true)  &#x21d2; <tt>self</tt> 
+    #<strong>schedule</strong>(*args, mode: :smart, auto_local: true, timeout: nil)  &#x21d2; <tt>self</tt><sup>?</sup> 
   
 
   
@@ -955,6 +955,26 @@ May be ignored by some executors.</p>
       
     </li>
   
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Maximum seconds to wait for ownership and queue space. Nil waits indefinitely.
+Zero only submits if no waiting is needed. Must be finite and non-negative.
+An expired attempt returns <code>nil</code> and does not enqueue the task.
+This does not limit task execution time. Executors without a queue may ignore it.</p>
+</div>
+      
+    </li>
+  
 </ul>
 
 <p class="tag_title">Returns:</p>
@@ -963,9 +983,13 @@ May be ignored by some executors.</p>
     <li>
       
       
-        <span class='type'>(<tt>self</tt>)</span>
+        <span class='type'>(<tt>self</tt>, <tt>nil</tt>)</span>
       
       
+      
+        &mdash;
+        <div class='inline'><p>self when submitted, or nil when the scheduling timeout expires.</p>
+</div>
       
     </li>
   
@@ -1094,7 +1118,7 @@ May be ignored by some executors.</p>
   <span class='kw'>def</span> <span class='id identifier rubyid_new_queue'>new_queue</span><span class='lparen'>(</span><span class='label'>capacity:</span><span class='rparen'>)</span>             <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>UnsharedQueue</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>capacity:</span><span class='rparen'>)</span>
   <span class='kw'>def</span> <span class='id identifier rubyid_launch_callback'>launch_callback</span>                  <span class='op'>=</span> <span class='tlambda'>-&gt;</span><span class='lparen'>(</span><span class='id identifier rubyid__scheduler'>_scheduler</span><span class='comma'>,</span> <span class='id identifier rubyid_priority'>priority</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span> <span class='tlambeg'>{</span> <span class='id identifier rubyid_launch!'>launch!</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='id identifier rubyid_priority'>priority</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_prepare_task'>prepare_task</span><span class='lparen'>(</span><span class='id identifier rubyid_args'>args</span><span class='comma'>,</span> <span class='id identifier rubyid_block'>block</span><span class='comma'>,</span> <span class='id identifier rubyid_mode'>mode</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_local'>auto_local</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_prepare_task'>prepare_task</span><span class='lparen'>(</span><span class='id identifier rubyid_args'>args</span><span class='comma'>,</span> <span class='id identifier rubyid_block'>block</span><span class='comma'>,</span> <span class='id identifier rubyid_mode'>mode</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_local'>auto_local</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_validate_local_mode'>validate_local_mode</span><span class='lparen'>(</span><span class='id identifier rubyid_mode'>mode</span><span class='comma'>,</span> <span class='id identifier rubyid_auto_local'>auto_local</span><span class='rparen'>)</span>
     <span class='const'>Internal</span><span class='op'>::</span><span class='const'>LocalScheduledTask</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_args'>args</span><span class='comma'>,</span> <span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
@@ -1109,7 +1133,7 @@ May be ignored by some executors.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct 20 10:27:45 2026 by
+  Generated on Tue Oct 20 11:40:23 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

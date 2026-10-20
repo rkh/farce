@@ -797,7 +797,7 @@ A timeout breaks the barrier for all waiters until <span class='object_link'><a 
     <span class='const'>Generation</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
   <span class='kw'>end</span>
 
-  <span class='kw'>unless</span> <span class='id identifier rubyid_waiting'>waiting</span><span class='period'>.</span><span class='id identifier rubyid_wait'>wait</span><span class='lparen'>(</span><span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='kw'>unless</span> <span class='id identifier rubyid_waiting'>waiting</span><span class='period'>.</span><span class='id identifier rubyid_wait'>wait</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_remaining'><span class='object_link'><a href="../Clock.html#remaining-instance_method" title="Farce::Clock#remaining (method)">remaining</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_update'>update</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_current'>current</span><span class='op'>|</span>
       <span class='comment'># A trip or reset may have won the race with this waiter&#39;s timeout.
 </span>      <span class='id identifier rubyid_waiting'>waiting</span><span class='period'>.</span><span class='id identifier rubyid_state'>state</span> <span class='op'>=</span> <span class='symbol'>:broken</span> <span class='kw'>if</span> <span class='id identifier rubyid_waiting'>waiting</span><span class='period'>.</span><span class='id identifier rubyid_state'>state</span> <span class='op'>==</span> <span class='symbol'>:waiting</span>
@@ -816,7 +816,7 @@ A timeout breaks the barrier for all waiters until <span class='object_link'><a 
 </div>
 
       <div id="footer">
-  Generated on Tue Oct 20 10:27:48 2026 by
+  Generated on Tue Oct 20 11:40:25 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

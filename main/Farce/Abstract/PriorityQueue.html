@@ -1092,7 +1092,7 @@ try_push is called without an explicit priority</p>
              <span class='kw'>end</span>
 
     <span class='kw'>return</span> <span class='id identifier rubyid_result'>result</span> <span class='kw'>unless</span> <span class='id identifier rubyid_empty'>empty</span>
-    <span class='id identifier rubyid_remaining'>remaining</span> <span class='op'>=</span> <span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_remaining'>remaining</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_remaining'><span class='object_link'><a href="../Clock.html#remaining-instance_method" title="Farce::Clock#remaining (method)">remaining</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span>
     <span class='kw'>return</span> <span class='id identifier rubyid_block_given?'>block_given?</span> <span class='op'>?</span> <span class='kw'>yield</span> <span class='op'>:</span> <span class='kw'>nil</span> <span class='kw'>unless</span> <span class='id identifier rubyid_wait_pop'>wait_pop</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='id identifier rubyid_remaining'>remaining</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
@@ -1470,7 +1470,7 @@ try_push is called without an explicit priority</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct 20 10:27:47 2026 by
+  Generated on Tue Oct 20 11:40:25 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

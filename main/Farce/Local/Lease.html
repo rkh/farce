@@ -558,10 +558,10 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 
 <span class='kw'>def</span> <span class='id identifier rubyid_checkout'>checkout</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_timeout_deadline'>timeout_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_lease'>lease</span>    <span class='op'>=</span> <span class='id identifier rubyid_scoped_lease'>scoped_lease</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_lease'>lease</span>    <span class='op'>=</span> <span class='id identifier rubyid_scoped_lease'>scoped_lease</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_remaining'><span class='object_link'><a href="../Clock.html#remaining-instance_method" title="Farce::Clock#remaining (method)">remaining</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#TimeoutError-constant" title="Farce::TimeoutError (constant)">TimeoutError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>lease checkout timed out</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_lease'>lease</span>
 
-  <span class='id identifier rubyid_timeout'>timeout</span> <span class='op'>=</span> <span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_timeout'>timeout</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_remaining'><span class='object_link'><a href="../Clock.html#remaining-instance_method" title="Farce::Clock#remaining (method)">remaining</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_block'>block</span> <span class='op'>?</span> <span class='id identifier rubyid_lease'>lease</span><span class='period'>.</span><span class='id identifier rubyid_checkout'>checkout</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_lease'>lease</span><span class='period'>.</span><span class='id identifier rubyid_checkout'>checkout</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -673,7 +673,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Tue Oct 20 10:27:37 2026 by
+  Generated on Tue Oct 20 11:40:15 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

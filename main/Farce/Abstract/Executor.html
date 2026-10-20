@@ -253,7 +253,7 @@ tasks run and how their arguments are transferred.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#execute-instance_method" title="#execute (instance method)">#<strong>execute</strong>(mode: :smart, auto_local: true, &amp;callback)  &#x21d2; self </a>
+      <a href="#execute-instance_method" title="#execute (instance method)">#<strong>execute</strong>(mode: :smart, auto_local: true, timeout: nil, &amp;callback)  &#x21d2; self<sup>?</sup> </a>
     
 
     
@@ -322,7 +322,7 @@ tasks run and how their arguments are transferred.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#schedule-instance_method" title="#schedule (instance method)">#<strong>schedule</strong>(*args, mode: :smart, auto_local: true) {|*args| ... } &#x21d2; self </a>
+      <a href="#schedule-instance_method" title="#schedule (instance method)">#<strong>schedule</strong>(*args, mode: :smart, auto_local: true, timeout: nil) {|*args| ... } &#x21d2; self<sup>?</sup> </a>
     
 
     
@@ -455,12 +455,6 @@ Will drain any pending tasks before fully closing. If tasks are running indefini
       <pre class="lines">
 
 
-72
-73
-74
-75
-76
-77
 78
 79
 80
@@ -511,10 +505,33 @@ Will drain any pending tasks before fully closing. If tasks are running indefini
 125
 126
 127
-128</pre>
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 72</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 78</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Executor (class)">Executor</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Noncopyable</a></span></span>
@@ -531,7 +548,9 @@ Will drain any pending tasks before fully closing. If tasks are running indefini
   <span class='comment'># Attempts to submit a task. Queue-based executors return `nil` when full
 </span>  <span class='comment'># instead of waiting for space. Other executors behave like {#schedule}.
 </span>  <span class='comment'>#
-</span>  <span class='comment'># @param (see #schedule)
+</span>  <span class='comment'># @param args (see #schedule)
+</span>  <span class='comment'># @param mode (see #schedule)
+</span>  <span class='comment'># @param auto_local (see #schedule)
 </span>  <span class='comment'># @return [self, nil] self when submitted, or nil when the queue is full.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_try_schedule'>try_schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
@@ -545,14 +564,16 @@ Will drain any pending tasks before fully closing. If tasks are running indefini
 </span>  <span class='comment'># 1. If {#local?} returns true, and it would run in local mode (either due to `auto_local` or explicitly set
 </span>  <span class='comment'>#    `mode: :local`), it executes the block directly without enqueuing it.
 </span>  <span class='comment'># 2. It blocks until the block has been executed, either immediately in local mode or after being scheduled.
+</span>  <span class='comment'># A `timeout` only limits scheduling waits. Once submitted, this waits for completion without a timeout.
 </span>  <span class='comment'>#
 </span>  <span class='comment'># @param (see #schedule)
-</span>  <span class='comment'># @return [self]
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
+</span>  <span class='comment'># @return [self, nil] self after execution, or nil when the scheduling timeout expires.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Cannot yield without a block</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot execute task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
 
-    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_local?'>local?</span>
+    <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_scheduling_deadline'>scheduling_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_local?'>local?</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='rparen'>)</span>
       <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot execute task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
       <span class='kw'>yield</span><span class='lparen'>(</span><span class='op'>*</span><span class='rparen'>)</span>
       <span class='kw'>return</span> <span class='kw'>self</span>
@@ -562,15 +583,28 @@ Will drain any pending tasks before fully closing. If tasks are running indefini
     <span class='id identifier rubyid_signal'>signal</span>   <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Signal.html" title="Farce::Signal (class)">Signal</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Signal.html#initialize-instance_method" title="Farce::Signal#initialize (method)">new</a></span></span>
     <span class='id identifier rubyid_callback'>callback</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable_proc'><span class='object_link'><a href="../Ractor.html#shareable_proc-class_method" title="Farce::Ractor.shareable_proc (method)">shareable_proc</a></span></span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="../Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
 
-    <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='op'>|</span>
+    <span class='id identifier rubyid_submitted'>submitted</span> <span class='op'>=</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='comma'>,</span>
+      <span class='label'>timeout:</span> <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_remaining'><span class='object_link'><a href="../Clock.html#remaining-instance_method" title="Farce::Clock#remaining (method)">remaining</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='op'>|</span>
       <span class='id identifier rubyid_callback'>callback</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='rparen'>)</span>
     <span class='kw'>ensure</span>
       <span class='id identifier rubyid_ran'>ran</span><span class='period'>.</span><span class='id identifier rubyid_set'>set</span>
       <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_broadcast'>broadcast</span>
     <span class='kw'>end</span>
+    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_submitted'>submitted</span>
 
     <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_ran'>ran</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
     <span class='kw'>self</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_scheduling_deadline'>scheduling_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_timeout'>timeout</span> <span class='op'>=</span> <span class='const'>Float</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>unless</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_finite?'>finite?</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_negative?'>negative?</span>
+      <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>timeout must be a finite, non-negative number or nil</span><span class='tstring_end'>&quot;</span></span>
+    <span class='kw'>end</span>
+    <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_timeout'>timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -617,10 +651,10 @@ For executors without scopes, this behaves like <span class='object_link'><a hre
       <pre class="lines">
 
 
-95</pre>
+103</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 95</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 103</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_close_all'>close_all</span> <span class='op'>=</span> <span class='id identifier rubyid_close'>close</span></pre>
     </td>
@@ -675,12 +709,6 @@ For executors without scopes, this behaves like <span class='object_link'><a hre
       <pre class="lines">
 
 
-72
-73
-74
-75
-76
-77
 78
 79
 80
@@ -731,10 +759,33 @@ For executors without scopes, this behaves like <span class='object_link'><a hre
 125
 126
 127
-128</pre>
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 72</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 78</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Executor (class)">Executor</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Noncopyable</a></span></span>
@@ -751,7 +802,9 @@ For executors without scopes, this behaves like <span class='object_link'><a hre
   <span class='comment'># Attempts to submit a task. Queue-based executors return `nil` when full
 </span>  <span class='comment'># instead of waiting for space. Other executors behave like {#schedule}.
 </span>  <span class='comment'>#
-</span>  <span class='comment'># @param (see #schedule)
+</span>  <span class='comment'># @param args (see #schedule)
+</span>  <span class='comment'># @param mode (see #schedule)
+</span>  <span class='comment'># @param auto_local (see #schedule)
 </span>  <span class='comment'># @return [self, nil] self when submitted, or nil when the queue is full.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_try_schedule'>try_schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
@@ -765,14 +818,16 @@ For executors without scopes, this behaves like <span class='object_link'><a hre
 </span>  <span class='comment'># 1. If {#local?} returns true, and it would run in local mode (either due to `auto_local` or explicitly set
 </span>  <span class='comment'>#    `mode: :local`), it executes the block directly without enqueuing it.
 </span>  <span class='comment'># 2. It blocks until the block has been executed, either immediately in local mode or after being scheduled.
+</span>  <span class='comment'># A `timeout` only limits scheduling waits. Once submitted, this waits for completion without a timeout.
 </span>  <span class='comment'>#
 </span>  <span class='comment'># @param (see #schedule)
-</span>  <span class='comment'># @return [self]
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
+</span>  <span class='comment'># @return [self, nil] self after execution, or nil when the scheduling timeout expires.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Cannot yield without a block</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot execute task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
 
-    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_local?'>local?</span>
+    <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_scheduling_deadline'>scheduling_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_local?'>local?</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='rparen'>)</span>
       <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot execute task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
       <span class='kw'>yield</span><span class='lparen'>(</span><span class='op'>*</span><span class='rparen'>)</span>
       <span class='kw'>return</span> <span class='kw'>self</span>
@@ -782,15 +837,28 @@ For executors without scopes, this behaves like <span class='object_link'><a hre
     <span class='id identifier rubyid_signal'>signal</span>   <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Signal.html" title="Farce::Signal (class)">Signal</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Signal.html#initialize-instance_method" title="Farce::Signal#initialize (method)">new</a></span></span>
     <span class='id identifier rubyid_callback'>callback</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable_proc'><span class='object_link'><a href="../Ractor.html#shareable_proc-class_method" title="Farce::Ractor.shareable_proc (method)">shareable_proc</a></span></span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="../Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
 
-    <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='op'>|</span>
+    <span class='id identifier rubyid_submitted'>submitted</span> <span class='op'>=</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='comma'>,</span>
+      <span class='label'>timeout:</span> <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_remaining'><span class='object_link'><a href="../Clock.html#remaining-instance_method" title="Farce::Clock#remaining (method)">remaining</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='op'>|</span>
       <span class='id identifier rubyid_callback'>callback</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='rparen'>)</span>
     <span class='kw'>ensure</span>
       <span class='id identifier rubyid_ran'>ran</span><span class='period'>.</span><span class='id identifier rubyid_set'>set</span>
       <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_broadcast'>broadcast</span>
     <span class='kw'>end</span>
+    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_submitted'>submitted</span>
 
     <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_ran'>ran</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
     <span class='kw'>self</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_scheduling_deadline'>scheduling_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_timeout'>timeout</span> <span class='op'>=</span> <span class='const'>Float</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>unless</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_finite?'>finite?</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_negative?'>negative?</span>
+      <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>timeout must be a finite, non-negative number or nil</span><span class='tstring_end'>&quot;</span></span>
+    <span class='kw'>end</span>
+    <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_timeout'>timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -825,10 +893,10 @@ You can check this if the <span class='object_link'><a href="#state-instance_met
       <pre class="lines">
 
 
-78</pre>
+84</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 78</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 84</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_error'>error</span> <span class='op'>=</span> <span class='kw'>nil</span></pre>
     </td>
@@ -839,7 +907,7 @@ You can check this if the <span class='object_link'><a href="#state-instance_met
       <div class="method_details ">
   <h3 class="signature " id="execute-instance_method">
   
-    #<strong>execute</strong>(mode: :smart, auto_local: true, &amp;callback)  &#x21d2; <tt>self</tt> 
+    #<strong>execute</strong>(mode: :smart, auto_local: true, timeout: nil, &amp;callback)  &#x21d2; <tt>self</tt><sup>?</sup> 
   
 
   
@@ -851,7 +919,8 @@ You can check this if the <span class='object_link'><a href="#state-instance_met
 <ol>
 <li>If <span class='object_link'><a href="#local%3F-instance_method" title="Farce::Abstract::Executor#local? (method)">#local?</a></span> returns true, and it would run in local mode (either due to <code>auto_local</code> or explicitly set
 <code>mode: :local</code>), it executes the block directly without enqueuing it.</li>
-<li>It blocks until the block has been executed, either immediately in local mode or after being scheduled.</li>
+<li>It blocks until the block has been executed, either immediately in local mode or after being scheduled.
+A <code>timeout</code> only limits scheduling waits. Once submitted, this waits for completion without a timeout.</li>
 </ol>
 
 
@@ -913,6 +982,26 @@ May be ignored by some executors.</p>
       
     </li>
   
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Maximum seconds to wait for ownership and queue space. Nil waits indefinitely.
+Zero only submits if no waiting is needed. Must be finite and non-negative.
+An expired attempt returns <code>nil</code> and does not enqueue the task.
+This does not limit task execution time. Executors without a queue may ignore it.</p>
+</div>
+      
+    </li>
+  
 </ul>
 
 <p class="tag_title">Returns:</p>
@@ -921,9 +1010,13 @@ May be ignored by some executors.</p>
     <li>
       
       
-        <span class='type'>(<tt>self</tt>)</span>
+        <span class='type'>(<tt>self</tt>, <tt>nil</tt>)</span>
       
       
+      
+        &mdash;
+        <div class='inline'><p>self after execution, or nil when the scheduling timeout expires.</p>
+</div>
       
     </li>
   
@@ -948,15 +1041,6 @@ May be ignored by some executors.</p>
       <pre class="lines">
 
 
-104
-105
-106
-107
-108
-109
-110
-111
-112
 113
 114
 115
@@ -971,16 +1055,29 @@ May be ignored by some executors.</p>
 124
 125
 126
-127</pre>
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 104</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 113</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Cannot yield without a block</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot execute task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
 
-  <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_local?'>local?</span>
+  <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_scheduling_deadline'>scheduling_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_local?'>local?</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot execute task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
     <span class='kw'>yield</span><span class='lparen'>(</span><span class='op'>*</span><span class='rparen'>)</span>
     <span class='kw'>return</span> <span class='kw'>self</span>
@@ -990,12 +1087,14 @@ May be ignored by some executors.</p>
   <span class='id identifier rubyid_signal'>signal</span>   <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Signal.html" title="Farce::Signal (class)">Signal</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Signal.html#initialize-instance_method" title="Farce::Signal#initialize (method)">new</a></span></span>
   <span class='id identifier rubyid_callback'>callback</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable_proc'><span class='object_link'><a href="../Ractor.html#shareable_proc-class_method" title="Farce::Ractor.shareable_proc (method)">shareable_proc</a></span></span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="../Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
 
-  <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='op'>|</span>
+  <span class='id identifier rubyid_submitted'>submitted</span> <span class='op'>=</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='comma'>,</span>
+    <span class='label'>timeout:</span> <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_remaining'><span class='object_link'><a href="../Clock.html#remaining-instance_method" title="Farce::Clock#remaining (method)">remaining</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='op'>|</span>
     <span class='id identifier rubyid_callback'>callback</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='rparen'>)</span>
   <span class='kw'>ensure</span>
     <span class='id identifier rubyid_ran'>ran</span><span class='period'>.</span><span class='id identifier rubyid_set'>set</span>
     <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_broadcast'>broadcast</span>
   <span class='kw'>end</span>
+  <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_submitted'>submitted</span>
 
   <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_ran'>ran</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
   <span class='kw'>self</span>
@@ -1068,10 +1167,10 @@ May be ignored by some executors.</p>
       <pre class="lines">
 
 
-82</pre>
+88</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 82</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 88</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_local?'>local?</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='kw'>true</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>false</span> <span class='comment'># rubocop:disable Lint/UnusedMethodArgument</span></pre>
     </td>
@@ -1126,12 +1225,6 @@ May be ignored by some executors.</p>
       <pre class="lines">
 
 
-72
-73
-74
-75
-76
-77
 78
 79
 80
@@ -1182,10 +1275,33 @@ May be ignored by some executors.</p>
 125
 126
 127
-128</pre>
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 72</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 78</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Executor (class)">Executor</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Noncopyable</a></span></span>
@@ -1202,7 +1318,9 @@ May be ignored by some executors.</p>
   <span class='comment'># Attempts to submit a task. Queue-based executors return `nil` when full
 </span>  <span class='comment'># instead of waiting for space. Other executors behave like {#schedule}.
 </span>  <span class='comment'>#
-</span>  <span class='comment'># @param (see #schedule)
+</span>  <span class='comment'># @param args (see #schedule)
+</span>  <span class='comment'># @param mode (see #schedule)
+</span>  <span class='comment'># @param auto_local (see #schedule)
 </span>  <span class='comment'># @return [self, nil] self when submitted, or nil when the queue is full.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_try_schedule'>try_schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
@@ -1216,14 +1334,16 @@ May be ignored by some executors.</p>
 </span>  <span class='comment'># 1. If {#local?} returns true, and it would run in local mode (either due to `auto_local` or explicitly set
 </span>  <span class='comment'>#    `mode: :local`), it executes the block directly without enqueuing it.
 </span>  <span class='comment'># 2. It blocks until the block has been executed, either immediately in local mode or after being scheduled.
+</span>  <span class='comment'># A `timeout` only limits scheduling waits. Once submitted, this waits for completion without a timeout.
 </span>  <span class='comment'>#
 </span>  <span class='comment'># @param (see #schedule)
-</span>  <span class='comment'># @return [self]
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
+</span>  <span class='comment'># @return [self, nil] self after execution, or nil when the scheduling timeout expires.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Cannot yield without a block</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot execute task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
 
-    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_local?'>local?</span>
+    <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_scheduling_deadline'>scheduling_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_local?'>local?</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='rparen'>)</span>
       <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot execute task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
       <span class='kw'>yield</span><span class='lparen'>(</span><span class='op'>*</span><span class='rparen'>)</span>
       <span class='kw'>return</span> <span class='kw'>self</span>
@@ -1233,15 +1353,28 @@ May be ignored by some executors.</p>
     <span class='id identifier rubyid_signal'>signal</span>   <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Signal.html" title="Farce::Signal (class)">Signal</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Signal.html#initialize-instance_method" title="Farce::Signal#initialize (method)">new</a></span></span>
     <span class='id identifier rubyid_callback'>callback</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable_proc'><span class='object_link'><a href="../Ractor.html#shareable_proc-class_method" title="Farce::Ractor.shareable_proc (method)">shareable_proc</a></span></span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="../Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
 
-    <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='op'>|</span>
+    <span class='id identifier rubyid_submitted'>submitted</span> <span class='op'>=</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='comma'>,</span>
+      <span class='label'>timeout:</span> <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_remaining'><span class='object_link'><a href="../Clock.html#remaining-instance_method" title="Farce::Clock#remaining (method)">remaining</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='op'>|</span>
       <span class='id identifier rubyid_callback'>callback</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='rparen'>)</span>
     <span class='kw'>ensure</span>
       <span class='id identifier rubyid_ran'>ran</span><span class='period'>.</span><span class='id identifier rubyid_set'>set</span>
       <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_broadcast'>broadcast</span>
     <span class='kw'>end</span>
+    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_submitted'>submitted</span>
 
     <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_ran'>ran</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
     <span class='kw'>self</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_scheduling_deadline'>scheduling_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_timeout'>timeout</span> <span class='op'>=</span> <span class='const'>Float</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>unless</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_finite?'>finite?</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_negative?'>negative?</span>
+      <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>timeout must be a finite, non-negative number or nil</span><span class='tstring_end'>&quot;</span></span>
+    <span class='kw'>end</span>
+    <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_timeout'>timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -1252,7 +1385,7 @@ May be ignored by some executors.</p>
       <div class="method_details ">
   <h3 class="signature " id="schedule-instance_method">
   
-    #<strong>schedule</strong>(*args, mode: :smart, auto_local: true) {|*args| ... } &#x21d2; <tt>self</tt> 
+    #<strong>schedule</strong>(*args, mode: :smart, auto_local: true, timeout: nil) {|*args| ... } &#x21d2; <tt>self</tt><sup>?</sup> 
   
 
   
@@ -1356,6 +1489,26 @@ May be ignored by some executors.</p>
       
     </li>
   
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Maximum seconds to wait for ownership and queue space. Nil waits indefinitely.
+Zero only submits if no waiting is needed. Must be finite and non-negative.
+An expired attempt returns <code>nil</code> and does not enqueue the task.
+This does not limit task execution time. Executors without a queue may ignore it.</p>
+</div>
+      
+    </li>
+  
 </ul>
 
 <p class="tag_title">Yields:</p>
@@ -1400,9 +1553,13 @@ May be ignored by some executors.</p>
     <li>
       
       
-        <span class='type'>(<tt>self</tt>)</span>
+        <span class='type'>(<tt>self</tt>, <tt>nil</tt>)</span>
       
       
+      
+        &mdash;
+        <div class='inline'><p>self when submitted, or nil when the scheduling timeout expires.</p>
+</div>
       
     </li>
   
@@ -1431,12 +1588,6 @@ May be ignored by some executors.</p>
       <pre class="lines">
 
 
-72
-73
-74
-75
-76
-77
 78
 79
 80
@@ -1487,10 +1638,33 @@ May be ignored by some executors.</p>
 125
 126
 127
-128</pre>
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 72</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 78</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Executor (class)">Executor</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Noncopyable</a></span></span>
@@ -1507,7 +1681,9 @@ May be ignored by some executors.</p>
   <span class='comment'># Attempts to submit a task. Queue-based executors return `nil` when full
 </span>  <span class='comment'># instead of waiting for space. Other executors behave like {#schedule}.
 </span>  <span class='comment'>#
-</span>  <span class='comment'># @param (see #schedule)
+</span>  <span class='comment'># @param args (see #schedule)
+</span>  <span class='comment'># @param mode (see #schedule)
+</span>  <span class='comment'># @param auto_local (see #schedule)
 </span>  <span class='comment'># @return [self, nil] self when submitted, or nil when the queue is full.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_try_schedule'>try_schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
@@ -1521,14 +1697,16 @@ May be ignored by some executors.</p>
 </span>  <span class='comment'># 1. If {#local?} returns true, and it would run in local mode (either due to `auto_local` or explicitly set
 </span>  <span class='comment'>#    `mode: :local`), it executes the block directly without enqueuing it.
 </span>  <span class='comment'># 2. It blocks until the block has been executed, either immediately in local mode or after being scheduled.
+</span>  <span class='comment'># A `timeout` only limits scheduling waits. Once submitted, this waits for completion without a timeout.
 </span>  <span class='comment'>#
 </span>  <span class='comment'># @param (see #schedule)
-</span>  <span class='comment'># @return [self]
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
+</span>  <span class='comment'># @return [self, nil] self after execution, or nil when the scheduling timeout expires.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Cannot yield without a block</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot execute task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
 
-    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_local?'>local?</span>
+    <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_scheduling_deadline'>scheduling_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_local?'>local?</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='rparen'>)</span>
       <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot execute task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
       <span class='kw'>yield</span><span class='lparen'>(</span><span class='op'>*</span><span class='rparen'>)</span>
       <span class='kw'>return</span> <span class='kw'>self</span>
@@ -1538,15 +1716,28 @@ May be ignored by some executors.</p>
     <span class='id identifier rubyid_signal'>signal</span>   <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Signal.html" title="Farce::Signal (class)">Signal</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Signal.html#initialize-instance_method" title="Farce::Signal#initialize (method)">new</a></span></span>
     <span class='id identifier rubyid_callback'>callback</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable_proc'><span class='object_link'><a href="../Ractor.html#shareable_proc-class_method" title="Farce::Ractor.shareable_proc (method)">shareable_proc</a></span></span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="../Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
 
-    <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='op'>|</span>
+    <span class='id identifier rubyid_submitted'>submitted</span> <span class='op'>=</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='comma'>,</span>
+      <span class='label'>timeout:</span> <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_remaining'><span class='object_link'><a href="../Clock.html#remaining-instance_method" title="Farce::Clock#remaining (method)">remaining</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='op'>|</span>
       <span class='id identifier rubyid_callback'>callback</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='rparen'>)</span>
     <span class='kw'>ensure</span>
       <span class='id identifier rubyid_ran'>ran</span><span class='period'>.</span><span class='id identifier rubyid_set'>set</span>
       <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_broadcast'>broadcast</span>
     <span class='kw'>end</span>
+    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_submitted'>submitted</span>
 
     <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_ran'>ran</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
     <span class='kw'>self</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_scheduling_deadline'>scheduling_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_timeout'>timeout</span> <span class='op'>=</span> <span class='const'>Float</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>unless</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_finite?'>finite?</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_negative?'>negative?</span>
+      <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>timeout must be a finite, non-negative number or nil</span><span class='tstring_end'>&quot;</span></span>
+    <span class='kw'>end</span>
+    <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_timeout'>timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -1615,12 +1806,6 @@ May be ignored by some executors.</p>
       <pre class="lines">
 
 
-72
-73
-74
-75
-76
-77
 78
 79
 80
@@ -1671,10 +1856,33 @@ May be ignored by some executors.</p>
 125
 126
 127
-128</pre>
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 72</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 78</span>
 
 <span class='kw'>class</span> <span class='const'><span class='object_link'><a href="" title="Farce::Abstract::Executor (class)">Executor</a></span></span>
   <span class='id identifier rubyid_include'>include</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Noncopyable</a></span></span>
@@ -1691,7 +1899,9 @@ May be ignored by some executors.</p>
   <span class='comment'># Attempts to submit a task. Queue-based executors return `nil` when full
 </span>  <span class='comment'># instead of waiting for space. Other executors behave like {#schedule}.
 </span>  <span class='comment'>#
-</span>  <span class='comment'># @param (see #schedule)
+</span>  <span class='comment'># @param args (see #schedule)
+</span>  <span class='comment'># @param mode (see #schedule)
+</span>  <span class='comment'># @param auto_local (see #schedule)
 </span>  <span class='comment'># @return [self, nil] self when submitted, or nil when the queue is full.
 </span>  <span class='kw'>def</span> <span class='id identifier rubyid_try_schedule'>try_schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span>
 
@@ -1705,14 +1915,16 @@ May be ignored by some executors.</p>
 </span>  <span class='comment'># 1. If {#local?} returns true, and it would run in local mode (either due to `auto_local` or explicitly set
 </span>  <span class='comment'>#    `mode: :local`), it executes the block directly without enqueuing it.
 </span>  <span class='comment'># 2. It blocks until the block has been executed, either immediately in local mode or after being scheduled.
+</span>  <span class='comment'># A `timeout` only limits scheduling waits. Once submitted, this waits for completion without a timeout.
 </span>  <span class='comment'>#
 </span>  <span class='comment'># @param (see #schedule)
-</span>  <span class='comment'># @return [self]
-</span>  <span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
+</span>  <span class='comment'># @return [self, nil] self after execution, or nil when the scheduling timeout expires.
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_execute'>execute</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Cannot yield without a block</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot execute task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
 
-    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_local?'>local?</span>
+    <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='id identifier rubyid_scheduling_deadline'>scheduling_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_auto_local'>auto_local</span> <span class='op'>||</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='symbol'>:local</span><span class='rparen'>)</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_local?'>local?</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='rparen'>)</span>
       <span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../../Farce.html#SchedulerClosedError-constant" title="Farce::SchedulerClosedError (constant)">SchedulerClosedError</a></span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cannot execute task on a closed scheduler</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
       <span class='kw'>yield</span><span class='lparen'>(</span><span class='op'>*</span><span class='rparen'>)</span>
       <span class='kw'>return</span> <span class='kw'>self</span>
@@ -1722,15 +1934,28 @@ May be ignored by some executors.</p>
     <span class='id identifier rubyid_signal'>signal</span>   <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Signal.html" title="Farce::Signal (class)">Signal</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Signal.html#initialize-instance_method" title="Farce::Signal#initialize (method)">new</a></span></span>
     <span class='id identifier rubyid_callback'>callback</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable_proc'><span class='object_link'><a href="../Ractor.html#shareable_proc-class_method" title="Farce::Ractor.shareable_proc (method)">shareable_proc</a></span></span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='const'><span class='object_link'><a href="../Ractor.html" title="Farce::Ractor (module)">Ractor</a></span></span><span class='period'>.</span><span class='id identifier rubyid_shareable?'><span class='object_link'><a href="../Ractor.html#shareable%3F-class_method" title="Farce::Ractor.shareable? (method)">shareable?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
 
-    <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='op'>|</span>
+    <span class='id identifier rubyid_submitted'>submitted</span> <span class='op'>=</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='comma'>,</span>
+      <span class='label'>timeout:</span> <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_remaining'><span class='object_link'><a href="../Clock.html#remaining-instance_method" title="Farce::Clock#remaining (method)">remaining</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='id identifier rubyid_ran'>ran</span><span class='comma'>,</span> <span class='id identifier rubyid_signal'>signal</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='op'>|</span>
       <span class='id identifier rubyid_callback'>callback</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='rparen'>)</span>
     <span class='kw'>ensure</span>
       <span class='id identifier rubyid_ran'>ran</span><span class='period'>.</span><span class='id identifier rubyid_set'>set</span>
       <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_broadcast'>broadcast</span>
     <span class='kw'>end</span>
+    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_submitted'>submitted</span>
 
     <span class='id identifier rubyid_signal'>signal</span><span class='period'>.</span><span class='id identifier rubyid_wait_until'>wait_until</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_ran'>ran</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='rbrace'>}</span>
     <span class='kw'>self</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_scheduling_deadline'>scheduling_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_timeout'>timeout</span> <span class='op'>=</span> <span class='const'>Float</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
+    <span class='kw'>unless</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_finite?'>finite?</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_negative?'>negative?</span>
+      <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>timeout must be a finite, non-negative number or nil</span><span class='tstring_end'>&quot;</span></span>
+    <span class='kw'>end</span>
+    <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_timeout'>timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -1833,10 +2058,10 @@ May be ignored by some executors.</p>
       <pre class="lines">
 
 
-89</pre>
+97</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 89</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/executor.rb', line 97</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_try_schedule'>try_schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -1849,7 +2074,7 @@ May be ignored by some executors.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct 20 10:27:43 2026 by
+  Generated on Tue Oct 20 11:40:21 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

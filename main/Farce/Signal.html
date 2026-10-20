@@ -842,7 +842,7 @@ A timeout of zero checks once without waiting. Exceptions from the block propaga
     <span class='id identifier rubyid_result'>result</span>   <span class='op'>=</span> <span class='kw'>yield</span>
     <span class='kw'>return</span> <span class='id identifier rubyid_result'>result</span> <span class='kw'>if</span> <span class='id identifier rubyid_result'>result</span>
 
-    <span class='id identifier rubyid_remaining'>remaining</span> <span class='op'>=</span> <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>-</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span> <span class='kw'>if</span> <span class='id identifier rubyid_deadline'>deadline</span>
+    <span class='id identifier rubyid_remaining'>remaining</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_remaining'><span class='object_link'><a href="Clock.html#remaining-instance_method" title="Farce::Clock#remaining (method)">remaining</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span>
     <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_remaining'>remaining</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_remaining'>remaining</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span>
     <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_wait'>wait</span><span class='lparen'>(</span><span class='id identifier rubyid_observed'>observed</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='id identifier rubyid_remaining'>remaining</span><span class='rparen'>)</span>
   <span class='kw'>end</span>
@@ -989,7 +989,7 @@ Uses the same timeout budget and notification handling as <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Tue Oct 20 10:27:34 2026 by
+  Generated on Tue Oct 20 11:40:12 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

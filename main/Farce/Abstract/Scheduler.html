@@ -543,7 +543,7 @@ drains queued tasks. A scheduler can only be launched or installed once.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#schedule-instance_method" title="#schedule (instance method)">#<strong>schedule</strong>(*args, mode: :smart, auto_local: true) {|*args| ... } &#x21d2; Scheduler </a>
+      <a href="#schedule-instance_method" title="#schedule (instance method)">#<strong>schedule</strong>(*args, mode: :smart, auto_local: true, timeout: nil) {|*args| ... } &#x21d2; self<sup>?</sup> </a>
     
 
     
@@ -1379,10 +1379,10 @@ that scheduler.</p>
       <pre class="lines">
 
 
-384</pre>
+392</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 384</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 392</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_alive?'>alive?</span> <span class='op'>=</span> <span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>==</span> <span class='symbol'>:running</span></pre>
     </td>
@@ -1513,19 +1513,19 @@ close the underlying fiber scheduler.</p>
       <pre class="lines">
 
 
-353
-354
-355
-356
-357
-358
-359
-360
 361
-362</pre>
+362
+363
+364
+365
+366
+367
+368
+369
+370</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 353</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 361</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_close'>close</span>
   <span class='kw'>until</span> <span class='id identifier rubyid_closed?'>closed?</span>
@@ -1595,10 +1595,10 @@ Does not imply all tasks have finished.</p>
       <pre class="lines">
 
 
-380</pre>
+388</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 380</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 388</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>=</span> <span class='const'>CLOSED_STATES</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span></pre>
     </td>
@@ -2224,13 +2224,13 @@ launching/setup states before returning. Returns the created worker instance.</p
       <pre class="lines">
 
 
-341
-342
-343
-344</pre>
+349
+350
+351
+352</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 341</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 349</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_local?'>local?</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='kw'>true</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_owner'>owner</span> <span class='op'>=</span> <span class='id identifier rubyid_wait'>wait</span> <span class='op'>?</span> <span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span> <span class='op'>:</span> <span class='ivar'>@owner</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
@@ -2395,7 +2395,7 @@ Setting the owner explicitly avoids blocking on ownership determination.</p>
       <div class="method_details ">
   <h3 class="signature " id="schedule-instance_method">
   
-    #<strong>schedule</strong>(*args, mode: :smart, auto_local: true) {|*args| ... } &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Abstract::Scheduler (class)">Scheduler</a></span></tt> 
+    #<strong>schedule</strong>(*args, mode: :smart, auto_local: true, timeout: nil) {|*args| ... } &#x21d2; <tt>self</tt><sup>?</sup> 
   
 
   
@@ -2411,6 +2411,8 @@ threads in that Ractor.</p>
 <p>Local tasks retain their block and arguments.</p>
 <p>Otherwise, the block must be convertible to a Ractor-shareable proc.
 Pass task data as arguments so the selected transfer mode can be applied to it.</p>
+<p>A <code>timeout</code> limits the combined wait for ownership and queue space.
+Expiry returns <code>nil</code> without enqueuing the task. Accepted tasks have no execution timeout.</p>
 
 
   </div>
@@ -2503,6 +2505,23 @@ See <span class='object_link'><a href="../ModeManager.html#wrap-instance_method"
       
     </li>
   
+    <li>
+      
+        <span class='name'>timeout</span>
+      
+      
+        <span class='type'>(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Maximum scheduling wait in seconds. Nil waits indefinitely, zero polls.</p>
+</div>
+      
+    </li>
+  
 </ul>
 
 <p class="tag_title">Yields:</p>
@@ -2528,12 +2547,12 @@ See <span class='object_link'><a href="../ModeManager.html#wrap-instance_method"
     <li>
       
       
-        <span class='type'>(<tt><span class='object_link'><a href="" title="Farce::Abstract::Scheduler (class)">Scheduler</a></span></tt>)</span>
+        <span class='type'>(<tt>self</tt>, <tt>nil</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'><p>self.</p>
+        <div class='inline'><p>self when submitted, or nil when the scheduling timeout expires.</p>
 </div>
       
     </li>
@@ -2573,10 +2592,10 @@ See <span class='object_link'><a href="../ModeManager.html#wrap-instance_method"
       <pre class="lines">
 
 
-329</pre>
+333</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 329</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 333</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_enqueue_task'>enqueue_task</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -2644,10 +2663,10 @@ See <span class='object_link'><a href="../ModeManager.html#wrap-instance_method"
       <pre class="lines">
 
 
-373</pre>
+381</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 373</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 381</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_state'>state</span> <span class='op'>=</span> <span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span></pre>
     </td>
@@ -2767,12 +2786,16 @@ May be ignored by some executors.</p>
       <pre class="lines">
 
 
-338</pre>
+344
+345
+346</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 338</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/scheduler.rb', line 344</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_try_schedule'>try_schedule</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_enqueue_task'>enqueue_task</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='op'>...</span><span class='rparen'>)</span></pre>
+<span class='kw'>def</span> <span class='id identifier rubyid_try_schedule'>try_schedule</span><span class='lparen'>(</span><span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='label'>auto_local:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_enqueue_task'>enqueue_task</span><span class='lparen'>(</span><span class='kw'>true</span><span class='comma'>,</span> <span class='op'>*</span><span class='comma'>,</span> <span class='label'>mode:</span><span class='comma'>,</span> <span class='label'>auto_local:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -2836,7 +2859,7 @@ May be ignored by some executors.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct 20 10:27:45 2026 by
+  Generated on Tue Oct 20 11:40:22 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -701,7 +701,7 @@ Resetting the event does not retract a signal already sent to current waiters.</
 </span>  <span class='id identifier rubyid_deadline'>deadline</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_timeout_deadline'>timeout_deadline</span><span class='lparen'>(</span><span class='id identifier rubyid_timeout'>timeout</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_observed'>observed</span> <span class='op'>=</span> <span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
   <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_observed'>observed</span><span class='period'>.</span><span class='id identifier rubyid_odd?'>odd?</span>
-  <span class='op'>!</span><span class='op'>!</span><span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_observed'>observed</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_remaining_timeout'>remaining_timeout</span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='op'>!</span><span class='op'>!</span><span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_observed'>observed</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='const'><span class='object_link'><a href="../Clock.html" title="Farce::Clock (module)">Clock</a></span></span><span class='period'>.</span><span class='id identifier rubyid_remaining'><span class='object_link'><a href="../Clock.html#remaining-instance_method" title="Farce::Clock#remaining (method)">remaining</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_deadline'>deadline</span><span class='rparen'>)</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -713,7 +713,7 @@ Resetting the event does not retract a signal already sent to current waiters.</
 </div>
 
       <div id="footer">
-  Generated on Tue Oct 20 10:27:43 2026 by
+  Generated on Tue Oct 20 11:40:21 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
