@@ -22,6 +22,7 @@ Farce provides a range of data structures that are ractor-safe, mutable, and exp
     - [Priority Queues](#priority-queues)
     - [Timer Queues](#timer-queues)
     - [Queue capacity](#queue-capacity)
+  - [Publishers](#publishers)
   - [Read Next](#read-next)
 
 ## Maps
@@ -307,6 +308,33 @@ queue.try_push(:c) # => false
 
 Normal queues have a default capacity of 1024. You can explicitly set the capacity to `nil` to create an unbounded queue.
 Priority queues and timer queues do not have a default capacity, so earlier entries are not getting blocked unexpectedly.
+
+## Publishers
+
+Both ports and queues deliver messages exactly ones. Multiple receivers can read from the same port (if they are running inside the same ractor) or queue, but each message will only be delivered once.
+
+A publisher allows one-to-many communication, where a single publisher can broadcast messages to multiple subscribers. Each subscriber will receive every message published.
+
+Subscribers can be:
+* Ractors, ports, queues, or other publishers, using their respective message sending mechanisms.
+* A [vector](#vectors) or [set](#sets), in which case each message will be added to the collection.
+* A [counter](#counters), incrementing it for each message received. This avoids potential copying of the message itself.
+* A [flag](#flags), setting it to true whenever a message is received. This avoids potential copying of the message itself.
+* A callback, executed for each message received.
+
+```ruby
+publisher = Farce::Publisher.new
+counter   = Farce::Counter.new
+
+publisher.subscribe do |message|
+  puts "Received: #{message}"
+end
+
+publisher.publish(:hello)
+publisher.publish(:world)
+
+counter.to_i # => 2
+```
 
 ## Read Next
 

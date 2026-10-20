@@ -259,6 +259,7 @@ The classes in this table accept the same five scopes. The scope determines whic
 | `Farce::Local::WeakSet` | A set that retains its elements weakly. |
 | `Farce::Local::Vector` | An indexed collection. |
 | `Farce::Local::Queue` | A FIFO queue with independent capacity and lifecycle. |
+| `Farce::Local::Publisher` | An independent set of subscriptions. |
 | `Farce::Local::PriorityQueue` | A queue ordered by priority. |
 | `Farce::Local::TimerQueue` | A queue whose values become available at scheduled times. |
 | `Farce::Local::Lazy` | A value computed on first access in that scope. |

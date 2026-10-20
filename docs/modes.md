@@ -392,6 +392,7 @@ The same choices appear in several Farce APIs. Containers normally default to `:
 | `Farce::Atom` | `new`, `store`, `swap`, `update`, and other replacement operations | The stored value. |
 | `Farce::Lazy`, `Farce::LazyRef` | `new` | The result computed once by the factory. |
 | `Farce::Task` | `new`, `schedule`, `try_schedule`, `in_parallel`, `on_main`, `add_argument` | Arguments and the successful result. `add_argument` overrides the mode for one argument. Scheduling can select local mode automatically. |
+| `Farce::Publisher`, `Farce::Unshared::Publisher`, `Farce::Local::Publisher` | `subscribe` with a block | Callback arguments and queued payloads. Defaults to `:smart` for `Publisher` and `:local` for its Unshared and Local variants. |
 | `Farce::Molecule` | `define`, `new` | Newly created field atoms. |
 | `Farce::Vector` | `new`, `push`, `store`, `update`, and other replacement operations | Element values. |
 | `Farce::WeakSet` | `new`, `add`, `add?` | Weakly held elements. Supports only `:raise`, `:make_shareable`, and `:dedup`. Defaults to `:raise`. |
