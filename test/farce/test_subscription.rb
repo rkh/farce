@@ -87,6 +87,23 @@ module Farce
       assert_raises(NoMethodError) { Subscription.new }
     end
 
+    def test_loading_subscriptions_does_not_load_concurrent_replacements
+      output, error, status = ruby_isolated(<<~'RUBY', coverage: false)
+        require "farce"
+        pattern = %r{/farce/concurrent(?:/|\.rb)}
+        before = $LOADED_FEATURES.grep(pattern)
+        autoload = Farce.autoload?(:Concurrent)
+        Farce::Subscription
+        raise "loaded Farce::Concurrent" unless before == $LOADED_FEATURES.grep(pattern)
+        raise "resolved Farce::Concurrent autoload" unless autoload == Farce.autoload?(:Concurrent)
+        raise "loaded concurrent-ruby" if defined?(::Concurrent::AtomicReference)
+        puts "ok"
+      RUBY
+
+      assert_predicate status, :success?, "#{output}\n#{error}"
+      assert_equal "ok\n", output
+    end
+
     def test_first_subscription_can_be_created_in_another_ractor
       output, error, status = ruby_isolated(<<~'RUBY')
         require "farce"

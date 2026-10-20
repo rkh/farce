@@ -9,6 +9,7 @@ module Farce
     def test_concurrent_transaction_integration
       output, error, status = ruby_isolated(<<~RUBY, timeout: 60)
         require "subprocess/concurrent"
+        require "subprocess/concurrent_subscribers"
         if RUBY_ENGINE == "ruby"
           raise "C extension not loaded" unless Concurrent.c_extensions_loaded?
           raise "wrong atomic implementation" unless Concurrent::AtomicReference < Concurrent::CAtomicReference
@@ -37,6 +38,7 @@ module Farce
         end
         Object.prepend(WithoutConcurrentCExtension)
         require "subprocess/concurrent"
+        require "subprocess/concurrent_subscribers"
         raise "C extension loaded" if Concurrent.c_extensions_loaded?
         raise "wrong atomic implementation" unless Concurrent::AtomicReference < Concurrent::MutexAtomicReference
       RUBY
@@ -65,6 +67,9 @@ module Farce
               raise "wrong map class" unless converted.instance_of?(Farce::Map)
               raise "wrong vector class" unless converted[:values].instance_of?(Farce::Vector)
               raise "wrong values" unless converted[:values].to_a == [1]
+              reference = Concurrent::AtomicReference.new
+              Farce::Unshared::Publisher.new(reference).publish(:message)
+              raise "subscription failed" unless reference.value == :message
             RUBY
 
             assert_predicate status, :success?, "#{output}\n#{error}"
@@ -88,6 +93,9 @@ module Farce
         raise "TVar extended" if Concurrent::TVar.method_defined?(:transaction_snapshot)
         raise "transaction failed" unless Farce.transaction { |tx| tx[tvar].value = 2 }
         raise "wrong value" unless tvar.value == 2
+        latch = Concurrent::CountDownLatch.new(1)
+        Farce::Local::Publisher.new(latch).publish(nil)
+        raise "subscription failed" unless latch.wait(0)
       RUBY
 
       assert_predicate status, :success?, "#{output}\n#{error}"

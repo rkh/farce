@@ -41,5 +41,10 @@ module Farce
 
     autoload :LockLocalVar, "farce/concurrent/fiber_local_var"
     private_constant :LocalVar
+
+    Farce.on_main do
+      Subscription.define(Event) { |_| subscriber.set }
+      Subscription.define(CountDownLatch) { |_| subscriber.count_down }
+    end
   end
 end

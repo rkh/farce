@@ -82,6 +82,7 @@ The integration adds the following features if [concurrent-ruby](https://github.
 
 * [Transaction support for `Concurrent::TVar`](concurrency.md#tvars)
 * Automatic conversion of `Concurrent::Map` instances to [maps](data-structures.md#maps) via [`Farce.enfarce`](utilities.md#top-level-methods).
+* [Subscriber support](data-structures.md#publishers) for `Concurrent::AtomicReference`, `Concurrent::AtomicFixnum`, `Concurrent::AtomicBoolean`, `Concurrent::Event`, and `Concurrent::CountDownLatch` with unshared and local publishers.
 
 ## Ractor Sharing
 

@@ -3,9 +3,14 @@
 # warn_indent: true
 
 # @!group concurrent-ruby Integration
-require "farce"           unless defined?(Farce::Abstract)
-require "concurrent/map"  unless defined?(Concurrent::Map)
-require "concurrent/tvar" unless defined?(Concurrent::TVar)
+require "farce"                              unless defined?(Farce::Abstract)
+require "concurrent/map"                     unless defined?(Concurrent::Map)
+require "concurrent/tvar"                    unless defined?(Concurrent::TVar)
+require "concurrent/atomic/atomic_reference" unless defined?(Concurrent::AtomicReference)
+require "concurrent/atomic/atomic_fixnum"    unless defined?(Concurrent::AtomicFixnum)
+require "concurrent/atomic/atomic_boolean"   unless defined?(Concurrent::AtomicBoolean)
+require "concurrent/atomic/event"            unless defined?(Concurrent::Event)
+require "concurrent/atomic/count_down_latch" unless defined?(Concurrent::CountDownLatch)
 
 module Farce
   module Integrations
@@ -108,5 +113,13 @@ module Farce
 
   Internal::Converter.define(::Concurrent::Map, :Map) do |instance, value|
     value.each { instance[_1] = convert(_2) }
+  end
+
+  Farce.on_main do
+    Subscription.define(::Concurrent::AtomicReference) { subscriber.value = it }
+    Subscription.define(::Concurrent::AtomicFixnum) { |_| subscriber.increment }
+    Subscription.define(::Concurrent::AtomicBoolean) { |_| subscriber.make_true }
+    Subscription.define(::Concurrent::Event) { |_| subscriber.set }
+    Subscription.define(::Concurrent::CountDownLatch) { |_| subscriber.count_down }
   end
 end

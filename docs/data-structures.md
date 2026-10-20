@@ -321,11 +321,15 @@ Subscribers can be:
 * A [vector](#vectors) or [set](#sets), in which case each message will be added to the collection.
 * A [counter](#counters), incrementing it for each message received. This avoids potential copying of the message itself.
 * A [flag](#flags), setting it to true whenever a message is received. This avoids potential copying of the message itself.
+* A `Farce::Concurrent::Event`, setting it for each message received.
+* A `Farce::Concurrent::CountDownLatch`, counting down for each message received.
 * A callback, executed for each message received.
 
 For unshared and local publisher [variants](variants-and-scopes.md) subscribers may also include:
+
 * Any unshared variant of the subscriber list above.
 * Ruby's `Thread::Queue` or `Thread::SizedQueue`
+* `Concurrent::AtomicReference`, `Concurrent::AtomicFixnum`, `Concurrent::AtomicBoolean`, `Concurrent::Event`, and `Concurrent::CountDownLatch` if the [concurrent-ruby integration](integrations.md#concurrent-ruby) is active.
 
 ```ruby
 publisher = Farce::Publisher.new

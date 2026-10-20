@@ -67,7 +67,16 @@ module Farce
       #     * {Vector#<<}
       #     * {Signal#broadcast} (without arguments)
       #     * {Publisher#publish}
+      #     * {Farce::Concurrent::Event#set} (without arguments)
+      #     * {Farce::Concurrent::CountDownLatch#count_down} (without arguments)
       #     * `Proc#call`
+      #
+      #     The concurrent-ruby integration supports these subscribers with unshared and local publishers:
+      #     * `Concurrent::AtomicReference#value=`
+      #     * `Concurrent::AtomicFixnum#increment` (without arguments)
+      #     * `Concurrent::AtomicBoolean#make_true`
+      #     * `Concurrent::Event#set` (without arguments)
+      #     * `Concurrent::CountDownLatch#count_down` (without arguments)
       #
       #     Set the default `mode`, `auto_local`, `capacity`, and similar options via initializers for these classes
       #     to influence how data transfer is handled.
