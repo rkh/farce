@@ -39,6 +39,7 @@ Use familiar Ruby APIs with coordinated access to shared state:
 - **Maps, vectors, and sets** for collections, with sorted and weak-reference variants.
 - **Atoms, counters, flags, and molecules** for individual values and structured records.
 - **FIFO, priority, and timer queues** for passing work, applying back pressure, or delaying delivery.
+- **Publishers and subscribers** for one-to-many communication, where a single publisher can broadcast messages to multiple subscribers.
 
 For example, use a Vector as a shared list:
 
