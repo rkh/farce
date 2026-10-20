@@ -12,7 +12,7 @@ module Farce
       include Internal::Freeze::Unfreezable
       include Internal::Noncopyable
 
-      # @param subscribers [Array<Publisher, Ractor::Port, Queue, Counter, Flag, Atom, Set, Vector, Signal, Proc>]
+      # @param subscribers [Array]
       #   the initial subscribers to add to the publisher, see {#subscribe}
       def initialize(*subscribers)
         @closed = Farce::Flag.new
@@ -24,6 +24,10 @@ module Farce
       def closed? = @closed.value
 
       # Publishes the given payload to all current subscribers.
+      #
+      # Full bounded queues drop new messages.
+      # Failed publishing attempts to closed or frozen receivers cancel their subscriptions.
+      #
       # @param payload [BasicObject] the payload to publish
       # @return [self] the publisher itself
       def publish(payload = nil)
@@ -45,13 +49,17 @@ module Farce
       #     upstream.subscribe(downstream)
       #     upstream.publish(:message) # also publishes to downstream's subscribers
       #
-      #   @param subscriber [Publisher, Ractor, Ractor::Port, Queue, Counter, Flag, Atom, Set, Vector, Signal, Proc]
+      #   @param subscriber [BasicObject]
       #     The subscriber to add.
+      #     Standard-library queues are supported by unshared and local publishers and retain the original payload.
+      #     A full `Thread::SizedQueue` drops new messages. Publishing to a closed queue cancels its subscription.
       #
       #     Calls one of the following methods:
       #     * {Ractor#send}
       #     * {Ractor::Port#send}
       #     * {Queue#try_push}
+      #     * `Thread::Queue#push`
+      #     * `Thread::SizedQueue#push` (nonblocking)
       #     * {Counter#increment} (without arguments)
       #     * {Flag#set}
       #     * {Atom#value=}
@@ -63,6 +71,8 @@ module Farce
       #
       #     Set the default `mode`, `auto_local`, `capacity`, and similar options via initializers for these classes
       #     to influence how data transfer is handled.
+      #
+      #     Support for additional subscribers can be added via {Subscription.define}.
       #
       # @overload subscribe(*args, mode: nil, scheduler: nil, capacity: nil)
       #   Adds a subscription callback.

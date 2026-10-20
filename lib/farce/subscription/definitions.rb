@@ -15,6 +15,13 @@ module Farce
       define(Abstract::Atom)                    { subscriber.value = it    }
       define(Abstract::Set, Abstract::Vector)   { subscriber << it         }
       define(Signal)                            { |_| subscriber.broadcast }
+
+      define(::Thread::Queue) { subscriber.push(it) }
+      define(::Thread::SizedQueue) do |payload|
+        subscriber.push(payload, true)
+      rescue ThreadError
+        false
+      end
     end
   end
 end

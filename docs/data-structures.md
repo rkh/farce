@@ -313,14 +313,19 @@ Priority queues and timer queues do not have a default capacity, so earlier entr
 
 Both ports and queues deliver messages exactly ones. Multiple receivers can read from the same port (if they are running inside the same ractor) or queue, but each message will only be delivered once.
 
-A publisher allows one-to-many communication, where a single publisher can broadcast messages to multiple subscribers. Each subscriber will receive every message published.
+A publisher allows one-to-many communication, where a single publisher can broadcast messages to multiple subscribers. Published messages are sent to enabled subscribers.
 
 Subscribers can be:
+
 * Ractors, ports, queues, or other publishers, using their respective message sending mechanisms.
 * A [vector](#vectors) or [set](#sets), in which case each message will be added to the collection.
 * A [counter](#counters), incrementing it for each message received. This avoids potential copying of the message itself.
 * A [flag](#flags), setting it to true whenever a message is received. This avoids potential copying of the message itself.
 * A callback, executed for each message received.
+
+For unshared and local publisher [variants](variants-and-scopes.md) subscribers may also include:
+* Any unshared variant of the subscriber list above.
+* Ruby's `Thread::Queue` or `Thread::SizedQueue`
 
 ```ruby
 publisher = Farce::Publisher.new

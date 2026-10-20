@@ -50,8 +50,7 @@ module Farce
       handler.new(publisher, subscriber, ...)
     end
 
-    # @return [Publisher, Ractor::Port, Queue, Counter, Flag, Atom, Set, Vector, Signal, Proc]
-    #   the subscriber associated with this subscription
+    # @return [BasicObject] the subscriber associated with this subscription
     attr_reader :subscriber
 
     # @return [Farce::Abstract::Publisher] the publisher associated with this subscription
@@ -80,7 +79,7 @@ module Farce
       return unless enabled?
       deliver(payload)
       true
-    rescue ClosedQueueError, Ractor::ClosedError, FrozenError
+    rescue ::ClosedQueueError, Ractor::ClosedError, FrozenError
       unsubscribe
       false
     end
