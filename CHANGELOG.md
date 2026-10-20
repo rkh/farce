@@ -2,17 +2,70 @@
 
 Farce follows [Semantic Versioning 2.0](http://semver.org/). Any public method on any public class or module documented in the README or via YARD and not declared private is part of the public API.
 
-## Release History
+## Overview
 
  Version                        | Date       | Important Changes
 --------------------------------|------------|--------------------------------------
- [0.4.1](#farce-041-2026-10-18) | 2026-10-18 | Include io_uring support in prebuilt Linux binaries
+ [0.5.0](#farce-050-upcoming)   | Upcoming   | Publishers, concurrent-ruby compatibility, and executor improvements
+ [0.4.1](#farce-041-2026-10-18) | 2026-10-18 | Include improved io_uring support in prebuilt Linux binaries
  [0.4.0](#farce-040-2026-10-16) | 2026-10-16 | Introduce `Farce::Backports`
  [0.3.0](#farce-030-2026-10-13) | 2026-10-13 | Introduce `Farce::Task` and executor improvements
  [0.2.0](#farce-020-2026-10-11) | 2026-10-11 | Improvements for flags, vectors, and timer queues, and performance
  [0.1.0](#farce-010-2026-10-09) | 2026-10-09 | Initial release
 
-## Development Releases
+## Upcoming Releases
+
+### Farce 0.5.0 (Upcoming)
+
+#### New Features
+
+##### Publishers
+
+`Farce::Publisher` broadcasts messages to multiple subscribers. It supports Ractors, ports, queues, atoms, counters, flags, collections, signals, other publishers, and callbacks.
+
+```ruby
+publisher = Farce::Publisher.new
+counter   = Farce::Counter.new
+queue     = Farce::Queue.new
+
+publisher.subscribe(counter)
+publisher.subscribe(queue)
+publisher.publish(:hello)
+
+counter.value # => 1
+queue.pop     # => :hello
+```
+
+##### Better `concurrent-ruby` Compatibility
+
+* Added `Farce::Concurrent`, with replacements for `CountDownLatch`, `CyclicBarrier`, `Event`, `FiberLocalVar`, `ThreadLocalVar`, `LockLocalVar`, and `Tuple`, plus aliases for existing Farce classes.
+* Maps now support all public API methods of `Concurrent::Map`.
+* Added `Counter#update` to atomically replace the value using a block.
+* Added `true?`, `false?`, `make_true`, and `make_false` to flags.
+
+##### Queue and Pool Tuning
+
+* Queues, priority queues, timer queues, schedulers, and pools now support resizing.
+* Pools now support tuning after construction. Increasing the minimum starts workers immediately. Excess workers retire when idle without interrupting running tasks.
+* Added `parallel_pool_*` configuration options for the shared CRuby pool used by `Farce.in_parallel`.
+
+##### Miscellaneous
+
+* Added `timeout:` to executor `schedule` and `execute` methods.
+* Added `Farce::Clock.remaining` and refactored code to use it.
+* Vectors now accept an integer size in their constructors, filling the initial entries with `nil`.
+
+#### Bug Fixes
+
+* Prevent waits from spinning when an unchanged value has non-reflexive equality, such as `Float::NAN`, or overrides `==`, `!=`, or `equal?`. Predicates receive unwrapped values.
+* Prevent graph traversal from retrying indefinitely when a map value cannot be matched using ordinary equality.
+* Fix vector wait timeout fallbacks on CRuby and TruffleRuby.
+
+#### Other changes
+
+* Added `pairing_heap` to the priority queue benchmark and refreshed the published benchmark results. It is the fastest priority queue implementation written in pure Ruby.
+
+## Release History
 
 ### Farce 0.4.1 (2026-10-18)
 
