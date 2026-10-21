@@ -22,6 +22,9 @@ module Farce
   #   #   initialized.value # => 0
   #   #   lazy_ref[:key] = :value
   #   #   initialized.value # => 1
+  #   #
+  #   # @see Farce::Memoize
+  #   # @see Farce::Lazy
   #   class LazyRef < Farce::Reference
   #     # @!macro modes
   #     # @overload initialize(factory, mode: :smart)

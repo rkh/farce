@@ -6,7 +6,7 @@ Farce follows [Semantic Versioning 2.0](http://semver.org/). Any public method o
 
  Version                        | Date       | Important Changes
 --------------------------------|------------|--------------------------------------
- [0.5.0](#farce-050-upcoming)   | Upcoming   | Publishers, concurrent-ruby compatibility, and executor improvements
+ [0.5.0](#farce-050-upcoming)   | Upcoming   | Publishers, memoization, pool and queue resizing, and better concurrent-ruby compatibility
  [0.4.1](#farce-041-2026-10-18) | 2026-10-18 | Include improved io_uring support in prebuilt Linux binaries
  [0.4.0](#farce-040-2026-10-16) | 2026-10-16 | Introduce `Farce::Backports`
  [0.3.0](#farce-030-2026-10-13) | 2026-10-13 | Introduce `Farce::Task` and executor improvements
@@ -34,6 +34,23 @@ publisher.publish(:hello)
 
 counter.value # => 1
 queue.pop     # => :hello
+```
+
+##### Memoization
+
+Added `Farce::Memoize` for memoization with scopes, transfer modes, and weak values, including after freezing.
+
+```ruby
+class MyClass
+  include Farce::Memoize
+
+  # Memoize #expensive_method, shared across Ractors
+  memoize def expensive_method = expensive_computation
+
+  # Memoize #method_with_unsharable_value for each Ractor separately
+  def method_with_unsharable_value = unsharable_computation
+  memoize :method_with_unsharable_value, scope: :ractor
+end
 ```
 
 ##### Better `concurrent-ruby` Compatibility

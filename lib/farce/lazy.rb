@@ -59,6 +59,9 @@ module Farce
   # # Will only compute the expensive attribute once, and return the same value to all Ractors.
   # 5.times { Ractor.new(object) { it.expensive_attribute } }
   # ```
+  #
+  # @see Farce::Memoize
+  # @see Farce::LazyRef
   class Lazy < Farce::Abstract::Lazy
     include Shareable::Tracked
 

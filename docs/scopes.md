@@ -238,7 +238,7 @@ Pass the needed data as task arguments when crossing an execution boundary. Use 
 
 ## Classes that support scopes
 
-The classes in this table accept the same five scopes. The scope determines which backing container or resource an operation uses. Each class retains its own behavior, such as queue ordering or weak references.
+The classes and modules in this table accept the same five scopes. The scope determines which backing container or resource an operation uses. Each class retains its own behavior, such as queue ordering or weak references.
 
 | Class | What each scope gets |
 | --- | --- |
@@ -262,6 +262,7 @@ The classes in this table accept the same five scopes. The scope determines whic
 | `Farce::Local::Publisher` | An independent set of subscriptions. |
 | `Farce::Local::PriorityQueue` | A queue ordered by priority. |
 | `Farce::Local::TimerQueue` | A queue whose values become available at scheduled times. |
+| `Farce::Memoize` | A cached result per instance and method. Also accepts `:global` (the default) for a shared cache or `:unshared` for a cache within one Ractor. |
 | `Farce::Local::Lazy` | A value computed on first access in that scope. |
 | `Farce::Local::LazyRef` | A reference that delegates to a scoped lazy value. |
 | `Farce::Local::Lease` | An independently initialized resource to borrow. |

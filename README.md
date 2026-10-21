@@ -212,7 +212,7 @@ config.class           # => Farce::Map
 config[:retries].class # => Farce::Vector
 ```
 
-Other helpers freeze object graphs, deduplicate values, and measure monotonic time. Lazy values and exchangers coordinate initialization and handoffs. Shareability mixins define how custom classes can be frozen, shared, copied, or moved.
+Other helpers freeze object graphs, deduplicate values, offer method memoization, and measure monotonic time. Lazy values and exchangers coordinate initialization and handoffs. Shareability mixins define how custom classes can be frozen, shared, copied, or moved.
 
 → [Conversion helpers and extension points](docs/utilities.md).
 

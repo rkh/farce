@@ -81,6 +81,37 @@ And also mixins to prevent them from being shareable:
 
 `Unshareable::Copyable` and `Unshareable::Movable` may be combined.
 
+## Memoization
+
+`Farce::Memoize` offers Ractor-friendly memoization:
+
+```ruby
+class MyClass
+  include Farce::Memoize
+
+  # Memoize #expensive_method, shared across Ractors
+  memoize def expensive_method = expensive_computation
+
+  # Memoize #method_with_unsharable_value for each Ractor separately
+  def method_with_unsharable_value = unsharable_computation
+  memoize :method_with_unsharable_value, scope: :ractor
+
+  private
+
+  # The memoized method will also be private
+  memoize def private_method = expensive_computation
+end
+```
+
+Or as a one-liner:
+
+```ruby
+class MyClass
+  # Memoize return values of #foo and #bar until they get garbage collected
+  include Farce::Memoize[:foo, :bar, weak: true]
+end
+```
+
 ## Constants
 
 * `Farce::MODES`: List of supported [sharing modes](sharing.md#sharing-modes).
