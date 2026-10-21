@@ -309,7 +309,7 @@
 </span></code></pre>
 <p>Pass the needed data as task arguments when crossing an execution boundary. Use <code>:fiber</code> when each task fiber should get its own state regardless of inherited storage.</p>
 <h2 id="classes-that-support-scopes">Classes that support scopes<a href="#classes-that-support-scopes" aria-label="Link to heading 'Classes that support scopes'" data-heading-content="Classes that support scopes" class="anchor"></a></h2>
-<p>The classes in this table accept the same five scopes. The scope determines which backing container or resource an operation uses. Each class retains its own behavior, such as queue ordering or weak references.</p>
+<p>The classes and modules in this table accept the same five scopes. The scope determines which backing container or resource an operation uses. Each class retains its own behavior, such as queue ordering or weak references.</p>
 <table>
 <thead>
 <tr>
@@ -397,6 +397,10 @@
 <tr>
 <td><code>Farce::Local::TimerQueue</code></td>
 <td>A queue whose values become available at scheduled times.</td>
+</tr>
+<tr>
+<td><code>Farce::Memoize</code></td>
+<td>A cached result per instance and method. Also accepts <code>:global</code> (the default) for a shared cache or <code>:unshared</code> for a cache within one Ractor.</td>
 </tr>
 <tr>
 <td><code>Farce::Local::Lazy</code></td>
@@ -745,7 +749,7 @@
 </div></div>
 
       <div id="footer">
-  Generated on Tue Oct 20 13:02:04 2026 by
+  Generated on Wed Oct 21 11:04:57 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

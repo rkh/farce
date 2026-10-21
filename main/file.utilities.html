@@ -144,6 +144,30 @@
 <li><code>Unshareable::Movable</code>: Instances aren't shareable but may be moved to another Ractor.</li>
 </ul>
 <p><code>Unshareable::Copyable</code> and <code>Unshareable::Movable</code> may be combined.</p>
+<h2 id="memoization">Memoization<a href="#memoization" aria-label="Link to heading 'Memoization'" data-heading-content="Memoization" class="anchor"></a></h2>
+<p><code>Farce::Memoize</code> offers Ractor-friendly memoization:</p>
+<pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>MyClass</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Memoize.html" title="Farce::Memoize (module)">Memoize</a></span></span>
+
+  <span class='comment'># Memoize #expensive_method, shared across Ractors
+</span>  <span class='id identifier rubyid_memoize'>memoize</span> <span class='kw'>def</span> <span class='id identifier rubyid_expensive_method'>expensive_method</span> <span class='op'>=</span> <span class='id identifier rubyid_expensive_computation'>expensive_computation</span>
+
+  <span class='comment'># Memoize #method_with_unsharable_value for each Ractor separately
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_method_with_unsharable_value'>method_with_unsharable_value</span> <span class='op'>=</span> <span class='id identifier rubyid_unsharable_computation'>unsharable_computation</span>
+  <span class='id identifier rubyid_memoize'>memoize</span> <span class='symbol'>:method_with_unsharable_value</span><span class='comma'>,</span> <span class='label'>scope:</span> <span class='symbol'>:ractor</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='comment'># The memoized method will also be private
+</span>  <span class='id identifier rubyid_memoize'>memoize</span> <span class='kw'>def</span> <span class='id identifier rubyid_private_method'>private_method</span> <span class='op'>=</span> <span class='id identifier rubyid_expensive_computation'>expensive_computation</span>
+<span class='kw'>end</span>
+</code></pre>
+<p>Or as a one-liner:</p>
+<pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>MyClass</span>
+  <span class='comment'># Memoize return values of #foo and #bar until they get garbage collected
+</span>  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Memoize.html" title="Farce::Memoize (module)">Memoize</a></span></span><span class='lbracket'>[</span><span class='symbol'>:foo</span><span class='comma'>,</span> <span class='symbol'>:bar</span><span class='comma'>,</span> <span class='label'>weak:</span> <span class='kw'>true</span><span class='rbracket'>]</span>
+<span class='kw'>end</span>
+</code></pre>
 <h2 id="constants">Constants<a href="#constants" aria-label="Link to heading 'Constants'" data-heading-content="Constants" class="anchor"></a></h2>
 <ul>
 <li><code>Farce::MODES</code>: List of supported <a href="file.sharing.html#sharing-modes" title="sharing modes">sharing modes</a>.</li>
@@ -156,7 +180,7 @@
 </div></div>
 
       <div id="footer">
-  Generated on Tue Oct 20 13:02:04 2026 by
+  Generated on Wed Oct 21 11:04:57 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

@@ -182,6 +182,15 @@ Use <span class='object_link'><a href="Strict/Lazy.html" title="Farce::Strict::L
 <div class="tags">
   
 
+  <p class="tag_title">See Also:</p>
+  <ul class="see">
+    
+      <li><span class='object_link'><a href="Memoize.html" title="Farce::Memoize (module)">Memoize</a></span></li>
+    
+      <li><span class='object_link'><a href="LazyRef.html" title="Farce::LazyRef (class)">LazyRef</a></span></li>
+    
+  </ul>
+
 </div>
 
 
@@ -548,13 +557,13 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-74
-75
-76
-77</pre>
+77
+78
+79
+80</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 74</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 77</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_factory'>factory</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='symbol'>:smart</span><span class='comma'>,</span> <span class='op'>**</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='ivar'>@manager</span> <span class='op'>=</span> <span class='id identifier rubyid_marshal_mode_manager'>marshal_mode_manager</span><span class='lparen'>(</span><span class='id identifier rubyid_mode'>mode</span><span class='rparen'>)</span>
@@ -620,14 +629,14 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-89
-90
-91
 92
-93</pre>
+93
+94
+95
+96</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 89</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 92</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_freeze'>freeze</span>
   <span class='id identifier rubyid_value'>value</span>
@@ -681,10 +690,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-80</pre>
+83</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 80</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 83</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_mode'>mode</span></pre>
     </td>
@@ -735,10 +744,10 @@ Repeated reads return the same value within the current Ractor.</p>
       <pre class="lines">
 
 
-85</pre>
+88</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 85</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/lazy.rb', line 88</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='ivar'>@manager</span><span class='period'>.</span><span class='id identifier rubyid_unwrap'>unwrap</span><span class='lparen'>(</span><span class='kw'>super</span><span class='rparen'>)</span></pre>
     </td>
@@ -751,7 +760,7 @@ Repeated reads return the same value within the current Ractor.</p>
 </div>
 
       <div id="footer">
-  Generated on Tue Oct 20 13:02:06 2026 by
+  Generated on Wed Oct 21 11:04:59 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>

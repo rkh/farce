@@ -88,7 +88,7 @@
 <tr>
 <td><a href="#farce-050-upcoming">0.5.0</a></td>
 <td>Upcoming</td>
-<td>Publishers, concurrent-ruby compatibility, and executor improvements</td>
+<td>Publishers, memoization, pool and queue resizing, and better concurrent-ruby compatibility</td>
 </tr>
 <tr>
 <td><a href="#farce-041-2026-10-18">0.4.1</a></td>
@@ -133,6 +133,19 @@
 <span class='id identifier rubyid_counter'>counter</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='comment'># =&gt; 1
 </span><span class='id identifier rubyid_queue'>queue</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span>     <span class='comment'># =&gt; :hello
 </span></code></pre>
+<h5 id="memoization">Memoization<a href="#memoization" aria-label="Link to heading 'Memoization'" data-heading-content="Memoization" class="anchor"></a></h5>
+<p>Added <code>Farce::Memoize</code> for memoization with scopes, transfer modes, and weak values, including after freezing.</p>
+<pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>MyClass</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Memoize.html" title="Farce::Memoize (module)">Memoize</a></span></span>
+
+  <span class='comment'># Memoize #expensive_method, shared across Ractors
+</span>  <span class='id identifier rubyid_memoize'>memoize</span> <span class='kw'>def</span> <span class='id identifier rubyid_expensive_method'>expensive_method</span> <span class='op'>=</span> <span class='id identifier rubyid_expensive_computation'>expensive_computation</span>
+
+  <span class='comment'># Memoize #method_with_unsharable_value for each Ractor separately
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_method_with_unsharable_value'>method_with_unsharable_value</span> <span class='op'>=</span> <span class='id identifier rubyid_unsharable_computation'>unsharable_computation</span>
+  <span class='id identifier rubyid_memoize'>memoize</span> <span class='symbol'>:method_with_unsharable_value</span><span class='comma'>,</span> <span class='label'>scope:</span> <span class='symbol'>:ractor</span>
+<span class='kw'>end</span>
+</code></pre>
 <h5 id="better-concurrent-ruby-compatibility">Better <code>concurrent-ruby</code> Compatibility<a href="#better-concurrent-ruby-compatibility" aria-label="Link to heading 'Better concurrent-ruby Compatibility'" data-heading-content="Better concurrent-ruby Compatibility" class="anchor"></a></h5>
 <ul>
 <li>Added <code>Farce::Concurrent</code>, with replacements for <code>CountDownLatch</code>, <code>CyclicBarrier</code>, <code>Event</code>, <code>FiberLocalVar</code>, <code>ThreadLocalVar</code>, <code>LockLocalVar</code>, and <code>Tuple</code>, plus aliases for existing Farce classes.</li>
@@ -347,7 +360,7 @@ This allows you to cancel a scheduled value using the returned entry:</p>
 </div></div>
 
       <div id="footer">
-  Generated on Tue Oct 20 13:02:04 2026 by
+  Generated on Wed Oct 21 11:04:57 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
