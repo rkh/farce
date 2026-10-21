@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: Utilities and Custom Classes
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "utilities";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../main/index.html">main</option>
+<option value="index.html" selected>v0.5.0</option>
+<option value="../v0.4.1/index.html">v0.4.1</option>
+<option value="../v0.4.0/index.html">v0.4.0</option>
+<option value="../v0.3.0/index.html">v0.3.0</option>
+<option value="../v0.2.0/index.html">v0.2.0</option>
+<option value="../v0.1.0/index.html">v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: Utilities and Custom Classes</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="utilities-and-custom-classes">Utilities and Custom Classes<a href="#utilities-and-custom-classes" aria-label="Link to heading 'Utilities and Custom Classes'" data-heading-content="Utilities and Custom Classes" class="anchor"></a></h1>
+<p>Farce provides helpers for converting object graphs, sharing custom classes, timing work, and coordinating access to values. Use these when adapting an existing library or building your own concurrency tools.</p>
+<h2 id="top-level-methods">Top Level Methods<a href="#top-level-methods" aria-label="Link to heading 'Top Level Methods'" data-heading-content="Top Level Methods" class="anchor"></a></h2>
+<ul>
+<li><code>Farce.clock</code> returns the monotonic clock time in seconds as a Float.</li>
+<li><code>Farce.config</code> returns the global configuration object.</li>
+<li><code>Farce.configure</code> allows you to configure Farce.</li>
+<li><code>Farce.dedup</code> de-duplicates the given object based on a deduplication cache shared by all Ractors.</li>
+<li><code>Farce.enfarce</code> turns a vanilla data structure into its Farce equivalent.</li>
+<li><code>Farce.freeze_graph</code> recursively freezes an object graph.</li>
+<li><code>Farce.in_parallel</code>, <code>Farce.on_main</code>, and <code>Farce.schedule</code>, see <a href="file.scheduling.html#scheduling-code" title="Scheduling Code">Scheduling Code</a></li>
+<li><code>Farce.rebind</code> rebinds a proc or lambda while preserving its Ractor-shareability.</li>
+<li><code>Farce.transaction</code> creates and runs a <a href="file.concurrency.html#transactions" title="transaction">transaction</a>.</li>
+</ul>
+<p>Some examples:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_a'>a</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='label'>a:</span> <span class='lbracket'>[</span><span class='op'>+</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>b</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_b'>b</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='label'>a:</span> <span class='lbracket'>[</span><span class='op'>+</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>b</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span> <span class='rbrace'>}</span>
+
+<span class='comment'># Farce.clock
+</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_clock'><span class='object_link'><a href="Farce.html#clock-class_method" title="Farce.clock (method)">clock</a></span></span>         <span class='comment'># =&gt; 0.017476999908685684
+</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_clock'><span class='object_link'><a href="Farce.html#clock-class_method" title="Farce.clock (method)">clock</a></span></span><span class='lparen'>(</span><span class='label'>in:</span> <span class='int'>10</span><span class='rparen'>)</span> <span class='comment'># =&gt; 10.017520000003278
+</span>
+<span class='comment'># Farce.dedup
+</span><span class='id identifier rubyid_a'>a</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span> <span class='id identifier rubyid_b'>b</span>                           <span class='comment'># =&gt; false
+</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_dedup'><span class='object_link'><a href="Farce.html#dedup-class_method" title="Farce.dedup (method)">dedup</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_a'>a</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_dedup'><span class='object_link'><a href="Farce.html#dedup-class_method" title="Farce.dedup (method)">dedup</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_b'>b</span><span class='rparen'>)</span> <span class='comment'># =&gt; true
+</span>
+<span class='comment'># Farce.enfarce
+</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_enfarce'><span class='object_link'><a href="Farce.html#enfarce-class_method" title="Farce.enfarce (method)">enfarce</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_a'>a</span><span class='rparen'>)</span>         <span class='comment'># =&gt; #&lt;Farce::Map {a: #&lt;Farce::Vector [&quot;b&quot;]&gt;}&gt;
+</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Strict.html" title="Farce::Strict (module)">Strict</a></span></span><span class='period'>.</span><span class='id identifier rubyid_enfarce'><span class='object_link'><a href="Farce/Strict.html#enfarce-class_method" title="Farce::Strict.enfarce (method)">enfarce</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_a'>a</span><span class='rparen'>)</span> <span class='comment'># =&gt; #&lt;Farce::Strict::Map {a: #&lt;Farce::Strict::Vector [&quot;b&quot;]&gt;}&gt;
+</span>
+<span class='comment'># Farce.freeze_graph
+</span><span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_freeze_graph'><span class='object_link'><a href="Farce.html#freeze_graph-class_method" title="Farce.freeze_graph (method)">freeze_graph</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_a'>a</span><span class='rparen'>)</span>
+
+<span class='comment'># Farce.rebind
+</span><span class='id identifier rubyid_callback'>callback</span> <span class='op'>=</span> <span class='tlambda'>-&gt;</span><span class='lparen'>(</span><span class='id identifier rubyid_add'>add</span><span class='rparen'>)</span> <span class='tlambeg'>{</span> <span class='kw'>self</span> <span class='op'>+</span> <span class='id identifier rubyid_add'>add</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_rebound'>rebound</span>  <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='period'>.</span><span class='id identifier rubyid_rebind'><span class='object_link'><a href="Farce.html#rebind-class_method" title="Farce.rebind (method)">rebind</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_callback'>callback</span><span class='comma'>,</span> <span class='label'>self:</span> <span class='int'>42</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_rebound'>rebound</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='int'>18</span><span class='rparen'>)</span> <span class='comment'># =&gt; 60
+</span></code></pre>
+<h2 id="additional-classes">Additional Classes<a href="#additional-classes" aria-label="Link to heading 'Additional Classes'" data-heading-content="Additional Classes" class="anchor"></a></h2>
+<p>Other classes Farce provides include:</p>
+<ul>
+<li><code>Config</code>: Configuration class, see <a href="file.scheduling.html#third-party-fiber-schedulers" title="Third-Party Fiber Schedulers">Third-Party Fiber Schedulers</a> example.</li>
+<li><code>ClassMirror</code>: inheritance-aware registry for classes</li>
+<li><code>Clock</code>: Timing functions based on a monotonic clock rather than on <code>Time</code>.</li>
+<li><code>Deduper</code>: Create your own deduplication cache. Direct usage isn't recommended, use <a href="#top-level-methods"><code>Farce.dedup</code></a> instead.</li>
+<li><code>Exchanger</code>: A synchronization point for two-way data swapping between Threads, Ractors, and/or Fibers. Drop-in replacement for concurrent-ruby's exchanger.</li>
+<li><code>Extension</code>: Defines extensions for existing classes that can either be activated globally or used as refinements.</li>
+<li><code>Lazy</code>: Lazily initialized value.</li>
+<li><code>LazyRef</code>: A <a href="file.data-structures.html#references" title="reference">reference</a> for a lazily initialized value.</li>
+<li><code>ThreadExecutor</code>: A <a href="file.scheduling.html#scheduling-code" title="task executor">task executor</a> creating a new thread for each unit of work. Used on TruffleRuby.</li>
+<li><code>Walker</code>: A tool for walking a Ruby object tree.</li>
+<li><code>WeakValue</code>: A value object version of <a href="file.shims.html#weakref" title="&lt;code&gt;WeakRef&lt;/code&gt;"><code>WeakRef</code></a>. Allows handling references more explicitly, without automatic method delegation.</li>
+</ul>
+<p>In addition, Farce includes a range of error classes not listed here. Check the <a href="https://rkh.github.io/farce/">API documentation</a> or <a href="https://github.com/rkh/farce/blob/main/lib/farce/error.rb">code base</a> for these.</p>
+<h2 id="shareability-mixins">Shareability Mixins<a href="#shareability-mixins" aria-label="Link to heading 'Shareability Mixins'" data-heading-content="Shareability Mixins" class="anchor"></a></h2>
+<p>Farce includes mixins to help you make your custom classes shareable:</p>
+<ul>
+<li><code>Shareable</code> automatically marks objects as shareable (via <code>Ractor.make_shareable</code>) after initialization.</li>
+<li><code>Shareable::Delegated</code> delegates <code>freeze</code> and <code>frozen?</code> to another object holding your object's state.</li>
+<li><code>Shareable::Immutable</code> instances are always immutable, being frozen after initialization.</li>
+<li><code>Shareable::Native</code> is for objects implemented in a native extension, which allows setting the frozen and shareable state separately.</li>
+<li><code>Shareable::Tracked</code> for objects implementing frozen tracking (via an internal <a href="file.data-structures.html#flags" title="flag">flag</a>).</li>
+<li><code>Shareable::Unfreezable</code> for objects that cannot be frozen (like <a href="file.data-structures.html#queues" title="queues">queues</a>).</li>
+</ul>
+<p>And also mixins to prevent them from being shareable:</p>
+<ul>
+<li><code>Unshareable</code>: Instances aren't shareable and cannot be made shareable. By default, they also cannot be copied or moved between Ractors.</li>
+<li><code>Unshareable::Copyable</code>: Instances aren't shareable but may be copied to another Ractor.</li>
+<li><code>Unshareable::Movable</code>: Instances aren't shareable but may be moved to another Ractor.</li>
+</ul>
+<p><code>Unshareable::Copyable</code> and <code>Unshareable::Movable</code> may be combined.</p>
+<h2 id="memoization">Memoization<a href="#memoization" aria-label="Link to heading 'Memoization'" data-heading-content="Memoization" class="anchor"></a></h2>
+<p><code>Farce::Memoize</code> offers Ractor-friendly memoization:</p>
+<pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>MyClass</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Memoize.html" title="Farce::Memoize (module)">Memoize</a></span></span>
+
+  <span class='comment'># Memoize #expensive_method, shared across Ractors
+</span>  <span class='id identifier rubyid_memoize'>memoize</span> <span class='kw'>def</span> <span class='id identifier rubyid_expensive_method'>expensive_method</span> <span class='op'>=</span> <span class='id identifier rubyid_expensive_computation'>expensive_computation</span>
+
+  <span class='comment'># Memoize #method_with_unsharable_value for each Ractor separately
+</span>  <span class='kw'>def</span> <span class='id identifier rubyid_method_with_unsharable_value'>method_with_unsharable_value</span> <span class='op'>=</span> <span class='id identifier rubyid_unsharable_computation'>unsharable_computation</span>
+  <span class='id identifier rubyid_memoize'>memoize</span> <span class='symbol'>:method_with_unsharable_value</span><span class='comma'>,</span> <span class='label'>scope:</span> <span class='symbol'>:ractor</span>
+
+  <span class='id identifier rubyid_private'>private</span>
+
+  <span class='comment'># The memoized method will also be private
+</span>  <span class='id identifier rubyid_memoize'>memoize</span> <span class='kw'>def</span> <span class='id identifier rubyid_private_method'>private_method</span> <span class='op'>=</span> <span class='id identifier rubyid_expensive_computation'>expensive_computation</span>
+<span class='kw'>end</span>
+</code></pre>
+<p>Or as a one-liner:</p>
+<pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>MyClass</span>
+  <span class='comment'># Memoize return values of #foo and #bar until they get garbage collected
+</span>  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Memoize.html" title="Farce::Memoize (module)">Memoize</a></span></span><span class='lbracket'>[</span><span class='symbol'>:foo</span><span class='comma'>,</span> <span class='symbol'>:bar</span><span class='comma'>,</span> <span class='label'>weak:</span> <span class='kw'>true</span><span class='rbracket'>]</span>
+<span class='kw'>end</span>
+</code></pre>
+<h2 id="constants">Constants<a href="#constants" aria-label="Link to heading 'Constants'" data-heading-content="Constants" class="anchor"></a></h2>
+<ul>
+<li><code>Farce::MODES</code>: List of supported <a href="file.sharing.html#sharing-modes" title="sharing modes">sharing modes</a>.</li>
+<li><code>Farce::NULL_PORT</code>: A special <code>Ractor::Port</code> that acts as a sink for messages and never closes.</li>
+<li><code>Farce::SCOPES</code>: List of <a href="file.variants-and-scopes.html#provided-scopes" title="provided scopes">provided scopes</a>.</li>
+<li><code>Farce::VERSION</code>: The current version.</li>
+</ul>
+<h2 id="read-next">Read Next<a href="#read-next" aria-label="Link to heading 'Read Next'" data-heading-content="Read Next" class="anchor"></a></h2>
+<p><a href="index.html#features" title="README">README</a> · <a href="file.sharing.html" title="Sharing Unshareable Data">Sharing Unshareable Data</a> · <a href="file.integrations.html" title="Integrations">Integrations</a></p>
+</div></div>
+
+      <div id="footer">
+  Generated on Wed Oct 21 13:45:10 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: Farce::Abstract::Publisher
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="../../css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "Farce::Abstract::Publisher";
+  relpath = '../../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="../../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../../../main/index.html">main</option>
+<option value="../../index.html" selected>v0.5.0</option>
+<option value="../../../v0.4.1/index.html">v0.4.1</option>
+<option value="../../../v0.4.0/index.html">v0.4.0</option>
+<option value="../../../v0.3.0/index.html">v0.3.0</option>
+<option value="../../../v0.2.0/index.html">v0.2.0</option>
+<option value="../../../v0.1.0/index.html">v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../../_index.html">Index (P)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Abstract.html" title="Farce::Abstract (module)">Abstract</a></span></span>
+     &raquo; 
+    <span class="title">Publisher</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: Farce::Abstract::Publisher
+  <span class="abstract note title">Abstract</span>
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">Farce::Abstract::Publisher</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  <dl>
+      <dt>Includes:</dt>
+      <dd><span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Internal::Noncopyable</a></span>, Internal::Freeze::Unfreezable</dd>
+  </dl>
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/farce/abstract/publisher.rb
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <div class="note abstract">
+  <strong>This class is abstract.</strong>
+  <div class='inline'><p>Shared superclass for all publisher implementations.</p>
+</div>
+</div>
+<p>Implements a publisher-subscriber (pub-sub) pattern.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+  <p class="tag_title">See Also:</p>
+  <ul class="see">
+    
+      <li><span class='object_link'><a href="../Publisher.html" title="Farce::Publisher (class)">Publisher</a></span></li>
+    
+  </ul>
+
+</div><div id="subclasses">
+  <h2>Direct Known Subclasses</h2>
+  <p class="children"><span class='object_link'><a href="../Local/Publisher.html" title="Farce::Local::Publisher (class)">Local::Publisher</a></span>, <span class='object_link'><a href="../Publisher.html" title="Farce::Publisher (class)">Publisher</a></span>, <span class='object_link'><a href="../Strict/Publisher.html" title="Farce::Strict::Publisher (class)">Strict::Publisher</a></span>, <span class='object_link'><a href="../Unshared/Publisher.html" title="Farce::Unshared::Publisher (class)">Unshared::Publisher</a></span></p>
+</div>
+
+
+
+
+
+
+
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#closed%3F-instance_method" title="#closed? (instance method)">#<strong>closed?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether the publisher is closed.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(*subscribers)  &#x21d2; Publisher </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>A new instance of Publisher.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#publish-instance_method" title="#publish (instance method)">#<strong>publish</strong>(payload = nil)  &#x21d2; self </a>
+    
+
+    
+      (also: #send, #&lt;&lt;, #broadcast)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Publishes the given payload to all current subscribers.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#subscribe-instance_method" title="#subscribe (instance method)">#<strong>subscribe</strong>  &#x21d2; Subscription </a>
+    
+
+    
+      (also: #monitor)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The created subscription.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#subscribed%3F-instance_method" title="#subscribed? (instance method)">#<strong>subscribed?</strong>(subscriber)  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether the given subscriber is currently subscribed.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#subscription_for-instance_method" title="#subscription_for (instance method)">#<strong>subscription_for</strong>(subscriber)  &#x21d2; Subscription<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The subscription for the given subscriber, or nil if none exists.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#unsubscribe-instance_method" title="#unsubscribe (instance method)">#<strong>unsubscribe</strong>(subscriber)  </a>
+    
+
+    
+      (also: #cancel, #unmonitor)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Unsubscribes the given subscriber from the publisher.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../Internal/Noncopyable.html" title="Farce::Internal::Noncopyable (module)">Internal::Noncopyable</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Internal/Noncopyable.html#duplicable%3F-instance_method" title="Farce::Internal::Noncopyable#duplicable? (method)">#duplicable?</a></span></p>
+
+  <div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    #<strong>initialize</strong>(*subscribers)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Abstract::Publisher (class)">Publisher</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns a new instance of Publisher.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>subscribers</span>
+      
+      
+        <span class='type'>(<tt>Array</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the initial subscribers to add to the publisher, see <span class='object_link'><a href="#subscribe-instance_method" title="Farce::Abstract::Publisher#subscribe (method)">#subscribe</a></span></p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+17
+18
+19
+20
+21</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/publisher.rb', line 17</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_subscribers'>subscribers</span><span class='rparen'>)</span>
+  <span class='ivar'>@closed</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Flag.html" title="Farce::Flag (class)">Flag</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Flag.html#initialize-instance_method" title="Farce::Flag#initialize (method)">new</a></span></span>
+  <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_subscribers'>subscribers</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_subscribe'>subscribe</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="closed?-instance_method">
+  
+    #<strong>closed?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns whether the publisher is closed.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>whether the publisher is closed.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+24</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/publisher.rb', line 24</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>=</span> <span class='ivar'>@closed</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="publish-instance_method">
+  
+    #<strong>publish</strong>(payload = nil)  &#x21d2; <tt>self</tt> 
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='send-instance_method'>send</span>, <span id='<<-instance_method'>&lt;&lt;</span>, <span id='broadcast-instance_method'>broadcast</span></span>
+    </span>
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Publishes the given payload to all current subscribers.</p>
+<p>Full bounded queues drop new messages.
+Failed publishing attempts to closed or frozen receivers cancel their subscriptions.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>payload</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the payload to publish</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the publisher itself</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+33
+34
+35
+36
+37</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/publisher.rb', line 33</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_publish'>publish</span><span class='lparen'>(</span><span class='id identifier rubyid_payload'>payload</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Cannot publish to a closed publisher</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
+  <span class='id identifier rubyid_map'>map</span><span class='period'>.</span><span class='id identifier rubyid_each_value'>each_value</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_it'>it</span><span class='period'>.</span><span class='id identifier rubyid_publish'>publish</span><span class='lparen'>(</span><span class='id identifier rubyid_payload'>payload</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+  <span class='kw'>self</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="subscribe-instance_method">
+  
+    
+      <span class="overload">#<strong>subscribe</strong>(subscriber)  &#x21d2; <tt><span class='object_link'><a href="../Subscription.html" title="Farce::Subscription (class)">Subscription</a></span></tt> </span>
+    
+      <span class="overload">#<strong>subscribe</strong>(*args, mode: nil, scheduler: nil, capacity: nil) {|*args, payload| ... } &#x21d2; <tt><span class='object_link'><a href="../Subscription.html" title="Farce::Subscription (class)">Subscription</a></span></tt> </span>
+    
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='monitor-instance_method'>monitor</span></span>
+    </span>
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the created subscription.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <p class="tag_title">Overloads:</p>
+  <ul class="overload">
+    
+      
+      <li class="overload_item">
+        <span class="signature">#<strong>subscribe</strong>(subscriber)  &#x21d2; <tt><span class='object_link'><a href="../Subscription.html" title="Farce::Subscription (class)">Subscription</a></span></tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Adds a subscriber to the publisher.
+Register additional subscriber classes with <span class='object_link'><a href="../Subscription.html#define-class_method" title="Farce::Subscription.define (method)">Subscription.define</a></span>.
+Publisher subscribers forward messages synchronously to their own subscribers.
+Avoid subscribing publishers in a cycle.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Forward messages to another publisher</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_upstream'>upstream</span><span class='period'>.</span><span class='id identifier rubyid_subscribe'>subscribe</span><span class='lparen'>(</span><span class='id identifier rubyid_downstream'>downstream</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_upstream'>upstream</span><span class='period'>.</span><span class='id identifier rubyid_publish'>publish</span><span class='lparen'>(</span><span class='symbol'>:message</span><span class='rparen'>)</span> <span class='comment'># also publishes to downstream&#39;s subscribers</span></code></pre>
+    
+  </div>
+<p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>subscriber</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The subscriber to add.
+Standard-library queues are supported by unshared and local publishers and retain the original payload.
+A full <code>Thread::SizedQueue</code> drops new messages. Publishing to a closed queue cancels its subscription.</p>
+<p>Calls one of the following methods:</p>
+<ul>
+<li><span class='object_link'><a href="../Ractor.html#send-instance_method" title="Farce::Ractor#send (method)">Ractor#send</a></span></li>
+<li><span class='object_link'><a href="../Ractor/Port.html#send-instance_method" title="Farce::Ractor::Port#send (method)">Ractor::Port#send</a></span></li>
+<li><span class='object_link'><a href="Queue.html#try_push-instance_method" title="Farce::Abstract::Queue#try_push (method)">Queue#try_push</a></span></li>
+<li><code>Thread::Queue#push</code></li>
+<li><code>Thread::SizedQueue#push</code> (nonblocking)</li>
+<li><span class='object_link'><a href="Counter.html#increment-instance_method" title="Farce::Abstract::Counter#increment (method)">Counter#increment</a></span> (without arguments)</li>
+<li><span class='object_link'><a href="Flag.html#set-instance_method" title="Farce::Abstract::Flag#set (method)">Flag#set</a></span></li>
+<li><span class='object_link'><a href="Atom.html#value=-instance_method" title="Farce::Abstract::Atom#value= (method)">Atom#value=</a></span></li>
+<li><span class='object_link'><a href="Set.html#<<-instance_method" title="Farce::Abstract::Set#&lt;&lt; (method)">Set#&lt;&lt;</a></span></li>
+<li><span class='object_link'><a href="Vector.html#<<-instance_method" title="Farce::Abstract::Vector#&lt;&lt; (method)">Vector#&lt;&lt;</a></span></li>
+<li><span class='object_link'><a href="../Signal.html#broadcast-instance_method" title="Farce::Signal#broadcast (method)">Signal#broadcast</a></span> (without arguments)</li>
+<li><span class='object_link'><a href="#publish-instance_method" title="Farce::Abstract::Publisher#publish (method)">#publish</a></span></li>
+<li><span class='object_link'><a href="../Concurrent/Event.html#set-instance_method" title="Farce::Concurrent::Event#set (method)">Concurrent::Event#set</a></span> (without arguments)</li>
+<li><span class='object_link'><a href="../Concurrent/CountDownLatch.html#count_down-instance_method" title="Farce::Concurrent::CountDownLatch#count_down (method)">Concurrent::CountDownLatch#count_down</a></span> (without arguments)</li>
+<li><code>Proc#call</code></li>
+</ul>
+<p>The concurrent-ruby integration supports these subscribers with unshared and local publishers:</p>
+<ul>
+<li><code>Concurrent::AtomicReference#value=</code></li>
+<li><code>Concurrent::AtomicFixnum#increment</code> (without arguments)</li>
+<li><code>Concurrent::AtomicBoolean#make_true</code></li>
+<li><code>Concurrent::Event#set</code> (without arguments)</li>
+<li><code>Concurrent::CountDownLatch#count_down</code> (without arguments)</li>
+</ul>
+<p>Set the default <code>mode</code>, <code>auto_local</code>, <code>capacity</code>, and similar options via initializers for these classes
+to influence how data transfer is handled.</p>
+<p>Support for additional subscribers can be added via <span class='object_link'><a href="../Subscription.html#define-class_method" title="Farce::Subscription.define (method)">Subscription.define</a></span>.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">#<strong>subscribe</strong>(*args, mode: nil, scheduler: nil, capacity: nil) {|*args, payload| ... } &#x21d2; <tt><span class='object_link'><a href="../Subscription.html" title="Farce::Subscription (class)">Subscription</a></span></tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Adds a subscription callback.
+Messages run in order on the selected scheduler. A full queue drops new messages.
+Unsubscribing drains queued messages and stops the callback.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+      <pre class="example code"><code><span class='id identifier rubyid_counter'>counter</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Counter.html" title="Farce::Counter (class)">Counter</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Counter.html#initialize-instance_method" title="Farce::Counter#initialize (method)">new</a></span></span>
+
+<span class='id identifier rubyid_publisher'>publisher</span><span class='period'>.</span><span class='id identifier rubyid_subscribe'>subscribe</span><span class='lparen'>(</span><span class='id identifier rubyid_counter'>counter</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_counter'>counter</span><span class='comma'>,</span> <span class='id identifier rubyid_payload'>payload</span><span class='op'>|</span>
+  <span class='id identifier rubyid_counter'>counter</span><span class='period'>.</span><span class='id identifier rubyid_increment'>increment</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Message #</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_counter'>counter</span><span class='embexpr_end'>}</span><span class='tstring_content'>: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_payload'>payload</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span></code></pre>
+    
+  </div>
+<p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>args</span>
+      
+      
+        <span class='type'>(<tt>Array</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>additional arguments to pass to the subscriber</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>mode</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The transfer mode to use</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>scheduler</span>
+      
+      
+        <span class='type'>(<tt>#schedule</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The scheduler to use for running the block</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>capacity</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the maximum queued messages, or nil for an unbounded queue</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>*args</tt>, <tt>payload</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the block to be called with the given arguments and payload</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>args</span>
+      
+      
+        <span class='type'>(<tt>Array</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the additional arguments passed to the block</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>payload</span>
+      
+      
+        <span class='type'>(<tt>Object</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the payload sent via <span class='object_link'><a href="#publish-instance_method" title="Farce::Abstract::Publisher#publish (method)">#publish</a></span></p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+      </li>
+    
+  </ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="../Subscription.html" title="Farce::Subscription (class)">Subscription</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the created subscription</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+108</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/publisher.rb', line 108</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_subscribe'>subscribe</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_block_given?'>block_given?</span> <span class='op'>?</span> <span class='id identifier rubyid_create_subscription'>create_subscription</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='id identifier rubyid_add_subscription'>add_subscription</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="subscribed?-instance_method">
+  
+    #<strong>subscribed?</strong>(subscriber)  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns whether the given subscriber is currently subscribed.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>whether the given subscriber is currently subscribed.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+124</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/publisher.rb', line 124</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_subscribed?'>subscribed?</span><span class='lparen'>(</span><span class='id identifier rubyid_subscriber'>subscriber</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='op'>!</span><span class='op'>!</span><span class='id identifier rubyid_subscription_for'>subscription_for</span><span class='lparen'>(</span><span class='id identifier rubyid_subscriber'>subscriber</span><span class='rparen'>)</span><span class='op'>&amp;.</span><span class='id identifier rubyid_subscribed?'>subscribed?</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="subscription_for-instance_method">
+  
+    #<strong>subscription_for</strong>(subscriber)  &#x21d2; <tt><span class='object_link'><a href="../Subscription.html" title="Farce::Subscription (class)">Subscription</a></span></tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the subscription for the given subscriber, or nil if none exists.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>subscriber</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the subscriber to retrieve the subscription for</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="../Subscription.html" title="Farce::Subscription (class)">Subscription</a></span></tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the subscription for the given subscriber, or nil if none exists.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+113
+114
+115
+116
+117
+118
+119
+120
+121</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/publisher.rb', line 113</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_subscription_for'>subscription_for</span><span class='lparen'>(</span><span class='id identifier rubyid_subscriber'>subscriber</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_subscriber'>subscriber</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="../Subscription.html" title="Farce::Subscription (class)">Subscription</a></span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_subscriber'>subscriber</span><span class='period'>.</span><span class='id identifier rubyid_publisher'>publisher</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_subscription'>subscription</span> <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='id identifier rubyid_subscriber'>subscriber</span><span class='period'>.</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span>
+    <span class='id identifier rubyid_subscription'>subscription</span> <span class='kw'>if</span> <span class='id identifier rubyid_subscription'>subscription</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_subscriber'>subscriber</span><span class='rparen'>)</span>
+  <span class='kw'>else</span>
+    <span class='id identifier rubyid_map'>map</span><span class='lbracket'>[</span><span class='id identifier rubyid_subscriber'>subscriber</span><span class='period'>.</span><span class='id identifier rubyid___id__'>__id__</span><span class='rbracket'>]</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="unsubscribe-instance_method">
+  
+    #<strong>unsubscribe</strong>(subscriber)  
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='cancel-instance_method'>cancel</span>, <span id='unmonitor-instance_method'>unmonitor</span></span>
+    </span>
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p class="note returns_void">This method returns an undefined value.</p><p>Unsubscribes the given subscriber from the publisher.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>subscriber</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the subscriber to unsubscribe</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+129</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/publisher.rb', line 129</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_unsubscribe'>unsubscribe</span><span class='lparen'>(</span><span class='id identifier rubyid_subscriber'>subscriber</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_subscription_for'>subscription_for</span><span class='lparen'>(</span><span class='id identifier rubyid_subscriber'>subscriber</span><span class='rparen'>)</span><span class='op'>&amp;.</span><span class='id identifier rubyid_unsubscribe'>unsubscribe</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Wed Oct 21 13:45:27 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.7).
+</div>
+
+    </div>
+  </body>
+</html>
