@@ -199,9 +199,9 @@ Farce.in_parallel do
 end
 ```
 
-If a string or symbol is provided (like `carbon_fiber`), it will first resolve this to a constant (i.e., `CarbonFiber`). If that constant is a class, it will use that for creating the fiber scheduler. If it is a module, it will look for a `Scheduler` constant inside it, which matches the established pattern implemented by most gems, including `farce`, `async`, `carbon_fiber`, `libev_scheduler` (use `libev` as value), `itsi_scheduler` (use `itsi` as value), but it also works for gems that define their scheduler class at top level, like `fiber_scheduler`.
+If a string or symbol is provided (like `carbon_fiber`), it will first resolve this to a constant (i.e., `CarbonFiber`). If that constant is a class, it will use that for creating the fiber scheduler. If it is a module, it will look for a `Scheduler` constant inside it, which matches the established pattern implemented by most gems, including `farce`, `async`, `carbon_fiber`, `libev_scheduler` (use `libev` as value), `itsi-scheduler` (use `itsi` as value), but it also works for gems that define their scheduler class at top level, like `fiber_scheduler`.
 
-Note that most of these are outdated and don't work with any recent Ruby version, with the notable exception of `async` and `carbon_fiber`.
+Note that most of these are outdated and don't work with any recent Ruby version, with the notable exception of `async`, `carbon_fiber`, and `itsi-scheduler`.
 
 ## Read Next
 
