@@ -451,7 +451,14 @@ Defaults to <code>compare_by_identity</code>.</p>
 52
 53
 54
-55</pre>
+55
+56
+57
+58
+59
+60
+61
+62</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/map.rb', line 45</span>
@@ -462,7 +469,14 @@ Defaults to <code>compare_by_identity</code>.</p>
 
   <span class='id identifier rubyid_private'>private</span>
 
-  <span class='kw'>def</span> <span class='id identifier rubyid_new_map'>new_map</span><span class='lparen'>(</span><span class='op'>**</span><span class='rparen'>)</span>    <span class='op'>=</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>StrictMap</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>**</span><span class='rparen'>)</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_new_map'>new_map</span><span class='lparen'>(</span>
+    <span class='label'>compare_by_identity:</span>        <span class='kw'>false</span><span class='comma'>,</span>
+    <span class='label'>compare_keys_by_identity:</span>   <span class='id identifier rubyid_compare_by_identity'>compare_by_identity</span><span class='comma'>,</span>
+    <span class='label'>compare_values_by_identity:</span> <span class='id identifier rubyid_compare_by_identity'>compare_by_identity</span>
+  <span class='rparen'>)</span>
+    <span class='const'>Internal</span><span class='op'>::</span><span class='const'>StrictMap</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>compare_by_identity:</span><span class='comma'>,</span> <span class='label'>compare_keys_by_identity:</span><span class='comma'>,</span> <span class='label'>compare_values_by_identity:</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
   <span class='kw'>def</span> <span class='id identifier rubyid_freeze_backend'>freeze_backend</span> <span class='op'>=</span> <span class='ivar'>@map</span>
 
   <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_prepare_map_access'>prepare_map_access</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='symbol'>:modes</span><span class='rparen'>)</span>
@@ -478,7 +492,7 @@ Defaults to <code>compare_by_identity</code>.</p>
 </div>
 
       <div id="footer">
-  Generated on Wed Oct 21 13:46:13 2026 by
+  Generated on Wed Oct 21 16:03:06 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
