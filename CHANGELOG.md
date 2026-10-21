@@ -6,16 +6,16 @@ Farce follows [Semantic Versioning 2.0](http://semver.org/). Any public method o
 
  Version                        | Date       | Important Changes
 --------------------------------|------------|--------------------------------------
- [0.5.0](#farce-050-upcoming)   | Upcoming   | Publishers, memoization, pool and queue resizing, and better concurrent-ruby compatibility
+ [0.5.0](#farce-050-2026-10-21) | 2026-10-21 | Publishers, memoization, pool and queue resizing, and better concurrent-ruby compatibility
  [0.4.1](#farce-041-2026-10-18) | 2026-10-18 | Include improved io_uring support in prebuilt Linux binaries
  [0.4.0](#farce-040-2026-10-16) | 2026-10-16 | Introduce `Farce::Backports`
  [0.3.0](#farce-030-2026-10-13) | 2026-10-13 | Introduce `Farce::Task` and executor improvements
  [0.2.0](#farce-020-2026-10-11) | 2026-10-11 | Improvements for flags, vectors, and timer queues, and performance
  [0.1.0](#farce-010-2026-10-09) | 2026-10-09 | Initial release
 
-## Upcoming Releases
+## Release History
 
-### Farce 0.5.0 (Upcoming)
+### Farce 0.5.0 (2026-10-21)
 
 #### New Features
 
@@ -81,8 +81,6 @@ end
 #### Other changes
 
 * Added `pairing_heap` to the priority queue benchmark and refreshed the published benchmark results. It is the fastest priority queue implementation written in pure Ruby.
-
-## Release History
 
 ### Farce 0.4.1 (2026-10-18)
 
