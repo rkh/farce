@@ -6,9 +6,11 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     class UnsharedVector
+      def self.normalize_source(source) = source.is_a?(Integer) ? Array.new(source) : source
+
       def initialize(source = nil, compare_by_identity: false)
         validate_boolean(compare_by_identity, "compare_by_identity")
-        raise TypeError, "source must be an Array" unless source.nil? || source.is_a?(Array)
+        raise TypeError, "source must be an Array" unless source.nil? || source.is_a?(Array) || source.is_a?(Integer)
 
         @values              = source ? Array.new(source) : []
         @compare_by_identity = compare_by_identity

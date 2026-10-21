@@ -36,6 +36,9 @@ containers_check_typed_frozen(VALUE self)
 
 void containers_check_shareable(VALUE value);
 bool containers_strict_bool(VALUE value, const char *name);
+VALUE containers_parse_constructor(
+    int argc, const VALUE *argv, const ID *keyword_ids, int keyword_count, VALUE *keyword_values
+);
 typedef void (*containers_native_reference_validator_t)(VALUE object);
 VALUE containers_publish_native_reference_free(VALUE self);
 VALUE containers_publish_native_with_references(

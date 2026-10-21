@@ -24,7 +24,7 @@ module Farce
 
     private
 
-    def new_map(**)    = Internal::StrictWeakValueMap.new(**)
+    def new_map(...) = Internal::StrictWeakValueMap.new(...)
     def freeze_backend = @map
   end
 

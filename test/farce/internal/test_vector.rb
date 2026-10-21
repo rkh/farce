@@ -55,6 +55,39 @@ module Farce
         assert_raises(ArgumentError) { Vector.new(compare_by_identity: nil) }
       end
 
+      def test_integer_initialization_fills_independent_storage_with_nil
+        return unless Internal.native_ractors?
+
+        [0, 1, 5, 17].each do |size|
+          vector = Vector.new(size, compare_by_identity: true)
+
+          assert_equal Array.new(size), vector.snapshot
+          assert_predicate vector, :compare_by_identity?
+          assert Ractor.shareable?(vector)
+          vector.push(:appended)
+
+          assert_equal [*Array.new(size), :appended], vector.snapshot
+        end
+        assert_raises(ArgumentError) { Vector.new(-1) }
+        assert_raises(RangeError) { Vector.new(2**100) }
+      end
+
+      def test_mode_factory_keeps_independent_identity_storage_and_shareability
+        source = [false, :original]
+        vector = Vector.new_for_modes(source)
+        source[0] = :changed
+        vector[1] = :replacement
+
+        assert_predicate vector, :compare_by_identity?
+        assert_equal [false, :replacement], vector.snapshot
+        assert_equal %i[changed original], source
+        assert_raises(TypeError) { Vector.new_for_modes({}) }
+        return unless Internal.native_ractors?
+
+        assert Ractor.shareable?(vector)
+        assert_raises(Ractor::IsolationError) { Vector.new_for_modes([Object.new]) }
+      end
+
       def test_indexed_assignment_grows_and_supports_negative_indexes
         vector = Vector.new([1, 2])
 

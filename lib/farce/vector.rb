@@ -26,14 +26,15 @@ module Farce
     # @raise [ArgumentError] If the size is negative.
     def initialize(source = nil, mode: :smart, compare_by_identity: false)
       source = normalize_vector_source(source)
-      raise TypeError, "source must be an Array" unless source.nil? || source.is_a?(Array)
-      unless true.equal?(compare_by_identity) || false.equal?(compare_by_identity)
-        raise ArgumentError, "compare_by_identity must be true or false"
-      end
+      raise TypeError, "source must be an Array" unless source.nil? || Integer === source || source.is_a?(Array)
 
-      @compare_by_identity = compare_by_identity
+      @compare_by_identity = compare_by_identity ? true : false
       @manager = ModeManager.new(mode:)
-      @vector = Internal::Vector.new(source&.map { @manager.wrap(it) }, compare_by_identity: true)
+      if source && !(Integer === source)
+        source = source.map { @manager.wrap(it) }
+        raise TypeError, "source must be an Array" unless source.nil? || source.is_a?(Array)
+      end
+      @vector = Internal::Vector.new_for_modes(source)
       super()
     end
 
@@ -53,7 +54,7 @@ module Farce
     def marshal_load(data)
       entries, @manager, identity, frozen = Internal::MarshalSupport.payload(data, 4)
       @compare_by_identity = identity
-      @vector = Internal::Vector.new(compare_by_identity: true)
+      @vector = Internal::Vector.new_for_modes(nil)
       publish_shareable
       entries.each { @vector.push(Internal::MarshalSupport.restore_value(it)) }
       Internal::MarshalSupport.freeze(self, frozen)

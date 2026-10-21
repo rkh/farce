@@ -22,9 +22,7 @@ module Farce
                      compare_keys_by_identity: compare_by_identity, compare_values_by_identity: compare_by_identity)
         initial_mapping = convert_entries(initial_mapping)
 
-        identity         = BasicObject.instance_method(:equal?)
-        valid_comparison = identity.bind_call(compare_values_by_identity, true) ||
-          identity.bind_call(compare_values_by_identity, false)
+        valid_comparison = true.equal?(compare_values_by_identity) || false.equal?(compare_values_by_identity)
 
         raise ArgumentError, "compare_values_by_identity must be a boolean" unless valid_comparison
         @compare_values_by_identity = compare_values_by_identity
@@ -33,9 +31,11 @@ module Farce
         @map     = new_map(compare_by_identity:, compare_keys_by_identity:, compare_values_by_identity: true)
         KeyNormalizer.prepare_concurrent(@map)
 
-        restoring  = KeyNormalizer.restoration?(normalize_keys)
-        normalizer = KeyNormalizer.build(normalize_keys, shareable: true)
-        KeyNormalizer.install_concurrent(self, normalizer) unless restoring
+        unless nil.equal?(normalize_keys)
+          restoring  = KeyNormalizer.restoration?(normalize_keys)
+          normalizer = KeyNormalizer.build(normalize_keys, shareable: true)
+          KeyNormalizer.install_concurrent(self, normalizer) unless restoring
+        end
 
         initial_mapping&.each { |key, value| self[key] = value }
         KeyNormalizer.install_concurrent(self, normalizer) if restoring

@@ -4,6 +4,7 @@
 #include "ruby/fiber/scheduler.h"
 
 #include <errno.h>
+#include <limits.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -380,22 +381,26 @@ vector_assignment_index(vector_t *vector, long long raw)
     return (size_t)raw;
 }
 
-static VALUE
-vector_initialize(int argc, VALUE *argv, VALUE self)
+static size_t
+vector_initial_size(VALUE source)
 {
-    VALUE source = Qnil;
-    VALUE keywords = Qnil;
-    VALUE identity = Qundef;
-    ID keyword_ids[] = {rb_intern("compare_by_identity")};
-    VALUE keyword_values[1];
-    vector_t *vector;
+    long size = NUM2LONG(source);
+    if (size < 0) rb_raise(rb_eArgError, "negative array size");
+    if (size > LONG_MAX / (long)sizeof(VALUE)) rb_raise(rb_eArgError, "array size too big");
+    return (size_t)size;
+}
 
-    rb_check_frozen(self);
-    rb_scan_args(argc, argv, "01:", &source, &keywords);
-    if (!NIL_P(keywords)) {
-        rb_get_kwargs(keywords, keyword_ids, 0, 1, keyword_values);
-        identity = keyword_values[0];
-    }
+static VALUE
+vector_normalize_source(VALUE klass, VALUE source)
+{
+    if (RB_INTEGER_TYPE_P(source)) vector_initial_size(source);
+    return source;
+}
+
+static VALUE
+vector_initialize_with_identity(VALUE self, VALUE source, VALUE identity)
+{
+    vector_t *vector;
     TypedData_Get_Struct(self, vector_t, &vector_type, vector);
     if (vector->initialized) rb_raise(rb_eRuntimeError, "Vector is already initialized");
 
@@ -403,8 +408,12 @@ vector_initialize(int argc, VALUE *argv, VALUE self)
         ? false
         : containers_strict_bool(identity, "compare_by_identity");
 
+    bool sized = RB_INTEGER_TYPE_P(source);
     size_t size = 0;
-    if (!NIL_P(source)) {
+    if (sized) {
+        size = vector_initial_size(source);
+    }
+    else if (!NIL_P(source)) {
         Check_Type(source, T_ARRAY);
         size = (size_t)RARRAY_LEN(source);
     }
@@ -413,14 +422,35 @@ vector_initialize(int argc, VALUE *argv, VALUE self)
     if (!vector->values) rb_memerror();
     vector->capacity = capacity;
 
-    for (size_t index = 0; index < size; index++) {
-        VALUE value = rb_ary_entry(source, (long)index);
-        containers_check_shareable(value);
-        RB_OBJ_WRITE(self, &vector->values[index], value);
+    if (!sized) {
+        for (size_t index = 0; index < size; index++) {
+            VALUE value = rb_ary_entry(source, (long)index);
+            containers_check_shareable(value);
+            RB_OBJ_WRITE(self, &vector->values[index], value);
+        }
     }
     vector->size = size;
     vector->initialized = true;
+    if (sized) return containers_publish_native_reference_free(self);
     return containers_publish_native_with_references(self, vector_validate_references);
+}
+
+static VALUE
+vector_initialize(int argc, VALUE *argv, VALUE self)
+{
+    ID keyword_ids[] = {rb_intern("compare_by_identity")};
+    VALUE keyword_values[1];
+
+    rb_check_frozen(self);
+    VALUE source = containers_parse_constructor(argc, argv, keyword_ids, 1, keyword_values);
+    return vector_initialize_with_identity(self, source, keyword_values[0]);
+}
+
+static VALUE
+vector_new_for_modes(VALUE klass, VALUE source)
+{
+    VALUE self = rb_obj_alloc(klass);
+    return vector_initialize_with_identity(self, source, Qtrue);
 }
 
 static VALUE
@@ -1185,6 +1215,8 @@ containers_init_vector(VALUE namespace)
 
     cVector = rb_define_class_under(namespace, "Vector", rb_cObject);
     rb_define_alloc_func(cVector, vector_allocate);
+    rb_define_singleton_method(cVector, "normalize_source", vector_normalize_source, 1);
+    rb_define_singleton_method(cVector, "new_for_modes", vector_new_for_modes, 1);
     rb_define_method(cVector, "freeze", vector_freeze, 0);
     rb_define_method(cVector, "initialize", vector_initialize, -1);
     rb_define_method(cVector, "size", vector_size, 0);

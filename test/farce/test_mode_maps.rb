@@ -24,6 +24,27 @@ module Farce
       end
     end
 
+    class InvalidComparisonOption
+      def equal?(_other) = raise "comparison option received equal?"
+      def ==(_other)     = raise "comparison option received =="
+    end
+
+    class ObservedConstructorMap < Map
+      attr_reader :backend_options, :manager_mode
+
+      private
+
+      def new_mode_manager(mode:)
+        @manager_mode = mode
+        super
+      end
+
+      def new_map(**options)
+        @backend_options = options.freeze
+        super
+      end
+    end
+
     MAP_CLASSES = [Map, WeakKeyMap].freeze
 
     def map_classes = MAP_CLASSES
@@ -68,6 +89,51 @@ module Farce
         error = assert_raises(ArgumentError) { klass.new(mode: :invalid) }
         assert_equal "invalid mode: :invalid", error.message
       end
+    end
+
+    def test_invalid_comparison_options_do_not_dispatch_equality
+      MAP_CLASSES.each do |klass|
+        error = assert_raises(ArgumentError) do
+          klass.new(compare_values_by_identity: InvalidComparisonOption.new)
+        end
+
+        assert_equal "compare_values_by_identity must be a boolean", error.message
+      end
+    end
+
+    def test_constructor_hooks_preserve_keywords_modes_and_normalization
+      payload = ModePayload.new(:original)
+      map = ObservedConstructorMap.new(
+        { "value" => payload, "nil_value" => nil },
+        mode: :copy, normalize_keys: :to_sym, compare_by_identity: true,
+        compare_keys_by_identity: false, compare_values_by_identity: false,
+      )
+      payload.value = :changed
+
+      assert_equal :copy, map.manager_mode
+      assert_equal({ compare_by_identity: true, compare_keys_by_identity: false, compare_values_by_identity: true },
+        map.backend_options)
+      refute_predicate map, :compare_values_by_identity?
+      assert_equal :original, map[:value].value
+      assert_nil map[:nil_value]
+      assert map.key?(:nil_value)
+    end
+
+    def test_false_key_normalizer_is_rejected
+      MAP_CLASSES.each do |klass|
+        assert_raises(TypeError) { klass.new(normalize_keys: false) }
+      end
+    end
+
+    def test_backend_constructor_hook_can_forward_selected_keywords
+      type = Class.new(Map) do
+        private def new_map(**) = super(compare_values_by_identity: true)
+      end
+      map = type.new({ key: nil })
+
+      assert map.key?(:key)
+      assert_nil map[:key]
+      refute_predicate map, :compare_keys_by_identity?
     end
 
     def test_keys_are_stored_directly_and_must_be_shareable

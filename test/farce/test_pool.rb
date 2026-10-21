@@ -145,9 +145,10 @@ module Farce
 
       assert submitter.join(5), "submission did not resume when space became available"
       assert_same pool, submitter.value
-      close_pool(pool)
 
       assert_equal(%i[queued later], 2.times.map { results.pop(timeout: 5) })
+      close_pool(pool)
+
       assert_nil results.try_pop
     ensure
       gate&.value = true

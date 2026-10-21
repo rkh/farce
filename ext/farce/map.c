@@ -850,8 +850,6 @@ map_initialize_entry(VALUE key, VALUE value, VALUE opaque)
 static VALUE
 map_initialize(int argc, VALUE *argv, VALUE self)
 {
-    VALUE mapping = Qnil;
-    VALUE keywords = Qnil;
     ID keyword_ids[] = {
         rb_intern("compare_by_identity"),
         rb_intern("compare_keys_by_identity"),
@@ -860,8 +858,7 @@ map_initialize(int argc, VALUE *argv, VALUE self)
     VALUE keyword_values[3] = {Qundef, Qundef, Qundef};
     map_t *map;
 
-    rb_scan_args(argc, argv, "01:", &mapping, &keywords);
-    if (!NIL_P(keywords)) rb_get_kwargs(keywords, keyword_ids, 0, 3, keyword_values);
+    VALUE mapping = containers_parse_constructor(argc, argv, keyword_ids, 3, keyword_values);
     TypedData_Get_Struct(self, map_t, &map_type, map);
     if (map->initialized) rb_raise(rb_eRuntimeError, "Map is already initialized");
 

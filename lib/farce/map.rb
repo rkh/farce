@@ -48,7 +48,14 @@ module Farce
 
     private
 
-    def new_map(**)    = Internal::StrictMap.new(**)
+    def new_map(
+      compare_by_identity:        false,
+      compare_keys_by_identity:   compare_by_identity,
+      compare_values_by_identity: compare_by_identity
+    )
+      Internal::StrictMap.new(compare_by_identity:, compare_keys_by_identity:, compare_values_by_identity:)
+    end
+
     def freeze_backend = @map
 
     Internal.prepare_map_access(self, :modes)

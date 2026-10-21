@@ -207,6 +207,17 @@ module Farce
         assert_raises(RuntimeError) { locks.__send__(:initialize) }
       end
 
+      def test_shared_publication_allows_an_existing_object_id
+        locks = SharedKeyLockMap.allocate
+        identity = locks.object_id
+        locks.send(:initialize)
+
+        assert_equal identity, locks.object_id
+        assert_empty locks.instance_variables
+        assert Ractor.shareable?(locks)
+        assert_equal :ready, locks.synchronize(:key) { :ready }
+      end
+
       def test_shared_publication_rejects_ivars_without_reentry_and_leaves_safe_state
         locks = SharedKeyLockMap.allocate
         metadata = PublicationReentry.new(locks)

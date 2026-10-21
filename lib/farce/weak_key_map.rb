@@ -23,7 +23,7 @@ module Farce
 
     private
 
-    def new_map(**)    = Internal::StrictWeakKeyMap.new(**)
+    def new_map(...) = Internal::StrictWeakKeyMap.new(...)
     def freeze_backend = @map
   end
 

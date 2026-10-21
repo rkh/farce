@@ -113,8 +113,15 @@ module Farce
     def storage_thread(thread)            = thread
     def prepare_mutable_numeric(_)        = nil
     def prepare_map_access(_klass, _kind) = nil
+    def prepare_shareable_class(_base)    = nil
     def finalize_engine                   = nil
     def with_scheduler_thread_group       = yield(ThreadGroup.new)
+
+    def publish_shareable(object)
+      Object.instance_method(:freeze).bind_call(object)
+      ::Ractor.make_shareable(object) if native_ractors?
+      object
+    end
 
     def delegate(from, to, *methods)
       methods.each do |method|

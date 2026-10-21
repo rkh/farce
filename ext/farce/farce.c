@@ -43,6 +43,40 @@ containers_strict_bool(VALUE value, const char *name)
     rb_raise(rb_eArgError, "%s must be true or false", name);
 }
 
+VALUE
+containers_parse_constructor(
+    int argc, const VALUE *argv, const ID *keyword_ids, int keyword_count, VALUE *keyword_values
+)
+{
+    VALUE keywords = Qnil;
+    int positional_count = argc;
+    if (argc > 0 && rb_keyword_given_p()) keywords = argv[--positional_count];
+    rb_check_arity(positional_count, 0, 1);
+
+    int found = 0;
+    for (int index = 0; index < keyword_count; index++) {
+        VALUE value = NIL_P(keywords)
+            ? Qundef
+            : rb_hash_lookup2(keywords, ID2SYM(keyword_ids[index]), Qundef);
+        keyword_values[index] = value;
+        if (value != Qundef) found++;
+    }
+    if (!NIL_P(keywords) && RHASH_SIZE(keywords) != (size_t)found) {
+        /* Ruby's unknown-keyword error path deletes recognized keys, even
+         * when no output values are requested. Copy only for that error. */
+        rb_get_kwargs(rb_hash_dup(keywords), keyword_ids, 0, keyword_count, keyword_values);
+    }
+    return positional_count ? argv[0] : Qnil;
+}
+
+static int
+containers_find_public_ivar(ID name, VALUE value, st_data_t found)
+{
+    if (!rb_is_instance_id(name)) return ST_CONTINUE;
+    *(bool *)found = true;
+    return ST_STOP;
+}
+
 static void
 containers_check_native_publication_target(VALUE self)
 {
@@ -53,15 +87,15 @@ containers_check_native_publication_target(VALUE self)
         rb_raise(rb_eTypeError, "native publication requires a shareable typed-data descriptor");
     }
 
-    VALUE instance_variables = rb_obj_instance_variables(self);
-    if (RARRAY_LEN(instance_variables) != 0) {
+    bool has_public_ivar = false;
+    rb_ivar_foreach(self, containers_find_public_ivar, (st_data_t)&has_public_ivar);
+    if (has_public_ivar) {
         rb_raise(
             rb_eTypeError,
             "%s cannot be published with Ruby instance variables",
             rb_obj_classname(self)
         );
     }
-    RB_GC_GUARD(instance_variables);
 }
 
 VALUE
@@ -327,6 +361,63 @@ farce_load_native_fiber_scheduler(VALUE namespace)
     return Qnil;
 }
 
+#if RUBY_API_VERSION_CODE >= 40100
+static rb_alloc_func_t farce_object_allocator;
+static VALUE farce_shareable_inclusion;
+
+static VALUE
+farce_new_shareable(int argc, VALUE *argv, VALUE klass)
+{
+    /* Ordinary ivar writes then include the hidden ID in the class's size
+     * hint, keeping later instances embedded instead of spilling at publication.
+     * Leave the allocator unchanged: Ruby's copy path requires a root shape. */
+    VALUE object = rb_obj_alloc(klass);
+    if (RB_TYPE_P(object, T_OBJECT)) rb_obj_id(object);
+    rb_obj_call_init_kw(object, argc, argv, RB_PASS_CALLED_KEYWORDS);
+    return object;
+}
+
+static VALUE
+farce_prepare_shareable_class(VALUE namespace, VALUE base)
+{
+    if (RB_TYPE_P(base, T_CLASS) && !RB_FL_TEST_RAW(base, RUBY_FL_SINGLETON)) {
+        ID id_new = rb_intern("new");
+        if (rb_get_alloc_func(base) == farce_object_allocator &&
+            rb_method_basic_definition_p(rb_singleton_class(base), id_new)) {
+            VALUE constructor = rb_obj_method(base, ID2SYM(id_new));
+            if (rb_funcall(constructor, rb_intern("owner"), 0) == rb_cClass) {
+                rb_define_singleton_method(base, "new", farce_new_shareable, -1);
+            }
+        }
+    }
+    else if (RB_TYPE_P(base, T_MODULE)) {
+        rb_prepend_module(rb_singleton_class(base), farce_shareable_inclusion);
+    }
+    return base;
+}
+
+static VALUE
+farce_shareable_included(VALUE self, VALUE base)
+{
+    VALUE result = rb_call_super(1, &base);
+    farce_prepare_shareable_class(Qnil, base);
+    return result;
+}
+#endif
+
+static VALUE
+farce_publish_shareable(VALUE namespace, VALUE object)
+{
+#if RUBY_API_VERSION_CODE >= 40100
+    /* A frozen facade can bypass Ruby's object-ID preallocation during
+     * make_shareable. Reserve the ID before freezing so a later object_id
+     * cannot resize shared ivar storage while another Ractor reads it. */
+    rb_obj_id(object);
+#endif
+    rb_obj_freeze(object);
+    return rb_ractor_make_shareable(object);
+}
+
 #if RUBY_API_VERSION_CODE == 30400
 static VALUE
 farce_lock_native_thread(VALUE namespace)
@@ -345,6 +436,13 @@ Init_farce(void)
     VALUE singleton = rb_singleton_class(mInternal);
     eIsolationError = rb_const_get(rb_cRactor, rb_intern("IsolationError"));
     rb_define_singleton_method(mInternal, "value_changed?", farce_value_changed, 3);
+#if RUBY_API_VERSION_CODE >= 40100
+    farce_object_allocator = rb_get_alloc_func(rb_cObject);
+    farce_shareable_inclusion = rb_define_module_under(mInternal, "ShareableConstruction");
+    rb_define_method(farce_shareable_inclusion, "included", farce_shareable_included, 1);
+    rb_define_singleton_method(mInternal, "prepare_shareable_class", farce_prepare_shareable_class, 1);
+#endif
+    rb_define_singleton_method(mInternal, "publish_shareable", farce_publish_shareable, 1);
 #if RUBY_API_VERSION_CODE == 30400
     rb_define_singleton_method(mInternal, "lock_native_thread", farce_lock_native_thread, 0);
 #endif

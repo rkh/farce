@@ -44,13 +44,17 @@ module Farce
         assert_equal 5, vector.size
         assert_raises(IndexError) { vector[-6] = 0 }
         assert_raises(TypeError) { klass.new({}) }
-        assert_raises(ArgumentError) { klass.new(compare_by_identity: nil) }
+        if klass == Vector
+          refute_predicate klass.new(compare_by_identity: nil), :compare_by_identity?
+        else
+          assert_raises(ArgumentError) { klass.new(compare_by_identity: nil) }
+        end
       end
     end
 
     def test_initialization_with_integer_size
       [*VECTOR_CLASSES, Local::Vector].each do |klass|
-        [0, 1, 5].each do |size|
+        [0, 1, 5, 17].each do |size|
           vector = klass.new(size)
 
           assert_equal size, vector.size
@@ -75,6 +79,35 @@ module Farce
       end
     end
 
+    def test_large_integer_sizes_keep_array_errors_and_validation_order
+      [2**100, (2**63) - 1].each do |size|
+        expected = assert_raises(ArgumentError, RangeError) { Array.new(size) }
+        [*VECTOR_CLASSES, Local::Vector].each do |klass|
+          error = assert_raises(expected.class) { klass.new(size) }
+
+          assert_equal expected.message, error.message
+        end
+        error = assert_raises(expected.class) { Vector.new(size, mode: :invalid) }
+
+        assert_equal expected.message, error.message
+      end
+      error = assert_raises(ArgumentError) { Vector.new(-1, mode: :invalid) }
+
+      assert_equal "negative array size", error.message
+    end
+
+    def test_initialization_normalizes_the_comparison_option_by_truthiness
+      [nil, false].each do |option|
+        refute_predicate Vector.new(compare_by_identity: option), :compare_by_identity?
+      end
+      option = Object.new
+      option.define_singleton_method(:!) { raise "unexpected negation" }
+
+      [true, 0, "", option].each do |value|
+        assert_same true, Vector.new(compare_by_identity: value).compare_by_identity?
+      end
+    end
+
     def test_integer_size_preserves_transfer_options
       vector = Vector.new(1, mode: :local, compare_by_identity: true)
       value = Object.new
@@ -83,6 +116,97 @@ module Farce
       assert_equal :local, vector.mode
       assert_predicate vector, :compare_by_identity?
       assert_same value, vector[0]
+    end
+
+    def test_initial_shareable_values_are_not_retained_as_backing_storage
+      source = [nil, false, "value"]
+      vector = Vector.new(source, mode: :local)
+      source[0] = :changed
+      vector[1] = :replacement
+
+      assert_equal [nil, :replacement, "value"], vector.to_a
+      assert_equal [:changed, false, "value"], source
+      assert_same source[2], vector[2]
+    end
+
+    def test_initial_values_keep_the_requested_transfer_mode
+      %i[local copy marshal].each do |mode|
+        value = [1]
+        source = [false, value]
+        vector = Vector.new(source, mode:)
+        source.clear
+
+        assert_same false, vector[0]
+        assert_equal [1], vector[1]
+        retained = mode == :local || !Internal.native_ractors?
+        retained ? assert_same(value, vector[1]) : refute_same(value, vector[1])
+        value << 2
+
+        assert_equal(retained ? [1, 2] : [1], vector[1])
+      end
+    end
+
+    def test_initial_array_subclasses_keep_their_mapping_behavior
+      type = Class.new(Array) do
+        def map(&block) = super { block.call(it * 10) }
+      end
+      vector = Vector.new(type.new([1, 2]))
+
+      assert_equal [10, 20], vector.to_a
+    end
+
+    def test_initial_array_subclasses_cannot_map_to_an_integer_size
+      type = Class.new(Array) do
+        attr_accessor :mapped_result
+
+        def map = @mapped_result
+      end
+      source = type.new([1, 2])
+      [2, false, Object.new].each do |result|
+        source.mapped_result = result
+
+        assert_raises(TypeError) { Vector.new(source) }
+      end
+      source.mapped_result = nil
+
+      assert_empty Vector.new(source).to_a
+    end
+
+    def test_integer_initialization_preserves_subclass_source_normalization
+      type = Class.new(Vector) do
+        attr_reader :source_values
+
+        def initialize(...)
+          @source_values = [Object.new]
+          super
+        end
+
+        private def normalize_vector_source(source) = source.is_a?(Integer) ? @source_values : super
+      end
+      vector = type.new(1, mode: :local)
+      value = vector.source_values[0]
+
+      assert_same value, vector[0]
+      vector[0] = :replacement
+
+      assert_same value, vector.source_values[0]
+      assert_equal [:replacement], vector.to_a
+    end
+
+    def test_integer_source_normalization_can_return_an_array_with_singleton_mapping
+      type = Class.new(Vector) do
+        private
+
+        def normalize_vector_source(source)
+          return super unless Integer === source
+
+          values = Array.new(source)
+          def values.map = [:mapped]
+          values
+        end
+      end
+
+      assert_equal [:mapped], type.new(2).to_a
     end
 
     def test_integer_size_initializes_each_local_scope

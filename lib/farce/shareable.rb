@@ -13,6 +13,9 @@ module Farce
   #   object = MyClass.new
   #   Ractor.shareable?(object) # => true
   module Shareable
+    # @api private
+    def self.included(base) = Internal.prepare_shareable_class(base)
+
     # A structurally frozen wrapper whose logical frozen state is owned by its backend.
     # The including class must implement a private `freeze_backend` method.
     #

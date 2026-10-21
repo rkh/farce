@@ -2,11 +2,19 @@
 # shareable_constant_value: literal
 # warn_indent: true
 
+require "digest"
 require "rake/extensiontask"
 require_relative "../ext/ext_helper"
 require_relative "liburing"
 
 class ExtensionTask < Rake::ExtensionTask
+  class NativeConfigurationCheck < Rake::Task
+    # Check on every invocation without making unchanged file prerequisites stale.
+    def timestamp = Rake::EARLY
+  end
+
+  private_constant :NativeConfigurationCheck
+
   private
 
   # rake-compiler hooks up `file lib/…/<ext>.<dlext> => copy:<ext>:<host platform>:<host version>`
@@ -18,7 +26,34 @@ class ExtensionTask < Rake::ExtensionTask
   # build breaks. Honour no_native fully instead: skip the host tasks, leaving cross builds to
   # assemble the gem from tmp/<platform>/stage only.
   def define_compile_tasks(for_platform = nil, ruby_ver = RUBY_VERSION)
-    super unless for_platform.nil? && no_native
+    return if for_platform.nil? && no_native
+    super
+    define_native_configuration_check(ruby_ver) if for_platform.nil?
+  end
+
+  def define_native_configuration_check(ruby_ver)
+    tmp_path = "#{@tmp_dir}/#{platform}/#{@name}/#{ruby_ver}"
+    stamp = "#{tmp_path}/ruby-config.stamp"
+    makefile = "#{tmp_path}/Makefile"
+    native_binary = "#{tmp_path}/#{binary(platform)}"
+
+    check = NativeConfigurationCheck.define_task("#{stamp}:check" => tmp_path) do
+      fingerprint = native_configuration_fingerprint
+      next if File.file?(stamp) && File.binread(stamp) == fingerprint
+
+      # Dev Ruby updates can keep RUBY_VERSION while replacing headers and configuration.
+      # Remove cached outputs as their timestamps may be newer than the new Ruby's files.
+      rm_f [makefile, native_binary, *Dir.glob("#{tmp_path}/**/*.{o,obj}")]
+      File.binwrite(stamp, fingerprint)
+    end
+
+    file stamp => check.name
+    file makefile => stamp
+  end
+
+  def native_configuration_fingerprint(revision: RUBY_REVISION, config: RbConfig::CONFIG,
+                                       paths: $LOADED_FEATURES.grep(%r{(?:\A|[/\\])(?:rbconfig|mkmf)\.rb\z}))
+    Digest::SHA256.hexdigest(Marshal.dump([revision, config.sort, paths.sort]))
   end
 
   # Build with the same target configuration that extconf will use.

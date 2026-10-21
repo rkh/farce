@@ -8,11 +8,7 @@ module Farce
     module Freeze
       # Structurally freeze a Ruby facade, then validate and publish its object graph.
       # This deliberately bypasses an override that controls logical frozen state.
-      def self.publish(object)
-        Object.instance_method(:freeze).bind_call(object)
-        ::Ractor.make_shareable(object) if Internal.native_ractors?
-        object
-      end
+      def self.publish(object) = Internal.publish_shareable(object)
 
       def self.check(object)
         return object unless object.frozen?

@@ -6,6 +6,8 @@ module Farce
   # @!visibility private
   module Internal # :nodoc: all
     class Vector < UnsharedVector
+      def self.new_for_modes(source) = new(source, compare_by_identity: true)
+
       def initialize(source = nil, **)
         source.each { check_value(it) } if source.is_a?(Array)
         super
