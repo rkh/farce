@@ -14,6 +14,12 @@ end
 require "bundler/setup"
 require "benchmark"
 require "benchmark/ips"
+
+begin
+  require "atomic-ruby"
+rescue LoadError
+end
+
 require "farce"
 
 class PortQueue
@@ -86,6 +92,8 @@ if defined?(Ractor)
     warn "#{e.class}: #{e.message}"
   end
 end
+
+queues["AtomicQueue"] = -> { AtomicQueue.new } if defined?(AtomicQueue)
 
 Benchmark.ips do |x|
   x.config(time: Float(ENV.fetch("TIME", "5")), warmup: Float(ENV.fetch("WARMUP", "2")))

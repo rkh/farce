@@ -5,11 +5,32 @@
 require "bundler/setup"
 require "benchmark"
 require "benchmark/ips"
+
+begin
+  require "atomic-ruby"
+  class AtomicFixnum
+    def initialize
+      @atom = Atom.new(0)
+      freeze
+    end
+
+    def increment(by = 1) = @atom.swap { |value| value + by }
+    def decrement(by = 1) = @atom.swap { |value| value - by }
+    def value = @atom.value
+  end
+end
+
 require "farce"
 
 counter_classes  = [Farce::Counter]
 thread_classes   = [Farce::Counter]
 ractor_classes   = [Farce::Counter]
+
+if AtomicFixnum
+  counter_classes << AtomicFixnum
+  thread_classes  << AtomicFixnum
+  ractor_classes  << AtomicFixnum
+end
 
 begin
   require "concurrent"

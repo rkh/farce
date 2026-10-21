@@ -137,6 +137,31 @@ Both the Ruby core library, and other libraries, like the very popular [concurre
       <td>❌ <b>not supported</b></td>
       <td>⚠️ CRuby only</td>
     </tr>
+    <tr>
+      <td rowspan="4"><a href="https://github.com/joshuay03/atomic-ruby">atomic-ruby</a></td>
+      <td>Atom</td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>💣 <b>breaks isolation¹²</b></td>
+    </tr>
+    <tr>
+      <td>AtomicQueue, AtomicThreadPool</td>
+      <td>⚠️ CRuby only</td>
+      <td>⚠️ CRuby only</td>
+      <td>❌ <b>not supported</b></td>
+    </tr>
+    <tr>
+      <td>AtomicCountDownLatch, AtomicBoolean</td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+      <td>⚠️ CRuby only<b>¹</b></td>
+    </tr>
+    <tr>
+      <td>AtomicConditionVariable</td>
+      <td>⚠️ CRuby only</td>
+      <td>❌ <b>not supported</b></td>
+      <td>❌ <b>not supported</b></td>
+    </tr>
   </tbody>
 </table>
 

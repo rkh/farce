@@ -26,6 +26,7 @@ GEM
       console (~> 1.29)
       fiber-annotation
       io-event (~> 1.21)
+    atomic-ruby (0.16.1)
     base64 (0.3.0)
     benchmark (0.5.0)
     benchmark-ips (2.15.1)
@@ -223,6 +224,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   async (>= 2.45)
+  atomic-ruby
   benchmark
   benchmark-ips
   bson
@@ -271,6 +273,7 @@ CHECKSUMS
   ansi (1.6.0) sha256=ac9ea0c0ea8d32fb4e271348e609963ac78882f34b73836c2a02b3622e666658
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   async (2.46.0) sha256=34f984733dbf63a997376346451ec995e858cacc3105e86ccfeaf8877b4f490b
+  atomic-ruby (0.16.1) sha256=60d7a72d81836174e7d7fc635a93a44a88e60dfebb8ba96a520f98f878b9c34b
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
   benchmark (0.5.0) sha256=465df122341aedcb81a2a24b4d3bd19b6c67c1530713fd533f3ff034e419236c
   benchmark-ips (2.15.1) sha256=07a1a9f3c6105ecaf68c174fc3fbcddd71a0e9ada6236ae03093a0dcfd812d59

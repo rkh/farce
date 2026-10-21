@@ -55,6 +55,7 @@ group :compatibility do
   gem "yajl-ruby", platforms: %i[mri_34 mri_40 truffleruby]
 
   platforms :mri_40, :mri_41 do
+    gem "atomic-ruby"
     gem "ractor-sharing"
     gem "ractor-tmvar", ">= 0.4.0"
   end

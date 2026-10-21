@@ -57,6 +57,7 @@ Also note that `Ratomic::Map` has a significant performance benefit over all oth
  concurrent-ruby-ext | 1.2x slower | same-ish       | 32-bit       | no ractor support
  ratomic             | 1.5x slower | 1.6x slower    | 64-bit       | no overflow protection
  ractor_safe         | 2.1x slower | 2.1x slower    | 64-bit       |
+ atomic-ruby         | 10x slower  | 2.9x slower    | any          | via `Atom`
  concurrent-ruby     | 12x slower  | 5x slower      | 32-bit       | no ractor support
 
 Performance differences between implementations are consistent between single-threaded and multi-threaded benchmarks.
@@ -101,6 +102,7 @@ In the producer/consumer workload in `benchmark/queue.rb`, Ruby's built-in `Thre
  Implementation                | Performance | Notes
 -------------------------------|-------------|-------------
  `Thread::Queue`               | Fastest     | no ractor support
+ `AtomicQueue`                 | 1.5x slower | no ractor support
  `Thread::SizedQueue`          | 1.5x slower | no ractor support
  `Farce::Strict::Queue`        | 1.6x slower | only allows sharable objects
  `Farce::Queue`                | 2.2x slower |
