@@ -253,6 +253,13 @@ so these numbers may not be accurate in the future.</li>
 <td></td>
 </tr>
 <tr>
+<td>atomic-ruby</td>
+<td>10x slower</td>
+<td>2.9x slower</td>
+<td>any</td>
+<td>via <code>Atom</code></td>
+</tr>
+<tr>
 <td>concurrent-ruby</td>
 <td>12x slower</td>
 <td>5x slower</td>
@@ -344,6 +351,11 @@ Farce and concurrent-ruby provide plenty of options.</p>
 <tr>
 <td><code>Thread::Queue</code></td>
 <td>Fastest</td>
+<td>no ractor support</td>
+</tr>
+<tr>
+<td><code>AtomicQueue</code></td>
+<td>1.5x slower</td>
 <td>no ractor support</td>
 </tr>
 <tr>
@@ -472,7 +484,7 @@ The below numbers compare non-blocking APIs, as only Farce implements a blocking
 </div></div>
 
       <div id="footer">
-  Generated on Wed Oct 21 11:04:57 2026 by
+  Generated on Wed Oct 21 12:52:57 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.7).
 </div>
