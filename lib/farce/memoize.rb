@@ -101,8 +101,8 @@ module Farce
       private_constant :KNOWN
 
       # @!macro memoize_params
+      # Creates or retrieves a memoization mixin for the given methods and options.
       # @return [Mixin] the memoization mixin
-      # @see #initialize
       def self.new(*methods, **options)
         return super unless self == Mixin
         methods = Farce.dedup(methods.map(&:to_sym).uniq.sort)
@@ -141,6 +141,7 @@ module Farce
       # @return [Symbol] the visibility of the memoized methods
       attr_reader :visibility
 
+      # @api private
       def initialize(methods, scope:, weak:, mode: nil, visibility: :public)
         @memoized_methods = methods
         @scope            = scope
