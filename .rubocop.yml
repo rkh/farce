@@ -22,6 +22,15 @@ Layout/ArgumentAlignment:
 
 Layout/ClassStructure:
   Enabled: true
+  ExpectedOrder:
+    - module_inclusion
+    - constants
+    - public_class_methods
+    - private_class_methods
+    - initializer
+    - public_methods
+    - protected_methods
+    - private_methods
 
 Layout/EmptyLineAfterGuardClause:
   Enabled: false

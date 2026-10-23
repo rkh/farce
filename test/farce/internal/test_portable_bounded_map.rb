@@ -427,7 +427,6 @@ module Farce
           end
         end
 
-        # rubocop:disable-next Style/SymbolProc
         observers = [
           ->(map) { map.key?(:a) },
           ->(map) { map.getkey(:a) },

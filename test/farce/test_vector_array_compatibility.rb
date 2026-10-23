@@ -537,7 +537,7 @@ module Farce
       [Vector, Strict::Vector].each do |type|
         source = type.new([1, 2, 3])
         [source.reverse, source.map { it * 2 }].each do |derived|
-          worker = Ractor.new(derived) { |value| value.to_a } # rubocop:disable Style/SymbolProc
+          worker = Ractor.new(derived) { |value| value.to_a }
           result = worker.respond_to?(:value) ? worker.value : worker.take
 
           assert_equal derived.to_a, result

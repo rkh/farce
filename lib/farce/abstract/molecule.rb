@@ -76,6 +76,20 @@ module Farce
       # @return [Boolean] the default comparison policy for new records
       def self.compare_by_identity? = false
 
+      # @return [Array<Symbol>] the atom accessor names in declaration order
+      def self.atoms
+        return @atoms if defined?(@atoms) && @atoms
+        return superclass.atoms if superclass.respond_to?(:atoms)
+        EMPTY_ARRAY
+      end
+
+      # @return [Array<Symbol>] the field names in declaration order
+      def self.members
+        return @members if defined?(@members) && @members
+        return superclass.members if superclass.respond_to?(:members)
+        EMPTY_ARRAY
+      end
+
       # @!visibility private
       def self.define_member(field)
         raise ArgumentError, "#{field.inspect} is not a valid field name" if field == :compare_by_identity
@@ -98,20 +112,6 @@ module Farce
         end
       end
       private_class_method :define_member
-
-      # @return [Array<Symbol>] the atom accessor names in declaration order
-      def self.atoms
-        return @atoms if defined?(@atoms) && @atoms
-        return superclass.atoms if superclass.respond_to?(:atoms)
-        EMPTY_ARRAY
-      end
-
-      # @return [Array<Symbol>] the field names in declaration order
-      def self.members
-        return @members if defined?(@members) && @members
-        return superclass.members if superclass.respond_to?(:members)
-        EMPTY_ARRAY
-      end
 
       # Initialize fields by position or name. A field may only be supplied once.
       # Existing {Atom} instances are retained directly, preserving their policy.
