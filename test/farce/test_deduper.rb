@@ -105,6 +105,45 @@ module Farce
       assert_same @deduper.dedup([+"key"]), first.keys.first
     end
 
+    def test_regular_expressions_are_canonicalized_by_default
+      first = Farce.dedup(Regexp.new("dedup pattern", Regexp::IGNORECASE))
+      GC.start
+
+      assert_predicate first, :frozen?
+      assert_same first, Farce.dedup(Regexp.new("dedup pattern", Regexp::IGNORECASE))
+    end
+
+    def test_nested_regular_expressions_are_canonicalized
+      result = @deduper.dedup([Regexp.new("pattern"), Regexp.new("pattern")])
+
+      assert_same result.first, result.last
+      assert_predicate result.first, :frozen?
+    end
+
+    def test_regular_expression_patterns_and_options_remain_distinct
+      first = @deduper.dedup(Regexp.new("pattern"))
+      other_pattern = @deduper.dedup(Regexp.new("other"))
+      other_options = @deduper.dedup(Regexp.new("pattern", Regexp::IGNORECASE))
+
+      refute_same first, other_pattern
+      refute_same first, other_options
+      assert_equal(/other/, other_pattern)
+      assert_equal(/pattern/i, other_options)
+    end
+
+    def test_copy_preserves_regular_expression_inputs
+      input = Regexp.new("pattern")
+      frozen = input.frozen?
+      result = @deduper.dedup(input, copy: true)
+
+      # TruffleRuby freezes regular expressions when they are created.
+      frozen ? assert_same(input, result) : refute_same(input, result)
+
+      assert_equal frozen, input.frozen?
+      assert_predicate result, :frozen?
+      assert_same result, @deduper.dedup(Regexp.new("pattern"), copy: true)
+    end
+
     def test_copy_preserves_all_mutable_input_containers
       key = [+"key"]
       child = [+"value"]
