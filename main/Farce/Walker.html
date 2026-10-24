@@ -689,12 +689,12 @@ Shared children and cycles are tracked by identity.</p>
       <pre class="lines">
 
 
-198
-199
-200</pre>
+203
+204
+205</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 198</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 203</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_class_variables'>class_variables</span>
   <span class='ivar'>@class_variables</span>
@@ -748,12 +748,12 @@ Shared children and cycles are tracked by identity.</p>
       <pre class="lines">
 
 
-195
-196
-197</pre>
+200
+201
+202</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 195</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 200</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_constants'>constants</span>
   <span class='ivar'>@constants</span>
@@ -807,12 +807,12 @@ Shared children and cycles are tracked by identity.</p>
       <pre class="lines">
 
 
-201
-202
-203</pre>
+206
+207
+208</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 201</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 206</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_current_object'>current_object</span>
   <span class='ivar'>@current_object</span>
@@ -868,12 +868,12 @@ or the selected copy method</p>
       <pre class="lines">
 
 
-192
-193
-194</pre>
+197
+198
+199</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 192</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 197</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_modify'>modify</span>
   <span class='ivar'>@modify</span>
@@ -1383,15 +1383,16 @@ assignment block and return the update result from the definition.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Transform a graph using the callback's return values.
-Call <span class='object_link'><a href="#traverse-instance_method" title="Farce::Walker#traverse (method)">#traverse</a></span> to transform an object's children. Returning another value
+    <p>Transform a graph using the callback's return values.</p>
+<p>Call <span class='object_link'><a href="#traverse-instance_method" title="Farce::Walker#traverse (method)">#traverse</a></span> to transform an object's children. Returning another value
 replaces the object without automatically visiting that replacement.
-Unchanged branches retain their identity, including when copy is enabled.
-Changed cycles are connected before results are frozen or finalized.
+Unchanged branches retain their identity, including when copy is enabled.</p>
+<p>Changed cycles are connected before results are frozen or finalized.
 A cyclic callback may run again as child replacements become known. Keep
 callbacks repeatable and put publication or caching in <span class='object_link'><a href="#finalize-instance_method" title="Farce::Walker#finalize (method)">#finalize</a></span>.
-Use <span class='object_link'><a href="#freeze_result-instance_method" title="Farce::Walker#freeze_result (method)">#freeze_result</a></span> instead of freezing a preliminary traversal result.
-Data values are rebuilt only when members change, using their normal initializer.
+Use <span class='object_link'><a href="#freeze_result-instance_method" title="Farce::Walker#freeze_result (method)">#freeze_result</a></span> instead of freezing a preliminary traversal result.</p>
+<p>Data values are rebuilt only when members change, using their normal initializer.
+Ranges are rebuilt when endpoints or instance variables change.
 Noncopyable coordination objects, such as leases, are updated in place.
 Constants and class variables are assigned only when their value
 changes identity. Constant replacement can emit Ruby redefinition warnings.
@@ -1616,7 +1617,7 @@ or a cyclic finalizer replaces its result</p>
       
       
         &mdash;
-        <div class='inline'><p>if a hash key or set element refers to a Data value
+        <div class='inline'><p>if a hash key or set element refers to a Data or Range value
 still being constructed. Identity-based containers do not hash their keys.</p>
 </div>
       
@@ -1630,11 +1631,6 @@ still being constructed. Identity-based containers do not hash their keys.</p>
       <pre class="lines">
 
 
-176
-177
-178
-179
-180
 181
 182
 183
@@ -1642,10 +1638,15 @@ still being constructed. Identity-based containers do not hash their keys.</p>
 185
 186
 187
-188</pre>
+188
+189
+190
+191
+192
+193</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 176</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 181</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_modify'>modify</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>copy:</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='label'>freeze:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>constants:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>class_variables:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_callback'>callback</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_callback'>callback</span>
@@ -1880,10 +1881,10 @@ still being constructed. Identity-based containers do not hash their keys.</p>
       <pre class="lines">
 
 
-308</pre>
+316</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 308</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 316</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_changed?'>changed?</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='id identifier rubyid_current_object'>current_object</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='kw'>false</span> <span class='comment'># rubocop:disable Lint/UnusedMethodArgument</span></pre>
     </td>
@@ -2017,10 +2018,10 @@ canonical replacement, which is propagated to the parent.</p>
       <pre class="lines">
 
 
-297</pre>
+305</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 297</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 305</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_finalize'>finalize</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_raise'>raise</span><span class='lparen'>(</span><span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>finalize requires a modifying walk</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span></pre>
     </td>
@@ -2088,10 +2089,10 @@ With copying enabled, mutable inputs are copied before freezing.</p>
       <pre class="lines">
 
 
-285</pre>
+292</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 285</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 292</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_freeze_result'>freeze_result</span> <span class='op'>=</span> <span class='id identifier rubyid_raise'>raise</span><span class='lparen'>(</span><span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>freeze_result requires a modifying walk</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span></pre>
     </td>
@@ -2145,10 +2146,10 @@ With copying enabled, mutable inputs are copied before freezing.</p>
       <pre class="lines">
 
 
-251</pre>
+256</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 251</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 256</span>
 
 <span class='kw'>def</span> <span class='kw'>return</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='id identifier rubyid_current_object'>current_object</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_throw'>throw</span><span class='lparen'>(</span><span class='const'>RETURN</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span></pre>
     </td>
@@ -2202,10 +2203,10 @@ With copying enabled, mutable inputs are copied before freezing.</p>
       <pre class="lines">
 
 
-246</pre>
+251</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 246</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 251</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_skip'>skip</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='id identifier rubyid_current_object'>current_object</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_throw'>throw</span><span class='lparen'>(</span><span class='const'>SKIP</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span></pre>
     </td>
@@ -2276,14 +2277,14 @@ With copying enabled, mutable inputs are copied before freezing.</p>
       <pre class="lines">
 
 
-256
-257
-258
-259
-260</pre>
+261
+262
+263
+264
+265</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 256</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 261</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_traverse'>traverse</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='id identifier rubyid_current_object'>current_object</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_klass'>klass</span> <span class='op'>=</span> <span class='id identifier rubyid_send_to'>send_to</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='symbol'>:class</span><span class='rparen'>)</span>
@@ -2306,8 +2307,8 @@ With copying enabled, mutable inputs are copied before freezing.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Visit child values and describe how to assign their replacements.
-The assignment block only runs during modification and may run again for cycles.
+    <p>Visit child values and describe how to assign their replacements.</p>
+<p>The assignment block only runs during modification and may run again for cycles.
 It receives a writable target and the resolved children. Do not mutate object
 outside this block. Return the result of update from a traversal definition.</p>
 
@@ -2442,13 +2443,13 @@ outside this block. Return the result of update from a traversal definition.</p>
       <pre class="lines">
 
 
-276
-277
-278
-279</pre>
+283
+284
+285
+286</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 276</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 283</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_values'>values</span><span class='comma'>,</span> <span class='label'>hash_keys:</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='label'>key_stride:</span> <span class='int'>1</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Lint/UnusedMethodArgument
 </span>  <span class='id identifier rubyid_values'>values</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_visit'>visit</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
@@ -2520,11 +2521,6 @@ outside this block. Return the result of update from a traversal definition.</p>
       <pre class="lines">
 
 
-223
-224
-225
-226
-227
 228
 229
 230
@@ -2538,10 +2534,15 @@ outside this block. Return the result of update from a traversal definition.</p>
 238
 239
 240
-241</pre>
+241
+242
+243
+244
+245
+246</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 223</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/walker.rb', line 228</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_visit'>visit</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
   <span class='ivar'>@seen</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span> <span class='kw'>do</span>
@@ -2572,7 +2573,7 @@ outside this block. Return the result of update from a traversal definition.</p>
 </div>
 
       <div id="footer">
-  Generated on Fri Oct 23 13:20:36 2026 by
+  Generated on Sat Oct 24 08:57:05 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>

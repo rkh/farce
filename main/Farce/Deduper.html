@@ -125,9 +125,10 @@
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
     <p>Reuse equal frozen values throughout object graphs.
-Plain strings use Ruby's string deduplication. Arrays, hashes, and Ruby Sets are frozen
-and cached by default. Other objects are traversed but are not cached unless
-their class matches <span class='object_link'><a href="#store-instance_method" title="Farce::Deduper#store (method)">#store</a></span>. Modules and classes are skipped by default.</p>
+Plain strings use Ruby's string deduplication. Arrays, hashes, Ruby Sets, regular
+expressions, Data records, and ranges are frozen and cached by default. Other objects are
+traversed but are not cached unless their class matches <span class='object_link'><a href="#store-instance_method" title="Farce::Deduper#store (method)">#store</a></span>.
+Modules and classes are skipped by default.</p>
 <p>Cached objects are held weakly. Keep a reference to a returned object if its
 identity matters. Shareable results can be reused across Ractors. Other
 results are cached within the current Ractor.</p>
@@ -373,13 +374,13 @@ Noncopyable coordination objects follow <span class='object_link'><a href="Walke
       <pre class="lines">
 
 
-76
 77
 78
-79</pre>
+79
+80</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 76</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 77</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_dedup'>dedup</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>copy:</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='label'>skip:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_skip'>skip</span> <span class='op'>=</span> <span class='id identifier rubyid_skip'>skip</span> <span class='op'>?</span> <span class='lbracket'>[</span><span class='op'>*</span><span class='ivar'>@skip</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_skip'>skip</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='ivar'>@skip</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span>
@@ -447,13 +448,13 @@ Noncopyable coordination objects follow <span class='object_link'><a href="Walke
       <pre class="lines">
 
 
-51
 52
 53
-54</pre>
+54
+55</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 51</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 52</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_skip'>skip</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_modules'>modules</span><span class='rparen'>)</span>
   <span class='ivar'>@skip</span><span class='period'>.</span><span class='id identifier rubyid_concat'>concat</span><span class='lparen'>(</span><span class='id identifier rubyid_modules'>modules</span><span class='rparen'>)</span>
@@ -523,13 +524,13 @@ These methods must remain stable after deduplication.</p>
       <pre class="lines">
 
 
-61
 62
 63
-64</pre>
+64
+65</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 61</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 62</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_modules'>modules</span><span class='rparen'>)</span>
   <span class='ivar'>@store</span><span class='period'>.</span><span class='id identifier rubyid_concat'>concat</span><span class='lparen'>(</span><span class='id identifier rubyid_modules'>modules</span><span class='rparen'>)</span>
@@ -545,7 +546,7 @@ These methods must remain stable after deduplication.</p>
 </div>
 
       <div id="footer">
-  Generated on Fri Oct 23 13:20:36 2026 by
+  Generated on Sat Oct 24 08:57:05 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>
