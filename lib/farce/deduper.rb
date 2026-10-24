@@ -5,7 +5,7 @@
 module Farce
   # Reuse equal frozen values throughout object graphs.
   # Plain strings use Ruby's string deduplication. Arrays, hashes, Ruby Sets, regular
-  # expressions, and Data records are frozen and cached by default. Other objects are
+  # expressions, Data records, and ranges are frozen and cached by default. Other objects are
   # traversed but are not cached unless their class matches {#store}.
   # Modules and classes are skipped by default.
   #
@@ -29,7 +29,7 @@ module Farce
       @shared = Strict::WeakKeyMap.new
       @local  = Local::WeakKeyMap.new
       @skip   = Strict::Vector[Module]
-      @store  = Strict::Vector[Hash, Array, ::Set, Regexp, Data]
+      @store  = Strict::Vector[Hash, Array, ::Set, Regexp, Data, Range]
       super
     end
 

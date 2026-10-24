@@ -122,6 +122,56 @@ module Farce
       assert_same @deduper.dedup([+"value"]), first.children
     end
 
+    def test_ranges_are_canonicalized_by_default
+      first = @deduper.dedup(1..3)
+      GC.start
+
+      assert_same first, @deduper.dedup(1..3)
+      assert_predicate first, :frozen?
+      refute_same first, @deduper.dedup(1...3)
+      refute_same first, @deduper.dedup(1..4)
+      [Range.new(nil, 3), Range.new(1, nil, true)].each do |range|
+        canonical = @deduper.dedup(range)
+
+        assert_same canonical, @deduper.dedup(Range.new(range.begin, range.end, range.exclude_end?))
+      end
+    end
+
+    def test_range_copy_deduplicates_endpoints_without_freezing_inputs
+      input = Range.new([1], [3], true)
+      result = @deduper.dedup(input, copy: true)
+
+      refute_same input, result
+      assert_same result, @deduper.dedup(Range.new([1], [3], true), copy: true)
+      assert_same @deduper.dedup([1]), result.begin
+      assert_same @deduper.dedup([3]), result.end
+      assert_predicate result, :exclude_end?
+      refute_predicate input.begin, :frozen?
+      refute_predicate input.end, :frozen?
+      assert_predicate result.begin, :frozen?
+      assert_predicate result.end, :frozen?
+    end
+
+    def test_nested_ranges_are_canonicalized
+      result = @deduper.dedup([Range.new(1, 3), Range.new(1, 3)])
+
+      assert_same result.first, result.last
+    end
+
+    def test_cyclic_ranges_are_not_cached
+      children = []
+      input = Range.new(children, children)
+      children << input
+      first = @deduper.dedup(input, copy: true)
+      second = @deduper.dedup(input, copy: true)
+
+      refute_same first, second
+      assert_same first, first.begin.first
+      assert_same second, second.begin.first
+      assert_same input, children.first
+      refute_predicate children, :frozen?
+    end
+
     def test_data_copy_preserves_input_members
       input = Record.new(children: [+"value"])
       first = @deduper.dedup(input, copy: true)
