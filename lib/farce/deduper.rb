@@ -69,6 +69,13 @@ module Farce
     # Use copy: true to preserve the input. Skipped objects are always returned
     # unchanged. Strings are deduplicated before skip rules are checked.
     # Noncopyable coordination objects follow {Walker.modify}'s in-place behavior.
+    #
+    # @note
+    #   Deduplication follows Ruby's `hash` and `eql?` semantics. Equal values
+    #   may differ in observable details. For example, `Time` values representing
+    #   the same instant can have different time zones. Deduplicating these values
+    #   or containers holding them may reuse a different timezone representation.
+    #
     # @param object [Object] the root object
     # @param copy [Boolean, Symbol] copying policy passed to {Walker.modify}
     # @param skip [Module, Array<Module>, nil] additional exclusions for this call
