@@ -12,15 +12,20 @@ module Farce
       assert_integration_process(<<~RUBY)
         require "farce/integrations/sorted_set"
         first = Farce.dedup(::SortedSet[[1], [2]])
-        second = Farce.dedup(::SortedSet[[2], [1]])
-        raise "set was not cached" unless first.equal?(second)
+        input = ::SortedSet[[2], [1]]
+        # Ruby 3's SortedSet uses RBTree identity for hash/eql?.
+        equivalent = first.eql?(input) && first.hash == input.hash
+        second = Farce.dedup(input)
+        raise "set cache ignored hash/eql?" unless first.equal?(second) == equivalent
         raise "set was not frozen" unless first.frozen?
         raise "member was not deduplicated" unless first.first.equal?(Farce.dedup([1]))
         input = ::SortedSet[[+"copy"]]
         result = Farce.dedup(input, copy: true)
         raise "copy changed input" if input.frozen? || input.first.frozen?
         raise "copy was not frozen" unless result.frozen?
-        raise "copy was not cached" unless result.equal?(Farce.dedup(::SortedSet[[+"copy"]]))
+        candidate = ::SortedSet[[+"copy"]]
+        equivalent = result.eql?(candidate) && result.hash == candidate.hash
+        raise "copy cache ignored hash/eql?" unless result.equal?(Farce.dedup(candidate)) == equivalent
       RUBY
     end
 
