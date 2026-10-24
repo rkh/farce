@@ -279,6 +279,24 @@ module Farce
       assert_equal 1, child.last
     end
 
+    def test_range_can_be_rebuilt_after_a_cyclic_callback_changes_its_result
+      child = []
+      root = Range.new(child, child, true)
+      child.push(root, 1)
+      canonical = [].freeze
+      result = Walker.modify(root, copy: true) do |value, walker|
+        next value + 1 if Integer === value
+        traversed = walker.traverse
+        Array === value && traversed.last == 2 ? canonical : traversed
+      end
+
+      assert_same canonical, result.begin
+      assert_same canonical, result.end
+      assert_predicate result, :exclude_end?
+      assert_same child, root.begin
+      assert_equal 1, child.last
+    end
+
     def test_data_can_have_a_member_named_members
       record = Data.define(:members) # rubocop:disable Lint/DataDefineOverride
       original = record.new(1)

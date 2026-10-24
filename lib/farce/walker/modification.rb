@@ -313,8 +313,10 @@ module Farce
               needed   = node.plans&.any?(&:dirty) || (freezing && @modify != true && !send_to(node.original, :frozen?))
               prepare(node) if needed
               next unless Data === node.destination || Range === node.destination
+              # Rebuild only after this destination's own assignments become stale.
               next unless node.plans&.any? do |plan|
-                plan.applied && plan.results.each_with_index.any? { |value, index| !value.equal?(plan.applied[index]) }
+                plan.target.equal?(node.destination) && plan.applied &&
+                  plan.results.each_with_index.any? { |value, index| !value.equal?(plan.applied[index]) }
               end
               prepare(node, rebuild: true)
             end
