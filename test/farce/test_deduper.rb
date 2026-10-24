@@ -113,6 +113,34 @@ module Farce
       assert_same first, Farce.dedup(Regexp.new("dedup pattern", Regexp::IGNORECASE))
     end
 
+    def test_data_records_are_canonicalized_by_default
+      first = @deduper.dedup(Record.new(children: [+"value"]))
+      GC.start
+
+      assert_same first, @deduper.dedup(Record.new(children: [+"value"]))
+      assert_predicate first.children, :frozen?
+      assert_same @deduper.dedup([+"value"]), first.children
+    end
+
+    def test_data_copy_preserves_input_members
+      input = Record.new(children: [+"value"])
+      first = @deduper.dedup(input, copy: true)
+
+      refute_same input, first
+      refute_predicate input.children, :frozen?
+      refute_predicate input.children.first, :frozen?
+      assert_predicate first.children, :frozen?
+      assert_same first, @deduper.dedup(Record.new(children: [+"value"]), copy: true)
+    end
+
+    def test_data_records_with_different_classes_or_members_remain_distinct
+      other_class = Data.define(:children)
+      first = @deduper.dedup(Record.new(children: [1]))
+
+      refute_same first, @deduper.dedup(Record.new(children: [2]))
+      refute_same first, @deduper.dedup(other_class.new(children: [1]))
+    end
+
     def test_nested_regular_expressions_are_canonicalized
       result = @deduper.dedup([Regexp.new("pattern"), Regexp.new("pattern")])
 

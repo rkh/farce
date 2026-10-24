@@ -6,6 +6,24 @@ require_relative "../setup"
 
 module Farce
   class TestIntegrations < Test
+    def test_sorted_set_integration_deduplicates_sets_and_members
+      skip "sorted_set is unavailable" if Gem::Specification.find_all_by_name("sorted_set").empty?
+
+      assert_integration_process(<<~RUBY)
+        require "farce/integrations/sorted_set"
+        first = Farce.dedup(::SortedSet[[1], [2]])
+        second = Farce.dedup(::SortedSet[[2], [1]])
+        raise "set was not cached" unless first.equal?(second)
+        raise "set was not frozen" unless first.frozen?
+        raise "member was not deduplicated" unless first.first.equal?(Farce.dedup([1]))
+        input = ::SortedSet[[+"copy"]]
+        result = Farce.dedup(input, copy: true)
+        raise "copy changed input" if input.frozen? || input.first.frozen?
+        raise "copy was not frozen" unless result.frozen?
+        raise "copy was not cached" unless result.equal?(Farce.dedup(::SortedSet[[+"copy"]]))
+      RUBY
+    end
+
     def test_disabling_autoload_before_farce_skips_startup_and_require_hooks
       ["require", "Kernel.require"].product(%i[environment config]).each do |loader, setting|
         setup = if setting == :environment

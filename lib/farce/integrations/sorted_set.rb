@@ -7,5 +7,6 @@ require "farce" unless defined?(Farce::Abstract)
 require "sorted_set"
 
 module Farce
+  Farce.dedup.store(::SortedSet)
   Internal::Converter.define(::SortedSet, :SortedSet)
 end
