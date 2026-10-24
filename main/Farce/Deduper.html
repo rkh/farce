@@ -279,7 +279,17 @@ not cached. This keeps canonical replacements from breaking back references.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Replace equal values with cached instances, including nested keys and values.
+    
+  <div class="note notetag">
+    <strong>Note:</strong>
+    <div class='inline'><p>Deduplication follows Ruby's <code>hash</code> and <code>eql?</code> semantics. Equal values
+may differ in observable details. For example, <code>Time</code> values representing
+the same instant can have different time zones. Deduplicating these values
+or containers holding them may reuse a different timezone representation.</p>
+</div>
+  </div>
+
+<p>Replace equal values with cached instances, including nested keys and values.
 By default, mutable containers are updated and cached containers are frozen.
 Use copy: true to preserve the input. Skipped objects are always returned
 unchanged. Strings are deduplicated before skip rules are checked.
@@ -374,13 +384,13 @@ Noncopyable coordination objects follow <span class='object_link'><a href="Walke
       <pre class="lines">
 
 
-77
-78
-79
-80</pre>
+84
+85
+86
+87</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 77</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/deduper.rb', line 84</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_dedup'>dedup</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='label'>copy:</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='label'>skip:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_skip'>skip</span> <span class='op'>=</span> <span class='id identifier rubyid_skip'>skip</span> <span class='op'>?</span> <span class='lbracket'>[</span><span class='op'>*</span><span class='ivar'>@skip</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_skip'>skip</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='ivar'>@skip</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span>
@@ -546,7 +556,7 @@ These methods must remain stable after deduplication.</p>
 </div>
 
       <div id="footer">
-  Generated on Sat Oct 24 08:57:05 2026 by
+  Generated on Sat Oct 24 09:09:05 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>
