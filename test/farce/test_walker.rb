@@ -23,6 +23,8 @@ module Farce
     end
 
     Record = Data.define(:value)
+    MutableRecord = Struct.new(:value)
+    MutableRange = Class.new(Range)
 
     ValidatedRecord = Data.define(:value) do
       def initialize(value:)
@@ -212,6 +214,148 @@ module Farce
       assert_equal 1, input.value
       assert_equal 2, result.value
       assert_predicate result, :frozen?
+    end
+
+    def test_struct_members_and_instance_variables_are_visited
+      input = MutableRecord.new([1])
+      input.instance_variable_set(:@extra, [2])
+
+      assert_equal [1, input.value, 2, input.instance_variable_get(:@extra), input], Walker.each(input).to_a
+    end
+
+    def test_struct_members_are_updated_in_place
+      input = MutableRecord.new([1])
+
+      assert_same input, increment(input)
+      assert_equal [2], input.value
+    end
+
+    def test_struct_copies_preserve_cycles
+      input = MutableRecord.new([])
+      input.value.push(input, 1)
+      result = increment(input, copy: true)
+
+      refute_same input, result
+      assert_same result, result.value.first
+      assert_equal 2, result.value.last
+      assert_same input, input.value.first
+      assert_equal 1, input.value.last
+    end
+
+    def test_frozen_struct_members_can_be_replaced
+      input = MutableRecord.new(1).freeze
+      result = increment(input)
+
+      refute_same input, result
+      assert_equal 2, result.value
+      assert_predicate result, :frozen?
+      assert_equal 1, input.value
+    end
+
+    def test_range_endpoints_are_visited
+      input = Range.new([1], [3], true)
+
+      assert_equal [1, input.begin, 3, input.end, input], Walker.each(input).to_a
+    end
+
+    def test_range_endpoints_are_rebuilt_and_preserve_exclusion
+      input = Range.new([1], [3], true)
+      result = increment(input, copy: true)
+
+      assert_equal Range.new([2], [4], true), result
+      assert_equal Range.new([1], [3], true), input
+      assert_predicate result, :frozen?
+    end
+
+    def test_open_range_endpoints_are_preserved
+      assert_equal(..3, increment(..2))
+      assert_equal(3..., increment(2...))
+    end
+
+    def test_unchanged_ranges_retain_identity
+      input = ("a".."z")
+
+      assert_same input, increment(input, copy: true)
+    end
+
+    def test_range_copies_preserve_cycles
+      child = []
+      input = Range.new(child, child)
+      child.push(input, 1)
+      result = increment(input, copy: true)
+
+      refute_same input, result
+      assert_same result.begin, result.end
+      assert_same result, result.begin.first
+      assert_equal 2, result.begin.last
+      assert_same input, child.first
+      assert_equal 1, child.last
+    end
+
+    def test_open_range_copies_preserve_cycles
+      children = []
+      input = Range.new(nil, children, true)
+      children.push(input, 1)
+      result = increment(input, copy: true)
+
+      assert_nil result.begin
+      assert_predicate result, :exclude_end?
+      assert_same result, result.end.first
+      assert_equal 2, result.end.last
+      assert_same input, children.first
+      assert_equal 1, children.last
+    end
+
+    def test_range_subclass_copies_preserve_instance_variable_cycles
+      input = MutableRange.new(1, 3)
+      input.instance_variable_set(:@extra, [input, 4])
+      result = increment(input, copy: true)
+
+      assert_equal 2..4, result
+      assert_same result, result.instance_variable_get(:@extra).first
+      assert_equal 5, result.instance_variable_get(:@extra).last
+      assert_same input, input.instance_variable_get(:@extra).first
+    end
+
+    def test_range_subclass_instance_variables_are_transformed
+      input = MutableRange.new(1, 3, true)
+      input.instance_variable_set(:@extra, [4])
+      result = increment(input, copy: true)
+
+      assert_instance_of MutableRange, result
+      assert_equal [2, 4, true], [result.begin, result.end, result.exclude_end?]
+      assert_equal [5], result.instance_variable_get(:@extra)
+      assert_equal [4], input.instance_variable_get(:@extra)
+    end
+
+    def test_freezing_a_range_subclass_copy_initializes_unchanged_endpoints
+      input = MutableRange.new("a", "z")
+      result = Walker.modify(input, copy: true, freeze: true) { |_, walker| walker.traverse }
+
+      refute_same input, result
+      assert_equal input, result
+      assert_predicate result, :frozen?
+      refute_predicate input, :frozen?
+    end
+
+    def test_unfinished_range_hash_keys_are_rejected
+      children = [{}]
+      input = Range.new(children, children)
+      children.first[input] = :value
+      children.first[:number] = 1
+
+      assert_raises(ArgumentError) { increment(input, copy: true) }
+    end
+
+    def test_identity_hashes_can_use_unfinished_ranges_as_keys
+      children = [{}.compare_by_identity]
+      input = Range.new(children, children)
+      children.first[input] = :value
+      result = increment(input, copy: true)
+
+      assert_same result, result.begin.first.keys.first
+      assert_equal :value, result.begin.first[result]
+      assert_same input, children.first.keys.first
     end
 
     def test_data_cycles_use_the_initialized_replacement

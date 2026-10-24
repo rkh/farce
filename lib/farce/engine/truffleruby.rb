@@ -39,6 +39,15 @@ module Farce
 
     def native_ractors? = false
 
+    # Range#initialize rejects open endpoints on TruffleRuby, while Range.new accepts them.
+    def initialize_range(target, first, last, exclude_end)
+      if first.nil? || last.nil?
+        target.__send__(:initialize_copy, target.class.new(first, last, exclude_end))
+      else
+        target.__send__(:initialize, first, last, exclude_end)
+      end
+    end
+
     # @api private
     # TruffleRuby probes this additional hook before using _dump.
     def marshal_protocol_method?(name)

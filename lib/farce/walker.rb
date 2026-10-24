@@ -140,14 +140,18 @@ module Farce
     end
 
     # Transform a graph using the callback's return values.
+    #
     # Call {#traverse} to transform an object's children. Returning another value
     # replaces the object without automatically visiting that replacement.
     # Unchanged branches retain their identity, including when copy is enabled.
+    #
     # Changed cycles are connected before results are frozen or finalized.
     # A cyclic callback may run again as child replacements become known. Keep
     # callbacks repeatable and put publication or caching in {#finalize}.
     # Use {#freeze_result} instead of freezing a preliminary traversal result.
+    #
     # Data values are rebuilt only when members change, using their normal initializer.
+    # Ranges are rebuilt when endpoints or instance variables change.
     # Noncopyable coordination objects, such as leases, are updated in place.
     # Constants and class variables are assigned only when their value
     # changes identity. Constant replacement can emit Ruby redefinition warnings.
@@ -156,6 +160,7 @@ module Farce
     #
     # A walk is not an atomic snapshot or update. Coordinate concurrent writers
     # when transforming container structure, especially map keys.
+    #
     # @param object [BasicObject] the root object
     # @!macro walker_module_options
     # @param copy [Boolean, Symbol] false to edit mutable objects in place, true to
@@ -171,7 +176,7 @@ module Farce
     # @raise [ArgumentError] if copy is neither a boolean nor a Symbol
     # @raise [ArgumentError] if cyclic callbacks do not converge within 32 passes,
     #   or a cyclic finalizer replaces its result
-    # @raise [ArgumentError] if a hash key or set element refers to a Data value
+    # @raise [ArgumentError] if a hash key or set element refers to a Data or Range value
     #   still being constructed. Identity-based containers do not hash their keys.
     def self.modify(object, copy: false, freeze: nil, constants: true, class_variables: true, &callback)
       raise LocalJumpError, "no block given" unless callback
@@ -263,9 +268,11 @@ module Farce
     def remember(object, result) = @seen[object] = result
 
     # Visit child values and describe how to assign their replacements.
+    #
     # The assignment block only runs during modification and may run again for cycles.
     # It receives a writable target and the resolved children. Do not mutate object
     # outside this block. Return the result of update from a traversal definition.
+    #
     # @param object [BasicObject] the object being traversed
     # @param values [Array] child references in assignment order
     # @param hash_keys [Boolean] rebuild when key descendants change in place
@@ -288,6 +295,7 @@ module Farce
     # and requested freezing. Registering another finalizer replaces the first.
     # Cyclic finalizers must preserve identity. Acyclic finalizers may return a
     # canonical replacement, which is propagated to the parent.
+    #
     # @yieldparam result [BasicObject] the settled result
     # @yieldparam cyclic [Boolean] whether the node belongs to a cycle
     # @yieldreturn [BasicObject] the final result

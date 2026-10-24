@@ -190,6 +190,24 @@ module Farce
       super(object, walker)
     end
 
+    define(Struct) do |object, walker|
+      result = walker.update(object, object.to_a) do |target, results|
+        results.each_with_index { |value, index| target[index] = value unless target[index].equal?(value) }
+        target
+      end
+      super(result, walker)
+    end
+
+    define(Range) do |object, walker|
+      names = object.instance_variables
+      values = [object.begin, object.end, *names.map { object.instance_variable_get(it) }]
+      walker.update(object, values) do |target, results|
+        names.each_with_index { |name, index| target.instance_variable_set(name, results[index + 2]) }
+        Internal.initialize_range(target, results[0], results[1], object.exclude_end?)
+        target
+      end
+    end
+
     define(Data) do |object, walker|
       walker.rebuild_data(object)
     end

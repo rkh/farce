@@ -117,6 +117,10 @@ module Farce
     def finalize_engine                   = nil
     def with_scheduler_thread_group       = yield(ThreadGroup.new)
 
+    def initialize_range(target, first, last, exclude_end)
+      target.__send__(:initialize, first, last, exclude_end)
+    end
+
     def publish_shareable(object)
       Object.instance_method(:freeze).bind_call(object)
       ::Ractor.make_shareable(object) if native_ractors?

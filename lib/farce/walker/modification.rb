@@ -172,14 +172,14 @@ module Farce
         node ? node.changed == true : (@seen.key?(object) && !@seen[object].equal?(object))
       end
 
-      # Follow pending references to check that hashing cannot reach unfinished Data.
+      # Follow pending references to check that hashing cannot reach unfinished values.
       def hashable?(object)
-        return true unless @unfinished_data && !@unfinished_data.empty?
+        return true unless @unfinished_values && !@unfinished_values.empty?
         !Walker.visit(object, constants:, class_variables:) do |value, traversal|
-          traversal.return(true) if @unfinished_data.key?(value)
+          traversal.return(true) if @unfinished_values.key?(value)
           node = @nodes[value] || @destinations&.[](value)
           if node && node.plans
-            traversal.return(true) if @unfinished_data.key?(node.destination)
+            traversal.return(true) if @unfinished_values.key?(node.destination)
             node.plans.each { |plan| plan.children.each { traversal.visit(resolved(it)) } }
           else
             traversal.traverse
@@ -188,10 +188,10 @@ module Farce
         end
       end
 
-      # Reject keys and set elements whose Data dependencies are still being built.
+      # Reject keys and set elements whose immutable dependencies are still being built.
       def check_hash_key(object)
         return object if hashable?(object)
-        raise ArgumentError, "hash key or set element refers to an unfinished Data value"
+        raise ArgumentError, "hash key or set element refers to an unfinished Data or Range value"
       end
 
       private
@@ -217,19 +217,19 @@ module Farce
           dirty        ||= plan.hash_keys && (index % plan.key_stride).zero? && child && child.changed
         end
         node.changed ||= dirty
-        plan.dirty = dirty
+        plan.dirty = dirty || (Range === node.destination && @unfinished_values&.key?(node.destination))
       end
 
-      # Choose a writable destination, copying lazily or allocating unfinished Data.
+      # Choose a writable destination, copying lazily or allocating unfinished values.
       def prepare(node, rebuild: false)
         previous = node.destination
         return previous unless rebuild || previous.equal?(node.original)
         object = node.original
         return object if Internal::Noncopyable === object || Abstract::LeaseMap === object
         destination =
-          if Data === object
+          if Data === object || Range === object
             value = object.class.allocate
-            (@unfinished_data ||= {}.compare_by_identity)[value] = true
+            (@unfinished_values ||= {}.compare_by_identity)[value] = true
             value
           elsif @modify == true
             send_to(object, :frozen?) ? send_to(object, :clone, freeze: false) : object
@@ -241,6 +241,7 @@ module Farce
         (@destinations ||= {}.compare_by_identity)[destination] = node unless destination.equal?(object)
         node.destination = destination
         node.result = destination if !node.skipped && (node.result.equal?(object) || node.result.equal?(previous))
+        node.plans&.each { it.dirty = true } if Range === destination
         destination
       end
 
@@ -259,7 +260,7 @@ module Farce
           node.destination = result
           node.result = result if node.result.equal?(old)
         end
-        @unfinished_data&.delete(node.destination) if Data === node.destination
+        @unfinished_values&.delete(node.destination) if Data === node.destination || Range === node.destination
         return unless node.cyclic
         plan.target = node.destination
         plan.applied = plan.results.dup
@@ -281,6 +282,9 @@ module Farce
         if freeze
           node.changed = true unless send_to(node.result, :frozen?)
           prepare(node) if @modify != true && node.result.equal?(node.original) && !send_to(node.result, :frozen?)
+          if Range === node.destination && @unfinished_values&.key?(node.destination)
+            node.plans&.each { apply(node, it) }
+          end
           send_to(node.result, :freeze)
         end
         finalize_node(node) if finalize
@@ -308,7 +312,8 @@ module Farce
               freezing = !node.skipped && (node.freeze_result || @freeze == true)
               needed   = node.plans&.any?(&:dirty) || (freezing && @modify != true && !send_to(node.original, :frozen?))
               prepare(node) if needed
-              next unless Data === node.destination && send_to(node.destination, :frozen?) && node.plans&.any? do |plan|
+              next unless Data === node.destination || Range === node.destination
+              next unless node.plans&.any? do |plan|
                 plan.applied && plan.results.each_with_index.any? { |value, index| !value.equal?(plan.applied[index]) }
               end
               prepare(node, rebuild: true)
@@ -316,7 +321,14 @@ module Farce
             break if component.each_with_index.all? { |node, index| node.destination.equal?(destinations[index]) }
           end
 
-          component.sort_by { Data === it.destination ? 2 : (it.plans&.any?(&:hash_keys) ? 1 : 0) }.each do |node|
+          ordered = component.sort_by do |node|
+            if Data === node.destination || Range === node.destination
+              2
+            else
+              node.plans&.any?(&:hash_keys) ? 1 : 0
+            end
+          end
+          ordered.each do |node|
             @node           = node
             @current_object = node.original
             node.plans&.each do |plan|

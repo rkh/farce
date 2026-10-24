@@ -8,6 +8,27 @@ module Farce
   class TestFreezeGraph < Test
     Record = Data.define(:value)
 
+    def test_freezes_struct_members_in_place
+      child = [+"value"]
+      root = Struct.new(:value).new(child)
+      child << root
+
+      assert_same root, Farce.freeze_graph(root)
+      assert_same root, child.last
+      [root, child, child.first].each { assert_predicate it, :frozen? }
+    end
+
+    def test_freezes_range_endpoints_in_place
+      first = [1]
+      last = [3]
+      root = Range.new(first, last)
+
+      assert_same root, Farce.freeze_graph(root)
+      assert_same first, root.begin
+      assert_same last, root.end
+      [root, first, last].each { assert_predicate it, :frozen? }
+    end
+
     def test_freezes_nested_arrays_and_hash_keys_and_values_in_place
       key = [+"key"]
       value = [+"value"]
