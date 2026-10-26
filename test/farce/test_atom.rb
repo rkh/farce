@@ -140,6 +140,59 @@ module Farce
       assert_equal 1, calls
     end
 
+    def test_store_if_absent_hit_preserves_false_and_validates_the_call
+      atom = Atom.new(false)
+
+      assert_same(false, atom.store_if_absent { flunk "false is already present" })
+      assert_raises(LocalJumpError) { atom.store_if_absent }
+      assert_raises(ArgumentError) { atom.store_if_absent(timeout: -1) { flunk "invalid timeout" } }
+
+      atom.freeze
+
+      assert_raises(FrozenError) { atom.store_if_absent { flunk "atom is frozen" } }
+    end
+
+    def test_store_if_absent_hit_rejects_recursive_access_during_an_update
+      atom = Atom.new(:original)
+
+      assert_equal(:updated, atom.update do
+        assert_raises(ThreadError) { atom.store_if_absent { flunk "update is still active" } }
+        :updated
+      end)
+      assert_equal(:updated, atom.store_if_absent { flunk "value is already present" })
+    end
+
+    def test_store_if_absent_waits_for_an_update_before_checking_for_a_hit
+      [:updated, nil].each do |replacement|
+        atom = Atom.new(:original)
+        entered = Thread::Queue.new
+        release = Thread::Queue.new
+        results = Thread::Queue.new
+        updater = Thread.new do
+          atom.update do
+            entered << true
+            release.pop
+            replacement
+          end
+        end
+        entered.pop
+        reader = Thread.new { results << atom.store_if_absent { :initialized } }
+        Thread.pass until reader.status == "sleep" || !reader.alive?
+
+        assert_empty results
+
+        release << true
+        updater.join
+        reader.join
+
+        assert_equal replacement || :initialized, results.pop
+      ensure
+        release&.push(true)
+        updater&.join
+        reader&.join
+      end
+    end
+
     def test_compare_and_set_compares_copied_values_by_equality
       atom = Atom.new(ModePayload.new(:expected), mode: :copy)
       replacement = ModePayload.new(:replacement)

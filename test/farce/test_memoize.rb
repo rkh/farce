@@ -36,6 +36,25 @@ module Farce
       end
     end
 
+    class FrozenArrayValue < ArrayValue
+      def value = super.freeze
+    end
+
+    class ResultValue
+      attr_reader :calls
+
+      def initialize(result)
+        @result = result
+        @calls = Counter.new
+      end
+
+      def value
+        @calls.increment
+        Thread.pass
+        @result
+      end
+    end
+
     class FlakyValue
       include Memoize[:value]
 
@@ -268,6 +287,46 @@ module Farce
       assert_equal 1, object.calls.value
     end
 
+    def test_strict_mode_caches_shareable_results_including_nil_and_false
+      [false, true].each do |weak|
+        klass = Class.new(ResultValue) { include Memoize[:value, mode: :strict, weak:] }
+
+        [nil, false, [].freeze, Envelope.new(:payload)].each do |result|
+          object = klass.new(result).freeze
+
+          2.times { result.nil? ? assert_nil(object.value) : assert_same(result, object.value) }
+
+          assert_equal 1, object.calls.value
+        end
+      end
+    end
+
+    def test_strict_mode_rejects_unshareable_results_without_caching_or_freezing_them
+      [false, true].each do |weak|
+        klass = Class.new(ResultValue) { include Memoize[:value, mode: :strict, weak:] }
+        result = Internal.native_ractors? ? Object.new : Unshared::Atom.new
+        object = klass.new(result).freeze
+
+        2.times { assert_raises(Ractor::IsolationError) { object.value } }
+
+        refute_predicate result, :frozen?
+        assert_equal 2, object.calls.value
+      end
+    end
+
+    def test_strict_mode_computes_once_across_ractors
+      [false, true].each do |weak|
+        klass = Class.new(ResultValue) { include Memoize[:value, mode: :strict, weak:] }
+        result = Object.new.freeze
+        object = Ractor.make_shareable(klass.new(result))
+        workers = 4.times.map { Ractor.new(object, &:value) }
+
+        workers.each { assert_same result, ractor_value(it) }
+
+        assert_equal 1, object.calls.value
+      end
+    end
+
     def test_global_copy_mode_caches_a_result_per_ractor
       return unless Internal.native_ractors?
 
@@ -378,9 +437,10 @@ module Farce
     end
 
     def test_weak_values_are_retained_only_while_referenced
-      [{ mode: :make_shareable }, { scope: :unshared }, { scope: :ractor }].each do |options|
+      [{ mode: :make_shareable }, { mode: :strict }, { scope: :unshared }, { scope: :ractor }].each do |options|
         mixin = Memoize[:value, weak: true, **options]
-        object = Class.new(ArrayValue) { include mixin }.new.freeze
+        value_class = options[:mode] == :strict ? FrozenArrayValue : ArrayValue
+        object = Class.new(value_class) { include mixin }.new.freeze
         reference, reused = Thread.new do
           value = object.value
           [WeakValue.new(value), value.equal?(object.value)]

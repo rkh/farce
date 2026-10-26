@@ -500,6 +500,15 @@ static VALUE
 atom_get(int argc, VALUE *argv, VALUE self)
 {
     atom_t *atom = get_atom(self);
+    if (argc == 0) {
+        pthread_mutex_lock(&atom->lock);
+        if (!atom->updating) {
+            VALUE value = atom->value;
+            pthread_mutex_unlock(&atom->lock);
+            return value;
+        }
+        pthread_mutex_unlock(&atom->lock);
+    }
     atom_timeout_t timeout = atom_parse_timeout(atom_extract_timeout(argc, argv, "0:", NULL));
     atom_execution_context_t execution = atom_current_execution_context();
 
@@ -607,6 +616,17 @@ static VALUE
 atom_store_if_absent(int argc, VALUE *argv, VALUE self)
 {
     atom_t *atom = get_atom(self);
+    if (argc == 0) {
+        rb_check_frozen(self);
+        rb_need_block();
+        pthread_mutex_lock(&atom->lock);
+        if (!atom->updating && !NIL_P(atom->value)) {
+            VALUE value = atom->value;
+            pthread_mutex_unlock(&atom->lock);
+            return value;
+        }
+        pthread_mutex_unlock(&atom->lock);
+    }
     atom_operation_t operation = {
         .self = self,
         .atom = atom,

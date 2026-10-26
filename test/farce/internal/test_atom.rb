@@ -155,6 +155,28 @@ module Farce
         assert_equal 1, calls
       end
 
+      def test_store_if_absent_hit_validates_the_call
+        atom = atom_class.new(false)
+
+        assert_same(false, atom.store_if_absent { flunk "false is already present" })
+        assert_raises(LocalJumpError) { atom.store_if_absent }
+        assert_raises(ArgumentError) { atom.store_if_absent(timeout: -1) { flunk "invalid timeout" } }
+
+        atom.freeze
+
+        assert_raises(FrozenError) { atom.store_if_absent { flunk "atom is frozen" } }
+      end
+
+      def test_store_if_absent_hit_rejects_recursive_access_during_an_update
+        atom = atom_class.new(:original)
+
+        assert_equal(:updated, atom.update do
+          assert_raises(ThreadError) { atom.store_if_absent { flunk "update is still active" } }
+          :updated
+        end)
+        assert_equal(:updated, atom.store_if_absent { flunk "value is already present" })
+      end
+
       def test_store_if_absent_executes_once_under_contention
         atom = atom_class.new
         calls = 0

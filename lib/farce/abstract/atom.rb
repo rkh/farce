@@ -59,7 +59,11 @@ module Farce
       # @yield computes the value to store when the current value is nil
       # @yieldreturn [BasicObject, nil] the value to store
       # @return [BasicObject, nil] the current or newly stored value, or nil when the timeout expires
-      def store_if_absent(timeout: nil, &) = internal_atom.store_if_absent(timeout:, &)
+      def store_if_absent(timeout: nil, &)
+        return internal_atom.store_if_absent(&) if timeout.nil?
+
+        internal_atom.store_if_absent(timeout:, &)
+      end
 
       # Atomically replace the current value if it matches the expected value.
       # @param expected [BasicObject, nil] the value to compare with the current value

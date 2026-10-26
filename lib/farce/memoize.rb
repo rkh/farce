@@ -77,7 +77,8 @@ module Farce
   #
   #     @param mode [Symbol]
   #       The mode of the memoization. Ignored for any scope other than `:global`.
-  #       Defaults to `:raise` with `weak: true`, which supports only `:raise`, `:make_shareable`, and `:dedup`.
+  #       Use `:strict` to cache shareable results directly, including with `weak: true`.
+  #       Defaults to `:raise` with `weak: true`, which also supports `:make_shareable` and `:dedup`.
   #
   #     @param weak [Boolean]
   #       Whether to use weak memoization.
@@ -159,9 +160,13 @@ module Farce
 
         case scope
         when :global
-          modes = weak ? Internal::WeakModeManager::MODES : MODES
-          raise ArgumentError, "unsupported mode: #{mode.inspect}" unless modes.include?(mode)
-          init = "::Farce::#{atom_class}.new(mode: #{mode.inspect})"
+          if mode == :strict
+            init = "::Farce::Strict::#{atom_class}.new"
+          else
+            modes = weak ? Internal::WeakModeManager::MODES : MODES
+            raise ArgumentError, "unsupported mode: #{mode.inspect}" unless modes.include?(mode)
+            init = "::Farce::#{atom_class}.new(mode: #{mode.inspect})"
+          end
           args = methods.join(", ")
           args += ", mode: #{mode.inspect}" unless mode == :smart
         when :unshared
@@ -187,7 +192,7 @@ module Farce
           initializer << "  #{ivar} = #{init}\n"
           module_eval <<~RUBY, __FILE__, __LINE__ + 1
             #{visibility} def #{method}
-              value = #{ivar}.store_if_absent do
+              value = #{ivar}.value || #{ivar}.store_if_absent do
                 result = super()
                 nil.equal?(result) ? NIL_VALUE : result
               end

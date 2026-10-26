@@ -61,7 +61,7 @@ module Farce
           STATES[self] = state
           GROUPS[group] = self
 
-          state.main_thread = Thread.new do # rubocop:disable Lint/UselessSetterCall
+          state.main_thread = Thread.new do
             current = Thread.current
             group.add(current)
             current.freeze

@@ -140,6 +140,12 @@ module Farce
       raise LocalJumpError, "no block given" unless block_given?
       check_frozen!
 
+      if timeout.nil?
+        # A hit must still wait for an update in progress.
+        current = @atom.get
+        return unwrap_value(current) unless NIL_VALUE.equal?(current)
+      end
+
       result = @atom.update(timeout:) do |current|
         next current unless NIL_VALUE.equal?(current)
 

@@ -390,7 +390,7 @@ The same choices appear in several Farce APIs. Containers normally default to `:
 | `Farce::Exchanger` | `new`, `exchange` | The value offered to a partner. |
 | `Farce::WeakAtom` | `new`, `store`, `update`, and other replacement operations | Weakly held values. Supports only `:raise`, `:make_shareable`, and `:dedup`. Defaults to `:raise`. |
 | `Farce::Atom` | `new`, `store`, `swap`, `update`, and other replacement operations | The stored value. |
-| `Farce::Memoize` | `memoize`, `[]` | Memoized results with `scope: :global` (the default). With `weak: true`, supports only `:raise`, `:make_shareable`, and `:dedup`, and defaults to `:raise`. Other scopes ignore the mode. |
+| `Farce::Memoize` | `memoize`, `[]` | Memoized results with `scope: :global` (the default). `:strict` caches shareable results directly, including with `weak: true`. Weak memoization also accepts `:raise` (the default), `:make_shareable`, and `:dedup`. Other scopes ignore the mode. |
 | `Farce::Lazy`, `Farce::LazyRef` | `new` | The result computed once by the factory. |
 | `Farce::Task` | `new`, `schedule`, `try_schedule`, `in_parallel`, `on_main`, `add_argument` | Arguments and the successful result. `add_argument` overrides the mode for one argument. Scheduling can select local mode automatically. |
 | `Farce::Publisher`, `Farce::Unshared::Publisher`, `Farce::Local::Publisher` | `subscribe` with a block | Callback arguments and queued payloads. Defaults to `:smart` for `Publisher` and `:local` for its Unshared and Local variants. |
