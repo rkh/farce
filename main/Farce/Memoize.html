@@ -367,7 +367,8 @@ In addition to the <span class='object_link'><a href="../Farce.html#SCOPES-const
       
         &mdash;
         <div class='inline'><p>The mode of the memoization. Ignored for any scope other than <code>:global</code>.
-Defaults to <code>:raise</code> with <code>weak: true</code>, which supports only <code>:raise</code>, <code>:make_shareable</code>, and <code>:dedup</code>.</p>
+Use <code>:strict</code> to cache shareable results directly, including with <code>weak: true</code>.
+Defaults to <code>:raise</code> with <code>weak: true</code>, which also supports <code>:make_shareable</code> and <code>:dedup</code>.</p>
 </div>
       
     </li>
@@ -440,10 +441,10 @@ Other methods will default to <code>:public</code>.</p>
       <pre class="lines">
 
 
-222</pre>
+227</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 222</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 227</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='op'>[]</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Memoize/Mixin.html" title="Farce::Memoize::Mixin (class)">Mixin</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Memoize/Mixin.html#new-class_method" title="Farce::Memoize::Mixin.new (method)">new</a></span></span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
     </td>
@@ -565,7 +566,8 @@ In addition to the <span class='object_link'><a href="../Farce.html#SCOPES-const
       
         &mdash;
         <div class='inline'><p>The mode of the memoization. Ignored for any scope other than <code>:global</code>.
-Defaults to <code>:raise</code> with <code>weak: true</code>, which supports only <code>:raise</code>, <code>:make_shareable</code>, and <code>:dedup</code>.</p>
+Use <code>:strict</code> to cache shareable results directly, including with <code>weak: true</code>.
+Defaults to <code>:raise</code> with <code>weak: true</code>, which also supports <code>:make_shareable</code> and <code>:dedup</code>.</p>
 </div>
       
     </li>
@@ -638,11 +640,6 @@ Other methods will default to <code>:public</code>.</p>
       <pre class="lines">
 
 
-288
-289
-290
-291
-292
 293
 294
 295
@@ -662,10 +659,15 @@ Other methods will default to <code>:public</code>.</p>
 309
 310
 311
-312</pre>
+312
+313
+314
+315
+316
+317</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 288</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 293</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_memoize'>memoize</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_methods'>methods</span><span class='comma'>,</span> <span class='label'>visibility:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>warn:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='op'>**</span><span class='rparen'>)</span>
   <span class='kw'>if</span> <span class='id identifier rubyid_visibility'>visibility</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
@@ -702,7 +704,7 @@ Other methods will default to <code>:public</code>.</p>
 </div>
 
       <div id="footer">
-  Generated on Sat Oct 24 09:29:29 2026 by
+  Generated on Mon Oct 26 11:58:44 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>

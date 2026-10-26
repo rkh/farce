@@ -377,12 +377,12 @@
       <pre class="lines">
 
 
-133
 134
-135</pre>
+135
+136</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 133</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 134</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_memoized_methods'>memoized_methods</span>
   <span class='ivar'>@memoized_methods</span>
@@ -436,12 +436,12 @@
       <pre class="lines">
 
 
-139
 140
-141</pre>
+141
+142</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 139</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 140</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span>
   <span class='ivar'>@mode</span>
@@ -495,12 +495,12 @@
       <pre class="lines">
 
 
-136
 137
-138</pre>
+138
+139</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 136</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 137</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_scope'>scope</span>
   <span class='ivar'>@scope</span>
@@ -554,12 +554,12 @@
       <pre class="lines">
 
 
-142
 143
-144</pre>
+144
+145</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 142</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 143</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_visibility'>visibility</span>
   <span class='ivar'>@visibility</span>
@@ -650,7 +650,8 @@ In addition to the <span class='object_link'><a href="../../Farce.html#SCOPES-co
       
         &mdash;
         <div class='inline'><p>The mode of the memoization. Ignored for any scope other than <code>:global</code>.
-Defaults to <code>:raise</code> with <code>weak: true</code>, which supports only <code>:raise</code>, <code>:make_shareable</code>, and <code>:dedup</code>.</p>
+Use <code>:strict</code> to cache shareable results directly, including with <code>weak: true</code>.
+Defaults to <code>:raise</code> with <code>weak: true</code>, which also supports <code>:make_shareable</code> and <code>:dedup</code>.</p>
 </div>
       
     </li>
@@ -723,16 +724,16 @@ Other methods will default to <code>:public</code>.</p>
       <pre class="lines">
 
 
-106
 107
 108
 109
 110
 111
-112</pre>
+112
+113</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 106</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 107</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_methods'>methods</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='kw'>super</span> <span class='kw'>unless</span> <span class='kw'>self</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="" title="Farce::Memoize::Mixin (class)">Mixin</a></span></span>
@@ -794,10 +795,10 @@ Other methods will default to <code>:public</code>.</p>
       <pre class="lines">
 
 
-209</pre>
+214</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 209</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 214</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_weak?'>weak?</span> <span class='op'>=</span> <span class='ivar'>@weak</span></pre>
     </td>
@@ -810,7 +811,7 @@ Other methods will default to <code>:public</code>.</p>
 </div>
 
       <div id="footer">
-  Generated on Sat Oct 24 09:29:33 2026 by
+  Generated on Mon Oct 26 11:58:48 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>

@@ -489,7 +489,7 @@ This improves over the default control via <code>Ractor::Port</code>'s <code>mov
 <tr>
 <td><code>Farce::Memoize</code></td>
 <td><code>memoize</code>, <code>[]</code></td>
-<td>Memoized results with <code>scope: :global</code> (the default). With <code>weak: true</code>, supports only <code>:raise</code>, <code>:make_shareable</code>, and <code>:dedup</code>, and defaults to <code>:raise</code>. Other scopes ignore the mode.</td>
+<td>Memoized results with <code>scope: :global</code> (the default). <code>:strict</code> caches shareable results directly, including with <code>weak: true</code>. Weak memoization also accepts <code>:raise</code> (the default), <code>:make_shareable</code>, and <code>:dedup</code>. Other scopes ignore the mode.</td>
 </tr>
 <tr>
 <td><code>Farce::Lazy</code>, <code>Farce::LazyRef</code></td>
@@ -826,7 +826,7 @@ Already-shareable elements pass through unchanged, as in the other containers.</
 </div></div>
 
       <div id="footer">
-  Generated on Sat Oct 24 09:29:29 2026 by
+  Generated on Mon Oct 26 11:58:42 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>

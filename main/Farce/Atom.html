@@ -994,12 +994,6 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-160
-161
-162
-163
-164
-165
 166
 167
 168
@@ -1008,10 +1002,16 @@ This may update and freeze the original. Already-shareable values pass through u
 171
 172
 173
-174</pre>
+174
+175
+176
+177
+178
+179
+180</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 160</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 166</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='id identifier rubyid_new_value'>new_value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
@@ -1544,7 +1544,13 @@ This may update and freeze the original. Already-shareable values pass through u
 148
 149
 150
-151</pre>
+151
+152
+153
+154
+155
+156
+157</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 139</span>
@@ -1552,6 +1558,12 @@ This may update and freeze the original. Already-shareable values pass through u
 <span class='kw'>def</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
   <span class='id identifier rubyid_check_frozen!'>check_frozen!</span>
+
+  <span class='kw'>if</span> <span class='id identifier rubyid_timeout'>timeout</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='comment'># A hit must still wait for an update in progress.
+</span>    <span class='id identifier rubyid_current'>current</span> <span class='op'>=</span> <span class='ivar'>@atom</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_unwrap_value'>unwrap_value</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='const'>NIL_VALUE</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
 
   <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='ivar'>@atom</span><span class='period'>.</span><span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='label'>timeout:</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_current'>current</span><span class='op'>|</span>
     <span class='kw'>next</span> <span class='id identifier rubyid_current'>current</span> <span class='kw'>unless</span> <span class='const'>NIL_VALUE</span><span class='period'>.</span><span class='id identifier rubyid_equal?'>equal?</span><span class='lparen'>(</span><span class='id identifier rubyid_current'>current</span><span class='rparen'>)</span>
@@ -1896,19 +1908,19 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-184
-185
-186
-187
-188
-189
 190
 191
 192
-193</pre>
+193
+194
+195
+196
+197
+198
+199</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 184</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 190</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -2112,12 +2124,6 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-204
-205
-206
-207
-208
-209
 210
 211
 212
@@ -2126,10 +2132,16 @@ This may update and freeze the original. Already-shareable values pass through u
 215
 216
 217
-218</pre>
+218
+219
+220
+221
+222
+223
+224</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 204</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 210</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_upsert'>upsert</span><span class='lparen'>(</span><span class='id identifier rubyid_initial_value'>initial_value</span><span class='comma'>,</span> <span class='label'>mode:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -2397,14 +2409,14 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-221
-222
-223
-224
-225</pre>
+227
+228
+229
+230
+231</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 221</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 227</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until'>wait_until</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
@@ -2511,22 +2523,22 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-232
-233
-234
-235
-236
-237
 238
 239
 240
 241
 242
 243
-244</pre>
+244
+245
+246
+247
+248
+249
+250</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 232</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 238</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='comma'>,</span> <span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_expected'>expected</span> <span class='op'>=</span> <span class='id identifier rubyid_wrap_comparison'>wrap_comparison</span><span class='lparen'>(</span><span class='id identifier rubyid_expected'>expected</span><span class='rparen'>)</span>
@@ -2626,10 +2638,10 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
       <pre class="lines">
 
 
-250</pre>
+256</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 250</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/atom.rb', line 256</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_wait_until_non_nil'>wait_until_non_nil</span><span class='lparen'>(</span><span class='label'>timeout:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>timeout:</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span></pre>
     </td>
@@ -2642,7 +2654,7 @@ One timeout budget covers all checks and waits. The block is not interrupted.</p
 </div>
 
       <div id="footer">
-  Generated on Sat Oct 24 09:29:31 2026 by
+  Generated on Mon Oct 26 11:58:46 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>
