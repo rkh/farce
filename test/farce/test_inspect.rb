@@ -113,13 +113,17 @@ module Farce
 
     def test_weak_caches_show_empty_and_populated_entries
       [false, true].each do |identity|
-        assert_inspection "#<Farce::Strict::WeakCache {}>", Strict::WeakCache.new(compare_by_identity: identity)
+        empty = Strict::WeakCache.new(compare_by_identity: identity)
+
+        assert_inspection "#<Farce::Strict::WeakCache {}>", empty
+        assert_equal empty.inspect, empty.to_s
 
         [:value, nil, false].each do |value|
           cache = Strict::WeakCache.new(compare_by_identity: identity)
-          cache.get(:key) { value }
+          cache.store_if_absent(:key) { value }
 
           assert_inspection "#<Farce::Strict::WeakCache {key: #{value.inspect}}>", cache
+          assert_equal cache.inspect, cache.to_s
         end
       end
     end

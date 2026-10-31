@@ -36,7 +36,7 @@ Benchmark.ips do |x|
   x.report("Strict::Map (identity)") { identity_map.store_if_absent(key) { value } }
   x.report("Strict::WeakValueMap") { weak_map.store_if_absent(key) { value } }
   x.report("Strict::WeakValueMap (identity)") { weak_identity_map.store_if_absent(key) { value } }
-  x.report("Strict::WeakCache") { cache.get(key) { value } }
-  x.report("Strict::WeakCache (identity)") { identity_cache.get(key) { value } }
+  x.report("Strict::WeakCache") { cache.store_if_absent(key) { value } }
+  x.report("Strict::WeakCache (identity)") { identity_cache.store_if_absent(key) { value } }
   x.compare!
 end

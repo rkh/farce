@@ -9,7 +9,7 @@ module Farce
     #
     # @example
     #   cache = Farce::Strict::WeakCache.new
-    #   value = cache.get(:key) { ExpensiveClass.new.freeze }
+    #   value = cache.store_if_absent(:key) { ExpensiveClass.new.freeze }
     class WeakCache
       include Shareable::Delegated
       include Internal::Inspect
@@ -49,12 +49,66 @@ module Farce
       # @yield Called without arguments when the key is absent.
       # @yieldreturn [BasicObject] The value to store and return.
       # @return [BasicObject] The associated value.
-      def get(key, &)
+      def store_if_absent(key, &)
         raise LocalJumpError, "no block given" unless block_given?
         @cache.store_if_absent(key, &)
       end
 
-      alias store_if_absent get
+      alias compute_if_absent store_if_absent
+
+      # Store a value only when the key is absent.
+      # Existing nil and false values count as present.
+      # @param key [BasicObject] The key to look up or store.
+      # @param value [BasicObject] The value to store if the key is absent.
+      # @return [BasicObject, nil] The existing value, or nil when a value was inserted.
+      def put_if_absent(key, value)
+        inserted = false
+        previous = store_if_absent(key) do
+          inserted = true
+          value
+        end
+        inserted ? nil : previous
+      end
+
+      # Look up a value without generating it.
+      # @param key [BasicObject] The key to look up.
+      # @return [BasicObject, nil] The associated value, or nil if the key is absent.
+      def [](key) = @cache.fetch(key) { nil } # rubocop:disable Style/RedundantFetchBlock
+
+      # Return a lookup key and its associated value if present.
+      # @param key [BasicObject] The key to look up.
+      # @return [Array(BasicObject, BasicObject), nil] The pair `[key, value]`, or nil if the key is absent.
+      def assoc(key)
+        value = fetch(key) { return nil }
+        [key, value]
+      end
+
+      # Return whether a live entry exists, including entries with nil or false values.
+      # @param key [BasicObject] The key to look up.
+      # @return [Boolean]
+      def key?(key)
+        @cache.fetch(key) { return false }
+        true
+      end
+
+      alias has_key? key?
+      alias include? key?
+      alias member?  key?
+
+      # Look up a value in nested maps or arrays.
+      # @param key [BasicObject] The key to look up.
+      # @param rest [Array<BasicObject>] Additional keys or indices for the nested value.
+      # @return [BasicObject, nil] The nested value, or nil if an intermediate value is absent or nil.
+      def dig(key, *rest)
+        value = self[key]
+        return value if rest.empty? || value.nil?
+        value.dig(*rest)
+      end
+
+      # Return the stored key matching a lookup key.
+      # @param key [BasicObject] The key to look up.
+      # @return [BasicObject, nil] The stored key, or nil if the key is absent.
+      def getkey(key) = @map.getkey(key)
 
       # Fetch the value associated with a key, using the same missing-key behavior as Hash#fetch.
       # If both a default and a block are provided, the block takes precedence.
@@ -89,8 +143,36 @@ module Farce
         end
       end
 
+      # Fetch values in the requested order, using {#fetch} for missing keys.
+      # @param keys [Array<BasicObject>] The keys to look up.
+      # @yield [key] Called for each missing key.
+      # @yieldparam key [BasicObject] The missing key.
+      # @yieldreturn [BasicObject] The fallback value, which is not stored.
+      # @return [Array<BasicObject>] The associated values or block results.
+      def fetch_values(*keys, &) = keys.map { fetch(it, &) }
+
+      # Look up values in the requested order, returning nil for missing keys.
+      # @param keys [Array<BasicObject>] The keys to look up.
+      # @return [Array<BasicObject>] The associated values, with nil for missing keys.
+      def values_at(*keys) = keys.map { self[it] }
+
       # @return [Boolean] Whether keys are compared by identity instead of `hash` and `eql?`.
-      def compare_by_identity? = @map.compare_keys_by_identity?
+      def compare_keys_by_identity? = @map.compare_keys_by_identity?
+
+      # (see #compare_keys_by_identity?)
+      def compare_by_identity? = compare_keys_by_identity?
+
+      # @return [Boolean] Whether keys must be Ractor-shareable, including copied mutable strings.
+      def shareable_keys? = true
+
+      # @return [Boolean] Whether values must be Ractor-shareable.
+      def shareable_values? = true
+
+      # @return [Boolean] Whether keys are referenced weakly.
+      def weak_keys? = false
+
+      # @return [Boolean] Whether values are referenced weakly.
+      def weak_values? = true
 
       # @api private
       def inspect_with(inspector)
@@ -105,6 +187,8 @@ module Farce
           end
         end
       end
+
+      alias to_s inspect
 
       private
 
