@@ -209,8 +209,6 @@ Converts everything to a monotonic clock time in seconds, from when <code>farce/
     
 
     
-      (also: #now)
-    
   </span>
   
   
@@ -233,8 +231,6 @@ Converts everything to a monotonic clock time in seconds, from when <code>farce/
       <a href="#offset-instance_method" title="#offset (instance method)">#<strong>offset</strong>(value)  &#x21d2; Float </a>
     
 
-    
-      (also: #delay, #in, #timeout, #wait)
     
   </span>
   
@@ -304,8 +300,6 @@ Converts everything to a monotonic clock time in seconds, from when <code>farce/
       <a href="#time-instance_method" title="#time (instance method)">#<strong>time</strong>(value)  &#x21d2; Float </a>
     
 
-    
-      (also: #at, #timeout_at)
     
   </span>
   
@@ -486,10 +480,6 @@ Returns the current clock time if no value is given.</p>
   
 
   
-    <span class="aliases">Also known as:
-    <span class="names"><span id='now-instance_method'>now</span></span>
-    </span>
-  
 
   
 </h3><div class="docstring">
@@ -542,10 +532,6 @@ Returns the current clock time if no value is given.</p>
     #<strong>offset</strong>(value)  &#x21d2; <tt>Float</tt> 
   
 
-  
-    <span class="aliases">Also known as:
-    <span class="names"><span id='delay-instance_method'>delay</span>, <span id='in-instance_method'>in</span>, <span id='timeout-instance_method'>timeout</span>, <span id='wait-instance_method'>wait</span></span>
-    </span>
   
 
   
@@ -810,7 +796,7 @@ Expired deadlines return zero. Nil means there is no deadline and returns nil.</
       
       
         &mdash;
-        <div class='inline'><p>a deadline from <span class='object_link'><a href="#clock-instance_method" title="Farce::Clock#clock (method)">#clock</a></span> or <span class='object_link'><a href="#timeout-instance_method" title="Farce::Clock#timeout (method)">#timeout</a></span></p>
+        <div class='inline'><p>a deadline from <span class='object_link'><a href="#clock-instance_method" title="Farce::Clock#clock (method)">#clock</a></span> or #timeout</p>
 </div>
       
     </li>
@@ -883,10 +869,6 @@ Expired deadlines return zero. Nil means there is no deadline and returns nil.</
     #<strong>time</strong>(value)  &#x21d2; <tt>Float</tt> 
   
 
-  
-    <span class="aliases">Also known as:
-    <span class="names"><span id='at-instance_method'>at</span>, <span id='timeout_at-instance_method'>timeout_at</span></span>
-    </span>
   
 
   
@@ -994,7 +976,7 @@ Meaning that you can't pass a clock time greater than 31 years, or a timestamp b
 </div>
 
       <div id="footer">
-  Generated on Sat Oct 31 14:32:36 2026 by
+  Generated on Sat Oct 31 15:09:17 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>
