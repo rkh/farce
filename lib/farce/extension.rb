@@ -100,13 +100,15 @@ module Farce
     # @yield the block containing method definitions
     # @yieldreceiver [Module, Refinement] the module/refinement used for extending the target class.
     # @return [self] the extension instance
-    def define(*targets, &)
+    # rubocop:disable-next Naming/BlockForwarding, Style/ArgumentsForwarding
+    def define(*targets, &block)
+      # JRuby rejects repeated anonymous block forwarding inside a block.
       @lock.synchronize do
         check_state!
         targets.each do |target|
-          refine(target, &)
+          refine(target, &block)
           mixin = @definitions.store_if_absent(target) { Mixin.new(self, target) }
-          mixin.module_eval(&)
+          mixin.module_eval(&block)
           mixin.install if installed?
         end
       end
