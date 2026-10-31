@@ -17,6 +17,7 @@ import org.jruby.RubyModule;
 import org.jruby.RubyObject;
 import org.jruby.RubyThread;
 import org.jruby.anno.JRubyMethod;
+import org.jruby.api.Access;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.util.io.SelectExecutor;
@@ -30,9 +31,10 @@ public final class FiberScheduler extends RubyObject {
     public FiberScheduler(Ruby runtime, RubyClass klass) { super(runtime, klass); }
 
     public static void load(Ruby runtime) {
-        RubyModule internal = (RubyModule) runtime.getModule("Farce").getConstantAt("Internal");
-        RubyClass klass = internal.defineClassUnder("FiberScheduler", runtime.getObject(), FiberScheduler::new);
-        klass.defineAnnotatedMethods(FiberScheduler.class);
+        ThreadContext context = runtime.getCurrentContext();
+        RubyModule internal = (RubyModule) Access.getModule(context, "Farce").getConstantAt(context, "Internal");
+        RubyClass klass = internal.defineClassUnder(context, "FiberScheduler", runtime.getObject(), FiberScheduler::new);
+        klass.defineMethods(context, FiberScheduler.class);
     }
 
     @JRubyMethod(name = "nio_initialize")
@@ -59,14 +61,14 @@ public final class FiberScheduler extends RubyObject {
         checkOwner(context);
         if (selector == null) throw context.runtime.newIOError("scheduler is closed");
         RubyArray groups = (RubyArray) groupValue;
-        Long milliseconds = timeout.isNil() ? null : Math.max(0, (long)Math.ceil(timeout.convertToFloat().getDoubleValue() * 1000));
+        Long milliseconds = timeout.isNil() ? null : Math.max(0, (long)Math.ceil(timeout.convertToFloat().asDouble(context) * 1000));
         IRubyObject immediate = snapshot(context, groups, 0L);
         if (!immediate.isNil() || (milliseconds != null && milliseconds == 0)) return immediate;
         HashMap<SelectableChannel, Integer> interests = new HashMap<>();
         boolean compatible = ((RubyArray)groups.entry(2)).isEmpty();
         for (int i = 0; i < 2; i++) {
             RubyArray list = (RubyArray)groups.entry(i);
-            for (Object object : list.toJavaArray()) {
+            for (Object object : list.toJavaArray(context)) {
                 RubyIO io = RubyIO.convertToIO(context, (IRubyObject)object);
                 SelectableChannel channel = io.getOpenFileChecked().fd().chSelect;
                 if (channel == null || channel.provider() != selector.provider()) { compatible = false; continue; }
@@ -123,7 +125,7 @@ public final class FiberScheduler extends RubyObject {
     public IRubyObject hookBuffer(ThreadContext context, IRubyObject value) {
         RubyIOBuffer buffer = (RubyIOBuffer)value;
         if (!buffer.locked_p(context).isTrue()) return value;
-        if (buffer.size(context).convertToInteger().getLongValue() != 0) return value;
+        if (buffer.size(context).convertToInteger().asLong(context) != 0) return value;
         try {
             Field field = RubyIOBuffer.class.getDeclaredField("base");
             if (!field.trySetAccessible()) throw context.runtime.newRuntimeError("Farce cannot access the JRuby hook buffer layout");

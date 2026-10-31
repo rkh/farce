@@ -154,7 +154,8 @@ module Farce
         prepared_key = @map.normalize_external_key(key)
         expected = wrap_comparison(expected)
         deadline = Internal.timeout_deadline(timeout)
-        loop do
+        # JRuby rejects repeated anonymous block forwarding inside a block.
+        while true
           current = @map.get_prepared(prepared_key, timeout: Clock.remaining(deadline)) { TIMED_OUT }
           return unwrap_result(current, &) if TIMED_OUT.equal?(current)
           return unwrap_value(current) unless values_equal?(nil.equal?(current) ? NIL_VALUE : current, expected)

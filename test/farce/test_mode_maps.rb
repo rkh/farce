@@ -387,6 +387,17 @@ module Farce
       end
     end
 
+    def test_wait_until_changed_timeout_fallback_is_returned_without_unwrapping
+      MAP_CLASSES.each do |klass|
+        map = klass.new({ key: ModePayload.new(:old) }, mode: :copy)
+        fallback = Envelope.new(ModePayload.new(:fallback), mode: :local)
+
+        assert_same fallback,
+          map.wait_until_changed(:key, ModePayload.new(:old), timeout: 0) { fallback }
+        assert_nil map.wait_until_changed(:key, ModePayload.new(:old), timeout: 0)
+      end
+    end
+
     def test_copy_mode_transfers_values_between_ractors
       return unless Internal.native_ractors?
 
