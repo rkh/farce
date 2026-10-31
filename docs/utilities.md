@@ -59,6 +59,7 @@ Other classes Farce provides include:
 * `ThreadExecutor`: A [task executor](scheduling.md#scheduling-code) creating a new thread for each unit of work. Used on TruffleRuby.
 * `Walker`: A tool for walking a Ruby object tree.
 * `WeakValue`: A value object version of [`WeakRef`](shims.md#weakref). Allows handling references more explicitly, without automatic method delegation.
+* `Strict::WeakCache`: Ractor-shared weak maps are slow on CRuby before 4.1. `WeakCache` provides a faster alternative if entries aren't frequently garbage collected, but it does not allow deleting or replacing entries manually.
 
 In addition, Farce includes a range of error classes not listed here. Check the [API documentation](https://rkh.github.io/farce/) or [code base](https://github.com/rkh/farce/blob/main/lib/farce/error.rb) for these.
 
