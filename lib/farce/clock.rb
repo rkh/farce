@@ -115,13 +115,14 @@ module Farce
       raise TypeError, "Cannot convert #{value.class} to clock time"
     end
 
-    alias now        current
-    alias at         time
-    alias timeout_at time
-    alias delay      offset
-    alias in         offset
-    alias timeout    offset
-    alias wait       offset
+    # Copy the bodies eagerly. Lazy module alias resolution can race between Ractors.
+    define_method :now,        instance_method(:current)
+    define_method :at,         instance_method(:time)
+    define_method :timeout_at, instance_method(:time)
+    define_method :delay,      instance_method(:offset)
+    define_method :in,         instance_method(:offset)
+    define_method :timeout,    instance_method(:offset)
+    define_method :wait,       instance_method(:offset)
 
     private
 

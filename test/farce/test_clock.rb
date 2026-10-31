@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# shareable_constant_value: literal
+# warn_indent: true
 
 require_relative "../setup"
 
@@ -20,6 +22,51 @@ module Farce
 
       assert_operator before, :>=, 0.0
       assert_operator after, :>=, before
+    end
+
+    def test_aliases_can_be_first_called_concurrently_from_non_main_ractors
+      skip "native Ractors are unavailable" unless Internal.native_ractors?
+
+      output, error, status = ruby_isolated(<<~'RUBY')
+        require "farce"
+        Farce::Clock
+
+        workers = 8.times.map do
+          # This subprocess does not load the Windows startup barrier in test/setup.rb.
+          GC.start if Gem.win_platform?
+          ::Ractor.new do
+            ::Ractor.main.send(:ready)
+            ::Ractor.receive
+
+            before = Farce::Clock.current
+            now = Farce::Clock.now
+            at = Farce::Clock.at(700)
+            timeout_at = Farce::Clock.timeout_at(701)
+            offsets = {
+              delay: Farce::Clock.delay(1),
+              in: Farce::Clock.in(1),
+              timeout: Farce::Clock.timeout(1),
+              wait: Farce::Clock.wait(1)
+            }
+            after = Farce::Clock.current
+
+            raise "now returned an invalid clock time" unless now.between?(before, after)
+            raise "at changed a fixed clock time" unless at == 700.0
+            raise "timeout_at changed a fixed clock time" unless timeout_at == 701.0
+            offsets.each do |name, value|
+              raise "#{name} returned an invalid deadline" unless value.between?(before + 1, after + 1)
+            end
+          end
+        end
+
+        workers.size.times { raise "worker was not ready" unless ::Ractor.receive == :ready }
+        workers.each { |worker| worker.send(:start) }
+        workers.each { |worker| worker.respond_to?(:value) ? worker.value : worker.take }
+        puts "ok"
+      RUBY
+
+      assert_predicate status, :success?, "#{output}\n#{error}"
+      assert_equal "ok", output.strip
     end
 
     def test_clock_returns_current_time_without_value
