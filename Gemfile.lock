@@ -35,10 +35,10 @@ GEM
     bson (5.2.0)
     bson (5.2.0-java)
     builder (3.3.0)
-    carbon_fiber (0.2.0)
-    carbon_fiber (0.2.0-aarch64-linux)
-    carbon_fiber (0.2.0-arm64-darwin)
-    carbon_fiber (0.2.0-x86_64-linux)
+    carbon_fiber (0.2.1)
+    carbon_fiber (0.2.1-aarch64-linux)
+    carbon_fiber (0.2.1-arm64-darwin)
+    carbon_fiber (0.2.1-x86_64-linux)
     cbor (0.5.10.3)
     commonmarker (2.10.1)
       rb_sys (~> 0.9)
@@ -80,8 +80,8 @@ GEM
     fiber-storage (1.0.1)
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
-    io-console (0.9.4)
-    io-console (0.9.4-java)
+    io-console (0.9.5)
+    io-console (0.9.5-java)
     io-event (1.22.3)
     irb (1.18.0)
       pp (>= 0.6.0)
@@ -103,8 +103,8 @@ GEM
       builder
       minitest (>= 5.0, < 7)
       ruby-progressbar
-    msgpack (1.8.5)
-    msgpack (1.8.5-java)
+    msgpack (1.8.7)
+    msgpack (1.8.7-java)
     nio4r (2.7.5)
     oj (3.17.7)
       bigdecimal (>= 3.0)
@@ -161,7 +161,7 @@ GEM
     reline (0.7.0)
       io-console (~> 0.5)
     rice (4.12.0)
-    rubocop (1.92.1)
+    rubocop (1.92.2)
       json (>= 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
@@ -282,11 +282,11 @@ CHECKSUMS
   bson (5.2.0) sha256=c468c1e8a3cfa1e80531cc519a890f85586986721d8e305f83465cc36bb82608
   bson (5.2.0-java) sha256=7c23b959a34b477d2578d4093fed8ca18ca3621c4c24d0e75ee2d50ca4425d1a
   builder (3.3.0) sha256=497918d2f9dca528fdca4b88d84e4ef4387256d984b8154e9d5d3fe5a9c8835f
-  bundler (4.1.0.beta2) sha256=ffd80c244e3c080cbc403b194e7b386668c69275561f81b7a801f08772a6e2d6
-  carbon_fiber (0.2.0) sha256=2feab587b247695b6b8bfb2abd5456d28c1deab7cfba6b330620386ad053b3ce
-  carbon_fiber (0.2.0-aarch64-linux) sha256=ea3335c7fcde7233db54d73332c40d2733adb1e39e14a07d01a388fe74296f81
-  carbon_fiber (0.2.0-arm64-darwin) sha256=5501b087fb6337445705ad7ffb160ca68c8b7f4a9b7b6bbb977a811c4df869e7
-  carbon_fiber (0.2.0-x86_64-linux) sha256=9792141dabf6910724c8223fc8f0b64dca995502dc558e6836babf4620a2839c
+  bundler (4.1.0.beta3) sha256=3a0dbbbb7c86af269517a9de67903472e219d3ae9edb3b6b4da7706cdc993d12
+  carbon_fiber (0.2.1) sha256=947f7bdbbe6ba1cec6777d5430d843b1bf36e2420eeaa12001228eb3048f1972
+  carbon_fiber (0.2.1-aarch64-linux) sha256=4cbaf607ab8d1c74ba5ebbb7402b733f887ef456604aaedaa7ccf1d05d823060
+  carbon_fiber (0.2.1-arm64-darwin) sha256=e1ccbf0dfc4ab3eded5b0ae4699084ea788e090eb323a0a4e5c06eed5c91e412
+  carbon_fiber (0.2.1-x86_64-linux) sha256=8f9863b0d588ba27a94c8b7fd4286d58d84d910a693e1a2869e012d77ed04c9d
   cbor (0.5.10.3) sha256=c3aa1d0c7e9bbffe8de4bed554f588d7926c62276ffe2dd7fabb65bae801d28a
   commonmarker (2.10.1) sha256=924a972223dab8701cd01ed66bb5fda208ad17a4a566c0b7cdc4a78772e9f845
   commonmarker (2.10.1-aarch64-linux) sha256=3ab9e7027d2350364bdc541680cc28e21011b2950abf7d08ac29093fa691bdc3
@@ -310,8 +310,8 @@ CHECKSUMS
   fiber-local (1.1.0) sha256=c885f94f210fb9b05737de65d511136ea602e00c5105953748aa0f8793489f06
   fiber-storage (1.0.1) sha256=f48e5b6d8b0be96dac486332b55cee82240057065dc761c1ea692b2e719240e1
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
-  io-console (0.9.4) sha256=a403304f32928ee85e56d457b4612ca43f2703b561a3258844992bd24085fbb1
-  io-console (0.9.4-java) sha256=789188c38b937fc2d04400e35fd3b2838ffdf061e846571e51524036bc1bc185
+  io-console (0.9.5) sha256=83dd9bbf4c4680416629245b39cd4212eb5f4d9a4ea91804870c1f6b846414d5
+  io-console (0.9.5-java) sha256=34b74ec7d8e39a526fb9a82aa34853257a1baa08f56c5cd5d37ec6be2a5e6000
   io-event (1.22.3) sha256=1b12f144898bd36b689ee1e0898750fc04adf039188c7e24a05f21fa63cc6adb
   irb (1.18.0) sha256=de9454a0703a54704b9811a5ef31a60c86949fbf4013fcf244fabc7c775248e3
   jar-dependencies (0.6.1-java) sha256=2746643482d139fd9cecb524b57df63b71d9b5d734c7275171701201e3164f23
@@ -323,8 +323,8 @@ CHECKSUMS
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
   minitest-reporters (1.8.0) sha256=8ce5280fb73ad3178ae525454df169b6f28c1b38b1d088ea91815d3a370ba384
-  msgpack (1.8.5) sha256=97419eaa7b35dfe3e462c0e6c1a3dfdcbfc8756605c09e46e4c6daef127517ba
-  msgpack (1.8.5-java) sha256=8a29860a77f6530a130a6e0ffa23608e0e091e1377b0d50f1c4b56827d599fe3
+  msgpack (1.8.7) sha256=dfefec761b5f9047e6e8d95d2c7f8af4b3725d984a01942adc533aa819a2df33
+  msgpack (1.8.7-java) sha256=729c29fbf09eb667e34f7df2478fa3b4ffba0f18f3ea4b628c1cfdd43fe3a2ac
   nio4r (2.7.5) sha256=6c90168e48fb5f8e768419c93abb94ba2b892a1d0602cb06eef16d8b7df1dca1
   oj (3.17.7) sha256=7a21d3ac8e544a850f1cdaf711b0c8144ba587d14d3e4917c0855fd7b0483db7
   ostruct (0.6.3) sha256=95a2ed4a4bd1d190784e666b47b2d3f078e4a9efda2fccf18f84ddc6538ed912
@@ -359,7 +359,7 @@ CHECKSUMS
   regexp_parser (2.13.1) sha256=5aedb6b7c35688f51e86eef17a15374dfd287c83f4ca644b2c5f3ec50a33b44b
   reline (0.7.0) sha256=5b012d8e55dbf9d450f12bde2cf7d15ff546ae80b3f8f3b30e570d431815583d
   rice (4.12.0) sha256=672c369ca706ff5be46695537f51e1a3db262c1b789af5b967ef477f25111dfd
-  rubocop (1.92.1) sha256=a905381a5344215a79abcfe80f6c94366447e6a55347c9a525b5a24990e33f62
+  rubocop (1.92.2) sha256=14fb31eed143a0dc6f78186c550c1715e81cd38f59d05d1165050e445c1f5382
   rubocop-ast (1.50.0) sha256=b9ca88300da0803ee222ad20cdb30494c0a784eed06fdc35d254b06d662788db
   rubocop-minitest (0.41.0) sha256=c15bfe00134a30c8a00ce670b07ecc80440455ba277b8682cf0d515c98ee7426
   rubocop-rake (0.7.1) sha256=3797f2b6810c3e9df7376c26d5f44f3475eda59eb1adc38e6f62ecf027cbae4d
@@ -383,4 +383,4 @@ CHECKSUMS
   zeitwerk (2.8.3) sha256=2c85125a8467ce069e20123d1e709a08955c9d29c118c25b46b7b7fafdbb92e5
 
 BUNDLED WITH
-  4.1.0.beta2
+  4.1.0.beta3
