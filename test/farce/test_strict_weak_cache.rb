@@ -26,6 +26,27 @@ module Farce
       assert_raises(KeyError) { cache.fetch(:missing) }
     end
 
+    def test_create_selects_the_platform_cache_and_forwards_arguments
+      expected_class = Internal.native_weak_maps? ? Strict::WeakValueMap : Strict::WeakCache
+      empty = Strict::WeakCache.create
+
+      assert_instance_of expected_class, empty
+      assert_raises(KeyError) { empty.fetch(:missing) }
+
+      first = String.new("key").freeze
+      equal = String.new("key").freeze
+      [false, true].each do |identity|
+        cache = Strict::WeakCache.create({ first => :first }, compare_by_identity: identity)
+
+        assert_instance_of expected_class, cache
+        assert Ractor.shareable?(cache)
+        assert_equal identity, cache.compare_by_identity?
+        assert_equal :first, cache.fetch(first)
+        assert_equal(identity ? :second : :first, cache.store_if_absent(equal) { :second })
+        assert_equal :first, cache.fetch(first)
+      end
+    end
+
     def test_initial_mapping_accepts_hashes_maps_and_pairs
       value = Object.new.freeze
       [{ key: value }, Strict::Map.new({ key: value }), [[:key, value]], [[:key, value]].each].each do |entries|

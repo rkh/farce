@@ -14,6 +14,11 @@ module Farce
       include Shareable::Delegated
       include Internal::Inspect
 
+      # Creates a new WeakCache instance if it outperforms {Strict::WeakValueMap} on the current platform.
+      # Otherwise it creates a standard WeakValueMap instance.
+      # @return [WeakCache, Strict::WeakValueMap] The created cache instance.
+      def self.create(...) = Internal.native_weak_maps? ? Strict::WeakValueMap.new(...) : WeakCache.new(...)
+
       # @param initial_mapping [Hash, Farce::Abstract::Map, #each, nil]
       #   The entries to store initially. Each iteration must yield a key-value pair.
       #   Nil creates an empty map.
