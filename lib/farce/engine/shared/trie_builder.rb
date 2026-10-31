@@ -17,6 +17,13 @@ module Farce
     # terminal match. A regexp edge is atomic. Later edges cannot make a regexp
     # choose a different endpoint.
     #
+    # Pass `ignore_case: true` to {.build} or {Builder.new} to compare all static
+    # segments using Unicode downcasing. Regexp options do not change. Regexp
+    # matches, captures, and suffixes use the original input and retain its casing.
+    # This does not include every equivalence supported by `Regexp::IGNORECASE`.
+    # For example, `"SS"` matches `"ss"`, but `"ß"` does not match `"ss"`.
+    # Case-equivalent static entries share a branch and retain their token order.
+    #
     # Tokens must already be Ractor-shareable. They are stored and returned
     # unchanged. Equal but different token objects remain separate. Reusing the
     # same token object produces at most one result per lookup.
@@ -94,20 +101,23 @@ module Farce
       # Collects entries and publishes immutable {Trie} snapshots.
       class Builder
         # Create an empty builder.
-        def initialize
+        # @param ignore_case [Boolean] compare all static segments without case
+        def initialize(ignore_case: false)
           @entries = []
+          @ignore_case = !!ignore_case
         end
 
         # @api private
         def marshal_dump
           entries = @entries.map { |parts, token| [parts, Internal::MarshalSupport.value(token)] }
-          [1, entries, frozen?]
+          [1, entries, frozen?, @ignore_case]
         end
 
         # @api private
         def marshal_load(data)
-          entries, frozen = Internal::MarshalSupport.payload(data, 2)
-          initialize
+          length = data.is_a?(Array) && data.length == 3 ? 2 : 3
+          entries, frozen, ignore_case = Internal::MarshalSupport.payload(data, length)
+          initialize(ignore_case:)
           entries.each { |parts, token| add(parts, Internal::MarshalSupport.restore_value(token)) }
           freeze if frozen
         end
@@ -159,7 +169,7 @@ module Farce
             [parts.dup.freeze, token_ids.fetch(token)].freeze
           end.freeze
 
-          Trie.send(:build_entries, entries, tokens.freeze)
+          Trie.send(:build_entries, entries, tokens.freeze, ignore_case: @ignore_case)
         end
 
         private
@@ -180,17 +190,18 @@ module Farce
       class << self
         # Build an immutable trie.
         #
+        # @param ignore_case [Boolean] compare all static segments without case
         # @yieldparam builder [Builder]
         # @return [Trie]
-        def build
-          builder = Builder.new
+        def build(ignore_case: false)
+          builder = Builder.new(ignore_case:)
           yield builder if block_given?
           builder.build
         end
 
         private
 
-        def build_entries(entries, tokens) = new(entries, tokens)
+        def build_entries(entries, tokens, ignore_case:) = new(entries, tokens, ignore_case:)
 
         private :new
       end

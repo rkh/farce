@@ -7,6 +7,7 @@ reactor.o: reactor.c reactor.h futex.h
 drivers.o: drivers.c reactor.h futex.h
 io.o: io.c reactor.h futex.h
 tree_map.o: tree_map.c containers.h native_wait.h futex.h
+trie.o: trie.c containers.h trie_search.h
 
 queue.o: queue.c containers.h unshared_wait.h
 unshared_signal.o: unshared_signal.c containers.h unshared_wait.h unshared_io_pool.h

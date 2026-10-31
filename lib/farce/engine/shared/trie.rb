@@ -76,10 +76,15 @@ module Farce
       end
       private_constant :Node
 
-      def initialize(entries, tokens)
+      def initialize(entries, tokens, ignore_case: false)
         validate_array!(entries, "entries")
         validate_array!(tokens, "tokens")
         validate_tokens!(tokens)
+
+        if ignore_case
+          @ignore_case = true
+          extend IgnoreCase
+        end
 
         @tokens      = Array.new(tokens).freeze
         @root        = Node.new
@@ -103,6 +108,7 @@ module Farce
             when String
               literal = String.new(part)
               validate_encoding!(literal, "edge")
+              literal.downcase! if ignore_case
               literal.each_char do |character|
                 child = node.static[character]
                 unless child
@@ -170,6 +176,12 @@ module Farce
       end
 
       private
+
+      def initialize_dup(other)
+        super
+        # Unlike clone, dup does not retain the instance's matching module.
+        extend IgnoreCase if @ignore_case
+      end
 
       def anchor(regexp)
         compile_regexp("\\G(?:#{regexp.source})", regexp)
@@ -314,4 +326,5 @@ module Farce
   end
 end
 
+require "farce/engine/shared/trie/ignore_case"
 require "farce/engine/shared/trie_builder"

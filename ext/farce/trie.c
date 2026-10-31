@@ -111,6 +111,7 @@ typedef struct {
     size_t static_index_count;
     size_t static_index_bytes;
     size_t regexp_edge_count;
+    VALUE (*search_body)(VALUE);
     bool initialized;
 } trie_t;
 
@@ -131,6 +132,7 @@ typedef struct {
     size_t static_index;
     size_t regexp_index;
     unsigned phase;
+    unsigned lowercase_offset;
 } trie_frame_t;
 
 /* A suspended Enumerator or user Fiber can be collected without unwinding the
@@ -191,7 +193,11 @@ static VALUE cTrie;
 static ID id_captures;
 static ID id_named_captures;
 static ID id_timeout;
+static ID id_downcase;
 static bool regexp_timeout_supported;
+
+static VALUE trie_search_body(VALUE opaque);
+static VALUE trie_search_body_ignore_case(VALUE opaque);
 
 #ifdef FARCE_TRIE_FAILURE_INJECTION
 static _Thread_local long trie_failure_countdown = -1;
@@ -1356,6 +1362,14 @@ trie_insert_entry(VALUE self, trie_t *trie, VALUE parts, uint32_t token)
             if (rb_enc_str_coderange(stable_part) == ENC_CODERANGE_BROKEN) {
                 rb_raise(rb_eArgError, "trie literal has invalid encoding");
             }
+            if (trie->search_body == trie_search_body_ignore_case) {
+                VALUE lowercase = rb_funcall(stable_part, id_downcase, 0);
+                Check_Type(lowercase, T_STRING);
+                stable_part = rb_str_new_frozen(lowercase);
+                if (rb_enc_str_coderange(stable_part) == ENC_CODERANGE_BROKEN) {
+                    rb_raise(rb_eArgError, "trie literal has invalid encoding");
+                }
+            }
             node = trie_insert_string(self, trie, node, stable_part);
             RB_GC_GUARD(stable_part);
         }
@@ -1407,16 +1421,25 @@ trie_validate_references(VALUE self)
 }
 
 static VALUE
-trie_initialize(VALUE self, VALUE entries, VALUE tokens)
+trie_initialize(int argc, VALUE *argv, VALUE self)
 {
     trie_t *trie;
+    VALUE entries, tokens, options;
+    VALUE ignore_case = Qfalse;
     VALUE token_copy;
     VALUE token_identities;
     long index;
+    rb_scan_args(argc, argv, "2:", &entries, &tokens, &options);
+    if (!NIL_P(options)) {
+        ID keyword = rb_intern("ignore_case");
+        rb_get_kwargs(options, &keyword, 0, 1, &ignore_case);
+        if (ignore_case == Qundef) ignore_case = Qfalse;
+    }
     TypedData_Get_Struct(self, trie_t, &trie_type, trie);
     if (trie->initialized || trie->node_count || !NIL_P(trie->tokens)) {
         rb_raise(rb_eRuntimeError, "trie initialization already attempted");
     }
+    trie->search_body = RTEST(ignore_case) ? trie_search_body_ignore_case : trie_search_body;
     Check_Type(entries, T_ARRAY);
     Check_Type(tokens, T_ARRAY);
     if ((unsigned long)RARRAY_LEN(tokens) > UINT32_MAX) rb_raise(rb_eArgError, "too many trie tokens");
@@ -1616,6 +1639,107 @@ trie_static_match(VALUE input, long cursor, const trie_static_edge_t *edge,
     return true;
 }
 
+typedef struct {
+    rb_encoding *encoding;
+    bool ascii_compatible;
+} trie_case_mapping_t;
+
+static unsigned char
+trie_lowercase_ascii(unsigned char byte)
+{
+    return byte >= 'A' && byte <= 'Z' ? byte + ('a' - 'A') : byte;
+}
+
+static int
+trie_lowercase_character(const trie_case_mapping_t *mapping, const unsigned char **cursor,
+                         const unsigned char *end, unsigned char *output)
+{
+    int bytes = rb_enc_mbclen((const char *)*cursor, (const char *)end, mapping->encoding);
+    OnigCaseFoldType flags = ONIGENC_CASE_DOWNCASE;
+    int length = mapping->encoding->case_map(&flags, cursor, *cursor + bytes,
+                                             output, output + ONIGENC_MBC_CASE_FOLD_MAXLEN,
+                                             mapping->encoding);
+    if (length <= 0) rb_raise(rb_eArgError, "cannot lowercase trie input character");
+    return length;
+}
+
+static void
+trie_search_push_frame_ignore_case(trie_search_t *search, trie_node_t *node, long cursor,
+                                   size_t restore_events, unsigned lowercase_offset,
+                                   const trie_case_mapping_t *mapping)
+{
+    trie_search_ensure_frames(search, search->frame_count + 1);
+    trie_frame_t *frame = &search->frames[search->frame_count++];
+    memset(frame, 0, sizeof(*frame));
+    frame->node = node;
+    frame->cursor = cursor;
+    frame->restore_events = restore_events;
+    frame->lowercase_offset = lowercase_offset;
+    if (node->static_index && cursor < search->input_length) {
+        const unsigned char *bytes = (const unsigned char *)RSTRING_PTR(search->input) + cursor;
+        unsigned char first;
+        if (*bytes < 128 && mapping->ascii_compatible) first = trie_lowercase_ascii(*bytes);
+        else {
+            unsigned char lowercase[ONIGENC_MBC_CASE_FOLD_MAXLEN];
+            const unsigned char *end = (const unsigned char *)RSTRING_END(search->input);
+            trie_lowercase_character(mapping, &bytes, end, lowercase);
+            first = lowercase[lowercase_offset];
+        }
+        const uint32_t *slot = trie_static_index_slot_const(node->static_index, first);
+        frame->static_index = slot ? *slot : 0;
+    }
+}
+
+static bool
+trie_static_match_ignore_case(trie_search_t *search, const trie_frame_t *frame,
+                              const trie_static_edge_t *edge, const trie_case_mapping_t *mapping,
+                              long *end_cursor, unsigned *end_offset)
+{
+    VALUE input = search->input;
+    VALUE label = edge->label;
+    if (edge->encoding != search->input_encoding && !rb_enc_compatible(label, input)) return false;
+    long cursor = frame->cursor;
+    unsigned offset = frame->lowercase_offset;
+    long index = 0;
+    long length = RSTRING_LEN(label);
+    long checkpoint = 16384;
+    while (index < length) {
+        if (cursor >= search->input_length) return false;
+        const unsigned char *bytes = (const unsigned char *)RSTRING_PTR(input) + cursor;
+        const unsigned char *literal = (const unsigned char *)RSTRING_PTR(label);
+        if (*bytes < 128 && mapping->ascii_compatible) {
+            if (trie_lowercase_ascii(*bytes) != literal[index]) return false;
+            cursor++;
+            index++;
+        }
+        else {
+            unsigned char lowercase[ONIGENC_MBC_CASE_FOLD_MAXLEN];
+            const unsigned char *begin = bytes;
+            const unsigned char *end = (const unsigned char *)RSTRING_END(input);
+            int count = trie_lowercase_character(mapping, &bytes, end, lowercase);
+            while (offset < (unsigned)count && index < length) {
+                if (lowercase[offset++] != literal[index++]) return false;
+            }
+            /* A radix split can fall inside one character's lowercase expansion.
+             * Retain its original cursor until every lowercase byte is consumed. */
+            if (offset == (unsigned)count) {
+                cursor += bytes - begin;
+                offset = 0;
+            }
+        }
+        if (index >= checkpoint) {
+            trie_check_interrupts();
+            checkpoint = index + 16384;
+        }
+    }
+    *end_cursor = cursor;
+    *end_offset = offset;
+    return true;
+}
+
+/* Keep the original traversal's inlining when compiling both search modes. */
+ALWAYS_INLINE(static bool trie_regexp_match(const trie_regexp_edge_t *edge, trie_search_t *search,
+                                           long cursor, long *end_cursor));
 static bool
 trie_regexp_match(const trie_regexp_edge_t *edge, trie_search_t *search,
                   long cursor, long *end_cursor)
@@ -1765,6 +1889,7 @@ trie_seen(trie_search_t *search, uint32_t token)
     return false;
 }
 
+ALWAYS_INLINE(static bool trie_emit_terminal(trie_search_t *search, trie_frame_t *frame));
 static bool
 trie_emit_terminal(trie_search_t *search, trie_frame_t *frame)
 {
@@ -1796,75 +1921,17 @@ trie_emit_terminal(trie_search_t *search, trie_frame_t *frame)
     return false;
 }
 
-static VALUE
-trie_search_body(VALUE opaque)
-{
-    trie_search_t *search = (trie_search_t *)(uintptr_t)opaque;
-    trie_search_push_frame(search, search->trie->root, 0, 0);
-    while (search->frame_count) {
-        trie_frame_t *frame = &search->frames[search->frame_count - 1];
-        trie_search_work_checkpoint(search);
-        if (frame->phase == 0) {
-            bool descended = false;
-            if (frame->node->static_index) {
-                while (frame->static_index) {
-                    trie_static_edge_t *edge = &frame->node->static_edges[frame->static_index - 1];
-                    long label_length = RSTRING_LEN(edge->label);
-                    frame->static_index = edge->next_same_byte;
-                    if (!trie_static_match(search->input, frame->cursor, edge,
-                                           label_length, search->input_encoding)) continue;
-                    trie_search_push_frame(search, edge->child, frame->cursor + label_length,
-                                           search->event_count);
-                    descended = true;
-                    break;
-                }
-            }
-            else {
-                while (frame->static_index < frame->node->static_count) {
-                    trie_static_edge_t *edge = &frame->node->static_edges[frame->static_index++];
-                    long label_length = RSTRING_LEN(edge->label);
-                    if (!trie_static_match(search->input, frame->cursor, edge,
-                                           label_length, search->input_encoding)) continue;
-                    trie_search_push_frame(search, edge->child, frame->cursor + label_length,
-                                           search->event_count);
-                    descended = true;
-                    break;
-                }
-            }
-            if (descended) continue;
-            frame->phase = 1;
-        }
-        if (frame->phase == 1) {
-            bool descended = false;
-            while (frame->regexp_index < frame->node->regexp_count) {
-                trie_regexp_edge_t *edge = &frame->node->regexp_edges[frame->regexp_index++];
-                size_t restore = search->event_count;
-                long end_cursor;
-                if (!trie_regexp_match(edge, search, frame->cursor, &end_cursor)) {
-                    search->event_count = restore;
-                    continue;
-                }
-                trie_search_push_frame(search, edge->child, end_cursor, restore);
-                descended = true;
-                break;
-            }
-            if (descended) continue;
-            frame->phase = 2;
-        }
-        if (frame->phase == 2) {
-            frame->phase = 3;
-            if ((search->peek || frame->cursor == search->input_length) &&
-                trie_emit_terminal(search, frame)) break;
-        }
-        if (frame->phase == 3) {
-            size_t restore = frame->restore_events;
-            search->frame_count--;
-            search->event_count = restore;
-        }
-    }
-    if (search->stream) return search->self;
-    return search->first_only ? search->first : search->results;
-}
+#define TRIE_IGNORE_CASE 0
+#define TRIE_SEARCH_BODY trie_search_body
+#include "trie_search.h"
+#undef TRIE_SEARCH_BODY
+#undef TRIE_IGNORE_CASE
+
+#define TRIE_IGNORE_CASE 1
+#define TRIE_SEARCH_BODY trie_search_body_ignore_case
+#include "trie_search.h"
+#undef TRIE_SEARCH_BODY
+#undef TRIE_IGNORE_CASE
 
 static VALUE
 trie_search_cleanup(VALUE opaque)
@@ -1916,7 +1983,7 @@ trie_search(VALUE self, VALUE input, bool peek, bool first_only, bool stream)
                                       encoding == rb_usascii_encindex() ||
                                       encoding == rb_ascii8bit_encindex();
     }
-    VALUE result = rb_ensure(trie_search_body, (VALUE)(uintptr_t)&search,
+    VALUE result = rb_ensure(search.trie->search_body, (VALUE)(uintptr_t)&search,
                              trie_search_cleanup, (VALUE)(uintptr_t)&search);
     RB_GC_GUARD(self);
     RB_GC_GUARD(input);
@@ -2035,7 +2102,7 @@ containers_init_trie(VALUE namespace)
     (void)namespace;
     cTrie = rb_define_class_under(strict, "Trie", rb_cObject);
     rb_define_alloc_func(cTrie, trie_allocate);
-    rb_define_private_method(cTrie, "initialize", trie_initialize, 2);
+    rb_define_private_method(cTrie, "initialize", trie_initialize, -1);
     rb_define_private_method(cTrie, "initialize_copy", trie_initialize_copy, 1);
     rb_define_method(cTrie, "match", trie_match, 1);
     rb_define_method(cTrie, "match_all", trie_match_all, 1);
@@ -2054,5 +2121,6 @@ containers_init_trie(VALUE namespace)
     id_captures = rb_intern("captures");
     id_named_captures = rb_intern("named_captures");
     id_timeout = rb_intern("timeout");
+    id_downcase = rb_intern("downcase");
     regexp_timeout_supported = rb_respond_to(rb_cRegexp, id_timeout);
 }
