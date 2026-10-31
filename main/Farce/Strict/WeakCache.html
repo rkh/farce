@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: Farce::Strict::WeakCache
+  
+    &mdash; Documentation by YARD 0.9.45
+  
+</title>
+
+  <link rel="stylesheet" href="../../css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/common.css" type="text/css">
+
+  <link rel="stylesheet" href="../../css/gfm-alerts.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "Farce::Strict::WeakCache";
+  relpath = '../../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="../../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+<!-- farce-versions:start -->
+<nav aria-label="Documentation version" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 48px 12px 16px; background: #eef2f6; color: #222; border-bottom: 1px solid #ccd3db; position: relative; z-index: 10">
+  <label for="farce-version">Farce documentation version:</label>
+  <select id="farce-version" onchange="window.location.assign(this.value)" style="font: inherit; max-width: 100%; padding: 4px"><option value="../../index.html" selected>main</option>
+<option value="../../../version/v0.5.0/index.html">v0.5.0</option>
+<option value="../../../version/v0.4.1/index.html">v0.4.1</option>
+<option value="../../../version/v0.4.0/index.html">v0.4.0</option>
+<option value="../../../version/v0.3.0/index.html">v0.3.0</option>
+<option value="../../../version/v0.2.0/index.html">v0.2.0</option>
+<option value="../../../version/v0.1.0/index.html">v0.1.0</option></select>
+</nav>
+<!-- farce-versions:end -->
+
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../../_index.html">Index (W)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Strict.html" title="Farce::Strict (module)">Strict</a></span></span>
+     &raquo; 
+    <span class="title">WeakCache</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: Farce::Strict::WeakCache
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">Farce::Strict::WeakCache</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  <dl>
+      <dt>Includes:</dt>
+      <dd><span class='object_link'><a href="../Shareable/Delegated.html" title="Farce::Shareable::Delegated (module)">Farce::Shareable::Delegated</a></span>, Internal::Inspect</dd>
+  </dl>
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/farce/strict/weak_cache.rb
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>A weak cache that allows reusing previously generated values without holding strong references to them.
+Only shareable keys and values can be used.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+      <pre class="example code"><code><span class='id identifier rubyid_cache'>cache</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../../Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Strict.html" title="Farce::Strict (module)">Strict</a></span></span><span class='op'>::</span><span class='const'>WeakCache</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="Farce::Strict::WeakCache#initialize (method)">new</a></span></span>
+<span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_cache'>cache</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='symbol'>:key</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='const'>ExpensiveClass</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span> <span class='rbrace'>}</span></code></pre>
+    
+  </div>
+
+
+</div>
+
+
+
+
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#create-class_method" title="create (class method)">.<strong>create</strong>  &#x21d2; WeakCache, Strict::WeakValueMap </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Creates a new WeakCache instance if it outperforms <span class='object_link'><a href="WeakValueMap.html" title="Farce::Strict::WeakValueMap (class)">WeakValueMap</a></span> on the current platform.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#[]-instance_method" title="#[] (instance method)">#<strong>[]</strong>(key)  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Look up a value without generating it.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#assoc-instance_method" title="#assoc (instance method)">#<strong>assoc</strong>(key)  &#x21d2; Array(BasicObject, BasicObject)<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return a lookup key and its associated value if present.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#compare_by_identity%3F-instance_method" title="#compare_by_identity? (instance method)">#<strong>compare_by_identity?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether keys are compared by identity instead of <code>hash</code> and <code>eql?</code>.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#compare_keys_by_identity%3F-instance_method" title="#compare_keys_by_identity? (instance method)">#<strong>compare_keys_by_identity?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether keys are compared by identity instead of <code>hash</code> and <code>eql?</code>.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#dig-instance_method" title="#dig (instance method)">#<strong>dig</strong>(key, *rest)  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Look up a value in nested maps or arrays.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#fetch-instance_method" title="#fetch (instance method)">#<strong>fetch</strong>(*arguments)  &#x21d2; BasicObject </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Fetch the value associated with a key, using the same missing-key behavior as Hash#fetch.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#fetch_values-instance_method" title="#fetch_values (instance method)">#<strong>fetch_values</strong>(*keys) {|key| ... } &#x21d2; Array&lt;BasicObject&gt; </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Fetch values in the requested order, using <span class='object_link'><a href="#fetch-instance_method" title="Farce::Strict::WeakCache#fetch (method)">#fetch</a></span> for missing keys.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#getkey-instance_method" title="#getkey (instance method)">#<strong>getkey</strong>(key)  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return the stored key matching a lookup key.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(initial_mapping = nil, compare_by_identity: false)  &#x21d2; WeakCache </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>A new instance of WeakCache.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#key%3F-instance_method" title="#key? (instance method)">#<strong>key?</strong>(key)  &#x21d2; Boolean </a>
+    
+
+    
+      (also: #has_key?, #include?, #member?)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Return whether a live entry exists, including entries with nil or false values.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#put_if_absent-instance_method" title="#put_if_absent (instance method)">#<strong>put_if_absent</strong>(key, value)  &#x21d2; BasicObject<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Store a value only when the key is absent.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#shareable_keys%3F-instance_method" title="#shareable_keys? (instance method)">#<strong>shareable_keys?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether keys must be Ractor-shareable, including copied mutable strings.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#shareable_values%3F-instance_method" title="#shareable_values? (instance method)">#<strong>shareable_values?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether values must be Ractor-shareable.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#store_if_absent-instance_method" title="#store_if_absent (instance method)">#<strong>store_if_absent</strong>(key) { ... } &#x21d2; BasicObject </a>
+    
+
+    
+      (also: #compute_if_absent)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Retrieves or stores a value for the given key.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#values_at-instance_method" title="#values_at (instance method)">#<strong>values_at</strong>(*keys)  &#x21d2; Array&lt;BasicObject&gt; </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Look up values in the requested order, returning nil for missing keys.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#weak_keys%3F-instance_method" title="#weak_keys? (instance method)">#<strong>weak_keys?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether keys are referenced weakly.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#weak_values%3F-instance_method" title="#weak_values? (instance method)">#<strong>weak_values?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether values are referenced weakly.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../Shareable.html" title="Farce::Shareable (module)">Farce::Shareable</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../Shareable.html#ractor_shareable%3F-instance_method" title="Farce::Shareable#ractor_shareable? (method)">#ractor_shareable?</a></span></p>
+<div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    #<strong>initialize</strong>(initial_mapping = nil, compare_by_identity: false)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Strict::WeakCache (class)">WeakCache</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns a new instance of WeakCache.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>initial_mapping</span>
+      
+      
+        <span class='type'>(<tt>Hash</tt>, <tt><span class='object_link'><a href="../Abstract/Map.html" title="Farce::Abstract::Map (class)">Farce::Abstract::Map</a></span></tt>, <tt>#each</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>The entries to store initially. Each iteration must yield a key-value pair.
+Nil creates an empty map.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>compare_by_identity</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>false</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether keys use object identity instead of <code>hash</code> and <code>eql?</code>.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+27
+28
+29
+30
+31</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 27</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_initial_mapping'>initial_mapping</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>compare_by_identity:</span> <span class='kw'>false</span><span class='rparen'>)</span>
+  <span class='ivar'>@map</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Strict.html" title="Farce::Strict (module)">Strict</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="WeakValueMap.html" title="Farce::Strict::WeakValueMap (class)">WeakValueMap</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="WeakValueMap.html#initialize-instance_method" title="Farce::Strict::WeakValueMap#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_initial_mapping'>initial_mapping</span><span class='comma'>,</span> <span class='label'>compare_keys_by_identity:</span> <span class='id identifier rubyid_compare_by_identity'>compare_by_identity</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_initialize_cache'>initialize_cache</span>
+  <span class='kw'>super</span><span class='lparen'>(</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="create-class_method">
+  
+    .<strong>create</strong>  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Strict::WeakCache (class)">WeakCache</a></span></tt>, <tt><span class='object_link'><a href="WeakValueMap.html" title="Farce::Strict::WeakValueMap (class)">Strict::WeakValueMap</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Creates a new WeakCache instance if it outperforms <span class='object_link'><a href="WeakValueMap.html" title="Farce::Strict::WeakValueMap (class)">Farce::Strict::WeakValueMap</a></span> on the current platform.
+Otherwise it creates a standard WeakValueMap instance.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="" title="Farce::Strict::WeakCache (class)">WeakCache</a></span></tt>, <tt><span class='object_link'><a href="WeakValueMap.html" title="Farce::Strict::WeakValueMap (class)">Strict::WeakValueMap</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The created cache instance.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+20</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 20</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_create'>create</span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='const'>Internal</span><span class='period'>.</span><span class='id identifier rubyid_native_weak_maps?'>native_weak_maps?</span> <span class='op'>?</span> <span class='const'><span class='object_link'><a href="../Strict.html" title="Farce::Strict (module)">Strict</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="WeakValueMap.html" title="Farce::Strict::WeakValueMap (class)">WeakValueMap</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="WeakValueMap.html#initialize-instance_method" title="Farce::Strict::WeakValueMap#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span> <span class='op'>:</span> <span class='const'><span class='object_link'><a href="" title="Farce::Strict::WeakCache (class)">WeakCache</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="Farce::Strict::WeakCache#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='op'>...</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="[]-instance_method">
+  
+    #<strong>[]</strong>(key)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Look up a value without generating it.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to look up.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The associated value, or nil if the key is absent.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+76</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 76</span>
+
+<span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@cache</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>nil</span> <span class='rbrace'>}</span> <span class='comment'># rubocop:disable Style/RedundantFetchBlock</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="assoc-instance_method">
+  
+    #<strong>assoc</strong>(key)  &#x21d2; <tt>Array(BasicObject, BasicObject)</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Return a lookup key and its associated value if present.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to look up.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array(BasicObject, BasicObject)</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The pair <code>[key, value]</code>, or nil if the key is absent.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+81
+82
+83
+84</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 81</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_assoc'>assoc</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>return</span> <span class='kw'>nil</span> <span class='rbrace'>}</span>
+  <span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rbracket'>]</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="compare_by_identity?-instance_method">
+  
+    #<strong>compare_by_identity?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns Whether keys are compared by identity instead of <code>hash</code> and <code>eql?</code>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether keys are compared by identity instead of <code>hash</code> and <code>eql?</code>.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+163</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 163</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_compare_by_identity?'>compare_by_identity?</span> <span class='op'>=</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="compare_keys_by_identity?-instance_method">
+  
+    #<strong>compare_keys_by_identity?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns Whether keys are compared by identity instead of <code>hash</code> and <code>eql?</code>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether keys are compared by identity instead of <code>hash</code> and <code>eql?</code>.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+160</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 160</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span> <span class='op'>=</span> <span class='ivar'>@map</span><span class='period'>.</span><span class='id identifier rubyid_compare_keys_by_identity?'>compare_keys_by_identity?</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="dig-instance_method">
+  
+    #<strong>dig</strong>(key, *rest)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Look up a value in nested maps or arrays.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to look up.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>rest</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;BasicObject&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Additional keys or indices for the nested value.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The nested value, or nil if an intermediate value is absent or nil.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+102
+103
+104
+105
+106</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 102</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_dig'>dig</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_rest'>rest</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_value'>value</span> <span class='kw'>if</span> <span class='id identifier rubyid_rest'>rest</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>||</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+  <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_dig'>dig</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_rest'>rest</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="fetch-instance_method">
+  
+    
+      <span class="overload">#<strong>fetch</strong>(key)  &#x21d2; <tt>BasicObject</tt> </span>
+    
+      <span class="overload">#<strong>fetch</strong>(key, default)  &#x21d2; <tt>BasicObject</tt> </span>
+    
+      <span class="overload">#<strong>fetch</strong>(key) {|key| ... } &#x21d2; <tt>BasicObject</tt> </span>
+    
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Fetch the value associated with a key, using the same missing-key behavior as Hash#fetch.
+If both a default and a block are provided, the block takes precedence.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <p class="tag_title">Overloads:</p>
+  <ul class="overload">
+    
+      
+      <li class="overload_item">
+        <span class="signature">#<strong>fetch</strong>(key)  &#x21d2; <tt>BasicObject</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Returns The associated value.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to look up.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The associated value.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>KeyError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>If the key is absent.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">#<strong>fetch</strong>(key, default)  &#x21d2; <tt>BasicObject</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Returns The associated value or <code>default</code>.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to look up.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>default</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to return if the key is absent.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The associated value or <code>default</code>.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+      </li>
+    
+      
+      <li class="overload_item">
+        <span class="signature">#<strong>fetch</strong>(key) {|key| ... } &#x21d2; <tt>BasicObject</tt> </span>
+        <div class="docstring">
+  <div class="discussion">
+    <p>Returns The associated value or the block result.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to look up.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>key</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Called if the key is absent.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The missing key.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to return.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The associated value or the block result.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div>
+      </li>
+    
+  </ul>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 132</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_arguments'>arguments</span><span class='rparen'>)</span>
+  <span class='kw'>unless</span> <span class='id identifier rubyid_arguments'>arguments</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span><span class='period'>.</span><span class='id identifier rubyid_between?'>between?</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>wrong number of arguments (given </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_arguments'>arguments</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span><span class='embexpr_end'>}</span><span class='tstring_content'>, expected 1..2)</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_default'>default</span> <span class='op'>=</span> <span class='id identifier rubyid_arguments'>arguments</span>
+  <span class='id identifier rubyid_warn'>warn</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>block supersedes default value argument</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='label'>uplevel:</span> <span class='int'>1</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_arguments'>arguments</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span> <span class='op'>==</span> <span class='int'>2</span>
+  <span class='ivar'>@cache</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='kw'>do</span>
+    <span class='kw'>return</span> <span class='kw'>yield</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+    <span class='kw'>return</span> <span class='id identifier rubyid_default'>default</span> <span class='kw'>if</span> <span class='id identifier rubyid_arguments'>arguments</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span> <span class='op'>==</span> <span class='int'>2</span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='const'>KeyError</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>key not found: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='label'>receiver:</span> <span class='kw'>self</span><span class='comma'>,</span> <span class='label'>key:</span> <span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="fetch_values-instance_method">
+  
+    #<strong>fetch_values</strong>(*keys) {|key| ... } &#x21d2; <tt>Array&lt;BasicObject&gt;</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Fetch values in the requested order, using <span class='object_link'><a href="#fetch-instance_method" title="Farce::Strict::WeakCache#fetch (method)">#fetch</a></span> for missing keys.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>keys</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;BasicObject&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The keys to look up.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>key</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Called for each missing key.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Parameters:</p>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The missing key.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The fallback value, which is not stored.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array&lt;BasicObject&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The associated values or block results.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+152</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 152</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_fetch_values'>fetch_values</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_keys'>keys</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_it'>it</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span> <span class='rbrace'>}</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="getkey-instance_method">
+  
+    #<strong>getkey</strong>(key)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Return the stored key matching a lookup key.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to look up.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The stored key, or nil if the key is absent.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+111</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 111</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_getkey'>getkey</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='ivar'>@map</span><span class='period'>.</span><span class='id identifier rubyid_getkey'>getkey</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="key?-instance_method">
+  
+    #<strong>key?</strong>(key)  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='has_key?-instance_method'>has_key?</span>, <span id='include?-instance_method'>include?</span>, <span id='member?-instance_method'>member?</span></span>
+    </span>
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Return whether a live entry exists, including entries with nil or false values.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to look up.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+89
+90
+91
+92</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 89</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_key?'>key?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
+  <span class='ivar'>@cache</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='kw'>return</span> <span class='kw'>false</span> <span class='rbrace'>}</span>
+  <span class='kw'>true</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="put_if_absent-instance_method">
+  
+    #<strong>put_if_absent</strong>(key, value)  &#x21d2; <tt>BasicObject</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Store a value only when the key is absent.
+Existing nil and false values count as present.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to look up or store.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to store if the key is absent.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The existing value, or nil when a value was inserted.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+64
+65
+66
+67
+68
+69
+70
+71</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 64</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_put_if_absent'>put_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_inserted'>inserted</span> <span class='op'>=</span> <span class='kw'>false</span>
+  <span class='id identifier rubyid_previous'>previous</span> <span class='op'>=</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span> <span class='kw'>do</span>
+    <span class='id identifier rubyid_inserted'>inserted</span> <span class='op'>=</span> <span class='kw'>true</span>
+    <span class='id identifier rubyid_value'>value</span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_inserted'>inserted</span> <span class='op'>?</span> <span class='kw'>nil</span> <span class='op'>:</span> <span class='id identifier rubyid_previous'>previous</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="shareable_keys?-instance_method">
+  
+    #<strong>shareable_keys?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns Whether keys must be Ractor-shareable, including copied mutable strings.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether keys must be Ractor-shareable, including copied mutable strings.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+166</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 166</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_shareable_keys?'>shareable_keys?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="shareable_values?-instance_method">
+  
+    #<strong>shareable_values?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns Whether values must be Ractor-shareable.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether values must be Ractor-shareable.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+169</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 169</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_shareable_values?'>shareable_values?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="store_if_absent-instance_method">
+  
+    #<strong>store_if_absent</strong>(key) { ... } &#x21d2; <tt>BasicObject</tt> 
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='compute_if_absent-instance_method'>compute_if_absent</span></span>
+    </span>
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Retrieves or stores a value for the given key.
+The block is called to generate the value if the key is absent.
+Concurrent calls for the same key reuse the generated value.
+Once that value is collected, a later call generates it again.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>key</span>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key to look up.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'></span>
+      
+      
+      
+        
+        <div class='inline'><p>Called without arguments when the key is absent.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Yield Returns:</p>
+<ul class="yieldreturn">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to store and return.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>BasicObject</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The associated value.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>LocalJumpError</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+52
+53
+54
+55</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 52</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>LocalJumpError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>no block given</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_block_given?'>block_given?</span>
+  <span class='ivar'>@cache</span><span class='period'>.</span><span class='id identifier rubyid_store_if_absent'>store_if_absent</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="values_at-instance_method">
+  
+    #<strong>values_at</strong>(*keys)  &#x21d2; <tt>Array&lt;BasicObject&gt;</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Look up values in the requested order, returning nil for missing keys.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>keys</span>
+      
+      
+        <span class='type'>(<tt>Array&lt;BasicObject&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The keys to look up.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array&lt;BasicObject&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The associated values, with nil for missing keys.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+157</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 157</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_values_at'>values_at</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_keys'>keys</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='kw'>self</span><span class='lbracket'>[</span><span class='id identifier rubyid_it'>it</span><span class='rbracket'>]</span> <span class='rbrace'>}</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="weak_keys?-instance_method">
+  
+    #<strong>weak_keys?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns Whether keys are referenced weakly.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether keys are referenced weakly.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+172</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 172</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_weak_keys?'>weak_keys?</span> <span class='op'>=</span> <span class='kw'>false</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="weak_values?-instance_method">
+  
+    #<strong>weak_values?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns Whether values are referenced weakly.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Whether values are referenced weakly.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+175</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/strict/weak_cache.rb', line 175</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_weak_values?'>weak_values?</span> <span class='op'>=</span> <span class='kw'>true</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Sat Oct 31 11:10:10 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-4.0.9).
+</div>
+
+    </div>
+  </body>
+</html>

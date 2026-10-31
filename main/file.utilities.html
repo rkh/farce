@@ -126,6 +126,7 @@
 <li><code>ThreadExecutor</code>: A <a href="file.scheduling.html#scheduling-code" title="task executor">task executor</a> creating a new thread for each unit of work. Used on TruffleRuby.</li>
 <li><code>Walker</code>: A tool for walking a Ruby object tree.</li>
 <li><code>WeakValue</code>: A value object version of <a href="file.shims.html#weakref" title="&lt;code&gt;WeakRef&lt;/code&gt;"><code>WeakRef</code></a>. Allows handling references more explicitly, without automatic method delegation.</li>
+<li><code>Strict::WeakCache</code>: Ractor-shared weak maps are slow on CRuby before 4.1. <code>WeakCache</code> provides a faster alternative if entries aren't frequently garbage collected, but it does not allow deleting or replacing entries manually.</li>
 </ul>
 <p>In addition, Farce includes a range of error classes not listed here. Check the <a href="https://rkh.github.io/farce/">API documentation</a> or <a href="https://github.com/rkh/farce/blob/main/lib/farce/error.rb">code base</a> for these.</p>
 <h2 id="shareability-mixins">Shareability Mixins<a href="#shareability-mixins" aria-label="Link to heading 'Shareability Mixins'" data-heading-content="Shareability Mixins" class="anchor"></a></h2>
@@ -181,7 +182,7 @@
 </div></div>
 
       <div id="footer">
-  Generated on Mon Oct 26 11:58:43 2026 by
+  Generated on Sat Oct 31 11:10:00 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>
