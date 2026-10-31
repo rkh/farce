@@ -54,6 +54,8 @@ module Farce
       end
     end
 
+    def native_weak_maps? = true
+
     # define_method supplies the receiver. Rebinding first is unnecessary without
     # native Ractor isolation and can change the method context used by super.
     def prepare_method_definition(&definition) = definition

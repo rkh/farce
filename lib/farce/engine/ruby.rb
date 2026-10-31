@@ -40,10 +40,14 @@ module Farce
       raise e unless e.path == "#{ENGINE_PATH}/patch"
     end
 
-    unless const_defined?(:NATIVE_WEAK_MAPS, false) && NATIVE_WEAK_MAPS
+    if const_defined?(:NATIVE_WEAK_MAPS, false) && NATIVE_WEAK_MAPS
+      def native_weak_maps? = true
+    else
+      def native_weak_maps? = false
       autoload :WeakMap,      "farce/engine/ruby/shared/weak_map"
       autoload :WeakKeyMap,   "farce/engine/ruby/shared/weak_map"
       autoload :WeakValueMap, "farce/engine/ruby/shared/weak_map"
+      autoload :WeakCacheMirror, "farce/engine/ruby/shared/weak_cache_mirror"
     end
 
     StrictAtom    = Atom
