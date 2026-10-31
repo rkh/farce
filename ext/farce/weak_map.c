@@ -1,4 +1,5 @@
 #include "containers.h"
+#include "weak_references.h"
 
 #ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
 
@@ -14,11 +15,6 @@
 #include <unistd.h>
 
 #define WEAK_MAP_INITIAL_CAPACITY 16
-
-/* These functions are exported by Rubies with the probed typed-data weak
- * reference callback, but their declarations intentionally remain internal. */
-void rb_gc_declare_weak_references(VALUE object);
-bool rb_gc_handle_weak_references_alive_p(VALUE object);
 
 static VALUE cWeakKeyMap;
 static VALUE weak_map_keep;
@@ -209,7 +205,7 @@ weak_map_compact(void *pointer)
  * mutex here could deadlock if GC stopped a mutator at a safepoint while it
  * owned the mutex, so cleanup deliberately runs lock-free. */
 static void
-weak_map_handle_weak_references(void *pointer)
+FARCE_WEAK_REFERENCES_CALLBACK(weak_map_handle_weak_references)
 {
     weak_map_t *map = pointer;
     if (!map->slots) return;
@@ -219,8 +215,8 @@ weak_map_handle_weak_references(void *pointer)
         weak_map_slot_t *slot = &map->slots[index];
         if (slot->state != WEAK_MAP_OCCUPIED) continue;
 
-        bool key_alive = !map->weak_keys || rb_gc_handle_weak_references_alive_p(slot->key);
-        bool value_alive = !map->weak_values || rb_gc_handle_weak_references_alive_p(slot->value);
+        bool key_alive = !map->weak_keys || FARCE_WEAK_REFERENCE_ALIVE_P(slot->key);
+        bool value_alive = !map->weak_values || FARCE_WEAK_REFERENCE_ALIVE_P(slot->value);
         if (key_alive && value_alive) continue;
 
         slot->key = Qnil;

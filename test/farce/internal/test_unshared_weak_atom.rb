@@ -38,6 +38,7 @@ module Farce
         worker = Ractor.new(type) do |klass|
           local = []
           atom = klass.new(local)
+          GC.start
           atom.value.equal?(local)
         end
 

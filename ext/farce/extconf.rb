@@ -103,19 +103,21 @@ if epoll || kqueue
   end
 end
 
-weak_callback = try_compile(<<~SOURCE)
-  #include "ruby.h"
+# The internal callback gained an object-space argument during Ruby 4.1
+# development. Check its exact type, since incompatible assignments may only warn.
+weak_callback_arguments = ["void *, void *", "void *"].find do |arguments|
+  try_compile(<<~SOURCE)
+    #include "ruby.h"
 
-  static void handle_weak_references(void *pointer) { (void)pointer; }
-  static const rb_data_type_t probe_type = {
-      .wrap_struct_name = "weak-reference-probe",
-      .function = {
-          .handle_weak_references = handle_weak_references,
-      },
-  };
+    _Static_assert(
+        _Generic(((rb_data_type_t *)0)->function.handle_weak_references,
+            void (*)(#{arguments}): 1, default: 0),
+        "unsupported weak-reference callback"
+    );
 
-  int main(void) { return probe_type.function.handle_weak_references == 0; }
-SOURCE
+    int main(void) { return 0; }
+  SOURCE
+end
 
 weak_declare = have_func("rb_gc_declare_weak_references")
 weak_alive   = have_func("rb_gc_handle_weak_references_alive_p")
@@ -123,7 +125,10 @@ weak_alive   = have_func("rb_gc_handle_weak_references_alive_p")
 # Kazlib deliberately puts full-tree integrity walks behind assert(3).
 # Enable them only while debugging the priority queue.
 $defs << "-DNDEBUG" unless ENV["FARCE_PRIORITY_QUEUE_ASSERTIONS"] == "1"
-$defs << "-DRC_HAVE_NATIVE_WEAK_REFERENCES=1" if weak_callback && weak_declare && weak_alive
+if weak_callback_arguments && weak_declare && weak_alive
+  $defs << "-DRC_HAVE_NATIVE_WEAK_REFERENCES=1"
+  $defs << "-DFARCE_WEAK_REFERENCES_HAVE_OBJSPACE=1" if weak_callback_arguments == "void *, void *"
+end
 $defs << "-DFARCE_TRIE_FAILURE_INJECTION" if ENV["FARCE_TRIE_FAILURE_INJECTION"] == "1"
 $CFLAGS  = "#{$CFLAGS} -std=c11 -fvisibility=hidden -Wall -Wextra -Wno-unused-parameter -Wno-unused-function"
 $LDFLAGS = "#{$LDFLAGS} -pthread" unless /mswin|mingw/ =~ RUBY_PLATFORM

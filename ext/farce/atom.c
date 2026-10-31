@@ -1,6 +1,7 @@
 #include "containers.h"
 #include "native_wait.h"
 #include "transaction.h"
+#include "weak_references.h"
 #include "ruby/fiber/scheduler.h"
 
 #include <errno.h>
@@ -12,11 +13,6 @@ static VALUE cAtom;
 #ifdef RC_HAVE_NATIVE_WEAK_REFERENCES
 static VALUE cWeakAtom;
 static VALUE cUnsharedWeakAtom;
-
-/* These functions are exported by Rubies with the probed typed-data weak
- * reference callback, but their declarations intentionally remain internal. */
-void rb_gc_declare_weak_references(VALUE object);
-bool rb_gc_handle_weak_references_alive_p(VALUE object);
 #endif
 
 typedef struct atom_waiter atom_waiter_t;
@@ -149,11 +145,11 @@ atom_compact(void *pointer)
 /* The VM invokes this after marking while mutators are stopped. Taking the atom
  * mutex here could deadlock if GC stopped a mutator while it owned the mutex. */
 static void
-atom_handle_weak_references(void *pointer)
+FARCE_WEAK_REFERENCES_CALLBACK(atom_handle_weak_references)
 {
     atom_t *atom = pointer;
     if (!atom->weak || NIL_P(atom->value)) return;
-    if (rb_gc_handle_weak_references_alive_p(atom->value)) return;
+    if (FARCE_WEAK_REFERENCE_ALIVE_P(atom->value)) return;
 
     atom->value = Qnil;
     atom_changed(atom);

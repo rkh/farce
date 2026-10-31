@@ -12,7 +12,8 @@ trie.o: trie.c containers.h trie_search.h
 queue.o: queue.c containers.h unshared_wait.h
 unshared_signal.o: unshared_signal.c containers.h unshared_wait.h unshared_io_pool.h
 
-atom.o: atom.c containers.h transaction.h native_wait.h futex.h
+atom.o: atom.c containers.h transaction.h native_wait.h futex.h weak_references.h
+weak_map.o: weak_map.c containers.h weak_references.h
 map.o: map.c containers.h transaction.h native_wait.h futex.h
 vector.o: vector.c containers.h transaction.h native_wait.h futex.h
 signal.o: signal.c containers.h native_wait.h futex.h
