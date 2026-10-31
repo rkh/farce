@@ -12,6 +12,7 @@ module Farce
     #   value = cache.get(:key) { ExpensiveClass.new.freeze }
     class WeakCache
       include Shareable::Delegated
+      include Internal::Inspect
 
       # @param initial_mapping [Hash, Farce::Abstract::Map, #each, nil]
       #   The entries to store initially. Each iteration must yield a key-value pair.
@@ -85,6 +86,20 @@ module Farce
 
       # @return [Boolean] Whether keys are compared by identity instead of `hash` and `eql?`.
       def compare_by_identity? = @map.compare_keys_by_identity?
+
+      # @api private
+      def inspect_with(inspector)
+        super do
+          yield if block_given?
+          inspector.breakable
+          inspector.group("{", "}") do
+            inspector.breakable ""
+            inspector.seplist(@map, nil, :each) do |key, value|
+              inspector.group { inspector.hash_pair(key, value) }
+            end
+          end
+        end
+      end
 
       private
 

@@ -111,6 +111,19 @@ module Farce
       end
     end
 
+    def test_weak_caches_show_empty_and_populated_entries
+      [false, true].each do |identity|
+        assert_inspection "#<Farce::Strict::WeakCache {}>", Strict::WeakCache.new(compare_by_identity: identity)
+
+        [:value, nil, false].each do |value|
+          cache = Strict::WeakCache.new(compare_by_identity: identity)
+          cache.get(:key) { value }
+
+          assert_inspection "#<Farce::Strict::WeakCache {key: #{value.inspect}}>", cache
+        end
+      end
+    end
+
     def test_sets_and_vectors_show_empty_and_populated_contents
       %i[Set SortedSet WeakSet Vector].each do |name|
         variants(name).each do |klass|
