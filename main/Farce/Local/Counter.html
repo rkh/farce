@@ -214,7 +214,7 @@ Each scope starts at the initial integer. Reset affects only the current scope.<
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#decrement-instance_method" title="#decrement (instance method)">#<strong>decrement</strong>(by = 1)  &#x21d2; self </a>
+      <a href="#decrement-instance_method" title="#decrement (instance method)">#<strong>decrement</strong>(by = 1)  &#x21d2; Integer </a>
     
 
     
@@ -239,7 +239,7 @@ Each scope starts at the initial integer. Reset affects only the current scope.<
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#increment-instance_method" title="#increment (instance method)">#<strong>increment</strong>(by = 1)  &#x21d2; self </a>
+      <a href="#increment-instance_method" title="#increment (instance method)">#<strong>increment</strong>(by = 1)  &#x21d2; Integer </a>
     
 
     
@@ -720,7 +720,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <div class="method_details ">
   <h3 class="signature " id="decrement-instance_method">
   
-    #<strong>decrement</strong>(by = 1)  &#x21d2; <tt>self</tt> 
+    #<strong>decrement</strong>(by = 1)  &#x21d2; <tt>Integer</tt> 
   
 
   
@@ -766,9 +766,13 @@ but not for non-blocking fibers (such as those created by <span class='object_li
     <li>
       
       
-        <span class='type'>(<tt>self</tt>)</span>
+        <span class='type'>(<tt>Integer</tt>)</span>
       
       
+      
+        &mdash;
+        <div class='inline'><p>the value produced by this atomic update</p>
+</div>
       
     </li>
   
@@ -780,18 +784,12 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-62
-63
-64
-65</pre>
+59</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 62</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 59</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_decrement'>decrement</span><span class='lparen'>(</span><span class='id identifier rubyid_by'>by</span> <span class='op'>=</span> <span class='int'>1</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_internal_counter'>internal_counter</span><span class='period'>.</span><span class='id identifier rubyid_decrement'>decrement</span><span class='lparen'>(</span><span class='id identifier rubyid_by'>by</span><span class='rparen'>)</span>
-  <span class='kw'>self</span>
-<span class='kw'>end</span></pre>
+<span class='kw'>def</span> <span class='id identifier rubyid_decrement'>decrement</span><span class='lparen'>(</span><span class='id identifier rubyid_by'>by</span> <span class='op'>=</span> <span class='int'>1</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_counter'>internal_counter</span><span class='period'>.</span><span class='id identifier rubyid_decrement'>decrement</span><span class='lparen'>(</span><span class='id identifier rubyid_by'>by</span><span class='rparen'>)</span></pre>
     </td>
   </tr>
 </table>
@@ -800,7 +798,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <div class="method_details ">
   <h3 class="signature " id="increment-instance_method">
   
-    #<strong>increment</strong>(by = 1)  &#x21d2; <tt>self</tt> 
+    #<strong>increment</strong>(by = 1)  &#x21d2; <tt>Integer</tt> 
   
 
   
@@ -842,9 +840,13 @@ but not for non-blocking fibers (such as those created by <span class='object_li
     <li>
       
       
-        <span class='type'>(<tt>self</tt>)</span>
+        <span class='type'>(<tt>Integer</tt>)</span>
       
       
+      
+        &mdash;
+        <div class='inline'><p>the value produced by this atomic update</p>
+</div>
       
     </li>
   
@@ -856,18 +858,12 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-54
-55
-56
-57</pre>
+54</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/farce/local/counter.rb', line 54</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_increment'>increment</span><span class='lparen'>(</span><span class='id identifier rubyid_by'>by</span> <span class='op'>=</span> <span class='int'>1</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_internal_counter'>internal_counter</span><span class='period'>.</span><span class='id identifier rubyid_increment'>increment</span><span class='lparen'>(</span><span class='id identifier rubyid_by'>by</span><span class='rparen'>)</span>
-  <span class='kw'>self</span>
-<span class='kw'>end</span></pre>
+<span class='kw'>def</span> <span class='id identifier rubyid_increment'>increment</span><span class='lparen'>(</span><span class='id identifier rubyid_by'>by</span> <span class='op'>=</span> <span class='int'>1</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_internal_counter'>internal_counter</span><span class='period'>.</span><span class='id identifier rubyid_increment'>increment</span><span class='lparen'>(</span><span class='id identifier rubyid_by'>by</span><span class='rparen'>)</span></pre>
     </td>
   </tr>
 </table>
@@ -1075,7 +1071,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
 </div>
 
       <div id="footer">
-  Generated on Sat Oct 31 15:09:22 2026 by
+  Generated on Wed Nov  4 17:57:20 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>
