@@ -6,6 +6,7 @@ Farce follows [Semantic Versioning 2.0](http://semver.org/). Any public method o
 
  Version                        | Date       | Important Changes
 --------------------------------|------------|--------------------------------------
+ [0.6.0](#farce-060-2026-11-04) | 2026-11-04 | Performance improvements, better counters, and `WeakCache`
  [0.5.0](#farce-050-2026-10-21) | 2026-10-21 | Publishers, memoization, pool and queue resizing, and better concurrent-ruby compatibility
  [0.4.1](#farce-041-2026-10-18) | 2026-10-18 | Include improved io_uring support in prebuilt Linux binaries
  [0.4.0](#farce-040-2026-10-16) | 2026-10-16 | Introduce `Farce::Backports`
@@ -14,6 +15,23 @@ Farce follows [Semantic Versioning 2.0](http://semver.org/). Any public method o
  [0.1.0](#farce-010-2026-10-09) | 2026-10-09 | Initial release
 
 ## Release History
+
+### Farce 0.6.0 (2026-11-04)
+
+#### Breaking Changes
+
+* `Counter` and `Local::Counter` arithmetic methods (`increment`, `add`, `decrement`, `subtract`, and `remove`) now return the integer produced by the atomic update instead of the counter. Use `number = counter.increment` to allocate sequence numbers without a separate read. Calls can no longer be chained.
+
+#### New Features
+
+* `Farce.dedup` can now deduplicate `Regexp`, `Range`, `Data`, and `SortedSet` instances.
+* `Farce::Walker` (and thus `Farce.freeze_graph`) correctly walk `Struct` and `Range` instances now.
+* Add `Farce::Strict::WeakCache`. It offers a subset of the API of `Farce::Strict::WeakValueMap`, but without its performance penalty on CRuby 3.x and 4.0 (on other Rubies, including CRuby 4.1, it's just a tiny wrapper around the well-performing `WeakValueMap`).
+
+#### Performance improvements
+
+* Faster construction of Map and Vector instances.
+* Speed up atoms and memoization.
 
 ### Farce 0.5.0 (2026-10-21)
 
