@@ -87,6 +87,11 @@
 </thead>
 <tbody>
 <tr>
+<td><a href="#farce-060-2026-11-04">0.6.0</a></td>
+<td>2026-11-04</td>
+<td>Performance improvements, better counters, and <code>WeakCache</code></td>
+</tr>
+<tr>
 <td><a href="#farce-050-2026-10-21">0.5.0</a></td>
 <td>2026-10-21</td>
 <td>Publishers, memoization, pool and queue resizing, and better concurrent-ruby compatibility</td>
@@ -119,8 +124,24 @@
 </tbody>
 </table>
 <h2 id="release-history">Release History<a href="#release-history" aria-label="Link to heading 'Release History'" data-heading-content="Release History" class="anchor"></a></h2>
-<h3 id="farce-050-2026-10-21">Farce 0.5.0 (2026-10-21)<a href="#farce-050-2026-10-21" aria-label="Link to heading 'Farce 0.5.0 (2026-10-21)'" data-heading-content="Farce 0.5.0 (2026-10-21)" class="anchor"></a></h3>
+<h3 id="farce-060-2026-11-04">Farce 0.6.0 (2026-11-04)<a href="#farce-060-2026-11-04" aria-label="Link to heading 'Farce 0.6.0 (2026-11-04)'" data-heading-content="Farce 0.6.0 (2026-11-04)" class="anchor"></a></h3>
+<h4 id="breaking-changes">Breaking Changes<a href="#breaking-changes" aria-label="Link to heading 'Breaking Changes'" data-heading-content="Breaking Changes" class="anchor"></a></h4>
+<ul>
+<li><code>Counter</code> and <code>Local::Counter</code> arithmetic methods (<code>increment</code>, <code>add</code>, <code>decrement</code>, <code>subtract</code>, and <code>remove</code>) now return the integer produced by the atomic update instead of the counter. Use <code>number = counter.increment</code> to allocate sequence numbers without a separate read. Calls can no longer be chained.</li>
+</ul>
 <h4 id="new-features">New Features<a href="#new-features" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
+<ul>
+<li><code>Farce.dedup</code> can now deduplicate <code>Regexp</code>, <code>Range</code>, <code>Data</code>, and <code>SortedSet</code> instances.</li>
+<li><code>Farce::Walker</code> (and thus <code>Farce.freeze_graph</code>) correctly walk <code>Struct</code> and <code>Range</code> instances now.</li>
+<li>Add <code>Farce::Strict::WeakCache</code>. It offers a subset of the API of <code>Farce::Strict::WeakValueMap</code>, but without its performance penalty on CRuby 3.x and 4.0 (on other Rubies, including CRuby 4.1, it's just a tiny wrapper around the well-performing <code>WeakValueMap</code>).</li>
+</ul>
+<h4 id="performance-improvements">Performance improvements<a href="#performance-improvements" aria-label="Link to heading 'Performance improvements'" data-heading-content="Performance improvements" class="anchor"></a></h4>
+<ul>
+<li>Faster construction of Map and Vector instances.</li>
+<li>Speed up atoms and memoization.</li>
+</ul>
+<h3 id="farce-050-2026-10-21">Farce 0.5.0 (2026-10-21)<a href="#farce-050-2026-10-21" aria-label="Link to heading 'Farce 0.5.0 (2026-10-21)'" data-heading-content="Farce 0.5.0 (2026-10-21)" class="anchor"></a></h3>
+<h4 id="new-features-1">New Features<a href="#new-features-1" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
 <h5 id="publishers">Publishers<a href="#publishers" aria-label="Link to heading 'Publishers'" data-heading-content="Publishers" class="anchor"></a></h5>
 <p><code>Farce::Publisher</code> broadcasts messages to multiple subscribers. It supports Ractors, ports, queues, atoms, counters, flags, collections, signals, other publishers, and callbacks.</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_publisher'>publisher</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Publisher.html" title="Farce::Publisher (class)">Publisher</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Publisher.html#initialize-instance_method" title="Farce::Publisher#initialize (method)">new</a></span></span>
@@ -183,7 +204,7 @@
 <li>Consistent <code>wrap_struct_name</code> across the native extension for debugging.</li>
 </ul>
 <h3 id="farce-040-2026-10-16">Farce 0.4.0 (2026-10-16)<a href="#farce-040-2026-10-16" aria-label="Link to heading 'Farce 0.4.0 (2026-10-16)'" data-heading-content="Farce 0.4.0 (2026-10-16)" class="anchor"></a></h3>
-<h4 id="new-features-1">New Features<a href="#new-features-1" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
+<h4 id="new-features-2">New Features<a href="#new-features-2" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
 <h5 id="ractor-backports">Ractor Backports<a href="#ractor-backports" aria-label="Link to heading 'Ractor Backports'" data-heading-content="Ractor Backports" class="anchor"></a></h5>
 <p><code>Farce::Backports</code> makes newer Ractor APIs available on older Ruby versions:</p>
 <ul>
@@ -221,8 +242,8 @@ Global installation also defines <code>Ractor</code> and <code>Ractor::Port</cod
 <li>Updated compatibility documentation and tests for <code>ractor-tmvar</code> 0.4.0.</li>
 </ul>
 <h3 id="farce-030-2026-10-13">Farce 0.3.0 (2026-10-13)<a href="#farce-030-2026-10-13" aria-label="Link to heading 'Farce 0.3.0 (2026-10-13)'" data-heading-content="Farce 0.3.0 (2026-10-13)" class="anchor"></a></h3>
-<h4 id="new-features-2">New Features<a href="#new-features-2" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
-<h5 id="breaking-changes">Breaking Changes<a href="#breaking-changes" aria-label="Link to heading 'Breaking Changes'" data-heading-content="Breaking Changes" class="anchor"></a></h5>
+<h4 id="new-features-3">New Features<a href="#new-features-3" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
+<h5 id="breaking-changes-1">Breaking Changes<a href="#breaking-changes-1" aria-label="Link to heading 'Breaking Changes'" data-heading-content="Breaking Changes" class="anchor"></a></h5>
 <ul>
 <li><code>Abstract::Scheduler</code> is no longer a superclass of <code>Pool</code>. Use <code>Abstract::Executor</code> instead.</li>
 </ul>
@@ -258,7 +279,7 @@ executed manually, or handed off to any other executor supporting procs or calla
 <li>Calling <code>wait_*</code> methods on atoms on JRuby no longer blocks a fiber scheduler.</li>
 </ul>
 <h3 id="farce-020-2026-10-11">Farce 0.2.0 (2026-10-11)<a href="#farce-020-2026-10-11" aria-label="Link to heading 'Farce 0.2.0 (2026-10-11)'" data-heading-content="Farce 0.2.0 (2026-10-11)" class="anchor"></a></h3>
-<h4 id="new-features-3">New Features<a href="#new-features-3" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
+<h4 id="new-features-4">New Features<a href="#new-features-4" aria-label="Link to heading 'New Features'" data-heading-content="New Features" class="anchor"></a></h4>
 <h5 id="waiting-on-flags">Waiting on Flags<a href="#waiting-on-flags" aria-label="Link to heading 'Waiting on Flags'" data-heading-content="Waiting on Flags" class="anchor"></a></h5>
 <p>You can now wait for a <code>Farce::Flag</code> or <code>Farce::Local::Flag</code> to change its value:</p>
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_flag'>flag</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Flag.html" title="Farce::Flag (class)">Flag</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Farce/Flag.html#initialize-instance_method" title="Farce::Flag#initialize (method)">new</a></span></span>
@@ -298,7 +319,7 @@ This allows you to cancel a scheduled value using the returned entry:</p>
 <ul>
 <li>Improve compatibility with other gems modifying <code>Kernel#require</code>, work around an issue with Ruby 4.0's runtime ractor require patch and alias methods chains not working nicely with <code>Module#prepend</code>.</li>
 </ul>
-<h4 id="performance-improvements">Performance Improvements<a href="#performance-improvements" aria-label="Link to heading 'Performance Improvements'" data-heading-content="Performance Improvements" class="anchor"></a></h4>
+<h4 id="performance-improvements-1">Performance Improvements<a href="#performance-improvements-1" aria-label="Link to heading 'Performance Improvements'" data-heading-content="Performance Improvements" class="anchor"></a></h4>
 <h5 id="rework-cruby-native-extension">Rework CRuby native extension<a href="#rework-cruby-native-extension" aria-label="Link to heading 'Rework CRuby native extension'" data-heading-content="Rework CRuby native extension" class="anchor"></a></h5>
 <p>Incorporated the advice from <a href="https://github.com/ruby/ruby/blob/master/doc/efficient_extensions.md">&quot;Tips for updating Ruby C extensions for efficiently using Ruby 4 VM APIs&quot;</a>.</p>
 <p>With this change, all long-living Farce objects can be compacted and moved to old GC generations. This was not the case previously for maps and vectors that had snapshots taken of them (either for iteration or for transactions). These ended up being permanently kept in young generations. A long-living map or vector would therefore cause frequent GC runs to be quite expensive.</p>
@@ -360,7 +381,7 @@ This allows you to cancel a scheduled value using the returned entry:</p>
 </div></div>
 
       <div id="footer">
-  Generated on Wed Nov  4 17:57:13 2026 by
+  Generated on Wed Nov  4 18:25:07 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>
