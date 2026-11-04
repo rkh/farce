@@ -90,22 +90,22 @@ module Farce
         counter = Counter.new
 
         assert_kind_of Numeric, counter
-        assert_same counter, counter.increment
+        assert_equal 1, counter.increment
         assert_equal 1, counter.value
-        assert_same counter, counter.increment(3)
+        assert_equal 4, counter.increment(3)
         assert_equal 4, counter.value
-        assert_same counter, counter.decrement
+        assert_equal 3, counter.decrement
         assert_equal 3, counter.value
-        assert_same counter, counter.decrement(4)
+        assert_equal(-1, counter.decrement(4))
         assert_equal(-1, counter.value)
       end
 
-      def test_chainable_updates_coerce_deltas_without_changing_primitive_returns
+      def test_increment_and_decrement_coerce_deltas
         counter = Counter.new(10)
 
-        assert_same counter, counter.increment("3")
+        assert_equal 13, counter.increment("3")
         assert_equal 13, counter.value
-        assert_same counter, counter.decrement(2.9)
+        assert_equal 11, counter.decrement(2.9)
         assert_equal 11, counter.value
         assert_equal 12, counter.add
         assert_equal 11, counter.subtract

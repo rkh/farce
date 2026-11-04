@@ -50,19 +50,13 @@ module Farce
 
       # Increment the counter atomically.
       # @param by [Numeric, String, #to_int] the amount, converted to an Integer
-      # @return [self]
-      def increment(by = 1)
-        internal_counter.increment(by)
-        self
-      end
+      # @return [Integer] the value produced by this atomic update
+      def increment(by = 1) = internal_counter.increment(by)
 
       # Decrement the counter atomically.
       # @param by [Numeric, String, #to_int] the amount, converted to an Integer
-      # @return [self]
-      def decrement(by = 1)
-        internal_counter.decrement(by)
-        self
-      end
+      # @return [Integer] the value produced by this atomic update
+      def decrement(by = 1) = internal_counter.decrement(by)
 
       alias subtract decrement
       alias remove   decrement

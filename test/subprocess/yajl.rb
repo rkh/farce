@@ -9,7 +9,8 @@ require "stringio"
 module Farce
   class YajlTests < Test
     def test_nested_primitive_encoding_and_streaming
-      value = Vector.new([Map.new({ "count" => Counter.new(2).increment(3) }), Atom.new(Flag.new(true)), Set.new([1])])
+      counter = Counter.new(2).tap { it.increment(3) }
+      value = Vector.new([Map.new({ "count" => counter }), Atom.new(Flag.new(true)), Set.new([1])])
       expected = [{ "count" => 5 }, true, [1]]
 
       assert_equal expected, ::Yajl::Parser.parse(value.to_json)

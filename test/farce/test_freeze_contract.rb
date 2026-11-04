@@ -181,7 +181,7 @@ module Farce
       containers.each(&:freeze)
       values.each do |value|
         refute_predicate value, :frozen?
-        assert_same value, value.increment
+        assert_equal 1, value.increment
       end
     end
 

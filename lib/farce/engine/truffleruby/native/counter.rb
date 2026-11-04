@@ -60,7 +60,6 @@ module Farce
           check_frozen!
         end
         change(delta)
-        self
       end
 
       def decrement(delta = 1)
@@ -70,7 +69,6 @@ module Farce
           check_frozen!
         end
         change(-delta)
-        self
       end
 
       alias value get

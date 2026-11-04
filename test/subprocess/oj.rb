@@ -9,7 +9,7 @@ module Farce
   class OjTests < Test
     def test_primitive_encoding_and_mode_contracts
       values = [Vector.new([1, false, nil]), Map.new({ "x" => 2 }), Set.new([3]),
-                Counter.new(2).increment(3), Flag.new(true), Atom.new, Atom.new(false)]
+                Counter.new(2).tap { it.increment(3) }, Flag.new(true), Atom.new, Atom.new(false)]
       primitives = [[1, false, nil], { "x" => 2 }, [3], 5, true, nil, false]
       values.zip(primitives).each do |value, primitive|
         assert_equal primitive.to_json(indent: "  "), value.to_json(indent: "  ")
@@ -21,7 +21,7 @@ module Farce
     end
 
     def test_object_mode_restores_nested_types_and_independent_storage
-      source = Vector.new([Map.new({ "count" => Counter.new(2).increment(3) }), Atom.new(Flag.new(true)),
+      source = Vector.new([Map.new({ "count" => Counter.new(2).tap { it.increment(3) } }), Atom.new(Flag.new(true)),
                            Set.new([1, 2])])
       copy = ::Oj.load(::Oj.dump(source))
 
@@ -47,7 +47,7 @@ module Farce
       Oj.register_type(Local::Counter, scope: :fiber)
       Oj.register_type(LRUMap, max_size: 2)
       Oj.register_type(Unshared::Vector)
-      counter = ::Oj.load(::Oj.dump(Local::Counter.new(3, scope: :thread).increment(4)))
+      counter = ::Oj.load(::Oj.dump(Local::Counter.new(3, scope: :thread).tap { it.increment(4) }))
       map = ::Oj.load(::Oj.dump(LRUMap.new({ a: 1 }, max_size: 5)))
       vector = ::Oj.load(::Oj.dump(Unshared::Vector.new([false, nil])))
 
@@ -69,7 +69,7 @@ module Farce
       workers = Array.new(3) do
         Ractor.new do
           30.times do
-            source = Farce::Vector.new([Farce::Counter.new(2).increment(3), Farce::Flag.new(true)])
+            source = Farce::Vector.new([Farce::Counter.new(2).tap { it.increment(3) }, Farce::Flag.new(true)])
             copy = ::Oj.load(::Oj.dump(source))
             raise "wrong values" unless copy[0].value == 5 && copy[0].reset.value == 2 && copy[1].value
           end

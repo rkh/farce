@@ -379,7 +379,7 @@ module Farce
       pool_classes.each do |klass|
         calls = Counter.new
         pool = klass.new(max_size: 1) do
-          case calls.increment.value
+          case calls.increment
           when 1 then raise "factory failed"
           when 2 then nil
           when 3 then true
@@ -402,7 +402,7 @@ module Farce
         entered = Flag.new
         release = Flag.new
         pool = klass.new(max_size: 1) do
-          attempt = calls.increment.value
+          attempt = calls.increment
           if attempt == 1
             entered.set
             Thread.pass until release.value
@@ -460,7 +460,7 @@ module Farce
       pool_classes.each do |klass|
         calls = Counter.new
         pool = klass.new(max_size: 1) do
-          throw :factory_exit, :exited if calls.increment.value == 1
+          throw :factory_exit, :exited if calls.increment == 1
           Object.new
         end
 

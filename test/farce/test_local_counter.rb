@@ -30,11 +30,11 @@ module Farce
     def test_operations_and_numeric_interface
       counter = Local::Counter.new(7)
 
-      assert_same counter, counter.increment("3")
-      assert_same counter, counter.add(2)
-      assert_same counter, counter.decrement(1)
-      assert_same counter, counter.subtract(2)
-      assert_same counter, counter.remove
+      assert_equal 10, counter.increment("3")
+      assert_equal 12, counter.add(2)
+      assert_equal 11, counter.decrement(1)
+      assert_equal 9, counter.subtract(2)
+      assert_equal 8, counter.remove
       assert_equal 8, counter.get
       assert_equal 8, counter.swap(4)
       assert_equal 5, counter.store(5)
@@ -106,7 +106,7 @@ module Farce
       counter = Local::Counter.new(5, scope: :fiber_storage)
       counter.increment
 
-      assert_equal 7, Fiber.new { counter.increment.value }.resume
+      assert_equal 7, Fiber.new { counter.increment }.resume
       assert_equal 5, Fiber.new(storage: {}) { counter.value }.resume
       assert_equal 7, counter.value
     end

@@ -40,7 +40,7 @@ module Farce
 
     def test_scalar_variants_restore_independent_storage_and_settings
       NAMESPACES.each do |namespace|
-        counter = namespace::Counter.new(3).increment(4)
+        counter = namespace::Counter.new(3).tap { it.increment(4) }
         copy = round_trip(counter)
 
         assert_equal 7, copy.value
@@ -265,7 +265,7 @@ module Farce
     end
 
     def test_local_current_state_and_future_scope_configuration_are_separate
-      counter = Local::Counter.new(3, scope: :thread).increment(4)
+      counter = Local::Counter.new(3, scope: :thread).tap { it.increment(4) }
       atom = Local::Atom.new(:initial, scope: :thread)
       atom.value = :current
       map = Local::Map.new({ initial: 1 }, scope: :thread)
@@ -373,7 +373,7 @@ module Farce
                 round_trip(Vector.new([[2]])), round_trip(Map.new({ value: [3] })),
                 round_trip(Set.new([[4]]))]
       worker = Ractor.new(*copies) do |counter, atom, vector, map, set|
-        [counter.increment.value, atom.value, vector.first, map[:value], set.first]
+        [counter.increment, atom.value, vector.first, map[:value], set.first]
       end
 
       assert_equal [4, [1], [2], [3], [4]], ractor_value(worker)

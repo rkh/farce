@@ -15,14 +15,15 @@ module Farce
     #   @return [Integer] The current value of the counter.
     #
     # @!method increment(by = 1)
-    #   Increment the counter by the given amount (default is 1).
+    #   Atomically increment the counter by the given amount (default is 1).
+    #   Use the returned integer to allocate a sequence number without a separate read.
     #   @param [Numeric, String, #to_int] by The amount, converted to an Integer.
-    #   @return [self] Returns self for chaining.
+    #   @return [Integer] The value produced by this atomic update.
     #
     # @!method decrement(by = 1)
-    #   Decrement the counter by the given amount (default is 1).
+    #   Atomically decrement the counter by the given amount (default is 1).
     #   @param [Numeric, String, #to_int] by The amount, converted to an Integer.
-    #   @return [self] Returns self for chaining.
+    #   @return [Integer] The value produced by this atomic update.
     module Counter
       include Internal::MarshalSupport::Counter
       include Internal::Copyable

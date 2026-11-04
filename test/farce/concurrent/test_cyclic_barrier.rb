@@ -156,7 +156,7 @@ module Farce
 
       def test_action_exception_breaks_the_generation_and_releases_waiters
         calls = Counter.new
-        barrier = CyclicBarrier.new(2) { raise "action failed" if calls.increment.value == 1 }
+        barrier = CyclicBarrier.new(2) { raise "action failed" if calls.increment == 1 }
         worker = Thread.new { barrier.wait(5) }
         wait_for_waiters(barrier, 1)
 

@@ -338,8 +338,8 @@ counter_compare_and_set(VALUE self, VALUE expected_input, VALUE replacement_inpu
     return exchanged ? Qtrue : Qfalse;
 }
 
-/* The chainable operations are inherited directly by Farce::Counter. Keep
- * add/subtract as strict, value-returning primitives for internal callers. */
+/* Farce::Counter inherits these coercing operations directly. Internal
+ * add/subtract callers require strict Integer arguments. */
 static VALUE
 counter_increment(int argc, VALUE *argv, VALUE self)
 {
@@ -352,8 +352,7 @@ counter_increment(int argc, VALUE *argv, VALUE self)
         rb_check_frozen(self);
     }
     long long delta = NUM2LL(input);
-    (void)counter_change(counter, delta, false);
-    return self;
+    return counter_change(counter, delta, false);
 }
 
 static VALUE
@@ -368,8 +367,7 @@ counter_decrement(int argc, VALUE *argv, VALUE self)
         rb_check_frozen(self);
     }
     long long delta = NUM2LL(input);
-    (void)counter_change(counter, delta, true);
-    return self;
+    return counter_change(counter, delta, true);
 }
 
 void

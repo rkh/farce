@@ -68,7 +68,6 @@ module Farce
           check_frozen!
         end
         @counter.addAndGet(delta).tap { @signal.broadcast }
-        self
       end
 
       def decrement(delta = 1)
@@ -78,7 +77,6 @@ module Farce
           check_frozen!
         end
         @counter.addAndGet(-delta).tap { @signal.broadcast }
-        self
       end
 
       alias value get

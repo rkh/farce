@@ -10,7 +10,7 @@ module Farce
   class MessagePackTests < Test
     def test_primitive_encoding_and_packer_arguments
       objects = [Vector.new([1, false, nil]), Map.new({ "a" => 1 }), Set.new([1]),
-                 Counter.new(2).increment(3), Flag.new, Flag.new(true), Atom.new, Atom.new(false)]
+                 Counter.new(2).tap { it.increment(3) }, Flag.new, Flag.new(true), Atom.new, Atom.new(false)]
       primitives = [[1, false, nil], { "a" => 1 }, [1], 5, false, true, nil, false]
       objects.zip(primitives).each do |object, primitive|
         assert_equal primitive.to_msgpack, object.to_msgpack
@@ -34,7 +34,7 @@ module Farce
 
     def test_factory_restores_nested_types_and_independent_containers
       factory = MessagePack.factory
-      counter = Counter.new(2).increment(3)
+      counter = Counter.new(2).tap { it.increment(3) }
       source = Vector.new([Map.new({ "count" => counter }), Atom.new(Flag.new(true)), Set.new([1, 2])])
       copy = factory.load(factory.dump(source))
 
@@ -73,7 +73,7 @@ module Farce
 
       assert_instance_of Flag, factory.load(factory.dump(Flag.new))
       MessagePack.register_type(factory, 43, Local::Counter, scope: :fiber)
-      source = Local::Counter.new(4, scope: :fiber).increment(2)
+      source = Local::Counter.new(4, scope: :fiber).tap { it.increment(2) }
       copy = factory.load(factory.dump(source))
 
       assert_equal :fiber, copy.scope

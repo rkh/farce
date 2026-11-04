@@ -10,6 +10,75 @@ module Farce
 
     COUNTER_TYPES = [Counter, Local::Counter].freeze
 
+    def test_arithmetic_updates_return_the_committed_integer
+      COUNTER_TYPES.each do |type|
+        %i[increment add decrement subtract remove].each do |operation|
+          counter = type.new(20)
+          direction = %i[increment add].include?(operation) ? 1 : -1
+          expected = 20
+          [[], ["3"], [0], [-2]].each do |arguments|
+            result = counter.public_send(operation, *arguments)
+            expected += direction * Integer(arguments.fetch(0, 1))
+
+            assert_instance_of Integer, result, "#{type}##{operation}"
+            assert_equal expected, result, "#{type}##{operation}"
+            assert_equal expected, counter.value, "#{type}##{operation}"
+            counter.increment
+            expected += 1
+
+            assert_equal expected - 1, result, "#{type}##{operation}"
+          end
+        end
+      end
+    end
+
+    def test_arithmetic_updates_allocate_distinct_values_across_threads
+      COUNTER_TYPES.each do |type|
+        %i[increment add decrement subtract remove].each do |operation|
+          counter = type.new
+          ready = Thread::Queue.new
+          start = Thread::Queue.new
+          workers = 4.times.map do
+            Thread.new do
+              ready << true
+              start.pop
+              100.times.map { counter.public_send(operation) }
+            end
+          end
+          begin
+            Timeout.timeout(5) { workers.size.times { ready.pop } }
+            workers.size.times { start << true }
+            workers.each { assert it.join(5), "#{type}##{operation} did not finish" }
+            expected = %i[increment add].include?(operation) ? (1..400) : (-400..-1)
+
+            assert_equal expected.to_a, workers.flat_map(&:value).sort, "#{type}##{operation}"
+            assert_equal(%i[increment add].include?(operation) ? 400 : -400, counter.value)
+          ensure
+            workers.each(&:kill)
+            workers.each(&:join)
+          end
+        end
+      end
+    end
+
+    def test_arithmetic_updates_allocate_distinct_values_across_ractors
+      return unless Internal.native_ractors?
+
+      %i[increment add decrement subtract remove].each do |operation|
+        counter = Counter.new
+        workers = 4.times.map do
+          Ractor.new(counter, operation) do |shared, method|
+            1_000.times.map { shared.public_send(method) }
+          end
+        end
+        results = workers.flat_map { ractor_value(it) }
+        expected = %i[increment add].include?(operation) ? (1..4_000) : (-4_000..-1)
+
+        assert_equal expected.to_a, results.sort, operation.to_s
+        assert_equal(%i[increment add].include?(operation) ? 4_000 : -4_000, counter.value)
+      end
+    end
+
     def test_update_yields_the_current_integer_and_returns_the_new_value
       COUNTER_TYPES.each do |type|
         counter = type.new(5)

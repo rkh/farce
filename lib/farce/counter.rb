@@ -13,6 +13,12 @@ module Farce
   #
   # On CRuby, subclasses must not add Ruby instance variables.
   #
+  # @example Allocate sequence numbers across threads or Ractors
+  #   counter = Farce::Counter.new
+  #   ticket = counter.increment # => 1
+  #   counter.increment          # => 2
+  #   ticket                     # => 1
+  #
   # @example Cross-Ractor counting
   #   counter = Farce::Counter.new
   #   counter.value # => 0

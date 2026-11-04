@@ -549,7 +549,7 @@ module Farce
     def test_local_lease_retries_after_nonlocal_initializer_exit
       calls = Counter.new
       lease = Local::Lease.new do
-        throw :initializer_exit, :exited if calls.increment.value == 1
+        throw :initializer_exit, :exited if calls.increment == 1
         []
       end
 
@@ -603,7 +603,7 @@ module Farce
       entered = Farce::Queue.new
       release = Farce::Queue.new
       lease = Local::Lease.new do
-        attempt = calls.increment.value
+        attempt = calls.increment
         if attempt == 1
           entered << true
           release.pop

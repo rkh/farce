@@ -799,7 +799,7 @@ module Farce
       klass = concrete_map_class(Local)
       calls = Counter.new
       map = klass.new do
-        raise "not ready" if calls.increment.value == 1
+        raise "not ready" if calls.increment == 1
         { key: [] }
       end
 

@@ -162,18 +162,18 @@ module Farce
       assert_match(/cannot be published with Ruby instance variables/, error.message)
     end
 
-    def test_increment_decrement_aliases_and_reset_return_self
+    def test_arithmetic_returns_integers_and_reset_returns_self
       counter = Counter.new(10)
 
-      assert_same counter, counter.increment
+      assert_equal 11, counter.increment
       assert_equal 11, counter.value
-      assert_same counter, counter.add(4)
+      assert_equal 15, counter.add(4)
       assert_equal 15, counter.value
-      assert_same counter, counter.decrement(3)
+      assert_equal 12, counter.decrement(3)
       assert_equal 12, counter.value
-      assert_same counter, counter.subtract
+      assert_equal 11, counter.subtract
       assert_equal 11, counter.value
-      assert_same counter, counter.remove(2)
+      assert_equal 9, counter.remove(2)
       assert_equal 9, counter.value
       assert_same counter, counter.reset
       assert_equal 10, counter.value
@@ -184,15 +184,15 @@ module Farce
       coercible.define_singleton_method(:to_int) { 7 }
       counter = Counter.new
 
-      assert_same counter, counter.increment("3")
+      assert_equal 3, counter.increment("3")
       assert_equal 3, counter.value
-      assert_same counter, counter.increment(2.9)
+      assert_equal 5, counter.increment(2.9)
       assert_equal 5, counter.value
-      assert_same counter, counter.increment(Rational(5, 2))
+      assert_equal 7, counter.increment(Rational(5, 2))
       assert_equal 7, counter.value
-      assert_same counter, counter.increment(coercible)
+      assert_equal 14, counter.increment(coercible)
       assert_equal 14, counter.value
-      assert_same counter, counter.increment(-4)
+      assert_equal 10, counter.increment(-4)
       assert_equal 10, counter.value
     end
 
@@ -204,7 +204,7 @@ module Farce
         2
       end
 
-      assert_same counter, counter.increment(coercible)
+      assert_equal 13, counter.increment(coercible)
       assert_equal 13, counter.value
     end
 
@@ -233,7 +233,7 @@ module Farce
       assert_equal maximum, counter.value
       assert_raises(RangeError) { counter.increment(minimum - 1) }
       assert_equal maximum, counter.value
-      assert_same counter, counter.increment(minimum)
+      assert_equal(-1, counter.increment(minimum))
       assert_equal(-1, counter.value)
 
       counter = Counter.new(minimum)
@@ -244,7 +244,7 @@ module Farce
       assert_equal minimum, counter.value
       assert_raises(RangeError) { counter.decrement(minimum - 1) }
       assert_equal minimum, counter.value
-      assert_same counter, counter.decrement(minimum)
+      assert_equal 0, counter.decrement(minimum)
       assert_equal 0, counter.value
       assert_raises(RangeError) { counter.decrement(minimum) }
       assert_equal 0, counter.value
@@ -276,9 +276,9 @@ module Farce
       end
       counter = subclass.new
 
-      assert_same counter, counter.add(3)
+      assert_equal 6, counter.add(3)
       assert_equal 7, counter.value
-      assert_same counter, counter.decrement
+      assert_equal 3, counter.decrement
       assert_equal 4, counter.value
     end
 
@@ -287,15 +287,15 @@ module Farce
       coercible.define_singleton_method(:to_int) { 7 }
       counter = Counter.new(20)
 
-      assert_same counter, counter.decrement("3")
+      assert_equal 17, counter.decrement("3")
       assert_equal 17, counter.value
-      assert_same counter, counter.decrement(2.9)
+      assert_equal 15, counter.decrement(2.9)
       assert_equal 15, counter.value
-      assert_same counter, counter.decrement(Rational(5, 2))
+      assert_equal 13, counter.decrement(Rational(5, 2))
       assert_equal 13, counter.value
-      assert_same counter, counter.decrement(coercible)
+      assert_equal 6, counter.decrement(coercible)
       assert_equal 6, counter.value
-      assert_same counter, counter.decrement(-4)
+      assert_equal 10, counter.decrement(-4)
       assert_equal 10, counter.value
     end
 
@@ -433,7 +433,13 @@ module Farce
       workers = 4.times.map do
         Ractor.new(counter) do |shared|
           threads = 2.times.map do
-            Thread.new { 2_000.times { shared.increment.decrement.increment } }
+            Thread.new do
+              2_000.times do
+                shared.increment
+                shared.decrement
+                shared.increment
+              end
+            end
           end
           threads.each(&:value)
           shared.object_id

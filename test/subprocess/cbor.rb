@@ -10,7 +10,7 @@ module Farce
   class CBORTests < Test
     def test_primitive_encoding_and_packer_arguments
       objects = [Vector.new([1, false, nil]), Map.new({ "a" => 1 }), Set.new([1]),
-                 Counter.new(2).increment(3), Flag.new, Flag.new(true), Atom.new, Atom.new(false)]
+                 Counter.new(2).tap { it.increment(3) }, Flag.new, Flag.new(true), Atom.new, Atom.new(false)]
       primitives = [[1, false, nil], { "a" => 1 }, [1], 5, false, true, nil, false]
       objects.zip(primitives).each do |object, primitive|
         assert_equal primitive.to_cbor, object.to_cbor

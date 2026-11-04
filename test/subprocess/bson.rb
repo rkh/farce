@@ -25,7 +25,7 @@ module Farce
 
     def test_standard_encoding_and_buffer_arguments
       objects = [Vector.new([1, false, nil]), Map.new({ "a" => 1 }), Set.new([1]),
-                 Counter.new(2).increment(3), Flag.new, Flag.new(true), Atom.new, Atom.new(false)]
+                 Counter.new(2).tap { it.increment(3) }, Flag.new, Flag.new(true), Atom.new, Atom.new(false)]
       ordinary = [[1, false, nil], { "a" => 1 }, [1], 5, false, true, nil, false]
       objects.zip(ordinary).each do |object, value|
         assert_equal value.to_bson.to_s, object.to_bson.to_s

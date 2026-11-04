@@ -154,7 +154,7 @@ module Helpers
 
     def test_shareable_default_block_is_evaluated_independently_in_each_ractor
       calls = Farce::Counter.new
-      variable = local_var_class.new { calls.increment.value }
+      variable = local_var_class.new { calls.increment }
 
       assert Farce::Ractor.shareable?(variable)
       assert_equal 1, variable.value
