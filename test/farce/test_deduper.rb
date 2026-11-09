@@ -93,6 +93,19 @@ module Farce
       end
     end
 
+    def test_shareable_procs_in_custom_objects
+      callable = Ractor.shareable_lambda { :converted }
+      original = Box.new(callable)
+      @deduper.store(Box)
+      result = @deduper.dedup(original)
+
+      assert_same original, result
+      assert_same callable, result.value
+      assert_equal :converted, result.value.call
+      assert_predicate result, :frozen?
+      assert_same result, @deduper.dedup(Box.new(callable))
+    end
+
     def test_nested_arrays_hashes_and_sets_are_canonicalized
       left = { [+"key"] => ::Set[[+"value"]] }
       right = { [+"key"] => ::Set[[+"value"]] }

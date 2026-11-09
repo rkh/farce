@@ -8,6 +8,7 @@ module Farce
   # Traversal follows container elements, hash keys and values, and ordinary
   # instance variables. Farce containers expose their contents, not their storage.
   # Proc traversal follows the receiver, not captured local variables.
+  # Isolated procs retain their receiver without traversing it.
   # Module and class traversal includes directly defined public constants and
   # class variables. Set constants: :inherited or class_variables: :inherited
   # to include ancestors, or false to skip either kind. Autoloads are not loaded.

@@ -73,6 +73,7 @@ typedef union farce_proc farce_proc_t;
 #define FARCE_PROC_TYPE(proc) ((proc)->header.type)
 #define FARCE_PROC_SELF(proc) (&(proc)->captured.captured.self)
 #define FARCE_PROC_LAMBDA(proc) ((proc)->header.is_lambda)
+#define FARCE_PROC_ISOLATED(proc) ((proc)->header.is_isolated)
 
 #else
 struct farce_proc
@@ -89,6 +90,7 @@ typedef struct farce_proc farce_proc_t;
 #define FARCE_PROC_TYPE(proc) ((proc)->block.type)
 #define FARCE_PROC_SELF(proc) (&(proc)->block.as.captured.self)
 #define FARCE_PROC_LAMBDA(proc) ((proc)->is_lambda)
+#define FARCE_PROC_ISOLATED(proc) ((proc)->is_isolated)
 #endif
 
 #define FARCE_STATIC_ASSERT(name, expr) \
@@ -130,7 +132,9 @@ farce_proc_ptr(VALUE proc)
 static int
 farce_proc_rebindable_p(farce_proc_t *proc)
 {
-    return (FARCE_PROC_TYPE(proc) == FARCE_BLOCK_ISEQ || FARCE_PROC_TYPE(proc) == FARCE_BLOCK_IFUNC);
+    /* Isolated procs reject Binding creation and must retain their receiver. */
+    return !FARCE_PROC_ISOLATED(proc) &&
+        (FARCE_PROC_TYPE(proc) == FARCE_BLOCK_ISEQ || FARCE_PROC_TYPE(proc) == FARCE_BLOCK_IFUNC);
 }
 
 static VALUE

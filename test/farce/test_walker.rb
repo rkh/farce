@@ -601,6 +601,16 @@ module Farce
       assert_equal [1], callable.call
     end
 
+    def test_isolated_procs_preserve_their_receiver
+      return unless RUBY_ENGINE == "ruby"
+
+      callable = Ractor.shareable_lambda(self: 1) { self }
+
+      assert_equal [callable], Walker.each(callable).to_a
+      assert_same callable, increment(callable, copy: true)
+      assert_equal 1, callable.call
+    end
+
     def test_basic_objects_can_be_traversed
       object = BasicObject.new
       object.instance_eval { @value = 1 }

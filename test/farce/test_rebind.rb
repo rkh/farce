@@ -95,6 +95,16 @@ module Farce
       assert_same original, Farce.rebind(original, self: 42, lambda: false)
     end
 
+    def test_returns_isolated_proc_unchanged
+      return unless RUBY_ENGINE == "ruby"
+
+      original = Ractor.shareable_lambda(self: 1) { self }
+
+      assert_same original, Farce.rebind(original, self: [])
+      assert_equal 1, original.call
+      assert Ractor.shareable?(original)
+    end
+
     def test_rebinds_bound_method_to_new_self
       original = "hello".method(:upcase)
       rebound = Farce.rebind(original, self: "goodbye")

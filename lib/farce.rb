@@ -272,6 +272,7 @@ module Farce
   #  Performance overhead               | ✅ none     | ⚠️ up to 200% | ⚠️ up to 80%  | ✅ none
   #
   # If you want the proc to also be shareable, use {Ractor.shareable_proc} instead.
+  # Already isolated procs are returned unchanged.
   #
   # The performance overhead of `BasicObject#instance_exec`/`BasicObject#instance_eval` is the most significant on the
   # official Ruby implementation, but is still present on JRuby, which does not exhibit a performance penalty for
