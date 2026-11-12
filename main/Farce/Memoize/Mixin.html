@@ -272,7 +272,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#new-class_method" title="new (class method)">.<strong>new</strong>(*methods, scope: :global, mode: :smart, weak: false, visibility: nil)  &#x21d2; Mixin </a>
+      <a href="#new-class_method" title="new (class method)">.<strong>new</strong>(*methods, **options)  &#x21d2; Mixin </a>
     
 
     
@@ -301,6 +301,52 @@
     </h2>
 
     <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#add_keywords%3F-instance_method" title="#add_keywords? (instance method)">#<strong>add_keywords?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether constructor keywords can prefill the cache.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#reset_copy%3F-instance_method" title="#reset_copy? (instance method)">#<strong>reset_copy?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether copies get fresh memoization atoms.</p>
+</div></span>
+  
+</li>
+
       
         <li class="public ">
   <span class="summary_signature">
@@ -378,12 +424,12 @@
       <pre class="lines">
 
 
-134
-135
-136</pre>
+146
+147
+148</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 134</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 146</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_memoized_methods'>memoized_methods</span>
   <span class='ivar'>@memoized_methods</span>
@@ -437,12 +483,12 @@
       <pre class="lines">
 
 
-140
-141
-142</pre>
+152
+153
+154</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 140</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 152</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_mode'>mode</span>
   <span class='ivar'>@mode</span>
@@ -496,12 +542,12 @@
       <pre class="lines">
 
 
-137
-138
-139</pre>
+149
+150
+151</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 137</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 149</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_scope'>scope</span>
   <span class='ivar'>@scope</span>
@@ -555,12 +601,12 @@
       <pre class="lines">
 
 
-143
-144
-145</pre>
+155
+156
+157</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 143</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 155</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_visibility'>visibility</span>
   <span class='ivar'>@visibility</span>
@@ -580,7 +626,7 @@
       <div class="method_details first">
   <h3 class="signature first" id="new-class_method">
   
-    .<strong>new</strong>(*methods, scope: :global, mode: :smart, weak: false, visibility: nil)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Memoize::Mixin (class)">Mixin</a></span></tt> 
+    .<strong>new</strong>(*methods, **options)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Memoize::Mixin (class)">Mixin</a></span></tt> 
   
 
   
@@ -628,11 +674,9 @@
         <span class='type'>(<tt>Symbol</tt>)</span>
       
       
-        <em class="default">(defaults to: <tt>:global</tt>)</em>
-      
       
         &mdash;
-        <div class='inline'><p>The scope of the memoization.
+        <div class='inline'><p>The scope of the memoization. Defaults to <code>:global</code>.
 In addition to the <span class='object_link'><a href="../../Farce.html#SCOPES-constant" title="Farce::SCOPES (constant)">normal scopes</a></span> it may also be set to <code>:global</code> or <code>:unshared</code>.</p>
 </div>
       
@@ -646,11 +690,9 @@ In addition to the <span class='object_link'><a href="../../Farce.html#SCOPES-co
         <span class='type'>(<tt>Symbol</tt>)</span>
       
       
-        <em class="default">(defaults to: <tt>:smart</tt>)</em>
-      
       
         &mdash;
-        <div class='inline'><p>The mode of the memoization. Ignored for any scope other than <code>:global</code>.
+        <div class='inline'><p>The mode of the memoization. Defaults to <code>:smart</code>. Ignored for any scope other than <code>:global</code>.
 Use <code>:strict</code> to cache shareable results directly, including with <code>weak: true</code>.
 Defaults to <code>:raise</code> with <code>weak: true</code>, which also supports <code>:make_shareable</code> and <code>:dedup</code>.</p>
 </div>
@@ -665,11 +707,9 @@ Defaults to <code>:raise</code> with <code>weak: true</code>, which also support
         <span class='type'>(<tt>Boolean</tt>)</span>
       
       
-        <em class="default">(defaults to: <tt>false</tt>)</em>
-      
       
         &mdash;
-        <div class='inline'><p>Whether to use weak memoization.
+        <div class='inline'><p>Whether to use weak memoization. Defaults to <code>false</code>.
 If enabled, memoized values may be garbage collected when no longer referenced.
 In this case, next access to the memoized method may recompute the value.</p>
 </div>
@@ -684,14 +724,46 @@ In this case, next access to the memoized method may recompute the value.</p>
         <span class='type'>(<tt>Symbol</tt>, <tt>nil</tt>)</span>
       
       
-        <em class="default">(defaults to: <tt>nil</tt>)</em>
-      
       
         &mdash;
-        <div class='inline'><p>The visibility of the memoized methods.
+        <div class='inline'><p>The visibility of the memoized methods. Defaults to <code>nil</code>.
 May be one of <code>:public</code>, <code>:protected</code>, or <code>:private</code>.
 If set to <code>nil</code>, <span class='object_link'><a href="../Memoize.html#memoize-instance_method" title="Farce::Memoize#memoize (method)">Farce::Memoize#memoize</a></span> will attempt to infer the visibility based on the context.
 Other methods will default to <code>:public</code>.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>reset_copy</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Give copies made with <code>dup</code> or <code>clone</code> fresh, empty memoization atoms. Defaults to <code>false</code>.
+By default, copies share their memoization atoms with the original.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>add_keywords</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Accept optional constructor keywords named after the memoized methods. Defaults to <code>false</code>.
+Supplied values prefill the cache before the original initializer runs, including <code>nil</code> and <code>false</code>.
+These keywords are consumed. Other arguments and the block are forwarded.
+Values use the configured transfer mode and are stored in the current scope.</p>
 </div>
       
     </li>
@@ -725,16 +797,16 @@ Other methods will default to <code>:public</code>.</p>
       <pre class="lines">
 
 
-107
-108
-109
-110
-111
-112
-113</pre>
+117
+118
+119
+120
+121
+122
+123</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 107</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 117</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_methods'>methods</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='kw'>super</span> <span class='kw'>unless</span> <span class='kw'>self</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="" title="Farce::Memoize::Mixin (class)">Mixin</a></span></span>
@@ -755,7 +827,113 @@ Other methods will default to <code>:public</code>.</p>
 
     
       <div class="method_details first">
-  <h3 class="signature first" id="weak?-instance_method">
+  <h3 class="signature first" id="add_keywords?-instance_method">
+  
+    #<strong>add_keywords?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns whether constructor keywords can prefill the cache.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>whether constructor keywords can prefill the cache</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+259</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 259</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_add_keywords?'>add_keywords?</span> <span class='op'>=</span> <span class='ivar'>@add_keywords</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="reset_copy?-instance_method">
+  
+    #<strong>reset_copy?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns whether copies get fresh memoization atoms.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>whether copies get fresh memoization atoms</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+256</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 256</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_reset_copy?'>reset_copy?</span> <span class='op'>=</span> <span class='ivar'>@reset_copy</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="weak?-instance_method">
   
     #<strong>weak?</strong>  &#x21d2; <tt>Boolean</tt> 
   
@@ -796,10 +974,10 @@ Other methods will default to <code>:public</code>.</p>
       <pre class="lines">
 
 
-214</pre>
+253</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 214</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/memoize.rb', line 253</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_weak?'>weak?</span> <span class='op'>=</span> <span class='ivar'>@weak</span></pre>
     </td>
@@ -812,7 +990,7 @@ Other methods will default to <code>:public</code>.</p>
 </div>
 
       <div id="footer">
-  Generated on Thu Nov 12 13:31:58 2026 by
+  Generated on Thu Nov 12 13:52:28 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>

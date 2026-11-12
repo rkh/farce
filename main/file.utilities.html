@@ -171,6 +171,26 @@
 </span>  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Memoize.html" title="Farce::Memoize (module)">Memoize</a></span></span><span class='lbracket'>[</span><span class='symbol'>:foo</span><span class='comma'>,</span> <span class='symbol'>:bar</span><span class='comma'>,</span> <span class='label'>weak:</span> <span class='kw'>true</span><span class='rbracket'>]</span>
 <span class='kw'>end</span>
 </code></pre>
+<p>By default, <code>dup</code> and <code>clone</code> share memoization atoms with the original object.
+Use <code>reset_copy: true</code> to give each copy fresh, empty caches.</p>
+<p>Use <code>add_keywords: true</code> to accept constructor keywords named after the memoized methods:</p>
+<pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>Report</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="Farce.html" title="Farce (module)">Farce</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Farce/Memoize.html" title="Farce::Memoize (module)">Memoize</a></span></span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_summary'>summary</span> <span class='op'>=</span> <span class='id identifier rubyid_expensive_computation'>expensive_computation</span>
+  <span class='id identifier rubyid_memoize'>memoize</span> <span class='symbol'>:summary</span><span class='comma'>,</span> <span class='label'>reset_copy:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>add_keywords:</span> <span class='kw'>true</span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_report'>report</span> <span class='op'>=</span> <span class='const'>Report</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>summary:</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Already computed</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+<span class='id identifier rubyid_report'>report</span><span class='period'>.</span><span class='id identifier rubyid_summary'>summary</span>     <span class='comment'># =&gt; &quot;Already computed&quot;
+</span><span class='id identifier rubyid_report'>report</span><span class='period'>.</span><span class='id identifier rubyid_dup'>dup</span><span class='period'>.</span><span class='id identifier rubyid_summary'>summary</span> <span class='comment'># Runs expensive_computation
+</span></code></pre>
+<p>Both options default to <code>false</code> and also work with <code>Farce::Memoize[...]</code>.
+Supplied keywords prefill the cache before the class's <code>initialize</code> runs and are consumed.
+Other arguments and the block are forwarded. Omitted keywords leave the cache empty.
+Explicit <code>nil</code> and <code>false</code> values are cached too.
+Prefilled values follow the configured transfer mode and weak-reference behavior.
+For scoped memoization, they are stored in the current scope.</p>
 <h2 id="constants">Constants<a href="#constants" aria-label="Link to heading 'Constants'" data-heading-content="Constants" class="anchor"></a></h2>
 <ul>
 <li><code>Farce::MODES</code>: List of supported <a href="file.sharing.html#sharing-modes" title="sharing modes">sharing modes</a>.</li>
@@ -183,7 +203,7 @@
 </div></div>
 
       <div id="footer">
-  Generated on Thu Nov 12 13:31:54 2026 by
+  Generated on Thu Nov 12 13:52:25 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>
