@@ -113,6 +113,31 @@ class MyClass
 end
 ```
 
+By default, `dup` and `clone` share memoization atoms with the original object.
+Use `reset_copy: true` to give each copy fresh, empty caches.
+
+Use `add_keywords: true` to accept constructor keywords named after the memoized methods:
+
+```ruby
+class Report
+  include Farce::Memoize
+
+  def summary = expensive_computation
+  memoize :summary, reset_copy: true, add_keywords: true
+end
+
+report = Report.new(summary: "Already computed")
+report.summary     # => "Already computed"
+report.dup.summary # Runs expensive_computation
+```
+
+Both options default to `false` and also work with `Farce::Memoize[...]`.
+Supplied keywords prefill the cache before the class's `initialize` runs and are consumed.
+Other arguments and the block are forwarded. Omitted keywords leave the cache empty.
+Explicit `nil` and `false` values are cached too.
+Prefilled values follow the configured transfer mode and weak-reference behavior.
+For scoped memoization, they are stored in the current scope.
+
 ## Constants
 
 * `Farce::MODES`: List of supported [sharing modes](sharing.md#sharing-modes).

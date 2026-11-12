@@ -68,6 +68,10 @@ module Farce
       end
     end
 
+    class KeywordValue < ResultValue
+      include Memoize[:value, reset_copy: true, add_keywords: true]
+    end
+
     def test_include_adds_the_memoize_class_method
       klass = Class.new(Value) do
         include Memoize
@@ -144,6 +148,265 @@ module Farce
       assert_equal 1, object.calls.value
     end
 
+    def test_copies_share_memoization_by_default
+      [false, true].each do |resolved|
+        object = Class.new(ArrayValue) { include Memoize[:value] }.new.freeze
+        object.value if resolved
+        copies = [object.dup, object.clone, object.clone(freeze: false)]
+
+        copies.each { assert_same object.value, it.value }
+
+        assert_equal 1, object.calls.value
+      end
+    end
+
+    def test_reset_copy_gives_copies_empty_independent_caches
+      options = [{}, { mode: :strict }, { scope: :unshared }, *SCOPES.map { { scope: it } }]
+      options.product([false, true], [false, true]).each do |settings, weak, resolved|
+        klass = Class.new(FrozenArrayValue) { include Memoize[:value, reset_copy: true, weak:, **settings] }
+        object = klass.new.freeze
+        object.value if resolved
+        copies = [object.dup, object.clone, object.clone(freeze: false)]
+
+        assert_predicate copies[1], :frozen?
+        refute_predicate copies[2], :frozen?
+        values = [object, *copies].map(&:value)
+
+        assert_equal 4, values.map(&:object_id).uniq.size
+        [object, *copies].zip(values).each { |instance, value| assert_same value, instance.value }
+        assert_equal 4, object.calls.value
+      end
+    end
+
+    def test_reset_copy_runs_before_existing_copy_hooks
+      klass = Class.new do
+        include Memoize[:value, reset_copy: true]
+
+        attr_reader :copied_value
+
+        def initialize = @result = :original
+        def value = @result
+
+        private
+
+        def initialize_copy(other)
+          super
+          @result = :copy
+          @copied_value = value
+          freeze
+        end
+      end
+      object = klass.new
+
+      assert_equal :original, object.value
+      [object.dup, object.clone].each do |copy|
+        assert_equal :copy, copy.copied_value
+        assert_equal :copy, copy.value
+      end
+      assert_equal :original, object.value
+      assert klass.private_method_defined?(:initialize_copy)
+    end
+
+    def test_reset_copy_only_resets_selected_methods
+      klass = Class.new do
+        include Memoize
+
+        def first = Object.new.freeze
+        def last = Object.new.freeze
+        memoize :first, reset_copy: true
+        memoize :last
+      end
+      object = klass.new
+      first, last = object.first, object.last
+
+      [object.dup, object.clone].each do |copy|
+        refute_same first, copy.first
+        assert_same last, copy.last
+      end
+    end
+
+    def test_reset_copy_composes_across_declarations_and_inheritance
+      parent = Class.new do
+        include Memoize
+
+        def first = Object.new.freeze
+        memoize :first, reset_copy: true
+      end
+      klass = Class.new(parent) do
+        def second = Object.new.freeze
+        def third = Object.new.freeze
+        memoize :second, reset_copy: true
+        memoize :third, reset_copy: true
+      end
+      object = klass.new.freeze
+      values = [object.first, object.second, object.third]
+
+      [object.dup, object.clone].each do |copy|
+        %i[first second third].zip(values).each { |method, value| refute_same value, copy.public_send(method) }
+      end
+    end
+
+    def test_overlapping_options_keep_prefilled_values
+      klass = Class.new(ArrayValue) do
+        include Memoize[:value]
+        include Memoize[:value, add_keywords: true]
+        include Memoize[:value, reset_copy: true, add_keywords: true]
+      end
+      object = klass.new(value: :prefilled)
+
+      assert_equal :prefilled, object.value
+      assert_equal 0, object.calls.value
+      assert_empty object.dup.value
+      assert_equal :prefilled, object.value
+      assert_equal 1, object.calls.value
+    end
+
+    def test_constructor_keywords_are_forwarded_by_default
+      klass = Class.new do
+        include Memoize[:value]
+
+        attr_reader :value
+
+        def initialize(value:) = @value = value + 1
+      end
+
+      assert_equal 43, klass.new(value: 42).value
+    end
+
+    def test_add_keywords_prefills_values_including_nil_and_false
+      options = [{}, { mode: :strict }, { scope: :unshared }, *SCOPES.map { { scope: it } }]
+      options.product([false, true]).each do |settings, weak|
+        klass = Class.new(ResultValue) { include Memoize[:value, add_keywords: true, weak:, **settings] }
+        [nil, false, :prefilled].each do |value|
+          object = klass.new(:computed, value:).freeze
+
+          2.times { value.nil? ? assert_nil(object.value) : assert_same(value, object.value) }
+
+          assert_equal 0, object.calls.value
+        end
+
+        object = klass.new(:computed).freeze
+
+        assert_equal :computed, object.value
+        assert_equal 1, object.calls.value
+      end
+    end
+
+    def test_add_keywords_prefills_before_initialization_and_forwards_other_arguments
+      klass = Class.new do
+        include Memoize[:value, add_keywords: true]
+
+        attr_reader :initial, :arguments
+
+        def initialize(first, last:, &block)
+          @initial = value
+          @arguments = block.call(first, last)
+          freeze
+        end
+
+        def value = raise("should already be cached")
+      end
+      object = klass.new({ first: 20 }, last: 22, value: 100) { _1.fetch(:first) + _2 }
+
+      assert_equal 100, object.initial
+      assert_equal 100, object.value
+      assert_equal 42, object.arguments
+      assert_raises(ArgumentError) { klass.new(20, last: 22, value: 100, unknown: true) }
+    end
+
+    def test_add_keywords_composes_across_declarations_and_inheritance
+      parent = Class.new do
+        include Memoize
+
+        def first = :first
+        memoize :first, add_keywords: true
+      end
+      klass = Class.new(parent) do
+        def second = :second
+        def third = :third
+        memoize :second, add_keywords: true
+        memoize :third, add_keywords: true
+      end
+      object = klass.new(first: 1, second: 2, third: 3)
+
+      assert_equal 1, object.first
+      assert_equal 2, object.second
+      assert_equal 3, object.third
+    end
+
+    def test_add_keywords_supports_predicate_bang_and_private_methods
+      klass = Class.new do
+        include Memoize[:ready?, :ready!, :value, add_keywords: true, visibility: :private]
+
+        def ready? = raise("should already be cached")
+        def ready! = raise("should already be cached")
+        def value = raise("should already be cached")
+      end
+      object = klass.new(ready?: false, ready!: :bang, value: nil)
+
+      refute object.send(:ready?)
+      assert_equal :bang, object.send(:ready!)
+      assert_nil object.send(:value)
+    end
+
+    def test_prefilled_values_use_the_configured_transfer_mode
+      [false, true].each do |weak|
+        klass = Class.new(ArrayValue) { include Memoize[:value, add_keywords: true, mode: :make_shareable, weak:] }
+        value = []
+        object = klass.new(value:)
+
+        assert_same value, object.value
+        assert_equal Internal.native_ractors?, value.frozen?
+        assert_equal 0, object.calls.value
+
+        strict = Class.new(ArrayValue) { include Memoize[:value, add_keywords: true, mode: :strict, weak:] }
+        unshareable = Internal.native_ractors? ? Object.new : Unshared::Atom.new
+
+        assert_raises(Ractor::IsolationError) { strict.new(value: unshareable) }
+        refute_predicate unshareable, :frozen?
+      end
+    end
+
+    def test_prefilled_local_values_apply_to_the_current_scope
+      klass = Class.new(ResultValue) { include Memoize[:value, scope: :thread, add_keywords: true] }
+      object = klass.new(:computed, value: :prefilled).freeze
+
+      assert_equal :computed, Thread.new { object.value }.value
+      assert_equal :prefilled, object.value
+      assert_equal 1, object.calls.value
+    end
+
+    def test_reset_copy_discards_prefilled_values
+      [nil, false, :prefilled].each do |value|
+        object = KeywordValue.new(:computed, value:).freeze
+
+        [object.dup, object.clone].each { assert_equal :computed, it.value }
+        value.nil? ? assert_nil(object.value) : assert_same(value, object.value)
+
+        assert_equal 2, object.calls.value
+      end
+    end
+
+    def test_new_options_work_after_sharing_with_another_ractor
+      object = Ractor.make_shareable(KeywordValue.new(:computed, value: :prefilled))
+      worker = Ractor.new(object) { |original| [original.value, original.dup.value, original.clone.value] }
+
+      assert_equal %i[prefilled computed computed], ractor_value(worker)
+      assert_equal :prefilled, object.value
+      assert_equal 2, object.calls.value
+    end
+
+    def test_new_options_preserve_marshal_support
+      [nil, false, :prefilled].each do |value|
+        object = Marshal.load(Marshal.dump(KeywordValue.new(:computed, value:)))
+
+        value.nil? ? assert_nil(object.value) : assert_same(value, object.value)
+
+        assert_equal 0, object.calls.value
+        assert_equal :computed, object.dup.value
+      end
+    end
+
     def test_retries_after_a_method_raises
       object = FlakyValue.new.freeze
 
@@ -173,13 +436,20 @@ module Farce
     def test_mixin_cache_normalizes_method_names_order_and_defaults
       mixin = Memoize[:first, :last]
 
-      assert_same mixin, Memoize["last", :first, :first, scope: :global, mode: :smart, weak: false, visibility: :public]
+      assert_same mixin, Memoize["last", :first, :first, scope: :global, mode: :smart, weak: false,
+        visibility: :public, reset_copy: false, add_keywords: false]
       assert_equal %i[first last], mixin.memoized_methods
       assert_equal :global, mixin.scope
       assert_equal :smart, mixin.mode
       assert_equal :public, mixin.visibility
       refute_predicate mixin, :weak?
+      refute_predicate mixin, :reset_copy?
+      refute_predicate mixin, :add_keywords?
       refute_same mixin, Memoize[:first, :last, mode: :raise]
+      refute_same mixin, Memoize[:first, :last, reset_copy: true]
+      refute_same mixin, Memoize[:first, :last, add_keywords: true]
+      assert_predicate Memoize[:first, reset_copy: true], :reset_copy?
+      assert_predicate Memoize[:first, add_keywords: true], :add_keywords?
     end
 
     def test_mixin_subclasses_can_be_constructed

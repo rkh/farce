@@ -67,29 +67,39 @@ module Farce
   # @see Farce::LazyRef
   #
   # @!macro memoize_params
-  #   @overload $0(*methods, scope: :global, mode: :smart, weak: false, visibility: nil)
+  #   @overload $0(*methods, **options)
   #     @param methods [Array<Symbol>]
   #       The methods to memoize
   #
   #     @param scope [Symbol]
-  #       The scope of the memoization.
+  #       The scope of the memoization. Defaults to `:global`.
   #       In addition to the {Farce::SCOPES normal scopes} it may also be set to `:global` or `:unshared`.
   #
   #     @param mode [Symbol]
-  #       The mode of the memoization. Ignored for any scope other than `:global`.
+  #       The mode of the memoization. Defaults to `:smart`. Ignored for any scope other than `:global`.
   #       Use `:strict` to cache shareable results directly, including with `weak: true`.
   #       Defaults to `:raise` with `weak: true`, which also supports `:make_shareable` and `:dedup`.
   #
   #     @param weak [Boolean]
-  #       Whether to use weak memoization.
+  #       Whether to use weak memoization. Defaults to `false`.
   #       If enabled, memoized values may be garbage collected when no longer referenced.
   #       In this case, next access to the memoized method may recompute the value.
   #
   #     @param visibility [Symbol, nil]
-  #       The visibility of the memoized methods.
+  #       The visibility of the memoized methods. Defaults to `nil`.
   #       May be one of `:public`, `:protected`, or `:private`.
   #       If set to `nil`, {Farce::Memoize#memoize} will attempt to infer the visibility based on the context.
   #       Other methods will default to `:public`.
+  #
+  #     @param reset_copy [Boolean]
+  #       Give copies made with `dup` or `clone` fresh, empty memoization atoms. Defaults to `false`.
+  #       By default, copies share their memoization atoms with the original.
+  #
+  #     @param add_keywords [Boolean]
+  #       Accept optional constructor keywords named after the memoized methods. Defaults to `false`.
+  #       Supplied values prefill the cache before the original initializer runs, including `nil` and `false`.
+  #       These keywords are consumed. Other arguments and the block are forwarded.
+  #       Values use the configured transfer mode and are stored in the current scope.
   module Memoize
     # A named module preserves the nil marker's identity across Marshal round trips.
     NIL_VALUE = Module.new.freeze
@@ -116,9 +126,11 @@ module Farce
       def self.normalize_options(options)
         options[:visibility] &&= options[:visibility].to_sym
 
-        options[:scope]      ||= :global
-        options[:visibility] ||= :public
-        options[:weak]       ||= false
+        options[:scope]        ||= :global
+        options[:visibility]   ||= :public
+        options[:weak]         ||= false
+        options[:reset_copy]   ||= false
+        options[:add_keywords] ||= false
 
         if options[:scope] == :global
           options[:mode] ||= options[:weak] ? :raise : :smart
@@ -143,12 +155,14 @@ module Farce
       attr_reader :visibility
 
       # @api private
-      def initialize(methods, scope:, weak:, mode: nil, visibility: :public)
+      def initialize(methods, scope:, weak:, mode: nil, visibility: :public, reset_copy: false, add_keywords: false)
         @memoized_methods = methods
         @scope            = scope
         @mode             = mode
         @weak             = !!weak # rubocop:disable Style/DoubleNegation
         @visibility       = visibility
+        @reset_copy       = !!reset_copy # rubocop:disable Style/DoubleNegation
+        @add_keywords     = !!add_keywords # rubocop:disable Style/DoubleNegation
 
         super()
 
@@ -179,10 +193,15 @@ module Farce
           raise ArgumentError, "unsupported scope: #{scope.inspect}"
         end
 
+        args += ", reset_copy: true" if reset_copy
+        args += ", add_keywords: true" if add_keywords
         set_temporary_name(-"Farce::Memoize[#{args}]") if instance_of?(Mixin)
         initializer = +""
+        prefill = +""
         # Overlapping mixins need separate slots. Stable names also survive Marshal across processes.
         slot = "#{methods.join(",").unpack1("H*")}_#{scope}_#{mode}_#{@weak}_#{visibility}"
+        slot += "_reset_copy" if reset_copy
+        slot += "_add_keywords" if add_keywords
 
         methods.each do |method|
           unless method =~ /\A[a-z_]\w*[!?]?\z/i && method != :initialize
@@ -190,6 +209,14 @@ module Farce
           end
           ivar = "@_#{method.to_s.unpack1("H*")}_memoize_#{slot}_atom"
           initializer << "  #{ivar} = #{init}\n"
+          if add_keywords
+            prefill << <<~RUBY
+              if keywords.key?(#{method.inspect})
+                value = keywords.delete(#{method.inspect})
+                #{ivar}.value = nil.equal?(value) ? NIL_VALUE : value
+              end
+            RUBY
+          end
           module_eval <<~RUBY, __FILE__, __LINE__ + 1
             #{visibility} def #{method}
               value = #{ivar}.value || #{ivar}.store_if_absent do
@@ -203,7 +230,19 @@ module Farce
 
         # Explicit forwarding preserves nested constructor keywords on JRuby.
         module_eval <<~RUBY, __FILE__, __LINE__ + 1
-          def initialize(*, **, &)
+          def initialize(*, **#{"keywords" if add_keywords}, &)
+            #{initializer}
+            #{prefill}
+            super(*, **#{"keywords" if add_keywords}, &)
+          end
+        RUBY
+
+        return unless reset_copy
+
+        module_eval <<~RUBY, __FILE__, __LINE__ + 1
+          private
+
+          def initialize_copy(other)
             #{initializer}
             super
           end
@@ -212,6 +251,12 @@ module Farce
 
       # @return [Boolean] whether the memoization is weak
       def weak? = @weak
+
+      # @return [Boolean] whether copies get fresh memoization atoms
+      def reset_copy? = @reset_copy
+
+      # @return [Boolean] whether constructor keywords can prefill the cache
+      def add_keywords? = @add_keywords
 
       # allow `include Farce::Memoize[...]` to work like `prepend`
       private def append_features(base) = base.prepend(self)
