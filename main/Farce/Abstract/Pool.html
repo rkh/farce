@@ -233,7 +233,7 @@ queued work. Concrete pools use either Ractor or Thread workers.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#close-instance_method" title="#close (instance method)">#<strong>close</strong>  &#x21d2; Pool </a>
+      <a href="#close-instance_method" title="#close (instance method)">#<strong>close</strong>(wait: false)  &#x21d2; Pool </a>
     
 
     
@@ -978,10 +978,10 @@ has no runnable fibers or when the pool has reached <code>max_size</code>.</p>
       <pre class="lines">
 
 
-186</pre>
+190</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 186</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 190</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_at_max_size?'>at_max_size?</span><span class='lparen'>(</span><span class='id identifier rubyid_settings'>settings</span> <span class='op'>=</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_settings'>settings</span><span class='rparen'>)</span> <span class='op'>=</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&gt;=</span> <span class='id identifier rubyid_settings'>settings</span><span class='period'>.</span><span class='id identifier rubyid_max_size'>max_size</span></pre>
     </td>
@@ -1082,7 +1082,7 @@ JRuby and TruffleRuby retain their initial bounded or unbounded choice.</p>
       <div class="method_details ">
   <h3 class="signature " id="close-instance_method">
   
-    #<strong>close</strong>  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Abstract::Pool (class)">Pool</a></span></tt> 
+    #<strong>close</strong>(wait: false)  &#x21d2; <tt><span class='object_link'><a href="" title="Farce::Abstract::Pool (class)">Pool</a></span></tt> 
   
 
   
@@ -1096,7 +1096,29 @@ JRuby and TruffleRuby retain their initial bounded or unbounded choice.</p>
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>wait</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>false</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Wait for accepted tasks and their workers to finish.
+Do not wait from a task running on this pool.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -1121,8 +1143,6 @@ JRuby and TruffleRuby retain their initial bounded or unbounded choice.</p>
       <pre class="lines">
 
 
-150
-151
 152
 153
 154
@@ -1130,19 +1150,25 @@ JRuby and TruffleRuby retain their initial bounded or unbounded choice.</p>
 156
 157
 158
-159</pre>
+159
+160
+161
+162
+163</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 150</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 152</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_close'>close</span>
-  <span class='kw'>return</span> <span class='kw'>self</span> <span class='kw'>if</span> <span class='id identifier rubyid_closed?'>closed?</span>
-  <span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='symbol'>:running</span><span class='comma'>,</span> <span class='symbol'>:closing</span><span class='rparen'>)</span>
-  <span class='ivar'>@queue</span><span class='period'>.</span><span class='id identifier rubyid_seal'>seal</span>
-  <span class='id identifier rubyid_admission_changed'>admission_changed</span>
-  <span class='kw'>if</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
-    <span class='ivar'>@queue</span><span class='period'>.</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='id identifier rubyid_finish_close'>finish_close</span> <span class='op'>:</span> <span class='id identifier rubyid_start_worker'>start_worker</span><span class='lparen'>(</span><span class='label'>drain:</span> <span class='kw'>true</span><span class='rparen'>)</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_close'>close</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='kw'>false</span><span class='rparen'>)</span>
+  <span class='kw'>unless</span> <span class='id identifier rubyid_closed?'>closed?</span>
+    <span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='symbol'>:running</span><span class='comma'>,</span> <span class='symbol'>:closing</span><span class='rparen'>)</span>
+    <span class='ivar'>@queue</span><span class='period'>.</span><span class='id identifier rubyid_seal'>seal</span>
+    <span class='id identifier rubyid_admission_changed'>admission_changed</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_size'>size</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span>
+      <span class='ivar'>@queue</span><span class='period'>.</span><span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>?</span> <span class='id identifier rubyid_finish_close'>finish_close</span> <span class='op'>:</span> <span class='id identifier rubyid_start_worker'>start_worker</span><span class='lparen'>(</span><span class='label'>drain:</span> <span class='kw'>true</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
   <span class='kw'>end</span>
+  <span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_wait_until_changed'>wait_until_changed</span><span class='lparen'>(</span><span class='symbol'>:closing</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_wait'>wait</span>
   <span class='kw'>self</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -1188,10 +1214,10 @@ JRuby and TruffleRuby retain their initial bounded or unbounded choice.</p>
       <pre class="lines">
 
 
-174</pre>
+178</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 174</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 178</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>=</span> <span class='id identifier rubyid_state'>state</span> <span class='op'>!=</span> <span class='symbol'>:running</span></pre>
     </td>
@@ -1237,10 +1263,10 @@ JRuby and TruffleRuby retain their initial bounded or unbounded choice.</p>
       <pre class="lines">
 
 
-177</pre>
+181</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 177</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 181</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_closing?'>closing?</span> <span class='op'>=</span> <span class='id identifier rubyid_state'>state</span> <span class='op'>==</span> <span class='symbol'>:closing</span></pre>
     </td>
@@ -1273,13 +1299,13 @@ JRuby and TruffleRuby retain their initial bounded or unbounded choice.</p>
       <pre class="lines">
 
 
-162
-163
-164
-165</pre>
+166
+167
+168
+169</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 162</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 166</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_error'>error</span>
   <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='ivar'>@error</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span>
@@ -1999,10 +2025,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-168</pre>
+172</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 168</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 172</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>=</span> <span class='ivar'>@worker_count</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span></pre>
     </td>
@@ -2035,10 +2061,10 @@ This may update and freeze the original. Already-shareable values pass through u
       <pre class="lines">
 
 
-171</pre>
+175</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 171</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/abstract/pool.rb', line 175</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_state'>state</span> <span class='op'>=</span> <span class='ivar'>@state</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span></pre>
     </td>
@@ -2177,7 +2203,7 @@ May be ignored by some executors.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Nov  9 17:28:40 2026 by
+  Generated on Thu Nov 12 13:32:02 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>

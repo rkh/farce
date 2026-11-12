@@ -226,7 +226,7 @@ across all scopes and Ractors, and prevents new pools from starting.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#close-instance_method" title="#close (instance method)">#<strong>close</strong>  &#x21d2; self </a>
+      <a href="#close-instance_method" title="#close (instance method)">#<strong>close</strong>(wait: false)  &#x21d2; self </a>
     
 
     
@@ -862,7 +862,7 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <div class="method_details ">
   <h3 class="signature " id="close-instance_method">
   
-    #<strong>close</strong>  &#x21d2; <tt>self</tt> 
+    #<strong>close</strong>(wait: false)  &#x21d2; <tt>self</tt> 
   
 
   
@@ -876,7 +876,28 @@ but not for non-blocking fibers (such as those created by <span class='object_li
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>wait</span>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>false</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Wait for this scope's accepted tasks and workers to finish.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -897,18 +918,18 @@ but not for non-blocking fibers (such as those created by <span class='object_li
       <pre class="lines">
 
 
-76
 77
 78
 79
-80</pre>
+80
+81</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 76</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 77</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_close'>close</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_close'>close</span><span class='lparen'>(</span><span class='label'>wait:</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_pool'>pool</span> <span class='op'>=</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>?</span> <span class='const'>Internal</span><span class='op'>::</span><span class='const'>Storage</span><span class='lbracket'>[</span><span class='kw'>self</span><span class='comma'>,</span> <span class='label'>scope:</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='id identifier rubyid_scoped_value'>scoped_value</span>
-  <span class='id identifier rubyid_pool'>pool</span><span class='op'>&amp;.</span><span class='id identifier rubyid_close'>close</span>
+  <span class='id identifier rubyid_pool'>pool</span><span class='op'>&amp;.</span><span class='id identifier rubyid_close'>close</span><span class='lparen'>(</span><span class='label'>wait:</span><span class='rparen'>)</span>
   <span class='kw'>self</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -955,7 +976,6 @@ Future scopes also reject submissions. Does not wait for running tasks.</p>
       <pre class="lines">
 
 
-85
 86
 87
 88
@@ -964,10 +984,11 @@ Future scopes also reject submissions. Does not wait for running tasks.</p>
 91
 92
 93
-94</pre>
+94
+95</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 85</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 86</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_close_all'>close_all</span>
   <span class='kw'>return</span> <span class='kw'>self</span> <span class='kw'>unless</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_compare_and_set'>compare_and_set</span><span class='lparen'>(</span><span class='kw'>false</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
@@ -1026,10 +1047,10 @@ Future scopes also reject submissions. Does not wait for running tasks.</p>
       <pre class="lines">
 
 
-106</pre>
+107</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 106</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 107</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_closed?'>closed?</span> <span class='op'>=</span> <span class='ivar'>@closed_all</span><span class='period'>.</span><span class='id identifier rubyid_value'>value</span> <span class='op'>||</span> <span class='kw'>super</span></pre>
     </td>
@@ -1079,10 +1100,10 @@ Future scopes also reject submissions. Does not wait for running tasks.</p>
       <pre class="lines">
 
 
-103</pre>
+104</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 103</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 104</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_error'>error</span> <span class='op'>=</span> <span class='id identifier rubyid_current_pool'>current_pool</span><span class='op'>&amp;.</span><span class='id identifier rubyid_error'>error</span></pre>
     </td>
@@ -1282,10 +1303,10 @@ Future scopes also reject submissions. Does not wait for running tasks.</p>
       <pre class="lines">
 
 
-97</pre>
+98</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 97</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 98</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>=</span> <span class='id identifier rubyid_current_pool'>current_pool</span><span class='op'>&amp;.</span><span class='id identifier rubyid_size'>size</span> <span class='op'>||</span> <span class='int'>0</span></pre>
     </td>
@@ -1335,10 +1356,10 @@ Future scopes also reject submissions. Does not wait for running tasks.</p>
       <pre class="lines">
 
 
-100</pre>
+101</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 100</span>
+      <pre class="code"><span class="info file"># File 'lib/farce/local/pool.rb', line 101</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_state'>state</span> <span class='op'>=</span> <span class='id identifier rubyid_current_pool'>current_pool</span><span class='op'>&amp;.</span><span class='id identifier rubyid_state'>state</span> <span class='op'>||</span> <span class='symbol'>:closed</span></pre>
     </td>
@@ -1351,7 +1372,7 @@ Future scopes also reject submissions. Does not wait for running tasks.</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Nov  9 17:28:38 2026 by
+  Generated on Thu Nov 12 13:32:00 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-4.0.9).
 </div>
