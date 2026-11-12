@@ -71,31 +71,34 @@ module Farce
   #     @param methods [Array<Symbol>]
   #       The methods to memoize
   #
-  #     @param scope [Symbol]
+  #     @param options [Hash]
+  #       The options for memoization
+  #
+  #     @option options [Symbol] scope
   #       The scope of the memoization. Defaults to `:global`.
   #       In addition to the {Farce::SCOPES normal scopes} it may also be set to `:global` or `:unshared`.
   #
-  #     @param mode [Symbol]
+  #     @option options [Symbol] mode
   #       The mode of the memoization. Defaults to `:smart`. Ignored for any scope other than `:global`.
   #       Use `:strict` to cache shareable results directly, including with `weak: true`.
   #       Defaults to `:raise` with `weak: true`, which also supports `:make_shareable` and `:dedup`.
   #
-  #     @param weak [Boolean]
+  #     @option options [Boolean] weak
   #       Whether to use weak memoization. Defaults to `false`.
   #       If enabled, memoized values may be garbage collected when no longer referenced.
   #       In this case, next access to the memoized method may recompute the value.
   #
-  #     @param visibility [Symbol, nil]
+  #     @option options [Symbol, nil] visibility
   #       The visibility of the memoized methods. Defaults to `nil`.
   #       May be one of `:public`, `:protected`, or `:private`.
   #       If set to `nil`, {Farce::Memoize#memoize} will attempt to infer the visibility based on the context.
   #       Other methods will default to `:public`.
   #
-  #     @param reset_copy [Boolean]
+  #     @option options [Boolean] reset_copy
   #       Give copies made with `dup` or `clone` fresh, empty memoization atoms. Defaults to `false`.
   #       By default, copies share their memoization atoms with the original.
   #
-  #     @param add_keywords [Boolean]
+  #     @option options [Boolean] add_keywords
   #       Accept optional constructor keywords named after the memoized methods. Defaults to `false`.
   #       Supplied values prefill the cache before the original initializer runs, including `nil` and `false`.
   #       These keywords are consumed. Other arguments and the block are forwarded.
