@@ -302,6 +302,39 @@ module Farce
       close_pool(pool)
     end
 
+    def test_close_can_wait_for_running_tasks_after_an_earlier_close
+      pool = pool_class.new(max_size: 1, shrink_after: nil)
+      started = Queue.new
+      release = Queue.new
+      finished = Queue.new
+      pool.schedule(started, release, finished, mode: :raise) do |ready, gate, done|
+        ready << true
+        gate.pop
+      ensure
+        done << true
+      end
+
+      assert started.pop(timeout: 2)
+      pool.close
+      waiter = Thread.new { pool.close(wait: true) }
+
+      refute waiter.join(0.05), "close returned while a task was still running"
+      assert_equal :closing, pool.state
+      assert_equal 1, pool.size
+      release << true
+
+      assert waiter.join(2), "close did not finish after the task completed"
+      assert_same pool, waiter.value
+      assert finished.try_pop
+      assert_equal :closed, pool.state
+      assert_equal 0, pool.size
+      assert_same pool, pool.close(wait: true)
+    ensure
+      release&.close
+      waiter&.join(2)
+      close_pool(pool)
+    end
+
     def test_close_rejects_a_submission_blocked_by_capacity
       # Hold admission below max_size so the queue stays full with thread-based tasks too.
       # Delay growth until after this test, since reaching max_size relaxes the inflight limit.

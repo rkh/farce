@@ -471,8 +471,13 @@ static VALUE start_body(VALUE data) {
 static VALUE start_cleanup(VALUE data) {
     VALUE *args = (VALUE *)data;
     fs_state *s = fs_get(args[0]);
-    RB_OBJ_WRITE(args[0], &s->active, s->admission->parent == s->root ? Qnil : s->admission->parent);
-    s->admission = s->admission->previous;
+    fs_admission *admission = (fs_admission *)args[2];
+    // Thread termination can unwind parent and child fibers out of stack order.
+    // Unlink this admission without removing another fiber's live stack record.
+    fs_admission **link = &s->admission;
+    while (*link && *link != admission) link = &(*link)->previous;
+    if (*link) *link = admission->previous;
+    RB_OBJ_WRITE(args[0], &s->active, admission->parent == s->root ? Qnil : admission->parent);
     return Qnil;
 }
 
@@ -500,7 +505,7 @@ static VALUE start_fiber(VALUE self, VALUE fiber) {
     RB_OBJ_WRITTEN(self, Qundef, admission.parent);
     RB_OBJ_WRITTEN(self, Qundef, admission.child);
     s->admission = &admission;
-    VALUE args[] = {self, fiber};
+    VALUE args[] = {self, fiber, (VALUE)&admission};
     return rb_ensure(start_body, (VALUE)args, start_cleanup, (VALUE)args);
 }
 

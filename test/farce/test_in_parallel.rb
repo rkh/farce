@@ -187,6 +187,97 @@ module Farce
       assert_empty error
     end
 
+    def test_process_exit_does_not_wait_for_running_or_queued_tasks
+      return unless Ractor.builtin?
+
+      output, error, status = ruby_subprocess(<<~RUBY)
+        require "farce"
+        Farce.config { |config| config.parallel_pool_max_size = 1 }
+        started = Farce::Queue.new
+        Farce.in_parallel(started) do |ready|
+          ready << true
+          Fiber.new(blocking: true) { sleep }.resume
+          puts "finished"
+        end
+        abort "task did not start" unless started.pop(timeout: 5)
+        Farce.in_parallel { puts "queued" }
+        exit 23
+      RUBY
+
+      assert_equal 23, status.exitstatus, error
+      assert_empty output
+      assert_empty error
+    end
+
+    def test_process_failure_interrupts_cpu_bound_tasks
+      return unless Ractor.builtin?
+
+      output, error, status = ruby_subprocess(<<~RUBY)
+        require "farce"
+        started = Farce::Queue.new
+        Farce.in_parallel(started) do |ready|
+          ready << true
+          count = 0
+          loop { count += 1 }
+        end
+        abort "task did not start" unless started.pop(timeout: 5)
+        raise "main failure"
+      RUBY
+
+      assert_equal 1, status.exitstatus, error
+      assert_empty output
+      assert_includes error, "main failure"
+      refute_includes error, "ClosedError"
+    end
+
+    def test_killed_worker_ignores_closed_vault_errors_only_during_termination
+      return unless Ractor.builtin?
+
+      output, error, status = ruby_subprocess(<<~RUBY)
+        require "farce"
+        module Farce
+          module Internal
+            class ClosedVaultScheduler < FiberScheduler
+              def initialize(...)
+                super
+                owner = Ractor.new do
+                  current = Ractor.current
+                  current.respond_to?(:close) ? current.close : current.close_incoming
+                  nil
+                end
+                owner.respond_to?(:value) ? owner.value : owner.take
+                @vault = Vault.allocate
+                @vault.instance_variable_set(:@ractor, owner)
+              end
+
+              def scheduler_close(...)
+                super
+              ensure
+                @vault.weak_map(Object.new.freeze, :create, {}.freeze)
+              end
+            end
+          end
+        end
+        [:kill, :close].each do |action|
+          scheduler = Farce::Scheduler.new { Farce.const_get(:Internal)::ClosedVaultScheduler.new }
+          worker = scheduler.launch_thread
+          worker.report_on_exception = false
+          worker.abort_on_exception = false
+          action == :kill ? worker.kill : scheduler.close
+          begin
+            worker.join
+            puts "stopped"
+          rescue Farce::Ractor::ClosedError
+            puts "closed vault"
+          end
+        end
+      RUBY
+
+      assert_predicate status, :success?, error
+      assert_equal "stopped\nclosed vault\n", output
+      assert_empty error
+    end
+
     def test_first_use_from_a_ractor
       assert_remote_first_use("Farce::Ractor")
     end

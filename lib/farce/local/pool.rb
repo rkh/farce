@@ -72,10 +72,11 @@ module Farce
       end
 
       # Stop accepting work in this scope and drain its queued tasks.
+      # @param wait [Boolean] Wait for this scope's accepted tasks and workers to finish.
       # @return [self]
-      def close
+      def close(wait: false)
         pool = @closed_all.value ? Internal::Storage[self, scope:] : scoped_value
-        pool&.close
+        pool&.close(wait:)
         self
       end
 

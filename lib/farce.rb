@@ -433,6 +433,8 @@ module Farce
   # On CRuby, uses a shared Ractor pool with at most {System.cpu_count} workers by default.
   # Set {Config}'s `parallel_pool_*` options before creating a scheduler to configure
   # its worker limits, growth and shrink delays, per-worker task limit, and queue capacity.
+  # Unfinished tasks are terminated when Ruby exits. On CRuby, explicitly call
+  # `Farce.in_parallel.close(wait: true)` before exit to drain accepted tasks.
   # On JRuby and TruffleRuby, starts a new thread for each task.
   #
   # Without a block, returns the shared scheduler. The CRuby pool starts workers

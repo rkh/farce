@@ -146,15 +146,19 @@ module Farce
 
       # Stop accepting tasks and drain queued work.
       #
+      # @param wait [Boolean] Wait for accepted tasks and their workers to finish.
+      #   Do not wait from a task running on this pool.
       # @return [Pool] self.
-      def close
-        return self if closed?
-        @state.compare_and_set(:running, :closing)
-        @queue.seal
-        admission_changed
-        if size.zero?
-          @queue.closed? ? finish_close : start_worker(drain: true)
+      def close(wait: false)
+        unless closed?
+          @state.compare_and_set(:running, :closing)
+          @queue.seal
+          admission_changed
+          if size.zero?
+            @queue.closed? ? finish_close : start_worker(drain: true)
+          end
         end
+        @state.wait_until_changed(:closing) if wait
         self
       end
 

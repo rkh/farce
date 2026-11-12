@@ -50,6 +50,8 @@ input = "this is my input"
 Farce.in_parallel(input) { expensive_computation(it) }
 ```
 
+Unfinished tasks are terminated when Ruby exits. Farce does not wait for background work at process exit. On CRuby, call `Farce.in_parallel.close(wait: true)` before exiting if you want to drain accepted tasks. This rejects new submissions and waits for running and queued tasks to finish.
+
 Like most of Farce, this is completely opt-in. If you never use this feature, no pool is being set up and no extra Ractors are created.
 
 Configure the CRuby pool before creating any scheduler:

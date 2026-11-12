@@ -426,6 +426,7 @@ module Farce
       rescue Internal::SchedulerLifecycle::Cancelled
         raise
       rescue Exception => e # rubocop:disable Lint/RescueException
+        raise if Thread.current.status == "aborting"
         unless @state.value == :error
           @error.value = Envelope.new(e)
           @state.value = :error
@@ -495,6 +496,16 @@ module Farce
             group.list.each { it.join unless it.equal?(Thread.current) }
           end
         end
+      rescue Ractor::ClosedError
+        # Ruby can close the Vault before killing a worker that still uses it.
+        # A terminating worker must not turn that cancellation into a task failure.
+        raise unless Thread.current.status == "aborting"
+      ensure
+        # Dispatch can finish while admitted task fibers are still running.
+        # Keep the worker registered until its scheduler has finished draining.
+        aborting = Thread.current.status == "aborting"
+        failure = $! unless aborting # rubocop:disable Style/SpecialGlobalVars
+        @pool_worker&.stopped(failure, replace: !aborting)
       end
 
       def setup_owner(expected_state)
@@ -510,7 +521,6 @@ module Farce
       end
 
       def dispatch(scheduler = nil, runnable_count = nil)
-        failure = nil
         @state.compare_and_set(:setup, :running)
         while keep_processing?
           if @pool_worker
@@ -536,19 +546,17 @@ module Farce
           end
         end
         @queue.close if @queue_owner
-      rescue Internal::SchedulerLifecycle::Cancelled => e
+      rescue Internal::SchedulerLifecycle::Cancelled
         # Shutdown cancellation must not create envelope ports in a terminating Ractor.
-        failure = e
         raise
       rescue ClosedQueueError
         raise unless @pool_worker || closed?
       rescue Exception => e # rubocop:disable Lint/RescueException
-        failure = e
+        raise if Thread.current.status == "aborting"
         @state.value = :error
         @error.value = Envelope.new(e)
         raise
       ensure
-        @pool_worker&.stopped(failure)
         # make sure we're in a closed state
         unless @state.compare_and_set(:closing, :closed)
           state = @state.value
