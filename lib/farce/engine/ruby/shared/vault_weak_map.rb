@@ -41,9 +41,12 @@ module Farce
         state
       end
 
-      def claim(ticket)
+      def claim(ticket, mode)
         current = read(retain_key: true)
         return current unless current.first == :ok
+
+        # A cache hit must stay readable even if the requesting fiber cannot resume.
+        return [:present, current[2]].freeze if mode == :absent && current[1]
 
         @claim = ticket
         current[0] = :claimed
@@ -190,11 +193,11 @@ module Farce
         end
       end
 
-      def claim(key, ticket, create)
-        with_entry(key, create:) do |entry|
+      def claim(key, ticket, mode)
+        with_entry(key, create: mode != :present) do |entry|
           next missing unless entry
 
-          result = entry.claim(ticket)
+          result = entry.claim(ticket, mode)
           next result unless result.first == :claimed
 
           # Retain the canonical key through the callback without placing it in

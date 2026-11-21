@@ -86,6 +86,34 @@ module Farce
         end
       end
 
+      def test_store_if_absent_hit_leaves_the_entry_readable_before_the_caller_resumes
+        received = Thread::Queue.new
+        release = Thread::Queue.new
+        map_class = Class.new(WeakKeyMap) do
+          define_method(:request) do |action, *args|
+            reply = super(action, *args)
+            if action == :claim
+              received << true
+              raise "lookup was never released" unless release.pop(timeout: 5)
+            end
+            reply
+          end
+          private :request
+        end
+        map = map_class.new({ key: false })
+        worker = Thread.new { map.store_if_absent(:key) { :recomputed } }
+        begin
+          assert received.pop(timeout: 5), "lookup never received a reply"
+          assert_same false, map.get(:key, timeout: 0) { :busy }
+        ensure
+          release << true
+
+          assert worker.join(5), "lookup did not finish"
+        end
+
+        assert_same false, worker.value
+      end
+
       def test_failed_block_releases_its_claim_without_rehashing_the_key
         map_classes.each do |klass|
           map = klass.new

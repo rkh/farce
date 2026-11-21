@@ -128,7 +128,7 @@ module Farce
         raise LocalJumpError, "no block given" unless update
         check_value(initial_value, "value")
 
-        claimed_update(key, timeout_deadline(timeout), claim: :present, initial: initial_value, &update)
+        claimed_update(key, timeout_deadline(timeout), claim: :always, initial: initial_value, &update)
       end
 
       # Yield presence and value under the entry claim.
@@ -144,7 +144,7 @@ module Farce
         begin
           response = await_response(deadline:) do
             sent = true
-            request(:claim, key, ticket, true)
+            request(:claim, key, ticket, :always)
           end
           return false if response.equal?(TIMED_OUT)
           present, current, signal = response[1], response[2], response[3]
@@ -262,17 +262,17 @@ module Farce
         begin
           response = await_response(deadline:) do
             sent = true
-            request(:claim, key, ticket, claim != :present || !initial.equal?(TIMED_OUT))
+            request(:claim, key, ticket, claim)
           end
           return if response.equal?(TIMED_OUT)
           return false if response.first == :missing
 
-          present, current, signal = response[1], response[2], response[3]
-          if claim == :absent && present
-            request(:finish, key, ticket, :abort)
+          if response.first == :present
             finished = true
-            return current
+            return response[1]
           end
+
+          present, current, signal = response[1], response[2], response[3]
 
           owners         = claim_owners
           owners[signal] = Fiber.current
